@@ -2,10 +2,12 @@
 // build) : configuration type, cartes d'essai, avance rapide.
 import { ENNEMIS } from '../data/ennemis';
 import { VERSION_DONNEES } from '../data/version';
-import type { DefEnnemi, Niveau, Vague } from './definitions';
-import type { ConfigPartie, EtatPartie } from './etat';
+import type { DefEnnemi, IdFamille, Niveau, Vague, Voie } from './definitions';
+import { ajouterEnnemi } from './ennemis';
+import type { ConfigPartie, Ennemi, EtatPartie, Unite } from './etat';
+import type { Evenement } from './evenements';
 import { PAS_PAR_SECONDE } from './temps';
-import { step } from './partie';
+import { appliquerAction, creerPartie, step } from './partie';
 
 export const CONFIG: ConfigPartie = {
   graine: 42,
@@ -75,4 +77,49 @@ export function avancerPas(etat: EtatPartie, pas: number): void {
 
 export function avancerSecondes(etat: EtatPartie, secondes: number): void {
   avancerPas(etat, Math.round(secondes * PAS_PAR_SECONDE));
+}
+
+/** Partie sur la carte d'essai avec beaucoup d'arêtes et la config donnée. */
+export function partieEssai(config: ConfigPartie = CONFIG, aretes = 5000): EtatPartie {
+  return creerPartie(niveauEssai(undefined, aretes), config);
+}
+
+/** Construit une tour (et la spécialise si `voie` est donnée) en vérifiant que le moteur accepte chaque étape. */
+export function construireTour(etat: EtatPartie, socle: number, tour: IdFamille | 'divine', voie?: Voie): void {
+  const action = { type: 'construire', socle, tour } as const;
+  if (!appliquerAction(etat, action).ok) throw new Error(`Construction refusée sur le socle ${String(socle)}`);
+  if (!voie) return;
+  for (const a of [{ type: 'ameliorer', socle }, { type: 'ameliorer', socle }, { type: 'specialiser', socle, voie }] as const) {
+    if (!appliquerAction(etat, a).ok) throw new Error(`Amélioration refusée sur le socle ${String(socle)}`);
+  }
+}
+
+/** Le héros de la partie. */
+export function heros(etat: EtatPartie): Unite {
+  const h = etat.unites.find((u) => u.id === etat.heros);
+  if (!h) throw new Error('pas de héros');
+  return h;
+}
+
+/**
+ * Ennemi immobile, increvable et inoffensif posé à `x` sur le chemin 0 (ou un autre) ; `surcharges` pour changer
+ * ce qu'on veut tester (volant, boss, furtif, armure…).
+ */
+export function ennemiFixe(etat: EtatPartie, x: number, surcharges: Partial<DefEnnemi> = {}, chemin = 0): Ennemi {
+  return ajouterEnnemi(etat, ennemiEssai({ pv: 100000, vitesse: 0, degats: [0, 0], ...surcharges }), 'paysan_affame', chemin, x);
+}
+
+/** Avance de `secondes` en gardant les événements de chaque pas. */
+export function evenementsPendant(etat: EtatPartie, secondes: number): Evenement[] {
+  const vus: Evenement[] = [];
+  for (let i = 0; i < Math.round(secondes * PAS_PAR_SECONDE); i++) {
+    step(etat);
+    vus.push(...etat.evenements);
+  }
+  return vus;
+}
+
+/** Nombre d'événements d'un type dans une liste. */
+export function compter(evenements: readonly Evenement[], type: Evenement['type']): number {
+  return evenements.filter((e) => e.type === type).length;
 }

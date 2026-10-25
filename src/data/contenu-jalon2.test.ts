@@ -12,6 +12,11 @@ import { FAMILLES, TOURS } from './tours';
 const cles = new Set(Object.keys(fr));
 const paliers = new Set(REGLES.paliersProtection);
 
+/** Somme des champs numériques d'un objet (pour comparer des rangs). */
+function sommeChamps(objet: object): number {
+  return (Object.values(objet) as number[]).reduce((a, v) => a + v, 0);
+}
+
 function competencesTours(): DefCompetenceTour[] {
   return FAMILLES.flatMap((f) => [...TOURS[f].specialisations.A.competences, ...TOURS[f].specialisations.B.competences]);
 }
@@ -100,7 +105,7 @@ describe('héros', () => {
           expect(r2[cle], `${c.id}.${cle}`).toBeGreaterThanOrEqual(r1[cle]);
           expect(r3[cle], `${c.id}.${cle}`).toBeGreaterThanOrEqual(r2[cle]);
         }
-        const somme = (r: typeof r1): number => Object.values(r).reduce((a, b) => a + b, 0);
+        const somme = (r: object): number => sommeChamps(r);
         expect(somme(r1), c.id).toBeGreaterThan(0);
         expect(somme(r3), c.id).toBeGreaterThan(somme(r1));
       }
@@ -168,7 +173,7 @@ describe('arbre d’améliorations', () => {
     for (const [id, b] of Object.entries(BRANCHES)) {
       expect(b.rangMax, id).toBe(RANG_MAX_ARBRE);
       expect(b.effets, id).toHaveLength(RANG_MAX_ARBRE);
-      const total = (i: number): number => Object.values(b.effets[i] ?? {}).reduce((a, v) => a + v, 0);
+      const total = (i: number): number => sommeChamps(b.effets[i] ?? {});
       for (let i = 1; i < RANG_MAX_ARBRE; i++) expect(total(i), `${id} rang ${String(i + 1)}`).toBeGreaterThan(total(i - 1));
       expect(total(0), id).toBeGreaterThan(0);
     }
