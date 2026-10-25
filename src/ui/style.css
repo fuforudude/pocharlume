@@ -1,0 +1,595 @@
+/* Interface de Pocharlume : accueil, partie (HUD, menu en cercle), pause, fin, orientation. Mobile d'abord :
+   toutes les cibles tactiles font au moins 44 px (une partie se joue au pouce, en paysage). */
+
+:root {
+  --fond: #0b0a0d;
+  --panneau: rgba(20, 15, 17, 0.84);
+  --bord: #6a5640;
+  --bord-clair: #a8895c;
+  --texte: #eadcb9;
+  --texte-doux: #b8a888;
+  --or: #e8c860;
+  --sang: #c8402f;
+  --cible: 44px;
+  font-family: ui-monospace, 'Cascadia Mono', 'Courier New', monospace;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--fond);
+  color: var(--texte);
+  overscroll-behavior: none;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+}
+
+img {
+  image-rendering: pixelated;
+  -webkit-user-drag: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--or);
+  outline-offset: 2px;
+}
+
+/* --- Boutons --- */
+
+.bouton {
+  position: relative;
+  min-width: var(--cible);
+  min-height: var(--cible);
+  padding: 4px 10px;
+  box-sizing: border-box;
+  background: var(--panneau);
+  border: 2px solid var(--bord);
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+.bouton:hover {
+  border-color: var(--bord-clair);
+}
+
+.bouton:active {
+  transform: translateY(1px);
+  background: rgba(60, 44, 34, 0.9);
+}
+
+.bouton.actif {
+  border-color: var(--or);
+  box-shadow: 0 0 0 2px rgba(232, 200, 96, 0.35);
+}
+
+.bouton.grise {
+  filter: grayscale(0.85) brightness(0.7);
+}
+
+.bouton.grand {
+  min-width: 200px;
+  min-height: 52px;
+  font-size: 18px;
+}
+
+.bouton.secondaire {
+  border-color: #4a4036;
+  color: var(--texte-doux);
+}
+
+/* --- Partie --- */
+
+.partie {
+  position: fixed;
+  inset: 0;
+  background: var(--fond);
+  overflow: hidden;
+}
+
+.partie canvas.jeu {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  image-rendering: pixelated;
+  touch-action: none;
+}
+
+.hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.groupe {
+  position: absolute;
+  display: flex;
+  gap: 6px;
+  align-items: flex-end;
+}
+
+.groupe.haut-gauche {
+  top: max(6px, env(safe-area-inset-top));
+  left: max(6px, env(safe-area-inset-left));
+  align-items: stretch;
+}
+
+.groupe.haut-droite {
+  top: max(6px, env(safe-area-inset-top));
+  right: max(6px, env(safe-area-inset-right));
+}
+
+.groupe.bas-gauche {
+  bottom: max(6px, env(safe-area-inset-bottom));
+  left: max(6px, env(safe-area-inset-left));
+}
+
+.groupe.bas-droite {
+  bottom: max(6px, env(safe-area-inset-bottom));
+  right: max(6px, env(safe-area-inset-right));
+}
+
+.puce {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 10px;
+  background: var(--panneau);
+  border: 2px solid var(--bord);
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 15px;
+  pointer-events: auto;
+}
+
+.puce .icone {
+  width: 24px;
+  height: 24px;
+}
+
+.puce.degat {
+  animation: degat 0.6s ease-out;
+}
+
+@keyframes degat {
+  0% {
+    background: var(--sang);
+    transform: scale(1.12);
+  }
+  100% {
+    background: var(--panneau);
+    transform: scale(1);
+  }
+}
+
+.touche {
+  position: absolute;
+  top: 1px;
+  left: 3px;
+  font-size: 10px;
+  color: var(--texte-doux);
+  pointer-events: none;
+}
+
+.bouton.pause {
+  gap: 4px;
+}
+
+.bouton.pause i {
+  display: block;
+  width: 5px;
+  height: 16px;
+  background: var(--texte);
+}
+
+.bouton.pause.actif i:first-child {
+  width: 0;
+  height: 0;
+  background: none;
+  border-style: solid;
+  border-width: 9px 0 9px 14px;
+  border-color: transparent transparent transparent var(--texte);
+}
+
+.bouton.pause.actif i:last-child {
+  display: none;
+}
+
+/* Portrait du héros et sorts */
+
+.bouton.portrait {
+  width: 64px;
+  height: 64px;
+  padding: 0;
+  overflow: hidden;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.bouton.portrait .visage {
+  width: 64px;
+  height: 64px;
+  margin-top: -6px;
+}
+
+.bouton.portrait .jauge {
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  height: 6px;
+  background: #1c0f10;
+  border: 1px solid #000;
+}
+
+.bouton.portrait .rempli {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: #5fb85a;
+}
+
+.bouton.portrait .etat {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 11px;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.bouton.portrait .etat:empty {
+  display: none;
+}
+
+.bouton.sort {
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.bouton.sort .icone {
+  width: 48px;
+  height: 48px;
+}
+
+.bouton.sort .recharge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0;
+  background: rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
+.bouton.sort .secondes {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  text-shadow: 0 0 3px #000, 0 0 3px #000;
+  pointer-events: none;
+}
+
+/* Appel de la vague suivante */
+
+.bouton.vague {
+  flex-direction: column;
+  gap: 3px;
+  min-width: 132px;
+  min-height: 52px;
+  padding: 6px 12px;
+}
+
+.bouton.vague .compte {
+  font-size: 11px;
+  font-weight: normal;
+  color: var(--texte-doux);
+}
+
+.bouton.vague.cache {
+  display: none;
+}
+
+.bouton.vague.grise {
+  opacity: 0.8;
+}
+
+/* Invite et messages */
+
+.invite,
+.message {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 60vw;
+  padding: 6px 12px;
+  background: var(--panneau);
+  border: 2px solid var(--bord);
+  border-radius: 6px;
+  font-size: 13px;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.invite {
+  top: max(48px, calc(env(safe-area-inset-top) + 42px));
+  border-color: var(--or);
+}
+
+.message {
+  bottom: max(86px, calc(env(safe-area-inset-bottom) + 80px));
+  border-color: var(--sang);
+}
+
+.invite.visible,
+.message.visible {
+  opacity: 1;
+}
+
+/* Menu en cercle */
+
+.menu-cercle {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.element-menu {
+  position: absolute;
+  width: 54px;
+  min-height: 54px;
+  margin: -27px 0 0 -27px;
+  padding: 2px 0 3px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  background: rgba(32, 24, 22, 0.94);
+  border: 2px solid var(--bord-clair);
+  border-radius: 50%;
+  pointer-events: auto;
+  cursor: pointer;
+  touch-action: manipulation;
+  animation: apparition 0.12s ease-out;
+}
+
+.element-menu .icone {
+  max-width: 32px;
+  max-height: 32px;
+  object-fit: contain;
+}
+
+.element-menu .prix {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--or);
+  line-height: 1;
+}
+
+.element-menu .prix .arete {
+  width: 12px;
+  height: 12px;
+}
+
+.element-menu.grise {
+  filter: grayscale(1) brightness(0.65);
+}
+
+.element-menu.trop-cher .prix {
+  color: #e87060;
+}
+
+@keyframes apparition {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* --- Écrans plein cadre --- */
+
+.ecran {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: rgba(8, 6, 8, 0.78);
+  text-align: center;
+}
+
+.ecran[hidden] {
+  display: none;
+}
+
+.ecran .carte {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 32px;
+  background: var(--panneau);
+  border: 3px solid var(--bord);
+  border-radius: 8px;
+}
+
+.ecran .titre {
+  margin: 0;
+  font-size: 30px;
+  letter-spacing: 2px;
+  color: var(--or);
+}
+
+.ecran .detail {
+  margin: 0;
+  color: var(--texte-doux);
+  font-size: 14px;
+}
+
+.ecran .rangee {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ecran .colonne {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ecran.accueil {
+  position: fixed;
+  background: radial-gradient(ellipse at center, #1c1418 0%, var(--fond) 70%);
+}
+
+.ecran.accueil .titre {
+  font-size: clamp(36px, 9vmin, 72px);
+  letter-spacing: 6px;
+  text-shadow: 0 0 18px rgba(232, 200, 96, 0.35);
+}
+
+.ecran.fin.defaite .titre {
+  color: var(--sang);
+}
+
+.etoiles {
+  display: flex;
+  gap: 8px;
+}
+
+.etoile {
+  width: 48px;
+  height: 48px;
+}
+
+.etoile.eteinte {
+  filter: grayscale(1) brightness(0.3);
+}
+
+/* --- Orientation : la partie se joue en paysage --- */
+
+.tourne {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  box-sizing: border-box;
+  background: var(--fond);
+  text-align: center;
+}
+
+.tourne .titre {
+  margin: 0;
+  font-size: 24px;
+  color: var(--or);
+}
+
+.tourne .detail {
+  margin: 0;
+  color: var(--texte-doux);
+}
+
+.pictogramme-tourne {
+  width: 56px;
+  height: 92px;
+  box-sizing: border-box;
+  border: 4px solid var(--texte);
+  border-radius: 8px;
+  animation: tourne 2.4s ease-in-out infinite;
+}
+
+@keyframes tourne {
+  0%,
+  20% {
+    transform: rotate(0);
+  }
+  60%,
+  100% {
+    transform: rotate(-90deg);
+  }
+}
+
+@media (orientation: portrait) {
+  body.en-partie .tourne {
+    display: flex;
+  }
+}
+
+/* Petits écrans en paysage (un téléphone fait ~360 px de haut) : tout se resserre. */
+@media (max-height: 460px) {
+  .puce {
+    min-height: 32px;
+    font-size: 14px;
+  }
+
+  .ecran .carte {
+    padding: 12px 24px;
+    gap: 6px;
+  }
+
+  .ecran .titre {
+    font-size: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .puce.degat,
+  .element-menu,
+  .pictogramme-tourne {
+    animation: none;
+  }
+}
