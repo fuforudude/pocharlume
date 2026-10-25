@@ -183,3 +183,42 @@ Le simulateur de `src/equilibrage/` rejoue les 10 niveaux dans les 3 difficulté
 - **Versions** : `VERSION_ETAT` (format de l'état) et `VERSION_DONNEES` (équilibrage) sont rangées dans l'état ;
   `deserialiser` et `rejouer` refusent une version différente.
 - **Fichiers d'aide aux tests** : suffixe `.test-utils.ts` (jamais importés par le jeu, donc absents du build).
+
+## Dieux, héros, objets et arbre dans le moteur (jalon 2)
+- **`ConfigPartie`** fixe tout ce qui entre dans une partie : `graine`, `difficulte`, `dieu`, `heros` (l'avatar du
+  dieu ou l'un de ses disciples), `niveauHeros`, `competencesHeros` (id vers rang 0 à 3), `ameliorations` (branche
+  vers rang 0 à 5), `objets` (0 à 3 ids distincts), `versionDonnees`. `verifierConfig` (`engine/config.ts`) la
+  valide sans lever d'exception (raison en français) ; `creerPartie` lève cette raison et range une copie propre
+  (seuls les champs connus). Règles : héros du dieu, rang au plus égal au maximum, compétence de niveau requis atteint
+  (l'ultime demande le niveau 6), somme des rangs au plus égale au niveau du héros, branches et objets connus.
+- **Données** : `dieux.ts` (Plume, Charlie, Pollen : sorts, bonus de famille, tour divine), `heros.ts` (9 héros avec
+  leurs 4 compétences de 3 rangs et `SEUILS_XP` ; `DEFS_META` pour la sauvegarde), `ameliorations.ts` (6 branches de
+  5 rangs), `objets.ts` (effets en partie ; prix et stock dans `meta.ts`, qui fait foi), `competences-tours.ts` (les 16
+  compétences des spécialisations), `capacites.ts` (valeurs neutres et constructeurs). Un rang donne l'effet total de
+  la compétence ou de la branche à ce rang (le rang 2 remplace le rang 1) ; les compétences s'additionnent.
+- **Résolution des stats** (`engine/modificateurs.ts`) : le héros est calculé une fois à la création (base, niveau,
+  rangs de compétence, branche héros), une tour à chaque construction, amélioration ou achat de compétence (rangs de la
+  spécialisation, branche de sa famille, puis bonus du dieu ; les PV des soldats de ces trois sources s'additionnent).
+  Le moteur ne relit plus ces tables pendant les pas.
+- **Pouvoirs génériques** : une unité alliée porte des `capacites` optionnelles (esquive, exécution, armure ignorée,
+  critique, rage, régénération, soin de zone, ciblable ou non, voit les furtifs, attaque à distance, ouvrage). Un héros
+  à distance ne bloque personne et reste à son point de garde ; un assassin non ciblable ne bloque personne, n'est visé
+  par aucun ennemi et revient à son point. Les soldats peuvent recevoir ces pouvoirs par les compétences de tour.
+- **Structures qui durent** (`engine/structures.ts`) : pièges (premier ennemi au sol non immobilisé qui s'approche ; au
+  plus `REGLES.piegesMax`, le plus ancien disparaît), zones durables (Voile de Nuit : ralentit et ajoute des points de
+  critique aux tirs sur un ennemi de la zone ; nappe de soufre), tourelles construites par une tour (Atelier) ou un
+  héros (Rouage) avec durée de vie, ouvrage (construction à cadence fixe jusqu'à un maximum, pose d'un piège sur le
+  point du chemin le plus proche à portée). Une tour qui révèle rend les furtifs de sa portée visibles de tous.
+- **Sorts et objets** partagent `ZoneEffets` (rayon, sur chemin ou non, global ou non, liste d'effets) et la même
+  fonction `lancerEffets` : dégâts, effet, invocation, exécution, zone durable, pièges, arêtes, boost de cadence des
+  tours voisines, vies (sans dépasser les vies de départ). Un objet s'utilise par `utiliserObjet {emplacement, x, y}` ;
+  l'emplacement ne sert qu'une fois (`etat.objetsUtilises`). La branche « sorts » raccourcit les recharges.
+- **Compétences de spécialisation** : `ameliorerCompetence {socle, competence}` (id de la compétence) achète le rang
+  suivant en arêtes (remise de famille du dieu comprise, prix ajouté à la valeur de revente).
+- **Événements ajoutés pour le rendu et le son** : `tir_unite`, `esquive`, `soin`, `regain_vies`, `execution`, `zone`,
+  `zone_fin`, `piege_pose`, `piege_declenche`, `structure`, `tir_structure`, `structure_fin`, `boost`, `objet`,
+  `competence_tour`.
+- **Bot soigneux** : joue les trois dieux simplement (tour divine à partir de la troisième tour, Pièges à Ressort deux
+  tuiles avant la zone de feu, Ingéniosité au cœur du plus gros groupe de tours, sorts de zone sur les grappes). Pour
+  Charlie il ne construit pas le Totem (option `tourDivine`) : les bandes de la région 1 ont été réglées sans lui.
+  Les bandes des trois dieux relèvent de la tâche d'équilibrage.

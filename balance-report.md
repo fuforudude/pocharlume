@@ -1,7 +1,7 @@
 # Rapport d’équilibrage
 
 Généré par `npm run balance` (tools/balance/) : ne pas modifier à la main. Chaque niveau de la région 1 est rejoué sans
-affichage dans les trois difficultés par deux bots, sur 10 graines chacun (version des données 3).
+affichage dans les trois difficultés par deux bots, sur 10 graines chacun (version des données 4).
 
 - **Soigneux** : achète à chaque fois ce qui apporte le plus de puissance par arête dépensée (socle, famille, niveau,
   spécialisation), après une petite recherche entre dix variantes (5 préférences × 2 diversités) jouées sur des graines d’entraînement ; place le

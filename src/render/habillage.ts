@@ -16,6 +16,15 @@ const SPRITES_UNITES: Readonly<Record<string, string>> = {
   'unite.spectre': 'spectre-chat',
   'unite.gros_matou': 'gros-matou',
   'heros.charlie': 'charlie',
+  'heros.plume': 'heros-plume',
+  'heros.suie': 'heros-suie',
+  'heros.corbeau': 'heros-corbeau',
+  'heros.mastoc': 'heros-mastoc',
+  'heros.brise_os': 'heros-brise-os',
+  'heros.pollen': 'heros-pollen',
+  'heros.rouage': 'heros-rouage',
+  'heros.lanterne': 'heros-lanterne',
+  'unite.assassin_du_sanctuaire': 'assassin-ombre',
 };
 
 export function spriteUnite(_genre: GenreUnite, nomStats: string): string {
