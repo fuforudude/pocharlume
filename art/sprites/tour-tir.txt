@@ -1,0 +1,250 @@
+# Clocher des Archers (tir) : cadres de 32×48, ancre au pied de la tour. Le chat tireur (archer-chat,
+# guetteur-chat, arbaletrier-chat) est dessiné par le rendu au point `tireur` (ses pieds).
+# Niveau 1 : tour de guet en bois sur pilotis. Niveau 2 : tour de pierre crénelée.
+# Niveau 3 : beffroi à cloche sous un toit d'ardoise. Spécialisations dérivées du niveau 3.
+# repos : le fanion claque ; attaque : la cloche ou le fanion s'agite au tir.
+categorie tour
+palette commune
+taille 32 48
+ancre 16 45
+origine 2 1
+
+sprite tour-tir-1
+point tireur 16 19
+
+calque batiment
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.....bBbBbBbBbBbBbBbBbB
+......b..b..b..b..b..b
+......b..b..b..b..b..b
+.....dddddddddddddddddd
+.....bBBBBBBBBBBBBBBBBb
+......db....oOOo....db
+......dbB...o..o...Bdb
+......db.B..o..o..B.db
+......db..B.oOOo.B..db
+......db...Bo..oB...db
+......db....o..o....db
+......db....oOOo....db
+......db....oBBo....db
+......db....o..o....db
+......db...BoOOoB...db
+......db..B.o..o.B..db
+......db.B..o..o..B.db
+......ddddddoOOodddddd
+......dbb...o..o...bdb
+......db.b..o..o..b.db
+......db..b.oOOo.b..db
+......db...bo..ob...db
+......db....o..o....db
+......db....oOOo....db
+......db....obbo....db
+......db....o..o....db
+......db...boOOob...db
+......db..b.o..o.b..db
+......db.b..o..o..b.db
+
+calque fanion 21 10
+d
+dRRR
+dRR
+d
+d
+d
+
+calque fanion-b 21 10
+d
+dRR
+dRRR
+d
+d
+d
+
+anim repos 300
+cadre batiment + fanion
+cadre batiment + fanion-b
+
+anim attaque 100
+cadre batiment + fanion-b
+cadre batiment + fanion duree 200
+
+sprite tour-tir-2
+modele tour-tir-1
+point tireur 16 16
+
+calque batiment
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+......PP..PP..PP..PP
+......pp..pp..pp..pp
+......PPPPPPPPPPPPPPPP
+......gggggggggggggggg
+.......gPPgPPPPgPPPPG
+.......gppgppppgppppG
+.......gggggggggggggG
+.......ggPPqPgPPPPgPG
+.......ggppppgppppgpG
+.......ggggggkkgggggG
+.......gPPPgPkkPgPPPG
+.......gpppgGkkpgpppG
+.......ggggggkkgggggG
+.......gPgPPPkkPPPPgG
+.......gpgppGpgpppGgG
+.......gggggggggggggG
+.......gPPPPgPPPPgPPG
+.......gpGppgppppgppG
+.......gggkggggggkggG
+.......gPPkPPPPgPkPPG
+.......gppkppppgpkppG
+.......gggkggggggkggG
+.......ggPPPPgPPPPgPG
+.......ggppppgppGpgpG
+.......gggggggggggggG
+.......gPPPgPddPgPqPG
+.......gpppgdBBdgpppG
+.......gggggdBBdggggG
+.......gPgPPdBBdPPPgG
+.......gpgGpdBBdppGgG
+.......gggggdBBdggggG
+.......gPPqqdBBdPgPPG
+
+calque fanion 20 7
+d
+dRRR
+dRR
+d
+d
+d
+
+calque fanion-b 20 7
+d
+dRR
+dRRR
+d
+d
+d
+
+sprite tour-tir-3
+modele tour-tir-1
+point tireur 16 20
+
+calque batiment
+............gGgG
+...........gGGGgg
+..........gGGgggGg
+.........gGGgGgGggG
+........gGGgGGGggGgg
+.......gGGgGGgggGggGg
+......gGGgGGgGgGggGggG
+.....gGGgGGgGGGggGggGgg
+...kkkkkkkkkkkkkkkkkkkkkk
+......gPPkkkkkkkkkkPgP
+......gPPkkkkddkkkkPgP
+......gPkkkkYYYkkkkkgP
+......gPkkk.YyYfkkkkgP
+......gPkkkYYYYffkkkgP
+......gPkkkkkkkkkkkkgP
+......gPkkkkkkkkkkkkgP
+......gPkkkkkkkkkkkkgP
+......gPkkkkkkkkkkkkgP
+......gPkkkkkkkkkkkkgP
+......gPkkkkkkkkkkkkgP
+.....PPPPPPPPPPPPPPPPPP
+.....gggggggggggggggggg
+......gPPPgPPPPgqPPPgG
+......gpppgppppgppppgG
+......gggggggggggggggG
+......gPgqPPPgqPPPgPPG
+......gGgpppGgppGpgppG
+......gggggggkkggggggG
+......gPPPPgPkkPgqPPPG
+......gGpppgpkkpgppppG
+......gggggggkkggggggG
+......gPPgPPPkkPPPPgPG
+......gppgppppgpGppgpG
+......gggggggggggggggG
+......ggPPPPgPPPPgPPPG
+......ggppppgGpppgppGG
+......gggggggggggggggG
+......gPPPgPqddgPPqPgG
+......gpGpgpdBBdppppgG
+......ggggggdBBdgggggG
+......gPgPqqdBBdPPgPqG
+......gpgpppdBBdGpgppG
+......ggggggdBBdgggggG
+......gPPPPgdBBdgPPPPG
+......gppppgdBBdgppGGG
+
+# La cloche oscille au fond de la chambre.
+calque fanion 11 12
+.
+.
+
+calque fanion-b 11 12
+y
+.
+
+# Guetteurs des Toits : toit moussu, lierre sur la pierre, fanion vert-de-gris.
+sprite tour-tir-guetteurs
+derive tour-tir-3 couleurs G=H g=h
+point tireur 16 20
+
+calque lierre 5 21
+.H...........H...H
+HjH.........HjH.Hj
+.Hj..........H..jH
+..H..............H
+.................j
+.................H
+..............
+H
+jH
+.H
+.j
+.H
+
+retouche repos * + lierre
+retouche attaque * + lierre
+
+# Arbalétriers du Beffroi : pierre bleuie et cerclée de fer, cloche de bronze sombre, étendard rouge.
+sprite tour-tir-beffroi
+derive tour-tir-3 couleurs p=G P=t q=T G=u g=k
+point tireur 16 20
+
+calque etendard 11 22
+RRRRRR
+RxRRxR
+RRxxRR
+RxRRxR
+RRRRRR
+R.RR.R
+..R..R
+
+retouche repos * + etendard
+retouche attaque * + etendard

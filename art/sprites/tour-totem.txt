@@ -1,0 +1,85 @@
+# Totem du Colosse : tour divine de Charlie (un seul état). Pieu de chêne sculpté de deux têtes de chat,
+# la tête de pierre de Charlie au sommet, sur un tertre de pierres. Cadres de 32×48, ancre au pied.
+# repos : les yeux de braise palpitent ; attaque : ils s'embrasent et la poussière jaillit au pied
+# (l'onde de choc elle-même est l'effet `onde-choc`).
+categorie tour
+palette commune
+taille 32 48
+ancre 16 45
+origine 2 1
+
+sprite tour-totem
+
+calque totem
+.
+.
+.
+.
+.........u......u
+.........uv....vu
+.........uuuuuuuu
+........uUUUUUUUUu
+........uUPkUUUkUu
+........uUUUUUUUUu
+........uUUUvvvvvu
+........uUUvvvrvvu
+.........uuvvvvvu
+..........uuuuuu
+...........dbBd
+...........dbBd
+...........dbBd
+..........dddddd
+...........dbBd
+.........B.dbBd.B
+.........bBdbBdBb
+.........bOOOOOOb
+.........bOkOOkOb
+.........bOOOoOOb
+..........bOOOOb
+...........dbBd
+.....q.....dbBd.....q
+....qwq....dbBd....qwq
+.....q.p...dbBd..p..q
+........p..dbBd.p
+.........p.dbBdp
+..........pdbBd
+...........dbBd
+...........dbBd
+..........dddddd
+...........dbBd
+...........dbBd
+...........dbBd
+...........dbBd
+.........gPPPPPPg
+.......gpPPPPPPPPpg
+.....gpPPqPPPPPqPPPpg
+....gpPPPPPPPPPPPPPPpg
+...gppPPgPPPPPPgPPPPppg
+..gGpppgppppppppgpppppGg
+..gggggggggggggggggggggg
+
+calque yeux 11 8
+F...F
+
+calque yeux-b 11 8
+f...f
+
+calque yeux-vifs 11 8
+y...y
+
+calque yeux-bois 11 21
+F..F
+
+calque poussiere 0 40
+.q....................q
+P.q..q............q..P.q
+.PqPPpq..........qPPqPP
+
+anim repos 300
+cadre totem + yeux + yeux-bois
+cadre totem + yeux-b + yeux-bois duree 450
+
+anim attaque 90
+cadre totem + yeux-vifs + yeux-bois
+cadre totem + yeux-vifs + yeux-bois + poussiere duree 200
+cadre totem + yeux + yeux-bois + poussiere decale 0 1 duree 160

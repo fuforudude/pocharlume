@@ -1,0 +1,159 @@
+# Chat de grange, soldat du Grenier des Griffes : chat tigré roux debout, gilet de cuir, serpe.
+# Regarde vers la droite comme les humains du pack. Grilles posées à l'origine (6, 18) : les pieds en y = 30.
+# Le sprite est construit en calques (tête, corps, arme, queue, jambes) : la Garde du Cloître et les
+# Écorcheurs le prennent pour modèle et ne redéfinissent que leurs calques.
+categorie unite
+palette commune
+taille 32 32
+ancre 16 30
+origine 6 18
+
+sprite soldat-grange
+
+calque tete 6 0
+B.....B.
+oO...Oo.
+ooBoBoo.
+ooookok.
+oooccrcc
+.occccc.
+
+calque yeux-clos 10 3
+o.o
+
+calque yeux-mal 10 3
+k.k
+
+calque corps 5 6
+.bBbbb
+obBbbbb
+obbbbb
+.KKKKK
+.bbbbbb
+
+calque queue 2 8
+B
+o
+.ooo
+
+calque queue-b 2 8
+.B
+o
+.ooo
+
+calque jambes 7 11
+oo.oo
+BB.BB
+
+calque jambes-a 6 11
+oo...oo
+BB...BB
+
+calque jambes-b 7 11
+.ooo
+.BBB
+
+calque jambes-c 6 11
+.oo.oo
+.BB.BB
+
+# Arme au repos : serpe tenue devant, lame vers le haut.
+calque arme 11 1
+...T
+...iT
+....T
+....T
+...d
+o.d
+.cd
+
+# Bras levé derrière la tête, lame en arrière.
+calque arme-haut 7 -2
+.iTT
+T..d
+....d
+....c
+.....o
+......o
+
+# Bras tendu, lame qui frappe vers l'avant et le bas.
+calque arme-frappe 11 5
+.......T
+......iT
+oocdddT
+.....T
+
+# Trace du coup de serpe.
+calque trace 13 2
+...w
+....w
+.....w
+.....w
+....w
+
+anim repos 200
+cadre queue + jambes + corps + arme + tete
+cadre queue-b + jambes + corps + arme + tete
+cadre queue-b + jambes + corps + arme + tete + yeux-clos
+cadre queue + jambes + corps decale 0 1 + arme decale 0 1 + tete decale 0 1
+
+anim marche 110
+cadre queue + jambes-a + corps + arme + tete
+cadre queue-b decale 0 -1 + jambes-b decale 0 -1 + corps decale 0 -1 + arme decale 0 -1 + tete decale 0 -1
+cadre queue + jambes-c + corps + arme + tete
+cadre queue-b decale 0 -1 + jambes decale 0 -1 + corps decale 0 -1 + arme decale 0 -1 + tete decale 0 -1
+
+anim attaque 90
+cadre queue + jambes + corps decale -1 0 + tete decale -1 0 + arme-haut
+cadre queue + jambes-a + corps decale 1 0 + tete decale 1 0 + arme-frappe decale 1 0 + trace duree 60
+cadre queue + jambes-a + corps decale 1 0 + tete decale 1 0 + arme-frappe decale 1 1
+cadre queue + jambes + corps + arme + tete duree 150
+
+anim blesse 120
+cadre queue + jambes + corps decale -1 0 + arme decale -1 0 + tete decale -1 0 + yeux-mal decale -1 0
+cadre queue + jambes + corps + arme + tete + yeux-clos
+
+anim mort 140
+cadre queue + jambes + corps decale -1 0 + arme decale -1 0 + tete decale -1 0 + yeux-mal decale -1 0
+cadre
+.
+.
+.
+.
+.
+......B.....B
+..B...oO...Oo.
+..o...ooBoBoo
+...oo.ooooooo
+....bBoooccrcc
+.dKbbbbocccc.
+..T.oobbbbo
+.TiKKKBBbbBB
+cadre duree 300
+.
+.
+.
+.
+.
+.
+.
+.....
+.......BoO..
+..B..ooooBo...
+...oobbbooBoBo.
+.TidbbKbbooooo.
+.....oBBbbcccrc
+cadre duree 600
+.
+.
+.
+.
+.
+.
+.
+.
+.
+..
+.......B.oO..
+...oobbbooBoBo.
+.TidbbKbbooooco

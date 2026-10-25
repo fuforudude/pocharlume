@@ -15,7 +15,8 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
 | `src/i18n/` | Textes affichés. `fr.ts` contient la table, `t('clé')` la lit avec une clé typée. | rien |
 | `src/save/` | Couche de stockage unique (IndexedDB, puis Preferences de Capacitor), format versionné avec migrations, export et import par code. | `src/engine/`, `src/data/` |
 | `tools/` | Scripts Node : `art` (grilles de pixels vers planches PNG et atlas JSON), `balance` (simulateur et `balance-report.md`). | `src/engine/`, `src/data/` |
-| `art/` | Sources graphiques : pack Minifolks d'origine (`art/minifolks/`), grilles de pixels en texte (`art/sprites/<nom>.txt`). | — |
+| `art/` | Sources graphiques : pack Minifolks d'origine (`art/minifolks/`), grilles de pixels en texte (`art/sprites/<nom>.txt`, format décrit en tête de `tools/art/format.ts`), palettes partagées (`art/palettes/`). `npm run art` écrit aussi des aperçus agrandis dans `art/apercu/` (ignoré par git). | — |
+| `public/sprites/` | Atlas généré par `npm run art` (`atlas.png`, `atlas.json`), commité : le build n'exécute pas le pipeline, un test vérifie que l'atlas est à jour. | — |
 
 `src/main.ts` est le point d'entrée du navigateur.
 

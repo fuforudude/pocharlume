@@ -1,0 +1,56 @@
+# Le Boucher de Vaudrelle, boss de la région 1 : le porte-bouclier du pack, agrandi ×2 (cadres de 64×64).
+# Capuche de cuir sombre, grand tablier de toile pâle taché (le bouclier), couperet au bout du bras.
+# Le sang reste suggéré : quelques taches sombres sur le tablier, rien d'autre.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+agrandi 2
+
+sprite boucher-vaudrelle
+minifolks Without Outline/MiniShieldMan.png
+# armure → cuir sombre, bouclier bleu → tablier de toile, liseré blanc → sangle
+recolore 8cadc6=b b5d6de=B 5a7b94=d ffffff=o 4058c0=Z 6098e8=z 901000=k
+
+calque couperet
+qPP
+qPP
+qPg
+
+calque couperet-h
+qqq
+PPP
+PPg
+
+# Taches sur le tablier : on recolore la toile dans une petite zone, elles suivent donc le tablier.
+anim repos 200
+cadre mf 0.0 couleurs z=r dans 19 26 19 26 couleurs z=r dans 20 27 20 27 + couperet decale 10 16
+cadre mf 0.1 couleurs z=r dans 19 26 19 26 couleurs z=r dans 20 27 20 27 + couperet decale 10 16
+cadre mf 0.2 couleurs z=r dans 19 27 19 27 couleurs z=r dans 20 28 20 28 + couperet decale 10 17
+cadre mf 0.3 couleurs z=r dans 19 27 19 27 couleurs z=r dans 20 28 20 28 + couperet decale 10 17
+
+anim marche 140
+cadre mf 1.0 couleurs z=r dans 18 26 18 26 couleurs z=r dans 19 27 19 27 + couperet decale 9 16
+cadre mf 1.1 couleurs z=r dans 19 26 19 26 couleurs z=r dans 20 27 20 27 + couperet decale 10 16
+cadre mf 1.2 couleurs z=r dans 19 25 19 25 couleurs z=r dans 20 26 20 26 + couperet decale 11 15
+cadre mf 1.3 couleurs z=r dans 19 26 19 26 couleurs z=r dans 20 27 20 27 + couperet decale 11 16
+cadre mf 1.4 couleurs z=r dans 19 26 19 26 couleurs z=r dans 20 27 20 27 + couperet decale 10 16
+cadre mf 1.5 couleurs z=r dans 18 25 18 25 couleurs z=r dans 19 26 19 26 + couperet decale 9 15
+
+anim attaque 110
+cadre mf 3.0 + couperet decale 8 14 duree 220
+cadre mf 3.1
+cadre mf 3.2 couleurs o=#00000000 dans 22 15 29 25 + couperet-h decale 27 24 duree 160
+cadre mf 3.3 couleurs o=#00000000 dans 26 23 29 26 + couperet-h decale 27 25
+cadre mf 3.4 + couperet-h decale 26 25
+cadre mf 3.5 + couperet-h decale 23 25 duree 200
+
+anim blesse 140
+cadre mf 5.0 + couperet decale 10 16
+cadre mf 5.1 + couperet decale 8 16
+
+anim mort 180
+cadre mf 6.0
+cadre mf 6.1
+cadre mf 6.2
+cadre mf 6.3 duree 800

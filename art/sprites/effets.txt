@@ -1,0 +1,235 @@
+# Effets : impacts, onde de choc, fumée, étourdissement, sang suggéré. Sans contour (ce sont des lueurs
+# et des poussières), ancre au centre. Les impacts reprennent l'éclat magique du pack, recoloré.
+categorie effet
+palette commune
+contour non
+taille 16 16
+ancre 8 8
+minifolks HumansProjectiles.png
+
+# Impact physique (flèche, pierre) : éclat de poussière.
+sprite impact
+recolore e09128=P f0d50a=q d8f8f8=w
+anim impact 60
+cadre mf 2.0-4
+
+# Impact de cendre (Autel, Oracle) : éclat de braise.
+sprite impact-cendre
+recolore e09128=e f0d50a=f d8f8f8=y
+anim impact 60
+cadre mf 2.0-4
+
+# Fumée : bouffée qui gonfle et se dissipe (feux, mort des spectres, construction).
+sprite fumee
+couleur 1 67625ad0
+couleur 2 8a8478b0
+couleur 3 aea69680
+couleur 4 aea69650
+anim impact 120
+cadre
+.
+.
+.
+.
+.
+.
+......11
+.....1221
+.....1221
+......11
+cadre
+.
+.
+.
+.
+.
+.....22
+....2332.1
+....23322
+.....2221
+......11
+cadre
+.
+.
+.
+.
+....33.33
+...3443343
+...3444443
+....34433
+.....333
+cadre
+.
+.
+.
+....4.44
+...4..4.4
+..4......4
+...4....4
+....4.44
+
+# Étoiles qui tournent au-dessus d'un ennemi étourdi (Totem du Colosse, Chute du Colosse).
+sprite etourdi
+anim repos 110
+cadre
+.
+.
+.
+.
+.
+.y.......y
+yFy.....yFy
+.y.........
+.......y
+......yFy
+.......y
+cadre
+.
+.
+.
+.
+....y
+...yFy
+....y.....y
+.........yFy
+.y........y
+yFy
+.y
+cadre
+.
+.
+.
+.
+.
+........y
+.......yFy
+.y......y
+yFy......y
+.y......yFy
+.........y
+
+# Sang suggéré : deux gouttes sombres, puis une tache minuscule.
+sprite sang
+anim impact 90
+cadre
+.
+.
+.
+.
+.
+.
+.......R
+......rR.R
+.........r
+cadre
+.
+.
+.
+.
+.
+.
+.....R....R
+......r..
+........r
+.......r.
+cadre
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+......r.r
+.......rr
+
+# Onde de choc au sol (Totem du Colosse, Chute du Colosse) : anneau de poussière qui s'élargit.
+sprite onde-choc
+taille 32 32
+ancre 16 16
+anim impact 70
+cadre
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.............qqqq
+............P....P
+.............PPPP
+cadre
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+............qqqqqqqq
+.........qqq........qqq
+........qq............qq
+........P..............P
+........PP............PP
+.........PPP........PPP
+............PPPPPPPP
+cadre
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.........qqqqqqqqqqqqqq
+......qqq..............qqq
+.....qq..................qq
+....qq....................qq
+....P......................P
+....PP....................PP
+.....PP..................PP
+......PPP..............PPP
+.........PPPPPPPPPPPPPP
+cadre
+.
+.
+.
+.
+.
+.
+.
+.
+.
+..........qqqqqqqqqqqq
+......qqqq............qqqq
+....qq....................qq
+...q........................q
+..q..........................q
+.q............................q
+.P............................P
+.P............................P
+..P..........................P
+...P........................P
+....PP....................PP
+......PPPP............PPPP
+..........PPPPPPPPPPPP

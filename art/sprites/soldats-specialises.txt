@@ -1,0 +1,137 @@
+# Soldats des spécialisations de la caserne et spectre du Nécromancien.
+# Garde du Cloître et Écorcheur reprennent le chat de grange comme modèle et ne redéfinissent que des calques :
+# leurs animations suivent donc toujours celles du soldat.
+categorie unite
+palette commune
+taille 32 32
+ancre 16 30
+origine 6 18
+
+# Garde du Cloître : coiffe et cotte de mailles, scapulaire de lin, masse d'armes.
+sprite garde-cloitre
+modele soldat-grange
+
+calque tete 6 0
+B.....B.
+oO...Oo.
+TiTiTiT.
+Toookok.
+Tooccrcc
+tTccccc.
+
+calque corps 5 6
+.TzzzT
+oTzZzzT
+oTzzzT
+.KKKKK
+.tTtTtt
+
+calque arme 11 1
+...pq
+..pPPp
+..pPPp
+...pp
+...d
+o.d
+.cd
+
+calque arme-haut 7 -3
+.pq
+pPPp
+pPpd
+.p..d
+....c
+.....o
+......o
+
+calque arme-frappe 11 6
+......pqp
+oocdddPPp
+......pPp
+
+# Chute : les cadres couchés du chat de grange, recolorés.
+anim mort 140
+cadre queue + jambes + corps decale -1 0 + arme decale -1 0 + tete decale -1 0 + yeux-mal decale -1 0
+cadre soldat-grange/mort.1 couleurs b=T B=t T=p i=q
+cadre soldat-grange/mort.2 couleurs b=T B=t T=p i=q duree 300
+cadre soldat-grange/mort.3 couleurs b=T B=t T=p i=q duree 600
+
+# Écorcheur : chat noir aux yeux jaunes, bandeau rouge, cuir sombre, deux lames courtes.
+sprite ecorcheur
+modele soldat-grange
+
+calque tete 6 0
+k.....k.
+uU...Uu.
+RRRRRRr.
+uuuyuyu.
+uuuvvrvv
+.uvvvv..
+
+calque yeux-clos 10 3
+u.u
+
+calque corps 3 6
+...dbKbd
+..udbbKbd
+..udbbbK
+.T.KRKKK
+i..dddddd
+
+calque queue 2 8
+k
+u
+.uuu
+
+calque queue-b 2 8
+.k
+u
+.uuu
+
+calque jambes 7 11
+uu.uu
+kk.kk
+
+calque jambes-a 6 11
+uu...uu
+kk...kk
+
+calque jambes-b 7 11
+.uuu
+.kkk
+
+calque jambes-c 6 11
+.uu.uu
+.kk.kk
+
+calque arme 11 4
+...i
+..iT
+u.d
+.v
+
+calque arme-haut 8 -1
+iT
+.Td
+...v
+....u
+.....u
+
+calque arme-frappe 11 6
+.....i
+uuvdiT
+
+# Chute : les cadres couchés du chat de grange, recolorés.
+anim mort 140
+cadre queue + jambes + corps decale -1 0 + arme decale -1 0 + tete decale -1 0 + yeux-mal decale -1 0
+cadre soldat-grange/mort.1 couleurs o=u O=U B=k c=v b=d
+cadre soldat-grange/mort.2 couleurs o=u O=U B=k c=v b=d duree 300
+cadre soldat-grange/mort.3 couleurs o=u O=U B=k c=v b=d duree 600
+
+# Spectre de chat relevé par le Nécromancien des Neuf Vies : le soldat en couleurs de brume, translucide.
+sprite spectre-chat
+couleur 1 7f9aa8b0
+couleur 2 c8e4ecc8
+couleur 3 4a6070b8
+couleur 4 d8f8f8
+derive soldat-grange couleurs o=1 O=2 B=3 b=3 c=2 k=4 r=3 K=3 d=3 T=2 i=4 w=2

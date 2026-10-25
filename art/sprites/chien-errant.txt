@@ -1,0 +1,95 @@
+# Chien Errant (région 1, dessiné) : bâtard famélique au poil terreux, côtes saillantes, queue basse,
+# oreille tombante. Rapide. De profil vers la droite, les pattes posées en y = 30.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+origine 5 19
+
+sprite chien-errant
+
+calque tete 12 1
+..NNN
+.MNNNnn
+MMNkNnnn
+.M.NNNNmk
+....Nmmm
+
+calque gueule 12 1
+..NNN
+.MNNNnnn
+MMNkNnnnk
+.M.NNkkkk
+....Nmwmw
+
+calque corps 1 4
+.MMMMMMMMMMN
+NNMNMNMNNNNN
+NNNNNNNNNNNn
+.nNN....NNn.
+
+calque queue 0 4
+.N
+N.
+N.
+M.
+
+calque queue-b 0 4
+.N
+N.
+M.
+
+calque pattes 2 8
+.N.N.....N.N
+.N.N.....N.N
+.N.N.....N.N
+.m.m.....m.m
+
+calque pattes-a 2 8
+..NN.....NN.
+.N..N...N..N
+.N..N...N..N
+m...m..m...m
+
+calque pattes-b 2 8
+..NN.....NN.
+..NN.....NN.
+..NN.....NN.
+..mm.....mm.
+
+anim repos 220
+cadre queue + pattes + corps + tete
+cadre queue-b + pattes + corps decale 0 1 + tete decale 0 1
+
+anim marche 80
+cadre queue + pattes-a + corps + tete
+cadre queue-b + pattes-b + corps decale 0 -1 + tete decale 0 -1
+cadre queue + pattes-a decale 1 0 + corps + tete
+cadre queue-b + pattes-b + corps decale 0 -1 + tete decale 0 -1
+
+# Il se ramasse puis bondit gueule ouverte.
+anim attaque 90
+cadre queue decale 0 1 + pattes-b + corps decale -1 1 + tete decale -1 2 duree 160
+cadre queue + pattes-a + corps decale 2 -1 + gueule decale 3 -1
+cadre queue + pattes-a + corps decale 2 0 + gueule decale 3 0 duree 140
+cadre queue + pattes + corps + tete
+
+anim blesse 120
+cadre queue-b + pattes + corps decale -1 0 + tete decale -1 1
+cadre queue + pattes + corps + tete
+
+anim mort 150
+cadre queue-b + pattes-b + corps decale -1 2 + tete decale -1 4
+cadre duree 1000
+.
+.
+.
+.
+.
+.
+.
+..................NNN
+.N..MMMMMMMMMMMN.MNNNnn
+N..NNMNMNMNMNNNNMMNkNnnn
+N..NNNNNNNNNNNNnNM.NNNNmk
+.....nNNnnNN.NN.....Nmmm

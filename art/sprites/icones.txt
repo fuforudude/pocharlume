@@ -1,0 +1,174 @@
+# Icônes d'interface 16×16, avec contour comme le reste. Ancre au centre.
+categorie icone
+palette commune
+taille 16 16
+ancre 8 8
+
+# Arêtes : la monnaie de partie.
+sprite icone-arete
+origine 1 5
+....q.q.q.q
+q...w.w.w.w.ww
+wwwwwwwwwwwwwkw
+q...w.w.w.w.ww
+....q.q.q.q
+
+sprite icone-etoile
+origine 2 2
+.....F
+....FyF
+....FyF
+FFFFFyFFFFF
+.FyyyyyyFf
+..FyyyyFf
+..FyfFyFf
+.FyF...FFf
+.Ff.....Ff
+
+sprite icone-vie
+origine 3 3
+.RR...RR
+RxxR.RxRR
+RxRRRRRRR
+RRRRRRRRr
+.RRRRRRr
+..RRRRr
+...RRr
+....r
+
+# Braises : la monnaie des dieux.
+sprite icone-braise
+origine 3 2
+....f
+...ff
+...fFf.f
+..fFFff
+.ffFyFff
+.fFyyyFf
+.fFyyyFf
+..eFFFe
+...eee
+
+# Sort de Charlie : Chute du Colosse.
+sprite icone-chute-colosse
+origine 2 2
+...uuuuu
+..uUUUUUu
+..uUvUvUu
+..uUUUUUu
+..uuUUUuu
+...uuuuu
+....uu
+....uu
+.q.......q
+PqP.q.q.PqP
+pPpPpPpPpPp
+
+# Sort de Charlie : Renforts.
+sprite icone-renforts
+origine 1 4
+o...o
+oo.oo..B...B
+ooooo..BB.BB
+okook..BBBBB
+occco..BkBkB
+.ccc...BcccB
+........ccc
+
+# Familles de tours.
+sprite icone-caserne
+origine 2 2
+.tttttttttt
+tTTTTTTTTTt
+tTkTTkTTkTt
+tTTkTTkTTkt
+tTTTkTTkTTt
+.tTTTkTTkTt
+..tTTTTTTt
+...tTTTTt
+....tTt
+.....t
+
+sprite icone-tir
+origine 2 1
+.........ii
+........iTi
+..b....dT
+.bB...d
+.b.w.d
+b..wd
+b..dw
+b.d.w
+bd...w
+db...w
+.b..w
+.bBw
+..b
+
+sprite icone-magie
+origine 3 1
+.....y
+....yF
+....fFf
+...fFyf
+..fFyyFf
+..fFyyFf
+...eFFe
+.PPPPPPPP
+pPqPPPPqPp
+.ppppppp
+..gGGGg
+...ggg
+
+sprite icone-artillerie
+origine 1 3
+..........pPP
+.q.......pPqPP
+q.q.q....pPPPP
+.q.......gpPPp
+...q.q....gpp
+.....b
+....bBb
+..bbBbBbb
+.dbbbbbbbd
+.d.d...d.d
+
+sprite icone-vendre
+origine 3 2
+...bBb
+....b
+..BBBBB
+.BOOOOOB
+BOOwOwOOB
+BOwwwwwOB
+BOOwOwOOB
+BOOOOOOOB
+.BBBBBBB
+
+sprite icone-ameliorer
+origine 3 1
+....F
+...FyF
+..FyyyF
+.FyyyyyF
+FFFyyyFFF
+..FyyyF
+..FyyyF
+..FyyyF
+..FyyyF
+..FFFFF
+
+sprite icone-ralliement
+origine 3 1
+d
+dRRRRR
+dRxxRRR
+dRxRRRR
+dRRRRr
+dRRr
+d
+d
+d
+d
+d
+dd

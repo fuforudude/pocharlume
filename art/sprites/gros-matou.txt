@@ -1,0 +1,9 @@
+# Gros matou des Renforts (sort de Charlie) : la carrure de Charlie en matou roux, collier de cuir,
+# sans balafre. Mêmes animations que Charlie, recolorées.
+categorie unite
+palette commune
+taille 32 32
+ancre 16 30
+
+sprite gros-matou
+derive charlie couleurs u=B U=o v=c P=b p=b g=d

@@ -1,0 +1,3784 @@
+{
+ "version": 1,
+ "image": "atlas.png",
+ "largeur": 1024,
+ "hauteur": 290,
+ "sprites": {
+  "arbaletrier-chat": {
+   "categorie": "unite",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 30
+   },
+   "animations": {
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 329, "y": 215, "largeur": 18, "hauteur": 14, "dx": 7, "dy": 17, "duree": 110 },
+      { "x": 291, "y": 215, "largeur": 18, "hauteur": 14, "dx": 7, "dy": 16, "duree": 110 },
+      { "x": 348, "y": 215, "largeur": 18, "hauteur": 14, "dx": 7, "dy": 17, "duree": 110 },
+      { "x": 310, "y": 215, "largeur": 18, "hauteur": 14, "dx": 7, "dy": 16, "duree": 110 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 841, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 120 },
+      { "x": 386, "y": 215, "largeur": 18, "hauteur": 14, "dx": 7, "dy": 17, "duree": 120 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 841, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 140 },
+      { "x": 337, "y": 273, "largeur": 15, "hauteur": 9, "dx": 6, "dy": 22, "duree": 140 },
+      { "x": 941, "y": 273, "largeur": 16, "hauteur": 6, "dx": 6, "dy": 25, "duree": 300 },
+      { "x": 398, "y": 284, "largeur": 16, "hauteur": 4, "dx": 6, "dy": 27, "duree": 600 }
+     ]
+    },
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 348, "y": 215, "largeur": 18, "hauteur": 14, "dx": 7, "dy": 17, "duree": 220 },
+      { "x": 310, "y": 215, "largeur": 18, "hauteur": 14, "dx": 7, "dy": 16, "duree": 220 },
+      { "x": 367, "y": 215, "largeur": 18, "hauteur": 14, "dx": 7, "dy": 17, "duree": 220 },
+      { "x": 348, "y": 215, "largeur": 18, "hauteur": 14, "dx": 7, "dy": 17, "duree": 220 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 348, "y": 215, "largeur": 18, "hauteur": 14, "dx": 7, "dy": 17, "duree": 90 },
+      { "x": 405, "y": 215, "largeur": 18, "hauteur": 14, "dx": 7, "dy": 17, "duree": 180 },
+      { "x": 348, "y": 215, "largeur": 18, "hauteur": 14, "dx": 7, "dy": 17, "duree": 140 }
+     ]
+    }
+   },
+   "sansContour": {
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 85, "y": 245, "largeur": 16, "hauteur": 13, "dx": 8, "dy": 18, "duree": 110 },
+      { "x": 34, "y": 245, "largeur": 16, "hauteur": 13, "dx": 8, "dy": 17, "duree": 110 },
+      { "x": 68, "y": 245, "largeur": 16, "hauteur": 13, "dx": 8, "dy": 18, "duree": 110 },
+      { "x": 51, "y": 245, "largeur": 16, "hauteur": 13, "dx": 8, "dy": 17, "duree": 110 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 330, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 120 },
+      { "x": 17, "y": 245, "largeur": 16, "hauteur": 13, "dx": 8, "dy": 18, "duree": 120 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 330, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 140 },
+      { "x": 601, "y": 273, "largeur": 13, "hauteur": 8, "dx": 7, "dy": 23, "duree": 140 },
+      { "x": 224, "y": 284, "largeur": 14, "hauteur": 5, "dx": 7, "dy": 26, "duree": 300 },
+      { "x": 618, "y": 284, "largeur": 14, "hauteur": 3, "dx": 7, "dy": 28, "duree": 600 }
+     ]
+    },
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 68, "y": 245, "largeur": 16, "hauteur": 13, "dx": 8, "dy": 18, "duree": 220 },
+      { "x": 51, "y": 245, "largeur": 16, "hauteur": 13, "dx": 8, "dy": 17, "duree": 220 },
+      { "x": 0, "y": 245, "largeur": 16, "hauteur": 13, "dx": 8, "dy": 18, "duree": 220 },
+      { "x": 68, "y": 245, "largeur": 16, "hauteur": 13, "dx": 8, "dy": 18, "duree": 220 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 68, "y": 245, "largeur": 16, "hauteur": 13, "dx": 8, "dy": 18, "duree": 90 },
+      { "x": 102, "y": 245, "largeur": 16, "hauteur": 13, "dx": 8, "dy": 18, "duree": 180 },
+      { "x": 68, "y": 245, "largeur": 16, "hauteur": 13, "dx": 8, "dy": 18, "duree": 140 }
+     ]
+    }
+   }
+  },
+  "arbre-mort-1": {
+   "categorie": "decor",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 30
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 760, "y": 130, "largeur": 21, "hauteur": 22, "dx": 4, "dy": 9, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 476, "y": 155, "largeur": 19, "hauteur": 21, "dx": 5, "dy": 10, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "arbre-mort-2": {
+   "categorie": "decor",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 30
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 552, "y": 130, "largeur": 23, "hauteur": 22, "dx": 6, "dy": 9, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 286, "y": 155, "largeur": 21, "hauteur": 21, "dx": 7, "dy": 10, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "archer-chat": {
+   "categorie": "unite",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 30
+   },
+   "animations": {
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 643, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 110 },
+      { "x": 607, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 16, "duree": 110 },
+      { "x": 661, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 110 },
+      { "x": 625, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 16, "duree": 110 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 68, "y": 230, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 17, "duree": 120 },
+      { "x": 715, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 120 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 68, "y": 230, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 17, "duree": 140 },
+      { "x": 337, "y": 273, "largeur": 15, "hauteur": 9, "dx": 6, "dy": 22, "duree": 140 },
+      { "x": 941, "y": 273, "largeur": 16, "hauteur": 6, "dx": 6, "dy": 25, "duree": 300 },
+      { "x": 398, "y": 284, "largeur": 16, "hauteur": 4, "dx": 6, "dy": 27, "duree": 600 }
+     ]
+    },
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 661, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 220 },
+      { "x": 625, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 16, "duree": 220 },
+      { "x": 697, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 220 },
+      { "x": 661, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 220 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 661, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 90 },
+      { "x": 443, "y": 215, "largeur": 18, "hauteur": 14, "dx": 7, "dy": 17, "duree": 180 },
+      { "x": 679, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 140 }
+     ]
+    }
+   },
+   "sansContour": {
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 426, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 110 },
+      { "x": 378, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 17, "duree": 110 },
+      { "x": 410, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 110 },
+      { "x": 394, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 17, "duree": 110 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 765, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 18, "duree": 120 },
+      { "x": 362, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 120 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 765, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 18, "duree": 140 },
+      { "x": 601, "y": 273, "largeur": 13, "hauteur": 8, "dx": 7, "dy": 23, "duree": 140 },
+      { "x": 224, "y": 284, "largeur": 14, "hauteur": 5, "dx": 7, "dy": 26, "duree": 300 },
+      { "x": 618, "y": 284, "largeur": 14, "hauteur": 3, "dx": 7, "dy": 28, "duree": 600 }
+     ]
+    },
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 410, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 220 },
+      { "x": 394, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 17, "duree": 220 },
+      { "x": 346, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 220 },
+      { "x": 410, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 220 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 410, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 90 },
+      { "x": 136, "y": 245, "largeur": 16, "hauteur": 13, "dx": 8, "dy": 18, "duree": 180 },
+      { "x": 442, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 140 }
+     ]
+    }
+   }
+  },
+  "boucher-vaudrelle": {
+   "categorie": "ennemi",
+   "largeur": 64,
+   "hauteur": 64,
+   "ancre": {
+    "x": 32,
+    "y": 61
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 917, "y": 0, "largeur": 26, "hauteur": 31, "dx": 19, "dy": 31, "duree": 200 },
+      { "x": 890, "y": 0, "largeur": 26, "hauteur": 31, "dx": 19, "dy": 31, "duree": 200 },
+      { "x": 241, "y": 47, "largeur": 26, "hauteur": 29, "dx": 19, "dy": 33, "duree": 200 },
+      { "x": 268, "y": 47, "largeur": 26, "hauteur": 29, "dx": 19, "dy": 33, "duree": 200 }
+     ]
+    },
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 832, "y": 0, "largeur": 28, "hauteur": 31, "dx": 17, "dy": 31, "duree": 140 },
+      { "x": 917, "y": 0, "largeur": 26, "hauteur": 31, "dx": 19, "dy": 31, "duree": 140 },
+      { "x": 994, "y": 0, "largeur": 24, "hauteur": 31, "dx": 21, "dy": 29, "duree": 140 },
+      { "x": 944, "y": 0, "largeur": 24, "hauteur": 31, "dx": 21, "dy": 31, "duree": 140 },
+      { "x": 917, "y": 0, "largeur": 26, "hauteur": 31, "dx": 19, "dy": 31, "duree": 140 },
+      { "x": 861, "y": 0, "largeur": 28, "hauteur": 31, "dx": 17, "dy": 29, "duree": 140 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 662, "y": 0, "largeur": 28, "hauteur": 35, "dx": 15, "dy": 27, "duree": 220 },
+      { "x": 760, "y": 0, "largeur": 40, "hauteur": 31, "dx": 3, "dy": 31, "duree": 110 },
+      { "x": 37, "y": 78, "largeur": 36, "hauteur": 25, "dx": 25, "dy": 37, "duree": 160 },
+      { "x": 0, "y": 78, "largeur": 36, "hauteur": 25, "dx": 25, "dy": 37, "duree": 110 },
+      { "x": 74, "y": 78, "largeur": 34, "hauteur": 25, "dx": 25, "dy": 37, "duree": 110 },
+      { "x": 109, "y": 78, "largeur": 30, "hauteur": 25, "dx": 23, "dy": 37, "duree": 200 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 969, "y": 0, "largeur": 24, "hauteur": 31, "dx": 19, "dy": 31, "duree": 140 },
+      { "x": 801, "y": 0, "largeur": 30, "hauteur": 31, "dx": 15, "dy": 31, "duree": 140 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 215, "y": 130, "largeur": 32, "hauteur": 23, "dx": 19, "dy": 39, "duree": 180 },
+      { "x": 124, "y": 177, "largeur": 30, "hauteur": 19, "dx": 21, "dy": 43, "duree": 180 },
+      { "x": 560, "y": 259, "largeur": 34, "hauteur": 11, "dx": 17, "dy": 51, "duree": 180 },
+      { "x": 697, "y": 273, "largeur": 36, "hauteur": 7, "dx": 15, "dy": 55, "duree": 800 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 122, "y": 47, "largeur": 24, "hauteur": 30, "dx": 20, "dy": 32, "duree": 200 },
+      { "x": 147, "y": 47, "largeur": 24, "hauteur": 30, "dx": 20, "dy": 32, "duree": 200 },
+      { "x": 320, "y": 47, "largeur": 24, "hauteur": 28, "dx": 20, "dy": 34, "duree": 200 },
+      { "x": 295, "y": 47, "largeur": 24, "hauteur": 28, "dx": 20, "dy": 34, "duree": 200 }
+     ]
+    },
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 68, "y": 47, "largeur": 26, "hauteur": 30, "dx": 18, "dy": 32, "duree": 140 },
+      { "x": 122, "y": 47, "largeur": 24, "hauteur": 30, "dx": 20, "dy": 32, "duree": 140 },
+      { "x": 195, "y": 47, "largeur": 22, "hauteur": 30, "dx": 22, "dy": 30, "duree": 140 },
+      { "x": 172, "y": 47, "largeur": 22, "hauteur": 30, "dx": 22, "dy": 32, "duree": 140 },
+      { "x": 122, "y": 47, "largeur": 24, "hauteur": 30, "dx": 20, "dy": 32, "duree": 140 },
+      { "x": 95, "y": 47, "largeur": 26, "hauteur": 30, "dx": 18, "dy": 30, "duree": 140 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 733, "y": 0, "largeur": 26, "hauteur": 34, "dx": 16, "dy": 28, "duree": 220 },
+      { "x": 0, "y": 47, "largeur": 38, "hauteur": 30, "dx": 4, "dy": 32, "duree": 110 },
+      { "x": 373, "y": 104, "largeur": 34, "hauteur": 24, "dx": 26, "dy": 38, "duree": 160 },
+      { "x": 338, "y": 104, "largeur": 34, "hauteur": 24, "dx": 26, "dy": 38, "duree": 110 },
+      { "x": 408, "y": 104, "largeur": 32, "hauteur": 24, "dx": 26, "dy": 38, "duree": 110 },
+      { "x": 60, "y": 130, "largeur": 28, "hauteur": 24, "dx": 24, "dy": 38, "duree": 200 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 218, "y": 47, "largeur": 22, "hauteur": 30, "dx": 20, "dy": 32, "duree": 140 },
+      { "x": 39, "y": 47, "largeur": 28, "hauteur": 30, "dx": 16, "dy": 32, "duree": 140 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 354, "y": 130, "largeur": 30, "hauteur": 22, "dx": 20, "dy": 40, "duree": 180 },
+      { "x": 460, "y": 177, "largeur": 28, "hauteur": 18, "dx": 22, "dy": 44, "duree": 180 },
+      { "x": 895, "y": 259, "largeur": 32, "hauteur": 10, "dx": 18, "dy": 52, "duree": 180 },
+      { "x": 808, "y": 273, "largeur": 34, "hauteur": 6, "dx": 16, "dy": 56, "duree": 800 }
+     ]
+    }
+   }
+  },
+  "boue-1": {
+   "categorie": "tuile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 0,
+    "y": 0
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 155, "y": 198, "largeur": 16, "hauteur": 16, "dx": 0, "dy": 0, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "boue-2": {
+   "categorie": "tuile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 0,
+    "y": 0
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 138, "y": 198, "largeur": 16, "hauteur": 16, "dx": 0, "dy": 0, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "boule-cendre": {
+   "categorie": "projectile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 1004, "y": 273, "largeur": 11, "hauteur": 6, "dx": 2, "dy": 5, "duree": 80 },
+      { "x": 0, "y": 284, "largeur": 11, "hauteur": 6, "dx": 2, "dy": 5, "duree": 80 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 239, "y": 284, "largeur": 9, "hauteur": 5, "dx": 3, "dy": 6, "duree": 80 },
+      { "x": 249, "y": 284, "largeur": 9, "hauteur": 5, "dx": 3, "dy": 6, "duree": 80 }
+     ]
+    }
+   }
+  },
+  "bucher-eteint": {
+   "categorie": "decor",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 30
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 427, "y": 177, "largeur": 16, "hauteur": 19, "dx": 5, "dy": 7, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 527, "y": 177, "largeur": 14, "hauteur": 18, "dx": 6, "dy": 8, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "cailloux": {
+   "categorie": "decor",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 15
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 751, "y": 273, "largeur": 12, "hauteur": 7, "dx": 1, "dy": 9, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 24, "y": 284, "largeur": 10, "hauteur": 6, "dx": 2, "dy": 10, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "carreau": {
+   "categorie": "projectile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 488, "y": 284, "largeur": 11, "hauteur": 4, "dx": 2, "dy": 5, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 682, "y": 284, "largeur": 9, "hauteur": 3, "dx": 3, "dy": 6, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "charlie": {
+   "categorie": "unite",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 30
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 576, "y": 130, "largeur": 22, "hauteur": 22, "dx": 3, "dy": 9, "duree": 260 },
+      { "x": 645, "y": 130, "largeur": 22, "hauteur": 22, "dx": 3, "dy": 9, "duree": 260 },
+      { "x": 150, "y": 155, "largeur": 22, "hauteur": 21, "dx": 3, "dy": 10, "duree": 260 },
+      { "x": 104, "y": 155, "largeur": 22, "hauteur": 21, "dx": 3, "dy": 10, "duree": 260 }
+     ]
+    },
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 599, "y": 130, "largeur": 22, "hauteur": 22, "dx": 3, "dy": 9, "duree": 140 },
+      { "x": 622, "y": 130, "largeur": 22, "hauteur": 22, "dx": 3, "dy": 8, "duree": 140 },
+      { "x": 127, "y": 155, "largeur": 22, "hauteur": 21, "dx": 3, "dy": 10, "duree": 140 },
+      { "x": 622, "y": 130, "largeur": 22, "hauteur": 22, "dx": 3, "dy": 8, "duree": 140 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 1002, "y": 47, "largeur": 22, "hauteur": 26, "dx": 3, "dy": 5, "duree": 220 },
+      { "x": 564, "y": 155, "largeur": 27, "hauteur": 20, "dx": 3, "dy": 11, "duree": 110 },
+      { "x": 592, "y": 155, "largeur": 27, "hauteur": 20, "dx": 3, "dy": 11, "duree": 180 },
+      { "x": 576, "y": 130, "largeur": 22, "hauteur": 22, "dx": 3, "dy": 9, "duree": 160 }
+     ]
+    },
+    "competence": {
+     "boucle": false,
+     "cadres": [
+      { "x": 930, "y": 155, "largeur": 22, "hauteur": 20, "dx": 3, "dy": 11, "duree": 200 },
+      { "x": 273, "y": 104, "largeur": 22, "hauteur": 25, "dx": 3, "dy": 0, "duree": 100 },
+      { "x": 273, "y": 104, "largeur": 22, "hauteur": 25, "dx": 3, "dy": 0, "duree": 100 },
+      { "x": 703, "y": 155, "largeur": 26, "hauteur": 20, "dx": 3, "dy": 11, "duree": 200 },
+      { "x": 676, "y": 155, "largeur": 26, "hauteur": 20, "dx": 3, "dy": 11, "duree": 200 },
+      { "x": 576, "y": 130, "largeur": 22, "hauteur": 22, "dx": 3, "dy": 9, "duree": 200 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 782, "y": 130, "largeur": 21, "hauteur": 22, "dx": 3, "dy": 9, "duree": 130 },
+      { "x": 576, "y": 130, "largeur": 22, "hauteur": 22, "dx": 3, "dy": 9, "duree": 130 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 242, "y": 155, "largeur": 21, "hauteur": 21, "dx": 3, "dy": 10, "duree": 160 },
+      { "x": 70, "y": 198, "largeur": 22, "hauteur": 16, "dx": 3, "dy": 13, "duree": 160 },
+      { "x": 182, "y": 273, "largeur": 22, "hauteur": 9, "dx": 4, "dy": 22, "duree": 1000 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 308, "y": 155, "largeur": 20, "hauteur": 21, "dx": 4, "dy": 10, "duree": 260 },
+      { "x": 371, "y": 155, "largeur": 20, "hauteur": 21, "dx": 4, "dy": 10, "duree": 260 },
+      { "x": 997, "y": 155, "largeur": 20, "hauteur": 20, "dx": 4, "dy": 11, "duree": 260 },
+      { "x": 0, "y": 177, "largeur": 20, "hauteur": 20, "dx": 4, "dy": 11, "duree": 260 }
+     ]
+    },
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 329, "y": 155, "largeur": 20, "hauteur": 21, "dx": 4, "dy": 10, "duree": 140 },
+      { "x": 350, "y": 155, "largeur": 20, "hauteur": 21, "dx": 4, "dy": 9, "duree": 140 },
+      { "x": 976, "y": 155, "largeur": 20, "hauteur": 20, "dx": 4, "dy": 11, "duree": 140 },
+      { "x": 350, "y": 155, "largeur": 20, "hauteur": 21, "dx": 4, "dy": 9, "duree": 140 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 296, "y": 104, "largeur": 20, "hauteur": 25, "dx": 4, "dy": 6, "duree": 220 },
+      { "x": 207, "y": 177, "largeur": 25, "hauteur": 19, "dx": 4, "dy": 12, "duree": 110 },
+      { "x": 181, "y": 177, "largeur": 25, "hauteur": 19, "dx": 4, "dy": 12, "duree": 180 },
+      { "x": 308, "y": 155, "largeur": 20, "hauteur": 21, "dx": 4, "dy": 10, "duree": 160 }
+     ]
+    },
+    "competence": {
+     "boucle": false,
+     "cadres": [
+      { "x": 385, "y": 177, "largeur": 20, "hauteur": 19, "dx": 4, "dy": 12, "duree": 200 },
+      { "x": 173, "y": 130, "largeur": 20, "hauteur": 24, "dx": 4, "dy": 1, "duree": 100 },
+      { "x": 173, "y": 130, "largeur": 20, "hauteur": 24, "dx": 4, "dy": 1, "duree": 100 },
+      { "x": 310, "y": 177, "largeur": 24, "hauteur": 19, "dx": 4, "dy": 12, "duree": 200 },
+      { "x": 285, "y": 177, "largeur": 24, "hauteur": 19, "dx": 4, "dy": 12, "duree": 200 },
+      { "x": 308, "y": 155, "largeur": 20, "hauteur": 21, "dx": 4, "dy": 10, "duree": 200 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 496, "y": 155, "largeur": 19, "hauteur": 21, "dx": 4, "dy": 10, "duree": 130 },
+      { "x": 308, "y": 155, "largeur": 20, "hauteur": 21, "dx": 4, "dy": 10, "duree": 130 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 84, "y": 177, "largeur": 19, "hauteur": 20, "dx": 4, "dy": 11, "duree": 160 },
+      { "x": 781, "y": 198, "largeur": 20, "hauteur": 15, "dx": 4, "dy": 14, "duree": 160 },
+      { "x": 464, "y": 273, "largeur": 20, "hauteur": 8, "dx": 5, "dy": 23, "duree": 1000 }
+     ]
+    }
+   }
+  },
+  "chemin-1": {
+   "categorie": "tuile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 0,
+    "y": 0
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 359, "y": 198, "largeur": 16, "hauteur": 16, "dx": 0, "dy": 0, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "chemin-2": {
+   "categorie": "tuile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 0,
+    "y": 0
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 393, "y": 198, "largeur": 16, "hauteur": 16, "dx": 0, "dy": 0, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "chemin-bord-e": {
+   "categorie": "tuile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 0,
+    "y": 0
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 376, "y": 198, "largeur": 16, "hauteur": 16, "dx": 0, "dy": 0, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "chemin-bord-n": {
+   "categorie": "tuile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 0,
+    "y": 0
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 308, "y": 198, "largeur": 16, "hauteur": 16, "dx": 0, "dy": 0, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "chemin-bord-o": {
+   "categorie": "tuile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 0,
+    "y": 0
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 240, "y": 198, "largeur": 16, "hauteur": 16, "dx": 0, "dy": 0, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "chemin-bord-s": {
+   "categorie": "tuile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 0,
+    "y": 0
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 325, "y": 198, "largeur": 16, "hauteur": 16, "dx": 0, "dy": 0, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "chemin-coin-ext-ne": {
+   "categorie": "tuile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 0,
+    "y": 0
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 206, "y": 198, "largeur": 16, "hauteur": 16, "dx": 0, "dy": 0, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "chemin-coin-ext-no": {
+   "categorie": "tuile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 0,
+    "y": 0
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 189, "y": 198, "largeur": 16, "hauteur": 16, "dx": 0, "dy": 0, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "chemin-coin-ext-se": {
+   "categorie": "tuile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 0,
+    "y": 0
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 444, "y": 198, "largeur": 16, "hauteur": 16, "dx": 0, "dy": 0, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "chemin-coin-ext-so": {
+   "categorie": "tuile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 0,
+    "y": 0
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 291, "y": 198, "largeur": 16, "hauteur": 16, "dx": 0, "dy": 0, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "chemin-coin-int-ne": {
+   "categorie": "tuile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 0,
+    "y": 0
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 427, "y": 198, "largeur": 16, "hauteur": 16, "dx": 0, "dy": 0, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "chemin-coin-int-no": {
+   "categorie": "tuile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 0,
+    "y": 0
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 274, "y": 198, "largeur": 16, "hauteur": 16, "dx": 0, "dy": 0, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "chemin-coin-int-se": {
+   "categorie": "tuile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 0,
+    "y": 0
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 410, "y": 198, "largeur": 16, "hauteur": 16, "dx": 0, "dy": 0, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "chemin-coin-int-so": {
+   "categorie": "tuile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 0,
+    "y": 0
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 342, "y": 198, "largeur": 16, "hauteur": 16, "dx": 0, "dy": 0, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "chien-errant": {
+   "categorie": "ennemi",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 30
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 179, "y": 259, "largeur": 23, "hauteur": 12, "dx": 4, "dy": 19, "duree": 220 },
+      { "x": 704, "y": 259, "largeur": 23, "hauteur": 11, "dx": 4, "dy": 20, "duree": 220 }
+     ]
+    },
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 155, "y": 259, "largeur": 23, "hauteur": 12, "dx": 4, "dy": 19, "duree": 80 },
+      { "x": 499, "y": 230, "largeur": 23, "hauteur": 13, "dx": 4, "dy": 18, "duree": 80 },
+      { "x": 203, "y": 259, "largeur": 23, "hauteur": 12, "dx": 4, "dy": 19, "duree": 80 },
+      { "x": 499, "y": 230, "largeur": 23, "hauteur": 13, "dx": 4, "dy": 18, "duree": 80 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 980, "y": 259, "largeur": 22, "hauteur": 10, "dx": 4, "dy": 21, "duree": 160 },
+      { "x": 420, "y": 230, "largeur": 26, "hauteur": 13, "dx": 4, "dy": 18, "duree": 90 },
+      { "x": 103, "y": 259, "largeur": 26, "hauteur": 12, "dx": 4, "dy": 19, "duree": 140 },
+      { "x": 179, "y": 259, "largeur": 23, "hauteur": 12, "dx": 4, "dy": 19, "duree": 90 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 728, "y": 259, "largeur": 22, "hauteur": 11, "dx": 4, "dy": 20, "duree": 120 },
+      { "x": 179, "y": 259, "largeur": 23, "hauteur": 12, "dx": 4, "dy": 19, "duree": 120 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 228, "y": 273, "largeur": 22, "hauteur": 9, "dx": 4, "dy": 22, "duree": 150 },
+      { "x": 843, "y": 273, "largeur": 27, "hauteur": 6, "dx": 4, "dy": 25, "duree": 1000 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 795, "y": 259, "largeur": 21, "hauteur": 11, "dx": 5, "dy": 20, "duree": 220 },
+      { "x": 1003, "y": 259, "largeur": 21, "hauteur": 10, "dx": 5, "dy": 21, "duree": 220 }
+     ]
+    },
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 773, "y": 259, "largeur": 21, "hauteur": 11, "dx": 5, "dy": 20, "duree": 80 },
+      { "x": 227, "y": 259, "largeur": 21, "hauteur": 12, "dx": 5, "dy": 19, "duree": 80 },
+      { "x": 751, "y": 259, "largeur": 21, "hauteur": 11, "dx": 5, "dy": 20, "duree": 80 },
+      { "x": 227, "y": 259, "largeur": 21, "hauteur": 12, "dx": 5, "dy": 19, "duree": 80 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 251, "y": 273, "largeur": 20, "hauteur": 9, "dx": 5, "dy": 22, "duree": 160 },
+      { "x": 130, "y": 259, "largeur": 24, "hauteur": 12, "dx": 5, "dy": 19, "duree": 90 },
+      { "x": 679, "y": 259, "largeur": 24, "hauteur": 11, "dx": 5, "dy": 20, "duree": 140 },
+      { "x": 795, "y": 259, "largeur": 21, "hauteur": 11, "dx": 5, "dy": 20, "duree": 90 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 0, "y": 273, "largeur": 20, "hauteur": 10, "dx": 5, "dy": 21, "duree": 120 },
+      { "x": 795, "y": 259, "largeur": 21, "hauteur": 11, "dx": 5, "dy": 20, "duree": 120 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 506, "y": 273, "largeur": 20, "hauteur": 8, "dx": 5, "dy": 23, "duree": 150 },
+      { "x": 105, "y": 284, "largeur": 25, "hauteur": 5, "dx": 5, "dy": 26, "duree": 1000 }
+     ]
+    }
+   }
+  },
+  "cloture-cassee": {
+   "categorie": "decor",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 15
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 368, "y": 273, "largeur": 13, "hauteur": 9, "dx": 0, "dy": 7, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 615, "y": 273, "largeur": 12, "hauteur": 8, "dx": 0, "dy": 8, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "cloture-h": {
+   "categorie": "decor",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 15
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 272, "y": 273, "largeur": 16, "hauteur": 9, "dx": 0, "dy": 7, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 527, "y": 273, "largeur": 16, "hauteur": 8, "dx": 0, "dy": 8, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "cloture-v": {
+   "categorie": "decor",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 15
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 678, "y": 198, "largeur": 6, "hauteur": 16, "dx": 5, "dy": 0, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 685, "y": 198, "largeur": 4, "hauteur": 16, "dx": 6, "dy": 0, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "crane": {
+   "categorie": "decor",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 15
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 382, "y": 273, "largeur": 13, "hauteur": 9, "dx": 1, "dy": 7, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 628, "y": 273, "largeur": 11, "hauteur": 8, "dx": 2, "dy": 8, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "croix": {
+   "categorie": "decor",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 15
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 934, "y": 245, "largeur": 12, "hauteur": 13, "dx": 2, "dy": 2, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 541, "y": 259, "largeur": 10, "hauteur": 12, "dx": 3, "dy": 3, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "ecorcheur": {
+   "categorie": "unite",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 30
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 134, "y": 230, "largeur": 15, "hauteur": 14, "dx": 7, "dy": 17, "duree": 200 },
+      { "x": 118, "y": 230, "largeur": 15, "hauteur": 14, "dx": 7, "dy": 17, "duree": 200 },
+      { "x": 118, "y": 230, "largeur": 15, "hauteur": 14, "dx": 7, "dy": 17, "duree": 200 },
+      { "x": 170, "y": 245, "largeur": 15, "hauteur": 13, "dx": 7, "dy": 18, "duree": 200 }
+     ]
+    },
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 150, "y": 230, "largeur": 15, "hauteur": 14, "dx": 7, "dy": 17, "duree": 110 },
+      { "x": 102, "y": 230, "largeur": 15, "hauteur": 14, "dx": 7, "dy": 16, "duree": 110 },
+      { "x": 134, "y": 230, "largeur": 15, "hauteur": 14, "dx": 7, "dy": 17, "duree": 110 },
+      { "x": 118, "y": 230, "largeur": 15, "hauteur": 14, "dx": 7, "dy": 17, "duree": 110 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 843, "y": 198, "largeur": 14, "hauteur": 15, "dx": 7, "dy": 16, "duree": 90 },
+      { "x": 195, "y": 215, "largeur": 19, "hauteur": 14, "dx": 7, "dy": 17, "duree": 60 },
+      { "x": 272, "y": 215, "largeur": 18, "hauteur": 14, "dx": 7, "dy": 17, "duree": 90 },
+      { "x": 134, "y": 230, "largeur": 15, "hauteur": 14, "dx": 7, "dy": 17, "duree": 150 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 214, "y": 230, "largeur": 14, "hauteur": 14, "dx": 7, "dy": 17, "duree": 120 },
+      { "x": 134, "y": 230, "largeur": 15, "hauteur": 14, "dx": 7, "dy": 17, "duree": 120 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 214, "y": 230, "largeur": 14, "hauteur": 14, "dx": 7, "dy": 17, "duree": 140 },
+      { "x": 289, "y": 273, "largeur": 15, "hauteur": 9, "dx": 6, "dy": 22, "duree": 140 },
+      { "x": 958, "y": 273, "largeur": 16, "hauteur": 6, "dx": 6, "dy": 25, "duree": 300 },
+      { "x": 415, "y": 284, "largeur": 16, "hauteur": 4, "dx": 6, "dy": 27, "duree": 600 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 851, "y": 245, "largeur": 13, "hauteur": 13, "dx": 8, "dy": 18, "duree": 200 },
+      { "x": 837, "y": 245, "largeur": 13, "hauteur": 13, "dx": 8, "dy": 18, "duree": 200 },
+      { "x": 837, "y": 245, "largeur": 13, "hauteur": 13, "dx": 8, "dy": 18, "duree": 200 },
+      { "x": 422, "y": 259, "largeur": 13, "hauteur": 12, "dx": 8, "dy": 19, "duree": 200 }
+     ]
+    },
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 865, "y": 245, "largeur": 13, "hauteur": 13, "dx": 8, "dy": 18, "duree": 110 },
+      { "x": 823, "y": 245, "largeur": 13, "hauteur": 13, "dx": 8, "dy": 17, "duree": 110 },
+      { "x": 851, "y": 245, "largeur": 13, "hauteur": 13, "dx": 8, "dy": 18, "duree": 110 },
+      { "x": 837, "y": 245, "largeur": 13, "hauteur": 13, "dx": 8, "dy": 18, "duree": 110 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 288, "y": 230, "largeur": 12, "hauteur": 14, "dx": 8, "dy": 17, "duree": 90 },
+      { "x": 865, "y": 230, "largeur": 17, "hauteur": 13, "dx": 8, "dy": 18, "duree": 60 },
+      { "x": 970, "y": 230, "largeur": 16, "hauteur": 13, "dx": 8, "dy": 18, "duree": 90 },
+      { "x": 851, "y": 245, "largeur": 13, "hauteur": 13, "dx": 8, "dy": 18, "duree": 150 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 947, "y": 245, "largeur": 12, "hauteur": 13, "dx": 8, "dy": 18, "duree": 120 },
+      { "x": 851, "y": 245, "largeur": 13, "hauteur": 13, "dx": 8, "dy": 18, "duree": 120 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 947, "y": 245, "largeur": 12, "hauteur": 13, "dx": 8, "dy": 18, "duree": 140 },
+      { "x": 559, "y": 273, "largeur": 13, "hauteur": 8, "dx": 7, "dy": 23, "duree": 140 },
+      { "x": 179, "y": 284, "largeur": 14, "hauteur": 5, "dx": 7, "dy": 26, "duree": 300 },
+      { "x": 573, "y": 284, "largeur": 14, "hauteur": 3, "dx": 7, "dy": 28, "duree": 600 }
+     ]
+    }
+   }
+  },
+  "etourdi": {
+   "categorie": "effet",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 12, "y": 284, "largeur": 11, "hauteur": 6, "dx": 0, "dy": 5, "duree": 110 },
+      { "x": 764, "y": 273, "largeur": 12, "hauteur": 7, "dx": 0, "dy": 4, "duree": 110 },
+      { "x": 992, "y": 273, "largeur": 11, "hauteur": 6, "dx": 0, "dy": 5, "duree": 110 }
+     ]
+    }
+   }
+  },
+  "fleche": {
+   "categorie": "projectile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 464, "y": 284, "largeur": 11, "hauteur": 4, "dx": 3, "dy": 6, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 672, "y": 284, "largeur": 9, "hauteur": 3, "dx": 4, "dy": 7, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "fleche-poison": {
+   "categorie": "projectile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 476, "y": 284, "largeur": 11, "hauteur": 4, "dx": 3, "dy": 6, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 662, "y": 284, "largeur": 9, "hauteur": 3, "dx": 4, "dy": 7, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "fumee": {
+   "categorie": "effet",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "impact": {
+     "boucle": false,
+     "cadres": [
+      { "x": 507, "y": 284, "largeur": 4, "hauteur": 4, "dx": 5, "dy": 6, "duree": 120 },
+      { "x": 276, "y": 284, "largeur": 6, "hauteur": 5, "dx": 4, "dy": 5, "duree": 120 },
+      { "x": 268, "y": 284, "largeur": 7, "hauteur": 5, "dx": 3, "dy": 4, "duree": 120 },
+      { "x": 259, "y": 284, "largeur": 8, "hauteur": 5, "dx": 2, "dy": 3, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "garde-cloitre": {
+   "categorie": "unite",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 30
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 787, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 200 },
+      { "x": 751, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 200 },
+      { "x": 805, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 200 },
+      { "x": 883, "y": 230, "largeur": 17, "hauteur": 13, "dx": 7, "dy": 18, "duree": 200 }
+     ]
+    },
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 769, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 110 },
+      { "x": 733, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 16, "duree": 110 },
+      { "x": 787, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 110 },
+      { "x": 751, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 110 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 772, "y": 177, "largeur": 14, "hauteur": 17, "dx": 7, "dy": 14, "duree": 90 },
+      { "x": 68, "y": 215, "largeur": 21, "hauteur": 14, "dx": 7, "dy": 17, "duree": 60 },
+      { "x": 46, "y": 215, "largeur": 21, "hauteur": 14, "dx": 7, "dy": 17, "duree": 90 },
+      { "x": 787, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 150 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 85, "y": 230, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 17, "duree": 120 },
+      { "x": 823, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 120 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 85, "y": 230, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 17, "duree": 140 },
+      { "x": 321, "y": 273, "largeur": 15, "hauteur": 9, "dx": 6, "dy": 22, "duree": 140 },
+      { "x": 924, "y": 273, "largeur": 16, "hauteur": 6, "dx": 6, "dy": 25, "duree": 300 },
+      { "x": 381, "y": 284, "largeur": 16, "hauteur": 4, "dx": 6, "dy": 27, "duree": 600 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 522, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 200 },
+      { "x": 506, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 200 },
+      { "x": 458, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 200 },
+      { "x": 360, "y": 259, "largeur": 15, "hauteur": 12, "dx": 8, "dy": 19, "duree": 200 }
+     ]
+    },
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 538, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 110 },
+      { "x": 490, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 17, "duree": 110 },
+      { "x": 522, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 110 },
+      { "x": 506, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 110 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 595, "y": 198, "largeur": 12, "hauteur": 16, "dx": 8, "dy": 15, "duree": 90 },
+      { "x": 690, "y": 230, "largeur": 19, "hauteur": 13, "dx": 8, "dy": 18, "duree": 60 },
+      { "x": 670, "y": 230, "largeur": 19, "hauteur": 13, "dx": 8, "dy": 18, "duree": 90 },
+      { "x": 522, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 150 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 780, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 18, "duree": 120 },
+      { "x": 474, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 120 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 780, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 18, "duree": 140 },
+      { "x": 587, "y": 273, "largeur": 13, "hauteur": 8, "dx": 7, "dy": 23, "duree": 140 },
+      { "x": 209, "y": 284, "largeur": 14, "hauteur": 5, "dx": 7, "dy": 26, "duree": 300 },
+      { "x": 603, "y": 284, "largeur": 14, "hauteur": 3, "dx": 7, "dy": 28, "duree": 600 }
+     ]
+    }
+   }
+  },
+  "gros-matou": {
+   "categorie": "unite",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 30
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 668, "y": 130, "largeur": 22, "hauteur": 22, "dx": 3, "dy": 9, "duree": 260 },
+      { "x": 737, "y": 130, "largeur": 22, "hauteur": 22, "dx": 3, "dy": 9, "duree": 260 },
+      { "x": 219, "y": 155, "largeur": 22, "hauteur": 21, "dx": 3, "dy": 10, "duree": 260 },
+      { "x": 173, "y": 155, "largeur": 22, "hauteur": 21, "dx": 3, "dy": 10, "duree": 260 }
+     ]
+    },
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 691, "y": 130, "largeur": 22, "hauteur": 22, "dx": 3, "dy": 9, "duree": 140 },
+      { "x": 714, "y": 130, "largeur": 22, "hauteur": 22, "dx": 3, "dy": 8, "duree": 140 },
+      { "x": 196, "y": 155, "largeur": 22, "hauteur": 21, "dx": 3, "dy": 10, "duree": 140 },
+      { "x": 714, "y": 130, "largeur": 22, "hauteur": 22, "dx": 3, "dy": 8, "duree": 140 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 979, "y": 47, "largeur": 22, "hauteur": 26, "dx": 3, "dy": 5, "duree": 220 },
+      { "x": 620, "y": 155, "largeur": 27, "hauteur": 20, "dx": 3, "dy": 11, "duree": 110 },
+      { "x": 648, "y": 155, "largeur": 27, "hauteur": 20, "dx": 3, "dy": 11, "duree": 180 },
+      { "x": 668, "y": 130, "largeur": 22, "hauteur": 22, "dx": 3, "dy": 9, "duree": 160 }
+     ]
+    },
+    "competence": {
+     "boucle": false,
+     "cadres": [
+      { "x": 953, "y": 155, "largeur": 22, "hauteur": 20, "dx": 3, "dy": 11, "duree": 200 },
+      { "x": 250, "y": 104, "largeur": 22, "hauteur": 25, "dx": 3, "dy": 0, "duree": 100 },
+      { "x": 250, "y": 104, "largeur": 22, "hauteur": 25, "dx": 3, "dy": 0, "duree": 100 },
+      { "x": 757, "y": 155, "largeur": 26, "hauteur": 20, "dx": 3, "dy": 11, "duree": 200 },
+      { "x": 730, "y": 155, "largeur": 26, "hauteur": 20, "dx": 3, "dy": 11, "duree": 200 },
+      { "x": 668, "y": 130, "largeur": 22, "hauteur": 22, "dx": 3, "dy": 9, "duree": 200 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 804, "y": 130, "largeur": 21, "hauteur": 22, "dx": 3, "dy": 9, "duree": 130 },
+      { "x": 668, "y": 130, "largeur": 22, "hauteur": 22, "dx": 3, "dy": 9, "duree": 130 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 264, "y": 155, "largeur": 21, "hauteur": 21, "dx": 3, "dy": 10, "duree": 160 },
+      { "x": 93, "y": 198, "largeur": 22, "hauteur": 16, "dx": 3, "dy": 13, "duree": 160 },
+      { "x": 205, "y": 273, "largeur": 22, "hauteur": 9, "dx": 4, "dy": 22, "duree": 1000 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 392, "y": 155, "largeur": 20, "hauteur": 21, "dx": 4, "dy": 10, "duree": 260 },
+      { "x": 455, "y": 155, "largeur": 20, "hauteur": 21, "dx": 4, "dy": 10, "duree": 260 },
+      { "x": 42, "y": 177, "largeur": 20, "hauteur": 20, "dx": 4, "dy": 11, "duree": 260 },
+      { "x": 63, "y": 177, "largeur": 20, "hauteur": 20, "dx": 4, "dy": 11, "duree": 260 }
+     ]
+    },
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 413, "y": 155, "largeur": 20, "hauteur": 21, "dx": 4, "dy": 10, "duree": 140 },
+      { "x": 434, "y": 155, "largeur": 20, "hauteur": 21, "dx": 4, "dy": 9, "duree": 140 },
+      { "x": 21, "y": 177, "largeur": 20, "hauteur": 20, "dx": 4, "dy": 11, "duree": 140 },
+      { "x": 434, "y": 155, "largeur": 20, "hauteur": 21, "dx": 4, "dy": 9, "duree": 140 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 317, "y": 104, "largeur": 20, "hauteur": 25, "dx": 4, "dy": 6, "duree": 220 },
+      { "x": 259, "y": 177, "largeur": 25, "hauteur": 19, "dx": 4, "dy": 12, "duree": 110 },
+      { "x": 233, "y": 177, "largeur": 25, "hauteur": 19, "dx": 4, "dy": 12, "duree": 180 },
+      { "x": 392, "y": 155, "largeur": 20, "hauteur": 21, "dx": 4, "dy": 10, "duree": 160 }
+     ]
+    },
+    "competence": {
+     "boucle": false,
+     "cadres": [
+      { "x": 406, "y": 177, "largeur": 20, "hauteur": 19, "dx": 4, "dy": 12, "duree": 200 },
+      { "x": 194, "y": 130, "largeur": 20, "hauteur": 24, "dx": 4, "dy": 1, "duree": 100 },
+      { "x": 194, "y": 130, "largeur": 20, "hauteur": 24, "dx": 4, "dy": 1, "duree": 100 },
+      { "x": 360, "y": 177, "largeur": 24, "hauteur": 19, "dx": 4, "dy": 12, "duree": 200 },
+      { "x": 335, "y": 177, "largeur": 24, "hauteur": 19, "dx": 4, "dy": 12, "duree": 200 },
+      { "x": 392, "y": 155, "largeur": 20, "hauteur": 21, "dx": 4, "dy": 10, "duree": 200 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 516, "y": 155, "largeur": 19, "hauteur": 21, "dx": 4, "dy": 10, "duree": 130 },
+      { "x": 392, "y": 155, "largeur": 20, "hauteur": 21, "dx": 4, "dy": 10, "duree": 130 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 104, "y": 177, "largeur": 19, "hauteur": 20, "dx": 4, "dy": 11, "duree": 160 },
+      { "x": 802, "y": 198, "largeur": 20, "hauteur": 15, "dx": 4, "dy": 14, "duree": 160 },
+      { "x": 485, "y": 273, "largeur": 20, "hauteur": 8, "dx": 5, "dy": 23, "duree": 1000 }
+     ]
+    }
+   }
+  },
+  "guetteur-chat": {
+   "categorie": "unite",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 30
+   },
+   "animations": {
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 517, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 110 },
+      { "x": 481, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 16, "duree": 110 },
+      { "x": 535, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 110 },
+      { "x": 499, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 16, "duree": 110 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 51, "y": 230, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 17, "duree": 120 },
+      { "x": 589, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 120 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 51, "y": 230, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 17, "duree": 140 },
+      { "x": 337, "y": 273, "largeur": 15, "hauteur": 9, "dx": 6, "dy": 22, "duree": 140 },
+      { "x": 941, "y": 273, "largeur": 16, "hauteur": 6, "dx": 6, "dy": 25, "duree": 300 },
+      { "x": 398, "y": 284, "largeur": 16, "hauteur": 4, "dx": 6, "dy": 27, "duree": 600 }
+     ]
+    },
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 535, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 220 },
+      { "x": 499, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 16, "duree": 220 },
+      { "x": 571, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 220 },
+      { "x": 535, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 220 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 535, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 90 },
+      { "x": 424, "y": 215, "largeur": 18, "hauteur": 14, "dx": 7, "dy": 17, "duree": 180 },
+      { "x": 553, "y": 215, "largeur": 17, "hauteur": 14, "dx": 7, "dy": 17, "duree": 140 }
+     ]
+    }
+   },
+   "sansContour": {
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 298, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 110 },
+      { "x": 250, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 17, "duree": 110 },
+      { "x": 282, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 110 },
+      { "x": 266, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 17, "duree": 110 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 750, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 18, "duree": 120 },
+      { "x": 234, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 120 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 750, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 18, "duree": 140 },
+      { "x": 601, "y": 273, "largeur": 13, "hauteur": 8, "dx": 7, "dy": 23, "duree": 140 },
+      { "x": 224, "y": 284, "largeur": 14, "hauteur": 5, "dx": 7, "dy": 26, "duree": 300 },
+      { "x": 618, "y": 284, "largeur": 14, "hauteur": 3, "dx": 7, "dy": 28, "duree": 600 }
+     ]
+    },
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 282, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 220 },
+      { "x": 266, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 17, "duree": 220 },
+      { "x": 218, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 220 },
+      { "x": 282, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 220 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 282, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 90 },
+      { "x": 119, "y": 245, "largeur": 16, "hauteur": 13, "dx": 8, "dy": 18, "duree": 180 },
+      { "x": 314, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 140 }
+     ]
+    }
+   }
+  },
+  "herbe-1": {
+   "categorie": "tuile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 0,
+    "y": 0
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 172, "y": 198, "largeur": 16, "hauteur": 16, "dx": 0, "dy": 0, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "herbe-2": {
+   "categorie": "tuile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 0,
+    "y": 0
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 257, "y": 198, "largeur": 16, "hauteur": 16, "dx": 0, "dy": 0, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "herbe-3": {
+   "categorie": "tuile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 0,
+    "y": 0
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 223, "y": 198, "largeur": 16, "hauteur": 16, "dx": 0, "dy": 0, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "icone-ameliorer": {
+   "categorie": "icone",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 848, "y": 259, "largeur": 11, "hauteur": 11, "dx": 2, "dy": 0, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 138, "y": 273, "largeur": 9, "hauteur": 10, "dx": 3, "dy": 1, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "icone-arete": {
+   "categorie": "icone",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 975, "y": 273, "largeur": 16, "hauteur": 6, "dx": 0, "dy": 4, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 147, "y": 284, "largeur": 15, "hauteur": 5, "dx": 1, "dy": 5, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "icone-artillerie": {
+   "categorie": "icone",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 817, "y": 259, "largeur": 16, "hauteur": 11, "dx": 0, "dy": 2, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 38, "y": 273, "largeur": 14, "hauteur": 10, "dx": 1, "dy": 3, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "icone-braise": {
+   "categorie": "icone",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 128, "y": 273, "largeur": 9, "hauteur": 10, "dx": 3, "dy": 1, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 456, "y": 273, "largeur": 7, "hauteur": 9, "dx": 4, "dy": 2, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "icone-caserne": {
+   "categorie": "icone",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 834, "y": 259, "largeur": 13, "hauteur": 11, "dx": 1, "dy": 1, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 94, "y": 273, "largeur": 11, "hauteur": 10, "dx": 2, "dy": 2, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "icone-chute-colosse": {
+   "categorie": "icone",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 450, "y": 259, "largeur": 13, "hauteur": 12, "dx": 1, "dy": 1, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 860, "y": 259, "largeur": 11, "hauteur": 11, "dx": 2, "dy": 2, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "icone-etoile": {
+   "categorie": "icone",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 68, "y": 273, "largeur": 13, "hauteur": 10, "dx": 1, "dy": 1, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 422, "y": 273, "largeur": 11, "hauteur": 9, "dx": 2, "dy": 2, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "icone-magie": {
+   "categorie": "icone",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 921, "y": 245, "largeur": 12, "hauteur": 13, "dx": 2, "dy": 0, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 530, "y": 259, "largeur": 10, "hauteur": 12, "dx": 3, "dy": 1, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "icone-ralliement": {
+   "categorie": "icone",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 44, "y": 259, "largeur": 9, "hauteur": 13, "dx": 2, "dy": 0, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 552, "y": 259, "largeur": 7, "hauteur": 12, "dx": 3, "dy": 1, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "icone-renforts": {
+   "categorie": "icone",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 544, "y": 273, "largeur": 14, "hauteur": 8, "dx": 0, "dy": 3, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 777, "y": 273, "largeur": 12, "hauteur": 7, "dx": 1, "dy": 4, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "icone-tir": {
+   "categorie": "icone",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 274, "y": 230, "largeur": 13, "hauteur": 14, "dx": 1, "dy": 0, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 999, "y": 245, "largeur": 11, "hauteur": 13, "dx": 2, "dy": 1, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "icone-vendre": {
+   "categorie": "icone",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 82, "y": 273, "largeur": 11, "hauteur": 10, "dx": 2, "dy": 1, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 446, "y": 273, "largeur": 9, "hauteur": 9, "dx": 3, "dy": 2, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "icone-vie": {
+   "categorie": "icone",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 434, "y": 273, "largeur": 11, "hauteur": 9, "dx": 2, "dy": 2, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 651, "y": 273, "largeur": 9, "hauteur": 8, "dx": 3, "dy": 3, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "impact": {
+   "categorie": "effet",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "impact": {
+     "boucle": false,
+     "cadres": [
+      { "x": 512, "y": 284, "largeur": 4, "hauteur": 4, "dx": 6, "dy": 6, "duree": 60 },
+      { "x": 84, "y": 284, "largeur": 6, "hauteur": 6, "dx": 5, "dy": 5, "duree": 60 },
+      { "x": 661, "y": 273, "largeur": 8, "hauteur": 8, "dx": 4, "dy": 4, "duree": 60 },
+      { "x": 117, "y": 273, "largeur": 10, "hauteur": 10, "dx": 3, "dy": 3, "duree": 60 },
+      { "x": 688, "y": 273, "largeur": 8, "hauteur": 8, "dx": 4, "dy": 4, "duree": 60 }
+     ]
+    }
+   }
+  },
+  "impact-cendre": {
+   "categorie": "effet",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "impact": {
+     "boucle": false,
+     "cadres": [
+      { "x": 517, "y": 284, "largeur": 4, "hauteur": 4, "dx": 6, "dy": 6, "duree": 60 },
+      { "x": 91, "y": 284, "largeur": 6, "hauteur": 6, "dx": 5, "dy": 5, "duree": 60 },
+      { "x": 670, "y": 273, "largeur": 8, "hauteur": 8, "dx": 4, "dy": 4, "duree": 60 },
+      { "x": 106, "y": 273, "largeur": 10, "hauteur": 10, "dx": 3, "dy": 3, "duree": 60 },
+      { "x": 679, "y": 273, "largeur": 8, "hauteur": 8, "dx": 4, "dy": 4, "duree": 60 }
+     ]
+    }
+   }
+  },
+  "maison-ruine-1": {
+   "categorie": "decor",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 30
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 0, "y": 198, "largeur": 23, "hauteur": 16, "dx": 2, "dy": 15, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 759, "y": 198, "largeur": 21, "hauteur": 15, "dx": 3, "dy": 16, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "maison-ruine-2": {
+   "categorie": "decor",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 30
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 90, "y": 215, "largeur": 20, "hauteur": 14, "dx": 4, "dy": 17, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 770, "y": 230, "largeur": 18, "hauteur": 13, "dx": 5, "dy": 18, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "mendiant": {
+   "categorie": "ennemi",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 30
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 340, "y": 230, "largeur": 12, "hauteur": 14, "dx": 10, "dy": 17, "duree": 160 },
+      { "x": 314, "y": 230, "largeur": 12, "hauteur": 14, "dx": 10, "dy": 17, "duree": 160 },
+      { "x": 301, "y": 230, "largeur": 12, "hauteur": 14, "dx": 10, "dy": 17, "duree": 160 },
+      { "x": 327, "y": 230, "largeur": 12, "hauteur": 14, "dx": 10, "dy": 17, "duree": 160 }
+     ]
+    },
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 229, "y": 230, "largeur": 14, "hauteur": 14, "dx": 9, "dy": 17, "duree": 80 },
+      { "x": 353, "y": 230, "largeur": 12, "hauteur": 14, "dx": 10, "dy": 17, "duree": 80 },
+      { "x": 366, "y": 230, "largeur": 11, "hauteur": 14, "dx": 11, "dy": 16, "duree": 80 },
+      { "x": 378, "y": 230, "largeur": 10, "hauteur": 14, "dx": 11, "dy": 17, "duree": 80 },
+      { "x": 353, "y": 230, "largeur": 12, "hauteur": 14, "dx": 10, "dy": 17, "duree": 80 },
+      { "x": 244, "y": 230, "largeur": 14, "hauteur": 14, "dx": 9, "dy": 16, "duree": 80 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 809, "y": 245, "largeur": 13, "hauteur": 13, "dx": 9, "dy": 18, "duree": 80 },
+      { "x": 202, "y": 245, "largeur": 15, "hauteur": 13, "dx": 9, "dy": 18, "duree": 80 },
+      { "x": 186, "y": 245, "largeur": 15, "hauteur": 13, "dx": 8, "dy": 18, "duree": 80 },
+      { "x": 607, "y": 230, "largeur": 20, "hauteur": 13, "dx": 12, "dy": 18, "duree": 140 },
+      { "x": 730, "y": 230, "largeur": 19, "hauteur": 13, "dx": 12, "dy": 18, "duree": 80 },
+      { "x": 710, "y": 230, "largeur": 19, "hauteur": 13, "dx": 12, "dy": 18, "duree": 80 },
+      { "x": 554, "y": 245, "largeur": 15, "hauteur": 13, "dx": 12, "dy": 18, "duree": 80 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 198, "y": 230, "largeur": 15, "hauteur": 14, "dx": 7, "dy": 17, "duree": 120 },
+      { "x": 259, "y": 230, "largeur": 14, "hauteur": 14, "dx": 8, "dy": 17, "duree": 120 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 795, "y": 245, "largeur": 13, "hauteur": 13, "dx": 9, "dy": 18, "duree": 150 },
+      { "x": 53, "y": 273, "largeur": 14, "hauteur": 10, "dx": 10, "dy": 21, "duree": 150 },
+      { "x": 871, "y": 273, "largeur": 17, "hauteur": 6, "dx": 8, "dy": 25, "duree": 150 },
+      { "x": 345, "y": 284, "largeur": 18, "hauteur": 4, "dx": 7, "dy": 27, "duree": 150 },
+      { "x": 307, "y": 284, "largeur": 18, "hauteur": 4, "dx": 7, "dy": 27, "duree": 600 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 22, "y": 259, "largeur": 10, "hauteur": 13, "dx": 11, "dy": 18, "duree": 160 },
+      { "x": 1011, "y": 245, "largeur": 10, "hauteur": 13, "dx": 11, "dy": 18, "duree": 160 },
+      { "x": 0, "y": 259, "largeur": 10, "hauteur": 13, "dx": 11, "dy": 18, "duree": 160 },
+      { "x": 33, "y": 259, "largeur": 10, "hauteur": 13, "dx": 11, "dy": 18, "duree": 160 }
+     ]
+    },
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 960, "y": 245, "largeur": 12, "hauteur": 13, "dx": 10, "dy": 18, "duree": 80 },
+      { "x": 11, "y": 259, "largeur": 10, "hauteur": 13, "dx": 11, "dy": 18, "duree": 80 },
+      { "x": 54, "y": 259, "largeur": 9, "hauteur": 13, "dx": 12, "dy": 17, "duree": 80 },
+      { "x": 64, "y": 259, "largeur": 8, "hauteur": 13, "dx": 12, "dy": 18, "duree": 80 },
+      { "x": 11, "y": 259, "largeur": 10, "hauteur": 13, "dx": 11, "dy": 18, "duree": 80 },
+      { "x": 986, "y": 245, "largeur": 12, "hauteur": 13, "dx": 10, "dy": 17, "duree": 80 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 518, "y": 259, "largeur": 11, "hauteur": 12, "dx": 10, "dy": 19, "duree": 80 },
+      { "x": 478, "y": 259, "largeur": 13, "hauteur": 12, "dx": 10, "dy": 19, "duree": 80 },
+      { "x": 464, "y": 259, "largeur": 13, "hauteur": 12, "dx": 9, "dy": 19, "duree": 80 },
+      { "x": 249, "y": 259, "largeur": 18, "hauteur": 12, "dx": 13, "dy": 19, "duree": 140 },
+      { "x": 324, "y": 259, "largeur": 17, "hauteur": 12, "dx": 13, "dy": 19, "duree": 80 },
+      { "x": 306, "y": 259, "largeur": 17, "hauteur": 12, "dx": 13, "dy": 19, "duree": 80 },
+      { "x": 492, "y": 259, "largeur": 13, "hauteur": 12, "dx": 13, "dy": 19, "duree": 80 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 907, "y": 245, "largeur": 13, "hauteur": 13, "dx": 8, "dy": 18, "duree": 120 },
+      { "x": 973, "y": 245, "largeur": 12, "hauteur": 13, "dx": 9, "dy": 18, "duree": 120 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 506, "y": 259, "largeur": 11, "hauteur": 12, "dx": 10, "dy": 19, "duree": 150 },
+      { "x": 409, "y": 273, "largeur": 12, "hauteur": 9, "dx": 11, "dy": 22, "duree": 150 },
+      { "x": 163, "y": 284, "largeur": 15, "hauteur": 5, "dx": 9, "dy": 26, "duree": 150 },
+      { "x": 539, "y": 284, "largeur": 16, "hauteur": 3, "dx": 8, "dy": 28, "duree": 150 },
+      { "x": 522, "y": 284, "largeur": 16, "hauteur": 3, "dx": 8, "dy": 28, "duree": 600 }
+     ]
+    }
+   }
+  },
+  "onde-choc": {
+   "categorie": "effet",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 16
+   },
+   "animations": {
+    "impact": {
+     "boucle": false,
+     "cadres": [
+      { "x": 692, "y": 284, "largeur": 6, "hauteur": 3, "dx": 12, "dy": 14, "duree": 70 },
+      { "x": 734, "y": 273, "largeur": 16, "hauteur": 7, "dx": 8, "dy": 12, "duree": 70 },
+      { "x": 157, "y": 273, "largeur": 24, "hauteur": 9, "dx": 4, "dy": 11, "duree": 70 },
+      { "x": 389, "y": 230, "largeur": 30, "hauteur": 13, "dx": 1, "dy": 9, "duree": 70 }
+     ]
+    }
+   }
+  },
+  "paves-1": {
+   "categorie": "tuile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 0,
+    "y": 0
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 478, "y": 198, "largeur": 16, "hauteur": 16, "dx": 0, "dy": 0, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "paves-2": {
+   "categorie": "tuile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 0,
+    "y": 0
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 461, "y": 198, "largeur": 16, "hauteur": 16, "dx": 0, "dy": 0, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "paysan-affame": {
+   "categorie": "ennemi",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 30
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 816, "y": 177, "largeur": 13, "hauteur": 17, "dx": 9, "dy": 14, "duree": 180 },
+      { "x": 802, "y": 177, "largeur": 13, "hauteur": 17, "dx": 9, "dy": 14, "duree": 180 },
+      { "x": 525, "y": 198, "largeur": 13, "hauteur": 16, "dx": 9, "dy": 15, "duree": 180 },
+      { "x": 539, "y": 198, "largeur": 13, "hauteur": 16, "dx": 9, "dy": 15, "duree": 180 }
+     ]
+    },
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 844, "y": 177, "largeur": 12, "hauteur": 17, "dx": 10, "dy": 13, "duree": 100 },
+      { "x": 857, "y": 177, "largeur": 11, "hauteur": 17, "dx": 10, "dy": 14, "duree": 100 },
+      { "x": 830, "y": 177, "largeur": 13, "hauteur": 17, "dx": 9, "dy": 14, "duree": 100 },
+      { "x": 740, "y": 177, "largeur": 15, "hauteur": 17, "dx": 8, "dy": 13, "duree": 100 },
+      { "x": 724, "y": 177, "largeur": 15, "hauteur": 17, "dx": 8, "dy": 14, "duree": 100 },
+      { "x": 830, "y": 177, "largeur": 13, "hauteur": 17, "dx": 9, "dy": 14, "duree": 100 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 444, "y": 177, "largeur": 15, "hauteur": 19, "dx": 7, "dy": 12, "duree": 90 },
+      { "x": 116, "y": 198, "largeur": 21, "hauteur": 16, "dx": 1, "dy": 15, "duree": 90 },
+      { "x": 649, "y": 230, "largeur": 20, "hauteur": 13, "dx": 12, "dy": 18, "duree": 150 },
+      { "x": 628, "y": 230, "largeur": 20, "hauteur": 13, "dx": 12, "dy": 18, "duree": 90 },
+      { "x": 750, "y": 230, "largeur": 19, "hauteur": 13, "dx": 12, "dy": 18, "duree": 90 },
+      { "x": 901, "y": 230, "largeur": 17, "hauteur": 13, "dx": 11, "dy": 18, "duree": 90 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 756, "y": 177, "largeur": 15, "hauteur": 17, "dx": 7, "dy": 14, "duree": 120 },
+      { "x": 787, "y": 177, "largeur": 14, "hauteur": 17, "dx": 8, "dy": 14, "duree": 120 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 436, "y": 259, "largeur": 13, "hauteur": 12, "dx": 9, "dy": 19, "duree": 150 },
+      { "x": 21, "y": 273, "largeur": 16, "hauteur": 10, "dx": 9, "dy": 21, "duree": 150 },
+      { "x": 889, "y": 273, "largeur": 17, "hauteur": 6, "dx": 8, "dy": 25, "duree": 150 },
+      { "x": 326, "y": 284, "largeur": 18, "hauteur": 4, "dx": 7, "dy": 27, "duree": 600 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 645, "y": 198, "largeur": 11, "hauteur": 16, "dx": 10, "dy": 15, "duree": 180 },
+      { "x": 621, "y": 198, "largeur": 11, "hauteur": 16, "dx": 10, "dy": 15, "duree": 180 },
+      { "x": 884, "y": 198, "largeur": 11, "hauteur": 15, "dx": 10, "dy": 16, "duree": 180 },
+      { "x": 896, "y": 198, "largeur": 11, "hauteur": 15, "dx": 10, "dy": 16, "duree": 180 }
+     ]
+    },
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 657, "y": 198, "largeur": 10, "hauteur": 16, "dx": 11, "dy": 14, "duree": 100 },
+      { "x": 668, "y": 198, "largeur": 9, "hauteur": 16, "dx": 11, "dy": 15, "duree": 100 },
+      { "x": 633, "y": 198, "largeur": 11, "hauteur": 16, "dx": 10, "dy": 15, "duree": 100 },
+      { "x": 567, "y": 198, "largeur": 13, "hauteur": 16, "dx": 9, "dy": 14, "duree": 100 },
+      { "x": 553, "y": 198, "largeur": 13, "hauteur": 16, "dx": 9, "dy": 15, "duree": 100 },
+      { "x": 633, "y": 198, "largeur": 11, "hauteur": 16, "dx": 10, "dy": 15, "duree": 100 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 542, "y": 177, "largeur": 13, "hauteur": 18, "dx": 8, "dy": 13, "duree": 90 },
+      { "x": 823, "y": 198, "largeur": 19, "hauteur": 15, "dx": 2, "dy": 16, "duree": 90 },
+      { "x": 268, "y": 259, "largeur": 18, "hauteur": 12, "dx": 13, "dy": 19, "duree": 150 },
+      { "x": 287, "y": 259, "largeur": 18, "hauteur": 12, "dx": 13, "dy": 19, "duree": 90 },
+      { "x": 342, "y": 259, "largeur": 17, "hauteur": 12, "dx": 13, "dy": 19, "duree": 90 },
+      { "x": 376, "y": 259, "largeur": 15, "hauteur": 12, "dx": 12, "dy": 19, "duree": 90 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 581, "y": 198, "largeur": 13, "hauteur": 16, "dx": 8, "dy": 15, "duree": 120 },
+      { "x": 608, "y": 198, "largeur": 12, "hauteur": 16, "dx": 9, "dy": 15, "duree": 120 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 872, "y": 259, "largeur": 11, "hauteur": 11, "dx": 10, "dy": 20, "duree": 150 },
+      { "x": 353, "y": 273, "largeur": 14, "hauteur": 9, "dx": 10, "dy": 22, "duree": 150 },
+      { "x": 131, "y": 284, "largeur": 15, "hauteur": 5, "dx": 9, "dy": 26, "duree": 150 },
+      { "x": 556, "y": 284, "largeur": 16, "hauteur": 3, "dx": 8, "dy": 28, "duree": 600 }
+     ]
+    }
+   }
+  },
+  "pierre": {
+   "categorie": "projectile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 69, "y": 284, "largeur": 7, "hauteur": 6, "dx": 4, "dy": 4, "duree": 100 },
+      { "x": 53, "y": 284, "largeur": 7, "hauteur": 6, "dx": 6, "dy": 4, "duree": 100 },
+      { "x": 61, "y": 284, "largeur": 7, "hauteur": 6, "dx": 6, "dy": 6, "duree": 100 },
+      { "x": 45, "y": 284, "largeur": 7, "hauteur": 6, "dx": 4, "dy": 6, "duree": 100 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 289, "y": 284, "largeur": 5, "hauteur": 5, "dx": 5, "dy": 5, "duree": 100 },
+      { "x": 283, "y": 284, "largeur": 5, "hauteur": 5, "dx": 7, "dy": 5, "duree": 100 },
+      { "x": 295, "y": 284, "largeur": 5, "hauteur": 5, "dx": 7, "dy": 7, "duree": 100 },
+      { "x": 301, "y": 284, "largeur": 5, "hauteur": 5, "dx": 5, "dy": 7, "duree": 100 }
+     ]
+    }
+   }
+  },
+  "pot-soufre": {
+   "categorie": "projectile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 790, "y": 273, "largeur": 8, "hauteur": 7, "dx": 3, "dy": 3, "duree": 100 },
+      { "x": 799, "y": 273, "largeur": 8, "hauteur": 7, "dx": 3, "dy": 3, "duree": 100 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 77, "y": 284, "largeur": 6, "hauteur": 6, "dx": 4, "dy": 4, "duree": 100 },
+      { "x": 98, "y": 284, "largeur": 6, "hauteur": 6, "dx": 4, "dy": 4, "duree": 100 }
+     ]
+    }
+   }
+  },
+  "potence": {
+   "categorie": "decor",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 30
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 345, "y": 47, "largeur": 14, "hauteur": 28, "dx": 8, "dy": 3, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 416, "y": 47, "largeur": 12, "hauteur": 27, "dx": 9, "dy": 4, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "puits": {
+   "categorie": "decor",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 30
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 462, "y": 215, "largeur": 18, "hauteur": 14, "dx": 7, "dy": 16, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 153, "y": 245, "largeur": 16, "hauteur": 13, "dx": 8, "dy": 17, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "sang": {
+   "categorie": "effet",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "impact": {
+     "boucle": false,
+     "cadres": [
+      { "x": 699, "y": 284, "largeur": 4, "hauteur": 3, "dx": 6, "dy": 6, "duree": 90 },
+      { "x": 500, "y": 284, "largeur": 6, "hauteur": 4, "dx": 5, "dy": 6, "duree": 90 },
+      { "x": 704, "y": 284, "largeur": 3, "hauteur": 2, "dx": 6, "dy": 10, "duree": 90 }
+     ]
+    }
+   }
+  },
+  "socle": {
+   "categorie": "decor",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 26
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 73, "y": 259, "largeur": 29, "hauteur": 12, "dx": 1, "dy": 17, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 595, "y": 259, "largeur": 27, "hauteur": 11, "dx": 2, "dy": 18, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "soldat-grange": {
+   "categorie": "unite",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 30
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 0, "y": 230, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 17, "duree": 200 },
+      { "x": 978, "y": 215, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 17, "duree": 200 },
+      { "x": 17, "y": 230, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 17, "duree": 200 },
+      { "x": 1004, "y": 230, "largeur": 16, "hauteur": 13, "dx": 7, "dy": 18, "duree": 200 }
+     ]
+    },
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 995, "y": 215, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 17, "duree": 110 },
+      { "x": 961, "y": 215, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 16, "duree": 110 },
+      { "x": 0, "y": 230, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 17, "duree": 110 },
+      { "x": 978, "y": 215, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 17, "duree": 110 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 495, "y": 198, "largeur": 14, "hauteur": 16, "dx": 7, "dy": 15, "duree": 90 },
+      { "x": 174, "y": 215, "largeur": 20, "hauteur": 14, "dx": 7, "dy": 17, "duree": 60 },
+      { "x": 153, "y": 215, "largeur": 20, "hauteur": 14, "dx": 7, "dy": 17, "duree": 90 },
+      { "x": 0, "y": 230, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 17, "duree": 150 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 182, "y": 230, "largeur": 15, "hauteur": 14, "dx": 7, "dy": 17, "duree": 120 },
+      { "x": 34, "y": 230, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 17, "duree": 120 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 182, "y": 230, "largeur": 15, "hauteur": 14, "dx": 7, "dy": 17, "duree": 140 },
+      { "x": 337, "y": 273, "largeur": 15, "hauteur": 9, "dx": 6, "dy": 22, "duree": 140 },
+      { "x": 941, "y": 273, "largeur": 16, "hauteur": 6, "dx": 6, "dy": 25, "duree": 300 },
+      { "x": 398, "y": 284, "largeur": 16, "hauteur": 4, "dx": 6, "dy": 27, "duree": 600 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 720, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 18, "duree": 200 },
+      { "x": 705, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 18, "duree": 200 },
+      { "x": 660, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 18, "duree": 200 },
+      { "x": 407, "y": 259, "largeur": 14, "hauteur": 12, "dx": 8, "dy": 19, "duree": 200 }
+     ]
+    },
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 735, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 18, "duree": 110 },
+      { "x": 690, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 17, "duree": 110 },
+      { "x": 720, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 18, "duree": 110 },
+      { "x": 705, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 18, "duree": 110 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 871, "y": 198, "largeur": 12, "hauteur": 15, "dx": 8, "dy": 16, "duree": 90 },
+      { "x": 846, "y": 230, "largeur": 18, "hauteur": 13, "dx": 8, "dy": 18, "duree": 60 },
+      { "x": 827, "y": 230, "largeur": 18, "hauteur": 13, "dx": 8, "dy": 18, "duree": 90 },
+      { "x": 720, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 18, "duree": 150 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 893, "y": 245, "largeur": 13, "hauteur": 13, "dx": 8, "dy": 18, "duree": 120 },
+      { "x": 675, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 18, "duree": 120 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 893, "y": 245, "largeur": 13, "hauteur": 13, "dx": 8, "dy": 18, "duree": 140 },
+      { "x": 601, "y": 273, "largeur": 13, "hauteur": 8, "dx": 7, "dy": 23, "duree": 140 },
+      { "x": 224, "y": 284, "largeur": 14, "hauteur": 5, "dx": 7, "dy": 26, "duree": 300 },
+      { "x": 618, "y": 284, "largeur": 14, "hauteur": 3, "dx": 7, "dy": 28, "duree": 600 }
+     ]
+    }
+   }
+  },
+  "souche": {
+   "categorie": "decor",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 15
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 396, "y": 273, "largeur": 12, "hauteur": 9, "dx": 2, "dy": 7, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 640, "y": 273, "largeur": 10, "hauteur": 8, "dx": 3, "dy": 8, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "spectre-chat": {
+   "categorie": "unite",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 30
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 893, "y": 215, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 17, "duree": 200 },
+      { "x": 876, "y": 215, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 17, "duree": 200 },
+      { "x": 927, "y": 215, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 17, "duree": 200 },
+      { "x": 987, "y": 230, "largeur": 16, "hauteur": 13, "dx": 7, "dy": 18, "duree": 200 }
+     ]
+    },
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 910, "y": 215, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 17, "duree": 110 },
+      { "x": 859, "y": 215, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 16, "duree": 110 },
+      { "x": 893, "y": 215, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 17, "duree": 110 },
+      { "x": 876, "y": 215, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 17, "duree": 110 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 510, "y": 198, "largeur": 14, "hauteur": 16, "dx": 7, "dy": 15, "duree": 90 },
+      { "x": 132, "y": 215, "largeur": 20, "hauteur": 14, "dx": 7, "dy": 17, "duree": 60 },
+      { "x": 111, "y": 215, "largeur": 20, "hauteur": 14, "dx": 7, "dy": 17, "duree": 90 },
+      { "x": 893, "y": 215, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 17, "duree": 150 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 166, "y": 230, "largeur": 15, "hauteur": 14, "dx": 7, "dy": 17, "duree": 120 },
+      { "x": 944, "y": 215, "largeur": 16, "hauteur": 14, "dx": 7, "dy": 17, "duree": 120 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 166, "y": 230, "largeur": 15, "hauteur": 14, "dx": 7, "dy": 17, "duree": 140 },
+      { "x": 305, "y": 273, "largeur": 15, "hauteur": 9, "dx": 6, "dy": 22, "duree": 140 },
+      { "x": 907, "y": 273, "largeur": 16, "hauteur": 6, "dx": 6, "dy": 25, "duree": 300 },
+      { "x": 364, "y": 284, "largeur": 16, "hauteur": 4, "dx": 6, "dy": 27, "duree": 600 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 630, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 18, "duree": 200 },
+      { "x": 615, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 18, "duree": 200 },
+      { "x": 570, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 18, "duree": 200 },
+      { "x": 392, "y": 259, "largeur": 14, "hauteur": 12, "dx": 8, "dy": 19, "duree": 200 }
+     ]
+    },
+    "marche": {
+     "boucle": true,
+     "cadres": [
+      { "x": 645, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 18, "duree": 110 },
+      { "x": 600, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 17, "duree": 110 },
+      { "x": 630, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 18, "duree": 110 },
+      { "x": 615, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 18, "duree": 110 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 858, "y": 198, "largeur": 12, "hauteur": 15, "dx": 8, "dy": 16, "duree": 90 },
+      { "x": 808, "y": 230, "largeur": 18, "hauteur": 13, "dx": 8, "dy": 18, "duree": 60 },
+      { "x": 789, "y": 230, "largeur": 18, "hauteur": 13, "dx": 8, "dy": 18, "duree": 90 },
+      { "x": 630, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 18, "duree": 150 }
+     ]
+    },
+    "blesse": {
+     "boucle": false,
+     "cadres": [
+      { "x": 879, "y": 245, "largeur": 13, "hauteur": 13, "dx": 8, "dy": 18, "duree": 120 },
+      { "x": 585, "y": 245, "largeur": 14, "hauteur": 13, "dx": 8, "dy": 18, "duree": 120 }
+     ]
+    },
+    "mort": {
+     "boucle": false,
+     "cadres": [
+      { "x": 879, "y": 245, "largeur": 13, "hauteur": 13, "dx": 8, "dy": 18, "duree": 140 },
+      { "x": 573, "y": 273, "largeur": 13, "hauteur": 8, "dx": 7, "dy": 23, "duree": 140 },
+      { "x": 194, "y": 284, "largeur": 14, "hauteur": 5, "dx": 7, "dy": 26, "duree": 300 },
+      { "x": 588, "y": 284, "largeur": 14, "hauteur": 3, "dx": 7, "dy": 28, "duree": 600 }
+     ]
+    }
+   }
+  },
+  "tonneau": {
+   "categorie": "decor",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 15
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 884, "y": 259, "largeur": 10, "hauteur": 11, "dx": 3, "dy": 5, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 148, "y": 273, "largeur": 8, "hauteur": 10, "dx": 4, "dy": 6, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "touffe": {
+   "categorie": "decor",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 15
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 35, "y": 284, "largeur": 9, "hauteur": 6, "dx": 3, "dy": 9, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "tour-artillerie-1": {
+   "categorie": "tour",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 26
+   },
+   "points": {
+    "tir": {
+     "x": 4,
+     "y": 18
+    }
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 651, "y": 259, "largeur": 27, "hauteur": 11, "dx": 2, "dy": 17, "duree": 400 },
+      { "x": 623, "y": 259, "largeur": 27, "hauteur": 11, "dx": 2, "dy": 17, "duree": 150 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 826, "y": 130, "largeur": 27, "hauteur": 21, "dx": 2, "dy": 7, "duree": 80 },
+      { "x": 556, "y": 177, "largeur": 27, "hauteur": 17, "dx": 2, "dy": 11, "duree": 80 },
+      { "x": 556, "y": 177, "largeur": 27, "hauteur": 17, "dx": 2, "dy": 11, "duree": 300 },
+      { "x": 651, "y": 259, "largeur": 27, "hauteur": 11, "dx": 2, "dy": 17, "duree": 200 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 954, "y": 259, "largeur": 25, "hauteur": 10, "dx": 3, "dy": 18, "duree": 400 },
+      { "x": 928, "y": 259, "largeur": 25, "hauteur": 10, "dx": 3, "dy": 18, "duree": 150 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 784, "y": 155, "largeur": 25, "hauteur": 20, "dx": 3, "dy": 8, "duree": 80 },
+      { "x": 869, "y": 177, "largeur": 25, "hauteur": 16, "dx": 3, "dy": 12, "duree": 80 },
+      { "x": 869, "y": 177, "largeur": 25, "hauteur": 16, "dx": 3, "dy": 12, "duree": 300 },
+      { "x": 954, "y": 259, "largeur": 25, "hauteur": 10, "dx": 3, "dy": 18, "duree": 200 }
+     ]
+    }
+   }
+  },
+  "tour-artillerie-2": {
+   "categorie": "tour",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 26
+   },
+   "points": {
+    "tir": {
+     "x": 4,
+     "y": 15
+    }
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 936, "y": 198, "largeur": 27, "hauteur": 14, "dx": 2, "dy": 14, "duree": 400 },
+      { "x": 908, "y": 198, "largeur": 27, "hauteur": 14, "dx": 2, "dy": 14, "duree": 150 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 145, "y": 130, "largeur": 27, "hauteur": 24, "dx": 2, "dy": 4, "duree": 80 },
+      { "x": 536, "y": 155, "largeur": 27, "hauteur": 20, "dx": 2, "dy": 8, "duree": 80 },
+      { "x": 536, "y": 155, "largeur": 27, "hauteur": 20, "dx": 2, "dy": 8, "duree": 300 },
+      { "x": 936, "y": 198, "largeur": 27, "hauteur": 14, "dx": 2, "dy": 14, "duree": 200 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 473, "y": 230, "largeur": 25, "hauteur": 13, "dx": 3, "dy": 15, "duree": 400 },
+      { "x": 447, "y": 230, "largeur": 25, "hauteur": 13, "dx": 3, "dy": 15, "duree": 150 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 328, "y": 130, "largeur": 25, "hauteur": 23, "dx": 3, "dy": 5, "duree": 80 },
+      { "x": 155, "y": 177, "largeur": 25, "hauteur": 19, "dx": 3, "dy": 9, "duree": 80 },
+      { "x": 155, "y": 177, "largeur": 25, "hauteur": 19, "dx": 3, "dy": 9, "duree": 300 },
+      { "x": 473, "y": 230, "largeur": 25, "hauteur": 13, "dx": 3, "dy": 15, "duree": 200 }
+     ]
+    }
+   }
+  },
+  "tour-artillerie-3": {
+   "categorie": "tour",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 26
+   },
+   "points": {
+    "tir": {
+     "x": 4,
+     "y": 11
+    }
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 612, "y": 177, "largeur": 27, "hauteur": 17, "dx": 2, "dy": 10, "duree": 400 },
+      { "x": 584, "y": 177, "largeur": 27, "hauteur": 17, "dx": 2, "dy": 10, "duree": 150 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 388, "y": 47, "largeur": 27, "hauteur": 27, "dx": 2, "dy": 0, "duree": 80 },
+      { "x": 248, "y": 130, "largeur": 27, "hauteur": 23, "dx": 2, "dy": 4, "duree": 80 },
+      { "x": 248, "y": 130, "largeur": 27, "hauteur": 23, "dx": 2, "dy": 4, "duree": 300 },
+      { "x": 612, "y": 177, "largeur": 27, "hauteur": 17, "dx": 2, "dy": 10, "duree": 200 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 921, "y": 177, "largeur": 25, "hauteur": 16, "dx": 3, "dy": 11, "duree": 400 },
+      { "x": 895, "y": 177, "largeur": 25, "hauteur": 16, "dx": 3, "dy": 11, "duree": 150 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 953, "y": 47, "largeur": 25, "hauteur": 26, "dx": 3, "dy": 1, "duree": 80 },
+      { "x": 526, "y": 130, "largeur": 25, "hauteur": 22, "dx": 3, "dy": 5, "duree": 80 },
+      { "x": 526, "y": 130, "largeur": 25, "hauteur": 22, "dx": 3, "dy": 5, "duree": 300 },
+      { "x": 921, "y": 177, "largeur": 25, "hauteur": 16, "dx": 3, "dy": 11, "duree": 200 }
+     ]
+    }
+   }
+  },
+  "tour-artillerie-baliste": {
+   "categorie": "tour",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 26
+   },
+   "points": {
+    "tir": {
+     "x": 24,
+     "y": 8
+    }
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 498, "y": 130, "largeur": 27, "hauteur": 22, "dx": 2, "dy": 5, "duree": 400 },
+      { "x": 470, "y": 130, "largeur": 27, "hauteur": 22, "dx": 2, "dy": 5, "duree": 150 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 442, "y": 130, "largeur": 27, "hauteur": 22, "dx": 2, "dy": 5, "duree": 80 },
+      { "x": 414, "y": 130, "largeur": 27, "hauteur": 22, "dx": 2, "dy": 5, "duree": 300 },
+      { "x": 385, "y": 130, "largeur": 28, "hauteur": 22, "dx": 1, "dy": 5, "duree": 200 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 26, "y": 155, "largeur": 25, "hauteur": 21, "dx": 3, "dy": 6, "duree": 400 },
+      { "x": 0, "y": 155, "largeur": 25, "hauteur": 21, "dx": 3, "dy": 6, "duree": 150 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 78, "y": 155, "largeur": 25, "hauteur": 21, "dx": 3, "dy": 6, "duree": 80 },
+      { "x": 52, "y": 155, "largeur": 25, "hauteur": 21, "dx": 3, "dy": 6, "duree": 300 },
+      { "x": 854, "y": 130, "largeur": 26, "hauteur": 21, "dx": 2, "dy": 6, "duree": 200 }
+     ]
+    }
+   }
+  },
+  "tour-artillerie-mortier": {
+   "categorie": "tour",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 26
+   },
+   "points": {
+    "tir": {
+     "x": 11,
+     "y": 3
+    }
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 117, "y": 130, "largeur": 27, "hauteur": 24, "dx": 2, "dy": 3, "duree": 400 },
+      { "x": 89, "y": 130, "largeur": 27, "hauteur": 24, "dx": 2, "dy": 3, "duree": 150 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 574, "y": 47, "largeur": 27, "hauteur": 26, "dx": 2, "dy": 1, "duree": 90 },
+      { "x": 602, "y": 47, "largeur": 27, "hauteur": 26, "dx": 2, "dy": 1, "duree": 200 },
+      { "x": 360, "y": 47, "largeur": 27, "hauteur": 27, "dx": 2, "dy": 0, "duree": 200 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 302, "y": 130, "largeur": 25, "hauteur": 23, "dx": 3, "dy": 4, "duree": 400 },
+      { "x": 276, "y": 130, "largeur": 25, "hauteur": 23, "dx": 3, "dy": 4, "duree": 150 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 952, "y": 78, "largeur": 25, "hauteur": 25, "dx": 3, "dy": 2, "duree": 90 },
+      { "x": 926, "y": 78, "largeur": 25, "hauteur": 25, "dx": 3, "dy": 2, "duree": 200 },
+      { "x": 927, "y": 47, "largeur": 25, "hauteur": 26, "dx": 3, "dy": 1, "duree": 200 }
+     ]
+    }
+   }
+  },
+  "tour-caserne-1": {
+   "categorie": "tour",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 26
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 23, "y": 215, "largeur": 22, "hauteur": 14, "dx": 5, "dy": 13, "duree": 400 },
+      { "x": 23, "y": 215, "largeur": 22, "hauteur": 14, "dx": 5, "dy": 13, "duree": 400 },
+      { "x": 23, "y": 215, "largeur": 22, "hauteur": 14, "dx": 5, "dy": 13, "duree": 400 },
+      { "x": 23, "y": 215, "largeur": 22, "hauteur": 14, "dx": 5, "dy": 13, "duree": 400 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 0, "y": 215, "largeur": 22, "hauteur": 14, "dx": 5, "dy": 13, "duree": 120 },
+      { "x": 964, "y": 198, "largeur": 22, "hauteur": 14, "dx": 5, "dy": 13, "duree": 120 },
+      { "x": 987, "y": 198, "largeur": 22, "hauteur": 14, "dx": 5, "dy": 13, "duree": 300 },
+      { "x": 0, "y": 215, "largeur": 22, "hauteur": 14, "dx": 5, "dy": 13, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 586, "y": 230, "largeur": 20, "hauteur": 13, "dx": 6, "dy": 14, "duree": 400 },
+      { "x": 586, "y": 230, "largeur": 20, "hauteur": 13, "dx": 6, "dy": 14, "duree": 400 },
+      { "x": 586, "y": 230, "largeur": 20, "hauteur": 13, "dx": 6, "dy": 14, "duree": 400 },
+      { "x": 586, "y": 230, "largeur": 20, "hauteur": 13, "dx": 6, "dy": 14, "duree": 400 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 565, "y": 230, "largeur": 20, "hauteur": 13, "dx": 6, "dy": 14, "duree": 120 },
+      { "x": 523, "y": 230, "largeur": 20, "hauteur": 13, "dx": 6, "dy": 14, "duree": 120 },
+      { "x": 544, "y": 230, "largeur": 20, "hauteur": 13, "dx": 6, "dy": 14, "duree": 300 },
+      { "x": 565, "y": 230, "largeur": 20, "hauteur": 13, "dx": 6, "dy": 14, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "tour-caserne-2": {
+   "categorie": "tour",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 26
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 959, "y": 130, "largeur": 25, "hauteur": 21, "dx": 4, "dy": 6, "duree": 400 },
+      { "x": 985, "y": 130, "largeur": 25, "hauteur": 21, "dx": 4, "dy": 6, "duree": 400 },
+      { "x": 959, "y": 130, "largeur": 25, "hauteur": 21, "dx": 4, "dy": 6, "duree": 400 },
+      { "x": 959, "y": 130, "largeur": 25, "hauteur": 21, "dx": 4, "dy": 6, "duree": 400 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 881, "y": 130, "largeur": 25, "hauteur": 21, "dx": 4, "dy": 6, "duree": 120 },
+      { "x": 907, "y": 130, "largeur": 25, "hauteur": 21, "dx": 4, "dy": 6, "duree": 120 },
+      { "x": 933, "y": 130, "largeur": 25, "hauteur": 21, "dx": 4, "dy": 6, "duree": 300 },
+      { "x": 881, "y": 130, "largeur": 25, "hauteur": 21, "dx": 4, "dy": 6, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 882, "y": 155, "largeur": 23, "hauteur": 20, "dx": 5, "dy": 7, "duree": 400 },
+      { "x": 906, "y": 155, "largeur": 23, "hauteur": 20, "dx": 5, "dy": 7, "duree": 400 },
+      { "x": 882, "y": 155, "largeur": 23, "hauteur": 20, "dx": 5, "dy": 7, "duree": 400 },
+      { "x": 882, "y": 155, "largeur": 23, "hauteur": 20, "dx": 5, "dy": 7, "duree": 400 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 858, "y": 155, "largeur": 23, "hauteur": 20, "dx": 5, "dy": 7, "duree": 120 },
+      { "x": 810, "y": 155, "largeur": 23, "hauteur": 20, "dx": 5, "dy": 7, "duree": 120 },
+      { "x": 834, "y": 155, "largeur": 23, "hauteur": 20, "dx": 5, "dy": 7, "duree": 300 },
+      { "x": 858, "y": 155, "largeur": 23, "hauteur": 20, "dx": 5, "dy": 7, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "tour-caserne-3": {
+   "categorie": "tour",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 26
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 388, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 400 },
+      { "x": 760, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 400 },
+      { "x": 388, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 400 },
+      { "x": 729, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 400 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 357, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 120 },
+      { "x": 667, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 120 },
+      { "x": 326, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 300 },
+      { "x": 698, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 561, "y": 104, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 400 },
+      { "x": 441, "y": 104, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 400 },
+      { "x": 561, "y": 104, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 400 },
+      { "x": 471, "y": 104, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 400 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 621, "y": 104, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 120 },
+      { "x": 501, "y": 104, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 120 },
+      { "x": 591, "y": 104, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 300 },
+      { "x": 531, "y": 104, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "tour-caserne-cloitre": {
+   "categorie": "tour",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 26
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 202, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 400 },
+      { "x": 512, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 400 },
+      { "x": 202, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 400 },
+      { "x": 481, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 400 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 171, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 120 },
+      { "x": 419, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 120 },
+      { "x": 140, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 300 },
+      { "x": 450, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 771, "y": 104, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 400 },
+      { "x": 651, "y": 104, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 400 },
+      { "x": 771, "y": 104, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 400 },
+      { "x": 681, "y": 104, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 400 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 831, "y": 104, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 120 },
+      { "x": 711, "y": 104, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 120 },
+      { "x": 801, "y": 104, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 300 },
+      { "x": 741, "y": 104, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "tour-caserne-ecorcheurs": {
+   "categorie": "tour",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 26
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 295, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 400 },
+      { "x": 636, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 400 },
+      { "x": 295, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 400 },
+      { "x": 605, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 400 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 264, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 120 },
+      { "x": 543, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 120 },
+      { "x": 233, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 300 },
+      { "x": 574, "y": 78, "largeur": 30, "hauteur": 25, "dx": 2, "dy": 2, "duree": 120 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 861, "y": 104, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 400 },
+      { "x": 951, "y": 104, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 400 },
+      { "x": 861, "y": 104, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 400 },
+      { "x": 981, "y": 104, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 400 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 921, "y": 104, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 120 },
+      { "x": 0, "y": 130, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 120 },
+      { "x": 891, "y": 104, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 300 },
+      { "x": 30, "y": 130, "largeur": 29, "hauteur": 24, "dx": 3, "dy": 3, "duree": 120 }
+     ]
+    }
+   }
+  },
+  "tour-magie-1": {
+   "categorie": "tour",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 26
+   },
+   "points": {
+    "tir": {
+     "x": 16,
+     "y": 13
+    }
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 234, "y": 215, "largeur": 18, "hauteur": 14, "dx": 7, "dy": 13, "duree": 140 },
+      { "x": 253, "y": 215, "largeur": 18, "hauteur": 14, "dx": 7, "dy": 13, "duree": 140 },
+      { "x": 215, "y": 215, "largeur": 18, "hauteur": 14, "dx": 7, "dy": 13, "duree": 140 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 489, "y": 177, "largeur": 18, "hauteur": 18, "dx": 7, "dy": 9, "duree": 90 },
+      { "x": 508, "y": 177, "largeur": 18, "hauteur": 18, "dx": 7, "dy": 9, "duree": 140 },
+      { "x": 215, "y": 215, "largeur": 18, "hauteur": 14, "dx": 7, "dy": 13, "duree": 90 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 936, "y": 230, "largeur": 16, "hauteur": 13, "dx": 8, "dy": 14, "duree": 140 },
+      { "x": 953, "y": 230, "largeur": 16, "hauteur": 13, "dx": 8, "dy": 14, "duree": 140 },
+      { "x": 919, "y": 230, "largeur": 16, "hauteur": 13, "dx": 8, "dy": 14, "duree": 140 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 707, "y": 177, "largeur": 16, "hauteur": 17, "dx": 8, "dy": 10, "duree": 90 },
+      { "x": 690, "y": 177, "largeur": 16, "hauteur": 17, "dx": 8, "dy": 10, "duree": 140 },
+      { "x": 919, "y": 230, "largeur": 16, "hauteur": 13, "dx": 8, "dy": 14, "duree": 90 }
+     ]
+    }
+   }
+  },
+  "tour-magie-2": {
+   "categorie": "tour",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 26
+   },
+   "points": {
+    "tir": {
+     "x": 16,
+     "y": 13
+    }
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 972, "y": 177, "largeur": 24, "hauteur": 16, "dx": 3, "dy": 10, "duree": 140 },
+      { "x": 997, "y": 177, "largeur": 24, "hauteur": 16, "dx": 3, "dy": 10, "duree": 140 },
+      { "x": 947, "y": 177, "largeur": 24, "hauteur": 16, "dx": 3, "dy": 10, "duree": 140 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 640, "y": 177, "largeur": 24, "hauteur": 17, "dx": 3, "dy": 9, "duree": 90 },
+      { "x": 665, "y": 177, "largeur": 24, "hauteur": 17, "dx": 3, "dy": 9, "duree": 140 },
+      { "x": 947, "y": 177, "largeur": 24, "hauteur": 16, "dx": 3, "dy": 10, "duree": 90 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 690, "y": 198, "largeur": 22, "hauteur": 15, "dx": 4, "dy": 11, "duree": 140 },
+      { "x": 736, "y": 198, "largeur": 22, "hauteur": 15, "dx": 4, "dy": 11, "duree": 140 },
+      { "x": 713, "y": 198, "largeur": 22, "hauteur": 15, "dx": 4, "dy": 11, "duree": 140 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 24, "y": 198, "largeur": 22, "hauteur": 16, "dx": 4, "dy": 10, "duree": 90 },
+      { "x": 47, "y": 198, "largeur": 22, "hauteur": 16, "dx": 4, "dy": 10, "duree": 140 },
+      { "x": 713, "y": 198, "largeur": 22, "hauteur": 15, "dx": 4, "dy": 11, "duree": 90 }
+     ]
+    }
+   }
+  },
+  "tour-magie-3": {
+   "categorie": "tour",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 26
+   },
+   "points": {
+    "tir": {
+     "x": 16,
+     "y": 13
+    }
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 711, "y": 47, "largeur": 26, "hauteur": 26, "dx": 3, "dy": 1, "duree": 140 },
+      { "x": 738, "y": 47, "largeur": 26, "hauteur": 26, "dx": 3, "dy": 1, "duree": 140 },
+      { "x": 684, "y": 47, "largeur": 26, "hauteur": 26, "dx": 3, "dy": 1, "duree": 140 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 657, "y": 47, "largeur": 26, "hauteur": 26, "dx": 3, "dy": 1, "duree": 90 },
+      { "x": 630, "y": 47, "largeur": 26, "hauteur": 26, "dx": 3, "dy": 1, "duree": 140 },
+      { "x": 684, "y": 47, "largeur": 26, "hauteur": 26, "dx": 3, "dy": 1, "duree": 90 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 0, "y": 104, "largeur": 24, "hauteur": 25, "dx": 4, "dy": 2, "duree": 140 },
+      { "x": 50, "y": 104, "largeur": 24, "hauteur": 25, "dx": 4, "dy": 2, "duree": 140 },
+      { "x": 25, "y": 104, "largeur": 24, "hauteur": 25, "dx": 4, "dy": 2, "duree": 140 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 978, "y": 78, "largeur": 24, "hauteur": 25, "dx": 4, "dy": 2, "duree": 90 },
+      { "x": 75, "y": 104, "largeur": 24, "hauteur": 25, "dx": 4, "dy": 2, "duree": 140 },
+      { "x": 25, "y": 104, "largeur": 24, "hauteur": 25, "dx": 4, "dy": 2, "duree": 90 }
+     ]
+    }
+   }
+  },
+  "tour-magie-necromancien": {
+   "categorie": "tour",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 26
+   },
+   "points": {
+    "tir": {
+     "x": 16,
+     "y": 13
+    }
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 458, "y": 47, "largeur": 28, "hauteur": 26, "dx": 2, "dy": 1, "duree": 140 },
+      { "x": 487, "y": 47, "largeur": 28, "hauteur": 26, "dx": 2, "dy": 1, "duree": 140 },
+      { "x": 429, "y": 47, "largeur": 28, "hauteur": 26, "dx": 2, "dy": 1, "duree": 140 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 516, "y": 47, "largeur": 28, "hauteur": 26, "dx": 2, "dy": 1, "duree": 90 },
+      { "x": 545, "y": 47, "largeur": 28, "hauteur": 26, "dx": 2, "dy": 1, "duree": 140 },
+      { "x": 429, "y": 47, "largeur": 28, "hauteur": 26, "dx": 2, "dy": 1, "duree": 90 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 818, "y": 78, "largeur": 26, "hauteur": 25, "dx": 3, "dy": 2, "duree": 140 },
+      { "x": 845, "y": 78, "largeur": 26, "hauteur": 25, "dx": 3, "dy": 2, "duree": 140 },
+      { "x": 791, "y": 78, "largeur": 26, "hauteur": 25, "dx": 3, "dy": 2, "duree": 140 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 872, "y": 78, "largeur": 26, "hauteur": 25, "dx": 3, "dy": 2, "duree": 90 },
+      { "x": 899, "y": 78, "largeur": 26, "hauteur": 25, "dx": 3, "dy": 2, "duree": 140 },
+      { "x": 791, "y": 78, "largeur": 26, "hauteur": 25, "dx": 3, "dy": 2, "duree": 90 }
+     ]
+    }
+   }
+  },
+  "tour-magie-oracle": {
+   "categorie": "tour",
+   "largeur": 32,
+   "hauteur": 32,
+   "ancre": {
+    "x": 16,
+    "y": 26
+   },
+   "points": {
+    "tir": {
+     "x": 16,
+     "y": 13
+    }
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 846, "y": 47, "largeur": 26, "hauteur": 26, "dx": 3, "dy": 1, "duree": 140 },
+      { "x": 873, "y": 47, "largeur": 26, "hauteur": 26, "dx": 3, "dy": 1, "duree": 140 },
+      { "x": 900, "y": 47, "largeur": 26, "hauteur": 26, "dx": 3, "dy": 1, "duree": 140 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 765, "y": 47, "largeur": 26, "hauteur": 26, "dx": 3, "dy": 1, "duree": 90 },
+      { "x": 819, "y": 47, "largeur": 26, "hauteur": 26, "dx": 3, "dy": 1, "duree": 140 },
+      { "x": 792, "y": 47, "largeur": 26, "hauteur": 26, "dx": 3, "dy": 1, "duree": 90 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 175, "y": 104, "largeur": 24, "hauteur": 25, "dx": 4, "dy": 2, "duree": 140 },
+      { "x": 225, "y": 104, "largeur": 24, "hauteur": 25, "dx": 4, "dy": 2, "duree": 140 },
+      { "x": 200, "y": 104, "largeur": 24, "hauteur": 25, "dx": 4, "dy": 2, "duree": 140 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 150, "y": 104, "largeur": 24, "hauteur": 25, "dx": 4, "dy": 2, "duree": 90 },
+      { "x": 100, "y": 104, "largeur": 24, "hauteur": 25, "dx": 4, "dy": 2, "duree": 140 },
+      { "x": 125, "y": 104, "largeur": 24, "hauteur": 25, "dx": 4, "dy": 2, "duree": 90 }
+     ]
+    }
+   }
+  },
+  "tour-tir-1": {
+   "categorie": "tour",
+   "largeur": 32,
+   "hauteur": 48,
+   "ancre": {
+    "x": 16,
+    "y": 45
+   },
+   "points": {
+    "tireur": {
+     "x": 16,
+     "y": 19
+    }
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 639, "y": 0, "largeur": 22, "hauteur": 36, "dx": 6, "dy": 10, "duree": 300 },
+      { "x": 616, "y": 0, "largeur": 22, "hauteur": 36, "dx": 6, "dy": 10, "duree": 300 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 616, "y": 0, "largeur": 22, "hauteur": 36, "dx": 6, "dy": 10, "duree": 100 },
+      { "x": 639, "y": 0, "largeur": 22, "hauteur": 36, "dx": 6, "dy": 10, "duree": 200 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 691, "y": 0, "largeur": 20, "hauteur": 35, "dx": 7, "dy": 11, "duree": 300 },
+      { "x": 712, "y": 0, "largeur": 20, "hauteur": 35, "dx": 7, "dy": 11, "duree": 300 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 712, "y": 0, "largeur": 20, "hauteur": 35, "dx": 7, "dy": 11, "duree": 100 },
+      { "x": 691, "y": 0, "largeur": 20, "hauteur": 35, "dx": 7, "dy": 11, "duree": 200 }
+     ]
+    }
+   }
+  },
+  "tour-tir-2": {
+   "categorie": "tour",
+   "largeur": 32,
+   "hauteur": 48,
+   "ancre": {
+    "x": 16,
+    "y": 45
+   },
+   "points": {
+    "tireur": {
+     "x": 16,
+     "y": 16
+    }
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 557, "y": 0, "largeur": 20, "hauteur": 39, "dx": 7, "dy": 7, "duree": 300 },
+      { "x": 536, "y": 0, "largeur": 20, "hauteur": 39, "dx": 7, "dy": 7, "duree": 300 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 536, "y": 0, "largeur": 20, "hauteur": 39, "dx": 7, "dy": 7, "duree": 100 },
+      { "x": 557, "y": 0, "largeur": 20, "hauteur": 39, "dx": 7, "dy": 7, "duree": 200 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 578, "y": 0, "largeur": 18, "hauteur": 38, "dx": 8, "dy": 8, "duree": 300 },
+      { "x": 597, "y": 0, "largeur": 18, "hauteur": 38, "dx": 8, "dy": 8, "duree": 300 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 597, "y": 0, "largeur": 18, "hauteur": 38, "dx": 8, "dy": 8, "duree": 100 },
+      { "x": 578, "y": 0, "largeur": 18, "hauteur": 38, "dx": 8, "dy": 8, "duree": 200 }
+     ]
+    }
+   }
+  },
+  "tour-tir-3": {
+   "categorie": "tour",
+   "largeur": 32,
+   "hauteur": 48,
+   "ancre": {
+    "x": 16,
+    "y": 45
+   },
+   "points": {
+    "tireur": {
+     "x": 16,
+     "y": 20
+    }
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 125, "y": 0, "largeur": 24, "hauteur": 46, "dx": 4, "dy": 0, "duree": 300 },
+      { "x": 100, "y": 0, "largeur": 24, "hauteur": 46, "dx": 4, "dy": 0, "duree": 300 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 100, "y": 0, "largeur": 24, "hauteur": 46, "dx": 4, "dy": 0, "duree": 100 },
+      { "x": 125, "y": 0, "largeur": 24, "hauteur": 46, "dx": 4, "dy": 0, "duree": 200 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 265, "y": 0, "largeur": 22, "hauteur": 45, "dx": 5, "dy": 1, "duree": 300 },
+      { "x": 242, "y": 0, "largeur": 22, "hauteur": 45, "dx": 5, "dy": 1, "duree": 300 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 242, "y": 0, "largeur": 22, "hauteur": 45, "dx": 5, "dy": 1, "duree": 100 },
+      { "x": 265, "y": 0, "largeur": 22, "hauteur": 45, "dx": 5, "dy": 1, "duree": 200 }
+     ]
+    }
+   }
+  },
+  "tour-tir-beffroi": {
+   "categorie": "tour",
+   "largeur": 32,
+   "hauteur": 48,
+   "ancre": {
+    "x": 16,
+    "y": 45
+   },
+   "points": {
+    "tireur": {
+     "x": 16,
+     "y": 20
+    }
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 25, "y": 0, "largeur": 24, "hauteur": 46, "dx": 4, "dy": 0, "duree": 300 },
+      { "x": 0, "y": 0, "largeur": 24, "hauteur": 46, "dx": 4, "dy": 0, "duree": 300 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 0, "y": 0, "largeur": 24, "hauteur": 46, "dx": 4, "dy": 0, "duree": 100 },
+      { "x": 25, "y": 0, "largeur": 24, "hauteur": 46, "dx": 4, "dy": 0, "duree": 200 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 173, "y": 0, "largeur": 22, "hauteur": 45, "dx": 5, "dy": 1, "duree": 300 },
+      { "x": 150, "y": 0, "largeur": 22, "hauteur": 45, "dx": 5, "dy": 1, "duree": 300 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 150, "y": 0, "largeur": 22, "hauteur": 45, "dx": 5, "dy": 1, "duree": 100 },
+      { "x": 173, "y": 0, "largeur": 22, "hauteur": 45, "dx": 5, "dy": 1, "duree": 200 }
+     ]
+    }
+   }
+  },
+  "tour-tir-guetteurs": {
+   "categorie": "tour",
+   "largeur": 32,
+   "hauteur": 48,
+   "ancre": {
+    "x": 16,
+    "y": 45
+   },
+   "points": {
+    "tireur": {
+     "x": 16,
+     "y": 20
+    }
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 75, "y": 0, "largeur": 24, "hauteur": 46, "dx": 4, "dy": 0, "duree": 300 },
+      { "x": 50, "y": 0, "largeur": 24, "hauteur": 46, "dx": 4, "dy": 0, "duree": 300 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 50, "y": 0, "largeur": 24, "hauteur": 46, "dx": 4, "dy": 0, "duree": 100 },
+      { "x": 75, "y": 0, "largeur": 24, "hauteur": 46, "dx": 4, "dy": 0, "duree": 200 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 219, "y": 0, "largeur": 22, "hauteur": 45, "dx": 5, "dy": 1, "duree": 300 },
+      { "x": 196, "y": 0, "largeur": 22, "hauteur": 45, "dx": 5, "dy": 1, "duree": 300 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 196, "y": 0, "largeur": 22, "hauteur": 45, "dx": 5, "dy": 1, "duree": 100 },
+      { "x": 219, "y": 0, "largeur": 22, "hauteur": 45, "dx": 5, "dy": 1, "duree": 200 }
+     ]
+    }
+   }
+  },
+  "tour-totem": {
+   "categorie": "tour",
+   "largeur": 32,
+   "hauteur": 48,
+   "ancre": {
+    "x": 16,
+    "y": 45
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 367, "y": 0, "largeur": 24, "hauteur": 43, "dx": 3, "dy": 4, "duree": 300 },
+      { "x": 342, "y": 0, "largeur": 24, "hauteur": 43, "dx": 3, "dy": 4, "duree": 450 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 392, "y": 0, "largeur": 24, "hauteur": 43, "dx": 3, "dy": 4, "duree": 90 },
+      { "x": 315, "y": 0, "largeur": 26, "hauteur": 43, "dx": 1, "dy": 4, "duree": 200 },
+      { "x": 288, "y": 0, "largeur": 26, "hauteur": 43, "dx": 1, "dy": 4, "duree": 160 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 490, "y": 0, "largeur": 22, "hauteur": 42, "dx": 4, "dy": 5, "duree": 300 },
+      { "x": 467, "y": 0, "largeur": 22, "hauteur": 42, "dx": 4, "dy": 5, "duree": 450 }
+     ]
+    },
+    "attaque": {
+     "boucle": false,
+     "cadres": [
+      { "x": 513, "y": 0, "largeur": 22, "hauteur": 42, "dx": 4, "dy": 5, "duree": 90 },
+      { "x": 417, "y": 0, "largeur": 24, "hauteur": 42, "dx": 2, "dy": 5, "duree": 200 },
+      { "x": 442, "y": 0, "largeur": 24, "hauteur": 42, "dx": 2, "dy": 5, "duree": 160 }
+     ]
+    }
+   }
+  },
+  "trait-chaine": {
+   "categorie": "projectile",
+   "largeur": 16,
+   "hauteur": 16,
+   "ancre": {
+    "x": 8,
+    "y": 8
+   },
+   "animations": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 432, "y": 284, "largeur": 15, "hauteur": 4, "dx": 0, "dy": 5, "duree": 90 },
+      { "x": 448, "y": 284, "largeur": 15, "hauteur": 4, "dx": 0, "dy": 5, "duree": 90 }
+     ]
+    }
+   },
+   "sansContour": {
+    "repos": {
+     "boucle": true,
+     "cadres": [
+      { "x": 648, "y": 284, "largeur": 13, "hauteur": 3, "dx": 1, "dy": 6, "duree": 90 },
+      { "x": 633, "y": 284, "largeur": 14, "hauteur": 3, "dx": 0, "dy": 6, "duree": 90 }
+     ]
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,36 @@
+# Mendiant (région 1) : le lancier du pack, capuche grise de haillons, tunique de toile sale, pieds nus.
+# La lance devient un bâton taillé en pointe (pointe grise). Rapide et fragile.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+couleur S c8a884
+
+sprite mendiant
+minifolks Without Outline/MiniSpearMan.png
+# acier → capuche grise, tunique bleue → toile terreuse, peau → grise et creuse, bottes → pieds nus
+recolore 8cadc6=p b5d6de=P ffffff=q 5a7b94=g 4058c0=M 6098e8=N f8c090=S b07040=S 901000=k
+
+anim repos 160
+cadre mf 0.0-3
+
+anim marche 80
+cadre mf 1.0-5
+
+# Coup de pointe ; la traînée du pack est effacée.
+anim attaque 80
+cadre mf 3.0
+cadre mf 3.1
+cadre mf 3.2
+cadre mf 3.3 couleurs q=#00000000 dans 20 27 31 28 duree 140
+cadre mf 3.4 couleurs q=#00000000 dans 22 27 31 28
+cadre mf 3.5 couleurs P=#00000000 dans 26 25 26 25 couleurs P=#00000000 dans 26 27 26 27
+cadre mf 3.6 couleurs P=#00000000 dans 22 26 22 26 couleurs P=#00000000 dans 22 28 22 28
+
+anim blesse 120
+cadre mf 4.1
+cadre mf 4.2
+
+anim mort 150
+cadre mf 5.0-3
+cadre mf 5.4 duree 600

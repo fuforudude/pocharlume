@@ -1,0 +1,103 @@
+# Projectiles, cadres de 16×16 comme la planche du pack, pointe vers la droite (le rendu les tourne).
+# L'ancre est au centre. La flèche et la boule magique viennent de HumansProjectiles.png.
+categorie projectile
+palette commune
+taille 16 16
+ancre 8 8
+minifolks HumansProjectiles.png
+
+# Flèche du Clocher des Archers.
+sprite fleche
+anim repos
+cadre mf 0.0
+
+# Flèche des Guetteurs des Toits : pointe empoisonnée.
+sprite fleche-poison
+anim repos
+cadre mf 0.0 couleurs i=E W=E dans 10 0 15 15
+
+# Carreau des Arbalétriers du Beffroi : plus court, plus lourd, empennage de cuir.
+sprite carreau
+.
+.
+.
+.
+.
+.
+...b
+...bBBBBBBTi
+...b
+
+# Boule de cendre de l'Autel : la boule magique du pack en braise, traîne de cendre.
+sprite boule-cendre
+recolore e09128=p f0d50a=f d8f8f8=y
+anim repos 80
+cadre mf 1.0-1
+
+# Pierre de la Catapulte du Rempart (elle tourne sur elle-même).
+sprite pierre
+anim repos 100
+cadre
+.
+.
+.
+.
+.
+......pPP
+.....pPqPP
+.....pPPPP
+.....gpPPp
+......gpp
+cadre pierre/repos.0 tourne 90 decale 1 0
+cadre pierre/repos.0 tourne 180 decale 1 1
+cadre pierre/repos.0 tourne 270 decale 0 1
+
+# Pot de soufre du Mortier : la pierre en terre cuite, mèche allumée.
+sprite pot-soufre
+anim repos 100
+cadre
+.
+.
+.
+.
+......y
+.....fF.
+.....BOOb
+....BOYYOb
+....bOOOOb
+.....bbbb
+cadre
+.
+.
+.
+.
+.....F.
+......f
+.....BOOb
+....BOYYOb
+....bOOOOb
+.....bbbb
+
+# Trait de la Baliste à Chaînes : gros carreau qui traîne une chaîne.
+sprite trait-chaine
+anim repos 90
+cadre
+.
+.
+.
+.
+.
+.
+..p.p.......
+.p.p.pBBBBBBPq
+..p.p.......
+cadre
+.
+.
+.
+.
+.
+.
+.p.p........
+p.p.p.BBBBBBPq
+.p.p........

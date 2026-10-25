@@ -1,0 +1,218 @@
+# Catapulte du Rempart (artillerie) : une catapulte de bois servie par un chat.
+# Niveau 1 : catapulte sur ses roues. Niveau 2 : sur une plate-forme de pierre. Niveau 3 : sur un rempart
+# crénelé, bras cerclé de fer. Spécialisations : Mortier de Soufre (mortier de fonte qui crache une fumée
+# jaune) et Baliste à Chaînes (grande arbalète de rempart, chaîne enroulée).
+# repos : le chat servant cligne ; attaque : le bras part vers l'avant (le projectile part du point `tir`).
+# Les pièces sont des calques communs au fichier, chaque niveau les pose à sa hauteur.
+categorie tour
+palette commune
+taille 32 32
+ancre 16 26
+origine 3 2
+
+calque chassis 0 18
+..........dd
+.........dbbd
+........db..bd
+.......db....bd
+.bdb..............bdb
+dBBBBBBBBBBBBBBBBBBBd
+bddddddddddddddddddb
+.bdb..............bdb
+
+calque bras-arme 0 16
+..pP
+.bpPb
+.bbbbOOOOOd
+.....oooo
+
+calque bras-mi 8 6
+.pP
+bpPb
+bbbb
+.Oo
+.Oo
+.Oo
+.Oo
+.Oo
+.Oo
+.Oo
+.Oo
+.Oo
+.Od
+
+calque bras-lance 10 10
+......bb
+.....bbbb
+.....Oo
+....Oo
+...Oo
+..Oo
+.Oo
+Oo
+d
+
+calque chat 21 18
+o..o
+oooo
+okok
+.cco
+obbo
+.bb
+.oo
+
+calque cligne 22 20
+o.o
+
+calque rempart-2 0 21
+.gPPPPgPPPPPgPPPPPgPPg
+gpppPgppppPgpppppPgppg
+gggggggggggggggggggggg
+gPPgPPPPPgPPPPgPPPPPgg
+gppgpppppgppppgpppppgg
+
+calque rempart-3 0 13
+PPP...................PPP
+ppg...................ppg
+ggg...................ggg
+pPPPPgPPPPPgPPPPPgPPPPPPg
+gpppPgppppPgpppppPgpppppg
+ggggggggggggggggggggggggg
+pPPgPPPPPgPPPPgPPPPPgPPPg
+gppgpppppgpkppgpppppgpppg
+ggggggggggggggggggggggggg
+gPPPPgPPPPPgPPPPPgPPPPPPg
+gppppgppppkgpppppgpppppgg
+ggggggggggggggggggggggggg
+
+# Cercles de fer du niveau 3.
+calque fers 0 18
+.....p.......p
+.....p.......p
+.....p.......p
+.....p.......p
+.....p.......p
+.....p.......p
+.....p.......p
+
+sprite tour-artillerie-1
+point tir 4 18
+
+anim repos 400
+cadre chassis + bras-arme + chat
+cadre chassis + bras-arme + chat + cligne duree 150
+
+anim attaque 80
+cadre chassis + bras-mi + chat
+cadre chassis + bras-lance + chat
+cadre chassis + bras-lance + chat duree 300
+cadre chassis + bras-arme + chat duree 200
+
+sprite tour-artillerie-2
+point tir 4 15
+
+anim repos 400
+cadre rempart-2 + chassis decale 0 -3 + bras-arme decale 0 -3 + chat decale 0 -3
+cadre rempart-2 + chassis decale 0 -3 + bras-arme decale 0 -3 + chat decale 0 -3 + cligne decale 0 -3 duree 150
+
+anim attaque 80
+cadre rempart-2 + chassis decale 0 -3 + bras-mi decale 0 -3 + chat decale 0 -3
+cadre rempart-2 + chassis decale 0 -3 + bras-lance decale 0 -3 + chat decale 0 -3
+cadre rempart-2 + chassis decale 0 -3 + bras-lance decale 0 -3 + chat decale 0 -3 duree 300
+cadre rempart-2 + chassis decale 0 -3 + bras-arme decale 0 -3 + chat decale 0 -3 duree 200
+
+sprite tour-artillerie-3
+point tir 4 11
+
+anim repos 400
+cadre rempart-3 + chassis decale 0 -7 + fers decale 0 -7 + bras-arme decale 0 -7 + chat decale 0 -7
+cadre rempart-3 + chassis decale 0 -7 + fers decale 0 -7 + bras-arme decale 0 -7 + chat decale 0 -7 + cligne decale 0 -7 duree 150
+
+anim attaque 80
+cadre rempart-3 + chassis decale 0 -7 + fers decale 0 -7 + bras-mi decale 0 -7 + chat decale 0 -7
+cadre rempart-3 + chassis decale 0 -7 + fers decale 0 -7 + bras-lance decale 0 -7 + chat decale 0 -7
+cadre rempart-3 + chassis decale 0 -7 + fers decale 0 -7 + bras-lance decale 0 -7 + chat decale 0 -7 duree 300
+cadre rempart-3 + chassis decale 0 -7 + fers decale 0 -7 + bras-arme decale 0 -7 + chat decale 0 -7 duree 200
+
+# Mortier de Soufre : gros mortier de fonte cerclé, pointé vers le ciel, bouche jaune de soufre.
+sprite tour-artillerie-mortier
+point tir 11 3
+
+calque mortier 4 2
+......gGGGg
+.....gYyyYGg
+.....gGGGGGg
+....gGgGGGgGg
+....gGGGGGGGg
+...gGgGGGGGgGg
+...gGGGGGGGGGg
+...gpPPPPPPPpg
+..gGGGGGGGGGGGg
+..gGgGGGGGGGgGg
+..dBBBBBBBBBBBd
+..dbbbbbbbbbbbd
+
+calque fumee-soufre 4 0
+.....Y..Y.Y
+....YJY.JYJY
+...YJYY..YJ
+.....Y
+
+calque eclair 8 0
+..y.y
+.yFFFy
+..yFy
+
+anim repos 400
+cadre rempart-3 + mortier + chat decale 0 -7
+cadre rempart-3 + mortier + chat decale 0 -7 + cligne decale 0 -7 duree 150
+
+anim attaque 90
+cadre rempart-3 + mortier decale 0 1 + eclair + chat decale 0 -7
+cadre rempart-3 + mortier + fumee-soufre + chat decale 0 -7 duree 200
+cadre rempart-3 + mortier + fumee-soufre decale 0 -1 + chat decale 0 -7 duree 200
+
+# Baliste à Chaînes : grande arbalète de rempart, trait armé, chaîne enroulée sur un treuil.
+sprite tour-artillerie-baliste
+point tir 24 8
+
+calque baliste 1 4
+.........p
+.........pp
+.........p.p
+.........p..p
+....ddddddddddPq
+.........p..p
+.........p.p
+.........pp
+.........p
+......dd.dd
+.....dbbdbbd
+...pPp..d.d
+..pP.Pp.d.d
+..pPpPp.d.d
+...pPp.dddd
+
+calque trait 1 8
+..ww.....
+BBBBBBBBBBBBBTi
+
+calque corde-lachee 1 4
+.........p
+.........pp
+.........p.p
+.........p..p
+.........p...p
+.........p...p
+.........p..p
+.........pp
+.........p
+
+anim repos 400
+cadre rempart-3 + baliste + trait + chat decale 0 -7
+cadre rempart-3 + baliste + trait + chat decale 0 -7 + cligne decale 0 -7 duree 150
+
+anim attaque 80
+cadre rempart-3 + corde-lachee + baliste + chat decale 0 -7
+cadre rempart-3 + baliste + chat decale 0 -7 duree 300
+cadre rempart-3 + baliste + trait decale -2 0 + chat decale 0 -7 duree 200

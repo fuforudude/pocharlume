@@ -1,0 +1,55 @@
+# Paysan Affamé (région 1) : l'épéiste du pack en haillons. Le casque devient un capuchon de toile brune,
+# l'épée un manche de bois auquel on ajoute les dents d'une fourche ; pieds nus, teint blafard.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+couleur S d4b088
+
+sprite paysan-affame
+minifolks Without Outline/MiniSwordMan.png
+# acier → toile et bois, tunique bleue → haillons olive, peau → blafarde, bottes → pieds nus
+recolore 8cadc6=B b5d6de=o ffffff=O 5a7b94=b 4058c0=H 6098e8=j f8c090=S b07040=S
+
+# Dents de fourche, posées au bout du manche (vertical puis horizontal).
+calque fourche
+P.P
+PPP
+
+calque fourche-h
+PPP
+P..
+PPP
+
+anim repos 180
+cadre mf 0.0 + fourche decale 10 15
+cadre mf 0.1 + fourche decale 10 15
+cadre mf 0.2 + fourche decale 10 16
+cadre mf 0.3 + fourche decale 10 16
+
+anim marche 100
+cadre mf 1.0 + fourche decale 11 14
+cadre mf 1.1 + fourche decale 11 15
+cadre mf 1.2 + fourche decale 10 15
+cadre mf 1.3 + fourche decale 9 14
+cadre mf 1.4 + fourche decale 9 15
+cadre mf 1.5 + fourche decale 10 15
+
+# Coup de fourche : on lève, on recule, on pique. La traînée blanche du pack est effacée.
+anim attaque 90
+cadre mf 3.0 + fourche decale 8 13
+cadre mf 3.1
+cadre mf 3.2 couleurs O=#00000000 dans 22 14 29 25 + fourche-h decale 28 25 duree 150
+cadre mf 3.3 couleurs O=#00000000 dans 25 22 29 26 + fourche-h decale 28 26
+cadre mf 3.4 + fourche-h decale 27 26
+cadre mf 3.5 + fourche-h decale 24 26
+
+anim blesse 120
+cadre mf 4.1 couleurs R=k + fourche decale 8 15
+cadre mf 4.2 couleurs R=k + fourche decale 9 15
+
+anim mort 150
+cadre mf 5.0 couleurs R=k
+cadre mf 5.1 couleurs R=k
+cadre mf 5.2 couleurs R=k
+cadre mf 5.3 couleurs R=k duree 600

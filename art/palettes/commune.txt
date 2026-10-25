@@ -1,0 +1,71 @@
+# Palette commune de Pocharlume : une lettre par couleur, RRGGBB ou RRGGBBAA.
+# Les couleurs marquées (pack) sont celles du pack Minifolks, pour que les ennemis recolorés et les sprites
+# dessinés partagent les mêmes teintes. Lettres réservées : . _ # + =
+
+# Ombres
+K 2b2928  contour et ombre la plus sombre (pack)
+k 171412  noir profond : fenêtres, intérieurs, pupilles
+
+# Pierre et os
+g 3e3b39  pierre sombre (pack)
+G 4e4b49  pierre (pack)
+p 67625a  pierre moyenne
+P 8a8478  pierre claire
+q aea696  pierre éclairée, os
+w e5e9de  blanc cassé (pack)
+W ffffff  blanc, reflet du métal (pack)
+
+# Bois, cuir, peau
+d 3b2a20  bois sombre
+b 623f2a  brun (pack)
+B 705030  brun moyen (pack)
+o b07040  roux (pack)
+O c88850  fauve (pack)
+s f8c090  chair claire (pack)
+c e8d0a0  crème : ventre et museau des chats
+
+# Pelages gris (Charlie, spectres)
+u 45424c  anthracite
+U 67636f  gris
+v 948f9a  gris clair
+
+# Rouges
+r 5a1a14  sang séché, bois peint sombre
+R 901000  rouge (pack)
+x c83018  rouge vif
+
+# Feu et braise
+e 6e2c12  braise éteinte
+f e09128  orange (pack)
+F f0d50a  jaune (pack)
+y f7f757  jaune clair (pack)
+Y dfc76f  or pâle (pack)
+
+# Végétation morte
+h 2e3020  mousse sombre
+H 4a4a2c  herbe morte sombre
+j 6e6a40  herbe morte
+J 9a9058  paille
+
+# Acier et bleus
+t 5a7b94  acier sombre (pack)
+T 8cadc6  acier (pack)
+i b5d6de  acier clair (pack)
+a 4058c0  bleu (pack)
+A 6098e8  bleu clair (pack)
+I d8f8f8  lueur magique (pack)
+
+# Église du Soleil Blême
+z d8d0b0  lin pâle
+Z b8a870  ocre blême
+
+# Terre et boue
+m 3a3024  boue sombre
+M 54452f  terre
+N 6e5a3c  terre claire
+n 8a7550  terre sèche
+
+# Spectres et nécromancie
+l 7f9aa8  spectre
+L c8e4ec  spectre clair
+E 5e8a4a  vert maladif

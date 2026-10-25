@@ -1,0 +1,248 @@
+# Grenier des Griffes (caserne) : une grange au toit de chaume d'où sortent les chats de grange.
+# Niveau 1 : remise de planches. Niveau 2 : grange à grenier, un chat guette à la lucarne.
+# Niveau 3 : grange fortifiée, pieux et bannière griffée. Spécialisations dérivées du niveau 3.
+# Les trois niveaux partagent les animations du niveau 1 (modèle) : seuls les calques changent.
+# repos : porte fermée, le chat de la lucarne cligne ; attaque : la porte s'ouvre sur des yeux (sortie des soldats).
+categorie tour
+palette commune
+taille 32 32
+ancre 16 26
+origine 3 2
+
+sprite tour-caserne-1
+
+calque batiment
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+............JJ
+..........JJjjJJ
+........JJjJJjjJJJ
+......JJjjJJjJJjjJJJ
+....JJjJJjjJJJjjJJjJJJ
+...hjjjjjjjjjjjjjjjjjjh
+....BbBbBbBbBbBbBbBbBb
+....BbBbBkkkkkkkBbBbBb
+....BbBbkkkkkkkkkBbBbB
+....BbBbkkkkkkkkkBbBbB
+....BbBbkkkkkkkkkBbBbB
+....BbBbkkkkkkkkkBbBbB
+...gpPpPggggggggggPpPpg
+
+calque porte 8 19
+.dBdBdBd
+dBdBdBdBd
+ppPpppPpp
+dBdBdBdBd
+dBdBdBdBd
+
+calque porte-mi 11 19
+.dBdB
+BdBdBd
+pppPpp
+BdBdBd
+BdBdBd
+
+calque yeux 10 21
+y.y...y.y
+
+calque chat-loft
+.
+
+calque cligne
+.
+
+calque extra
+.
+
+calque extra-b
+.
+
+anim repos 400
+cadre batiment + porte + chat-loft + extra
+cadre batiment + porte + chat-loft + cligne + extra-b
+cadre batiment + porte + chat-loft + extra
+cadre batiment + porte + chat-loft + extra-b
+
+anim attaque 120
+cadre batiment + porte-mi + chat-loft + extra
+cadre batiment + yeux + chat-loft + extra-b
+cadre batiment + yeux decale 1 0 + chat-loft + extra duree 300
+cadre batiment + porte-mi + chat-loft + extra-b
+
+sprite tour-caserne-2
+modele tour-caserne-1
+
+calque batiment
+.
+.
+.
+.
+.
+............JJ
+..........JJjjJ
+.........JjJJjjJJ
+........JjjJJjjJjJ
+......JJjJJjjJJjjJJ
+.....JjjJJjJJjJjjJJJ
+....JjJjjJJjjJJjJjjJJ
+...JJjJJjjJJjJjjJJjJJJ
+..hjjjjjjjjjjjjjjjjjjjjh
+...BbBbBbBkkkkkBbBbBbBb
+...BbBbBbBkkkkkBbBbBbBb
+...BbBbBbBkkkkkBbBbBbBb
+...ddddddddddddddddddddd
+...BbBbBkkkkkkkkBbBbBbBb
+...BbBbkkkkkkkkkkbBbBbBb
+...BbBbkkkkkkkkkkbBbBbBb
+...BbBbkkkkkkkkkkbBbBbBb
+...BbBbkkkkkkkkkkbBbBbBb
+..gpPpPpggggggggggPpPpPpg
+..gPpPpPpPpPpPpPpPpPpPpPg
+
+calque porte 7 18
+.dBdBdBdB
+dBdBdBdBdB
+ppPpppPppp
+dBdBdBdBdB
+dBdBdBdBdB
+
+calque porte-mi 11 18
+.dBdB
+dBdBdB
+ppPppp
+dBdBdB
+dBdBdB
+
+calque yeux 8 20
+y.y..y.y
+
+calque chat-loft 10 14
+.o.o
+.yoy
+.ooo
+
+calque cligne 11 15
+o.o
+
+# Grange fortifiée : soubassement de pierre, pieux devant, bannière griffée qui claque au vent.
+sprite tour-caserne-3
+modele tour-caserne-2
+
+calque extra
+.
+.dRRR
+.dRxR
+.dRRR
+.dRRR
+.dR.R
+.d
+.d
+.d
+.d
+.d
+.d
+.d
+.d
+.d
+.d
+.d
+.d
+.d
+.d
+.d
+B.B.......................B.B
+d.d.......................d.d
+dBd.......................dBd
+dbd.......................dbd
+
+calque extra-b
+.
+.dRRRR
+.dRRxR
+.dRRRR
+.dRRRR
+.dRR.R
+.d
+.d
+.d
+.d
+.d
+.d
+.d
+.d
+.d
+.d
+.d
+.d
+.d
+.d
+.d
+B.B.......................B.B
+d.d.......................d.d
+dBd.......................dBd
+dbd.......................dbd
+
+calque batiment
+.
+.
+.
+.
+.
+............JJ
+..........JJjjJ
+.........JjJJjjJJ
+........JjjJJjjJjJ
+......JJjJJjjJJjjJJ
+.....JjjJJjJJjJjjJJJ
+....JjJjjJJjjJJjJjjJJ
+...JJjJJjjJJjJjjJJjJJJ
+..hdddddddddddddddddddddh
+...BbBbBbBkkkkkBbBbBbBb
+...BbBbBbBkkkkkBbBbBbBb
+...BbBbBbBkkkkkBbBbBbBb
+...ddddddddddddddddddddd
+...pPpPgkkkkkkkkgPpPpPp
+...PpPgkkkkkkkkkkgpPpPp
+...gggpkkkkkkkkkkpgggPg
+...pPpPkkkkkkkkkkPpPpPp
+...PpPgkkkkkkkkkkgPpgPp
+..gpPpPpggggggggggPpPpPpg
+..gPpPpPpPpPpPpPpPpPpPpPg
+
+# Garde du Cloître : la grange devenue cloître, murs de pierre, toit d'ardoise, clocheton et bannière de lin.
+sprite tour-caserne-cloitre
+derive tour-caserne-3 couleurs J=G j=g h=k B=p b=P R=z x=Z
+
+calque clocheton 10 3
+..d
+.gZg
+.gYg
+ggggg
+
+retouche repos * + clocheton
+retouche attaque * + clocheton
+
+# Écorcheurs : bois noirci, chaume pourri, bannière sombre, peaux qui sèchent sur un cadre.
+sprite tour-caserne-ecorcheurs
+derive tour-caserne-3 couleurs B=d b=b J=B j=b R=r x=R
+
+calque peaux 24 12
+d..d
+dOOd
+dOod
+dOOd
+dood
+d..d
+
+retouche repos * + peaux
+retouche attaque * + peaux

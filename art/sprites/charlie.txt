@@ -1,0 +1,168 @@
+# Charlie, le Colosse : héros du dieu Charlie. Énorme chat gris, poitrail blanc, collier de fer brisé,
+# balafre sur l'œil, petits yeux. Il frappe des deux poings. Grilles posées à l'origine (4, 10).
+categorie unite
+palette commune
+taille 32 32
+ancre 16 30
+origine 4 10
+
+sprite charlie
+
+calque tete 8 0
+u.......u.
+uv.....vu.
+uuuuuuuuu.
+uUPUUUUUuu
+uUUPkUUkUu
+uUUUUvvvvv
+.uUUvvvrvv
+..uuUvvvv.
+
+calque yeux-clos 12 4
+U..U
+
+calque corps 4 8
+....gpPpPpPpg...
+..uuuUvvvvvUuuu.
+.uuUUvvvvvvUUUuu
+uuUUUvvvvvvUUUUu
+uuUUUUvvvvUUUUuu
+uuuUUUUvvUUUUuuu
+uuu.UUUUUUUU.uuu
+vvv..uuuuuu..vvv
+
+calque corps-leve 4 -4
+.......vvvv
+......vvvvvv
+.....uvvvvvvu
+....uu......uu
+...uu........uu
+..uu..........uu
+..uu..........uu
+..uu..........uu
+..uu..........uu
+..uu..........uu
+..uu..........uu
+..uu..........uu
+..uugpPpPpPpgUuu
+..uuuUvvvvvUuuu
+..uUUvvvvvvUUU
+..uUUvvvvvvUUU
+..uUUUvvvvUUUU
+..uuUUUvvUUUUu
+....UUUUUUUU
+.....uuuuuu
+
+calque corps-frappe 4 8
+....gpPpPpPpg
+..uuuUvvvvvUuuuu
+..uUUvvvvvvUUUuuu
+..uUUvvvvvvUUUUuuu
+..uUUUvvvvUUUU.uuu
+..uuUUUvvUUUu...uu
+....UUUUUUUU....uuu
+.....uuuuuu.....vvvv
+................vvvv
+
+calque poussiere 13 16
+.q.......q
+P.q.q..q.P
+.PqPPqqPP.
+PpPpPPpPpP
+
+calque grande-poussiere 0 15
+..q.................q.
+.P..q...........q..P..
+P.q..Pq.......qP..q..P
+.PqPPpPq.....PpPPqPPq.
+PpPpPpPpP...PpPpPpPpPp
+
+calque queue 0 8
+.uu
+u..
+u..
+uu.
+.uu
+
+calque queue-b 0 8
+uu.
+u..
+u..
+uu.
+.uu
+
+calque jambes 7 17
+.uuu..uuu.
+.uuu..uuu.
+.uUu..uUu.
+vvvv..vvvv
+
+calque jambes-a 6 17
+.uuu....uuu.
+.uuu....uuu.
+uUu......uUu
+vvv......vvvv
+
+calque jambes-b 7 17
+..uuu.uuu.
+..uuu.uuu.
+..uUu.uUu.
+.vvvvvvvv.
+
+anim repos 260
+cadre queue + jambes + corps + tete
+cadre queue-b + jambes + corps + tete
+cadre queue-b + jambes + corps decale 0 1 + tete decale 0 1
+cadre queue + jambes + corps decale 0 1 + tete decale 0 1 + yeux-clos decale 0 1
+
+anim marche 140
+cadre queue + jambes-a + corps + tete
+cadre queue-b decale 0 -1 + jambes-b decale 0 -1 + corps decale 0 -1 + tete decale 0 -1
+cadre queue + jambes-a + corps decale 0 1 + tete decale 0 1
+cadre queue-b decale 0 -1 + jambes-b decale 0 -1 + corps decale 0 -1 + tete decale 0 -1
+
+# Deux poings levés puis abattus devant lui.
+anim attaque 110
+cadre queue + jambes + corps-leve + tete duree 220
+cadre queue + jambes-a + corps-frappe decale 1 1 + tete decale 1 2
+cadre queue + jambes-a + corps-frappe decale 1 1 + tete decale 1 2 + poussiere duree 180
+cadre queue + jambes + corps + tete duree 160
+
+# Chute du Colosse : il s'accroupit, bondit et retombe en écrasant le sol.
+anim competence 100
+cadre queue + jambes + corps decale 0 2 + tete decale 0 2 duree 200
+cadre queue decale 0 -6 + jambes-b decale 0 -6 + corps-leve decale 0 -5 + tete decale 0 -5
+cadre queue decale 0 -3 + jambes-b decale 0 -3 + corps-leve decale 0 -2 + tete decale 0 -2
+cadre queue + jambes-a + corps-frappe decale 0 1 + tete decale 0 2 + grande-poussiere duree 200
+cadre queue + jambes-a + corps-frappe decale 0 1 + tete decale 0 2 + poussiere decale -3 0 duree 200
+cadre queue + jambes + corps + tete duree 200
+
+anim blesse 130
+cadre queue + jambes + corps decale -1 0 + tete decale -1 0 + yeux-clos decale -1 0
+cadre queue + jambes + corps + tete
+
+anim mort 160
+cadre queue + jambes + corps decale -1 0 + tete decale -1 1 + yeux-clos decale -1 1
+cadre queue decale 0 3 + corps decale 0 3 + tete decale 0 4 + yeux-clos decale 0 4
+cadre duree 1000
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+..........u.......u
+..uu......uv.....vu
+.u..uuuuuuuuuuuuuuuu
+.u.uuUUvvvvvUUUUUUuuu
+..uuUUvvvvvvUUUUUkUUu
+.vvvUUvvvvvvUUUUvvvvv
+.vvuuuUUvvvUUuuUvvvrv
+.....vvuuuuuuvv..vvvv.

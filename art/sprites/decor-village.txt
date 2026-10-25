@@ -1,0 +1,314 @@
+# Décor du Village Affamé : objets posés sur les tuiles, avec contour comme les personnages, ancre au pied.
+# Les grands objets font 32×32, les petits 16×16. Le socle de construction a la même ancre que les tours.
+categorie decor
+palette commune
+taille 32 32
+ancre 16 30
+
+sprite arbre-mort-1
+origine 4 10
+..........b.......b
+...b......b......b
+....b....b......b..b
+.b...b...b.....b..b
+..b..b..bb....b..b
+...bb.b.b....bb.b
+.....bbbb...b..b
+......dbb..b..b
+.......dbbbbbb
+.......ddbB
+........dbB
+........dbB
+........dbbB
+........ddbB
+........ddbB
+.......dddbB
+.......ddbbB
+......dddbbB
+.....dd.ddbbB
+....d...ddbbBb
+........d..bb..b
+
+sprite arbre-mort-2
+anim repos
+cadre arbre-mort-1/repos.0 miroir decale 1 0
+retouche repos 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+........JJ.Hj
+.......jJHjHJ
+
+# Maison brûlée : mur de façade aux fenêtres noires, poutre carbonisée tombée.
+sprite maison-ruine-1
+origine 3 16
+....k
+...gk.......k
+..gpPg.....gkg
+.gpPPPg...gpPPg
+.gPkkPPg.gpPkkPg
+.gPkkPPPgpPPkkPg
+.gPPPPPPPPPPPPPg
+.gpPqPPPPPPqPPPg..d
+.gPPPPPdddPPPPPg.dbd
+.gpPPPdkkkdPPPPg.dbd
+.gPPqPdkkkdPPqPg..b
+.gpPPPdkkkdPPPPg
+.gPPPPdkkkdPPPPg
+pgpPPPdkkkdPPPPgp.pq
+PpgggggggggggggpPPpPp
+
+# Pan de mur resté debout et poutre de toit penchée.
+sprite maison-ruine-2
+origine 5 18
+.........dk
+........dk
+.g.....dk
+gpg...dk
+gPPg.dk
+gPPPgk
+gPkPPg
+gPkPPPg
+gPPPPPPg
+gpPPqPPPg
+gPPPPPPPPg..p
+gpPPPPqPPPg.pP.p
+PgggggggggggpPPpPp
+
+# Puits de pierre, treuil et seau.
+sprite puits
+origine 8 17
+.dddddddddddddd
+.d....b.......d
+.d....b.......d
+.d...BBB......d
+.d...bBb......d
+.d............d
+.d............d
+.gggggggggggggg
+gpPPpPPPpPPPpPPg
+gPPqPPPPPqPPPPPg
+gpPPPpPPPPPpPPPg
+gPPPPPPqPPPPPPPg
+.gggggggggggggg
+
+# Potence au loin : poteau, traverse et nœud vide.
+sprite potence
+origine 9 4
+dddddddddddd
+dbd.......B
+db........B
+db........B
+db.......B.B
+db.......B.B
+db........B
+db
+db
+db
+db
+db
+db
+db
+db
+db
+db
+db
+db
+db
+db
+db
+db
+dbd
+dbbd
+ddbbd
+Mddbbdd
+
+# Bûcher éteint : poteau, chaîne, fagots noircis, cendre et une dernière braise.
+sprite bucher-eteint
+origine 6 8
+.......d
+.......d
+......pd
+.......dp
+......pd
+.......d
+.......d
+.......d
+.......d
+.......d
+.......d
+.....b.d.b
+....dbBdBbd
+..bdBbddbBdb
+.dbBbdBbdbBbd
+dbBkdBbkdeBbdk
+pdbdkdbdkdbdpp
+PpGpPpGpPpGpPp
+
+# Socle de construction vide : anneau de pierres autour d'un carré de terre battue.
+sprite socle
+ancre 16 26
+origine 2 18
+.......gggggggggggggg
+....gggPPqPPPqPPPqPPggg
+..ggPPpMMMMMMMMMMMMMpPPgg
+.gPppMMMNMMMMMmMMMMMMMppPg
+gPpMMMMMMMMMMMMMMMNMMMMMpPg
+gPpMMNMMMMmMMMMMMMMMMMMMpPg
+gPpMMMMMMMMMMMMMNMMMMmMMpPg
+.gPppMMMMMMMMMMMMMMMMMppPg
+..ggPPpppMMMMMMMMMpppPPgg
+....gggPPPpppppppPPPggg
+.......gggggggggggggg
+
+# Petits décors de 16×16.
+sprite cloture-h
+taille 16 16
+ancre 8 15
+origine 0 8
+.d......d
+.db.....db
+BBBBBBBBBBBBBBBB
+bdbbbbbbdbbbbbbb
+.db.....db
+BBBBBBBBBBBBBBBB
+bdbbbbbbdbbbbbbb
+.db.....db
+
+sprite cloture-v
+taille 16 16
+ancre 8 15
+origine 6 0
+.Bb
+.Bb
+dBb
+dBbd
+.Bb
+.Bb
+.Bb
+.Bb
+.Bb
+dBb
+dBbd
+.Bb
+.Bb
+.Bb
+.Bb
+.db
+
+sprite cloture-cassee
+taille 16 16
+ancre 8 15
+origine 0 8
+.d.......
+.db......B
+BBBBBBB.Bb
+bdbbbb..b
+.db.....
+BBBBBB...
+bdbbb....BBb
+.db....bbBb
+
+sprite touffe
+taille 16 16
+ancre 8 15
+contour non
+origine 3 9
+...J...j
+.J.j..J.
+..jJ.jj.J
+J.Hjjj.j
+.HjHjHjH.
+..HHhHH
+
+sprite cailloux
+taille 16 16
+ancre 8 15
+origine 2 10
+.....pPP
+....pPqPP
+.pP.gpPPp
+pPqP.gpp
+gppp...pPq
+.gg...gpp
+
+sprite souche
+taille 16 16
+ancre 8 15
+origine 3 8
+..BOOOOB
+.BOcOOcOB
+.dBOOOOBb
+.dbBBBBbb
+.dbbbBbbb
+.dbbbBbbb
+ddbbbbbbbd
+d.dd..dd.d
+
+sprite tonneau
+taille 16 16
+ancre 8 15
+origine 4 6
+.BOOOOB
+BOcccOOB
+pPPPPPPp
+bBoOoBbb
+bBoOoBbb
+pPPPPPPp
+bBoOoBbb
+bBoOoBbb
+pPPPPPPp
+.bbbbbb
+
+sprite croix
+taille 16 16
+ancre 8 15
+origine 3 3
+....d
+....db
+..dddbbb
+..bbdbBB
+....db
+....db
+....db
+....db
+....db
+..MMdbMM
+.MNMMMMNM
+MMMMNMMMMM
+
+sprite crane
+taille 16 16
+ancre 8 15
+origine 2 8
+q.........q
+wq......qw
+.wqwwwwqw
+..wkwwkw
+..wkwwkw
+...wqqw
+...wkkw
+....ww

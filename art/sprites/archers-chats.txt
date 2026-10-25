@@ -1,0 +1,101 @@
+# Chats tireurs postés au sommet des tours de tir (le rendu les pose sur la tour, ancre au pied).
+# Ils reprennent le chat de grange comme modèle ; seules les animations repos et attaque servent.
+categorie unite
+palette commune
+taille 32 32
+ancre 16 30
+origine 6 18
+
+# Archer du Clocher : capuchon de feutre, arc court.
+sprite archer-chat
+modele soldat-grange
+
+calque tete 6 0
+B.....B.
+oO...Oo.
+BbbbbbB.
+ooookok.
+oooccrcc
+.occccc.
+
+calque arme 11 1
+...b
+...wB
+...w.B
+...w.B
+oocw.B
+...w.B
+...w.B
+...wB
+...b
+
+calque arme-tire 11 1
+...b
+...wB
+..w..B
+..w..B
+ocTTTTTi
+..w..B
+..w..B
+...wB
+...b
+
+anim repos 220
+cadre queue + jambes + corps + arme + tete
+cadre queue-b + jambes + corps + arme + tete
+cadre queue-b + jambes + corps + arme + tete + yeux-clos
+cadre queue + jambes + corps + arme + tete
+
+anim attaque 90
+cadre queue + jambes + corps + arme + tete
+cadre queue + jambes + corps decale -1 0 + tete decale -1 0 + arme-tire decale -1 0 duree 180
+cadre queue + jambes + corps + tete + arme duree 140
+
+# Guetteur des Toits : capuche vert-de-gris, pointe de flèche empoisonnée.
+sprite guetteur-chat
+modele archer-chat
+
+calque tete 6 0
+H.....H.
+jH...Hj.
+HjjjjjH.
+Hoookok.
+Hooccrcc
+.Hcccc..
+
+calque arme-tire 11 1
+...b
+...wB
+..w..B
+..w..B
+ocTTTTTE
+..w..B
+..w..B
+...wB
+...b
+
+# Arbalétrier du Beffroi : chapel de fer, arbalète.
+sprite arbaletrier-chat
+modele archer-chat
+
+calque tete 6 0
+.tTTTTt.
+tTiTTTTt
+..ooooo.
+.oookok.
+.ooccrcc
+..occcc.
+
+calque arme 11 4
+.....p
+.....p
+oocdddP
+.....p
+.....p
+
+calque arme-tire 11 4
+.....p
+..TTTpTi
+occdddP
+.....p
+.....p

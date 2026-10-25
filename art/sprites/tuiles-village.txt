@@ -1,0 +1,267 @@
+# Tuiles 16×16 du Village Affamé (région 1) : herbe morte, terre du chemin et ses bords, boue, pavés.
+# Sans contour, ancre en haut à gauche. Les bords du chemin sont dessinés une fois (herbe au nord, ou au
+# nord-ouest pour les coins) puis tournés : -n, -e, -s, -o désignent le côté où se trouve l'herbe.
+categorie tuile
+palette commune
+taille 16 16
+ancre 0 0
+contour non
+
+sprite herbe-1
+HHHHHHHHhHHHHjHj
+hHHHHhHHHHhHHjHH
+HHHHjHHHHHHHHHHH
+HHHHHHHHHHHhHHHH
+HhHHJHHHHHHHHHHH
+HjHHHHHHHHHHHjHH
+HHHHHHHHjHhHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHjHHHHHHHH
+HHHHHJHHHHJHHHHH
+HHHHhHHHHHHjHHHH
+HHHHhHhHHHjHHHHH
+HHHHHJHhHHHhHHHj
+hjJHhHHHHHHHHHHH
+HHHHhHHjJHHHHHHH
+HHHHHHHHHHHHHHHH
+
+# Avec une touffe sèche.
+sprite herbe-2
+HHHjHhHjHjHHjHhH
+jHHHHHHHHHHJHHhH
+jHHHHHHHHHHHHhHH
+HHjHHHHHHjHHHHHH
+HjHHhHHHHJHJHHHH
+HHHHHHHHHHHHhHHH
+HHHHHHHHHHJHjjHH
+HJHHHHHHHjHJhHHH
+HHHHHHHHhJjJHHHj
+HHHHHhHHhhjhhhjj
+HJHjHHHJHHhHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHJHH
+HHHHHHHHjHHHHHHj
+HjHhHHHHHHHHHHHH
+HHHHjjjHHHHHHHHH
+
+# Avec un caillou et de la terre nue.
+sprite herbe-3
+HHHHHHHHHHjHHjHH
+HHhHHJHHHHHHHHhH
+HHHHjHHHjHHHHHHH
+HHHHHHHHJHHHHjHH
+HHHHHHHHHHHHHHjH
+jHHHHHHHHHHHjHHH
+HHJjHHHHhHJHHHHH
+HHHHHHHHHHHjHhhH
+HHHHHMMHHjHHHHHH
+HjHHMNMMHHHjjHHH
+HHHHMMPqHHHHHHHH
+HHHHHMgpHHHHHjhH
+HHHHHHhhHJHHHHHH
+HHHHHHHHHHHHHhHH
+hHHHHHhhHHHHHHHH
+HjjHjHHHHHHHHhHH
+
+sprite chemin-1
+MMMMMMMMMMMMNMMM
+MMMMMMmMMMMnMMMM
+MMMMMMNMMmMNMMNM
+MMMMMMMMMMMMmMmM
+MMMMMMMMMMMMMMNM
+MMnMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMmMMM
+MMMMMMNMMMMMMMMM
+mMnMMMMMMMmMMMMM
+MMMMnnMMMMNNNMMM
+MNMNnMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+mMmMMMMMMMMMMMMM
+MMMMMMNMMMMNMMNM
+MMMMMMMMnNMMMNMM
+
+# Avec des ornières.
+sprite chemin-2
+MMMMmMMMmMNMMMMN
+MMMMNMMMMMMNMMMM
+MMMMMMMMMMMmMMNM
+MMNMMMMMMMMMNMMM
+mmmmMmmmmmMmmmmm
+NmmmmmmMmmmmmmMm
+MMMmNmMMMMNMMMMM
+mMMMMMMMMMMMMMMM
+NMMMMMnMMMMMMMMM
+MmMMmMNMMMMMMMMN
+mmMmmmmmMmmmmmmm
+mmmmmMmmmmmmMmmm
+MMNMMMMMMMMMMMMM
+MMMMMMNMMMMMMMMM
+MMMMMMNMNMMMMMMM
+nMMMMNMMMMMMMMMM
+
+sprite chemin-bord-n
+HHjHHjHHHjHHHHHH
+hHHHHHHHHHHjHHHH
+HHHHHHHHHHHHHHHH
+HhHHHHHjhHHHHHHH
+HhHhhhhhhHHHhhHh
+hMhMnMMMMhhhMmhM
+MmMNMMMMNMMMMMMM
+MMMMMMNMMMMMMMMm
+MMMMMMMMMMMNmMMn
+MMMMMMMMmmMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMNMMMMMMMMM
+MmMMMMMMMMMMMMMM
+MMMMmMMNMMMMMMMM
+MMNNMNMMMMMmMMMM
+MMMmMMMMMnNmmMMM
+
+sprite chemin-bord-e
+anim repos
+cadre chemin-bord-n/repos.0 tourne 90
+
+sprite chemin-bord-s
+anim repos
+cadre chemin-bord-n/repos.0 tourne 180
+
+sprite chemin-bord-o
+anim repos
+cadre chemin-bord-n/repos.0 tourne 270
+
+# Coin extérieur : herbe au nord et à l'ouest (virage du chemin).
+sprite chemin-coin-ext-no
+HHHHHHHHHHHHHHHH
+HHHHHHHHHhHHHHHH
+HHHHHjjHHHHHHHHH
+HHHHHHHHHHjHHHhJ
+HHHHhhhhhjHHhhhh
+HjHHhMmMMhhhMNhm
+HHHHhMmMMmMMMMMM
+HHHHhMNMMMMMMMMM
+HHHHhMMmMMmMMMMM
+HHHHHhMMMMMMMMNM
+HHHHHhMMMMMMMMMM
+HHHHHhMMMMMMMMMM
+HHHHhMMMMMMMMMMM
+HjHHhMMMmMMMMNMM
+HHHHHhMMMNMMMMNm
+HHHjhMNMMMMMMMmM
+
+sprite chemin-coin-ext-ne
+anim repos
+cadre chemin-coin-ext-no/repos.0 tourne 90
+
+sprite chemin-coin-ext-se
+anim repos
+cadre chemin-coin-ext-no/repos.0 tourne 180
+
+sprite chemin-coin-ext-so
+anim repos
+cadre chemin-coin-ext-no/repos.0 tourne 270
+
+# Coin intérieur : un peu d'herbe au nord-ouest seulement.
+sprite chemin-coin-int-no
+HHHJjhmMMMMMMMMM
+JjHHhMMMnMMMMMMM
+HHHHHhMmMMMMMMMM
+HHHHhMMMMMMMMMMM
+HhHhhMMMMMmMMMMM
+hMhNMMMMMmMNMMNM
+MmMMMMMMmMMMMMMM
+MMMMMMmMMMMMMMMM
+NMNMMMMMMMMMMMMM
+MNMMMMMMMmMMMMMM
+MNMMMMMmMMMMmMMM
+mMMMMMmMMMMMMMNM
+NnNMMMmMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MmMMMMMMMNMMMMMM
+MMmmMMMMmMMMNMMM
+
+sprite chemin-coin-int-ne
+anim repos
+cadre chemin-coin-int-no/repos.0 tourne 90
+
+sprite chemin-coin-int-se
+anim repos
+cadre chemin-coin-int-no/repos.0 tourne 180
+
+sprite chemin-coin-int-so
+anim repos
+cadre chemin-coin-int-no/repos.0 tourne 270
+
+sprite boue-1
+mmmgmmmmmmmmmmmM
+gmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmMmmgmmmm
+mmmmmmmmmmmmmmmM
+mmMmmmmmmmmmMmmm
+MmgmmMmmmmgmmmmm
+mmmmmggmmmmmmmmM
+mmmmmmmmmmmmmmgm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmgmmgm
+mmmmmmmmgmmmmmmm
+mmmmmmmmmmmmgmmm
+mmMmMMmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmMmMmmmmmMmmm
+
+# Avec une flaque où se reflète un ciel gris.
+sprite boue-2
+mmmmmmmmmMmmMmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmgMmmmmm
+MmmmmmMmmmmmmmmm
+mmmmmMmmmgggmmmm
+mmmmmmmgggGgggmM
+mmggmmgggGGGggmm
+mmmmmmggGGgggmMm
+mmmmmmmgggggmmmm
+mmmmmmmmmmmmmmmM
+mmgmmmmmMmmmmmmm
+mmMmmmmmmmmmmMmm
+mmmmmmmmmmmmMMMm
+mmmmmmmmmgmmmmmm
+mmmMmmMmmMmmmggm
+
+sprite paves-1
+PPPqgPPPPqgPPPPq
+pppPgppppPgppppP
+GppPgGpppPgGpppP
+gggggggggggggggg
+PqgPPPPqgPPPPPqg
+pPgppppPgpppppPg
+GPgGpppPgGppppPg
+gggggggggggggggg
+PPPPqgPPPqgPPPPq
+ppppPgpppPgppppP
+GpppPgGppPgGpppP
+gggggggggggggggg
+PPqgPPPPPqgPPPqg
+ppPgpppppPgpppPg
+GpPgGppppPgGppPg
+gggggggggggggggg
+
+# Pavés disjoints : une pierre manque, la terre affleure.
+sprite paves-2
+PPPqgPPPPqgPPPPq
+pppPgppppPgppppP
+GppPgGpppPgGpppP
+gggggggggggggggg
+PqgPPPPqgmMMMmqg
+pPgppppPgMNMMmPg
+GPgGpppPgmMmMmPg
+gggggggggggmgggg
+PPPPqgPPPqgPPPPq
+ppppPgpppPgppppP
+GpppPgGppPgGpppP
+gggggggggggggggg
+PPqgPPPHhqgPPPqg
+ppPgpppjHPgpppPg
+GpPgGppppPgGppPg
+gggggggggggggggg

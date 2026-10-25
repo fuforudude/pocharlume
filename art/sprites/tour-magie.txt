@@ -1,0 +1,164 @@
+# Autel des Cendres (magie) : un autel de pierre où brûlent les braises des Chats Suprêmes.
+# Niveau 1 : bloc d'autel et vasque. Niveau 2 : deux menhirs gravés de griffes rougeoyantes.
+# Niveau 3 : sanctuaire à linteau, statue de chat aux yeux de braise au sommet. Spécialisations dérivées
+# du niveau 3. repos : la flamme vacille ; attaque : la flamme jaillit. Le projectile part du point `tir`.
+categorie tour
+palette commune
+taille 32 32
+ancre 16 26
+origine 3 2
+
+sprite tour-magie-1
+point tir 16 13
+
+calque batiment
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.........gPPPPPg
+..........gpppg
+...........gpg
+........gPPPPPPPg
+........pPqPPPqPp
+........pPPPPPPPp
+........pPPeePPPp
+.......gggggggggggg
+.....p.ggpgGgpgGgg..p
+
+calque flamme 11 12
+..f
+.fFf
+.fyFf
+.
+
+calque flamme-b 11 12
+.f
+.Ff
+.fyFf
+.
+
+calque flamme-c 11 12
+...f
+..fF
+.fFyf
+.
+
+calque flamme-haute 10 8
+...f
+..fF
+..fFf
+.fFyFf
+.fFyFf
+.fyyyf
+..fyf
+
+anim repos 140
+cadre batiment + flamme
+cadre batiment + flamme-b
+cadre batiment + flamme-c
+
+anim attaque 90
+cadre batiment + flamme-haute
+cadre batiment + flamme-haute miroir decale -1 0 duree 140
+cadre batiment + flamme-c
+
+sprite tour-magie-2
+modele tour-magie-1
+point tir 16 13
+
+calque batiment
+.
+.
+.
+.
+.
+.
+.
+.
+.
+...Pq...............Pq
+..pPPq.............pPPq
+..pPPP.............pPPP
+..pePp.............pePp
+..ppep.............ppep
+..pPeP.............pPeP
+..pPPP...gPPPPPg...pPPP
+..ppPp....gpppg....ppPp
+..pPPp.....gpg.....pPPp
+..pPPP..gPPPPPPPg..pPPP
+..ppPp..pPqPPPqPp..ppPp
+..pPPp..pPPPPPPPp..pPPp
+..ppPp..pPPeePPPp..ppPp
+.gggggggggggggggggggggg
+..p.ggpgGgpgGggpgGgg..p
+
+sprite tour-magie-3
+modele tour-magie-1
+point tir 16 13
+
+calque batiment
+.........U...U
+.........UuuuU
+.........uFuFu
+........uuuuuuu
+.......guuuuuuug
+..gPPPPPPPPPPPPPPPPPPPg
+..gpPpPpPpPpPpPpPpPpPpg
+..ggggggggggggggggggggg
+...pPP..............pPP
+...pPp..............pPp
+...pPP..............pPP
+...pPp..............pPp
+...pPP..............pPP
+...pPp..............pPp
+...pPP..............pPP
+...pPp..............pPp
+...pPP...gPPPPPg....pPP
+...pPp....gpppg.....pPp
+...pPP.....gpg......pPP
+...pPp..gPPPPPPPg...pPp
+...pPP..pPqPPPqPp...pPP
+...pPp..pPPPPPPPp...pPp
+...pPP..pPPeePPPp...pPP
+.gggggggggggggggggggggggg
+..p.ggpgGgpgGggpgGgg..p
+
+# Oracle de la Braise : un œil de braise flotte au-dessus de la vasque, la statue a les yeux blancs.
+sprite tour-magie-oracle
+derive tour-magie-3 couleurs F=y e=f
+point tir 16 13
+
+calque oeil 10 8
+.fff
+fykyf
+.fff
+
+retouche repos * + oeil
+retouche attaque * + oeil decale 0 -1
+
+# Nécromancien des Neuf Vies : feu vert-de-tombe, statue noircie, petites tombes de chats au pied.
+sprite tour-magie-necromancien
+derive tour-magie-3 couleurs f=E F=L y=L e=h u=k U=g
+point tir 16 13
+
+calque tombes 0 19
+.pp....................pp
+pPPp..................pPPp
+pkPp..................pPkp
+pPPp..................pPPp
+
+retouche repos * + tombes
+retouche attaque * + tombes
