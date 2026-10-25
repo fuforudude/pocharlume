@@ -1,6 +1,11 @@
-// Région 1, le Village Affamé. Les 10 niveaux viendront à la tâche 8 ; pour l'instant un seul niveau de
-// test complet (un chemin, 6 socles, 5 vagues), utilisé par les tests du moteur et des données.
+// Région 1, le Village Affamé : les 10 niveaux de la campagne (REGION1) et un niveau de test complet (un
+// chemin, 6 socles, 5 vagues) utilisé par les tests du moteur et des données. Cartes dans cartes.ts, plan des
+// niveaux dans plan-region1.ts, vagues figées dans vagues-region1.ts (générées par `npm run niveaux`).
 import type { Niveau } from '../../engine/definitions';
+import type { NiveauCampagne } from '../visuel';
+import { assemblerNiveau } from './assemblage';
+import { PLANS_REGION1 } from './plan-region1';
+import { VAGUES_REGION1 } from './vagues-region1';
 
 export const NIVEAU_TEST: Niveau = {
   id: 'r1-test',
@@ -61,4 +66,20 @@ export const NIVEAU_TEST: Niveau = {
   ],
 };
 
-export const NIVEAUX_REGION1: readonly Niveau[] = [NIVEAU_TEST];
+/** Les 10 niveaux de la région 1, numérotés de 1 à 10 dans l'ordre. */
+export const REGION1: readonly NiveauCampagne[] = PLANS_REGION1.map((plan, i) => {
+  const vagues = VAGUES_REGION1[i];
+  if (!vagues) throw new Error(`Vagues figées manquantes pour le niveau ${String(plan.numero)} : relancer npm run niveaux`);
+  return assemblerNiveau(plan, vagues);
+});
+
+/** Clés de texte d'un niveau de campagne : son nom et sa phrase d'ambiance (src/i18n/fr.ts). */
+export interface TextesNiveau {
+  readonly numero: number;
+  readonly nom: string;
+  readonly ambiance: string;
+}
+
+export const TEXTES_REGION1: readonly TextesNiveau[] = PLANS_REGION1.map((p) => ({ numero: p.numero, nom: p.nom, ambiance: p.ambiance }));
+
+export const NIVEAUX_REGION1: readonly Niveau[] = [NIVEAU_TEST, ...REGION1.map((n) => n.niveau)];
