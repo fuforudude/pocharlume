@@ -1,0 +1,929 @@
+# Structures posées par l'Atelier Boiteux et assassin d'ombre du Sanctuaire.
+# tourelle-atelier : arbalète sur trépied (32×32, ancre au pied, point `tir` = la bouche de l'arbalète). Animations
+# repos (armée), attaque (tir et recul), apparition (sort de terre) et destruction (en miettes) ; `mort` reprend
+# la destruction pour le rendu des unités. piege : mâchoire de piège à loup en 16×16 vue de dessus (repos = armé,
+# declenche = les mâchoires claquent puis restent fermées). assassin-ombre : l'ombre de Plume, translucide.
+categorie tour
+palette commune
+taille 32 32
+ancre 16 30
+couleur 1 e4f0f4
+
+sprite tourelle-atelier
+point tir 29 20
+
+calque armee 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.......................w
+......................w
+.....................wT
+...........OO........wT
+...........OOOObbbbbwbTbbbb
+.........O.OOOOddddiiiiiiiiiiW
+.........OOOoOBdddddwdTdddd
+...........OOOOBBBB..wT
+...........O.dOdddd..wT
+...........O...bBb....w
+..............bBBdb....w
+.............bB.B.db
+............bB..B..db
+...........bBbbbBbbbdb
+.........ddbbbbbbbbbbbdd
+
+calque armee-b 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.......................w
+......................w
+.....................wT
+.............O.......wT
+..........O..OObbbbbwbTbbbb
+..........OOOOBddddiiiiiiiiiiW
+...........OoOOdddddwdTdddd
+.........OOOOOBOBBB..wT
+..........O.OOddddd..wT
+............OO.bBb....w
+..............bBBdb....w
+.............bB.B.db
+............bB..B..db
+...........bBbbbBbbbdb
+.........ddbbbbbbbbbbbdd
+
+calque armee-c 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.......................w
+......................w
+.....................wT
+...........O.........wT
+...........O.OObbbbbwbTbbbb
+...........OOOOddddiiiiiiiiiiW
+.........OOOoOBdddddwdTdddd
+...........OOOOBBBB..wT
+...........O.dOdddd..wT
+...........O...bBb....w
+..............bBBdb....w
+.............bB.B.db
+............bB..B..db
+...........bBbbbBbbbdb
+.........ddbbbbbbbbbbbdd
+
+calque mi 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.........................w
+........................w
+........................w
+.............O.........w
+..........O..OObbbbbbbbwbbb
+..........OOOOBdddddddwTBBB
+...........OoOOddddddddwddd
+.........OOOOOBOBBB....w
+..........O.OOddddd.....w
+............OO.bBb......w
+..............bBBdb......w
+.............bB.B.db
+............bB..B..db
+...........bBbbbBbbbdb
+.........ddbbbbbbbbbbbdd
+
+calque tiree 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+..........................w
+........................TTw
+.......................T..w
+..........OO...........T..w
+..........OOOObbbbbbbbbTbbw
+........O.OOOOdddddddBTBBBw
+........OOOoOBdddddddddTddw
+..........OOOOBBBB.....T..w
+..........O.dOdddd.....T..w
+..........O....bBb......TTw
+..............bBBdb.......w
+.............bB.B.db
+............bB..B..db
+...........bBbbbBbbbdb
+.........ddbbbbbbbbbbbdd
+
+calque tiree-b 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+...........................w
+.........................TTw
+........................T..w
+.............O..........T..w
+..........O..OObbbbbbbbbTbbw
+..........OOOOBdddddddBTBBBw
+...........OoOOdddddddddTddw
+.........OOOOOBOBBB.....T..w
+..........O.OOddddd.....T..w
+............OO.bBb.......TTw
+..............bBBdb........w
+.............bB.B.db
+............bB..B..db
+...........bBbbbBbbbdb
+.........ddbbbbbbbbbbbdd
+
+calque sortie-0 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+...............dBB
+...............bBb
+..............bBBdb
+.............bB.B.db.....w
+............bB..B..db...w
+...........bBbbbBbbbdb..w
+.........ddOObbbbbbbbbdw
+
+calque sortie-1 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.........................w
+...............dBB......w
+...............bBb......w
+...........OO.bBBdb....w
+...........OOOObbbbbbbbwbbb
+.........O.OOOOdddddddwTBBB
+.........OOOoOBddddddddwddd
+.........ddOOOOBBBBbbbdw
+
+calque sortie-2 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.......................w
+......................w
+.....................wT
+...........OO........wT
+...........OOOObbbbbwbTbbbb
+.........O.OOOOddddwddBTBBB
+.........OOOoOBdddddwdTdddd
+...........OOOOBBBB..wT
+...........O.dOddddb.wT
+...........ObB..B..db.w
+...........bBbbbBbbbdb.w
+.........ddbbbbbbbbbbbdd
+
+calque sortie-3 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.......................w
+......................w
+.....................wT
+...........OO........wT
+...........OOOObbbbbwbTbbbb
+.........O.OOOOddddiiiiiiiiiiW
+.........OOOoOBdddddwdTdddd
+...........OOOOBBBB..wT
+...........O.dOdddd..wT
+...........O..bBBdb...w
+.............bB.B.db...w
+............bB..B..db
+...........bBbbbBbbbdb
+.........ddbbbbbbbbbbbdd
+
+calque abimee 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+...........................w
+.........................TTw
+........................T..w
+...........OO...........T..w
+...........OOOObbbbbbbbbTbbw
+.........O.OOOOdddddddBTBBBw
+.........OOOoOBdddddddddTddw
+...........OOOOBBBB.....T..w
+...........O.dOdddd.....T..w
+...........O.bB.B.db.....TTw
+............bB..B..db......w
+...........bBbbbBbbbdb
+.........ddbbbbbbbbbbbdd
+
+calque poussiere-0 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.............P.....P
+............P...P...P
+
+calque etincelle-0 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+..............F
+....................y
+.
+..........y
+
+calque debris-0 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+...........OO.............T
+............O............T
+.........O.OOOOO........T
+........OOOOOOO........T
+..........OOkOO.......T
+..........OOOOOOO
+.........OOOOOTO
+............O.....dddddddddd
+.........TTTOO
+........T
+..............BBBBB
+..............BBBBB
+..............BBBBB
+..............BBBBB
+............ddddddddd
+............ddddddddd
+............ddddddddd
+............ddddddddd
+
+calque fumee-0 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.................Pq
+.
+...............Pq
+
+calque poussiere-1 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+...........q.........q
+.........P............q
+.............q.....q....P
+
+calque etincelle-1 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.................y
+.
+...........y
+......................y
+.
+.
+.
+.
+.
+.........F
+
+calque debris-1 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+...................O
+..................OO..O
+...................OOOO
+................OOOOOOO
+................OOOOkOOOO...T
+..................OOOOOOO..T
+..................OOOO.....T
+...........T......O..OO...T
+..........T......ddddO....T
+........TT...dddd........T
+.......T.BBBBBB
+......T..BBBBBB...bbbbbb
+..................bbbbbb
+.
+.......................wwwwww
+
+calque fumee-1 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.....................Pq
+...........Pq
+.
+..................Pq
+.
+.............Pq
+
+calque poussiere-2 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+..........q
+........P..............q
+.........................P
+......P...................P
+
+calque etincelle-2 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.............F
+.
+.
+.
+.
+........................F
+
+calque debris-2 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.........................O
+......................dddd..O
+...................ddd.OOOOOO
+.........TT....bbbbbbbbOOoOO
+.......TTBBBBBBbbbbbbbOOOOOO
+.....TT.BBBBddddddddddOddO.OO
+.........................O
+
+calque fumee-2 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+......................pq
+................Pq
+..........pq
+.
+...................Pq
+............Pq
+
+calque poussiere-3 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.......P.................P
+.
+.....P.....................P
+
+calque etincelle-3 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+...................y
+
+calque debris-3 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+..............B
+......T..bbbbb..dddddd..O
+
+calque fumee-3 0 0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.................pp
+.
+..............Pp
+....................pp
+
+anim repos 200
+cadre armee
+cadre armee-b
+cadre armee-c
+cadre armee-b
+
+# Le trait part, l'arc se détend et la tourelle recule d'un pixel.
+anim attaque 70
+cadre mi duree 60
+cadre tiree duree 90
+cadre tiree-b duree 80
+cadre mi duree 80
+cadre armee duree 100
+
+# Elle sort de terre : poussière, trépied, arc, puis étincelles de remontage.
+anim apparition 100 unique
+cadre sortie-0 + poussiere-0
+cadre sortie-1 + poussiere-1
+cadre sortie-2 + poussiere-2 + etincelle-0
+cadre sortie-3 + poussiere-3 + etincelle-1
+cadre armee + etincelle-2 duree 120
+
+# Elle se disloque : les lames d'arc et la roue s'envolent, il ne reste que des planches.
+anim destruction 110 unique
+cadre abimee + etincelle-0 duree 90
+cadre debris-0 + etincelle-1 + fumee-0
+cadre debris-1 + fumee-1
+cadre debris-2 + fumee-2
+cadre debris-3 + fumee-3 duree 700
+
+anim mort 110 unique
+cadre abimee + etincelle-0 duree 90
+cadre debris-0 + etincelle-1 + fumee-0
+cadre debris-1 + fumee-1
+cadre debris-2 + fumee-2
+cadre debris-3 + fumee-3 duree 700
+
+# Piège à loup : mâchoire d'acier ouverte, plaque de détente rouillée au centre, chaîne vers un piquet.
+sprite piege
+categorie decor
+taille 16 16
+ancre 8 10
+origine 0 0
+
+calque arme
+.
+.
+.
+....PPPPPPPP
+..PPwPPPPPPwPP
+.PPw........wPP
+.Pw....ee....wP
+.P....eqqe....P
+.Pw....ee....wP
+.PPw........wPP
+..PPwPPPPPPwPP
+....PPPPPPPP
+.......g
+.......g
+......ggg
+
+calque arme-b
+.
+.
+.
+....PPPPPPPP
+..PPwPPPPPPwPP
+.PPw........wPP
+.Pw....ee....wP
+.P....eqWe....P
+.Pw....ee....wP
+.PPw........wPP
+..PPwPPPPPPwPP
+....PPPPPPPP
+.......g
+.......g
+......ggg
+
+calque ferme-0
+.
+.
+.
+.
+...PPPPPPPP
+..PPPwPwwPPPP
+.PPwP.wqqw.PwPP
+.PwPw.wqqw.wPwP
+.PPwP.wqqw.PwPP
+..PPPwPwwPPPP
+...PPPPPPPP
+.
+.
+.q......q
+..q....q
+
+calque ferme-1
+.
+.
+.
+.
+.
+....PPPPPPPP
+..PPPPPPPPPPPP
+.PPwwPwPwPwwPP
+.PPPwPwPwPwPPP
+..PPPPPPPPPPPP
+....PPPPPPPP
+.
+.
+.
+..q....q
+
+calque ferme-2
+.
+.
+.
+.
+.
+.
+....PPPPPPPP
+..PPPPPPPPPPPP
+.PwPwPwPwPwPwPP
+..PPPPPPPPPPPP
+....PPPPPPPP
+.
+......g
+......g
+.....ggg
+
+anim repos 600
+cadre arme
+cadre arme-b
+
+anim declenche 60 unique
+cadre ferme-0
+cadre ferme-1
+cadre ferme-2 duree 250
+cadre ferme-2 duree 800
+
+# Assassin d'ombre du Sanctuaire : l'ombre de Plume détachée d'elle, translucide, yeux et griffes pâles. Dérivé de
+# Plume (mêmes animations) en couleurs d'encre violette à demi transparentes.
+sprite assassin-ombre
+categorie unite
+derive heros-plume couleurs k=#0c0912b8 u=#1c1630b8 U=#30284cc0 v=#6a6094d0 W=#e4f0f4 1=#e4f0f4
