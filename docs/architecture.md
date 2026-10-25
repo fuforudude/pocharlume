@@ -20,6 +20,25 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
 
 `src/main.ts` est le point d'entrée du navigateur.
 
+## Rendu et interface
+- **Boucle** (`src/ui/partie.ts`, `lancerNiveau`) : une boucle `requestAnimationFrame` accumule le temps réel
+  (`src/render/pas-fixes.ts`, écart borné) et appelle `avancer` par pas de 1/30 s, ×1 ou ×2. Le rendu
+  interpole entre deux pas avec le reste de l'accumulateur. Les actions du joueur sont mises dans une file que
+  la boucle donne au prochain pas : l'interface n'écrit jamais dans l'état.
+- **Rendu** (`src/render/`) : `Rendu` dessine dans un tampon de pixels logiques (une tuile = 16 px) agrandi
+  d'un facteur entier sans lissage ; `camera.ts` (zoom entier, glisser, pincement, molette, bornes), `sol.ts`
+  (sol précalculé depuis les chemins : herbe, chemin avec bords et coins, boue, pavés), `suivi.ts` (une
+  représentation par entité du moteur, créée et retirée d'après les événements), `effets.ts` (effets en pool),
+  `animations.ts` et `atlas.ts` (sprites). Rien ne s'alloue dans la boucle chaude.
+- **Interface** (`src/ui/`) : `interaction.ts` (machine à états pure : menu d'un socle, héros, sort,
+  ralliement ; renvoie l'action à envoyer ou la raison d'un refus), `menu-cercle.ts` (éléments du menu
+  d'après `validerAction`), `gestes.ts` (toucher, glisser, pincer), `clavier.ts` (touches), `hud.ts`,
+  `ecrans.ts` (accueil, pause, fin, « Tourne ton téléphone »), `refus.ts` (raison de refus vers texte).
+- **Point d'entrée d'un niveau** : `lancerNiveau(niveauCampagne, config, surFin, options)`. `surFin` reçoit
+  une fois le `ResultatPartie` (statut, étoiles, vies, pas, journal) ; `options.surQuitter` ajoute le bouton
+  « Quitter » des écrans de pause et de fin ; `options.surDemarrage` donne la `PartieEnCours` (utile aux outils
+  de mesure). La carte du monde et la sauvegarde se brancheront sur cette fonction.
+
 ## Niveaux de la campagne (`src/data/niveaux/`)
 - `cartes.ts` : cartes dessinées à la main (chemins, socles et ralliements, départ du héros, zones de sol, décor).
   Une carte propose plusieurs chemins et plus de socles que nécessaire.

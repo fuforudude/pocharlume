@@ -16,7 +16,7 @@ import { commandeClavier, type Commande } from './clavier';
 import { afficherFin, creerAvisPaysage, creerPause } from './ecrans';
 import { Gestes } from './gestes';
 import { Hud } from './hud';
-import { Interaction, type Issue } from './interaction';
+import { Interaction, type Issue, type Mode } from './interaction';
 import { elementsMenu, type ElementMenu } from './menu-cercle';
 import { texteRefus } from './refus';
 import { el } from './dom';
@@ -41,6 +41,8 @@ export interface OptionsPartie {
   parent?: HTMLElement;
   /** Appelée par les boutons « Quitter » (pause et fin). Absente : ces boutons n'apparaissent pas. */
   surQuitter?: () => void;
+  /** Appelée dès que la partie tourne, y compris après « Rejouer » (qui lance une nouvelle partie). */
+  surDemarrage?: (partie: PartieEnCours) => void;
 }
 
 /** Temps passé dans la partie, pour mesurer le rendu (voir `PartieEnCours.mesures`). */
@@ -58,6 +60,8 @@ export interface PartieEnCours {
   readonly etat: EtatPartie;
   readonly rendu: Rendu;
   readonly mesures: Mesures;
+  /** Ce que le joueur est en train de faire (menu ouvert, visée d'un sort…), pour les tests et les mesures. */
+  readonly mode: Mode;
   /** Fait entrer une action dans la file du prochain pas, comme le ferait un geste du joueur. */
   envoyer(action: Action): void;
   /** Retire tout ce que la partie a installé (boucle, écouteurs, DOM). */
@@ -353,5 +357,16 @@ export async function lancerNiveau(
   }
 
   identifiantImage = requestAnimationFrame(boucle);
-  return { etat, rendu, mesures, envoyer, arreter };
+  const partie: PartieEnCours = {
+    etat,
+    rendu,
+    mesures,
+    get mode() {
+      return interaction.mode;
+    },
+    envoyer,
+    arreter,
+  };
+  options.surDemarrage?.(partie);
+  return partie;
 }

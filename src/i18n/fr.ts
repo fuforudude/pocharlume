@@ -39,6 +39,8 @@ export const fr = {
   // Accueil
   'accueil.jouer': 'Jouer',
   'accueil.reprendre': 'Reprendre à la vague {n}',
+  'accueil.niveau': 'Niveau {n}',
+  'accueil.niveau_test': 'Niveau de test',
 
   // Partie : barre du haut et commandes
   'hud.vies': 'Vies',

@@ -3,8 +3,16 @@ import { t } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
 import { bouton, el, image } from './dom';
 
+/** Un niveau proposé en plus de « Jouer » (en attendant la carte du monde de la tâche 8). */
+export interface ChoixNiveau {
+  readonly libelle: string;
+  readonly surChoisir: () => void;
+}
+
 export interface OptionsAccueil {
   surJouer: () => void;
+  /** Autres niveaux jouables depuis l'accueil (niveau final, niveau de test). */
+  readonly autres?: readonly ChoixNiveau[];
   /** Vague à laquelle reprendre une partie sauvegardée : affiche « Reprendre à la vague N ». */
   reprise?: { readonly vague: number; readonly surReprendre: () => void };
 }
@@ -16,6 +24,11 @@ export function afficherAccueil(parent: HTMLElement, options: OptionsAccueil): H
   const jouer = bouton('bouton grand', t('accueil.jouer'), options.surJouer);
   jouer.textContent = t('accueil.jouer');
   boutons.append(jouer);
+  for (const choix of options.autres ?? []) {
+    const b = bouton('bouton grand secondaire', choix.libelle, choix.surChoisir);
+    b.textContent = choix.libelle;
+    boutons.append(b);
+  }
   if (options.reprise) {
     const { vague, surReprendre } = options.reprise;
     const libelle = t('accueil.reprendre', { n: vague });
