@@ -29,6 +29,15 @@ export function dieuDuHeros(heros: IdHeros): IdDieu {
   return IDS_DIEUX.find((dieu) => (HEROS_PAR_DIEU[dieu] as readonly string[]).includes(heros)) ?? 'charlie';
 }
 
+/** Gardes de type : `x` est un identifiant connu (jamais vrai pour un nom hérité d'Object comme `constructor`). */
+export function estIdDieu(x: unknown): x is IdDieu {
+  return typeof x === 'string' && (IDS_DIEUX as readonly string[]).includes(x);
+}
+
+export function estIdHeros(x: unknown): x is IdHeros {
+  return typeof x === 'string' && (IDS_HEROS as readonly string[]).includes(x);
+}
+
 // --- Expérience et compétences des héros -----------------------------------------------------------------------
 
 /** Compétences par héros : 4, dont l'ultime (la dernière). */
@@ -46,6 +55,10 @@ export const PLAFOND_XP = 1_000_000;
 export const BRANCHES_ARBRE = ['caserne', 'tir', 'magie', 'artillerie', 'sorts', 'heros'] as const;
 export type IdBranche = (typeof BRANCHES_ARBRE)[number];
 export const RANG_MAX_ARBRE = 5;
+
+export function estIdBranche(x: unknown): x is IdBranche {
+  return typeof x === 'string' && (BRANCHES_ARBRE as readonly string[]).includes(x);
+}
 
 /** Étoiles que coûte l'achat du rang `rang` (1 à 5) : le rang n coûte n étoiles. */
 export function coutRangArbre(rang: number): number {
@@ -68,6 +81,9 @@ export const OBJETS = {
 } as const;
 export type IdObjet = keyof typeof OBJETS;
 export const IDS_OBJETS = Object.keys(OBJETS) as readonly IdObjet[];
+export function estIdObjet(x: unknown): x is IdObjet {
+  return typeof x === 'string' && (IDS_OBJETS as readonly string[]).includes(x);
+}
 /** Stock maximal de chaque objet. */
 export const STOCK_MAX_OBJET = 10;
 /** Emplacements d'objets emportés dans une partie (chacun utilisable une fois). */

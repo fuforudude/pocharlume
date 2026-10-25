@@ -110,7 +110,7 @@ describe('méta-progression avec les définitions de héros', () => {
 
   it('refuse l’ultime avant le niveau 6', () => {
     refusee(variante({ 'meta.heros.charlie.competences': { charlie_ultime: 1 } }), DEFS_TEST); // niveau 4
-    acceptee(variante({ 'meta.heros.suie.competences': { suie_ultime: 3 } }), DEFS_TEST); // niveau 7
+    acceptee(variante({ 'meta.heros.suie.competences': { suie_ultime: 3 } }), DEFS_TEST); // niveau 8
   });
 
   it('refuse une compétence inconnue ou un rang au-dessus du maximum du jeu', () => {
