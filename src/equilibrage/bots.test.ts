@@ -130,6 +130,34 @@ describe('bot soigneux', () => {
   });
 });
 
+describe('bot soigneux avec chaque dieu', () => {
+  const niveau3 = REGION1[2]?.niveau ?? NIVEAU_TEST;
+
+  function jouer(dieu: string, graine: number) {
+    const bot = creerBotSoigneux();
+    const etat = creerPartie(niveau3, configPartie({ graine, difficulte: 'matou', dieu }));
+    while (etat.statut === 'en_cours' && etat.pas < 30 * 2400) avancer(etat, etat.pas % 15 === 0 ? bot.decider(etat) : []);
+    return etat;
+  }
+
+  it.each(['plume', 'charlie', 'pollen'])('%s : joue un niveau, la partie se rejoue à l’identique', (dieu) => {
+    const etat = jouer(dieu, 21);
+    expect(etat.tours.length).toBeGreaterThan(2);
+    const rejoue = rejouer(niveau3, etat.config, etat.journal, etat.pas);
+    expect(serialiser(rejoue)).toBe(serialiser(etat));
+  }, DELAI_PARTIE_LONGUE);
+
+  it('Plume et Pollen construisent leur tour divine et lancent leurs sorts ; Charlie reste sans Totem', () => {
+    for (const dieu of ['plume', 'pollen']) {
+      const etat = jouer(dieu, 33);
+      const sorts = new Set(etat.journal.flatMap((e) => (e.action.type === 'lancerSort' ? [e.action.emplacement] : [])));
+      expect(etat.tours.some((t) => t.famille === 'divine'), dieu).toBe(true);
+      expect(sorts.size, dieu).toBeGreaterThanOrEqual(1);
+    }
+    expect(jouer('charlie', 33).tours.some((t) => t.famille === 'divine')).toBe(false);
+  }, DELAI_PARTIE_LONGUE);
+});
+
 describe('géométrie des cartes', () => {
   it('les poids des chemins somment à 1 et chaque socle voit du chemin', () => {
     for (const campagne of REGION1) {

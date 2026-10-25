@@ -49,6 +49,11 @@ export interface OptionsSoigneux {
   readonly appelerEnAvance?: boolean;
   /** Utilise le héros et les sorts. */
   readonly sorts?: boolean;
+  /**
+   * Construit la tour divine du dieu. Par défaut oui pour Plume et Pollen, non pour Charlie : le Totem n'a jamais
+   * fait partie du jeu du bot, et les bandes de la région 1 ont été réglées sans lui.
+   */
+  readonly tourDivine?: boolean;
 }
 
 interface Candidat {
@@ -134,7 +139,31 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
         liste.push({ action: { type: 'specialiser', socle, voie }, ratio: (valeur(etat, socle, spe, tour.famille) - avant) / spe.cout });
       }
     });
-    return liste.sort((a, b) => b.ratio - a.ratio);
+    liste.sort((a, b) => b.ratio - a.ratio);
+    const divine = candidatDivine(etat, liste[0]?.ratio ?? 0);
+    if (divine) liste.unshift(divine);
+    return liste;
+  }
+
+  /**
+   * La tour divine, dès que la défense compte trois tours : sur le socle libre qui voit le plus de chemin, avec une
+   * valeur juste au-dessus du meilleur autre achat (le bot ne sait pas la chiffrer comme une tour ordinaire).
+   */
+  function candidatDivine(etat: EtatPartie, meilleurRatio: number): Candidat | null {
+    if (!(options.tourDivine ?? etat.config.dieu !== 'charlie')) return null;
+    const dieu = dieux[etat.config.dieu];
+    if (!dieu || etat.tours.length < 3 || etat.tours.some((t) => t.famille === 'divine')) return null;
+    let socle = -1;
+    let meilleurVue = -1;
+    etat.niveau.carte.socles.forEach((_, i) => {
+      if (etat.tours.some((t) => t.socle === i)) return;
+      const v = vue(etat, i, dieu.tourDivine.portee);
+      if (v > meilleurVue) {
+        meilleurVue = v;
+        socle = i;
+      }
+    });
+    return socle < 0 ? null : { action: { type: 'construire', socle, tour: 'divine' }, ratio: meilleurRatio * 1.01 };
   }
 
   /** Achat de ce tour-ci : le meilleur s'il est payable, sinon un presque aussi bon qui l'est, sinon on économise. */
@@ -185,10 +214,50 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     return action;
   }
 
+  /** Pièges à Ressort : sur le chemin, un peu avant la zone de feu, quand des ennemis s'en approchent. */
+  function viserPieges(etat: EtatPartie, emplacement: number): Action | null {
+    calculerZones(etat);
+    for (let chemin = 0; chemin < zones.length; chemin++) {
+      const zone = zones[chemin];
+      if (!zone) continue;
+      const venant = etat.ennemis.some((e) => e.vivant && e.chemin === chemin && e.distance >= zone.distance - 7 && e.distance <= zone.distance - 1);
+      if (!venant) continue;
+      // Le point du chemin deux tuiles avant la zone de feu.
+      let devant: Echantillon | undefined;
+      for (const e of echantillons) {
+        if (e.chemin === chemin && (!devant || Math.abs(e.distance - (zone.distance - 2)) < Math.abs(devant.distance - (zone.distance - 2)))) devant = e;
+      }
+      if (devant) return { type: 'lancerSort', emplacement, x: devant.x, y: devant.y };
+    }
+    return null;
+  }
+
+  /** Ingéniosité : au cœur du plus gros groupe de tours, quand des ennemis sont à portée de l'une d'elles. */
+  function viserBoost(etat: EtatPartie, sort: DefSort, emplacement: number): Action | null {
+    const r2 = sort.rayon * sort.rayon;
+    let centre: Tour | undefined;
+    let meilleur = 1;
+    for (const t of etat.tours) {
+      let voisines = 0;
+      for (const autre of etat.tours) if ((t.x - autre.x) * (t.x - autre.x) + (t.y - autre.y) * (t.y - autre.y) <= r2) voisines++;
+      if (voisines > meilleur) {
+        meilleur = voisines;
+        centre = t;
+      }
+    }
+    if (!centre) return null;
+    const c = centre;
+    const portee2 = (sort.rayon + 2) * (sort.rayon + 2);
+    const pressant = etat.ennemis.some((e) => e.vivant && (e.x - c.x) * (e.x - c.x) + (e.y - c.y) * (e.y - c.y) <= portee2);
+    return pressant ? { type: 'lancerSort', emplacement, x: c.x, y: c.y } : null;
+  }
+
   function viserSort(etat: EtatPartie, sort: DefSort, emplacement: number): Action | null {
     if ((etat.sorts[emplacement]?.recharge ?? 1) > 0) return null;
     const ennemis = etat.ennemis.filter((e) => e.vivant);
     if (ennemis.length === 0) return null;
+    if (sort.effets.some((e) => e.type === 'pieges')) return viserPieges(etat, emplacement);
+    if (sort.effets.some((e) => e.type === 'boost')) return viserBoost(etat, sort, emplacement);
     if (!sort.effets.some((e) => e.type === 'invoquer')) {
       // Dégâts de zone : centrer sur l'ennemi qui a le plus de voisins.
       let meilleur: { x: number; y: number; nombre: number; boss: boolean } | null = null;
