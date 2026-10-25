@@ -1,0 +1,119 @@
+# Pollen, Trois-Pattes : héros du dieu Pollen. Chat tigré roux, rayures sombres bien marquées, oreille gauche
+# déchirée, foulard moutarde, ceinture d'outils. Une patte arrière manquante : un moignon bandé pend à gauche,
+# il ne marche que sur la patte avant-droite et boite (le corps retombe à chaque pas). Fronde de cuir.
+# Squelette du chat de grange, grilles posées à l'origine (6, 18), pieds en y = 30.
+categorie unite
+palette commune
+taille 32 32
+ancre 16 30
+origine 6 18
+
+sprite heros-pollen
+modele soldat-grange
+
+calque tete 6 0
+......b.
+oO...Ob.
+bobobob.
+ooookok.
+oooccrcc
+.occccc.
+
+calque yeux-clos 10 3
+o.o
+
+calque corps 5 6
+.YyYYY
+obBbbbb
+obbBbb
+.dTdPdd
+.bbBbbb
+
+calque queue 2 8
+b
+o
+.obo
+
+calque queue-b 2 8
+.b
+o
+.obo
+
+# Le moignon bandé (x 7-8) ne touche pas le sol ; la seule patte est à droite.
+calque jambes 7 11
+zz.oo
+...BB
+
+# Réception du saut : la patte avance, le moignon se balance.
+calque jambes-c 7 11
+..zz.oo
+......BB
+
+# Fronde au repos : lanière enroulée, pierre dans la poche.
+calque arme 11 3
+.dd
+d..d
+.dP
+..P
+
+# Fronde qui tournoie au-dessus de la tête.
+calque arme-haut 6 -3
+..dd..
+.d..d.
+d....d
+.d..dP
+..dd..
+
+# Bras tendu, lanière détendue, pierre partie.
+calque arme-frappe 11 5
+.....P
+oo.dd.
+..dd..
+
+# Piège à loup posé devant lui.
+calque piege 12 10
+T.T.T.T
+TTTTTTT
+.TdTdT.
+
+calque piege-ouvert 12 9
+T..T..T
+.T.T.T.
+TTTTTTT
+.TdTdT.
+
+anim repos 200
+cadre queue + jambes + corps + arme + tete
+cadre queue-b + jambes + corps + arme + tete
+cadre queue-b + jambes + corps + arme + tete + yeux-clos
+cadre queue + jambes + corps decale 0 1 + arme decale 0 1 + tete decale 0 1
+
+# Démarche boiteuse : appui, saut, réception lourde, balancier du moignon.
+anim marche 130
+cadre queue + jambes + corps + arme + tete
+cadre queue-b decale 0 -1 + jambes decale 0 -1 + corps decale 0 -1 + arme decale 0 -1 + tete decale 0 -1
+cadre queue + jambes-c + corps decale 1 1 + arme decale 1 1 + tete decale 1 1 duree 160
+cadre queue-b + jambes + corps + arme + tete
+
+anim attaque 100
+cadre queue + jambes + corps decale -1 0 + tete decale -1 0 + arme-haut duree 160
+cadre queue + jambes + corps decale 0 0 + tete decale 0 0 + arme-haut decale 1 0 duree 80
+cadre queue + jambes + corps decale 1 0 + tete decale 1 0 + arme-frappe decale 1 0 duree 90
+cadre queue + jambes + corps + arme + tete duree 140
+
+# Il pose un piège : accroupi, la mâchoire ouverte, puis refermée.
+anim competence 120
+cadre queue + jambes + corps decale 0 2 + arme decale 0 2 + tete decale 0 2 duree 160
+cadre queue + jambes + corps decale 1 3 + tete decale 1 3 + piege-ouvert duree 200
+cadre queue + jambes + corps decale 1 3 + tete decale 1 3 + piege duree 200
+cadre queue + jambes + corps + arme + tete duree 160
+
+anim blesse 120
+cadre queue + jambes + corps decale -1 0 + arme decale -1 0 + tete decale -1 0 + yeux-mal decale -1 0
+cadre queue + jambes + corps + arme + tete + yeux-clos
+
+anim mort 140
+cadre queue + jambes + corps decale -1 0 + arme decale -1 0 + tete decale -1 0 + yeux-mal decale -1 0
+cadre soldat-grange/mort.1 couleurs T=P i=q
+cadre soldat-grange/mort.2 couleurs T=P i=q duree 300
+cadre soldat-grange/mort.3 couleurs T=P i=q duree 600
