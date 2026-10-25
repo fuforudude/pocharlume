@@ -256,6 +256,88 @@ lot qu'on peut tirer.
 9. Simulateur, bots, `balance-report.md`, test des bandes, réglage de la région 1.
 10. Mesure de performance et optimisations (pools d'objets, rendu par couches).
 
+## Détail du jalon 2
+Les valeurs ci-dessous sont des valeurs de départ : le simulateur les ajuste (tâche 6), et seules les règles
+comptent pour l'acceptation.
+
+### Plume et Pollen
+| | Plume | Pollen |
+| --- | --- | --- |
+| Bonus de famille | Tir : +15 % cadence, +10 points de critique (×2 dégâts) | Artillerie : −15 % prix ; chaque tir d'artillerie qui touche le sol a 20 % de chances de laisser un piège |
+| Sort 1 | Voile de Nuit (recharge 35 s) : zone de rayon 2,5 pendant 8 s, ennemis −40 % vitesse, tours qui tirent dans la zone +50 points de critique | Pièges à Ressort (recharge 30 s) : 3 pièges sur le chemin autour du point, chacun 60 dégâts physiques et immobilise 1,5 s |
+| Sort 2 | Griffes d'Ombre (recharge 60 s) : rayon 1,2, tue net les non-boss, −15 % des PV actuels d'un boss | Ingéniosité (recharge 50 s) : +40 arêtes, tours dans un rayon de 3 à +30 % cadence pendant 10 s |
+| Tour divine (200) | Sanctuaire de l'Ombre : 2 assassins qui ne peuvent pas être ciblés, frappent vite, exécutent un non-boss sous 15 % de PV ; révèle les furtifs à portée | Atelier Boiteux : construit jusqu'à 2 tourelles (arbalète automatique, 30 s de vie) et pose un piège toutes les 12 s sur le chemin à portée |
+
+Mécaniques nouvelles du moteur : zones qui durent, pièges posés sur le chemin, exécution, boost temporaire de
+tours, unités non ciblables, structures construites par une tour.
+
+### Héros
+- 9 héros, 3 par dieu. L'avatar est offert. Les disciples coûtent 30 braises chacun (au jalon 3, ils seront aussi
+  offerts à la fin des régions 2, 4, 6, 8).
+
+| Dieu | Héros | Rôle | Attaque |
+| --- | --- | --- | --- |
+| Plume | Plume, l'Ombre Première | duelliste, esquive 30 %, critiques | corps-à-corps rapide |
+| Plume | Suie | assassin, exécute sous 20 % de PV | corps-à-corps |
+| Plume | Corbeau | tireur, ignore la moitié de l'armure | à distance |
+| Charlie | Charlie, le Colosse | tank, frappe de zone qui étourdit | corps-à-corps |
+| Charlie | Mastoc | provocation, bloque 3 ennemis | corps-à-corps |
+| Charlie | Brise-Os | berserker, plus fort quand il perd des PV | corps-à-corps |
+| Pollen | Pollen, Trois-Pattes | pose des pièges, fronde | à distance |
+| Pollen | Rouage | construit une tourelle | à distance |
+| Pollen | Lanterne | soigne les soldats et les héros autour | magique à distance |
+
+- Expérience : gagnée à chaque niveau joué (victoire 100 + 20 × N, défaite moitié), gardée par héros. Seuils
+  des niveaux 2 à 10 dans `src/data/heros.ts`. 1 point de compétence par niveau, 4 compétences de 3 rangs par
+  héros (la 4e, l'ultime, demande le niveau 6). Points redistribuables gratuitement hors partie.
+
+### Compétences des spécialisations
+Chaque spécialisation des tours a 2 compétences de 3 rangs, achetées en partie avec des arêtes (comme Kingdom
+Rush). Exemples : Garde du Cloître, Bénédiction (soigne) et Mur (PV) ; Arbalétriers du Beffroi, Tir à la tête et
+Carreau perforant ; Mortier de Soufre, Nappe de soufre et Charge lourde.
+
+### Méta-progression
+- **Arbre d'améliorations** (étoiles) : 6 branches (caserne, tir, magie, artillerie, sorts, héros) de 5 rangs ;
+  le rang n coûte n étoiles. Chaque rang donne un petit bonus défini dans `src/data/ameliorations.ts`.
+  Réinitialisation gratuite : toutes les étoiles dépensées reviennent.
+- **Arêtes** (hors partie) : victoire = 30 + 6 × N + 15 par étoile la première fois, 10 + 2 × N ensuite.
+- **Braises** : première victoire d'un boss 10, premières 3 étoiles d'un niveau 2.
+- **Objets consommables** (arêtes, stock de 10 au maximum chacun, 3 emplacements équipés avant un niveau,
+  chaque emplacement utilisable une fois par partie) : Fiole de Soufre (60 : zone, 150 dégâts purs), Herbe de
+  Sabbat (80 : +5 vies), Griffe de Renfort (60 : un chat soldat fort pendant 30 s), Sablier (100 : gèle tous
+  les non-boss 5 s, ralentit les boss).
+- Tout ce qui entre dans une partie est fixé au lancement dans `ConfigPartie` (dieu, héros, son niveau et ses
+  compétences, rangs de l'arbre, objets emportés) pour que la partie reste rejouable à l'identique.
+
+### Critères d'acceptation détaillés du jalon 2
+- [ ] Sur la fiche d'un niveau, on choisit le dieu puis l'un de ses héros possédés. La partie utilise ses sorts,
+  son bonus, sa tour divine et son héros.
+- [ ] Chacun des 6 sorts, des 3 tours divines et des 9 héros a un test moteur qui montre son effet principal.
+- [ ] Gagner un niveau donne de l'expérience au héros joué. Un niveau de héros donne un point, placé ou
+  redistribué sur l'écran des héros, et le changement se voit en partie.
+- [ ] Acheter un rang de l'arbre retire les étoiles. Réinitialiser les rend toutes. On ne peut pas dépenser plus
+  d'étoiles qu'on n'en a gagné.
+- [ ] Acheter un disciple retire 30 braises. Avec moins de 30, l'achat est refusé.
+- [ ] Un objet consommable acheté s'équipe, s'utilise une fois dans la partie, puis disparaît du stock.
+- [ ] La sauvegarde passe en v3 avec une migration testée depuis la v2 : aucune progression perdue.
+- [ ] Les bandes du simulateur passent pour chacun des 3 dieux avec son avatar, sans amélioration ni objet.
+  Aucun dieu ne dépasse de plus de 10 points le taux de victoire des autres en Vieux Sage.
+- [ ] Bruitages CC0 joués sur les événements (tir, impact, mort, construction, sorts, victoire, défaite),
+  volumes réglables, `CREDITS.md`.
+
+## Tâches du jalon 2
+1. Moteur et données en jeu : Plume, Pollen, les 6 disciples, les compétences de héros, celles des
+   spécialisations, les effets en partie de l'arbre et des objets, `ConfigPartie` étendue.
+2. Sprites : Plume, Pollen, les 6 disciples, Sanctuaire de l'Ombre et ses assassins, Atelier Boiteux, ses
+   tourelles et ses pièges, les effets des 6 sorts, les icônes (sorts, objets, compétences, boutique).
+3. Méta-progression et sauvegarde v3 : monnaies, arbre, disciples, objets, expérience et compétences des héros,
+   en fonctions pures avec migration v2 vers v3.
+4. Interface : choix du dieu et du héros, écran des héros, boutique (arbre, disciples, objets), objets en partie,
+   compétences des spécialisations dans le menu des tours.
+5. Son : bruitages CC0, réglages branchés, `CREDITS.md`.
+6. Équilibrage des trois dieux, bandes par dieu.
+7. Relecture, QA, corrections.
+
 ## Impacts
 - Données / migrations : aucune base de données. Le format de sauvegarde est versionné dès la v1.
 - API : aucune en V1. Le journal d'actions et le moteur déterministe préparent le rejeu serveur.
