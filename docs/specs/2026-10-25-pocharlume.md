@@ -55,6 +55,8 @@ plan, pour rester publiable sur le Play Store (classement PEGI 12 visé).
 ## Graphismes
 - Patte du pack Minifolks : pixel art en cadres de 32×32, contour sombre d'un pixel, peu de couleurs par
   personnage, une ligne de planche par animation (repos, marche, attaque, blessé, mort).
+- Exceptions aux cadres de 32×32, actées au jalon 1 : les tours hautes (tour de tir, totem) font 32×48, et les boss
+  64×64 (un boss est deux fois plus grand qu'un ennemi courant). Les ancres restent au pied du sprite.
 - Les 12 humains du pack (épéiste, lancier, hallebardier, porte-bouclier, archer, arbalétrier, mage, archimage,
   cavalier, homme à cheval, prince, roi) servent de base aux ennemis : un script les découpe, les recolore par
   palette (bure d'inquisiteur, haillons de pestiféré, tabard du Soleil Blême) et applique des retouches en grille

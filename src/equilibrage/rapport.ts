@@ -82,7 +82,7 @@ export function redigerRapport(evaluations: readonly Evaluation[], graines: numb
     `affichage dans les trois difficultés par deux bots, sur ${String(graines)} graines chacun (version des données ${String(VERSION_DONNEES)}).`,
     '',
     '- **Soigneux** : achète à chaque fois ce qui apporte le plus de puissance par arête dépensée (socle, famille, niveau,',
-    '  spécialisation), après une petite recherche entre six préférences de famille jouées sur des graines d’entraînement ; place le',
+    '  spécialisation), après une petite recherche entre dix variantes (5 préférences × 2 diversités) jouées sur des graines d’entraînement ; place le',
     '  héros dans la zone de feu de ses tours, lance la Chute du Colosse sur les grappes d’ennemis et les Renforts devant ses tours,',
     '  appelle les vagues en avance quand le terrain est vide et qu’il n’a plus rien à acheter.',
     '- **Naïf** : construit sur les socles proches du chemin, famille au hasard, améliore et spécialise au hasard dès qu’il peut, sans',

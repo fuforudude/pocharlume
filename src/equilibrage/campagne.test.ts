@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { REGION1 } from '../data/niveaux/region1';
 import { BANDES, correlationDeRang, courbeDifficulte, ecartsChaton, ecartsMatou, ecartsSansDefense, ecartsVieuxSage } from './bandes';
 import { evaluerCampagne, partiesDe, synthetiser, trouver, type Evaluation } from './campagne';
+import { VARIANTES } from './bot-soigneux';
 import { redigerRapport } from './rapport';
 import type { ResultatPartie } from './simulation';
 
@@ -120,6 +121,9 @@ describe('évaluation d’une région et rapport', () => {
     }
     expect(rapport).toContain('Vague la plus meurtrière');
     expect(rapport).toContain('Arêtes inutilisées');
+    expect(rapport).toContain('dix variantes (5 préférences × 2 diversités)');
+    // Le texte annonce le vrai nombre de variantes de la recherche.
+    expect(VARIANTES).toHaveLength(10);
     expect(rapport).toBe(redigerRapport(evaluations, 2));
   });
 });

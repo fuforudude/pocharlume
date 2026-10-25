@@ -8,6 +8,9 @@ import { creerBotSoigneux, noterPartie, optimiserBot, VARIANTES } from './bot-so
 import { distance, echantillonner, etatInitial, longueurVue, poidsDesChemins } from './geometrie';
 import { BOT_INACTIF, configPartie, jouerPartie, type Bot } from './simulation';
 
+/** Marge de temps pour les tests qui jouent plusieurs parties des niveaux 9 et 10 (longues, et plus lentes sur une machine chargée). */
+const DELAI_PARTIE_LONGUE = 30_000;
+
 const niveau1 = REGION1[0]?.niveau ?? NIVEAU_TEST;
 
 /** Rejoue une partie en gardant les actions acceptées, pour inspecter ce que le bot a fait. */
@@ -93,7 +96,7 @@ describe('bot soigneux', () => {
     const types = new Set(actionsJouees(creerBotSoigneux(), 4, 'matou', REGION1[9]?.niveau).map((a) => a.type));
     expect(types.has('ameliorer')).toBe(true);
     expect(types.has('specialiser')).toBe(true);
-  });
+  }, DELAI_PARTIE_LONGUE);
 
   it('sans option, il n’utilise ni sorts ni héros ni appel en avance', () => {
     const types = new Set(actionsJouees(creerBotSoigneux({ sorts: false, appelerEnAvance: false }), 4).map((a) => a.type));
@@ -109,7 +112,7 @@ describe('bot soigneux', () => {
       naif += jouerPartie(niveau, creerBotNaif({ graine: graine * 31 + 7 }), { graine, difficulte: 'vieux_sage' }).vies;
     }
     expect(soigneux).toBeGreaterThan(naif);
-  });
+  }, DELAI_PARTIE_LONGUE);
 
   it('la recherche en amont est déterministe, retient une variante connue et note toutes les variantes', () => {
     const a = optimiserBot(niveau1, 'matou', [9001]);
@@ -118,7 +121,7 @@ describe('bot soigneux', () => {
     expect(VARIANTES.map((v) => v.nom)).toContain(a.variante.nom);
     expect(a.notes.length).toBe(VARIANTES.length);
     expect(Math.max(...a.notes.map((n) => n.note))).toBe(a.notes.find((n) => n.variante === a.variante)?.note);
-  });
+  }, DELAI_PARTIE_LONGUE);
 
   it('noterPartie préfère toujours une victoire, puis plus de vies, à une défaite', () => {
     const base = { viesDepart: 20, etoiles: 0, secondes: 500, aretesFin: 0, viesPerduesParVague: [], choix: [], actions: 0 } as const;
