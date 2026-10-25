@@ -43,6 +43,23 @@ export interface OptionsPartie {
   surQuitter?: () => void;
   /** Appelée dès que la partie tourne, y compris après « Rejouer » (qui lance une nouvelle partie). */
   surDemarrage?: (partie: PartieEnCours) => void;
+  /**
+   * Appelée juste après le lancement de chaque vague (événement `vague` du moteur) avec l'état courant : c'est
+   * le moment de sauvegarder la partie en cours. L'appelant ne doit pas modifier l'état.
+   */
+  surVague?: (etat: EtatPartie) => void;
+  /**
+   * Reprend une partie sauvegardée au lieu d'en créer une : l'état est celui que rend `deserialiser`, `config`
+   * doit être la sienne. La partie démarre en pause. « Rejouer » relance, lui, une nouvelle partie du niveau.
+   */
+  reprise?: EtatPartie;
+  /** Vitesse au lancement (réglage « vitesse par défaut »), 1 par défaut. */
+  vitesse?: 1 | 2;
+  /**
+   * Après une victoire, « Continuer » (retour à la carte) devient le bouton principal de l'écran de fin, à la
+   * place de « Quitter ».
+   */
+  surContinuer?: () => void;
 }
 
 /** Temps passé dans la partie, pour mesurer le rendu (voir `PartieEnCours.mesures`). */
@@ -93,7 +110,7 @@ export async function lancerNiveau(
   options: OptionsPartie = {},
 ): Promise<PartieEnCours> {
   const atlas = await chargerAtlas();
-  const etat = creerPartie(niveau.niveau, config);
+  const etat = options.reprise ?? creerPartie(niveau.niveau, config);
   const parent = options.parent ?? document.body;
   const controleur = new AbortController();
   const { signal } = controleur;
@@ -109,6 +126,7 @@ export async function lancerNiveau(
   const surbrillance = new Surbrillance();
   const interaction = new Interaction();
   const pas = new PasFixes();
+  pas.vitesse = options.vitesse ?? 1;
   const actions: Action[] = [];
   const mesures: Mesures = { images: 0, msDessin: 0, msSimulation: 0, pasSimules: 0 };
   let temps = 0;
@@ -250,6 +268,11 @@ export async function lancerNiveau(
     if (e.matches) definirPause(true);
   }, { signal });
   if (portrait.matches) definirPause(true);
+  if (options.reprise) {
+    // Une partie reprise montre d'abord ce qu'elle contient (tours, ennemis), et attend que le joueur soit prêt.
+    rendu.apresPas(etat, temps);
+    definirPause(true);
+  }
   const surRedimension = (): void => { rendu.redimensionner(); };
   window.addEventListener('resize', surRedimension, { signal });
   window.addEventListener('orientationchange', surRedimension, { signal });
@@ -275,12 +298,25 @@ export async function lancerNiveau(
   const montrerEcranFin = (): void => {
     ecranFinAffiche = true;
     if (etat.statut === 'en_cours') return;
+    const continuer = options.surContinuer;
     afficherFin(racine, atlas, { statut: etat.statut, etoiles: etat.etoiles, vies: etat.vies, viesDepart: etat.viesDepart }, {
       surRejouer: () => {
         arreter();
-        lancerNiveau(niveau, { ...config, graine: graineSuivante(config.graine) }, surFin, options).catch(console.error);
+        // Une nouvelle tentative repart d'une partie neuve, jamais de la partie reprise.
+        const relance: OptionsPartie = { ...options };
+        delete relance.reprise;
+        lancerNiveau(niveau, { ...config, graine: graineSuivante(config.graine) }, surFin, relance).catch(console.error);
       },
-      ...(quitter ? { surQuitter: quitter } : {}),
+      ...(etat.statut === 'victoire' && continuer
+        ? {
+            surContinuer: () => {
+              arreter();
+              continuer();
+            },
+          }
+        : quitter
+          ? { surQuitter: quitter }
+          : {}),
     });
   };
 
@@ -303,6 +339,14 @@ export async function lancerNiveau(
         actions.length = 0;
         rendu.apresPas(etat, temps);
         mesures.pasSimules++;
+        if (options.surVague && etat.statut === 'en_cours') {
+          for (const evenement of etat.evenements) {
+            if (evenement.type === 'vague') {
+              options.surVague(etat);
+              break;
+            }
+          }
+        }
         if (etat.statut !== 'en_cours') {
           finVue = maintenant;
           terminer();

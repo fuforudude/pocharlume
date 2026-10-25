@@ -27,6 +27,7 @@ export {
 export { migrer, type ResultatMigration } from './migrations';
 export { avecPartieEnCours, partieEnCours, reprendrePartie } from './partie';
 export { changerReglages, enregistrerVictoire, etoilesDe, meilleuresEtoiles, niveauDebloque, niveauReussi, totalEtoiles } from './progression';
+export { difficulteDe, Session, type FinDePartie, type Reprise } from './session';
 export {
   ouvrirStockage,
   StockageIndexedDB,

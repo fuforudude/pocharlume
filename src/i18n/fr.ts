@@ -41,6 +41,56 @@ export const fr = {
   'accueil.reprendre': 'Reprendre à la vague {n}',
   'accueil.niveau': 'Niveau {n}',
   'accueil.niveau_test': 'Niveau de test',
+  'accueil.options': 'Options',
+
+  // Sauvegarde : avis discrets au démarrage
+  'sauvegarde.corrompue': 'Ta sauvegarde était illisible : une copie est gardée de côté, tu repars de zéro.',
+  'sauvegarde.trop_recente': 'Cette sauvegarde vient d’une version plus récente du jeu : une copie est gardée de côté, tu repars de zéro.',
+  'sauvegarde.indisponible': 'Le navigateur refuse de garder ta progression : elle sera perdue à la fermeture.',
+
+  // Carte du monde et fiche de niveau
+  'carte.retour': 'Retour',
+  'carte.options': 'Options',
+  'carte.total_etoiles': '{n} / {m}',
+  'carte.total_etoiles_libelle': 'Étoiles gagnées : {n} sur {m}',
+  'carte.niveau': 'Niveau {n} : {nom}',
+  'fiche.boss': 'Boss',
+  'fiche.dieu': 'Dieu : {nom}',
+  'fiche.difficulte': 'Difficulté',
+  'fiche.etoiles': '{n} étoile(s) en {difficulte}',
+  'fiche.lancer': 'Lancer',
+  'fiche.fermer': 'Fermer',
+
+  // Options
+  'options.titre': 'Options',
+  'options.son': 'Bruitages',
+  'options.musique': 'Musique',
+  'options.volume': '{n} %',
+  'options.vitesse': 'Vitesse par défaut',
+  'options.exporter': 'Exporter',
+  'options.exporter_aide': 'Ce code garde ta progression. Copie-le, puis colle-le dans Importer sur un autre appareil.',
+  'options.copier': 'Copier',
+  'options.copie': 'Copié',
+  'options.copie_impossible': 'Copie impossible : sélectionne le code et copie-le à la main.',
+  'options.importer': 'Importer',
+  'options.importer_aide': 'Colle ici un code exporté.',
+  'options.importer_champ': 'Code à importer',
+  'options.importer_valider': 'Importer ce code',
+  'options.confirmer_titre': 'Remplacer ta progression ?',
+  'options.confirmer_detail': 'Tu as {n} étoile(s). Le code en contient {m}. Ta progression et tes réglages actuels seront remplacés, la partie en cours abandonnée.',
+  'options.confirmer': 'Remplacer',
+  'options.annuler': 'Annuler',
+  'options.import_ok': 'Progression importée.',
+  'options.fermer': 'Fermer',
+
+  // Import : pourquoi un code est refusé
+  'import.refus.vide': 'Colle d’abord un code.',
+  'import.refus.trop_long': 'Ce code est beaucoup trop long pour être un code Pocharlume.',
+  'import.refus.format': 'Ce n’est pas un code Pocharlume.',
+  'import.refus.somme': 'Le code est incomplet ou erroné : recopie-le en entier.',
+  'import.refus.compression': 'Ce navigateur ne sait pas lire ce code.',
+  'import.refus.donnees': 'Ce code est abîmé : son contenu est illisible.',
+  'import.refus.trop_recent': 'Ce code vient d’une version plus récente du jeu.',
 
   // Partie : barre du haut et commandes
   'hud.vies': 'Vies',
@@ -106,6 +156,7 @@ export const fr = {
   'fin.etoiles': '{n} étoile(s) sur 3',
   'fin.vies': 'Vies restantes : {n}/{m}',
   'fin.rejouer': 'Rejouer',
+  'fin.continuer': 'Continuer',
   'fin.quitter': 'Quitter',
 
   // Dieu Charlie
