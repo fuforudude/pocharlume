@@ -1,7 +1,7 @@
 # Rapport d’équilibrage
 
 Généré par `npm run balance` (tools/balance/) : ne pas modifier à la main. Chaque niveau de la région 1 est rejoué sans
-affichage dans les trois difficultés par deux bots, sur 10 graines chacun (version des données 1).
+affichage dans les trois difficultés par deux bots, sur 10 graines chacun (version des données 2).
 
 - **Soigneux** : achète à chaque fois ce qui apporte le plus de puissance par arête dépensée (socle, famille, niveau,
   spécialisation), après une petite recherche entre six préférences de famille jouées sur des graines d’entraînement ; place le
@@ -13,21 +13,15 @@ affichage dans les trois difficultés par deux bots, sur 10 graines chacun (vers
 
 ## Bandes cibles
 
-**5 écart(s)** :
-
-- Chaton : le bot naïf gagne 99 % des parties, il doit tout gagner
-- Matou : le bot naïf gagne 98 % des parties, la bande est 50 % à 90 %
-- Sans défense : le niveau 2 est gagné 3 fois sur 3 en chaton
-- Sans défense : le niveau 3 est gagné 3 fois sur 3 en chaton
-- Sans défense : le niveau 4 est gagné 1 fois sur 3 en chaton
+Toutes les bandes sont respectées.
 
 | Difficulté | Naïf | Bande naïf | Soigneux | Bande soigneux | Sans défense |
 | --- | --- | --- | --- | --- | --- |
-| Chaton | 99 % | 100 % | 100 % | — | 33 % |
-| Matou | 98 % | 50 % à 90 % | 100 % | 100 % | 0 % |
-| Vieux Sage | 77 % | — | 100 % | au moins 80 % | 0 % |
+| Chaton | 100 % | 100 % | 100 % | — | 3 % |
+| Matou | 84 % | 50 % à 90 % | 100 % | 100 % | 0 % |
+| Vieux Sage | 28 % | — | 91 % | au moins 80 % | 0 % |
 
-Vies de départ : Chaton 25, Matou 20, Vieux Sage 15. Facteur sur les arêtes de départ des niveaux : Chaton ×1.15, Matou ×1, Vieux Sage ×0.9.
+Vies de départ : Chaton 25, Matou 20, Vieux Sage 15. Facteur sur les arêtes de départ des niveaux : Chaton ×1.5, Matou ×1, Vieux Sage ×0.9.
 
 ## Chaton
 
@@ -36,16 +30,16 @@ Durée en secondes de jeu. Vague la plus meurtrière : celle où l’on perd le 
 
 | Niveau | Naïf : victoires | Naïf : vies | Soigneux : victoires | Soigneux : vies | Arêtes inutilisées (naïf / soigneux) | Vague la plus meurtrière (naïf / soigneux) | Durée (naïf / soigneux) | Sans défense |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | 100 % (10/10) | 25,0 | 100 % (10/10) | 25,0 | 68 / 121 | aucune / aucune | 185 / 136 | gagné 3/3 |
-| 2 | 100 % (10/10) | 25,0 | 100 % (10/10) | 25,0 | 72 / 283 | aucune / aucune | 222 / 167 | gagné 3/3 |
-| 3 | 100 % (10/10) | 25,0 | 100 % (10/10) | 25,0 | 86 / 105 | aucune / aucune | 230 / 172 | gagné 3/3 |
-| 4 | 100 % (10/10) | 25,0 | 100 % (10/10) | 25,0 | 131 / 217 | aucune / aucune | 276 / 235 | gagné 1/3 |
-| 5 | 100 % (10/10) | 25,0 | 100 % (10/10) | 25,0 | 83 / 280 | aucune / aucune | 226 / 187 | perdu en 169 s |
-| 6 | 100 % (10/10) | 24,3 | 100 % (10/10) | 25,0 | 88 / 226 | 3 (0,4 vies) / aucune | 301 / 255 | perdu en 222 s |
-| 7 | 100 % (10/10) | 24,4 | 100 % (10/10) | 25,0 | 98 / 269 | 2 (0,3 vies) / aucune | 342 / 307 | perdu en 182 s |
-| 8 | 100 % (10/10) | 24,8 | 100 % (10/10) | 25,0 | 112 / 245 | 2 (0,2 vies) / aucune | 354 / 326 | perdu en 221 s |
-| 9 | 90 % (9/10) | 16,8 | 100 % (10/10) | 25,0 | 135 / 283 | 4 (5,7 vies) / aucune | 415 / 395 | perdu en 125 s |
-| 10 | 100 % (10/10) | 23,6 | 100 % (10/10) | 25,0 | 237 / 328 | 12 (1,0 vies) / aucune | 505 / 475 | perdu en 141 s |
+| 1 | 100 % (10/10) | 25,0 | 100 % (10/10) | 25,0 | 160 / 271 | aucune / aucune | 158 / 74 | gagné 1/3 |
+| 2 | 100 % (10/10) | 25,0 | 100 % (10/10) | 25,0 | 134 / 189 | aucune / aucune | 188 / 124 | perdu en 180 s |
+| 3 | 100 % (10/10) | 25,0 | 100 % (10/10) | 25,0 | 147 / 250 | aucune / aucune | 202 / 153 | perdu en 217 s |
+| 4 | 100 % (10/10) | 25,0 | 100 % (10/10) | 25,0 | 122 / 363 | aucune / aucune | 235 / 188 | perdu en 198 s |
+| 5 | 100 % (10/10) | 25,0 | 100 % (10/10) | 25,0 | 155 / 117 | aucune / aucune | 217 / 180 | perdu en 115 s |
+| 6 | 100 % (10/10) | 25,0 | 100 % (10/10) | 25,0 | 327 / 1314 | aucune / aucune | 262 / 216 | perdu en 131 s |
+| 7 | 100 % (10/10) | 24,9 | 100 % (10/10) | 25,0 | 604 / 1673 | 1 (0,1 vies) / aucune | 308 / 277 | perdu en 119 s |
+| 8 | 100 % (10/10) | 24,4 | 100 % (10/10) | 25,0 | 990 / 2178 | 3 (0,6 vies) / aucune | 319 / 281 | perdu en 128 s |
+| 9 | 100 % (10/10) | 22,1 | 100 % (10/10) | 25,0 | 2607 / 4242 | 4 (1,7 vies) / aucune | 371 / 350 | perdu en 98 s |
+| 10 | 100 % (10/10) | 24,9 | 100 % (10/10) | 24,5 | 4724 / 6344 | 1 (0,1 vies) / 2 (0,4 vies) | 439 / 394 | perdu en 90 s |
 
 ## Matou
 
@@ -54,16 +48,16 @@ Durée en secondes de jeu. Vague la plus meurtrière : celle où l’on perd le 
 
 | Niveau | Naïf : victoires | Naïf : vies | Soigneux : victoires | Soigneux : vies | Arêtes inutilisées (naïf / soigneux) | Vague la plus meurtrière (naïf / soigneux) | Durée (naïf / soigneux) | Sans défense |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | 100 % (10/10) | 20,0 | 100 % (10/10) | 20,0 | 69 / 198 | aucune / aucune | 187 / 142 | perdu en 190 s |
-| 2 | 100 % (10/10) | 19,8 | 100 % (10/10) | 20,0 | 70 / 165 | 5 (0,2 vies) / aucune | 231 / 179 | perdu en 185 s |
-| 3 | 100 % (10/10) | 20,0 | 100 % (10/10) | 20,0 | 112 / 250 | aucune / aucune | 233 / 177 | perdu en 201 s |
-| 4 | 100 % (10/10) | 20,0 | 100 % (10/10) | 20,0 | 73 / 185 | aucune / aucune | 279 / 229 | perdu en 169 s |
-| 5 | 100 % (10/10) | 19,2 | 100 % (10/10) | 20,0 | 82 / 227 | 2 (0,4 vies) / aucune | 230 / 186 | perdu en 140 s |
-| 6 | 100 % (10/10) | 17,3 | 100 % (10/10) | 19,7 | 77 / 126 | 3 (0,9 vies) / 7 (0,2 vies) | 304 / 253 | perdu en 168 s |
-| 7 | 100 % (10/10) | 19,0 | 100 % (10/10) | 20,0 | 72 / 215 | 1 (0,3 vies) / aucune | 345 / 309 | perdu en 157 s |
-| 8 | 100 % (10/10) | 19,4 | 100 % (10/10) | 20,0 | 118 / 280 | 3 (0,4 vies) / aucune | 357 / 330 | perdu en 185 s |
-| 9 | 80 % (8/10) | 6,6 | 100 % (10/10) | 20,0 | 109 / 190 | 4 (8,1 vies) / aucune | 368 / 398 | perdu en 122 s |
-| 10 | 100 % (10/10) | 13,9 | 100 % (10/10) | 19,7 | 202 / 371 | 12 (4,0 vies) / 3 (0,3 vies) | 563 / 495 | perdu en 122 s |
+| 1 | 100 % (10/10) | 19,0 | 100 % (10/10) | 20,0 | 99 / 135 | 5 (0,4 vies) / aucune | 166 / 113 | perdu en 132 s |
+| 2 | 100 % (10/10) | 18,1 | 100 % (10/10) | 20,0 | 106 / 197 | 3 (1,2 vies) / aucune | 196 / 146 | perdu en 114 s |
+| 3 | 100 % (10/10) | 17,8 | 100 % (10/10) | 20,0 | 109 / 308 | 5 (1,2 vies) / aucune | 208 / 171 | perdu en 109 s |
+| 4 | 100 % (10/10) | 19,2 | 100 % (10/10) | 20,0 | 166 / 168 | 1 (0,6 vies) / aucune | 239 / 196 | perdu en 98 s |
+| 5 | 90 % (9/10) | 13,7 | 100 % (10/10) | 19,7 | 164 / 294 | 8 (1,8 vies) / 4 (0,2 vies) | 220 / 194 | perdu en 84 s |
+| 6 | 100 % (10/10) | 12,0 | 100 % (10/10) | 19,9 | 170 / 78 | 6 (2,3 vies) / 3 (0,1 vies) | 270 / 238 | perdu en 83 s |
+| 7 | 90 % (9/10) | 10,0 | 100 % (10/10) | 17,9 | 169 / 174 | 2 (2,5 vies) / 5 (1,4 vies) | 292 / 294 | perdu en 89 s |
+| 8 | 60 % (6/10) | 6,8 | 100 % (10/10) | 20,0 | 98 / 374 | 3 (10,2 vies) / aucune | 239 / 294 | perdu en 92 s |
+| 9 | 40 % (4/10) | 5,3 | 100 % (10/10) | 20,0 | 84 / 930 | 4 (6,3 vies) / aucune | 214 / 353 | perdu en 87 s |
+| 10 | 60 % (6/10) | 4,5 | 100 % (10/10) | 16,3 | 1202 / 1432 | 2 (5,0 vies) / 2 (1,8 vies) | 359 / 425 | perdu en 69 s |
 
 ## Vieux Sage
 
@@ -72,16 +66,16 @@ Durée en secondes de jeu. Vague la plus meurtrière : celle où l’on perd le 
 
 | Niveau | Naïf : victoires | Naïf : vies | Soigneux : victoires | Soigneux : vies | Arêtes inutilisées (naïf / soigneux) | Vague la plus meurtrière (naïf / soigneux) | Durée (naïf / soigneux) | Sans défense |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | 100 % (10/10) | 14,3 | 100 % (10/10) | 15,0 | 46 / 97 | 2 (0,2 vies) / aucune | 193 / 142 | perdu en 162 s |
-| 2 | 100 % (10/10) | 11,6 | 100 % (10/10) | 14,9 | 68 / 197 | 5 (1,6 vies) / 1 (0,1 vies) | 234 / 173 | perdu en 149 s |
-| 3 | 100 % (10/10) | 14,9 | 100 % (10/10) | 15,0 | 67 / 137 | 3 (0,1 vies) / aucune | 236 / 173 | perdu en 170 s |
-| 4 | 100 % (10/10) | 14,4 | 100 % (10/10) | 15,0 | 70 / 156 | 3 (0,3 vies) / aucune | 281 / 252 | perdu en 146 s |
-| 5 | 70 % (7/10) | 6,6 | 100 % (10/10) | 14,9 | 58 / 146 | 8 (2,5 vies) / 7 (0,1 vies) | 223 / 185 | perdu en 111 s |
-| 6 | 70 % (7/10) | 5,3 | 100 % (10/10) | 12,8 | 97 / 101 | 3 (3,0 vies) / 6 (2,2 vies) | 282 / 275 | perdu en 128 s |
-| 7 | 90 % (9/10) | 11,0 | 100 % (10/10) | 15,0 | 84 / 211 | 5 (2,0 vies) / aucune | 330 / 308 | perdu en 133 s |
-| 8 | 100 % (10/10) | 13,5 | 100 % (10/10) | 15,0 | 99 / 243 | 2 (0,5 vies) / aucune | 361 / 335 | perdu en 155 s |
-| 9 | 20 % (2/10) | 1,6 | 100 % (10/10) | 15,0 | 91 / 43 | 3 (6,8 vies) / aucune | 187 / 402 | perdu en 119 s |
-| 10 | 20 % (2/10) | 1,8 | 100 % (10/10) | 15,0 | 117 / 218 | 12 (6,0 vies) / aucune | 446 / 441 | perdu en 93 s |
+| 1 | 40 % (4/10) | 4,7 | 100 % (10/10) | 15,0 | 130 / 165 | 3 (4,4 vies) / aucune | 150 / 98 | perdu en 119 s |
+| 2 | 40 % (4/10) | 2,7 | 100 % (10/10) | 15,0 | 83 / 333 | 3 (4,3 vies) / aucune | 174 / 139 | perdu en 107 s |
+| 3 | 80 % (8/10) | 6,9 | 100 % (10/10) | 15,0 | 126 / 88 | 5 (2,4 vies) / aucune | 202 / 160 | perdu en 108 s |
+| 4 | 90 % (9/10) | 8,5 | 100 % (10/10) | 14,6 | 113 / 311 | 3 (2,2 vies) / 3 (0,4 vies) | 230 / 200 | perdu en 97 s |
+| 5 | 0 % (0/10) | 0,0 | 100 % (10/10) | 14,5 | 62 / 64 | 4 (7,1 vies) / 2 (0,3 vies) | 138 / 196 | perdu en 70 s |
+| 6 | 20 % (2/10) | 1,3 | 100 % (10/10) | 13,2 | 113 / 338 | 4 (5,9 vies) / 3 (1,0 vies) | 163 / 251 | perdu en 79 s |
+| 7 | 10 % (1/10) | 1,2 | 80 % (8/10) | 7,5 | 115 / 162 | 2 (4,7 vies) / 5 (4,5 vies) | 136 / 253 | perdu en 74 s |
+| 8 | 0 % (0/10) | 0,0 | 100 % (10/10) | 13,7 | 69 / 186 | 3 (10,8 vies) / 3 (1,3 vies) | 102 / 292 | perdu en 91 s |
+| 9 | 0 % (0/10) | 0,0 | 100 % (10/10) | 14,7 | 70 / 61 | 2 (7,5 vies) / 4 (0,2 vies) | 111 / 356 | perdu en 75 s |
+| 10 | 0 % (0/10) | 0,0 | 30 % (3/10) | 1,3 | 61 / 195 | 2 (7,6 vies) / 2 (3,9 vies) | 89 / 339 | perdu en 66 s |
 
 ## Courbe de difficulté
 
@@ -89,9 +83,9 @@ Vies restantes moyennes du bot naïf en Matou, niveau par niveau : elle doit glo
 
 | Niveau | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Vies restantes | 20,0 | 19,8 | 20,0 | 20,0 | 19,2 | 17,3 | 19,0 | 19,4 | 6,6 | 13,9 |
+| Vies restantes | 19,0 | 18,1 | 17,8 | 19,2 | 13,7 | 12,0 | 10,0 | 6,8 | 5,3 | 4,5 |
 
-Corrélation de rang (Spearman) entre le niveau et les vies restantes : -0,8 (−1 = décroissance parfaite). Niveau le plus dur : 9 (6,6 vies).
+Corrélation de rang (Spearman) entre le niveau et les vies restantes : -0,9 (−1 = décroissance parfaite). Niveau le plus dur : 10 (4,5 vies).
 
 ## Variante choisie par le bot soigneux
 
@@ -99,71 +93,71 @@ La recherche en amont garde, pour chaque niveau et chaque difficulté, la préf�
 
 | Niveau | Chaton | Matou | Vieux Sage |
 | --- | --- | --- | --- |
-| 1 | sans caserne | sans caserne | tir |
-| 2 | sans caserne | tir | sans caserne |
-| 3 | magie | équilibrée | tir |
-| 4 | équilibrée | tir | sans caserne |
-| 5 | sans caserne | équilibrée | tir |
-| 6 | magie | tir | caserne |
-| 7 | magie | artillerie | équilibrée |
-| 8 | magie | sans caserne | artillerie |
-| 9 | magie | tir | tir |
-| 10 | artillerie | équilibrée | tir |
+| 1 | artillerie | caserne | artillerie |
+| 2 | sans caserne | caserne | artillerie |
+| 3 | artillerie | caserne | équilibrée |
+| 4 | artillerie | sans caserne | sans caserne |
+| 5 | magie | équilibrée | caserne |
+| 6 | tir | artillerie | équilibrée |
+| 7 | tir | caserne | équilibrée |
+| 8 | tir | caserne | artillerie |
+| 9 | tir | caserne | caserne |
+| 10 | tir | équilibrée | équilibrée |
 
 ## Tours choisies par le bot soigneux
 
 Constructions par famille et spécialisations par voie, sur toutes les parties du bot soigneux, de la plus à la moins choisie.
 
-**Chaton** : la plus choisie, Autel des Cendres (construction) (330 fois) ; la moins choisie, Mortier de Soufre (spécialisation A) (0 fois).
+**Chaton** : la plus choisie, Clocher des Archers (construction) (470 fois) ; la moins choisie, Oracle de la Braise (spécialisation A) (0 fois).
 
 | Choix | Fois |
 | --- | --- |
-| Autel des Cendres (construction) | 330 |
-| Clocher des Archers (construction) | 180 |
-| Catapulte du Rempart (construction) | 120 |
-| Grenier des Griffes (construction) | 30 |
-| Baliste à Chaînes (spécialisation B) | 30 |
-| Arbalétriers du Beffroi (spécialisation B) | 10 |
-| Nécromancien des Neuf Vies (spécialisation B) | 10 |
-| Garde du Cloître (spécialisation A) | 0 |
-| Écorcheurs (spécialisation B) | 0 |
-| Guetteurs des Toits (spécialisation A) | 0 |
-| Oracle de la Braise (spécialisation A) | 0 |
-| Mortier de Soufre (spécialisation A) | 0 |
-
-**Matou** : la plus choisie, Clocher des Archers (construction) (460 fois) ; la moins choisie, Mortier de Soufre (spécialisation A) (0 fois).
-
-| Choix | Fois |
-| --- | --- |
-| Clocher des Archers (construction) | 460 |
-| Catapulte du Rempart (construction) | 200 |
-| Arbalétriers du Beffroi (spécialisation B) | 40 |
-| Baliste à Chaînes (spécialisation B) | 30 |
-| Autel des Cendres (construction) | 10 |
+| Clocher des Archers (construction) | 470 |
+| Arbalétriers du Beffroi (spécialisation B) | 469 |
+| Catapulte du Rempart (construction) | 270 |
+| Autel des Cendres (construction) | 80 |
+| Nécromancien des Neuf Vies (spécialisation B) | 40 |
+| Baliste à Chaînes (spécialisation B) | 35 |
+| Mortier de Soufre (spécialisation A) | 10 |
 | Grenier des Griffes (construction) | 0 |
 | Garde du Cloître (spécialisation A) | 0 |
 | Écorcheurs (spécialisation B) | 0 |
 | Guetteurs des Toits (spécialisation A) | 0 |
 | Oracle de la Braise (spécialisation A) | 0 |
-| Nécromancien des Neuf Vies (spécialisation B) | 0 |
-| Mortier de Soufre (spécialisation A) | 0 |
 
-**Vieux Sage** : la plus choisie, Clocher des Archers (construction) (470 fois) ; la moins choisie, Baliste à Chaînes (spécialisation B) (0 fois).
+**Matou** : la plus choisie, Grenier des Griffes (construction) (427 fois) ; la moins choisie, Oracle de la Braise (spécialisation A) (0 fois).
 
 | Choix | Fois |
 | --- | --- |
-| Clocher des Archers (construction) | 470 |
-| Catapulte du Rempart (construction) | 150 |
-| Arbalétriers du Beffroi (spécialisation B) | 80 |
-| Grenier des Griffes (construction) | 50 |
-| Garde du Cloître (spécialisation A) | 10 |
+| Grenier des Griffes (construction) | 427 |
+| Garde du Cloître (spécialisation A) | 230 |
+| Catapulte du Rempart (construction) | 218 |
+| Clocher des Archers (construction) | 142 |
+| Baliste à Chaînes (spécialisation B) | 106 |
+| Arbalétriers du Beffroi (spécialisation B) | 94 |
+| Mortier de Soufre (spécialisation A) | 20 |
+| Autel des Cendres (construction) | 10 |
+| Nécromancien des Neuf Vies (spécialisation B) | 10 |
 | Écorcheurs (spécialisation B) | 0 |
 | Guetteurs des Toits (spécialisation A) | 0 |
-| Autel des Cendres (construction) | 0 |
 | Oracle de la Braise (spécialisation A) | 0 |
+
+**Vieux Sage** : la plus choisie, Catapulte du Rempart (construction) (416 fois) ; la moins choisie, Nécromancien des Neuf Vies (spécialisation B) (0 fois).
+
+| Choix | Fois |
+| --- | --- |
+| Catapulte du Rempart (construction) | 416 |
+| Clocher des Archers (construction) | 249 |
+| Baliste à Chaînes (spécialisation B) | 113 |
+| Grenier des Griffes (construction) | 109 |
+| Arbalétriers du Beffroi (spécialisation B) | 95 |
+| Garde du Cloître (spécialisation A) | 94 |
+| Mortier de Soufre (spécialisation A) | 28 |
+| Autel des Cendres (construction) | 10 |
+| Oracle de la Braise (spécialisation A) | 10 |
+| Écorcheurs (spécialisation B) | 0 |
+| Guetteurs des Toits (spécialisation A) | 0 |
 | Nécromancien des Neuf Vies (spécialisation B) | 0 |
-| Mortier de Soufre (spécialisation A) | 0 |
-| Baliste à Chaînes (spécialisation B) | 0 |
 
 ## Puissance des tours par palier de coût
 

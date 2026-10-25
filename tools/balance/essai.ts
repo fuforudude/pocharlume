@@ -6,7 +6,7 @@ import { assemblerNiveau } from '../../src/data/niveaux/assemblage.ts';
 import { evaluerCampagne, synthetiser, trouver } from '../../src/equilibrage/campagne.ts';
 import { verifierBandes } from '../../src/equilibrage/bandes.ts';
 
-const p = JSON.parse(process.argv[2] ?? '{}') as { base?: number; cn?: number; cv?: number; ir?: number; dc?: Record<string, number>; dv?: Record<string, number>; depart?: number; nv?: number[]; dep?: number[] };
+const p = JSON.parse(process.argv[2] ?? '{}') as { base?: number; cn?: number; cv?: number; ir?: number; dif?: string[]; dc?: Record<string, number>; dv?: Record<string, number>; depart?: number; nv?: number[]; dep?: number[] };
 const E = EQUILIBRAGE as unknown as Record<string, number>;
 if (p.base) E.budgetBase = p.base;
 if (p.cn !== undefined) E.croissanceNiveau = p.cn;
@@ -20,7 +20,7 @@ const niveaux = PLANS_REGION1.map((plan, i) => {
   const n = assemblerNiveau(copie, vagues);
   return n;
 });
-const ev = evaluerCampagne({ niveaux });
+const ev = evaluerCampagne({ niveaux, ...(p.dif ? { difficultes: p.dif } : {}) });
 const f = (n: number, d: string, b: 'naif' | 'soigneux' | 'inactif') => {
   const e = trouver(ev, n, d, b);
   if (!e) return '-';

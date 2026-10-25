@@ -1,7 +1,7 @@
 // Outil de tests (jamais importé par le jeu) : un joueur automatique « raisonnable » qui joue un niveau en
 // entier. Il construit une tour par socle (familles en alternance), puis améliore toutes les tours au
 // niveau 2, au niveau 3, puis les spécialise, en dépensant ses arêtes dès qu'il le peut. Il ne lance pas les
-// vagues en avance et n'utilise ni les sorts ni le héros. Le futur simulateur (tâche 9) aura de vrais bots.
+// vagues en avance et n'utilise ni les sorts ni le héros. Les vrais bots du simulateur d'équilibrage sont dans src/equilibrage/.
 import type { Action } from '../../engine/actions';
 import type { IdFamille, Niveau, Voie } from '../../engine/definitions';
 import type { ConfigPartie, EtatPartie } from '../../engine/etat';

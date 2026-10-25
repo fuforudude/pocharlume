@@ -74,12 +74,10 @@ describe('bot naïf', () => {
     const etat = etatInitial(niveau1);
     const echantillons = echantillonner(etat);
     const proximite = etat.niveau.carte.socles.map((s) => Math.min(...echantillons.map((e) => distance(e, s))));
-    const premiers = actionsJouees(creerBotNaif({ graine: 3 }), 4).filter((a) => a.type === 'construire').slice(0, 2);
+    const premiers = actionsJouees(creerBotNaif({ graine: 3 }), 4).flatMap((a) => (a.type === 'construire' ? [a.socle] : [])).slice(0, 2);
     const mediane = [...proximite].sort((a, b) => a - b)[Math.floor(proximite.length / 2)] ?? 0;
-    for (const a of premiers) {
-      if (a.type !== 'construire') continue;
-      expect(proximite[a.socle] ?? Infinity).toBeLessThanOrEqual(mediane + 1.5);
-    }
+    expect(premiers.length).toBe(2);
+    for (const socle of premiers) expect(proximite[socle] ?? Infinity).toBeLessThanOrEqual(mediane + 1.5);
   });
 });
 
