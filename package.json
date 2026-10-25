@@ -13,6 +13,7 @@
     "test": "vitest run",
     "lint": "eslint .",
     "art": "node tools/art/index.ts",
+    "balance": "node --import ./tools/niveaux/enregistrer.ts tools/balance/index.ts",
     "niveaux": "node --import ./tools/niveaux/enregistrer.ts tools/niveaux/generer.ts",
     "niveaux:bilan": "node --import ./tools/niveaux/enregistrer.ts tools/niveaux/bilan.ts",
     "niveaux:resume": "node --import ./tools/niveaux/enregistrer.ts tools/niveaux/resume.ts",

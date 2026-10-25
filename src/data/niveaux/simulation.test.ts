@@ -1,16 +1,19 @@
-// Les 10 niveaux de la région 1 sont jouables de bout en bout : un plan de construction automatique gagne en
-// Matou, et sans aucune tour on perd. Ce n'est pas le réglage fin de la difficulté (le simulateur de la
-// tâche 9 s'en charge), seulement la garantie qu'un niveau n'est ni impossible ni gagné d'avance.
+// Les 10 niveaux de la région 1 sont jouables de bout en bout : le bot soigneux du simulateur gagne en Matou,
+// et sans aucune tour on perd. Le réglage fin de la difficulté (bandes de victoire de chaque bot dans chaque
+// difficulté) est vérifié par src/equilibrage/bandes-*.test.ts ; ici, seulement la garantie qu'un niveau n'est
+// ni impossible ni gagné d'avance.
 import { describe, expect, it } from 'vitest';
 import { rejouer, serialiser } from '../../engine/partie';
+import { creerBotSoigneux } from '../../equilibrage/bot-soigneux';
+import { jouerPartie } from '../../equilibrage/simulation';
 import { CONFIG_MATOU, jouer, planDeConstruction } from './bot.test-utils';
 import { REGION1 } from './region1';
 
 describe('les niveaux de la région 1 se jouent', () => {
   for (const campagne of REGION1) {
-    it(`niveau ${String(campagne.numero)} : un plan de construction raisonnable gagne en Matou, quelle que soit la graine`, () => {
+    it(`niveau ${String(campagne.numero)} : le bot soigneux gagne en Matou, quelle que soit la graine`, () => {
       for (const graine of [7, 8, 9]) {
-        const bilan = jouer(campagne.niveau, planDeConstruction(campagne.niveau), { ...CONFIG_MATOU, graine });
+        const bilan = jouerPartie(campagne.niveau, creerBotSoigneux(), { graine, difficulte: 'matou' });
         expect(bilan.statut, `graine ${String(graine)}`).toBe('victoire');
         expect(bilan.etoiles).toBeGreaterThanOrEqual(1);
       }

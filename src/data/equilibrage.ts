@@ -16,19 +16,25 @@ export const EQUILIBRAGE = {
   /** Vitesse (tuiles/s) dont le facteur de menace vaut 1. */
   vitesseReference: 1,
   /** Menace de la vague 1 du niveau 1. */
-  budgetBase: 220,
+  budgetBase: 260,
   /** Croissance du budget par niveau de campagne (1 à 100). */
-  croissanceNiveau: 0.08,
-  /** Croissance du budget par vague dans un niveau. */
-  croissanceVague: 0.45,
+  croissanceNiveau: 0.15,
+  /**
+   * Croissance du budget par vague dans un niveau. Haute à dessein : une défense complète finit par tout arrêter,
+   * ce sont les dernières vagues qui empêchent le héros seul (ou une défense négligée) de gagner.
+   */
+  croissanceVague: 1.2,
   /** Arêtes rapportées par point de menace tué. */
   aretesParMenace: 0.12,
   /** Écart de puissance toléré entre les tours d'un même palier de coût. */
   tolerancePuissance: 0.15,
   /** Taille max d'un paquet généré. */
   tailleMaxPaquet: 12,
-  /** Secondes entre deux ennemis d'un paquet, pour un ennemi à la vitesse de référence. */
-  intervalleReference: 1.2,
+  /**
+   * Secondes entre deux ennemis d'un paquet, pour un ennemi à la vitesse de référence. Court : des colonnes serrées
+   * (réglé avec le simulateur, voir docs/architecture.md), car des ennemis très espacés ne pressent jamais la défense.
+   */
+  intervalleReference: 0.3,
 } as const;
 
 function moyenne(f: readonly [number, number]): number {

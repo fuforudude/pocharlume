@@ -1,6 +1,6 @@
 // `npm run niveaux:bilan` : joue les 10 niveaux de la région 1 avec le joueur automatique des tests
 // (src/data/niveaux/bot.test-utils.ts) et affiche le résultat, avec et sans défense, dans chaque difficulté.
-// Simple coup d'œil pour régler les niveaux ; le vrai simulateur (npm run balance) viendra à la tâche 9.
+// Simple coup d'œil pour régler les niveaux ; le simulateur complet, avec de vrais bots, est `npm run balance` (src/equilibrage/).
 import { DIFFICULTES } from '../../src/data/difficultes.ts';
 import { CONFIG_MATOU, jouer, planDeConstruction } from '../../src/data/niveaux/bot.test-utils.ts';
 import { REGION1 } from '../../src/data/niveaux/region1.ts';

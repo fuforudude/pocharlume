@@ -1,6 +1,6 @@
 // Préchargé par `node --import ./tools/niveaux/enregistrer.ts` : les sources de src/ s'importent sans extension
 // (résolution « bundler » de Vite et de TypeScript), ce que Node ne sait pas faire seul. Ce crochet de
-// résolution essaie `.ts` puis `/index.ts` quand un import relatif échoue. Pour les scripts de tools/ qui lisent
+// résolution essaie `.ts` puis `/index.ts` quand un import relatif échoue (fichier introuvable ou dossier). Pour les scripts de tools/ qui lisent
 // src/data ou src/engine.
 import { registerHooks } from 'node:module';
 
@@ -10,7 +10,8 @@ registerHooks({
       return suite(specifier, context);
     } catch (erreur) {
       const relatif = specifier.startsWith('./') || specifier.startsWith('../');
-      if (!relatif || (erreur as { code?: string }).code !== 'ERR_MODULE_NOT_FOUND') throw erreur;
+      const code = (erreur as { code?: string }).code;
+      if (!relatif || (code !== 'ERR_MODULE_NOT_FOUND' && code !== 'ERR_UNSUPPORTED_DIR_IMPORT')) throw erreur;
       try {
         return suite(`${specifier}.ts`, context);
       } catch {

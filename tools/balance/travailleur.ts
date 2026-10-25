@@ -1,0 +1,10 @@
+// Fil de calcul de `npm run balance` : évalue un niveau dans une difficulté et renvoie les évaluations au fil
+// principal (tools/balance/index.ts).
+import { parentPort, workerData } from 'node:worker_threads';
+import { REGION1 } from '../../src/data/niveaux/region1.ts';
+import { evaluerCampagne } from '../../src/equilibrage/campagne.ts';
+
+const { numero, difficulte } = workerData as { numero: number; difficulte: string };
+const campagne = REGION1.find((n) => n.numero === numero);
+if (!campagne) throw new Error(`Niveau ${String(numero)} introuvable`);
+parentPort?.postMessage(evaluerCampagne({ niveaux: [campagne], difficultes: [difficulte] }));
