@@ -65,6 +65,11 @@ export function decaler(c: Couche, dx: number, dy: number): Couche {
   return transformer(c, c.largeur, c.hauteur, (x, y) => [x - dx, y - dy]);
 }
 
+/** Découpe le rectangle (x, y, largeur, hauteur) : la sortie fait cette taille, le vide hors de la couche reste transparent. */
+export function rogner(c: Couche, x: number, y: number, largeur: number, hauteur: number): Couche {
+  return transformer(c, largeur, hauteur, (px, py) => [px + x, py + y]);
+}
+
 export function miroir(c: Couche): Couche {
   return transformer(c, c.largeur, c.hauteur, (x, y) => [c.largeur - 1 - x, y]);
 }

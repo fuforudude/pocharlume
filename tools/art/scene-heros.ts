@@ -12,7 +12,7 @@ export const HEROS_J2 = [
 ] as const;
 
 /** Rangées de héros : animation et indice de cadre montrés. */
-const RANGEES: readonly (readonly [string, number])[] = [['repos', 0], ['marche', 1], ['attaque', 1], ['competence', 2]];
+const RANGEES: readonly (readonly [string, number])[] = [['repos', 0], ['marche', 1], ['attaque', 1], ['competence', 3]];
 const LARGEUR_CASE = 34;
 const HAUTEUR_RANGEE = 34;
 

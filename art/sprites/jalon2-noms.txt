@@ -1,0 +1,49 @@
+# Index des sprites du jalon 2 (fichier de commentaires seulement : aucune directive). Les noms sont stables.
+#
+# HÉROS (32×32, ancre 16 30 aux pieds, regardent vers la droite ; animations repos, marche, attaque, competence, blesse, mort)
+#   id du jeu        sprite            fichier
+#   plume            heros-plume       heros-plume.txt
+#   suie             heros-suie        heros-disciples.txt
+#   corbeau          heros-corbeau     heros-disciples.txt
+#   charlie          charlie           charlie.txt (nom historique conservé, pas de heros-charlie)
+#   mastoc           heros-mastoc      heros-mastoc.txt
+#   brise_os         heros-brise-os    heros-disciples.txt   (le tiret remplace le _ : un nom de sprite n'a que a-z, 0-9, -)
+#   pollen           heros-pollen      heros-pollen.txt
+#   rouage           heros-rouage      heros-disciples.txt
+#   lanterne         heros-lanterne    heros-disciples.txt
+#   Règle : sprite = `heros-` + id avec _ remplacé par - (sauf charlie). `competence` est jouée une fois.
+#
+# TOURS DIVINES (32×48, ancre 16 45 au pied, animations repos et attaque seulement)
+#   tour-sanctuaire   points : assassin (16 46, pied des marches), ombre (16 22, le regard dans le vide)
+#   tour-atelier      points : porte (16 43), marteau (20 36)
+#   Leurs socles sont ceux des autres tours (`socle`).
+#
+# UNITÉS ET STRUCTURES DES TOURS DIVINES
+#   assassin-ombre    32×32 unité translucide dérivée de Plume : repos, marche, attaque, competence (disparition), blesse, mort
+#   tourelle-atelier  32×32 ancre 16 30 (catégorie tour) : repos, attaque, apparition (unique), destruction (unique), mort (= destruction)
+#                     point tir (29 20) : la bouche de l'arbalète, d'où part le carreau
+#   piege             16×16 ancre 8 10 (catégorie decor) : repos (armé), declenche (unique, finit mâchoires fermées)
+#
+# EFFETS (sans contour ; `repos` en boucle, `impact` joué une fois)
+#   effet-voile-nuit        64×64 ancre 32 32  boucle de 6 cadres, le disque d'ombre (diamètre 60 px)
+#   effet-voile-nuit-tuile  16×16 ancre 8 8    disque d'ombre d'une tuile, pour une zone de rayon quelconque
+#   effet-griffes           48×48 ancre 24 24  Griffes d'Ombre : trois griffures (impact)
+#   effet-ingeniosite       32×32 ancre 16 24  roues d'or et étincelles à poser sur chaque tour boostée (boucle)
+#   effet-soufre            48×48 ancre 24 24  Fiole de Soufre : explosion (impact)
+#   effet-sabbat            32×32 ancre 16 24  Herbe de Sabbat : fumée verte et feuilles (impact)
+#   effet-sablier           32×32 ancre 16 16  Sablier : le sablier et l'anneau de givre (impact)
+#   effet-gel               32×32 ancre 16 24  givre autour d'un ennemi gelé (boucle)
+#   effet-soin              32×32 ancre 16 24  Lanterne : halo et croix de lumière sur un soigné (boucle)
+#   effet-rage              32×32 ancre 16 24  Brise-Os : flammes rouges au pied (boucle)
+#   effet-execution         32×32 ancre 16 16  croisement de griffures et encre sombre (impact)
+#   effet-ombre             32×32 ancre 16 24  volutes d'encre : apparition d'un assassin (impact)
+#   Sorts de Charlie : Chute du Colosse = onde-choc + etourdi, Renforts = fumee (existants). Pièges à Ressort = piege.
+#
+# ICÔNES (16×16 ancre 8 8, avec contour)
+#   sorts      icone-voile-nuit, icone-griffes-ombre, icone-pieges-ressort, icone-ingeniosite (+ icone-chute-colosse, icone-renforts)
+#   objets     icone-fiole-soufre, icone-herbe-sabbat, icone-griffe-renfort, icone-sablier
+#   branches   icone-branche-caserne|tir|magie|artillerie (même image que icone-caserne… : atlas partagé) |sorts|heros
+#   divers     icone-competence, icone-cadenas (existantes : icone-braise, icone-etoile, icone-arete, icone-vie)
+#   dieux      icone-dieu-plume (plume), icone-dieu-charlie (patte du Colosse), icone-dieu-pollen (engrenage à trois dents)
+#   portraits  icone-portrait-<héros> : 24×24 ancre 12 13, recadrés sur le haut du cadre de repos du héros (opération `rogne`)
+#              ids : plume suie corbeau charlie mastoc brise-os pollen rouage lanterne

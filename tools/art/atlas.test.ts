@@ -78,6 +78,37 @@ describe('atlas commité', () => {
     expect(attendus.filter((n) => !(n in commite.sprites))).toEqual([]);
   });
 
+  it('contient les sprites du jalon 2', () => {
+    const heros = ['plume', 'suie', 'corbeau', 'mastoc', 'brise-os', 'pollen', 'rouage', 'lanterne'];
+    const attendus = [
+      // Les 9 héros : Charlie garde son nom historique `charlie`, les 8 autres sont `heros-<id avec des tirets>`.
+      ...heros.map((h) => `heros-${h}`),
+      'tour-sanctuaire', 'tour-atelier', 'assassin-ombre', 'tourelle-atelier', 'piege',
+      'effet-voile-nuit', 'effet-voile-nuit-tuile', 'effet-griffes', 'effet-ingeniosite', 'effet-soufre', 'effet-sabbat',
+      'effet-sablier', 'effet-gel', 'effet-soin', 'effet-rage', 'effet-execution', 'effet-ombre',
+      'icone-voile-nuit', 'icone-griffes-ombre', 'icone-pieges-ressort', 'icone-ingeniosite',
+      'icone-fiole-soufre', 'icone-herbe-sabbat', 'icone-griffe-renfort', 'icone-sablier',
+      ...['caserne', 'tir', 'magie', 'artillerie', 'sorts', 'heros'].map((b) => `icone-branche-${b}`),
+      'icone-competence', 'icone-dieu-plume', 'icone-dieu-charlie', 'icone-dieu-pollen', 'icone-cadenas',
+      ...[...heros, 'charlie'].map((h) => `icone-portrait-${h}`),
+    ];
+    expect(attendus.filter((n) => !(n in commite.sprites))).toEqual([]);
+  });
+
+  it('donne aux 9 héros les six animations jouées en partie', () => {
+    for (const nom of ['charlie', ...['plume', 'suie', 'corbeau', 'mastoc', 'brise-os', 'pollen', 'rouage', 'lanterne'].map((h) => `heros-${h}`)]) {
+      expect(Object.keys(commite.sprites[nom]?.animations ?? {}), nom)
+        .toEqual(expect.arrayContaining(['repos', 'marche', 'attaque', 'competence', 'blesse', 'mort']));
+    }
+  });
+
+  it('donne à la tourelle et au piège les animations de leur cycle de vie', () => {
+    expect(Object.keys(commite.sprites['tourelle-atelier']?.animations ?? {}))
+      .toEqual(expect.arrayContaining(['repos', 'attaque', 'apparition', 'destruction']));
+    expect(Object.keys(commite.sprites.piege?.animations ?? {})).toEqual(['repos', 'declenche']);
+    expect(commite.sprites['tourelle-atelier']?.points?.tir).toBeDefined();
+  });
+
   it('donne aux unités et aux ennemis les animations dont le rendu a besoin', () => {
     for (const [nom, sprite] of Object.entries(commite.sprites)) {
       if (sprite.categorie !== 'unite' && sprite.categorie !== 'ennemi') continue;
@@ -87,17 +118,21 @@ describe('atlas commité', () => {
       }
     }
     expect(Object.keys(commite.sprites.charlie?.animations ?? {})).toContain('competence');
+    // La tourelle de l'Atelier Boiteux sort de terre et se disloque : deux animations de plus que les autres tours.
+    const sansCycleDeVie = (nom: string): boolean => nom !== 'tourelle-atelier';
     for (const [nom, sprite] of Object.entries(commite.sprites)) {
-      if (sprite.categorie === 'tour') expect(Object.keys(sprite.animations), nom).toEqual(['repos', 'attaque']);
+      if (sprite.categorie === 'tour' && sansCycleDeVie(nom)) expect(Object.keys(sprite.animations), nom).toEqual(['repos', 'attaque']);
     }
   });
 
-  it('respecte les tailles prévues : 32×32 (tours hautes en 32×48, boss en 64×64), tuiles et icônes en 16×16', () => {
+  it('respecte les tailles prévues : 32×32 (tours hautes en 32×48, boss en 64×64), tuiles et icônes en 16×16 (portraits en 24×24)', () => {
     for (const [nom, s] of Object.entries(commite.sprites)) {
       const taille = `${String(s.largeur)}×${String(s.hauteur)}`;
-      if (s.categorie === 'tuile' || s.categorie === 'icone' || s.categorie === 'projectile') expect(taille, nom).toBe('16×16');
+      if (nom.startsWith('icone-portrait-')) expect(taille, nom).toBe('24×24');
+      else if (s.categorie === 'tuile' || s.categorie === 'icone' || s.categorie === 'projectile') expect(taille, nom).toBe('16×16');
       else if (nom === 'boucher-vaudrelle') expect(taille).toBe('64×64');
       else if (s.categorie === 'tour') expect(['32×32', '32×48'], nom).toContain(taille);
+      else if (nom === 'piege') expect(taille).toBe('16×16');
       else if (s.categorie === 'unite' || s.categorie === 'ennemi') expect(taille, nom).toBe('32×32');
     }
   });

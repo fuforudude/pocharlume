@@ -1,0 +1,244 @@
+# Icônes du jalon 2, 16×16 comme celles du jalon 1 (avec contour, ancre au centre) : sorts de Plume et de Pollen, objets
+# consommables, branches de l'arbre, compétence, symboles des trois dieux, cadenas, portraits des héros.
+# Nommage : icone-<nom> ; icone-branche-<famille> ; icone-dieu-<dieu> ; icone-portrait-<héros> (24×24, voir plus bas).
+categorie icone
+palette commune
+taille 16 16
+ancre 8 8
+
+# Sort de Plume : Voile de Nuit (une nappe d'ombre aux yeux pâles).
+sprite icone-voile-nuit
+origine 2 3
+...UUUUUU...
+..Uuuuuuuuv.
+.guUuuuuuug
+guuuuuuuuuug
+guuLuuuuLuug
+guuuuuuuuuug
+guuuuuuuuuug
+.gugugugugu.
+..g.g.g.g.g.
+
+# Sort de Plume : Griffes d'Ombre (trois griffures pâles).
+sprite icone-griffes-ombre
+origine 1 2
+IL.IL.IL......
+IL.IL.IL......
+.IL.IL.IL.....
+.IL.IL.IL.....
+..IL.IL.IL....
+...IL.IL.IL...
+...IL.IL.IL...
+....IL.IL.IL..
+.....IL.IL.IL.
+.....IL.IL.IL.
+......IL.IL.IL
+
+# Sort de Pollen : Pièges à Ressort (la mâchoire du piège ouverte, son ressort dessous).
+sprite icone-pieges-ressort
+origine 0 2
+....PPPPPPPP
+..PPwPPPPPPwPP
+.PPw........wPP
+.Pw....qq....wP
+.P....qeeq....P
+.Pw....qq....wP
+.PPw........wPP
+..PPwPPPPPPwPP
+....PPPPPPPP
+.......g
+......g
+.......g
+
+# Sort de Pollen : Ingéniosité (roue d'or et étincelles).
+sprite icone-ingeniosite
+origine 0 0
+.....Y...Y.....
+....YYYYYYY..y.
+....YYYYYYY.yIy
+..YYYYYYYYYYYy.
+.YYYYYkkkYYYYY.
+..YYYkkfkkYYY..
+..YYYkfffkYYY..
+..YYYkkfkkYYY..
+.YYYYYkkkYYYYY.
+..YYYYYYYYYYY..
+....YYYYYYY....
+....YYYYYYY....
+.y...Y...Y.....
+yIy............
+.y.............
+
+# Objet : Fiole de Soufre (verre, liquide jaune).
+sprite icone-fiole-soufre
+origine 3 3
+....bb....
+....bB....
+...TiT....
+...T.T....
+..TiFFiT..
+.TiFFyFFi.
+.TFFyIyFT.
+.TFFFFFFT.
+.TEFFFFET.
+..TTTTTT..
+
+# Objet : Herbe de Sabbat (brin d'herbe sombre noué d'une cordelette rouge).
+sprite icone-herbe-sabbat
+origine 2 3
+..E.....E...
+.EEH...EEH..
+EEEHE.EEHE..
+.HEEEHEEH...
+..HEEEEH....
+...HEEH.....
+....JJ......
+....xJ......
+....JJ......
+
+# Objet : Griffe de Renfort (griffe d'os, cordon rouge).
+sprite icone-griffe-renfort
+origine 2 3
+xxxww.......
+wxxqqw......
+.wqqqqw.....
+..wqqqqw....
+...wqqqqw...
+....wqqqqw..
+.....wqqqw..
+......wqqw..
+.......wqw..
+........ww..
+
+# Objet : Sablier (verre pâle, sable doré).
+sprite icone-sablier
+origine 3 2
+YYYYYYYYY
+.TiiiiiT.
+.TiFFFiT.
+..TiFiT..
+...TFT...
+....T....
+...TiT...
+..TiYiT..
+.TiYYYiT.
+.TYYYYYT.
+YYYYYYYYY
+
+# Arbre d'améliorations, branche caserne : la même image que la famille de tours.
+sprite icone-branche-caserne
+derive icone-caserne
+
+sprite icone-branche-tir
+derive icone-tir
+
+sprite icone-branche-magie
+derive icone-magie
+
+sprite icone-branche-artillerie
+derive icone-artillerie
+
+# Arbre d'améliorations, branche sorts : étincelle magique à huit branches.
+sprite icone-branche-sorts
+origine 1 1
+......y......
+......F......
+..f...F...f..
+...f..F..f...
+....f.F.f....
+.....yyy.....
+yFFFFyIyFFFFy
+.....yyy.....
+....f.F.f....
+...f..F..f...
+..f...F...f..
+......F......
+......y......
+
+# Arbre d'améliorations, branche héros : un chat couronné.
+sprite icone-branche-heros
+origine 2 3
+.Y.Y.Y.Y.Y.
+.YYYYYYYYY.
+..uuuuuuu..
+.uuuuuuuuu.
+uUuuuuuuuuU
+uuLuuuuuLuu
+uuuuvuvuuuu
+.uuvvvvvuu.
+..uuuuuuu..
+
+# Compétence générique : une gemme d'or.
+sprite icone-competence
+origine 2 3
+.....YY.....
+....YFFY....
+...YFyyFY...
+..YFyIIyFY..
+.YFyIIIIyFY.
+..YFyIIyFY..
+...YFyyFY...
+....YFFY....
+.....YY.....
+
+# Symbole du dieu Plume : une plume noire au liseré pâle.
+sprite icone-dieu-plume
+origine 2 2
+.........vv.
+........vkkv
+.......vkkU.
+......vkkU..
+.....vkkkU..
+....vkkkU...
+...vkkkkU...
+..vkkkU.....
+.vkkkU......
+vkkU........
+kU..........
+
+# Symbole du dieu Charlie : la patte du Colosse, griffes dressées.
+sprite icone-dieu-charlie
+origine 1 1
+....ww..ww....
+....UU..UU....
+.wwUUUUUUUUww.
+.UUUUUUUUUUUU.
+UUUUUU..UUUUUU
+UUUU......UUUU
+.UU..UUUU..UU.
+...UUUUUUUU...
+...UuUUuUUU...
+..UUUuUUuUUU..
+...UUuUUuUU...
+...UUUuUUuU...
+.....UUUU.....
+
+# Symbole du dieu Pollen : un engrenage à trois dents.
+sprite icone-dieu-pollen
+origine 2 2
+.....OO.....
+.....OO.....
+.....OO.....
+...OOOOOO...
+..OOooooOO..
+..OookkooO..
+.OOokkkkoOO.
+.OOokkkkoOO.
+..OookkooO..
+OOOOooooOOOO
+O..OOOOOO..O
+.....OO.....
+
+# Cadenas : héros ou amélioration verrouillé.
+sprite icone-cadenas
+origine 4 3
+..TTTT..
+.T....T.
+.T....T.
+.T....T.
+YYYYYYYY
+YFFFFFFY
+YFFkkFFY
+YFFkkFFY
+YFFFkFFY
+YYYYYYYY
