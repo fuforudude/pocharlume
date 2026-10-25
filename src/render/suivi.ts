@@ -1,0 +1,512 @@
+// Suivi visuel des entités du moteur : le moteur ne garde ni l'image précédente d'une position, ni l'état d'une
+// animation. Après chaque pas, on y note pour chaque ennemi, unité, tour et projectile : où il était, où il
+// est, vers où il regarde, quelle action il joue (attaque, blessé, mort…). Le rendu interpole entre les deux
+// positions. Les événements du pas (tir, impact, mort…) déclenchent animations et effets.
+//
+// Tout est réutilisé d'un pas à l'autre : les objets sortis du jeu rejoignent une réserve, les effets
+// viennent d'un pool. Seule la création d'une entité nouvelle peut allouer (et seulement au début).
+import { DIEUX } from '../data/dieux';
+import type { Ennemi, EtatPartie, Evenement, Projectile, Tour, Unite } from '../engine';
+import type { Voie } from '../engine/definitions';
+import type { FamilleTour } from '../engine/etat';
+import { dureeAnimation } from './animations';
+import type { AtlasRendu, SpriteAtlas } from './atlas';
+import { TUILE } from './camera';
+import { TYPE_EFFET, type Effet, type PoolEffets } from './effets';
+import {
+  habillageSort,
+  nomPointDeTir,
+  projectileTourne,
+  spriteEnnemi,
+  spriteImpact,
+  spriteProjectile,
+  spriteTireur,
+  spriteTour,
+  spriteUnite,
+} from './habillage';
+
+export const CATEGORIE = { tour: 0, ennemi: 1, unite: 2 } as const;
+
+/** Durées en millisecondes de temps de jeu. */
+const DUREE_BLESSE = 180;
+const MAINTIEN_MARCHE = 160;
+const DUREE_TEXTE = 900;
+const DUREE_ORDRE = 500;
+const DUREE_RAYON = 130;
+const MAINTIEN_CADAVRE = 700;
+/** Au-delà de cette distance (tuiles) entre deux pas, c'est une téléportation (réapparition) : pas d'interpolation. */
+const SAUT_TUILES = 3;
+const MOUVEMENT_MIN2 = 1e-6;
+/** Rayon visible du dernier cadre de l'onde de choc, pour l'agrandir d'un entier jusqu'au rayon voulu. */
+const RAYON_SPRITE_ONDE = 15;
+
+/** Une entité dessinée : ennemi, unité alliée ou tour. */
+export class Visuel {
+  id = 0;
+  categorie: number = CATEGORIE.ennemi;
+  sprite: SpriteAtlas | null = null;
+  /** Ce qui a servi à choisir le sprite (type d'ennemi, nom des stats…) : s'il change, on le rechoisit. */
+  cleSprite = '';
+  /** Position précédente et courante, en tuiles. */
+  xPrec = 0;
+  yPrec = 0;
+  x = 0;
+  y = 0;
+  miroir = false;
+  marcheJusqua = -1e9;
+  actionAnim = 'attaque';
+  actionDebut = -1e9;
+  actionFin = -1e9;
+  blesseFin = -1e9;
+  /** Instant de la mort d'une unité, -1 si elle vit. */
+  mortDebut = -1;
+  pvPrec = 0;
+  vu = 0;
+  /** Décalage de boucle, pour que deux ennemis voisins n'animent pas en chœur. */
+  phase = 0;
+  /** Ordre de tri en profondeur de l'image courante, et position interpolée dans le tampon (pixels). */
+  cle = 0;
+  px = 0;
+  py = 0;
+  ennemi: Ennemi | null = null;
+  unite: Unite | null = null;
+  tour: Tour | null = null;
+  // Tours
+  famille: FamilleTour = 'caserne';
+  niveau = 0;
+  voie: Voie | null = null;
+  tireur: SpriteAtlas | null = null;
+  tireurMiroir = false;
+  /** Point d'où part le tir, en pixels depuis l'ancre du sprite de la tour. */
+  tirX = 0;
+  tirY = -12;
+}
+
+export class VisuelProjectile {
+  id = 0;
+  sprite: SpriteAtlas | null = null;
+  xPrec = 0;
+  yPrec = 0;
+  x = 0;
+  y = 0;
+  /** Distance totale à parcourir (tuiles) et départ visuel (pixels depuis la position de la tour). */
+  total = 0;
+  origineX = 0;
+  origineY = 0;
+  /** Hauteur de l'arc (pixels) pour les tirs de zone, qui retombent du ciel. */
+  arc = 0;
+  /** Le projectile vise un ennemi (touche à hauteur de corps) plutôt qu'un point du sol. */
+  surEnnemi = false;
+  /** Le sprite pointe vers la droite et se tourne vers la cible (flèches, traits) ; les autres tournent d'eux-mêmes. */
+  tourne = false;
+  angle = 0;
+  vu = 0;
+  projectile: Projectile | null = null;
+}
+
+function distance(ax: number, ay: number, bx: number, by: number): number {
+  return Math.sqrt((ax - bx) * (ax - bx) + (ay - by) * (ay - by));
+}
+
+export class Suivi {
+  readonly ennemis = new Map<number, Visuel>();
+  readonly unites = new Map<number, Visuel>();
+  readonly tours = new Map<number, Visuel>();
+  readonly projectiles = new Map<number, VisuelProjectile>();
+  /** Tours, ennemis et unités : l'ordre est retrié par le rendu à chaque image. */
+  readonly dessinables: Visuel[] = [];
+  readonly listeProjectiles: VisuelProjectile[] = [];
+  /** Par socle : une tour s'y dresse. */
+  socleOccupe: boolean[] = [];
+
+  private marque = 0;
+  private readonly libres: Visuel[] = [];
+  private readonly libresProjectiles: VisuelProjectile[] = [];
+
+  constructor(
+    private readonly atlas: AtlasRendu,
+    private readonly effets: PoolEffets,
+  ) {}
+
+  /** À appeler après chaque pas du moteur (`avancer` ou `step`), avec le temps de jeu en millisecondes. */
+  apresPas(etat: EtatPartie, temps: number): void {
+    this.marque++;
+    const marque = this.marque;
+    this.suivreTours(etat, marque);
+    this.suivreEnnemis(etat, temps, marque);
+    this.suivreUnites(etat, temps, marque);
+    this.suivreProjectiles(etat, marque);
+    for (const evenement of etat.evenements) this.evenement(etat, evenement, temps);
+    if (this.tours.size !== etat.tours.length) this.retirer(this.tours, marque);
+    if (this.ennemis.size !== etat.ennemis.length) this.retirer(this.ennemis, marque);
+    if (this.unites.size !== etat.unites.length) this.retirer(this.unites, marque);
+    if (this.projectiles.size !== etat.projectiles.length) this.retirerProjectiles(marque);
+  }
+
+  // --- Création et suppression ---
+
+  private creer(categorie: number, id: number, x: number, y: number): Visuel {
+    const v = this.libres.pop() ?? new Visuel();
+    v.id = id;
+    v.categorie = categorie;
+    v.sprite = null;
+    v.cleSprite = '';
+    v.xPrec = x;
+    v.yPrec = y;
+    v.x = x;
+    v.y = y;
+    v.miroir = false;
+    v.marcheJusqua = -1e9;
+    v.actionAnim = 'attaque';
+    v.actionDebut = -1e9;
+    v.actionFin = -1e9;
+    v.blesseFin = -1e9;
+    v.mortDebut = -1;
+    v.pvPrec = 0;
+    v.vu = 0;
+    v.phase = (id * 137) % 997;
+    v.cle = 0;
+    v.px = 0;
+    v.py = 0;
+    v.ennemi = null;
+    v.unite = null;
+    v.tour = null;
+    v.famille = 'caserne';
+    v.niveau = 0;
+    v.voie = null;
+    v.tireur = null;
+    v.tireurMiroir = false;
+    v.tirX = 0;
+    v.tirY = -12;
+    this.dessinables.push(v);
+    return v;
+  }
+
+  private retirer(carte: Map<number, Visuel>, marque: number): void {
+    for (const [id, v] of carte) {
+      if (v.vu === marque) continue;
+      carte.delete(id);
+      const i = this.dessinables.indexOf(v);
+      const dernier = this.dessinables.pop();
+      if (i !== -1 && dernier && dernier !== v) this.dessinables[i] = dernier;
+      v.ennemi = null;
+      v.unite = null;
+      v.tour = null;
+      this.libres.push(v);
+    }
+  }
+
+  private retirerProjectiles(marque: number): void {
+    for (const [id, v] of this.projectiles) {
+      if (v.vu === marque) continue;
+      this.projectiles.delete(id);
+      const i = this.listeProjectiles.indexOf(v);
+      const dernier = this.listeProjectiles.pop();
+      if (i !== -1 && dernier && dernier !== v) this.listeProjectiles[i] = dernier;
+      v.projectile = null;
+      this.libresProjectiles.push(v);
+    }
+  }
+
+  // --- Synchronisation avec l'état ---
+
+  private deplacer(v: Visuel, x: number, y: number, temps: number): void {
+    const dx = x - v.x;
+    const dy = y - v.y;
+    if (dx * dx + dy * dy > SAUT_TUILES * SAUT_TUILES) {
+      v.xPrec = x;
+      v.yPrec = y;
+    } else {
+      v.xPrec = v.x;
+      v.yPrec = v.y;
+      if (dx * dx + dy * dy > MOUVEMENT_MIN2) {
+        v.marcheJusqua = temps + MAINTIEN_MARCHE;
+        if (dx > 0.001) v.miroir = false;
+        else if (dx < -0.001) v.miroir = true;
+      }
+    }
+    v.x = x;
+    v.y = y;
+  }
+
+  private suivreTours(etat: EtatPartie, marque: number): void {
+    const occupe = this.socleOccupe;
+    occupe.length = etat.niveau.carte.socles.length;
+    occupe.fill(false);
+    for (const t of etat.tours) {
+      occupe[t.socle] = true;
+      let v = this.tours.get(t.id);
+      if (!v) {
+        v = this.creer(CATEGORIE.tour, t.id, t.x, t.y);
+        this.tours.set(t.id, v);
+      }
+      if (v.niveau !== t.niveau || v.voie !== t.voie || v.sprite === null) this.habillerTour(v, t);
+      v.tour = t;
+      v.vu = marque;
+    }
+  }
+
+  private habillerTour(v: Visuel, t: Tour): void {
+    v.famille = t.famille;
+    v.niveau = t.niveau;
+    v.voie = t.voie;
+    v.sprite = this.atlas.sprite(spriteTour(t.famille, t.niveau, t.voie)) ?? null;
+    const nomTireur = spriteTireur(t.famille, t.niveau, t.voie);
+    v.tireur = nomTireur ? (this.atlas.sprite(nomTireur) ?? null) : null;
+    const nomPoint = nomPointDeTir(t.famille);
+    const point = nomPoint ? v.sprite?.points?.[nomPoint] : undefined;
+    if (point && v.sprite) {
+      v.tirX = point.x - v.sprite.ancre.x;
+      v.tirY = point.y - v.sprite.ancre.y;
+    } else {
+      v.tirX = 0;
+      v.tirY = -12;
+    }
+  }
+
+  private suivreEnnemis(etat: EtatPartie, temps: number, marque: number): void {
+    for (const e of etat.ennemis) {
+      let v = this.ennemis.get(e.id);
+      if (!v) {
+        v = this.creer(CATEGORIE.ennemi, e.id, e.x, e.y);
+        v.cleSprite = e.type;
+        v.sprite = this.atlas.sprite(spriteEnnemi(e.type)) ?? null;
+        v.pvPrec = e.pv;
+        this.ennemis.set(e.id, v);
+      } else {
+        this.deplacer(v, e.x, e.y, temps);
+        if (e.pv < v.pvPrec - 1e-6 && temps >= v.actionFin) v.blesseFin = temps + DUREE_BLESSE;
+        v.pvPrec = e.pv;
+      }
+      v.ennemi = e;
+      v.vu = marque;
+    }
+  }
+
+  private suivreUnites(etat: EtatPartie, temps: number, marque: number): void {
+    for (const u of etat.unites) {
+      let v = this.unites.get(u.id);
+      if (!v) {
+        v = this.creer(CATEGORIE.unite, u.id, u.x, u.y);
+        this.unites.set(u.id, v);
+      }
+      if (v.cleSprite !== u.stats.nom) {
+        v.cleSprite = u.stats.nom;
+        v.sprite = this.atlas.sprite(spriteUnite(u.genre, u.stats.nom)) ?? null;
+      }
+      if (u.mort) {
+        if (v.mortDebut < 0) v.mortDebut = temps;
+      } else {
+        if (v.mortDebut >= 0) {
+          v.mortDebut = -1;
+          v.xPrec = u.x;
+          v.yPrec = u.y;
+          v.x = u.x;
+          v.y = u.y;
+        } else {
+          this.deplacer(v, u.x, u.y, temps);
+        }
+        if (u.pv < v.pvPrec - 1e-6 && temps >= v.actionFin) v.blesseFin = temps + DUREE_BLESSE;
+      }
+      v.pvPrec = u.pv;
+      v.unite = u;
+      v.vu = marque;
+    }
+  }
+
+  private suivreProjectiles(etat: EtatPartie, marque: number): void {
+    for (const p of etat.projectiles) {
+      let v = this.projectiles.get(p.id);
+      if (!v) {
+        v = this.libresProjectiles.pop() ?? new VisuelProjectile();
+        v.id = p.id;
+        const nomSprite = spriteProjectile(p.stats.nom);
+        v.sprite = this.atlas.sprite(nomSprite) ?? null;
+        v.xPrec = p.x;
+        v.yPrec = p.y;
+        v.x = p.x;
+        v.y = p.y;
+        v.total = Math.max(0.01, distance(p.x, p.y, p.cx, p.cy));
+        const tour = this.tours.get(p.tour);
+        v.origineX = tour ? tour.tirX : 0;
+        v.origineY = tour ? tour.tirY : -12;
+        v.surEnnemi = p.cible >= 0;
+        v.arc = p.stats.zone > 0 ? Math.min(40, Math.round(v.total * TUILE * 0.35)) : 0;
+        v.tourne = projectileTourne(nomSprite);
+        v.angle = Math.atan2(p.cy - p.y, p.cx - p.x);
+        this.projectiles.set(p.id, v);
+        this.listeProjectiles.push(v);
+      } else {
+        v.xPrec = v.x;
+        v.yPrec = v.y;
+        v.x = p.x;
+        v.y = p.y;
+        const dx = p.cx - p.x;
+        const dy = p.cy - p.y;
+        if (dx * dx + dy * dy > 1e-6) v.angle = Math.atan2(dy, dx);
+      }
+      v.projectile = p;
+      v.vu = marque;
+    }
+  }
+
+  // --- Événements du moteur ---
+
+  private lancerAction(v: Visuel | undefined, anim: string, temps: number): void {
+    if (!v?.sprite) return;
+    const a = this.atlas.animation(v.sprite, anim);
+    v.actionAnim = anim;
+    v.actionDebut = temps;
+    v.actionFin = temps + (a ? dureeAnimation(a) : 200);
+  }
+
+  private regarder(v: Visuel | undefined, versX: number): void {
+    if (!v) return;
+    if (versX < v.x - 0.001) v.miroir = true;
+    else if (versX > v.x + 0.001) v.miroir = false;
+  }
+
+  /** Joue une animation d'atlas une fois, centrée sur un point du monde (en tuiles). */
+  private effetSprite(nom: string, xTuiles: number, yTuiles: number, temps: number, echelle = 1, decalageY = 0): Effet | null {
+    const sprite = this.atlas.sprite(nom);
+    if (!sprite) return null;
+    const anim = this.atlas.animation(sprite, 'impact');
+    const e = this.effets.prendre(TYPE_EFFET.sprite, temps, anim ? dureeAnimation(anim) : 300);
+    e.sprite = sprite;
+    e.anim = 'impact';
+    e.x = Math.round(xTuiles * TUILE);
+    e.y = Math.round(yTuiles * TUILE + decalageY);
+    e.echelle = echelle;
+    return e;
+  }
+
+  private marqueOrdre(x: number, y: number, temps: number, couleur: string): void {
+    const e = this.effets.prendre(TYPE_EFFET.ordre, temps, DUREE_ORDRE);
+    e.x = Math.round(x * TUILE);
+    e.y = Math.round(y * TUILE);
+    e.valeur = 9;
+    e.couleur = couleur;
+  }
+
+  private evenement(etat: EtatPartie, ev: Evenement, temps: number): void {
+    switch (ev.type) {
+      case 'tir': {
+        const tour = this.tours.get(ev.tour);
+        const cible = this.ennemis.get(ev.cible);
+        this.lancerAction(tour, 'attaque', temps);
+        if (tour && cible) tour.tireurMiroir = cible.x < tour.x;
+        if (ev.projectile === -1 && tour && cible) {
+          const e = this.effets.prendre(TYPE_EFFET.rayon, temps, DUREE_RAYON);
+          e.x = Math.round(tour.x * TUILE + tour.tirX);
+          e.y = Math.round(tour.y * TUILE + tour.tirY);
+          e.x2 = Math.round(cible.x * TUILE);
+          e.y2 = Math.round(cible.y * TUILE - 8);
+          e.couleur = '#ff9a4a';
+        }
+        return;
+      }
+      case 'impact': {
+        const nom = this.tours.get(ev.tour)?.tour?.stats.nom ?? '';
+        this.effetSprite(spriteImpact(nom), ev.x, ev.y, temps, ev.zone > 0 ? 2 : 1, ev.zone > 0 ? 0 : -6);
+        return;
+      }
+      case 'onde': {
+        this.lancerAction(this.tours.get(ev.tour), 'attaque', temps);
+        this.effetSprite('onde-choc', ev.x, ev.y, temps, Math.max(1, Math.round((ev.rayon * TUILE) / RAYON_SPRITE_ONDE)), -2);
+        return;
+      }
+      case 'coup': {
+        const unite = this.unites.get(ev.unite);
+        const ennemi = this.ennemis.get(ev.ennemi);
+        this.lancerAction(unite, 'attaque', temps);
+        if (ennemi) {
+          this.regarder(unite, ennemi.x);
+          this.effetSprite('sang', ennemi.x, ennemi.y, temps, 1, -8);
+        }
+        return;
+      }
+      case 'coup_ennemi': {
+        const ennemi = this.ennemis.get(ev.ennemi);
+        const unite = this.unites.get(ev.unite);
+        this.lancerAction(ennemi, 'attaque', temps);
+        if (unite) this.regarder(ennemi, unite.x);
+        return;
+      }
+      case 'devore': {
+        const ennemi = this.ennemis.get(ev.ennemi);
+        const unite = this.unites.get(ev.unite);
+        this.lancerAction(ennemi, 'attaque', temps);
+        if (unite) {
+          this.regarder(ennemi, unite.x);
+          this.effetSprite('sang', unite.x, unite.y, temps, 1, -8);
+        }
+        return;
+      }
+      case 'mort': {
+        const v = this.ennemis.get(ev.ennemi);
+        const sprite = this.atlas.sprite(spriteEnnemi(ev.typeEnnemi));
+        if (sprite) {
+          const anim = this.atlas.animation(sprite, 'mort');
+          const f = this.effets.prendre(TYPE_EFFET.fantome, temps, (anim ? dureeAnimation(anim) : 0) + MAINTIEN_CADAVRE);
+          f.sprite = sprite;
+          f.anim = 'mort';
+          f.miroir = v?.miroir ?? false;
+          f.x = Math.round(ev.x * TUILE);
+          f.y = Math.round(ev.y * TUILE);
+        }
+        if (ev.prime > 0) {
+          const e = this.effets.prendre(TYPE_EFFET.texte, temps, DUREE_TEXTE);
+          e.x = Math.round(ev.x * TUILE);
+          e.y = Math.round(ev.y * TUILE) - 18;
+          e.valeur = ev.prime;
+          e.couleur = '#e8c860';
+        }
+        return;
+      }
+      case 'mort_unite': {
+        const v = this.unites.get(ev.unite);
+        if (v && v.mortDebut < 0) v.mortDebut = temps;
+        this.effetSprite('sang', ev.x, ev.y, temps, 1, -8);
+        return;
+      }
+      case 'reapparition':
+      case 'apparition':
+      case 'fuite':
+      case 'vague':
+      case 'fin':
+        return;
+      case 'invocation':
+        this.effetSprite('fumee', ev.x, ev.y, temps, 1, -4);
+        return;
+      case 'construction': {
+        const tour = this.tours.get(ev.tour);
+        if (tour) this.effetSprite('fumee', tour.x, tour.y, temps, 2, -6);
+        return;
+      }
+      case 'amelioration': {
+        const tour = this.tours.get(ev.tour);
+        if (tour) this.effetSprite('impact', tour.x, tour.y, temps, 2, -14);
+        return;
+      }
+      case 'vente': {
+        const socle = etat.niveau.carte.socles[ev.socle];
+        if (socle) this.effetSprite('fumee', socle.x, socle.y, temps, 2, -6);
+        return;
+      }
+      case 'ralliement':
+        this.marqueOrdre(ev.x, ev.y, temps, '#7fc6f0');
+        return;
+      case 'ordre_heros':
+        this.marqueOrdre(ev.x, ev.y, temps, '#e8d9a0');
+        return;
+      case 'sort': {
+        const def = Object.hasOwn(DIEUX, etat.config.dieu) ? DIEUX[etat.config.dieu as keyof typeof DIEUX].sorts[ev.emplacement] : undefined;
+        const habillage = habillageSort(etat.config.dieu, ev.emplacement);
+        const echelle = def ? Math.max(1, Math.round((def.rayon * TUILE) / RAYON_SPRITE_ONDE)) : 1;
+        this.effetSprite(habillage.effet, ev.x, ev.y, temps, habillage.effet === 'onde-choc' ? echelle : 1, -2);
+        if (habillage.animationHeros) this.lancerAction(this.unites.get(etat.heros), habillage.animationHeros, temps);
+        return;
+      }
+    }
+  }
+}
