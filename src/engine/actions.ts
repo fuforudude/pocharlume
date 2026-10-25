@@ -13,6 +13,7 @@ export type Action =
 
 export type RaisonRefus =
   | 'partie_terminee'
+  | 'action_invalide'
   | 'socle_inconnu'
   | 'socle_occupe'
   | 'socle_vide'
@@ -29,6 +30,7 @@ export type RaisonRefus =
   | 'heros_mort'
   | 'sort_inconnu'
   | 'sort_en_recharge'
+  | 'vague_en_cours'
   | 'plus_de_vague';
 
 export type ResultatAction = { ok: true } | { ok: false; raison: RaisonRefus };

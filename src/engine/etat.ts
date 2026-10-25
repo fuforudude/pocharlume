@@ -27,6 +27,8 @@ export interface ConfigPartie {
   dieu: string;
   /** Niveau du héros (1 à 10), fourni par la progression. */
   niveauHeros: number;
+  /** VERSION_DONNEES de src/data/version.ts : une partie ne se rejoue qu'avec les données de sa version. */
+  versionDonnees: number;
 }
 
 /** Chemin précalculé : longueurs cumulées et directions unitaires de chaque segment. */
@@ -166,6 +168,7 @@ export interface EntreeJournal {
 
 export interface EtatPartie {
   version: number;
+  versionDonnees: number;
   niveau: Niveau;
   config: ConfigPartie;
   chemins: CheminCalcule[];
@@ -184,8 +187,14 @@ export interface EtatPartie {
   heros: number;
   sorts: EtatSort[];
   prochainId: number;
-  /** Événements du dernier pas (actions comprises), lus par le rendu pour les effets et les sons. */
+  /**
+   * Événements du pas `evenementsPas`, lus par le rendu pour les effets et les sons : ceux des actions
+   * appliquées à ce pas (par `avancer` ou `appliquerAction` juste avant `step`) puis ceux de la simulation.
+   * Ils sont remplacés dès que quelque chose se passe au pas suivant. Partie terminée : « fin » reste
+   * lisible après le dernier pas, puis le pas suivant (`step` ou `avancer`) vide la liste.
+   */
   evenements: Evenement[];
+  evenementsPas: number;
   /** Actions acceptées, horodatées : avec la config, elles suffisent à rejouer la partie. */
   journal: EntreeJournal[];
 }

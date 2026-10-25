@@ -12,7 +12,7 @@ export function calculerChemin(chemin: CheminCarte): CheminCalcule {
     const a = points[i - 1];
     const b = points[i];
     if (!a || !b) continue;
-    const longueur = Math.hypot(b.x - a.x, b.y - a.y);
+    const longueur = Math.sqrt((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y));
     dirX.push(longueur > 0 ? (b.x - a.x) / longueur : 0);
     dirY.push(longueur > 0 ? (b.y - a.y) / longueur : 0);
     total += longueur;
@@ -55,7 +55,9 @@ function distanceAuSegment(px: number, py: number, a: Point, b: Point): number {
   const vy = b.y - a.y;
   const l2 = vx * vx + vy * vy;
   const t = l2 > 0 ? Math.max(0, Math.min(1, ((px - a.x) * vx + (py - a.y) * vy) / l2)) : 0;
-  return Math.hypot(px - (a.x + t * vx), py - (a.y + t * vy));
+  const dx = px - (a.x + t * vx);
+  const dy = py - (a.y + t * vy);
+  return Math.sqrt(dx * dx + dy * dy);
 }
 
 /** Distance d'un point au chemin le plus proche. */

@@ -1,12 +1,15 @@
 // Cycle d'une partie : création, pas de simulation, fin, rejeu d'un journal, sérialisation.
 import { REGLES } from '../data/regles';
+import { VERSION_DONNEES } from '../data/version';
 import type { Action, ResultatAction } from './actions';
+import { ajusterMontant } from './argent';
 import { calculerChemin } from './chemins';
 import { appliquerAction } from './commandes';
 import { defDieu, defDifficulte, defEnnemi } from './contenu';
 import type { DefHeros, Niveau, StatsCombattant } from './definitions';
 import { mettreAJourEnnemis } from './ennemis';
 import { VERSION_ETAT, type ConfigPartie, type EntreeJournal, type EtatPartie } from './etat';
+import { ouvrirPas } from './evenements';
 import { mettreAJourSorts } from './sorts';
 import { enPas, PAS_PAR_SECONDE } from './temps';
 import { mettreAJourProjectiles, mettreAJourTours } from './tours';
@@ -14,8 +17,6 @@ import { creerUnite, estRetiree, mettreAJourUnites } from './unites';
 import { mettreAJourVagues } from './vagues';
 
 export { appliquerAction, coutConstruction, validerAction, valeurRevente } from './commandes';
-
-export const NIVEAU_HEROS_MAX = 10;
 
 /** Rejeu sans pas final : au-delà de 3 heures de jeu, on s'arrête (partie sans fin). */
 const PAS_MAX_REJEU = 3 * 3600 * PAS_PAR_SECONDE;
@@ -48,23 +49,31 @@ function verifierNiveau(niveau: Niveau): void {
   niveau.vagues.forEach((vague, i) => {
     for (const p of vague.paquets) {
       if (!defEnnemi(p.ennemi)) throw new Error(`Vague ${String(i + 1)} : ennemi inconnu ${p.ennemi}`);
-      if (!niveau.carte.chemins[p.chemin]) throw new Error(`Vague ${String(i + 1)} : chemin inconnu ${String(p.chemin)}`);
+      if (!Number.isInteger(p.chemin) || p.chemin < 0 || p.chemin >= niveau.carte.chemins.length) throw new Error(`Vague ${String(i + 1)} : chemin inconnu ${String(p.chemin)}`);
     }
   });
 }
 
+function verifierVersionDonnees(version: unknown): void {
+  if (version !== VERSION_DONNEES) {
+    throw new Error(`Partie prévue pour la version des données ${String(version)}, le jeu est en version ${String(VERSION_DONNEES)}`);
+  }
+}
+
 export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
+  verifierVersionDonnees(config.versionDonnees);
   const difficulte = defDifficulte(config.difficulte);
   if (!difficulte) throw new Error(`Difficulté inconnue : ${config.difficulte}`);
   const dieu = defDieu(config.dieu);
   if (!dieu) throw new Error(`Dieu inconnu : ${config.dieu}`);
-  if (!Number.isInteger(config.niveauHeros) || config.niveauHeros < 1 || config.niveauHeros > NIVEAU_HEROS_MAX) {
+  if (!Number.isInteger(config.niveauHeros) || config.niveauHeros < 1 || config.niveauHeros > REGLES.niveauHerosMax) {
     throw new Error(`Niveau de héros invalide : ${String(config.niveauHeros)}`);
   }
   verifierNiveau(niveau);
   const copie = JSON.parse(JSON.stringify(niveau)) as Niveau;
   const etat: EtatPartie = {
     version: VERSION_ETAT,
+    versionDonnees: VERSION_DONNEES,
     niveau: copie,
     config: { ...config },
     chemins: copie.carte.chemins.map(calculerChemin),
@@ -74,7 +83,7 @@ export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
     etoiles: 0,
     vies: difficulte.vies,
     viesDepart: difficulte.vies,
-    aretes: Math.round(niveau.aretesDepart * difficulte.aretesDepart),
+    aretes: ajusterMontant(niveau.aretesDepart, difficulte.aretesDepart),
     vagues: { lancees: 0, prochaine: copie.vagues.length > 0 ? enPas(REGLES.delaiPremiereVague) : -1, paquets: [] },
     ennemis: [],
     unites: [],
@@ -84,6 +93,7 @@ export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
     sorts: dieu.sorts.map((s) => ({ recharge: enPas(s.rechargeInitiale) })),
     prochainId: 1,
     evenements: [],
+    evenementsPas: 0,
     journal: [],
   };
   const depart = copie.carte.departHeros;
@@ -128,6 +138,7 @@ function verifierFin(etat: EtatPartie): void {
 
 /** Le pas de simulation lui-même, dans un ordre fixe. */
 function simuler(etat: EtatPartie): void {
+  ouvrirPas(etat);
   mettreAJourVagues(etat);
   mettreAJourEnnemis(etat);
   mettreAJourUnites(etat);
@@ -140,26 +151,31 @@ function simuler(etat: EtatPartie): void {
 }
 
 /**
- * Un pas complet : vide les événements, applique les actions de ce pas (dans l'ordre), puis simule 1/30 s.
- * Partie terminée : rien ne bouge et les actions sont refusées.
+ * Un pas complet : applique les actions de ce pas (dans l'ordre), puis simule 1/30 s. Les événements des
+ * actions et de la simulation se retrouvent ensemble dans `etat.evenements` (règle dans evenements.ts).
+ * Partie terminée : rien ne bouge, les actions sont refusées et les événements sont vidés.
  */
 export function avancer(etat: EtatPartie, actions: readonly Action[]): ResultatAction[] {
-  if (etat.statut !== 'en_cours') return actions.map(() => ({ ok: false, raison: 'partie_terminee' }));
-  etat.evenements = [];
+  if (etat.statut !== 'en_cours') {
+    etat.evenements = [];
+    return actions.map(() => ({ ok: false, raison: 'partie_terminee' }));
+  }
   const resultats = actions.map((a) => appliquerAction(etat, a));
   simuler(etat);
   return resultats;
 }
 
-/** Un pas sans action. */
+/** Un pas sans action ; garde les événements des actions appliquées juste avant à ce même pas. */
 export function step(etat: EtatPartie): void {
-  if (etat.statut !== 'en_cours') return;
-  etat.evenements = [];
+  if (etat.statut !== 'en_cours') {
+    etat.evenements = [];
+    return;
+  }
   simuler(etat);
 }
 
 /**
- * Rejoue une partie à partir de sa config et de son journal. S'arrête au pas `pasFinal` s'il est donné,
+ * Rejoue une partie à partir de sa config (version des données comprise) et de son journal. S'arrête au pas `pasFinal` s'il est donné,
  * sinon à la fin de la partie.
  */
 export function rejouer(niveau: Niveau, config: ConfigPartie, journal: readonly EntreeJournal[], pasFinal?: number): EtatPartie {
@@ -182,5 +198,6 @@ export function serialiser(etat: EtatPartie): string {
 export function deserialiser(texte: string): EtatPartie {
   const etat = JSON.parse(texte) as EtatPartie;
   if (etat.version !== VERSION_ETAT) throw new Error(`Etat de partie en version ${String(etat.version)}, attendue ${String(VERSION_ETAT)}`);
+  verifierVersionDonnees(etat.versionDonnees);
   return etat;
 }

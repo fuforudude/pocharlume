@@ -1,6 +1,12 @@
 // Événements émis pendant un pas, pour que le rendu joue effets et sons sans que le moteur le connaisse.
+//
+// Règle : `etat.evenements` contient les événements d'un seul pas, `etat.evenementsPas`. Ce pas réunit
+// les actions appliquées à ce pas (via `avancer`, ou `appliquerAction` juste avant `step`) et la
+// simulation qui suit. La liste est remplacée dès que quelque chose se passe au pas suivant, donc le
+// rendu la lit après chaque `step` ou `avancer`. Partie terminée : « fin » se lit après le dernier pas,
+// puis l'appel suivant à `step` ou `avancer` vide la liste.
 import type { Voie } from './definitions';
-import type { FamilleTour, GenreUnite, Statut } from './etat';
+import type { EtatPartie, FamilleTour, GenreUnite, Statut } from './etat';
 
 export type Evenement =
   | { type: 'vague'; index: number; bonus: number }
@@ -24,3 +30,10 @@ export type Evenement =
   | { type: 'ralliement'; tour: number; x: number; y: number }
   | { type: 'ordre_heros'; x: number; y: number }
   | { type: 'fin'; statut: Statut; etoiles: number };
+
+/** Ouvre la liste d'événements du pas courant : celle d'un pas précédent est remplacée. */
+export function ouvrirPas(etat: EtatPartie): void {
+  if (etat.evenementsPas === etat.pas) return;
+  etat.evenements = [];
+  etat.evenementsPas = etat.pas;
+}

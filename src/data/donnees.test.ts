@@ -115,7 +115,7 @@ describe('niveau de test de la région 1', () => {
       expect(s.y).toBeLessThan(carte.hauteur);
       expect(distanceAuxChemins(chemins, s.x, s.y)).toBeGreaterThan(1);
       expect(distanceAuxChemins(chemins, s.ralliement.x, s.ralliement.y)).toBeLessThanOrEqual(REGLES.distanceMaxChemin);
-      expect(Math.hypot(s.ralliement.x - s.x, s.ralliement.y - s.y)).toBeLessThanOrEqual(porteeCaserne);
+      expect(Math.sqrt((s.ralliement.x - s.x) * (s.ralliement.x - s.x) + (s.ralliement.y - s.y) * (s.ralliement.y - s.y))).toBeLessThanOrEqual(porteeCaserne);
     }
     expect(distanceAuxChemins(chemins, carte.departHeros.x, carte.departHeros.y)).toBeLessThanOrEqual(REGLES.distanceMaxChemin);
   });

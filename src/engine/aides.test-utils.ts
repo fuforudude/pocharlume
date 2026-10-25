@@ -1,11 +1,18 @@
-// Outils partagés par les tests du moteur : configuration type, cartes d'essai, avance rapide.
+// Outils réservés aux tests du moteur (suffixe .test-utils.ts : jamais importé par le jeu, donc absent du
+// build) : configuration type, cartes d'essai, avance rapide.
 import { ENNEMIS } from '../data/ennemis';
+import { VERSION_DONNEES } from '../data/version';
 import type { DefEnnemi, Niveau, Vague } from './definitions';
 import type { ConfigPartie, EtatPartie } from './etat';
 import { PAS_PAR_SECONDE } from './temps';
 import { step } from './partie';
 
-export const CONFIG: ConfigPartie = { graine: 42, difficulte: 'matou', dieu: 'charlie', niveauHeros: 1 };
+export const CONFIG: ConfigPartie = { graine: 42, difficulte: 'matou', dieu: 'charlie', niveauHeros: 1, versionDonnees: VERSION_DONNEES };
+
+/** Distance entre deux points, sans Math.hypot (interdit dans le moteur). */
+export function distance(ax: number, ay: number, bx: number, by: number): number {
+  return Math.sqrt((ax - bx) * (ax - bx) + (ay - by) * (ay - by));
+}
 
 /** Vague dont l'unique ennemi n'apparaît qu'après une heure : la partie reste en cours. */
 export const VAGUE_LOINTAINE: Vague = {

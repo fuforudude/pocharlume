@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { DIFFICULTES } from '../data/difficultes';
 import { NIVEAU_TEST } from '../data/niveaux/region1';
 import { REGLES } from '../data/regles';
-import { CONFIG, avancerPas, avancerSecondes, ennemiEssai, niveauEssai } from './aides-tests';
+import { VERSION_DONNEES } from '../data/version';
+import { CONFIG, avancerPas, avancerSecondes, ennemiEssai, niveauEssai } from './aides.test-utils';
 import { ajouterEnnemi } from './ennemis';
 import { appliquerAction, avancer, creerPartie, etoilesPour, step, validerAction } from './partie';
 import { PAS_PAR_SECONDE } from './temps';
@@ -63,16 +64,32 @@ describe('vagues', () => {
     expect(etat.ennemis.every((e) => e.type === 'paysan_affame' && e.chemin === 0)).toBe(true);
   });
 
-  it('donne un bonus d’arêtes quand le joueur appelle une vague en avance, sauf la première', () => {
+  it('n’autorise l’appel qu’avant la vague 1 ou une fois la vague en cours entièrement apparue', () => {
+    const etat = creerPartie(NIVEAU_TEST, CONFIG);
+    expect(validerAction(etat, { type: 'appelerVague' })).toBeNull();
+    expect(avancer(etat, [{ type: 'appelerVague' }])).toEqual([{ ok: true }]);
+    expect(appliquerAction(etat, { type: 'appelerVague' })).toEqual({ ok: false, raison: 'vague_en_cours' });
+    // Vague 1 : 6 paysans espacés de 1,5 s, le dernier apparaît au pas 225.
+    avancerPas(etat, 224);
+    expect(etat.vagues.paquets).toHaveLength(1);
+    expect(validerAction(etat, { type: 'appelerVague' })).toBe('vague_en_cours');
+    avancerPas(etat, 1);
+    expect(etat.vagues.paquets).toHaveLength(0);
+    expect(validerAction(etat, { type: 'appelerVague' })).toBeNull();
+  });
+
+  it('donne un bonus d’arêtes proportionnel au compte à rebours restant, sauf pour la première vague', () => {
     const etat = creerPartie(NIVEAU_TEST, CONFIG);
     const depart = etat.aretes;
-    expect(avancer(etat, [{ type: 'appelerVague' }])).toEqual([{ ok: true }]);
+    avancer(etat, [{ type: 'appelerVague' }]);
     expect(etat.aretes).toBe(depart);
+    avancerSecondes(etat, 8);
     const restant = etat.vagues.prochaine - etat.pas;
-    const bonus = Math.floor((restant / PAS_PAR_SECONDE) * REGLES.aretesParSecondeAvance);
+    const bonus = Math.floor((restant * REGLES.aretesParSecondeAvance) / PAS_PAR_SECONDE);
     expect(bonus).toBeGreaterThan(0);
-    appliquerAction(etat, { type: 'appelerVague' });
-    expect(etat.aretes).toBe(depart + bonus);
+    const avant = etat.aretes;
+    expect(appliquerAction(etat, { type: 'appelerVague' })).toEqual({ ok: true });
+    expect(etat.aretes).toBe(avant + bonus);
     expect(etat.evenements).toContainEqual({ type: 'vague', index: 1, bonus });
   });
 
@@ -80,6 +97,7 @@ describe('vagues', () => {
     const etat = creerPartie(NIVEAU_TEST, CONFIG);
     for (let i = 0; i < NIVEAU_TEST.vagues.length; i++) {
       expect(appliquerAction(etat, { type: 'appelerVague' })).toEqual({ ok: true });
+      while (etat.vagues.paquets.length > 0) step(etat);
     }
     expect(validerAction(etat, { type: 'appelerVague' })).toBe('plus_de_vague');
     expect(appliquerAction(etat, { type: 'appelerVague' })).toEqual({ ok: false, raison: 'plus_de_vague' });
@@ -93,19 +111,60 @@ describe('vagues', () => {
   });
 });
 
-describe('fin de partie', () => {
-  it('perd quand les vies tombent à 0, puis ne bouge plus et refuse les actions', () => {
+describe('événements', () => {
+  it('garde les événements d’une action appliquée avant le pas, avec ceux du pas', () => {
+    const etat = creerPartie(niveauEssai(), CONFIG);
+    appliquerAction(etat, { type: 'construire', socle: 0, tour: 'tir' });
+    ajouterEnnemi(etat, ennemiEssai({ vitesse: 0, pv: 1000 }), 'paysan_affame', 0, 6);
+    step(etat);
+    const types = etat.evenements.map((e) => e.type);
+    expect(types).toContain('construction');
+    expect(types).toContain('apparition');
+    expect(types).toContain('tir');
+  });
+
+  it('avancer garde les événements de ses propres actions', () => {
+    const etat = creerPartie(niveauEssai(), CONFIG);
+    avancer(etat, [{ type: 'construire', socle: 0, tour: 'tir' }]);
+    expect(etat.evenements.map((e) => e.type)).toContain('construction');
+  });
+
+  it('vide au pas suivant les événements du pas précédent', () => {
+    const etat = creerPartie(niveauEssai(), CONFIG);
+    avancer(etat, [{ type: 'construire', socle: 0, tour: 'tir' }]);
+    step(etat);
+    expect(etat.evenements).toEqual([]);
+    appliquerAction(etat, { type: 'construire', socle: 1, tour: 'tir' });
+    expect(etat.evenements).toHaveLength(1);
+  });
+});
+
+describe('version des données', () => {
+  it('refuse une partie créée pour une autre version des données', () => {
+    expect(() => creerPartie(NIVEAU_TEST, { ...CONFIG, versionDonnees: VERSION_DONNEES + 1 })).toThrow('version des données');
+  });
+
+  it('range la version des données dans l’état', () => {
     const etat = creerPartie(NIVEAU_TEST, CONFIG);
-    for (let i = 0; i < 5; i++) appliquerAction(etat, { type: 'appelerVague' });
-    avancerSecondes(etat, 400);
+    expect(etat.versionDonnees).toBe(VERSION_DONNEES);
+    expect(etat.config.versionDonnees).toBe(VERSION_DONNEES);
+  });
+});
+
+describe('fin de partie', () => {
+  it('perd quand les vies tombent à 0, émet « fin » une seule fois, puis ne bouge plus et refuse les actions', () => {
+    const etat = creerPartie(NIVEAU_TEST, CONFIG);
+    while (etat.statut === 'en_cours') step(etat);
     expect(etat.statut).toBe('defaite');
     expect(etat.vies).toBe(0);
     expect(etat.etoiles).toBe(0);
+    expect(etat.evenements).toContainEqual({ type: 'fin', statut: 'defaite', etoiles: 0 });
     const pas = etat.pas;
-    const fin = etat.evenements;
     step(etat);
     expect(etat.pas).toBe(pas);
-    expect(etat.evenements).toEqual(fin);
+    expect(etat.evenements).toEqual([]);
+    expect(avancer(etat, [{ type: 'appelerVague' }])).toEqual([{ ok: false, raison: 'partie_terminee' }]);
+    expect(etat.evenements).toEqual([]);
     expect(appliquerAction(etat, { type: 'appelerVague' })).toEqual({ ok: false, raison: 'partie_terminee' });
   });
 

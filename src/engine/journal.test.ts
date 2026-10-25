@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { NIVEAU_TEST } from '../data/niveaux/region1';
-import { CONFIG } from './aides-tests';
+import { CONFIG } from './aides.test-utils';
 import type { Action } from './actions';
-import type { ConfigPartie, EtatPartie } from './etat';
+import type { ConfigPartie, EntreeJournal, EtatPartie } from './etat';
 import { avancer, creerPartie, deserialiser, rejouer, serialiser, step } from './partie';
 import { PAS_PAR_SECONDE } from './temps';
 
@@ -86,5 +86,25 @@ describe('déterminisme et rejeu', () => {
   it('refuse un état d’une autre version', () => {
     const texte = serialiser(creerPartie(NIVEAU_TEST, CONFIG)).replace('"version":1', '"version":99');
     expect(() => deserialiser(texte)).toThrow('version');
+  });
+
+  it('refuse de relire ou de rejouer une partie d’une autre version des données', () => {
+    const etat = creerPartie(NIVEAU_TEST, CONFIG);
+    etat.versionDonnees += 1;
+    expect(() => deserialiser(serialiser(etat))).toThrow('version des données');
+    const autre = { ...CONFIG, versionDonnees: CONFIG.versionDonnees + 1 };
+    expect(() => rejouer(NIVEAU_TEST, autre, [])).toThrow('version des données');
+  });
+
+  it('rejoue sans lever d’exception un journal contenant des actions invalides', () => {
+    const journal = [
+      { pas: 0, action: { type: 'construire', socle: 0, tour: 'constructor' } },
+      { pas: 1, action: { type: '__proto__' } },
+      { pas: 2, action: null },
+      { pas: 3, action: { type: 'lancerSort', emplacement: 'toString', x: 1, y: 4 } },
+    ] as unknown as EntreeJournal[];
+    const etat = rejouer(NIVEAU_TEST, CONFIG, journal, 100);
+    expect(etat.journal).toEqual([]);
+    expect(etat.pas).toBe(100);
   });
 });

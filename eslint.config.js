@@ -28,6 +28,19 @@ export const reglesSimulationPure = [
         { object: 'Math', property: 'random', message: 'Aléatoire à graine uniquement (générateur du moteur).' },
         { object: 'Date', property: 'now', message: 'Le temps du moteur avance par pas fixes, pas par l’horloge.' },
         { object: 'performance', property: 'now', message: 'Le temps du moteur avance par pas fixes, pas par l’horloge.' },
+        // Ces fonctions ne sont pas exactement spécifiées : leur résultat peut changer d'un moteur JS à l'autre.
+        ...['hypot', 'sin', 'cos', 'tan', 'atan2', 'asin', 'acos', 'pow', 'exp', 'log', 'log2', 'log10', 'cbrt', 'expm1', 'log1p']
+          .map((property) => ({
+            object: 'Math',
+            property,
+            message: 'Résultat non garanti identique entre moteurs JS : sqrt et opérations de base seulement (déterminisme).',
+          })),
+      ],
+      'no-restricted-syntax': ['error',
+        {
+          selector: 'BinaryExpression[operator="**"], AssignmentExpression[operator="**="]',
+          message: 'L’opérateur ** n’est pas garanti identique entre moteurs JS : multiplications explicites (déterminisme).',
+        },
       ],
     },
   },

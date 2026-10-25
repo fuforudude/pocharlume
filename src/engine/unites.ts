@@ -9,9 +9,6 @@ import type { Ennemi, EtatPartie, GenreUnite, Unite } from './etat';
 import { chercherParId, distance2 } from './recherche';
 import { enPas, PAS_PAR_SECONDE } from './temps';
 
-/** Distance à laquelle une unité cesse d'approcher sa cible (un peu sous la distance de blocage). */
-const CONTACT = REGLES.distanceBlocage * 0.8;
-
 export interface NouvelleUnite {
   genre: GenreUnite;
   tour: number;
@@ -280,7 +277,7 @@ function mettreAJourUnite(etat: EtatPartie, u: Unite): void {
     return;
   }
   if (u.stats.capacite > 1 && u.bloques > 0) provoquer(etat, u);
-  avancerVers(u, cible.x, cible.y, CONTACT);
+  avancerVers(u, cible.x, cible.y, REGLES.distanceContact);
   const blocage = REGLES.distanceBlocage;
   if (u.recharge === 0 && distance2(cible.x, cible.y, u.x, u.y) <= blocage * blocage) {
     u.recharge = Math.max(1, enPas(u.stats.cadence));

@@ -1,7 +1,7 @@
 // Partie complète sur le niveau de test, par l'API publique : une défense raisonnable gagne, rien ne perd.
 import { describe, expect, it } from 'vitest';
 import { NIVEAU_TEST } from '../data/niveaux/region1';
-import { CONFIG } from './aides-tests';
+import { CONFIG } from './aides.test-utils';
 import { appliquerAction, creerPartie, rejouer, serialiser, step, validerAction, type Action, type EtatPartie } from './index';
 
 /** Plan fixe d'un joueur raisonnable : il exécute la prochaine étape dès qu'il en a les moyens. */

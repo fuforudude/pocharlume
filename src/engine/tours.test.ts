@@ -2,12 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { DIEUX } from '../data/dieux';
 import { REGLES } from '../data/regles';
 import { TOURS } from '../data/tours';
-import { CONFIG, avancerPas, avancerSecondes, ennemiEssai, niveauEssai } from './aides-tests';
+import { CONFIG, avancerPas, avancerSecondes, distance, ennemiEssai, niveauEssai } from './aides.test-utils';
 import type { DefEnnemi } from './definitions';
 import { ajouterEnnemi } from './ennemis';
 import { EFFET, type EtatPartie } from './etat';
 import type { Evenement } from './evenements';
-import { appliquerAction, creerPartie, step } from './partie';
+import { ajusterMontant, partEntiere } from './argent';
+import { appliquerEffet } from './degats';
+import { appliquerAction, creerPartie, step, valeurRevente } from './partie';
 import { blesserUnite } from './unites';
 
 function partie(aretes = 5000): EtatPartie {
@@ -80,9 +82,32 @@ describe('construction, amélioration, revente', () => {
     expect(etat.tours[0]?.coutCumule).toBe(cumul);
     const avant = etat.aretes;
     expect(appliquerAction(etat, { type: 'vendre', socle: 0 })).toEqual({ ok: true });
-    expect(etat.aretes).toBe(avant + Math.floor(cumul * REGLES.tauxRevente));
+    expect(etat.aretes).toBe(avant + Math.floor((cumul * REGLES.tauxRevente) / 100));
     expect(etat.tours).toHaveLength(0);
     construire(etat, 0, 'magie');
+  });
+
+  it('revend sans erreur d’arrondi : 180 donne 126, 340 donne 238', () => {
+    const etat = partie();
+    construire(etat, 0, 'caserne');
+    appliquerAction(etat, { type: 'ameliorer', socle: 0 });
+    expect(etat.tours[0]?.coutCumule).toBe(180);
+    expect(valeurRevente(etat, 0)).toBe(126);
+    appliquerAction(etat, { type: 'ameliorer', socle: 0 });
+    expect(etat.tours[0]?.coutCumule).toBe(340);
+    expect(valeurRevente(etat, 0)).toBe(238);
+    const avant = etat.aretes;
+    appliquerAction(etat, { type: 'vendre', socle: 0 });
+    expect(etat.aretes).toBe(avant + 238);
+  });
+
+  it('ajuste les montants par un pourcentage sans erreur d’arrondi', () => {
+    expect(ajusterMontant(70, 0.85)).toBe(60);
+    expect(ajusterMontant(15, 0.9)).toBe(14);
+    expect(ajusterMontant(5, 1.1)).toBe(6);
+    expect(ajusterMontant(260, 1.15)).toBe(299);
+    expect(partEntiere(180, 70)).toBe(126);
+    expect(partEntiere(340, 70)).toBe(238);
   });
 
   it('retire les soldats d’une caserne vendue et libère leurs ennemis', () => {
@@ -160,6 +185,44 @@ describe('tirs et projectiles', () => {
     avancerSecondes(etat, 1);
     expect(furtif.pv).toBeLessThan(furtif.pvMax);
     expect(furtif.effetsPas[EFFET.poison]).toBeGreaterThan(0);
+  });
+});
+
+describe('furtifs, zones et chaînes', () => {
+  it('une zone d’artillerie ne touche pas un furtif non révélé, mais touche un furtif empoisonné', () => {
+    const etat = partie();
+    construire(etat, 1, 'artillerie');
+    const visible = cible(etat, 10);
+    const furtif = cible(etat, 10.1, { furtif: true });
+    const empoisonne = cible(etat, 9.9, { furtif: true });
+    appliquerEffet(etat, empoisonne, { type: 'poison', chance: 1, duree: 60, valeur: 0 });
+    avancerSecondes(etat, 1.5);
+    expect(visible.pv).toBeLessThan(visible.pvMax);
+    expect(empoisonne.pv).toBeLessThan(empoisonne.pvMax);
+    expect(furtif.pv).toBe(furtif.pvMax);
+  });
+
+  it('une chaîne ne saute pas sur un furtif non révélé', () => {
+    const etat = partie();
+    construire(etat, 1, 'artillerie', 'B');
+    const premier = cible(etat, 11);
+    const furtif = cible(etat, 10, { furtif: true });
+    const suivant = cible(etat, 9.8);
+    avancerSecondes(etat, 1);
+    expect(premier.pv).toBeLessThan(premier.pvMax);
+    expect(furtif.pv).toBe(furtif.pvMax);
+    expect(furtif.effetsPas[EFFET.ralentissement]).toBe(0);
+    expect(suivant.pv).toBeLessThan(suivant.pvMax);
+  });
+
+  it('un sort de zone ne touche pas un furtif non révélé', () => {
+    const etat = partie();
+    avancerSecondes(etat, DIEUX.charlie.sorts[0].rechargeInitiale);
+    const visible = cible(etat, 10);
+    const furtif = cible(etat, 10.2, { furtif: true });
+    appliquerAction(etat, { type: 'lancerSort', emplacement: 0, x: 10, y: 5 });
+    expect(visible.pv).toBeLessThan(visible.pvMax);
+    expect(furtif.pv).toBe(furtif.pvMax);
   });
 });
 
@@ -255,7 +318,7 @@ describe('caserne', () => {
     const soldats = etat.unites.filter((u) => u.genre === 'soldat');
     expect(soldats).toHaveLength(3);
     avancerSecondes(etat, 3);
-    for (const s of soldats) expect(Math.hypot(s.x - 10, s.y - 5)).toBeLessThan(1);
+    for (const s of soldats) expect(distance(s.x, s.y, 10, 5)).toBeLessThan(1);
   });
 
   it('chaque soldat bloque un ennemi, le quatrième passe', () => {
@@ -295,7 +358,7 @@ describe('caserne', () => {
     construire(etat, 0, 'tir');
     expect(appliquerAction(etat, { type: 'deplacerRalliement', socle: 1, x: 11.5, y: 5 })).toEqual({ ok: true });
     avancerSecondes(etat, 3);
-    for (const s of etat.unites.filter((u) => u.genre === 'soldat')) expect(Math.hypot(s.x - 11.5, s.y - 5)).toBeLessThan(1);
+    for (const s of etat.unites.filter((u) => u.genre === 'soldat')) expect(distance(s.x, s.y, 11.5, 5)).toBeLessThan(1);
     expect(appliquerAction(etat, { type: 'deplacerRalliement', socle: 1, x: 13, y: 5 })).toEqual({ ok: false, raison: 'hors_portee' });
     expect(appliquerAction(etat, { type: 'deplacerRalliement', socle: 1, x: 10, y: 8.5 })).toEqual({ ok: false, raison: 'hors_chemin' });
     expect(appliquerAction(etat, { type: 'deplacerRalliement', socle: 0, x: 5, y: 5 })).toEqual({ ok: false, raison: 'pas_une_caserne' });

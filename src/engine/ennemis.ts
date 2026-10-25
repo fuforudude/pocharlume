@@ -1,6 +1,7 @@
 // Ennemis : apparition, effets dans le temps, déplacement le long du chemin, attaques, fuite.
 import { REGLES } from '../data/regles';
 import { tirer, tirerEntre } from './aleatoire';
+import { ajusterMontant } from './argent';
 import { placerSurChemin, segmentPour } from './chemins';
 import { difficulteDe } from './contenu';
 import { infligerDegats, libererEnnemi } from './degats';
@@ -41,7 +42,7 @@ export function ajouterEnnemi(etat: EtatPartie, def: DefEnnemi, type: string, ch
     distanceAttaque: def.distance,
     rechargeDistance: 0,
     coutVies: def.coutVies,
-    prime: Math.round(def.prime * difficulte.primes),
+    prime: ajusterMontant(def.prime, difficulte.primes),
     boss: def.boss,
     insensibleEtourdissement: def.insensibleEtourdissement,
     devore: enPas(def.devore),
@@ -63,6 +64,10 @@ export function facteurVitesse(e: Ennemi): number {
   return (e.effetsPas[EFFET.ralentissement] ?? 0) > 0 ? (e.effetsValeur[EFFET.ralentissement] ?? 1) : 1;
 }
 
+/**
+ * Bloqueur qui arrête l'ennemi ce pas-ci. Un bloqueur mort, ou qui n'est plus au contact sans viser cet
+ * ennemi (provocation dont il s'est éloigné), le relâche : pas de blocage fantôme.
+ */
 function bloqueurAuContact(etat: EtatPartie, e: Ennemi): Unite | undefined {
   if (e.bloqueur === -1) return undefined;
   const u = chercherParId(etat.unites, e.bloqueur);
@@ -71,7 +76,9 @@ function bloqueurAuContact(etat: EtatPartie, e: Ennemi): Unite | undefined {
     return undefined;
   }
   const portee = REGLES.distanceBlocage;
-  return distance2(u.x, u.y, e.x, e.y) <= portee * portee ? u : undefined;
+  if (distance2(u.x, u.y, e.x, e.y) <= portee * portee) return u;
+  if (u.cible !== e.id) libererEnnemi(etat, e);
+  return undefined;
 }
 
 function uniteLaPlusProche(etat: EtatPartie, x: number, y: number, portee: number): Unite | undefined {

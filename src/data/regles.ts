@@ -2,7 +2,7 @@
 import type { Regles } from '../engine/definitions';
 
 export const REGLES: Regles = {
-  tauxRevente: 0.7,
+  tauxRevente: 70,
   multiplicateurCritique: 2,
   paliersProtection: [0, 0.3, 0.6, 0.9],
   reapparitionHeros: 15,
@@ -10,6 +10,8 @@ export const REGLES: Regles = {
   delaiEntreVagues: 15,
   aretesParSecondeAvance: 1,
   distanceBlocage: 0.6,
+  distanceContact: 0.48,
+  niveauHerosMax: 10,
   laisseEngagement: 1.6,
   distanceMaxChemin: 1,
   decalageLateralMax: 0.25,

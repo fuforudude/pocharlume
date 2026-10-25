@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DIEUX } from '../data/dieux';
 import { REGLES } from '../data/regles';
-import { CONFIG, avancerSecondes, ennemiEssai, niveauEssai } from './aides-tests';
+import { CONFIG, avancerSecondes, distance, ennemiEssai, niveauEssai } from './aides.test-utils';
 import type { DefEnnemi } from './definitions';
 import { ajouterEnnemi } from './ennemis';
 import { EFFET, type EtatPartie, type Unite } from './etat';
@@ -39,10 +39,10 @@ describe('héros', () => {
     expect(appliquerAction(etat, { type: 'deplacerHeros', x: 25, y: 5.5 })).toEqual({ ok: true });
     expect(etat.evenements).toContainEqual({ type: 'ordre_heros', x: 25, y: 5.5 });
     const h = heros(etat);
-    const distance = Math.hypot(28 - 25, 16 - 5.5);
+    const trajet = distance(28, 16, 25, 5.5);
     avancerSecondes(etat, 1);
-    expect(Math.hypot(h.x - 28, h.y - 16)).toBeCloseTo(charlie.heros.vitesse, 5);
-    avancerSecondes(etat, distance / charlie.heros.vitesse);
+    expect(distance(h.x, h.y, 28, 16)).toBeCloseTo(charlie.heros.vitesse, 5);
+    avancerSecondes(etat, trajet / charlie.heros.vitesse);
     expect(h.x).toBeCloseTo(25, 5);
     expect(h.y).toBeCloseTo(5.5, 5);
   });

@@ -1,6 +1,6 @@
 // Sorts du dieu : effets ciblés en un point (dégâts, effet de zone, invocation).
 import { tirerEntre } from './aleatoire';
-import { appliquerEffet, infligerDegats } from './degats';
+import { appliquerEffet, estVisible, infligerDegats } from './degats';
 import type { DefSort } from './definitions';
 import type { EtatPartie } from './etat';
 import { distance2 } from './recherche';
@@ -31,7 +31,8 @@ export function lancerEffetsSort(etat: EtatPartie, sort: DefSort, x: number, y: 
       continue;
     }
     for (const e of etat.ennemis) {
-      if (!e.vivant || (e.volant && !effet.volants) || distance2(e.x, e.y, x, y) > rayon2) continue;
+      // Comme les zones des tours, un sort ne touche pas un furtif non révélé.
+      if (!e.vivant || (e.volant && !effet.volants) || !estVisible(e, false) || distance2(e.x, e.y, x, y) > rayon2) continue;
       if (effet.type === 'degats') infligerDegats(etat, e, tirerEntre(etat, effet.degats[0], effet.degats[1]), effet.typeDegats);
       else appliquerEffet(etat, e, effet.effet);
     }

@@ -1,17 +1,49 @@
-// Validation et application des actions du joueur. Une action refusée ne change rien à l'état ;
-// une action acceptée est inscrite au journal avec le pas courant.
+// Validation et application des actions du joueur. Les actions viennent de l'interface ou d'un journal
+// relu : elles ne sont pas fiables. Une action refusée (mal formée comprise) ne lève jamais d'exception et
+// ne change rien à l'état ; une action acceptée est inscrite au journal avec le pas courant.
 import { REGLES } from '../data/regles';
 import type { Action, RaisonRefus, ResultatAction } from './actions';
+import { partEntiere } from './argent';
 import { distanceAuxChemins } from './chemins';
-import { dieuDe } from './contenu';
+import { defFamille, dieuDe } from './contenu';
 import type { DefNiveauTour } from './definitions';
 import type { EtatPartie, FamilleTour, Tour } from './etat';
+import { ouvrirPas } from './evenements';
 import { chercherParId, distance2 } from './recherche';
 import { lancerEffetsSort } from './sorts';
 import { enPas } from './temps';
 import { defNiveau, deplacerSoldats, prix, statsTour, synchroniserSoldats } from './tours';
 import { libererBloques } from './unites';
 import { bonusAppel, lancerVague } from './vagues';
+
+function estFini(v: unknown): v is number {
+  return typeof v === 'number' && Number.isFinite(v);
+}
+
+/** Forme de l'action : type connu, socles et emplacements entiers, coordonnées finies, voie A ou B. */
+function estBienFormee(action: unknown): action is Action {
+  if (typeof action !== 'object' || action === null) return false;
+  const a = action as Record<string, unknown>;
+  switch (a.type) {
+    case 'construire':
+      return Number.isInteger(a.socle) && (a.tour === 'divine' || defFamille(a.tour) !== undefined);
+    case 'ameliorer':
+    case 'vendre':
+      return Number.isInteger(a.socle);
+    case 'specialiser':
+      return Number.isInteger(a.socle) && (a.voie === 'A' || a.voie === 'B');
+    case 'deplacerRalliement':
+      return Number.isInteger(a.socle) && estFini(a.x) && estFini(a.y);
+    case 'deplacerHeros':
+      return estFini(a.x) && estFini(a.y);
+    case 'lancerSort':
+      return Number.isInteger(a.emplacement) && estFini(a.x) && estFini(a.y);
+    case 'appelerVague':
+      return true;
+    default:
+      return false;
+  }
+}
 
 function tourSurSocle(etat: EtatPartie, socle: number): Tour | undefined {
   for (const t of etat.tours) if (t.socle === socle) return t;
@@ -47,12 +79,13 @@ export function coutConstruction(etat: EtatPartie, famille: FamilleTour): number
 /** Valeur de revente de la tour d'un socle. */
 export function valeurRevente(etat: EtatPartie, socle: number): number {
   const t = tourSurSocle(etat, socle);
-  return t ? Math.floor(t.coutCumule * REGLES.tauxRevente) : 0;
+  return t ? partEntiere(t.coutCumule, REGLES.tauxRevente) : 0;
 }
 
 /** Dit si l'action est permise maintenant, sans rien changer. Renvoie null si elle l'est. */
 export function validerAction(etat: EtatPartie, action: Action): RaisonRefus | null {
   if (etat.statut !== 'en_cours') return 'partie_terminee';
+  if (!estBienFormee(action)) return 'action_invalide';
   switch (action.type) {
     case 'construire': {
       if (!etat.niveau.carte.socles[action.socle]) return 'socle_inconnu';
@@ -95,7 +128,9 @@ export function validerAction(etat: EtatPartie, action: Action): RaisonRefus | n
       return sort.surChemin && loinDuChemin(etat, action.x, action.y) ? 'hors_chemin' : null;
     }
     case 'appelerVague':
-      return etat.vagues.prochaine === -1 ? 'plus_de_vague' : null;
+      // Comme dans Kingdom Rush : avant la vague 1, ou une fois la vague en cours entièrement apparue.
+      if (etat.vagues.prochaine === -1) return 'plus_de_vague';
+      return etat.vagues.lancees > 0 && etat.vagues.paquets.length > 0 ? 'vague_en_cours' : null;
   }
 }
 
@@ -138,7 +173,7 @@ function monterNiveau(etat: EtatPartie, t: Tour, action: Action): void {
 }
 
 function vendre(etat: EtatPartie, t: Tour): void {
-  const aretes = Math.floor(t.coutCumule * REGLES.tauxRevente);
+  const aretes = partEntiere(t.coutCumule, REGLES.tauxRevente);
   etat.aretes += aretes;
   etat.tours = etat.tours.filter((autre) => autre !== t);
   const restent = [];
@@ -207,6 +242,7 @@ function executer(etat: EtatPartie, action: Action): void {
 export function appliquerAction(etat: EtatPartie, action: Action): ResultatAction {
   const raison = validerAction(etat, action);
   if (raison !== null) return { ok: false, raison };
+  ouvrirPas(etat);
   executer(etat, action);
   etat.journal.push({ pas: etat.pas, action: { ...action } });
   return { ok: true };

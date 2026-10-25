@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DIFFICULTES } from '../data/difficultes';
 import { ENNEMIS } from '../data/ennemis';
 import { REGLES } from '../data/regles';
-import { CONFIG, avancerPas, avancerSecondes, ennemiEssai, niveauEssai } from './aides-tests';
+import { CONFIG, avancerPas, avancerSecondes, ennemiEssai, niveauEssai } from './aides.test-utils';
 import { appliquerEffet, infligerDegats } from './degats';
 import { ajouterEnnemi } from './ennemis';
 import type { Evenement } from './evenements';

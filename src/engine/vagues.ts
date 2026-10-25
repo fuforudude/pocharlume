@@ -3,7 +3,7 @@ import { REGLES } from '../data/regles';
 import { defEnnemi } from './contenu';
 import { ajouterEnnemi } from './ennemis';
 import type { EtatPartie } from './etat';
-import { enPas } from './temps';
+import { enPas, PAS_PAR_SECONDE } from './temps';
 
 /** Lance la vague suivante ; `bonus` est le bonus d'arêtes déjà versé (appel en avance). */
 export function lancerVague(etat: EtatPartie, bonus: number): void {
@@ -27,8 +27,9 @@ export function lancerVague(etat: EtatPartie, bonus: number): void {
 export function bonusAppel(etat: EtatPartie): number {
   const v = etat.vagues;
   if (v.lancees === 0 || v.prochaine === -1) return 0;
-  const secondes = Math.max(0, v.prochaine - etat.pas) / enPas(1);
-  return Math.floor(secondes * REGLES.aretesParSecondeAvance);
+  // Calcul en entiers (pas restants × arêtes par seconde), une seule division : pas d'erreur d'arrondi.
+  const restant = Math.max(0, v.prochaine - etat.pas);
+  return Math.floor((restant * REGLES.aretesParSecondeAvance) / PAS_PAR_SECONDE);
 }
 
 export function mettreAJourVagues(etat: EtatPartie): void {

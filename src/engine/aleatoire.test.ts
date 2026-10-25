@@ -29,7 +29,7 @@ describe('générateur à graine', () => {
       tirer(g);
       expect(Number.isInteger(g.rng)).toBe(true);
       expect(g.rng).toBeGreaterThanOrEqual(0);
-      expect(g.rng).toBeLessThan(2 ** 32);
+      expect(g.rng).toBeLessThan(4294967296);
     }
     const copie = JSON.parse(JSON.stringify(g)) as typeof g;
     expect(tirer(copie)).toBe(tirer(g));

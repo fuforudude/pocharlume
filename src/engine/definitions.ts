@@ -196,6 +196,7 @@ export interface Difficulte {
 
 /** Règles générales de la partie. */
 export interface Regles {
+  /** Pourcentage entier du coût cumulé rendu à la revente (70 = 70 %), pour un calcul sans arrondi. */
   readonly tauxRevente: number;
   /** Multiplicateur d'un coup critique donné par un bonus à une tour qui n'en a pas. */
   readonly multiplicateurCritique: number;
@@ -204,10 +205,14 @@ export interface Regles {
   readonly delaiPremiereVague: number;
   /** Délai entre la dernière apparition d'une vague et le lancement automatique de la suivante. */
   readonly delaiEntreVagues: number;
-  /** Arêtes par seconde d'avance quand le joueur appelle une vague (à partir de la deuxième). */
+  /** Arêtes (entier) par seconde d'avance quand le joueur appelle une vague (à partir de la deuxième). */
   readonly aretesParSecondeAvance: number;
   /** Distance à laquelle un bloqueur arrête son ennemi et l'échange de coups commence. */
   readonly distanceBlocage: number;
+  /** Distance à laquelle une unité cesse d'approcher sa cible (un peu sous la distance de blocage). */
+  readonly distanceContact: number;
+  /** Niveau maximal du héros. */
+  readonly niveauHerosMax: number;
   /** Un ennemi engagé qui s'éloigne au-delà de portée × ce facteur du point de garde est relâché. */
   readonly laisseEngagement: number;
   /** Distance max entre un point visé (héros, ralliement, sort sur chemin) et un chemin. */

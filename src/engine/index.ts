@@ -21,6 +21,7 @@ export { EFFET, VERSION_ETAT } from './etat';
 export type { Evenement } from './evenements';
 export { creerGenerateur, tirer, tirerEntre, type Generateur } from './aleatoire';
 export { distanceAuxChemins, pointSurChemin } from './chemins';
+export { ajusterMontant, partEntiere } from './argent';
 export { ajouterEnnemi } from './ennemis';
 export {
   appliquerAction,
@@ -29,7 +30,6 @@ export {
   creerPartie,
   deserialiser,
   etoilesPour,
-  NIVEAU_HEROS_MAX,
   rejouer,
   serialiser,
   step,

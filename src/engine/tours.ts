@@ -1,6 +1,7 @@
 // Tours : stats (bonus du dieu compris), coûts, soldats des casernes, ciblage, tirs, ondes, projectiles.
 import { REGLES } from '../data/regles';
 import { tirer, tirerEntre } from './aleatoire';
+import { ajusterMontant } from './argent';
 import { placerSurChemin, segmentPour } from './chemins';
 import { defFamille, dieuDe } from './contenu';
 import { appliquerEffets, estVisible, infligerDegats } from './degats';
@@ -16,7 +17,7 @@ export function defNiveau(etat: EtatPartie, famille: FamilleTour, niveau: number
   if (famille === 'divine') return niveau === 1 ? dieuDe(etat).tourDivine : undefined;
   const def = defFamille(famille);
   if (!def) return undefined;
-  if (niveau === 4) return voie ? def.specialisations[voie] : undefined;
+  if (niveau === 4) return voie === 'A' || voie === 'B' ? def.specialisations[voie] : undefined;
   return def.niveaux[niveau - 1];
 }
 
@@ -44,7 +45,7 @@ export function statsTour(etat: EtatPartie, famille: FamilleTour, def: DefNiveau
 /** Prix d'un niveau, remise de famille du dieu comprise. */
 export function prix(etat: EtatPartie, famille: FamilleTour, def: DefNiveauTour): number {
   const bonus = dieuDe(etat).bonus;
-  return bonus.famille === famille ? Math.round(def.cout * (1 + bonus.prix)) : def.cout;
+  return bonus.famille === famille ? ajusterMontant(def.cout, 1 + bonus.prix) : def.cout;
 }
 
 /** Met les soldats d'une caserne au nombre et aux stats de son niveau courant (remis à neuf). */
@@ -109,7 +110,7 @@ function premierEnnemi(etat: EtatPartie, t: Tour): Ennemi | undefined {
 /** Ennemis déjà touchés par une chaîne en cours (tampon réutilisé, hors état). */
 const dejaTouches: number[] = [];
 
-/** Coup au but sur une cible : dégâts, effets, puis chaîne vers les voisins. */
+/** Coup au but sur une cible : dégâts, effets, puis chaîne vers les voisins visibles (pas les furtifs cachés). */
 function toucher(etat: EtatPartie, s: DefNiveauTour, cible: Ennemi, degats: number): void {
   const x = cible.x;
   const y = cible.y;
@@ -126,7 +127,7 @@ function toucher(etat: EtatPartie, s: DefNiveauTour, cible: Ennemi, degats: numb
     let suivant: Ennemi | undefined;
     let min = rayon2;
     for (const e of etat.ennemis) {
-      if (!e.vivant || (e.volant && !s.volants) || dejaTouches.includes(e.id)) continue;
+      if (!e.vivant || (e.volant && !s.volants) || !estVisible(e, s.revele) || dejaTouches.includes(e.id)) continue;
       const d = distance2(e.x, e.y, px, py);
       if (d <= min) {
         min = d;
@@ -145,7 +146,7 @@ function toucher(etat: EtatPartie, s: DefNiveauTour, cible: Ennemi, degats: numb
 function frapperZone(etat: EtatPartie, s: DefNiveauTour, x: number, y: number, rayon: number, degats: number): void {
   const rayon2 = rayon * rayon;
   for (const e of etat.ennemis) {
-    if (!e.vivant || (e.volant && !s.volants) || distance2(e.x, e.y, x, y) > rayon2) continue;
+    if (!e.vivant || (e.volant && !s.volants) || !estVisible(e, s.revele) || distance2(e.x, e.y, x, y) > rayon2) continue;
     infligerDegats(etat, e, degats, s.typeDegats);
     appliquerEffets(etat, e, s.effets);
   }
