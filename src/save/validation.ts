@@ -5,6 +5,8 @@
 import { DIEUX } from '../data/dieux';
 import { DIFFICULTES } from '../data/difficultes';
 import { REGLES } from '../data/regles';
+import { VERSION_DONNEES } from '../data/version';
+import { verifierConfig } from '../engine/config';
 import type { ConfigPartie } from '../engine/etat';
 import {
   DIFFICULTES_SAUVEGARDE,
@@ -105,8 +107,18 @@ function validerReglages(x: unknown): Resultat<Reglages> {
   return ok({ son, musique, vitesse });
 }
 
+const CLES_CONFIG_ANCIENNES = ['graine', 'difficulte', 'dieu', 'niveauHeros', 'versionDonnees'];
+const CLES_CONFIG_HEROS = ['heros', 'competencesHeros', 'ameliorations', 'objets'];
+
+/**
+ * Config d'une partie en cours. Une config d'avant les héros (sans `heros`, `competencesHeros`, `ameliorations`
+ * ni `objets`) reste lisible, avec les valeurs neutres : sa version des données est ancienne, la partie sera
+ * simplement oubliée au moment de la reprise. Pour le reste, les règles du moteur (`verifierConfig`) font foi.
+ */
 function validerConfig(x: unknown): Resultat<ConfigPartie> {
-  const base = avecCles(x, ['graine', 'difficulte', 'dieu', 'niveauHeros', 'versionDonnees'], 'partie.config');
+  if (!estEnregistrement(x)) return echec('partie.config : objet attendu');
+  const avecHeros = CLES_CONFIG_HEROS.some((cle) => Object.hasOwn(x, cle));
+  const base = avecCles(x, avecHeros ? [...CLES_CONFIG_ANCIENNES, ...CLES_CONFIG_HEROS] : CLES_CONFIG_ANCIENNES, 'partie.config');
   if (!base.ok) return base;
   const graine = valeur(base.valeur, 'graine');
   const difficulte = valeur(base.valeur, 'difficulte');
@@ -118,7 +130,39 @@ function validerConfig(x: unknown): Resultat<ConfigPartie> {
   if (typeof dieu !== 'string' || !Object.hasOwn(DIEUX, dieu)) return echec('partie.config.dieu inconnu');
   if (!estEntierEntre(niveauHeros, 1, REGLES.niveauHerosMax)) return echec('partie.config.niveauHeros hors bornes');
   if (!estEntierEntre(versionDonnees, 1, 1_000_000)) return echec('partie.config.versionDonnees invalide');
-  return ok({ graine, difficulte, dieu, niveauHeros, versionDonnees });
+  if (!avecHeros) {
+    return ok({ graine, difficulte, dieu, heros: dieu, niveauHeros, competencesHeros: {}, ameliorations: {}, objets: [], versionDonnees });
+  }
+  const heros = valeur(base.valeur, 'heros');
+  const competencesHeros = valeur(base.valeur, 'competencesHeros');
+  const ameliorations = valeur(base.valeur, 'ameliorations');
+  const objets = valeur(base.valeur, 'objets');
+  if (typeof heros !== 'string' || !estEnregistrement(competencesHeros) || !estEnregistrement(ameliorations) || !Array.isArray(objets)) {
+    return echec('partie.config : héros, compétences, améliorations ou objets mal formés');
+  }
+  const config: ConfigPartie = {
+    graine,
+    difficulte,
+    dieu,
+    heros,
+    niveauHeros,
+    competencesHeros: copierRangs(competencesHeros),
+    ameliorations: copierRangs(ameliorations),
+    objets: objets.filter((o): o is string => typeof o === 'string'),
+    versionDonnees,
+  };
+  if (config.objets.length !== objets.length) return echec('partie.config.objets : liste d’identifiants attendue');
+  const refus = verifierConfig({ ...config, versionDonnees: VERSION_DONNEES });
+  return refus === null ? ok(config) : echec(`partie.config : ${refus}`);
+}
+
+/** Copie d'un tableau de rangs en objet neuf : les valeurs non numériques sont gardées telles quelles pour que le moteur les refuse. */
+function copierRangs(rangs: Record<string, unknown>): Record<string, number> {
+  const copie: Record<string, number> = {};
+  for (const cle of Object.keys(rangs)) {
+    Object.defineProperty(copie, cle, { value: valeur(rangs, cle), enumerable: true, writable: true, configurable: true });
+  }
+  return copie;
 }
 
 function validerPartie(x: unknown, niveauMax: number): Resultat<PartieEnCours | null> {

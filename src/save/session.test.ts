@@ -8,7 +8,7 @@ import { etoilesDe, meilleuresEtoiles, niveauDebloque, totalEtoiles } from './pr
 import { Session } from './session';
 import { StockageMemoire } from './stockage';
 
-const CONFIG: ConfigPartie = { graine: 11, difficulte: 'matou', dieu: 'charlie', niveauHeros: 1, versionDonnees: VERSION_DONNEES };
+const CONFIG: ConfigPartie = { graine: 11, difficulte: 'matou', dieu: 'charlie', heros: 'charlie', niveauHeros: 1, competencesHeros: {}, ameliorations: {}, objets: [], versionDonnees: VERSION_DONNEES };
 
 async function ouvrir(stockage = new StockageMemoire()): Promise<{ session: Session; stockage: StockageMemoire }> {
   return { session: await Session.ouvrir(new Depot(stockage)), stockage };

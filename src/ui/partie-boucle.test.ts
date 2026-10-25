@@ -56,7 +56,7 @@ vi.mock('../render/rendu', () => ({
 
 const NIVEAU = REGION1[0];
 if (!NIVEAU) throw new Error('niveau 1 absent');
-const CONFIG: ConfigPartie = { graine: 7, difficulte: 'matou', dieu: 'charlie', niveauHeros: 1, versionDonnees: VERSION_DONNEES };
+const CONFIG: ConfigPartie = { graine: 7, difficulte: 'matou', dieu: 'charlie', heros: 'charlie', niveauHeros: 1, competencesHeros: {}, ameliorations: {}, objets: [], versionDonnees: VERSION_DONNEES };
 const IMAGE_MS = 50;
 
 // --- Horloge et requestAnimationFrame factices ---

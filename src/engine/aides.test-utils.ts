@@ -7,7 +7,22 @@ import type { ConfigPartie, EtatPartie } from './etat';
 import { PAS_PAR_SECONDE } from './temps';
 import { step } from './partie';
 
-export const CONFIG: ConfigPartie = { graine: 42, difficulte: 'matou', dieu: 'charlie', niveauHeros: 1, versionDonnees: VERSION_DONNEES };
+export const CONFIG: ConfigPartie = {
+  graine: 42,
+  difficulte: 'matou',
+  dieu: 'charlie',
+  heros: 'charlie',
+  niveauHeros: 1,
+  competencesHeros: {},
+  ameliorations: {},
+  objets: [],
+  versionDonnees: VERSION_DONNEES,
+};
+
+/** Config d'un dieu avec son avatar, sans compétence, amélioration ni objet ; `surcharges` pour le reste. */
+export function configDe(dieu: string, surcharges: Partial<ConfigPartie> = {}): ConfigPartie {
+  return { ...CONFIG, dieu, heros: dieu, ...surcharges };
+}
 
 /** Distance entre deux points, sans Math.hypot (interdit dans le moteur). */
 export function distance(ax: number, ay: number, bx: number, by: number): number {

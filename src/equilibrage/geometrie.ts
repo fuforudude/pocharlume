@@ -58,5 +58,5 @@ export function longueurVue(echantillons: readonly Echantillon[], poids: readonl
 
 /** Partie neuve du niveau, pour lire ses chemins calculés. */
 export function etatInitial(niveau: Niveau): EtatPartie {
-  return creerPartie(niveau, { graine: 0, difficulte: 'matou', dieu: 'charlie', niveauHeros: 1, versionDonnees: VERSION_DONNEES });
+  return creerPartie(niveau, { graine: 0, difficulte: 'matou', dieu: 'charlie', heros: 'charlie', niveauHeros: 1, competencesHeros: {}, ameliorations: {}, objets: [], versionDonnees: VERSION_DONNEES });
 }

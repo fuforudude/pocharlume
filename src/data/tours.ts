@@ -1,7 +1,8 @@
 // Tours communes : 4 familles, 3 niveaux puis 2 spécialisations au niveau 4.
-// Jalon 1 : chaque spécialisation a ses stats et son effet principal. Ses 2 compétences améliorables
-// viendront au jalon 2.
+// Chaque spécialisation a ses stats, son effet principal et ses 2 compétences améliorables en partie
+// (competences-tours.ts).
 import type { DefFamille, DefNiveauTour, IdFamille, StatsSoldats } from '../engine/definitions';
+import { COMPETENCES_TOURS } from './competences-tours';
 
 const DEFAUT: Omit<DefNiveauTour, 'nom' | 'cout' | 'portee'> = {
   cadence: 0,
@@ -17,13 +18,18 @@ const DEFAUT: Omit<DefNiveauTour, 'nom' | 'cout' | 'portee'> = {
   soldats: null,
   spectres: null,
   onde: false,
+  ignoreArmure: 0,
+  nappe: null,
+  piegeAuSol: null,
+  atelier: null,
+  competences: [],
 };
 
-function niveau(champs: Pick<DefNiveauTour, 'nom' | 'cout' | 'portee'> & Partial<DefNiveauTour>): DefNiveauTour {
+export function niveau(champs: Pick<DefNiveauTour, 'nom' | 'cout' | 'portee'> & Partial<DefNiveauTour>): DefNiveauTour {
   return { ...DEFAUT, ...champs };
 }
 
-function soldats(champs: Pick<StatsSoldats, 'pv' | 'degats'> & Partial<StatsSoldats>): StatsSoldats {
+export function soldats(champs: Pick<StatsSoldats, 'pv' | 'degats'> & Partial<StatsSoldats>): StatsSoldats {
   return {
     nom: 'unite.chat_de_grange',
     nombre: 3,
@@ -49,12 +55,14 @@ const caserne: DefFamille = {
   ],
   specialisations: {
     A: niveau({
+      competences: COMPETENCES_TOURS.caserneA,
       nom: 'tour.garde_du_cloitre',
       cout: 230,
       portee: 2.8,
       soldats: soldats({ nom: 'unite.garde_du_cloitre', pv: 120, degats: [6, 10], armure: 0.6, capacite: 2 }),
     }),
     B: niveau({
+      competences: COMPETENCES_TOURS.caserneB,
       nom: 'tour.ecorcheurs',
       cout: 230,
       portee: 2.8,
@@ -79,6 +87,7 @@ const tir: DefFamille = {
   ],
   specialisations: {
     A: niveau({
+      competences: COMPETENCES_TOURS.tirA,
       nom: 'tour.guetteurs_des_toits',
       cout: 230,
       portee: 4.4,
@@ -90,6 +99,7 @@ const tir: DefFamille = {
       effets: [{ type: 'poison', chance: 1, duree: 3, valeur: 6 }],
     }),
     B: niveau({
+      competences: COMPETENCES_TOURS.tirB,
       nom: 'tour.arbaletriers_du_beffroi',
       cout: 230,
       portee: 6,
@@ -111,6 +121,7 @@ const magie: DefFamille = {
   ],
   specialisations: {
     A: niveau({
+      competences: COMPETENCES_TOURS.magieA,
       nom: 'tour.oracle_de_la_braise',
       cout: 300,
       portee: 3.6,
@@ -120,6 +131,7 @@ const magie: DefFamille = {
       volants: true,
     }),
     B: niveau({
+      competences: COMPETENCES_TOURS.magieB,
       nom: 'tour.necromancien_des_neuf_vies',
       cout: 300,
       portee: 3.8,
@@ -156,6 +168,7 @@ const artillerie: DefFamille = {
   ],
   specialisations: {
     A: niveau({
+      competences: COMPETENCES_TOURS.artillerieA,
       nom: 'tour.mortier_de_soufre',
       cout: 360,
       portee: 4.4,
@@ -166,6 +179,7 @@ const artillerie: DefFamille = {
       effets: [{ type: 'brulure', chance: 1, duree: 3, valeur: 4 }],
     }),
     B: niveau({
+      competences: COMPETENCES_TOURS.artillerieB,
       nom: 'tour.baliste_a_chaines',
       cout: 360,
       portee: 4.6,

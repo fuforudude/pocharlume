@@ -5,14 +5,14 @@ import { REGLES } from '../data/regles';
 import type { Action, RaisonRefus, ResultatAction } from './actions';
 import { partEntiere } from './argent';
 import { distanceAuxChemins } from './chemins';
-import { defFamille, dieuDe } from './contenu';
+import { defFamille, defObjet, dieuDe } from './contenu';
 import type { DefNiveauTour } from './definitions';
 import type { EtatPartie, FamilleTour, Tour } from './etat';
 import { ouvrirPas } from './evenements';
 import { chercherParId, distance2 } from './recherche';
-import { lancerEffetsSort } from './sorts';
-import { enPas } from './temps';
-import { defNiveau, deplacerSoldats, prix, statsTour, synchroniserSoldats } from './tours';
+import { lancerEffets, rechargeSort } from './sorts';
+import { minuteursInitiaux } from './structures';
+import { defNiveau, deplacerSoldats, prix, prixFamille, statsTour, synchroniserSoldats } from './tours';
 import { libererBloques } from './unites';
 import { bonusAppel, lancerVague } from './vagues';
 
@@ -32,11 +32,14 @@ function estBienFormee(action: unknown): action is Action {
       return Number.isInteger(a.socle);
     case 'specialiser':
       return Number.isInteger(a.socle) && (a.voie === 'A' || a.voie === 'B');
+    case 'ameliorerCompetence':
+      return Number.isInteger(a.socle) && typeof a.competence === 'string';
     case 'deplacerRalliement':
       return Number.isInteger(a.socle) && estFini(a.x) && estFini(a.y);
     case 'deplacerHeros':
       return estFini(a.x) && estFini(a.y);
     case 'lancerSort':
+    case 'utiliserObjet':
       return Number.isInteger(a.emplacement) && estFini(a.x) && estFini(a.y);
     case 'appelerVague':
       return true;
@@ -68,6 +71,26 @@ function niveauSuivant(etat: EtatPartie, t: Tour, action: Action): DefNiveauTour
   if (t.famille === 'divine' || t.niveau >= 4) return 'niveau_max';
   if (t.niveau === 3) return 'specialisation_requise';
   return defNiveau(etat, t.famille, t.niveau + 1, null) ?? 'niveau_max';
+}
+
+/** Prochain rang d'une compétence de spécialisation : indice, rang visé et prix, ou la raison du refus. */
+function competenceSuivante(etat: EtatPartie, t: Tour, id: string): { indice: number; rang: number; cout: number } | RaisonRefus {
+  if (t.famille === 'divine' || t.niveau !== 4) return 'specialisation_requise';
+  const indice = t.stats.competences.findIndex((c) => c.id === id);
+  const competence = t.stats.competences[indice];
+  if (!competence) return 'competence_inconnue';
+  const rang = t.rangs[indice] ?? 0;
+  const cout = competence.cout[rang];
+  if (cout === undefined || rang >= REGLES.rangMaxCompetence) return 'competence_au_maximum';
+  return { indice, rang: rang + 1, cout: prixFamille(etat, t.famille, cout) };
+}
+
+/** Prix en arêtes du prochain rang d'une compétence de la tour du socle, ou undefined si elle n'existe pas ou est au maximum. */
+export function coutCompetence(etat: EtatPartie, socle: number, competence: string): number | undefined {
+  const t = tourSurSocle(etat, socle);
+  if (!t) return undefined;
+  const suivante = competenceSuivante(etat, t, competence);
+  return typeof suivante === 'string' ? undefined : suivante.cout;
 }
 
 /** Coût de construction d'une tour (divine comprise) pour le dieu de la partie. */
@@ -103,8 +126,24 @@ export function validerAction(etat: EtatPartie, action: Action): RaisonRefus | n
       if (typeof suivant === 'string') return suivant;
       return prix(etat, t.famille, suivant) > etat.aretes ? 'aretes_insuffisantes' : null;
     }
+    case 'ameliorerCompetence': {
+      const t = tourSurSocle(etat, action.socle);
+      if (!t) return 'socle_vide';
+      const suivante = competenceSuivante(etat, t, action.competence);
+      if (typeof suivante === 'string') return suivante;
+      return suivante.cout > etat.aretes ? 'aretes_insuffisantes' : null;
+    }
     case 'vendre':
       return tourSurSocle(etat, action.socle) ? null : 'socle_vide';
+    case 'utiliserObjet': {
+      const id = etat.config.objets[action.emplacement];
+      const objet = defObjet(id);
+      if (!objet) return 'objet_inconnu';
+      if (etat.objetsUtilises[action.emplacement]) return 'objet_utilise';
+      if (objet.global) return null;
+      if (horsCarte(etat, action.x, action.y)) return 'hors_carte';
+      return objet.surChemin && loinDuChemin(etat, action.x, action.y) ? 'hors_chemin' : null;
+    }
     case 'deplacerRalliement': {
       const t = tourSurSocle(etat, action.socle);
       if (!t) return 'socle_vide';
@@ -153,6 +192,10 @@ function construire(etat: EtatPartie, socle: number, famille: FamilleTour): void
     ralliementX: s.ralliement.x,
     ralliementY: s.ralliement.y,
     stats: statsTour(etat, famille, def),
+    rangs: [],
+    boostCadence: 0,
+    boostPas: 0,
+    minuteurs: minuteursInitiaux(def.atelier, 0),
   };
   etat.tours.push(t);
   synchroniserSoldats(etat, t);
@@ -167,15 +210,30 @@ function monterNiveau(etat: EtatPartie, t: Tour, action: Action): void {
   t.coutCumule += cout;
   t.niveau++;
   if (action.type === 'specialiser') t.voie = action.voie;
-  t.stats = statsTour(etat, t.famille, suivant);
+  t.rangs = suivant.competences.map(() => 0);
+  t.stats = statsTour(etat, t.famille, suivant, t.rangs);
   synchroniserSoldats(etat, t);
   etat.evenements.push({ type: 'amelioration', tour: t.id, socle: t.socle, niveau: t.niveau, voie: t.voie });
+}
+
+/** Achète le rang suivant d'une compétence de la spécialisation et recalcule les stats de la tour. */
+function acheterCompetence(etat: EtatPartie, t: Tour, id: string): void {
+  const suivante = competenceSuivante(etat, t, id);
+  const def = defNiveau(etat, t.famille, t.niveau, t.voie);
+  if (typeof suivante === 'string' || !def) return;
+  etat.aretes -= suivante.cout;
+  t.coutCumule += suivante.cout;
+  t.rangs[suivante.indice] = suivante.rang;
+  t.stats = statsTour(etat, t.famille, def, t.rangs);
+  synchroniserSoldats(etat, t);
+  etat.evenements.push({ type: 'competence_tour', tour: t.id, socle: t.socle, competence: id, rang: suivante.rang });
 }
 
 function vendre(etat: EtatPartie, t: Tour): void {
   const aretes = partEntiere(t.coutCumule, REGLES.tauxRevente);
   etat.aretes += aretes;
   etat.tours = etat.tours.filter((autre) => autre !== t);
+  etat.structures = etat.structures.filter((s) => s.origine !== t.id);
   const restent = [];
   for (const u of etat.unites) {
     if (u.tour === t.id && u.genre === 'soldat') libererBloques(etat, u);
@@ -196,9 +254,23 @@ function executer(etat: EtatPartie, action: Action): void {
       if (t) monterNiveau(etat, t, action);
       return;
     }
+    case 'ameliorerCompetence': {
+      const t = tourSurSocle(etat, action.socle);
+      if (t) acheterCompetence(etat, t, action.competence);
+      return;
+    }
     case 'vendre': {
       const t = tourSurSocle(etat, action.socle);
       if (t) vendre(etat, t);
+      return;
+    }
+    case 'utiliserObjet': {
+      const id = etat.config.objets[action.emplacement];
+      const objet = defObjet(id);
+      if (!id || !objet) return;
+      etat.objetsUtilises[action.emplacement] = true;
+      etat.evenements.push({ type: 'objet', emplacement: action.emplacement, objet: id, x: action.x, y: action.y });
+      lancerEffets(etat, objet, action.x, action.y);
       return;
     }
     case 'deplacerRalliement': {
@@ -224,9 +296,9 @@ function executer(etat: EtatPartie, action: Action): void {
       const sort = dieuDe(etat).sorts[action.emplacement];
       const recharge = etat.sorts[action.emplacement];
       if (!sort || !recharge) return;
-      recharge.recharge = enPas(sort.recharge);
+      recharge.recharge = rechargeSort(etat, sort);
       etat.evenements.push({ type: 'sort', emplacement: action.emplacement, x: action.x, y: action.y });
-      lancerEffetsSort(etat, sort, action.x, action.y);
+      lancerEffets(etat, sort, action.x, action.y);
       return;
     }
     case 'appelerVague': {

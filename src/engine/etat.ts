@@ -4,6 +4,9 @@ import type { Action } from './actions';
 import type {
   AttaqueDistance,
   DefNiveauTour,
+  DefPiege,
+  DefTourelle,
+  EffetCoup,
   IdFamille,
   Niveau,
   Point,
@@ -13,20 +16,32 @@ import type {
 } from './definitions';
 import type { Evenement } from './evenements';
 
-export const VERSION_ETAT = 1;
+export const VERSION_ETAT = 2;
 
 export type Statut = 'en_cours' | 'victoire' | 'defaite';
 export type FamilleTour = IdFamille | 'divine';
 export type GenreUnite = 'soldat' | 'heros' | 'renfort' | 'spectre';
 
+/**
+ * Tout ce qui entre dans une partie, fixé au lancement : avec le niveau, la graine et le journal d'actions,
+ * elle suffit à rejouer la partie à l'identique. Validée par `verifierConfig` (config.ts).
+ */
 export interface ConfigPartie {
   graine: number;
   /** Clé de src/data/difficultes.ts. */
   difficulte: string;
   /** Clé de src/data/dieux.ts. */
   dieu: string;
+  /** Clé de src/data/heros.ts : l'avatar du dieu ou l'un de ses disciples. */
+  heros: string;
   /** Niveau du héros (1 à 10), fourni par la progression. */
   niveauHeros: number;
+  /** Compétences du héros : id de compétence vers rang (0 à 3). Somme des rangs au plus égale au niveau du héros. */
+  competencesHeros: Record<string, number>;
+  /** Arbre d'améliorations : id de branche (src/data/ameliorations.ts) vers rang (0 à 5). */
+  ameliorations: Record<string, number>;
+  /** Objets emportés (0 à 3 ids de src/data/objets.ts, distincts), un par emplacement. */
+  objets: string[];
   /** VERSION_DONNEES de src/data/version.ts : une partie ne se rejoue qu'avec les données de sa version. */
   versionDonnees: number;
 }
@@ -61,6 +76,8 @@ export interface Ennemi {
   resistance: number;
   volant: boolean;
   furtif: boolean;
+  /** Pas restants pendant lesquels une tour ou un assassin le révèle (furtif visible de tous). */
+  revele: number;
   degatsMin: number;
   degatsMax: number;
   cadence: number;
@@ -81,6 +98,9 @@ export interface Ennemi {
   /** Valeur par effet : facteur de vitesse ou dégâts par seconde. */
   effetsValeur: number[];
 }
+
+/** Indices des minuteurs d'une unité ou d'une tour (`minuteurs`). */
+export const MINUTEUR = { tourelle: 0, piege: 1, soin: 2 } as const;
 
 export interface Unite {
   id: number;
@@ -108,6 +128,8 @@ export interface Unite {
   /** Héros en route vers un point ordonné : il ne s'engage pas. */
   enDeplacement: boolean;
   zone: ZoneHeros | null;
+  /** Pas restants avant la prochaine tourelle, le prochain piège, le prochain soin (indices de MINUTEUR). */
+  minuteurs: number[];
 }
 
 export interface Tour {
@@ -122,8 +144,15 @@ export interface Tour {
   recharge: number;
   ralliementX: number;
   ralliementY: number;
-  /** Stats du niveau courant, bonus du dieu compris. Jamais modifié en place. */
+  /** Stats du niveau courant, bonus du dieu, de l'arbre et rangs de compétence compris. Jamais modifié en place. */
   stats: DefNiveauTour;
+  /** Rang acheté de chacune des compétences de la spécialisation (même ordre que `stats.competences`). */
+  rangs: number[];
+  /** Fraction de cadence en plus tant que `boostPas` > 0 (Ingéniosité). */
+  boostCadence: number;
+  boostPas: number;
+  /** Pas restants avant la prochaine tourelle et le prochain piège de l'Atelier (indices de MINUTEUR). */
+  minuteurs: number[];
 }
 
 export interface Projectile {
@@ -139,6 +168,40 @@ export interface Projectile {
   degats: number;
   critique: boolean;
   stats: DefNiveauTour;
+}
+
+/** Piège posé sur le chemin : se déclenche une fois sur le premier ennemi au sol qui s'en approche. */
+export interface Piege {
+  id: number;
+  x: number;
+  y: number;
+  stats: DefPiege;
+}
+
+/** Zone qui dure (Voile de Nuit, nappe de soufre). */
+export interface ZoneDurable {
+  id: number;
+  x: number;
+  y: number;
+  rayon: number;
+  /** Pas restants. */
+  restant: number;
+  effets: readonly EffetCoup[];
+  critique: number;
+  volants: boolean;
+}
+
+/** Tourelle construite par une tour ou un héros : tire seule jusqu'à la fin de sa vie. */
+export interface Structure {
+  id: number;
+  /** Id de la tour ou de l'unité qui l'a construite. */
+  origine: number;
+  x: number;
+  y: number;
+  /** Pas restants avant qu'elle disparaisse. */
+  restant: number;
+  recharge: number;
+  stats: DefTourelle;
 }
 
 export interface PaquetActif {
@@ -184,8 +247,13 @@ export interface EtatPartie {
   unites: Unite[];
   tours: Tour[];
   projectiles: Projectile[];
+  pieges: Piege[];
+  zones: ZoneDurable[];
+  structures: Structure[];
   heros: number;
   sorts: EtatSort[];
+  /** Pour chaque emplacement d'objet de la config : déjà utilisé dans cette partie. */
+  objetsUtilises: boolean[];
   prochainId: number;
   /**
    * Événements du pas `evenementsPas`, lus par le rendu pour les effets et les sons : ceux des actions

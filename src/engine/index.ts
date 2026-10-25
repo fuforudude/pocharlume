@@ -12,12 +12,16 @@ export type {
   FamilleTour,
   GenreUnite,
   PaquetActif,
+  Piege,
   Projectile,
   Statut,
+  Structure,
   Tour,
   Unite,
+  ZoneDurable,
 } from './etat';
-export { EFFET, VERSION_ETAT } from './etat';
+export { EFFET, MINUTEUR, VERSION_ETAT } from './etat';
+export { verifierConfig } from './config';
 export type { Evenement } from './evenements';
 export { creerGenerateur, tirer, tirerEntre, type Generateur } from './aleatoire';
 export { distanceAuxChemins, pointSurChemin } from './chemins';
@@ -26,6 +30,7 @@ export { ajouterEnnemi } from './ennemis';
 export {
   appliquerAction,
   avancer,
+  coutCompetence,
   coutConstruction,
   creerPartie,
   deserialiser,

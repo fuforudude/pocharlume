@@ -10,7 +10,7 @@ import { StockageMemoire } from './stockage';
 import { VERSION_DONNEES } from '../data/version';
 import { validerSauvegarde } from './validation';
 
-const CONFIG = { graine: 5, difficulte: 'matou', dieu: 'charlie', niveauHeros: 1, versionDonnees: VERSION_DONNEES };
+const CONFIG = { graine: 5, difficulte: 'matou', dieu: 'charlie', heros: 'charlie', niveauHeros: 1, competencesHeros: {}, ameliorations: {}, objets: [], versionDonnees: VERSION_DONNEES };
 
 function niveau1(): EtatPartie {
   const campagne = REGION1[0];

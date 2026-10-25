@@ -27,6 +27,24 @@ export type Evenement =
   | { type: 'reapparition'; unite: number; genre: GenreUnite }
   | { type: 'invocation'; unite: number; genre: GenreUnite; x: number; y: number }
   | { type: 'sort'; emplacement: number; x: number; y: number }
+  /** Objet utilisé : emplacement, id, point visé. */
+  | { type: 'objet'; emplacement: number; objet: string; x: number; y: number }
+  | { type: 'competence_tour'; tour: number; socle: number; competence: string; rang: number }
+  /** Tir d'un héros à distance. */
+  | { type: 'tir_unite'; unite: number; ennemi: number; critique: boolean }
+  | { type: 'esquive'; unite: number; ennemi: number }
+  | { type: 'soin'; source: number; unite: number; pv: number }
+  | { type: 'regain_vies'; vies: number }
+  /** Un ennemi tué net (exécution) ; sa mort suit comme d'habitude. */
+  | { type: 'execution'; ennemi: number; x: number; y: number }
+  | { type: 'zone'; zone: number; x: number; y: number; rayon: number; duree: number }
+  | { type: 'zone_fin'; zone: number; x: number; y: number }
+  | { type: 'piege_pose'; piege: number; x: number; y: number }
+  | { type: 'piege_declenche'; piege: number; ennemi: number; x: number; y: number }
+  | { type: 'structure'; structure: number; origine: number; nom: string; x: number; y: number; duree: number }
+  | { type: 'tir_structure'; structure: number; ennemi: number; x: number; y: number }
+  | { type: 'structure_fin'; structure: number; x: number; y: number }
+  | { type: 'boost'; tour: number; duree: number }
   | { type: 'ralliement'; tour: number; x: number; y: number }
   | { type: 'ordre_heros'; x: number; y: number }
   | { type: 'fin'; statut: Statut; etoiles: number };

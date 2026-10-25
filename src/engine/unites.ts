@@ -1,12 +1,15 @@
 // Unités alliées au corps-à-corps : soldats de caserne, héros, renforts, spectres.
 // Une unité garde un point (ancre), s'engage sur les ennemis au sol proches, en bloque autant que sa
 // capacité le permet (1 en général, plus avec la provocation) et les frappe.
+import { CAPACITES_NULLES } from '../data/capacites';
 import { REGLES } from '../data/regles';
-import { tirerEntre } from './aleatoire';
-import { appliquerEffets, estVisible, infligerDegats, partRestante } from './degats';
-import type { StatsCombattant, TypeDegats, ZoneHeros } from './definitions';
+import { tirer } from './aleatoire';
+import { degatsDuCoup, mettreAJourPouvoirs, tirerDeLoin } from './capacites';
+import { appliquerEffets, estVisible, executer, infligerDegats, partRestante } from './degats';
+import type { CapacitesUnite, StatsCombattant, TypeDegats, ZoneHeros } from './definitions';
 import type { Ennemi, EtatPartie, GenreUnite, Unite } from './etat';
 import { chercherParId, distance2 } from './recherche';
+import { minuteursInitiaux } from './structures';
 import { enPas, PAS_PAR_SECONDE } from './temps';
 
 export interface NouvelleUnite {
@@ -46,6 +49,7 @@ export function creerUnite(etat: EtatPartie, n: NouvelleUnite): Unite {
     duree: n.duree,
     enDeplacement: false,
     zone: n.zone,
+    minuteurs: minuteursInitiaux(n.stats.capacites?.ouvrage ?? null, n.stats.capacites?.soin?.cadence ?? 0),
   };
   etat.unites.push(u);
   return u;
@@ -103,9 +107,17 @@ export function mourir(etat: EtatPartie, u: Unite): void {
   if (u.genre !== 'spectre') releverEnSpectre(etat, u.x, u.y);
 }
 
-/** Inflige des dégâts à une unité alliée après ses protections. */
-export function blesserUnite(etat: EtatPartie, u: Unite, montant: number, type: TypeDegats): void {
+/**
+ * Inflige des dégâts à une unité alliée après ses protections. `ennemi` : l'ennemi qui frappe (-1 si aucun),
+ * pour l'événement d'esquive. Une unité qui esquive ne subit rien.
+ */
+export function blesserUnite(etat: EtatPartie, u: Unite, montant: number, type: TypeDegats, ennemi = -1): void {
   if (u.mort) return;
+  const esquive = u.stats.capacites?.esquive ?? 0;
+  if (esquive > 0 && tirer(etat) < esquive) {
+    etat.evenements.push({ type: 'esquive', unite: u.id, ennemi });
+    return;
+  }
   u.pv -= montant * partRestante(type, u.stats.armure, u.stats.resistance);
   if (u.pv <= 0) mourir(etat, u);
 }
@@ -207,13 +219,23 @@ function provoquer(etat: EtatPartie, u: Unite): void {
   }
 }
 
+/** Un coup au corps-à-corps : exécution d'un non-boss affaibli, sinon dégâts (rage, critique, armure ignorée) et effets. */
+function coup(etat: EtatPartie, u: Unite, cap: CapacitesUnite, cible: Ennemi, effets: boolean): void {
+  const s = u.stats;
+  if (cap.execution > 0 && cible.vivant && !cible.boss && cible.pv <= cible.pvMax * cap.execution) {
+    executer(etat, cible);
+    return;
+  }
+  const { degats } = degatsDuCoup(etat, u, cap, s.degats[0], s.degats[1]);
+  infligerDegats(etat, cible, degats, 'physique', cap.ignoreArmure);
+  if (effets) appliquerEffets(etat, cible, s.effets);
+}
+
 function frapper(etat: EtatPartie, u: Unite, cible: Ennemi): void {
   const s = u.stats;
+  const cap = s.capacites ?? CAPACITES_NULLES;
   etat.evenements.push({ type: 'coup', unite: u.id, ennemi: cible.id });
-  for (let i = 0; i < s.coups; i++) {
-    infligerDegats(etat, cible, tirerEntre(etat, s.degats[0], s.degats[1]), 'physique');
-    appliquerEffets(etat, cible, s.effets);
-  }
+  for (let i = 0; i < s.coups; i++) coup(etat, u, cap, cible, true);
   const zone = u.zone;
   if (!zone) return;
   const rayon2 = zone.rayon * zone.rayon;
@@ -222,8 +244,38 @@ function frapper(etat: EtatPartie, u: Unite, cible: Ennemi): void {
   appliquerEffets(etat, cible, zone.effets);
   for (const e of etat.ennemis) {
     if (e === cible || !engageable(e) || distance2(e.x, e.y, cx, cy) > rayon2) continue;
-    infligerDegats(etat, e, tirerEntre(etat, s.degats[0], s.degats[1]), 'physique');
+    coup(etat, u, cap, e, false);
     appliquerEffets(etat, e, zone.effets);
+  }
+}
+
+/**
+ * Assassin (non ciblable) : n'est jamais visé et ne bloque personne. Il frappe l'ennemi le plus proche dans son
+ * rayon de garde, ceux qu'il voit seulement s'il voit les furtifs, puis revient à son point.
+ */
+function assassiner(etat: EtatPartie, u: Unite, cap: CapacitesUnite): void {
+  const rayon2 = u.stats.portee * u.stats.portee;
+  let cible: Ennemi | undefined;
+  let min = Infinity;
+  for (const e of etat.ennemis) {
+    if (!e.vivant || e.volant || !estVisible(e, cap.voitFurtifs) || distance2(e.x, e.y, u.ancreX, u.ancreY) > rayon2) continue;
+    const d = distance2(e.x, e.y, u.x, u.y);
+    if (d < min) {
+      min = d;
+      cible = e;
+    }
+  }
+  if (!cible) {
+    u.cible = -1;
+    avancerVers(u, u.ancreX, u.ancreY, 0);
+    return;
+  }
+  u.cible = cible.id;
+  avancerVers(u, cible.x, cible.y, REGLES.distanceContact);
+  const blocage = REGLES.distanceBlocage;
+  if (u.recharge === 0 && distance2(cible.x, cible.y, u.x, u.y) <= blocage * blocage) {
+    u.recharge = Math.max(1, enPas(u.stats.cadence));
+    frapper(etat, u, cible);
   }
 }
 
@@ -241,9 +293,22 @@ function mettreAJourUnite(etat: EtatPartie, u: Unite): void {
     }
   }
   if (u.recharge > 0) u.recharge--;
+  mettreAJourPouvoirs(etat, u);
 
   if (u.enDeplacement) {
     if (avancerVers(u, u.ancreX, u.ancreY, 0)) u.enDeplacement = false;
+    return;
+  }
+
+  const cap = u.stats.capacites;
+  if (cap?.distance) {
+    // Tireur ou soigneur : reste à son point de garde et tire de loin, sans bloquer.
+    avancerVers(u, u.ancreX, u.ancreY, 0);
+    tirerDeLoin(etat, u);
+    return;
+  }
+  if (cap && !cap.ciblable) {
+    assassiner(etat, u, cap);
     return;
   }
 

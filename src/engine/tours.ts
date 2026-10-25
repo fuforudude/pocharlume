@@ -1,14 +1,18 @@
-// Tours : stats (bonus du dieu compris), coûts, soldats des casernes, ciblage, tirs, ondes, projectiles.
+// Tours : stats (bonus du dieu, de l'arbre et des compétences compris), coûts, soldats des casernes, ciblage, tirs,
+// ondes, projectiles, boost temporaire, Atelier (tourelles et pièges).
 import { REGLES } from '../data/regles';
 import { tirer, tirerEntre } from './aleatoire';
 import { ajusterMontant } from './argent';
 import { placerSurChemin, segmentPour } from './chemins';
+import { premierEnnemi } from './ciblage';
 import { defFamille, dieuDe } from './contenu';
 import { appliquerEffets, estVisible, infligerDegats } from './degats';
 import type { DefNiveauTour, Voie } from './definitions';
 import { facteurVitesse } from './ennemis';
 import type { Ennemi, EtatPartie, FamilleTour, Projectile, Tour } from './etat';
+import { AUCUN_ARBRE, appliquerModsTour, modArbre, sommeModsTour } from './modificateurs';
 import { chercherParId, distance2 } from './recherche';
+import { bonusCritiqueZones, creerZone, mettreAJourOuvrage, poserPiege } from './structures';
 import { enPas, PAS_PAR_SECONDE } from './temps';
 import { creerUnite, libererBloques, placeEnFormation } from './unites';
 
@@ -21,31 +25,53 @@ export function defNiveau(etat: EtatPartie, famille: FamilleTour, niveau: number
   return def.niveaux[niveau - 1];
 }
 
-/** Stats effectives : la définition avec le bonus de famille du dieu de la partie. */
-export function statsTour(etat: EtatPartie, famille: FamilleTour, def: DefNiveauTour): DefNiveauTour {
+/**
+ * Stats effectives d'un niveau de tour : la définition, les rangs de compétence achetés (`rangs`, même ordre que
+ * `def.competences`), l'arbre d'améliorations, puis le bonus de famille du dieu. Les PV des soldats de ces trois
+ * sources s'additionnent.
+ */
+export function statsTour(etat: EtatPartie, famille: FamilleTour, def: DefNiveauTour, rangs: readonly number[] = []): DefNiveauTour {
   const bonus = dieuDe(etat).bonus;
-  if (bonus.famille !== famille) return def;
+  let base = def;
+  let fractionPv = 0;
+  if (famille !== 'divine') {
+    const mod = sommeModsTour(def.competences, rangs);
+    const arbre = modArbre(etat.config, famille);
+    if (rangs.some((r) => r > 0) || arbre !== AUCUN_ARBRE) base = appliquerModsTour(def, mod, arbre);
+    fractionPv = mod.pvSoldats + arbre.pvSoldats;
+  }
+  if (bonus.famille !== famille) return fractionPv !== 0 ? avecPvSoldats(base, fractionPv) : base;
+  fractionPv += bonus.pvSoldats;
+  const avecPv = fractionPv !== 0 ? avecPvSoldats(base, fractionPv) : base;
   const critique = bonus.chanceCritique > 0
     ? {
-        chance: (def.critique?.chance ?? 0) + bonus.chanceCritique,
-        multiplicateur: def.critique?.multiplicateur ?? REGLES.multiplicateurCritique,
+        chance: (avecPv.critique?.chance ?? 0) + bonus.chanceCritique,
+        multiplicateur: avecPv.critique?.multiplicateur ?? REGLES.multiplicateurCritique,
       }
-    : def.critique;
+    : avecPv.critique;
   return {
-    ...def,
-    cadence: def.cadence / (1 + bonus.cadence),
+    ...avecPv,
+    cadence: avecPv.cadence / (1 + bonus.cadence),
     critique,
-    effets: def.soldats ? def.effets : [...def.effets, ...bonus.effets],
-    soldats: def.soldats
-      ? { ...def.soldats, pv: def.soldats.pv * (1 + bonus.pvSoldats), effets: [...def.soldats.effets, ...bonus.effets] }
-      : null,
+    effets: avecPv.soldats ? avecPv.effets : [...avecPv.effets, ...bonus.effets],
+    soldats: avecPv.soldats ? { ...avecPv.soldats, effets: [...avecPv.soldats.effets, ...bonus.effets] } : null,
+    piegeAuSol: bonus.piegeAuSol,
   };
+}
+
+function avecPvSoldats(def: DefNiveauTour, fraction: number): DefNiveauTour {
+  return def.soldats ? { ...def, soldats: { ...def.soldats, pv: def.soldats.pv * (1 + fraction) } } : def;
+}
+
+/** Un montant en arêtes pour une tour de cette famille, remise (ou majoration) de famille du dieu comprise. */
+export function prixFamille(etat: EtatPartie, famille: FamilleTour, montant: number): number {
+  const bonus = dieuDe(etat).bonus;
+  return bonus.famille === famille ? ajusterMontant(montant, 1 + bonus.prix) : montant;
 }
 
 /** Prix d'un niveau, remise de famille du dieu comprise. */
 export function prix(etat: EtatPartie, famille: FamilleTour, def: DefNiveauTour): number {
-  const bonus = dieuDe(etat).bonus;
-  return bonus.famille === famille ? ajusterMontant(def.cout, 1 + bonus.prix) : def.cout;
+  return prixFamille(etat, famille, def.cout);
 }
 
 /** Met les soldats d'une caserne au nombre et aux stats de son niveau courant (remis à neuf). */
@@ -89,24 +115,6 @@ export function deplacerSoldats(etat: EtatPartie, tour: Tour): void {
   }
 }
 
-/** Premier ennemi sur le chemin (le moins de distance restante) à portée et visible. */
-function premierEnnemi(etat: EtatPartie, t: Tour): Ennemi | undefined {
-  const s = t.stats;
-  const portee2 = s.portee * s.portee;
-  let meilleur: Ennemi | undefined;
-  let restantMin = Infinity;
-  for (const e of etat.ennemis) {
-    if (!e.vivant || (e.volant && !s.volants) || !estVisible(e, s.revele)) continue;
-    if (distance2(e.x, e.y, t.x, t.y) > portee2) continue;
-    const restant = (etat.chemins[e.chemin]?.longueur ?? 0) - e.distance;
-    if (restant < restantMin) {
-      restantMin = restant;
-      meilleur = e;
-    }
-  }
-  return meilleur;
-}
-
 /** Ennemis déjà touchés par une chaîne en cours (tampon réutilisé, hors état). */
 const dejaTouches: number[] = [];
 
@@ -114,7 +122,7 @@ const dejaTouches: number[] = [];
 function toucher(etat: EtatPartie, s: DefNiveauTour, cible: Ennemi, degats: number): void {
   const x = cible.x;
   const y = cible.y;
-  infligerDegats(etat, cible, degats, s.typeDegats);
+  infligerDegats(etat, cible, degats, s.typeDegats, s.ignoreArmure);
   appliquerEffets(etat, cible, s.effets);
   const chaine = s.chaine;
   if (!chaine) return;
@@ -138,7 +146,7 @@ function toucher(etat: EtatPartie, s: DefNiveauTour, cible: Ennemi, degats: numb
     dejaTouches.push(suivant.id);
     px = suivant.x;
     py = suivant.y;
-    infligerDegats(etat, suivant, degats * chaine.facteur, s.typeDegats);
+    infligerDegats(etat, suivant, degats * chaine.facteur, s.typeDegats, s.ignoreArmure);
     appliquerEffets(etat, suivant, s.effets);
   }
 }
@@ -147,7 +155,7 @@ function frapperZone(etat: EtatPartie, s: DefNiveauTour, x: number, y: number, r
   const rayon2 = rayon * rayon;
   for (const e of etat.ennemis) {
     if (!e.vivant || (e.volant && !s.volants) || !estVisible(e, s.revele) || distance2(e.x, e.y, x, y) > rayon2) continue;
-    infligerDegats(etat, e, degats, s.typeDegats);
+    infligerDegats(etat, e, degats, s.typeDegats, s.ignoreArmure);
     appliquerEffets(etat, e, s.effets);
   }
 }
@@ -188,8 +196,10 @@ function ondeDeChoc(etat: EtatPartie, t: Tour): boolean {
 function tirerSur(etat: EtatPartie, t: Tour, cible: Ennemi): void {
   const s = t.stats;
   let degats = tirerEntre(etat, s.degats[0], s.degats[1]);
-  const critique = s.critique !== null && tirer(etat) < s.critique.chance;
-  if (critique) degats *= s.critique.multiplicateur;
+  // Les zones comme le Voile de Nuit ajoutent des points de critique aux tirs sur un ennemi qui s'y trouve.
+  const chance = (s.critique?.chance ?? 0) + bonusCritiqueZones(etat, cible.x, cible.y, cible.volant);
+  const critique = chance > 0 && tirer(etat) < chance;
+  if (critique) degats *= s.critique?.multiplicateur ?? REGLES.multiplicateurCritique;
   if (s.projectile <= 0) {
     etat.evenements.push({ type: 'tir', tour: t.id, cible: cible.id, projectile: -1, x: t.x, y: t.y, critique });
     toucher(etat, s, cible, degats);
@@ -215,19 +225,37 @@ function tirerSur(etat: EtatPartie, t: Tour, cible: Ennemi): void {
   etat.evenements.push({ type: 'tir', tour: t.id, cible: cible.id, projectile: p.id, x: t.x, y: t.y, critique });
 }
 
+/** Une tour qui révèle rend visibles de tous les furtifs de sa portée (le temps de quelques pas). */
+function reveler(etat: EtatPartie, t: Tour): void {
+  const portee2 = t.stats.portee * t.stats.portee;
+  const duree = Math.max(1, enPas(REGLES.dureeRevelation));
+  for (const e of etat.ennemis) {
+    if (e.vivant && e.furtif && distance2(e.x, e.y, t.x, t.y) <= portee2) e.revele = duree;
+  }
+}
+
 export function mettreAJourTours(etat: EtatPartie): void {
   for (const t of etat.tours) {
     if (t.recharge > 0) t.recharge--;
+    if (t.boostPas > 0) {
+      t.boostPas--;
+      if (t.boostPas === 0) t.boostCadence = 0;
+    }
     const s = t.stats;
-    if (t.recharge > 0 || s.soldats) continue;
-    if (s.onde) {
-      if (ondeDeChoc(etat, t)) t.recharge = Math.max(1, enPas(s.cadence));
+    if (s.revele) reveler(etat, t);
+    if (s.atelier) {
+      mettreAJourOuvrage(etat, t.id, t.x, t.y, s.atelier, t.minuteurs);
       continue;
     }
-    const cible = premierEnnemi(etat, t);
+    if (t.recharge > 0 || s.soldats) continue;
+    if (s.onde) {
+      if (ondeDeChoc(etat, t)) t.recharge = Math.max(1, enPas(s.cadence / (1 + t.boostCadence)));
+      continue;
+    }
+    const cible = premierEnnemi(etat, t.x, t.y, s.portee, s.volants, s.revele);
     if (!cible) continue;
     tirerSur(etat, t, cible);
-    t.recharge = Math.max(1, enPas(s.cadence));
+    t.recharge = Math.max(1, enPas(s.cadence / (1 + t.boostCadence)));
   }
 }
 
@@ -261,8 +289,12 @@ export function mettreAJourProjectiles(etat: EtatPartie): void {
     p.y = p.cy;
     const s = p.stats;
     etat.evenements.push({ type: 'impact', projectile: p.id, tour: p.tour, x: p.x, y: p.y, zone: s.zone });
-    if (s.zone > 0) frapperZone(etat, s, p.x, p.y, s.zone, p.degats);
-    else if (cible) toucher(etat, s, cible, p.degats);
+    if (s.zone > 0) {
+      frapperZone(etat, s, p.x, p.y, s.zone, p.degats);
+      if (s.nappe) creerZone(etat, s.nappe, p.x, p.y, s.nappe.rayon);
+      // Un tir au sol de la famille d'un dieu qui sème des pièges (Pollen) en laisse parfois un à l'impact.
+      if (s.piegeAuSol && tirer(etat) < s.piegeAuSol.chance) poserPiege(etat, s.piegeAuSol.piege, p.x, p.y);
+    } else if (cible) toucher(etat, s, cible, p.degats);
   }
   liste.length = garde;
 }

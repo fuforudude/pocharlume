@@ -1,4 +1,5 @@
 // Tous les textes affichés du jeu, en français. Une clé par texte, groupées par écran.
+import { frDieux } from './fr-dieux';
 import { frNiveaux } from './fr-niveaux';
 
 export const fr = {
@@ -155,6 +156,10 @@ export const fr = {
   'refus.sort_inconnu': 'Ce sort n’existe pas.',
   'refus.sort_en_recharge': 'Le sort se recharge.',
   'refus.vague_en_cours': 'La vague sort encore.',
+  'refus.competence_inconnue': 'Cette compétence n’existe pas.',
+  'refus.competence_au_maximum': 'Cette compétence est au sommet.',
+  'refus.objet_inconnu': 'Il n’y a pas d’objet ici.',
+  'refus.objet_utilise': 'Cet objet est déjà utilisé.',
   'refus.plus_de_vague': 'Il ne reste plus de vague.',
 
   // Partie : pause, orientation et fin
@@ -172,12 +177,8 @@ export const fr = {
   'fin.continuer': 'Continuer',
   'fin.quitter': 'Quitter',
 
-  // Dieu Charlie
-  'dieu.charlie': 'Charlie',
-  'heros.charlie': 'Charlie, le Colosse',
-  'sort.chute_du_colosse': 'Chute du Colosse',
-  'sort.renforts': 'Renforts',
-  'tour.totem_du_colosse': 'Totem du Colosse',
+  // Dieux, héros, sorts, tours divines, compétences, arbre, objets (fr-dieux.ts)
+  ...frDieux,
 
   // Niveaux de la campagne (fr-niveaux.ts)
   ...frNiveaux,

@@ -38,7 +38,13 @@ export interface ResultatPartie {
 export interface OptionsPartie {
   readonly graine: number;
   readonly difficulte: string;
+  /** Dieu joué (Charlie par défaut) et son héros (son avatar par défaut). */
+  readonly dieu?: string;
+  readonly heros?: string;
   readonly niveauHeros?: number;
+  readonly competencesHeros?: Readonly<Record<string, number>>;
+  readonly ameliorations?: Readonly<Record<string, number>>;
+  readonly objets?: readonly string[];
   /** Temps de jeu au-delà duquel on abandonne la partie (jamais atteint en pratique). */
   readonly secondesMax?: number;
   /** Pas entre deux décisions du bot (15 = deux fois par seconde). */
@@ -46,7 +52,18 @@ export interface OptionsPartie {
 }
 
 export function configPartie(o: OptionsPartie): ConfigPartie {
-  return { graine: o.graine, difficulte: o.difficulte, dieu: 'charlie', niveauHeros: o.niveauHeros ?? 1, versionDonnees: VERSION_DONNEES };
+  const dieu = o.dieu ?? 'charlie';
+  return {
+    graine: o.graine,
+    difficulte: o.difficulte,
+    dieu,
+    heros: o.heros ?? dieu,
+    niveauHeros: o.niveauHeros ?? 1,
+    competencesHeros: { ...o.competencesHeros },
+    ameliorations: { ...o.ameliorations },
+    objets: [...(o.objets ?? [])],
+    versionDonnees: VERSION_DONNEES,
+  };
 }
 
 /** Un bot qui ne fait rien : la défense du niveau se limite au héros immobile. */

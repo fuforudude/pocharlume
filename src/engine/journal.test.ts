@@ -84,7 +84,7 @@ describe('déterminisme et rejeu', () => {
   });
 
   it('refuse un état d’une autre version', () => {
-    const texte = serialiser(creerPartie(NIVEAU_TEST, CONFIG)).replace('"version":1', '"version":99');
+    const texte = serialiser(creerPartie(NIVEAU_TEST, CONFIG)).replace('"version":2', '"version":99');
     expect(() => deserialiser(texte)).toThrow('version');
   });
 

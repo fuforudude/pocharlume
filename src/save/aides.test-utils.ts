@@ -8,7 +8,7 @@ import type { Stockage } from './stockage';
 
 export const FIXTURE_V1 = readFileSync(new URL('./fixtures/sauvegarde-v1.json', import.meta.url), 'utf8');
 
-export const CONFIG: ConfigPartie = { graine: 42, difficulte: 'matou', dieu: 'charlie', niveauHeros: 3, versionDonnees: VERSION_DONNEES };
+export const CONFIG: ConfigPartie = { graine: 42, difficulte: 'matou', dieu: 'charlie', heros: 'charlie', niveauHeros: 3, competencesHeros: {}, ameliorations: {}, objets: [], versionDonnees: VERSION_DONNEES };
 
 export const PARTIE: PartieEnCours = { niveau: 3, config: CONFIG, etat: '{"version":1}', vague: 2 };
 

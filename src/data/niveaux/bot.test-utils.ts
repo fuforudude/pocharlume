@@ -9,7 +9,7 @@ import { creerPartie, step, validerAction, appliquerAction } from '../../engine/
 import { PAS_PAR_SECONDE } from '../../engine/temps';
 import { VERSION_DONNEES } from '../version';
 
-export const CONFIG_MATOU: ConfigPartie = { graine: 7, difficulte: 'matou', dieu: 'charlie', niveauHeros: 1, versionDonnees: VERSION_DONNEES };
+export const CONFIG_MATOU: ConfigPartie = { graine: 7, difficulte: 'matou', dieu: 'charlie', heros: 'charlie', niveauHeros: 1, competencesHeros: {}, ameliorations: {}, objets: [], versionDonnees: VERSION_DONNEES };
 
 /** Familles posées sur les socles dans l'ordre, en boucle. */
 const FAMILLES_PLAN: readonly IdFamille[] = ['tir', 'caserne', 'magie', 'artillerie'];

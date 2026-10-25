@@ -35,6 +35,7 @@ export function ajouterEnnemi(etat: EtatPartie, def: DefEnnemi, type: string, ch
     resistance: def.resistance,
     volant: def.volant,
     furtif: def.furtif,
+    revele: 0,
     degatsMin: def.degats[0],
     degatsMax: def.degats[1],
     cadence: Math.max(1, enPas(def.cadence)),
@@ -85,7 +86,7 @@ function uniteLaPlusProche(etat: EtatPartie, x: number, y: number, portee: numbe
   let meilleure: Unite | undefined;
   let min = portee * portee;
   for (const u of etat.unites) {
-    if (u.mort) continue;
+    if (u.mort || u.stats.capacites?.ciblable === false) continue;
     const d = distance2(u.x, u.y, x, y);
     if (d <= min) {
       min = d;
@@ -116,7 +117,7 @@ function attaquerAuContact(etat: EtatPartie, e: Ennemi, u: Unite): void {
   e.recharge = e.cadence;
   if (e.degatsMax <= 0) return;
   etat.evenements.push({ type: 'coup_ennemi', ennemi: e.id, unite: u.id, distance: false });
-  blesserUnite(etat, u, tirerEntre(etat, e.degatsMin, e.degatsMax), 'physique');
+  blesserUnite(etat, u, tirerEntre(etat, e.degatsMin, e.degatsMax), 'physique', e.id);
 }
 
 function attaquerADistance(etat: EtatPartie, e: Ennemi): void {
@@ -126,7 +127,7 @@ function attaquerADistance(etat: EtatPartie, e: Ennemi): void {
   if (!u) return;
   e.rechargeDistance = Math.max(1, enPas(attaque.cadence));
   etat.evenements.push({ type: 'coup_ennemi', ennemi: e.id, unite: u.id, distance: true });
-  blesserUnite(etat, u, tirerEntre(etat, attaque.degats[0], attaque.degats[1]), attaque.typeDegats);
+  blesserUnite(etat, u, tirerEntre(etat, attaque.degats[0], attaque.degats[1]), attaque.typeDegats, e.id);
 }
 
 export function mettreAJourEnnemis(etat: EtatPartie): void {
@@ -146,6 +147,7 @@ export function mettreAJourEnnemis(etat: EtatPartie): void {
     const facteur = facteurVitesse(e);
     if ((pas[EFFET.etourdissement] ?? 0) > 0) pas[EFFET.etourdissement] = (pas[EFFET.etourdissement] ?? 0) - 1;
     if ((pas[EFFET.ralentissement] ?? 0) > 0) pas[EFFET.ralentissement] = (pas[EFFET.ralentissement] ?? 0) - 1;
+    if (e.revele > 0) e.revele--;
     if (e.recharge > 0) e.recharge--;
     if (e.rechargeDistance > 0) e.rechargeDistance--;
     if (facteur === 0) continue;

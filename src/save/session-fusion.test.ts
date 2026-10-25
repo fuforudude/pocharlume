@@ -10,7 +10,7 @@ import { enregistrerVictoire, etoilesDe } from './progression';
 import { Session } from './session';
 import { StockageMemoire } from './stockage';
 
-const CONFIG: ConfigPartie = { graine: 11, difficulte: 'matou', dieu: 'charlie', niveauHeros: 1, versionDonnees: VERSION_DONNEES };
+const CONFIG: ConfigPartie = { graine: 11, difficulte: 'matou', dieu: 'charlie', heros: 'charlie', niveauHeros: 1, competencesHeros: {}, ameliorations: {}, objets: [], versionDonnees: VERSION_DONNEES };
 const CHATON: ConfigPartie = { ...CONFIG, difficulte: 'chaton' };
 
 function rouvrir(stockage: StockageTruque | StockageMemoire): Promise<Session> {

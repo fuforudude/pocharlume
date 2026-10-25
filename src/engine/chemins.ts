@@ -60,6 +60,36 @@ function distanceAuSegment(px: number, py: number, a: Point, b: Point): number {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
+export interface Projection {
+  /** Indice du chemin le plus proche. */
+  chemin: number;
+  /** Distance parcourue le long de ce chemin jusqu'au point le plus proche. */
+  distance: number;
+  /** Distance du point au chemin. */
+  ecart: number;
+}
+
+/** Point du chemin le plus proche d'un point donné (le premier en cas d'égalité), ou undefined s'il n'y a pas de chemin. */
+export function projeterSurChemin(chemins: readonly CheminCalcule[], x: number, y: number): Projection | undefined {
+  let meilleur: Projection | undefined;
+  chemins.forEach((c, chemin) => {
+    for (let i = 1; i < c.points.length; i++) {
+      const a = c.points[i - 1];
+      const b = c.points[i];
+      if (!a || !b) continue;
+      const vx = b.x - a.x;
+      const vy = b.y - a.y;
+      const l2 = vx * vx + vy * vy;
+      const t = l2 > 0 ? Math.max(0, Math.min(1, ((x - a.x) * vx + (y - a.y) * vy) / l2)) : 0;
+      const dx = x - (a.x + t * vx);
+      const dy = y - (a.y + t * vy);
+      const ecart = Math.sqrt(dx * dx + dy * dy);
+      if (!meilleur || ecart < meilleur.ecart) meilleur = { chemin, distance: (c.cumul[i - 1] ?? 0) + t * Math.sqrt(l2), ecart };
+    }
+  });
+  return meilleur;
+}
+
 /** Distance d'un point au chemin le plus proche. */
 export function distanceAuxChemins(chemins: readonly CheminCalcule[], x: number, y: number): number {
   let min = Infinity;

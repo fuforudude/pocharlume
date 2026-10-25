@@ -14,7 +14,7 @@ const SPRITE = { ancre: { x: 0, y: 0 }, largeur: 16, hauteur: 16 } as unknown as
 const ATLAS = { sprite: () => SPRITE, animation: () => undefined } as unknown as AtlasRendu;
 
 function partie() {
-  return creerPartie(NIVEAU as NonNullable<typeof NIVEAU>, { graine: 1, difficulte: 'matou', dieu: 'charlie', niveauHeros: 1, versionDonnees: VERSION_DONNEES });
+  return creerPartie(NIVEAU as NonNullable<typeof NIVEAU>, { graine: 1, difficulte: 'matou', dieu: 'charlie', heros: 'charlie', niveauHeros: 1, competencesHeros: {}, ameliorations: {}, objets: [], versionDonnees: VERSION_DONNEES });
 }
 
 describe('Suivi : événements du pas', () => {

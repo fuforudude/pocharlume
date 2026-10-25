@@ -5,10 +5,14 @@ export type Action =
   | { type: 'construire'; socle: number; tour: IdFamille | 'divine' }
   | { type: 'ameliorer'; socle: number }
   | { type: 'specialiser'; socle: number; voie: Voie }
+  /** Achète le rang suivant d'une compétence de la spécialisation d'une tour (`competence` : son id). */
+  | { type: 'ameliorerCompetence'; socle: number; competence: string }
   | { type: 'vendre'; socle: number }
   | { type: 'deplacerRalliement'; socle: number; x: number; y: number }
   | { type: 'deplacerHeros'; x: number; y: number }
   | { type: 'lancerSort'; emplacement: number; x: number; y: number }
+  /** Utilise l'objet de l'emplacement (0 à 2) en un point ; un emplacement ne sert qu'une fois par partie. */
+  | { type: 'utiliserObjet'; emplacement: number; x: number; y: number }
   | { type: 'appelerVague' };
 
 export type RaisonRefus =
@@ -30,6 +34,10 @@ export type RaisonRefus =
   | 'heros_mort'
   | 'sort_inconnu'
   | 'sort_en_recharge'
+  | 'competence_inconnue'
+  | 'competence_au_maximum'
+  | 'objet_inconnu'
+  | 'objet_utilise'
   | 'vague_en_cours'
   | 'plus_de_vague';
 

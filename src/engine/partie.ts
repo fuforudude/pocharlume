@@ -5,18 +5,21 @@ import type { Action, ResultatAction } from './actions';
 import { ajusterMontant } from './argent';
 import { calculerChemin } from './chemins';
 import { appliquerAction } from './commandes';
+import { copierConfig, verifierConfig } from './config';
 import { defDieu, defDifficulte, defEnnemi } from './contenu';
-import type { DefHeros, Niveau, StatsCombattant } from './definitions';
+import type { Niveau } from './definitions';
 import { mettreAJourEnnemis } from './ennemis';
 import { VERSION_ETAT, type ConfigPartie, type EntreeJournal, type EtatPartie } from './etat';
 import { ouvrirPas } from './evenements';
-import { mettreAJourSorts } from './sorts';
+import { resoudreHeros } from './modificateurs';
+import { mettreAJourSorts, rechargeSort } from './sorts';
+import { mettreAJourPieges, mettreAJourStructures, mettreAJourZones } from './structures';
 import { enPas, PAS_PAR_SECONDE } from './temps';
 import { mettreAJourProjectiles, mettreAJourTours } from './tours';
 import { creerUnite, estRetiree, mettreAJourUnites } from './unites';
 import { mettreAJourVagues } from './vagues';
 
-export { appliquerAction, coutConstruction, validerAction, valeurRevente } from './commandes';
+export { appliquerAction, coutCompetence, coutConstruction, validerAction, valeurRevente } from './commandes';
 
 /** Rejeu sans pas final : au-delà de 3 heures de jeu, on s'arrête (partie sans fin). */
 const PAS_MAX_REJEU = 3 * 3600 * PAS_PAR_SECONDE;
@@ -26,23 +29,6 @@ export function etoilesPour(vies: number, viesDepart: number): number {
   if (vies <= 0) return 0;
   if (vies >= viesDepart) return 3;
   return vies >= viesDepart * REGLES.seuilDeuxEtoiles ? 2 : 1;
-}
-
-function statsHeros(def: DefHeros, niveau: number): StatsCombattant {
-  const bonus = niveau - 1;
-  return {
-    nom: def.nom,
-    pv: def.pv + bonus * def.pvParNiveau,
-    degats: [def.degats[0] + bonus * def.degatsParNiveau, def.degats[1] + bonus * def.degatsParNiveau],
-    cadence: def.cadence,
-    coups: 1,
-    armure: def.armure,
-    resistance: def.resistance,
-    vitesse: def.vitesse,
-    portee: def.portee,
-    capacite: def.capacite,
-    effets: def.effets,
-  };
 }
 
 function verifierNiveau(niveau: Niveau): void {
@@ -61,21 +47,18 @@ function verifierVersionDonnees(version: unknown): void {
 }
 
 export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
-  verifierVersionDonnees(config.versionDonnees);
+  const refus = verifierConfig(config);
+  if (refus !== null) throw new Error(refus);
   const difficulte = defDifficulte(config.difficulte);
-  if (!difficulte) throw new Error(`Difficulté inconnue : ${config.difficulte}`);
   const dieu = defDieu(config.dieu);
-  if (!dieu) throw new Error(`Dieu inconnu : ${config.dieu}`);
-  if (!Number.isInteger(config.niveauHeros) || config.niveauHeros < 1 || config.niveauHeros > REGLES.niveauHerosMax) {
-    throw new Error(`Niveau de héros invalide : ${String(config.niveauHeros)}`);
-  }
+  if (!difficulte || !dieu) throw new Error('Config de partie invalide');
   verifierNiveau(niveau);
   const copie = JSON.parse(JSON.stringify(niveau)) as Niveau;
   const etat: EtatPartie = {
     version: VERSION_ETAT,
     versionDonnees: VERSION_DONNEES,
     niveau: copie,
-    config: { ...config },
+    config: copierConfig(config),
     chemins: copie.carte.chemins.map(calculerChemin),
     pas: 0,
     rng: config.graine >>> 0,
@@ -89,14 +72,20 @@ export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
     unites: [],
     tours: [],
     projectiles: [],
+    pieges: [],
+    zones: [],
+    structures: [],
     heros: -1,
-    sorts: dieu.sorts.map((s) => ({ recharge: enPas(s.rechargeInitiale) })),
+    sorts: [],
+    objetsUtilises: config.objets.map(() => false),
     prochainId: 1,
     evenements: [],
     evenementsPas: 0,
     journal: [],
   };
+  etat.sorts = dieu.sorts.map((s) => ({ recharge: rechargeSort(etat, s, true) }));
   const depart = copie.carte.departHeros;
+  const resolu = resoudreHeros(etat.config);
   const heros = creerUnite(etat, {
     genre: 'heros',
     tour: -1,
@@ -105,10 +94,10 @@ export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
     y: depart.y,
     ancreX: depart.x,
     ancreY: depart.y,
-    stats: statsHeros(dieu.heros, config.niveauHeros),
+    stats: resolu.stats,
     delaiReapparition: enPas(REGLES.reapparitionHeros),
     duree: -1,
-    zone: dieu.heros.zone,
+    zone: resolu.zone,
   });
   etat.heros = heros.id;
   return etat;
@@ -140,9 +129,12 @@ function verifierFin(etat: EtatPartie): void {
 function simuler(etat: EtatPartie): void {
   ouvrirPas(etat);
   mettreAJourVagues(etat);
+  mettreAJourZones(etat);
   mettreAJourEnnemis(etat);
+  mettreAJourPieges(etat);
   mettreAJourUnites(etat);
   mettreAJourTours(etat);
+  mettreAJourStructures(etat);
   mettreAJourProjectiles(etat);
   mettreAJourSorts(etat);
   retirerDisparus(etat);

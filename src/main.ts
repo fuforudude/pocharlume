@@ -25,7 +25,7 @@ let carteOuverte: EcranCarteMonde | null = null;
 let derniereDifficulte: DifficulteSauvegarde = 'matou';
 
 function nouvelleConfig(difficulte: DifficulteSauvegarde): ConfigPartie {
-  return { graine: Date.now() & 0x7fffffff, difficulte, dieu: 'charlie', niveauHeros: 1, versionDonnees: VERSION_DONNEES };
+  return { graine: Date.now() & 0x7fffffff, difficulte, dieu: 'charlie', heros: 'charlie', niveauHeros: 1, competencesHeros: {}, ameliorations: {}, objets: [], versionDonnees: VERSION_DONNEES };
 }
 
 interface OptionsLancement {

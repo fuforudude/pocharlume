@@ -23,6 +23,10 @@ export const CLES_REFUS: Readonly<Record<RaisonRefus, CleTexte>> = {
   sort_inconnu: 'refus.sort_inconnu',
   sort_en_recharge: 'refus.sort_en_recharge',
   vague_en_cours: 'refus.vague_en_cours',
+  competence_inconnue: 'refus.competence_inconnue',
+  competence_au_maximum: 'refus.competence_au_maximum',
+  objet_inconnu: 'refus.objet_inconnu',
+  objet_utilise: 'refus.objet_utilise',
   plus_de_vague: 'refus.plus_de_vague',
 };
 
