@@ -873,4 +873,18 @@ button:focus-visible {
   .options-colonnes {
     grid-template-columns: 1fr;
   }
+
+  /* Écran étroit (portrait) : le nom du niveau passe sur une deuxième ligne. */
+  .carte-barre {
+    flex-wrap: wrap;
+  }
+
+  .carte-barre .puce.total {
+    margin-left: auto;
+  }
+
+  .carte-titre {
+    order: 5;
+    flex-basis: 100%;
+  }
 }

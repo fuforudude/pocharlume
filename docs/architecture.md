@@ -13,7 +13,7 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
 | `src/render/` | Rendu Canvas 2D : caméra, zoom à pixels entiers sans lissage, sprites, animations, barres de vie, effets. Lit l'état du moteur, ne le modifie jamais. | `src/engine/`, `src/data/` |
 | `src/ui/` | Écrans, HUD, menus, toucher, souris, clavier. Traduit les gestes en actions du moteur. | tout `src/` |
 | `src/i18n/` | Textes affichés. `fr.ts` contient la table, `t('clé')` la lit avec une clé typée. | rien |
-| `src/save/` | Sauvegarde. Fonctions pures : format versionné (`format.ts`), validation stricte, migrations en chaîne vN vers vN+1, progression (étoiles, déblocage), partie en cours, export et import par code (`code.ts`). Accès au stockage : interface `Stockage` (IndexedDB, repli localStorage, mémoire ; Capacitor Preferences plus tard) et `Depot`, qui ne lève jamais et garde une copie de secours d'une sauvegarde illisible. | `src/engine/`, `src/data/` |
+| `src/save/` | Sauvegarde. Fonctions pures : format versionné (`format.ts`), validation stricte, migrations en chaîne vN vers vN+1, progression (étoiles, déblocage), partie en cours, export et import par code (`code.ts`). `Session` (`session.ts`) tient la sauvegarde courante en mémoire et l'écrit à chaque changement. Accès au stockage : interface `Stockage` (IndexedDB, repli localStorage, mémoire ; Capacitor Preferences plus tard) et `Depot`, qui ne lève jamais et garde une copie de secours d'une sauvegarde illisible. | `src/engine/`, `src/data/` |
 | `tools/` | Scripts Node : `art` (grilles de pixels vers planches PNG et atlas JSON), `niveaux` (génère les vagues figées de la région 1, aperçu texte des cartes, bilan du joueur automatique ; `enregistrer.ts` permet à Node d'importer `src/` sans extension), `balance` (simulateur et `balance-report.md`). | `src/engine/`, `src/data/` |
 | `art/` | Sources graphiques : pack Minifolks d'origine (`art/minifolks/`), grilles de pixels en texte (`art/sprites/<nom>.txt`, format décrit en tête de `tools/art/format.ts`), palettes partagées (`art/palettes/`). `npm run art` écrit aussi des aperçus agrandis dans `art/apercu/` (ignoré par git). | — |
 | `public/sprites/` | Atlas généré par `npm run art` (`atlas.png`, `atlas.json`), commité : le build n'exécute pas le pipeline, un test vérifie que l'atlas est à jour. | — |
@@ -33,11 +33,33 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
 - **Interface** (`src/ui/`) : `interaction.ts` (machine à états pure : menu d'un socle, héros, sort,
   ralliement ; renvoie l'action à envoyer ou la raison d'un refus), `menu-cercle.ts` (éléments du menu
   d'après `validerAction`), `gestes.ts` (toucher, glisser, pincer), `clavier.ts` (touches), `hud.ts`,
-  `ecrans.ts` (accueil, pause, fin, « Tourne ton téléphone »), `refus.ts` (raison de refus vers texte).
+  `ecrans.ts` (accueil, pause, fin, « Tourne ton téléphone », avis discret), `refus.ts` (raison de refus vers texte).
 - **Point d'entrée d'un niveau** : `lancerNiveau(niveauCampagne, config, surFin, options)`. `surFin` reçoit
   une fois le `ResultatPartie` (statut, étoiles, vies, pas, journal) ; `options.surQuitter` ajoute le bouton
   « Quitter » des écrans de pause et de fin ; `options.surDemarrage` donne la `PartieEnCours` (utile aux outils
-  de mesure). La carte du monde et la sauvegarde se brancheront sur cette fonction.
+  de mesure). `options.surVague` reçoit l'état juste après le lancement de chaque vague (sauvegarde de la
+  partie en cours) ; `options.reprise` relance une partie depuis un état désérialisé (elle démarre en pause,
+  « Rejouer » repart d'une partie neuve) ; `options.vitesse` donne la vitesse du réglage par défaut ;
+  `options.surContinuer` remplace « Quitter » par « Continuer » après une victoire.
+- **Carte du monde** (`src/ui/carte-monde.ts`, `src/render/carte-monde.ts`) : le fond de 512 × 288 est peint une
+  fois avec `construireSol` et `peindreSol` (le tracé de `TRACE_REGION1`, seulement jusqu'au dernier niveau
+  débloqué), le décor de `carte-monde-decor.ts`, un voile sombre et le pointillé de la suite du chemin. Les
+  nœuds, leurs étoiles, le clignotement du prochain niveau et le chevron de sélection se redessinent à chaque
+  image, avec la `Camera` de la partie (zoom entier : 2 pixels CSS par pixel du fond au départ, pincer ou
+  molette pour tout voir). Ce que la carte montre (nœuds visibles, étoiles, tronçons, voisin d'une flèche,
+  nœud touché) est calculé par des fonctions pures (`carte-monde-logique.ts`) d'après la sauvegarde. La fiche
+  d'un niveau (nom, ambiance, étoiles par difficulté, difficulté, dieu, Lancer) est en DOM. La sauvegarde est
+  lue à l'ouverture de l'écran : pour la voir changer (victoire, import), on rouvre la carte.
+- **Options** (`src/ui/options.ts`) : volumes (rangés dans les réglages, pas encore de son), vitesse par défaut,
+  export (code à copier) et import (un code refusé affiche sa raison via `import-refus.ts` et n'altère rien ;
+  un code valide demande confirmation avant de remplacer la progression et abandonne la partie en cours).
+- **Enchaînement des écrans** (`src/main.ts`) : accueil, carte du monde, partie, options. Il ouvre le stockage et
+  une `Session` (`src/save/session.ts`) qui garde la sauvegarde courante et l'écrit à chaque changement :
+  `terminerPartie` (victoire : meilleur résultat conservé, niveau suivant débloqué ; toujours : partie en cours
+  effacée), `rangerPartie` (début de chaque vague), `effacerPartie` (abandon par « Quitter »),
+  `partieAReprendre` (état relu pour « Reprendre à la vague N »), réglages, export et import. Les raccourcis de
+  test « Niveau 10 » et « Niveau de test » de l'accueil n'existent qu'en développement (`import.meta.env.DEV`)
+  et ne touchent pas à la sauvegarde.
 
 ## Niveaux de la campagne (`src/data/niveaux/`)
 - `cartes.ts` : cartes dessinées à la main (chemins, socles et ralliements, départ du héros, zones de sol, décor).
