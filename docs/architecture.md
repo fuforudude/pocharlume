@@ -84,10 +84,22 @@ Le simulateur de `src/equilibrage/` rejoue les 10 niveaux dans les 3 difficulté
 - Les défenses complètes arrêtent presque tout : la difficulté vient des premières vagues (défense encore maigre) et de la
   densité des colonnes. D'où `intervalleReference` à 0,3 s (colonnes serrées), `croissanceVague` à 1,2 (dernières vagues
   énormes, qui seules arrêtent le héros seul) et `budgetBase` 260, `croissanceNiveau` 0,15.
-- `aretesDepart` de chaque niveau est le levier fin : il fixe la courbe de difficulté (vies restantes du bot naïf en Matou,
-  de 18 à 19 aux niveaux 1 à 4 à 2,5 au niveau 10).
+- `aretesDepart` de chaque niveau est le levier fin : il fixe la courbe de difficulté (vies restantes du bot naïf en Matou :
+  de 3,8 à 15,9 aux niveaux 1 à 4, moins de 1 à partir du niveau 5, 0,2 au niveau 10). Il joue en falaise : sous un seuil propre à chaque carte (autour de 210 au
+  niveau 4), le bot soigneux ne tient plus les premières vagues et passe de 100 % de victoires à 60 %.
 - Chaton est nettement plus facile que Matou (ennemis à 60 % de leurs PV, 150 % des arêtes de départ, primes ×1,25) pour que
-  le bot naïf y gagne tout alors qu'il perd souvent en Matou ; Vieux Sage garde ses valeurs d'origine.
+  le bot naïf y gagne tout alors qu'il perd souvent en Matou. Ses paramètres n'ont pas bougé au durcissement de Matou et du
+  Vieux Sage ; comme les arêtes de départ par niveau sont communes aux trois difficultés, il a perdu environ un tiers de
+  ses arêtes de départ aux niveaux 1 à 4, ce que la bande « le bot naïf gagne tout » supporte (24,2 vies en moyenne sur 25).
+- Durcissement de Matou et du Vieux Sage (jalon « un joueur attentif ne doit pas tout gagner à 20/20 avec des centaines
+  d'arêtes inutilisées ») : Matou passe à 108 % des PV, primes ×0,7 ; Vieux Sage à 127 % des PV, 85 % des arêtes de départ,
+  primes ×0,7. Les primes sont le levier qui supprime les arêtes inutilisées : les dernières vagues, énormes, rapportent des
+  primes qu'une défense déjà complète ne peut plus dépenser. Les PV créent les pertes de vies du bot soigneux. Le bot soigneux
+  lit la composition des vagues futures (`poidsDesChemins` dans `geometrie.ts`), ce qu'un joueur ne voit pas : il est un peu
+  optimiste, mais un joueur humain compétent se mesure à lui.
+- Les mesures sont très sensibles : un réglage voisin change la variante que le bot soigneux retient à l'entraînement, donc
+  son résultat. Les tests (5 graines, une seule graine d'entraînement) et `npm run balance` (10 graines, deux graines
+  d'entraînement) doivent passer tous les deux ; pour juger la marge, rejouer aussi sur d'autres graines.
 - Quand les données changent : `npm run niveaux` (vagues figées), `VERSION_DONNEES` + 1, `npm run balance`, puis `npm run verifier`.
 
 ## Invariants vérifiés automatiquement

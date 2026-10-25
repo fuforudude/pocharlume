@@ -172,9 +172,16 @@ lot qu'on peut tirer.
   pour chaque difficulté. Il produit `balance-report.md` (taux de victoire, vies restantes, or inutilisé, vague la
   plus meurtrière, tour la plus et la moins choisie) et un test Vitest échoue si un niveau sort de sa bande cible :
   - Chaton : le bot naïf gagne 100 % des niveaux.
-  - Matou : le bot soigneux gagne 100 % des niveaux, le bot naïf entre 50 et 90 %.
-  - Vieux Sage : le bot soigneux gagne au moins 80 % des niveaux, sans aucun bonus de caisse ni amélioration
+  - Matou : le bot soigneux gagne 100 % des niveaux, mais perd au moins une vie (en moyenne sur les graines) sur au
+    moins la moitié des niveaux, et laisse moins de 250 arêtes inutilisées en fin de chaque niveau (moyenne sur les
+    graines) ; le bot naïf gagne entre 30 et 70 % des niveaux.
+  - Vieux Sage : le bot soigneux gagne entre 60 et 85 % des niveaux, sans aucun bonus de caisse ni amélioration
     au-delà de ce que la progression attendue permet à ce niveau.
+  - Courbe de difficulté en Matou : les vies restantes du bot naïf baissent avec le niveau (corrélation de rang de
+    Spearman d'au plus −0,6) et le niveau 10 est parmi les 3 plus durs.
+  - Sans défense (héros seul), on perd tous les niveaux (sauf le niveau 1 en Chaton, qui sert d'introduction).
+  - Le bot soigneux lit la composition des vagues futures, ce qu'un joueur ne voit pas : il est un peu optimiste. Un
+    joueur humain compétent est supposé se comporter à peu près comme lui.
   - Aucune tour commune n'a une puissance hors de ±15 % de la moyenne de son palier de coût.
 
 ## Périmètre

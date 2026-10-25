@@ -46,7 +46,8 @@ describe('dégâts et protections', () => {
     expect(infligerDegats(etat, e, 100, 'physique')).toBeCloseTo(40);
     expect(infligerDegats(etat, e, 100, 'magique')).toBeCloseTo(70);
     expect(infligerDegats(etat, e, 100, 'pur')).toBe(100);
-    expect(e.pv).toBeCloseTo(1000 - 210);
+    // Les PV de départ suivent le multiplicateur de la difficulté : on part de ses PV max.
+    expect(e.pv).toBeCloseTo(e.pvMax - 210);
   });
 
   it('tue l’ennemi, verse sa prime selon la difficulté et le retire à la fin du pas', () => {
@@ -95,7 +96,7 @@ describe('effets', () => {
       appliquerEffet(etat, e, { type, chance: 1, duree: 3, valeur: 4 });
       appliquerEffet(etat, e, { type, chance: 1, duree: 2, valeur: 2 });
       avancerSecondes(etat, 5);
-      expect(e.pv).toBeCloseTo(100 - 12, 6);
+      expect(e.pv).toBeCloseTo(e.pvMax - 12, 6);
     }
   });
 

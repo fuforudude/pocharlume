@@ -108,8 +108,8 @@ describe('bot soigneux', () => {
     let soigneux = 0;
     let naif = 0;
     for (const graine of [101, 102, 103]) {
-      soigneux += jouerPartie(niveau, creerBotSoigneux(), { graine, difficulte: 'vieux_sage' }).vies;
-      naif += jouerPartie(niveau, creerBotNaif({ graine: graine * 31 + 7 }), { graine, difficulte: 'vieux_sage' }).vies;
+      soigneux += jouerPartie(niveau, creerBotSoigneux(), { graine, difficulte: 'matou' }).vies;
+      naif += jouerPartie(niveau, creerBotNaif({ graine: graine * 31 + 7 }), { graine, difficulte: 'matou' }).vies;
     }
     expect(soigneux).toBeGreaterThan(naif);
   }, DELAI_PARTIE_LONGUE);

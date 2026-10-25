@@ -3,8 +3,8 @@ import type { Difficulte } from '../engine/definitions';
 
 export const DIFFICULTES = {
   chaton: { nom: 'difficulte.chaton', pvEnnemis: 0.6, vies: 25, aretesDepart: 1.5, primes: 1.25 },
-  matou: { nom: 'difficulte.matou', pvEnnemis: 1, vies: 20, aretesDepart: 1, primes: 1 },
-  vieux_sage: { nom: 'difficulte.vieux_sage', pvEnnemis: 1.25, vies: 15, aretesDepart: 0.9, primes: 0.9 },
+  matou: { nom: 'difficulte.matou', pvEnnemis: 1.08, vies: 20, aretesDepart: 1, primes: 0.7 },
+  vieux_sage: { nom: 'difficulte.vieux_sage', pvEnnemis: 1.27, vies: 15, aretesDepart: 0.85, primes: 0.7 },
 } as const satisfies Record<string, Difficulte>;
 
 export type IdDifficulte = keyof typeof DIFFICULTES;
