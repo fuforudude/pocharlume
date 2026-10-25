@@ -25,7 +25,5 @@ export const REGLES: Regles = {
   ],
   seuilDeuxEtoiles: 0.5,
   piegesMax: 12,
-  emplacementsObjets: 3,
   dureeRevelation: 0.1,
-  rangMaxCompetence: 3,
 };

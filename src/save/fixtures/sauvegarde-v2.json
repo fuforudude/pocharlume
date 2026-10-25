@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "progression": {
+    "niveauMax": 7,
+    "etoiles": {
+      "1": { "matou": 3, "chaton": 3 },
+      "2": { "matou": 2 },
+      "3": { "matou": 3, "vieux_sage": 1 },
+      "4": { "chaton": 2 },
+      "5": { "matou": 1 },
+      "6": { "matou": 2, "chaton": 3 }
+    }
+  },
+  "reglages": { "son": 35, "musique": 0, "vitesse": 2 },
+  "partie": {
+    "niveau": 7,
+    "config": { "graine": 12345, "difficulte": "matou", "dieu": "charlie", "niveauHeros": 1, "versionDonnees": 3 },
+    "etat": "{\"version\":1}",
+    "vague": 4
+  }
+}

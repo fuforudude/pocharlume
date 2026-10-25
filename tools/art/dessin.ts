@@ -1,6 +1,6 @@
 // Transforme les sources lues par format.ts en cadres RVBA : palettes, calques, cadres dérivés, planches Minifolks.
 import {
-  agrandir, contourner, coucheVide, decaler, decouper, ecrirePixel, miroir, recolorer, retourner, superposer, tourner,
+  agrandir, contourner, coucheVide, decaler, decouper, ecrirePixel, miroir, recolorer, retourner, rogner, superposer, tourner,
   type Couche,
 } from './couche.ts';
 import { EFFACE, ErreurFormat, TRANSPARENT, type JetonCouleur, type Grille, type Operation, type SpriteSource, type Terme } from './format.ts';
@@ -167,6 +167,7 @@ function dessinerBrut(s: SpriteSource, sources: Sources, chercher: ChercherSprit
         case 'miroir': sortie = miroir(sortie); break;
         case 'retourne': sortie = retourner(sortie); break;
         case 'tourne': sortie = tourner(sortie, op.quarts); break;
+        case 'rogne': sortie = rogner(sortie, op.x, op.y, op.largeur, op.hauteur); break;
         case 'couleurs': sortie = recolorer(sortie, table(op.paires, ligne), op.zone); break;
       }
     }
@@ -199,7 +200,7 @@ function dessinerBrut(s: SpriteSource, sources: Sources, chercher: ChercherSprit
   /** Animations en cours de dessin : leurs cadres déjà faits peuvent servir aux suivants. */
   const enCours = new Map<string, AnimBrute>();
 
-  const cadreDe = (sprite: string | null, nomAnim: string, indice: number, ligne: number): Couche => {
+  const cadreDe = (sprite: string | null, nomAnim: string, indice: number, ligne: number, rogne = false): Couche => {
     let liste: AnimBrute[];
     if (sprite === null || sprite === s.nom) {
       const a = animPropre(nomAnim, ligne);
@@ -210,7 +211,7 @@ function dessinerBrut(s: SpriteSource, sources: Sources, chercher: ChercherSprit
     const anim = liste.find((a) => a.nom === nomAnim);
     const cadre = anim?.cadres[indice];
     if (!cadre) throw new ErreurFormat(s.fichier, ligne, `cadre introuvable : ${sprite ?? s.nom}/${nomAnim}.${String(indice)}`);
-    if (cadre.couche.largeur !== s.largeur || cadre.couche.hauteur !== s.hauteur) {
+    if (!rogne && (cadre.couche.largeur !== s.largeur || cadre.couche.hauteur !== s.hauteur)) {
       throw new ErreurFormat(s.fichier, ligne, `le cadre ${sprite ?? s.nom}/${nomAnim} n'a pas la taille de ce sprite`);
     }
     return cadre.couche;
@@ -220,7 +221,7 @@ function dessinerBrut(s: SpriteSource, sources: Sources, chercher: ChercherSprit
     let c: Couche;
     switch (t.source.type) {
       case 'minifolks': c = cadreMinifolks(t.source.ligne, t.source.indice, ligne); break;
-      case 'cadre': c = cadreDe(t.source.sprite, t.source.anim, t.source.indice, ligne); break;
+      case 'cadre': c = cadreDe(t.source.sprite, t.source.anim, t.source.indice, ligne, t.operations.some((o) => o.type === 'rogne')); break;
       case 'calque': {
         const g = s.calques.get(t.source.nom);
         if (!g) throw new ErreurFormat(s.fichier, ligne, `calque inconnu « ${t.source.nom} »`);

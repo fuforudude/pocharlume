@@ -6,8 +6,10 @@
 //   navigateur n'a pas de CompressionStream. L'import comprend les deux.
 // - `somme` : CRC-32 en 8 chiffres hexadécimaux de `<mode>.<données>`, qui détecte une copie tronquée ou fautive.
 //
-// Le code contient la progression et les réglages, pas la partie en cours. Un import ne touche à rien tant que
+// Le code contient la progression, les réglages et la méta-progression (monnaies, héros, arbre, objets, choix), pas
+// la partie en cours. Un import ne touche à rien tant que
 // tout n'est pas validé : taille, forme, somme, décompression bornée, JSON, migration, validation stricte.
+import type { DefsMeta } from './definitions';
 import { VERSION_SAUVEGARDE, type Sauvegarde } from './format';
 import { migrer } from './migrations';
 
@@ -113,10 +115,10 @@ const compressionDisponible = (): boolean => typeof CompressionStream === 'funct
 
 /** Les données qui voyagent dans un code : tout sauf la partie en cours. */
 function donneesExportees(s: Sauvegarde): string {
-  return JSON.stringify({ version: s.version, progression: s.progression, reglages: s.reglages });
+  return JSON.stringify({ version: s.version, progression: s.progression, reglages: s.reglages, meta: s.meta });
 }
 
-/** Produit le code qui redonne la progression et les réglages de cette sauvegarde. */
+/** Produit le code qui redonne la progression, les réglages et la méta-progression de cette sauvegarde. */
 export async function exporterCode(s: Sauvegarde): Promise<string> {
   const json = new TextEncoder().encode(donneesExportees(s));
   let mode = 'j';
@@ -145,9 +147,11 @@ function refus(raison: RaisonImport, detail: string): ResultatImport {
 /**
  * Lit un code d'export. Ne modifie rien : c'est à l'appelant, si le résultat est bon, de remplacer la
  * progression (avec `remplacerProgression`). Un code de la version courante ou d'une version plus ancienne
- * est accepté (migré), un code plus récent que le jeu est refusé.
+ * est accepté (migré : un code d'avant la version 3 donne une méta-progression de départ), un code plus récent que
+ * le jeu est refusé. `defs` (facultatif) active la validation complète des héros : compétences connues, rangs et
+ * niveaux requis cohérents avec l'expérience (voir validation.ts).
  */
-export async function importerCode(code: string): Promise<ResultatImport> {
+export async function importerCode(code: string, defs?: DefsMeta): Promise<ResultatImport> {
   // Les codes collés contiennent souvent des retours à la ligne ou des espaces en bout de ligne.
   const texte = code.replace(/\s+/g, '');
   if (texte.length === 0) return refus('vide', 'aucun code');
@@ -181,15 +185,15 @@ export async function importerCode(code: string): Promise<ResultatImport> {
   if (typeof analyse !== 'object' || analyse === null || Array.isArray(analyse) || Object.hasOwn(analyse, 'partie')) {
     return refus('donnees', 'structure inattendue');
   }
-  const migration = migrer({ ...analyse, partie: null });
+  const migration = migrer({ ...analyse, partie: null }, defs);
   if (!migration.ok) return refus(migration.cause === 'trop_recente' ? 'trop_recent' : 'donnees', migration.raison);
   return { ok: true, sauvegarde: migration.sauvegarde, depuis: migration.depuis };
 }
 
 /**
- * Applique un import réussi : la progression et les réglages du code remplacent ceux de la sauvegarde
- * courante, la partie en cours est abandonnée (elle appartenait à l'ancienne progression).
+ * Applique un import réussi : la progression, les réglages et la méta-progression du code remplacent ceux de la
+ * sauvegarde courante, la partie en cours est abandonnée (elle appartenait à l'ancienne progression).
  */
 export function remplacerProgression(importee: Sauvegarde): Sauvegarde {
-  return { version: VERSION_SAUVEGARDE, progression: importee.progression, reglages: importee.reglages, partie: null };
+  return { version: VERSION_SAUVEGARDE, progression: importee.progression, reglages: importee.reglages, meta: importee.meta, partie: null };
 }

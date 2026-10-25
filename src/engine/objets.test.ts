@@ -1,6 +1,5 @@
 // Objets consommables : effet principal de chacun, un emplacement ne sert qu'une fois, refus.
 import { describe, expect, it } from 'vitest';
-import { REGLES } from '../data/regles';
 import { CONFIG, avancerSecondes, compter, ennemiFixe, partieEssai } from './aides.test-utils';
 import { EFFET, type EtatPartie } from './etat';
 import { appliquerAction, validerAction } from './partie';
@@ -112,7 +111,7 @@ describe('emplacements', () => {
     expect(appliquerAction(etat, { type: 'utiliserObjet', emplacement: 2, x: 0, y: 0 })).toEqual({ ok: true });
     expect(appliquerAction(etat, { type: 'utiliserObjet', emplacement: 1, x: 0, y: 0 })).toEqual({ ok: true });
     expect(etat.objetsUtilises).toEqual([false, true, true]);
-    expect(REGLES.emplacementsObjets).toBe(3);
+
   });
 
   it('refuse un emplacement vide, négatif, trop grand ou mal formé, sans rien changer', () => {

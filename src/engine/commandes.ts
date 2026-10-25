@@ -1,6 +1,7 @@
 // Validation et application des actions du joueur. Les actions viennent de l'interface ou d'un journal
 // relu : elles ne sont pas fiables. Une action refusée (mal formée comprise) ne lève jamais d'exception et
 // ne change rien à l'état ; une action acceptée est inscrite au journal avec le pas courant.
+import { RANG_MAX_COMPETENCE } from '../data/meta';
 import { REGLES } from '../data/regles';
 import type { Action, RaisonRefus, ResultatAction } from './actions';
 import { partEntiere } from './argent';
@@ -81,7 +82,7 @@ function competenceSuivante(etat: EtatPartie, t: Tour, id: string): { indice: nu
   if (!competence) return 'competence_inconnue';
   const rang = t.rangs[indice] ?? 0;
   const cout = competence.cout[rang];
-  if (cout === undefined || rang >= REGLES.rangMaxCompetence) return 'competence_au_maximum';
+  if (cout === undefined || rang >= RANG_MAX_COMPETENCE) return 'competence_au_maximum';
   return { indice, rang: rang + 1, cout: prixFamille(etat, t.famille, cout) };
 }
 

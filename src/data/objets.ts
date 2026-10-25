@@ -1,5 +1,5 @@
 // Objets consommables : emportés avant un niveau (3 emplacements), un emplacement ne sert qu'une fois par partie.
-// `prix` et `stockMax` servent hors partie (boutique en arêtes) ; le reste décrit l'effet en partie.
+// Seul l'effet en partie est ici : les prix et le stock (hors partie) sont dans meta.ts, qui fait foi.
 import type { DefObjet } from '../engine/definitions';
 
 export const OBJETS = {
@@ -7,8 +7,6 @@ export const OBJETS = {
   fiole_soufre: {
     nom: 'objet.fiole_soufre',
     description: 'objet.fiole_soufre.desc',
-    prix: 60,
-    stockMax: 10,
     rayon: 1.8,
     surChemin: false,
     global: false,
@@ -18,8 +16,6 @@ export const OBJETS = {
   herbe_sabbat: {
     nom: 'objet.herbe_sabbat',
     description: 'objet.herbe_sabbat.desc',
-    prix: 80,
-    stockMax: 10,
     rayon: 0,
     surChemin: false,
     global: true,
@@ -29,8 +25,6 @@ export const OBJETS = {
   griffe_renfort: {
     nom: 'objet.griffe_renfort',
     description: 'objet.griffe_renfort.desc',
-    prix: 60,
-    stockMax: 10,
     rayon: 0.6,
     surChemin: true,
     global: false,
@@ -59,8 +53,6 @@ export const OBJETS = {
   sablier: {
     nom: 'objet.sablier',
     description: 'objet.sablier.desc',
-    prix: 100,
-    stockMax: 10,
     rayon: 0,
     surChemin: false,
     global: true,

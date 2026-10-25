@@ -1,0 +1,45 @@
+# Portraits des 9 héros (écran des héros, fiche de niveau, barre de partie) : le haut du cadre de repos, rogné en
+# 12×12 (`rogne`) puis doublé en 24×24. Ils suivent donc toute retouche des sprites des héros.
+# Nommage : icone-portrait-<id du héros avec des tirets>.
+categorie icone
+palette commune
+taille 12 12
+ancre 6 6
+agrandi 2
+
+sprite icone-portrait-plume
+anim repos 200
+cadre heros-plume/repos.0 rogne 9 15 12 12
+
+sprite icone-portrait-suie
+anim repos 200
+cadre heros-suie/repos.0 rogne 9 16 12 12
+
+sprite icone-portrait-corbeau
+anim repos 200
+cadre heros-corbeau/repos.0 rogne 9 16 12 12
+
+sprite icone-portrait-charlie
+anim repos 200
+cadre charlie/repos.0 rogne 10 8 12 12
+
+sprite icone-portrait-mastoc
+anim repos 200
+cadre heros-mastoc/repos.0 rogne 10 8 12 12
+
+sprite icone-portrait-brise-os
+anim repos 200
+cadre heros-brise-os/repos.0 rogne 9 16 12 12
+
+sprite icone-portrait-pollen
+anim repos 200
+cadre heros-pollen/repos.0 rogne 9 16 12 12
+
+sprite icone-portrait-rouage
+anim repos 200
+cadre heros-rouage/repos.0 rogne 9 16 12 12
+
+sprite icone-portrait-lanterne
+anim repos 200
+cadre heros-lanterne/repos.0 rogne 9 16 12 12
+

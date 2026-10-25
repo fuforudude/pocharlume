@@ -2,9 +2,10 @@
 import { describe, expect, it } from 'vitest';
 import type { DefCompetenceHeros, DefCompetenceTour, EffetSort } from '../engine/definitions';
 import { fr } from '../i18n/fr';
-import { BRANCHES, RANG_MAX_ARBRE } from './ameliorations';
+import { BRANCHES } from './ameliorations';
 import { DIEUX } from './dieux';
-import { experienceGagnee, HEROS, NIVEAU_ULTIME, niveauPourExperience, SEUILS_XP } from './heros';
+import { HEROS, SEUILS_XP } from './heros';
+import { NIVEAU_ULTIME, RANG_MAX_ARBRE, RANG_MAX_COMPETENCE } from './meta';
 import { OBJETS } from './objets';
 import { REGLES } from './regles';
 import { FAMILLES, TOURS } from './tours';
@@ -87,7 +88,7 @@ describe('héros', () => {
     for (const [id, h] of tous) {
       expect(h.competences, id).toHaveLength(4);
       h.competences.forEach((c: DefCompetenceHeros, i) => {
-        expect(c.rangMax, c.id).toBe(REGLES.rangMaxCompetence);
+        expect(c.rangMax, c.id).toBe(RANG_MAX_COMPETENCE);
         expect(c.rangs, c.id).toHaveLength(3);
         expect(c.ultime, c.id).toBe(i === 3);
         expect(c.niveauRequis, c.id).toBe(i === 3 ? NIVEAU_ULTIME : 1);
@@ -149,22 +150,6 @@ describe('expérience', () => {
       if (i > 0) expect(s).toBeGreaterThan(SEUILS_XP[i - 1] ?? 0);
     });
   });
-
-  it('le niveau suit l’expérience, de 1 à 10', () => {
-    expect(niveauPourExperience(0)).toBe(1);
-    expect(niveauPourExperience((SEUILS_XP[0] ?? 0) - 1)).toBe(1);
-    expect(niveauPourExperience(SEUILS_XP[0] ?? 0)).toBe(2);
-    expect(niveauPourExperience(SEUILS_XP[8] ?? 0)).toBe(10);
-    expect(niveauPourExperience(1e9)).toBe(10);
-  });
-
-  it('victoire : 100 + 20 × N ; défaite : la moitié', () => {
-    expect(experienceGagnee(1, true)).toBe(120);
-    expect(experienceGagnee(10, true)).toBe(300);
-    expect(experienceGagnee(1, false)).toBe(60);
-    expect(experienceGagnee(5, false)).toBe(100);
-    expect(experienceGagnee(3, false)).toBe(80);
-  });
 });
 
 describe('arbre d’améliorations', () => {
@@ -185,16 +170,6 @@ describe('arbre d’améliorations', () => {
 });
 
 describe('objets', () => {
-  it('sont quatre, avec un prix et un stock de 10', () => {
-    expect(Object.keys(OBJETS).sort()).toEqual(['fiole_soufre', 'griffe_renfort', 'herbe_sabbat', 'sablier']);
-    expect(Object.values(OBJETS).map((o) => o.prix)).toEqual([60, 80, 60, 100]);
-    for (const o of Object.values(OBJETS)) expect(o.stockMax).toBe(10);
-  });
-
-  it('trois emplacements par partie', () => {
-    expect(REGLES.emplacementsObjets).toBe(3);
-  });
-
   it('les effets des objets sont ceux de la spec', () => {
     const effets = (id: keyof typeof OBJETS): readonly EffetSort[] => OBJETS[id].effets;
     expect(effets('fiole_soufre')).toMatchObject([{ type: 'degats', degats: [150, 150], typeDegats: 'pur' }]);

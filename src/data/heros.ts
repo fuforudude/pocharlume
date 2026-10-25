@@ -3,31 +3,11 @@
 // La 4e compétence est l'ultime : elle demande le niveau 6.
 import type { CapacitesUnite, DefCompetenceHeros, DefHeros, ModUnite } from '../engine/definitions';
 import { capacites, rangsUnite, type ValeursParRang } from './capacites';
-
-/** Niveau du héros à partir duquel l'ultime reçoit des points. */
-export const NIVEAU_ULTIME = 6;
+import { NIVEAU_ULTIME } from './meta';
 
 /** Expérience totale à atteindre pour passer aux niveaux 2 à 10 (l'indice 0 mène au niveau 2). */
 export const SEUILS_XP: readonly number[] = [150, 350, 600, 900, 1300, 1800, 2400, 3100, 4000];
 
-/** Niveau (1 à 10) d'un héros qui a cette expérience totale. */
-export function niveauPourExperience(experience: number): number {
-  let niveau = 1;
-  for (const seuil of SEUILS_XP) {
-    if (experience < seuil) break;
-    niveau++;
-  }
-  return niveau;
-}
-
-/**
- * Expérience gagnée en jouant le niveau `numero` de la campagne (1 à 100) : victoire 100 + 20 × N,
- * défaite la moitié (arrondie vers le bas).
- */
-export function experienceGagnee(numero: number, victoire: boolean): number {
-  const base = 100 + 20 * numero;
-  return victoire ? base : Math.floor(base / 2);
-}
 
 function competence(id: string, niveauRequis: number, valeurs: ValeursParRang<ModUnite>): DefCompetenceHeros {
   return {
@@ -274,3 +254,21 @@ export const HEROS = { plume, suie, corbeau, charlie, mastoc, brise_os: briseOs,
 >;
 
 export type IdHeros = keyof typeof HEROS;
+
+/**
+ * Ce que la méta-progression (src/save/) sait des héros : leurs compétences et les seuils d'expérience. Même forme
+ * que `DefsMeta` de src/save/definitions.ts (la donnée ne dépend pas de la sauvegarde : un test vérifie la
+ * compatibilité). `seuilsXp[0]` est l'expérience cumulée qu'il faut pour le niveau 2.
+ */
+export const DEFS_META: {
+  readonly heros: Readonly<Record<string, { readonly competences: readonly { readonly id: string; readonly rangMax: number; readonly niveauRequis: number }[] }>>;
+  readonly seuilsXp: readonly number[];
+} = {
+  heros: Object.fromEntries(
+    Object.entries(HEROS).map(([id, def]) => [
+      id,
+      { competences: def.competences.map((c) => ({ id: c.id, rangMax: c.rangMax, niveauRequis: c.niveauRequis })) },
+    ]),
+  ),
+  seuilsXp: SEUILS_XP,
+};

@@ -411,10 +411,6 @@ export interface DefSort extends ZoneEffets {
 export interface DefObjet extends ZoneEffets {
   readonly nom: string;
   readonly description: string;
-  /** Prix en arêtes (hors partie). */
-  readonly prix: number;
-  /** Quantité maximale en stock. */
-  readonly stockMax: number;
 }
 
 /** Bonus d'un dieu sur une famille de tours. Les fractions s'ajoutent (+0,25 = +25 %). */
@@ -506,12 +502,8 @@ export interface Regles {
   readonly seuilDeuxEtoiles: number;
   /** Pièges vivants au plus sur la carte : au-delà, le plus ancien disparaît. */
   readonly piegesMax: number;
-  /** Objets emportés au plus dans une partie. */
-  readonly emplacementsObjets: number;
   /** Secondes pendant lesquelles un ennemi reste visible après avoir été révélé par une tour ou un assassin. */
   readonly dureeRevelation: number;
-  /** Rang maximal d'une compétence de héros ou de spécialisation de tour. */
-  readonly rangMaxCompetence: number;
 }
 
 export interface Paquet {

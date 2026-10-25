@@ -1,5 +1,6 @@
 // Validation de la config d'une partie. Elle vient de l'interface, d'une sauvegarde ou d'un journal relu : rien
 // n'est fiable. Les tables de données ne sont lues que par propriétés propres (voir contenu.ts).
+import { EMPLACEMENTS_OBJETS } from '../data/meta';
 import { REGLES } from '../data/regles';
 import { VERSION_DONNEES } from '../data/version';
 import { defBranche, defDieu, defDifficulte, defHeros, defObjet } from './contenu';
@@ -56,7 +57,7 @@ function verifierCompetences(config: Dictionnaire, niveauHeros: number): string 
 
 function verifierObjets(objets: unknown): string | null {
   if (!Array.isArray(objets)) return 'Objets : une liste est attendue';
-  if (objets.length > REGLES.emplacementsObjets) return `Objets : ${String(REGLES.emplacementsObjets)} au plus`;
+  if (objets.length > EMPLACEMENTS_OBJETS) return `Objets : ${String(EMPLACEMENTS_OBJETS)} au plus`;
   const vus = new Set<string>();
   for (const objet of objets as unknown[]) {
     if (typeof objet !== 'string' || !defObjet(objet)) return `Objets : ${String(objet)} inconnu`;

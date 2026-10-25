@@ -1,0 +1,541 @@
+# Disciples de Plume et de Pollen : Suie, Corbeau, Brise-Os, Rouage, Lanterne. Chacun reprend le squelette du chat
+# de grange (mêmes animations repos, marche, blesse) et ne redéfinit que ses calques, ses attaques et sa compétence.
+# Grilles posées à l'origine (6, 18), pieds en y = 30. Mastoc, énorme, est dans heros-mastoc.txt.
+categorie unite
+palette commune
+taille 32 32
+ancre 16 30
+origine 6 18
+couleur 1 e4f0f4
+
+# Suie : assassin du dieu Plume. Chat gris cendre, capuche de suie dont le ruban claque derrière lui, deux lames
+# courtes, yeux orange.
+sprite heros-suie
+modele soldat-grange
+
+calque tete 6 0
+g.....g.
+gu...ug.
+guuuuug.
+gUUUfUf.
+gUUvvrvv
+.gUvvvv.
+
+calque yeux-clos 10 3
+U.U
+
+calque yeux-mal 10 3
+k.k
+
+calque corps 5 6
+.ugggu
+vugguuu
+vuuguu
+.dddddd
+.ugguug
+
+# Le ruban de la capuche flotte au-dessus de la queue.
+calque queue 0 3
+....gg
+..ggg.
+.gg...
+......
+......
+..U
+..v
+...UUU
+
+calque queue-b 0 3
+.....g
+...ggg
+..gg..
+.g....
+......
+...U
+..v
+...UUU
+
+calque jambes 7 11
+uu.uu
+gg.gg
+
+calque jambes-a 6 11
+uu...uu
+gg...gg
+
+calque jambes-b 7 11
+.uuu
+.ggg
+
+calque jambes-c 6 11
+.uu.uu
+.gg.gg
+
+calque arme 11 4
+...i
+..iT
+u.d
+.v
+
+calque arme-haut 8 -1
+iT
+.Td
+...v
+....u
+.....u
+
+calque arme-frappe 11 6
+.....i
+uuvdiT
+
+calque trace 13 3
+...1
+....1
+.....1
+....1
+
+# Disparition en fumée : la silhouette s'efface en bandes.
+calque fumee 8 2
+.u.u.u
+u.u.u.
+.u.u.u
+u.u.u.
+
+anim attaque 70
+cadre queue + jambes + corps decale -1 0 + tete decale -1 0 + arme-haut duree 90
+cadre queue + jambes-a + corps decale 2 0 + tete decale 2 0 + arme-frappe decale 2 0 + trace duree 60
+cadre queue + jambes-a + corps decale 2 0 + tete decale 2 0 + arme-haut decale 2 1 + trace decale 0 2 duree 60
+cadre queue + jambes + corps + arme + tete duree 130
+
+# Elle s'efface, réapparaît derrière la cible et frappe.
+anim competence 90
+cadre queue + jambes + corps decale 0 2 + tete decale 0 2 + arme decale 0 2 duree 150
+cadre fumee decale 0 6 duree 90
+cadre fumee decale 6 6 duree 90
+cadre queue decale 5 0 + jambes-a decale 5 0 + corps decale 6 0 + tete decale 6 0 + arme-frappe decale 6 0 + trace decale 5 0 duree 100
+cadre queue + jambes + corps + arme + tete duree 150
+
+anim mort 140
+cadre queue + jambes + corps decale -1 0 + arme decale -1 0 + tete decale -1 0 + yeux-mal decale -1 0
+cadre soldat-grange/mort.1 couleurs o=U O=v B=u b=u c=v d=g r=g
+cadre soldat-grange/mort.2 couleurs o=U O=v B=u b=u c=v d=g r=g duree 300
+cadre soldat-grange/mort.3 couleurs o=U O=v B=u b=u c=v d=g r=g duree 600
+
+# Corbeau : tireur du dieu Plume. Chat noir et blanc (museau, plastron et gants blancs), cape de plumes
+# déchiquetée, arbalète courte.
+sprite heros-corbeau
+modele soldat-grange
+
+calque tete 6 0
+k.....k.
+ku...uk.
+kkkwkkk.
+kkkkFkF.
+kkkwwrww
+.kwwwww.
+
+calque yeux-clos 10 3
+k.k
+
+calque yeux-mal 10 3
+w.w
+
+calque corps 5 6
+.kukkk
+wkwwkkk
+wkwwkk
+.kkkkk
+.k.kuk
+
+calque queue 2 8
+w
+k
+.kkk
+
+calque queue-b 2 8
+.w
+k
+.kkk
+
+calque jambes 7 11
+kk.kk
+ww.ww
+
+calque jambes-a 6 11
+kk...kk
+ww...ww
+
+calque jambes-b 7 11
+.kkk
+.www
+
+calque jambes-c 6 11
+.kk.kk
+.ww.ww
+
+calque arme 11 4
+.....p
+.....p
+kkwdddP
+.....p
+.....p
+
+calque arme-tire 11 4
+.....p
+..TTTpTi
+kkwdddP
+.....p
+.....p
+
+# Éclat au bout du carreau avant le tir.
+calque eclat 18 6
+1
+.
+
+anim attaque 90
+cadre queue + jambes + corps + arme + tete duree 130
+cadre queue + jambes + corps decale -1 0 + tete decale -1 0 + arme-tire decale -1 0 duree 160
+cadre queue + jambes + corps + tete + arme duree 140
+
+# Tir ajusté : il épaule, retient son souffle, puis deux carreaux coup sur coup.
+anim competence 90
+cadre queue + jambes + corps decale 0 1 + tete decale 0 1 + arme decale 0 1 duree 160
+cadre queue + jambes + corps decale 0 1 + tete decale 0 1 + arme decale 0 1 + eclat decale 0 1 duree 220
+cadre queue + jambes + corps decale -1 1 + tete decale -1 1 + arme-tire decale -1 1 duree 90
+cadre queue + jambes + corps decale 0 1 + tete decale 0 1 + arme decale 0 1 duree 70
+cadre queue + jambes + corps decale -1 1 + tete decale -1 1 + arme-tire decale -1 1 duree 90
+cadre queue + jambes + corps + arme + tete duree 160
+
+anim mort 140
+cadre queue + jambes + corps decale -1 0 + arme decale -1 0 + tete decale -1 0 + yeux-mal decale -1 0
+cadre soldat-grange/mort.1 couleurs o=k O=u B=k b=k c=w
+cadre soldat-grange/mort.2 couleurs o=k O=u B=k b=k c=w duree 300
+cadre soldat-grange/mort.3 couleurs o=k O=u B=k b=k c=w duree 600
+
+# Brise-Os : berserker du dieu Charlie. Chat brun rayé, balafre blanche en travers de l'œil, yeux rouges,
+# plaque d'épaule en os, massue d'os.
+sprite heros-brise-os
+modele soldat-grange
+
+calque tete 6 0
+b.....b.
+Bo...oB.
+BbwbBbB.
+BBBwxBx.
+BBBcwrcc
+.Bccccc.
+
+calque yeux-clos 10 3
+B.B
+
+calque yeux-mal 10 3
+k.k
+
+calque corps 4 6
+.wqwwb
+oBbbBbb
+oBbBbb
+.dwdwdd
+.BBbBBB
+
+calque queue 1 8
+b
+B
+.BbB
+
+calque queue-b 1 8
+.b
+B
+.BbB
+
+calque jambes 6 11
+BB.BB
+bb.bb
+
+calque jambes-a 5 11
+BB...BB
+bb...bb
+
+calque jambes-b 6 11
+.BBB
+.bbb
+
+calque jambes-c 5 11
+.BB.BB
+.bb.bb
+
+calque arme 11 -1
+...ww.
+..wqqw
+...wq.
+...wq.
+...wq.
+....q.
+....d.
+o...d.
+.cd...
+
+calque arme-haut 6 -4
+.ww..
+wqqw.
+.wq.
+.wq.
+.q..
+.d..
+..d..
+...o
+
+calque arme-frappe 11 4
+..ww
+.wqqw
+wqwq.
+.oq
+.d
+
+calque trace 14 3
+...w
+....w
+.....w
+.....w
+....w
+
+# Rage : flammes rouges tout autour de lui.
+calque rage 3 4
+x..x...x..x
+.x..x.x..x.
+..x.....x..
+x.........x
+x.........x
+.x.......x.
+..x.....x..
+
+anim attaque 80
+cadre queue + jambes + corps decale -1 0 + tete decale -1 0 + arme-haut duree 130
+cadre queue + jambes-a + corps decale 2 0 + tete decale 2 0 + arme-frappe decale 2 0 + trace duree 60
+cadre queue + jambes-a + corps decale 2 0 + tete decale 2 0 + arme-frappe decale 2 1 duree 90
+cadre queue + jambes + corps + arme + tete duree 140
+
+# Rage : il rugit, ses flammes grandissent, puis il charge.
+anim competence 100
+cadre queue + jambes + corps decale 0 1 + tete decale 0 1 + arme decale 0 1 duree 140
+cadre queue + jambes + corps + tete + arme + rage duree 120
+cadre queue + jambes + corps decale 0 -1 + tete decale 0 -1 + arme-haut + rage decale 0 -1 duree 140
+cadre queue + jambes-a + corps decale 2 0 + tete decale 2 0 + arme-frappe decale 2 0 + trace + rage decale 2 0 duree 90
+cadre queue + jambes + corps + arme + tete duree 160
+
+anim mort 140
+cadre queue + jambes + corps decale -1 0 + arme decale -1 0 + tete decale -1 0 + yeux-mal decale -1 0
+cadre soldat-grange/mort.1 couleurs o=B O=o B=b T=q i=w d=d
+cadre soldat-grange/mort.2 couleurs o=B O=o B=b T=q i=w d=d duree 300
+cadre soldat-grange/mort.3 couleurs o=B O=o B=b T=q i=w d=d duree 600
+
+# Rouage : ingénieur du dieu Pollen. Chat sable, lunettes de cuivre sur les yeux, tablier de cuir, engrenage de
+# laiton dans le dos, grande clé à molette.
+sprite heros-rouage
+modele soldat-grange
+
+calque tete 6 0
+N.....N.
+nN...Nn.
+ndddddd.
+ndnTiTi.
+nnnccrcc
+.nccccc.
+
+calque yeux-clos 10 3
+n.n
+
+calque yeux-mal 10 3
+k.k
+
+calque corps 5 6
+.nddnn
+nbBbBbb
+nbBbBb
+.dYdYdd
+.bBbBbb
+
+# L'engrenage de laiton dans le dos tourne : dents en croix, puis en diagonale.
+calque queue 0 3
+..Y.Y.
+.YYYYY
+.YYdYY
+.YYYYY
+..Y.Y.
+..N
+..n
+...nnN
+
+calque queue-b 0 3
+.Y...Y
+..YYY.
+..YdY.
+..YYY.
+.Y...Y
+...N
+..n
+...nnN
+
+calque jambes 7 11
+nn.nn
+bb.bb
+
+calque jambes-a 6 11
+nn...nn
+bb...bb
+
+calque jambes-b 7 11
+.nnn
+.bbb
+
+calque jambes-c 6 11
+.nn.nn
+.bb.bb
+
+calque arme 13 0
+.iT.
+iT.T
+.TT.
+..T
+..T
+o.d
+.cd
+
+calque arme-haut 8 -4
+.iT.
+iT.T
+.TT.
+..T
+..d
+...d
+....o
+
+calque arme-frappe 11 5
+.......iT
+oocdddddTT
+.......iT
+
+calque etincelles 16 5
+y..F
+.F..y
+y..y
+
+calque tourelle 14 8
+.T.T
+TTTTT
+.dTd
+.ddd
+
+anim attaque 90
+cadre queue + jambes + corps decale -1 0 + tete decale -1 0 + arme-haut duree 120
+cadre queue + jambes-a + corps decale 1 0 + tete decale 1 0 + arme-frappe decale 1 0 + etincelles duree 70
+cadre queue + jambes-a + corps decale 1 1 + tete decale 1 1 + arme-frappe decale 1 1 duree 90
+cadre queue + jambes + corps + arme + tete duree 140
+
+# Il plante sa clé dans le sol : une tourelle sort de terre dans un jaillissement d'étincelles.
+anim competence 110
+cadre queue + jambes + corps decale 0 1 + tete decale 0 1 + arme-haut decale 0 1 duree 150
+cadre queue + jambes + corps decale 1 1 + tete decale 1 1 + arme-frappe decale 1 1 + etincelles duree 100
+cadre queue-b + jambes + corps decale 1 1 + tete decale 1 1 + arme-frappe decale 1 1 + etincelles decale 1 2 + tourelle decale 0 2 duree 120
+cadre queue + jambes + corps decale 0 1 + tete decale 0 1 + arme decale 0 1 + tourelle duree 150
+cadre queue + jambes + corps + arme + tete duree 150
+
+anim mort 140
+cadre queue + jambes + corps decale -1 0 + arme decale -1 0 + tete decale -1 0 + yeux-mal decale -1 0
+cadre soldat-grange/mort.1 couleurs o=n O=N B=m b=b
+cadre soldat-grange/mort.2 couleurs o=n O=N B=m b=b duree 300
+cadre soldat-grange/mort.3 couleurs o=n O=N B=m b=b duree 600
+
+# Lanterne : soigneuse du dieu Pollen. Chat blanc pâle sous un capuchon de lin, yeux bleus, lanterne pendue au
+# croc d'une perche. La lueur grandit quand elle soigne.
+sprite heros-lanterne
+modele soldat-grange
+
+calque tete 6 0
+z.....z.
+wz...zw.
+zzzzzzz.
+wwwwAwA.
+wwwwwsww
+.wwwwww.
+
+calque yeux-clos 10 3
+w.w
+
+calque yeux-mal 10 3
+q.q
+
+calque corps 5 6
+.zzzzz
+wZzzzzz
+wZzzzz
+.dYdYdd
+.zZzZzz
+
+calque queue 2 8
+q
+w
+.www
+
+calque queue-b 2 8
+.q
+w
+.www
+
+calque jambes 7 11
+ww.ww
+qq.qq
+
+calque jambes-a 6 11
+ww...ww
+qq...qq
+
+calque jambes-b 7 11
+.www
+.qqq
+
+calque jambes-c 6 11
+.ww.ww
+.qq.qq
+
+# Perche à croc, lanterne pendue ; le bras est tendu devant elle.
+calque arme 11 -2
+...ddddd
+...d...g
+...d..gGg
+...d..fFf
+...d..FyF
+...d..gGg
+...d
+...d
+...d
+zzzw
+...d
+...d
+
+# Flamme à pleine force, par-dessus la lanterne.
+calque vive 17 0
+gyg
+yIy
+yIy
+gyg
+
+anim attaque 90
+cadre queue + jambes + corps decale -1 0 + tete decale -1 0 + arme decale 0 -3 duree 120
+cadre queue + jambes-a + corps decale 1 0 + tete decale 1 0 + arme decale 3 1 + vive decale 3 1 duree 80
+cadre queue + jambes-a + corps decale 1 0 + tete decale 1 0 + arme decale 3 1 + vive decale 3 1 duree 90
+cadre queue + jambes + corps + arme + tete duree 140
+
+# Soin : elle lève sa lanterne, la flamme grandit (la lueur sur les alliés est l'effet `effet-soin`).
+anim competence 110
+cadre queue + jambes + corps + tete + arme decale 0 -3 duree 150
+cadre queue + jambes + corps + tete + arme decale 0 -3 + vive decale 0 -3 duree 120
+cadre queue + jambes + corps + tete + arme decale 0 -4 + vive decale 0 -4 duree 180
+cadre queue + jambes + corps + tete + arme decale 0 -3 + vive decale 0 -3 duree 120
+cadre queue + jambes + corps + arme + tete duree 140
+
+anim mort 140
+cadre queue + jambes + corps decale -1 0 + arme decale -1 0 + tete decale -1 0 + yeux-mal decale -1 0
+cadre soldat-grange/mort.1 couleurs o=w O=w B=z b=z c=w T=d i=d
+cadre soldat-grange/mort.2 couleurs o=w O=w B=z b=z c=w T=d i=d duree 300
+cadre soldat-grange/mort.3 couleurs o=w O=w B=z b=z c=w T=d i=d duree 600

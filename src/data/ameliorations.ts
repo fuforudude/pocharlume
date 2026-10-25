@@ -2,8 +2,7 @@
 // Ici, seulement l'effet en partie ; les prix (le rang n coûte n étoiles) et l'achat sont dans la méta-progression.
 // Un rang donne l'effet TOTAL de la branche à ce rang (indice 0 = rang 1).
 import type { DefBranche, ModArbre } from '../engine/definitions';
-
-export const RANG_MAX_ARBRE = 5;
+import { RANG_MAX_ARBRE } from './meta';
 
 const NUL: ModArbre = { pvSoldats: 0, portee: 0, degats: 0, zone: 0, recharge: 0, pvHeros: 0, degatsHeros: 0 };
 

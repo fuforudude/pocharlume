@@ -9,11 +9,11 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
 | Dossier | Rôle | Peut dépendre de |
 | --- | --- | --- |
 | `src/engine/` | Simulation déterministe : boucle à pas fixe (1/30 s), générateur pseudo-aléatoire à graine, chemins, ennemis, tours, projectiles, soldats, vagues, vies et or, journal d'actions rejouable. Aucune dépendance au DOM : tourne dans Node (simulateur, futur serveur). | `src/data/` |
-| `src/data/` | Tables d'équilibrage : tours, ennemis, dieux, difficultés, règles, formules et générateur de vagues (`equilibrage.ts`), version des données (`version.ts`, à incrémenter à chaque changement d'équilibrage). Aucune valeur de jeu en dur ailleurs. Les niveaux figés vont dans `src/data/niveaux/` (un fichier par région). | `src/engine/` : types, et le générateur à graine (`aleatoire.ts`) pour le générateur de vagues |
+| `src/data/` | Tables d'équilibrage : tours, ennemis, dieux, difficultés, règles, formules et générateur de vagues (`equilibrage.ts`), version des données (`version.ts`, à incrémenter à chaque changement d'équilibrage), méta-progression (`meta.ts` : ids des dieux, héros, branches de l'arbre et objets, prix, plafonds, formules de gain hors partie). Aucune valeur de jeu en dur ailleurs. Les niveaux figés vont dans `src/data/niveaux/` (un fichier par région). | `src/engine/` : types, et le générateur à graine (`aleatoire.ts`) pour le générateur de vagues |
 | `src/render/` | Rendu Canvas 2D : caméra, zoom à pixels entiers sans lissage, sprites, animations, barres de vie, effets. Lit l'état du moteur, ne le modifie jamais. | `src/engine/`, `src/data/` |
 | `src/ui/` | Écrans, HUD, menus, toucher, souris, clavier. Traduit les gestes en actions du moteur. | tout `src/` |
 | `src/i18n/` | Textes affichés. `fr.ts` contient la table, `t('clé')` la lit avec une clé typée. | rien |
-| `src/save/` | Sauvegarde. Fonctions pures : format versionné (`format.ts`), validation stricte, migrations en chaîne vN vers vN+1, progression (étoiles, déblocage), partie en cours, export et import par code (`code.ts`). `Session` (`session.ts`) tient la sauvegarde courante en mémoire et l'écrit à chaque changement. Avant chaque écriture elle relit le stockage et fusionne la progression (la plus haute gagne : deux onglets, ou une lecture qui avait échoué au démarrage, n'écrasent rien ; un stockage muet ou illisible n'est pas écrasé) ; `canal.ts` prévient les autres onglets par `BroadcastChannel`, qui se rafraîchissent. Accès au stockage : interface `Stockage` (IndexedDB, repli localStorage, mémoire ; Capacitor Preferences plus tard) et `Depot`, qui ne lève jamais et garde une copie de secours d'une sauvegarde illisible. | `src/engine/`, `src/data/` |
+| `src/save/` | Sauvegarde. Fonctions pures : format versionné v3 (`format.ts`), validation stricte, migrations en chaîne vN vers vN+1, progression (étoiles, déblocage), méta-progression (`transactions.ts`, `config-partie.ts`, `definitions.ts`), partie en cours, export et import par code (`code.ts`). `Session` (`session.ts`) tient la sauvegarde courante en mémoire et l'écrit à chaque changement ; sa règle multi-onglets est décrite plus bas (« Méta-progression et sauvegarde v3 »). `verrou.ts` exclut les écritures entre onglets (Web Locks) ; `canal.ts` prévient les autres onglets par `BroadcastChannel`, qui se rafraîchissent. Accès au stockage : interface `Stockage` (IndexedDB, repli localStorage, mémoire ; Capacitor Preferences plus tard) et `Depot`, qui ne lève jamais et garde une copie de secours d'une sauvegarde illisible. | `src/engine/`, `src/data/` |
 | `src/equilibrage/` | Simulateur d'équilibrage sans affichage : partie jouée par un bot (`simulation.ts`), bot naïf (`bot-naif.ts`) et bot soigneux avec sa petite recherche de variante (`bot-soigneux.ts`), géométrie des cartes, évaluation d'une région (`campagne.ts`), bandes cibles (`bandes.ts`), puissance des tours (`puissance.ts`), rédaction de `balance-report.md` (`rapport.ts`). Les bots ne passent que par l'API publique du moteur (`avancer` avec des actions). Réutilisé par `tools/balance/` et par les tests des bandes. | `src/engine/`, `src/data/`, `src/i18n/` |
 | `tools/` | Scripts Node : `art` (grilles de pixels vers planches PNG et atlas JSON), `niveaux` (génère les vagues figées de la région 1, aperçu texte des cartes, bilan du joueur automatique ; `enregistrer.ts` permet à Node d'importer `src/` sans extension), `balance` (`npm run balance` : lance le simulateur de `src/equilibrage/` et écrit `balance-report.md` à la racine). | `src/engine/`, `src/data/` |
 | `art/` | Sources graphiques : pack Minifolks d'origine (`art/minifolks/`), grilles de pixels en texte (`art/sprites/<nom>.txt`, format décrit en tête de `tools/art/format.ts`), palettes partagées (`art/palettes/`). `npm run art` écrit aussi des aperçus agrandis dans `art/apercu/` (ignoré par git). | — |
@@ -62,6 +62,63 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
   `partieAReprendre` (état relu pour « Reprendre à la vague N »), réglages, export et import. Les raccourcis de
   test « Niveau 10 » et « Niveau de test » de l'accueil n'existent qu'en développement (`import.meta.env.DEV`)
   et ne touchent pas à la sauvegarde.
+
+## Méta-progression et sauvegarde v3 (`src/save/`, `src/data/meta.ts`)
+**Format v3** (`format.ts`) : `{ version: 3, progression, reglages, meta, partie }`. `meta` contient :
+- `monnaies` : `{ aretes, braises }`, entiers de 0 à 99 999 999 ;
+- `heros` : les héros possédés, `{ [id]: { xp, competences: { [idCompetence]: rang 1 à 3 } } }`. Les trois avatars (`plume`,
+  `charlie`, `pollen`) sont toujours présents ; un disciple acheté s'ajoute à 0 d'expérience ; `xp` plafonné à 1 000 000 ;
+- `arbre` : les six branches (`caserne`, `tir`, `magie`, `artillerie`, `sorts`, `heros`), rang de 0 à 5 ;
+- `objets` : le stock des quatre objets, de 0 à 10 ;
+- `choix` : le dernier dieu, héros et objets emportés (3 au plus), proposés de nouveau au lancement suivant.
+
+Les étoiles dépensées dans l'arbre ne sont pas stockées : on retient les rangs, et les étoiles disponibles se déduisent
+(`etoilesGagnees` moins `etoilesDepensees`, le rang n ayant coûté 1 + 2 + … + n). La réinitialisation rend donc toutes les
+étoiles, et la validation refuse un arbre plus cher que les étoiles gagnées. Le niveau d'un héros n'est pas stocké non plus :
+il se déduit de `xp` avec les seuils de `src/data/heros.ts`.
+
+**Définitions injectées** (`definitions.ts`) : la sauvegarde ne connaît pas les compétences ni les seuils d'expérience
+(`heros.ts` appartient au moteur). Les fonctions qui en ont besoin reçoivent un `DefsMeta` (`{ heros: { [id]: { competences:
+[{ id, rangMax, niveauRequis }] } }, seuilsXp }`) ; `Session.ouvrir(depot, canal, { defs })` le garde pour ses transactions
+et pour valider les imports. Relire le stockage ne le passe volontairement pas : un rééquilibrage de `heros.ts` ne doit jamais
+rendre une sauvegarde existante illisible. Sans `defs`, la validation vérifie la forme et un plafond de points (niveau 10) ; avec, elle
+vérifie aussi que chaque compétence existe, que son rang est permis, que le niveau requis (6 pour l'ultime) est atteint et
+que les points placés ne dépassent pas ceux du niveau (1 point par niveau de héros).
+
+**Transactions** (`transactions.ts`) : `acheterRangArbre`, `reinitialiserArbre`, `acheterDisciple`, `acheterObjet`,
+`equiperObjets`, `choisirHeros`, `repartirPoint`, `reinitialiserPoints`, `enregistrerFinDePartie`. Chacune est pure, vérifie
+ses paramètres (chaînes quelconques venues de l'interface) et rend `{ ok: true, sauvegarde }` (une copie) ou
+`{ ok: false, raison }` sans rien avoir changé ; les raisons sont des codes stables (`etoiles_insuffisantes`, `rang_max`,
+`braises_insuffisantes`, `deja_possede`, `stock_plein`, `niveau_insuffisant`, `plus_de_points`…) que l'interface traduit.
+`enregistrerFinDePartie` étend l'enregistrement d'une victoire : étoiles et niveau suivant, arêtes (30 + 6 × N + 15 par
+étoile jamais obtenue sur ce niveau, toutes difficultés confondues ; sinon 10 + 2 × N), braises (10 à la première victoire
+d'un boss, 2 aux premières 3 étoiles d'un niveau), expérience du héros joué (100 + 20 × N, la moitié en défaite), objets
+utilisés retirés du stock ; elle rend aussi un `BilanPartie` pour l'écran de fin. `configDepuisSauvegarde` compose la config
+d'une partie (dieu, héros, niveau, compétences, rangs de l'arbre, objets) et refuse un héros ou un objet qu'on n'a pas.
+
+**Règle multi-onglets** (`session.ts`) : le stockage fait foi et les opérations se rejouent dessus. Chaque changement est
+une opération pure appliquée deux fois : tout de suite à la sauvegarde en mémoire (l'interface réagit, un refus évident est
+rendu sur-le-champ), puis, au moment d'écrire et sous le verrou des onglets, au contenu relu du stockage, avant d'écrire le
+résultat. On ne fusionne donc pas deux états (« la plus haute gagne » duplique ou détruit une monnaie qui se dépense) : un achat
+fait depuis une vue périmée est revalidé contre la réalité. Si l'autre onglet a dépensé les braises ou acheté le même
+disciple, l'achat est refusé et rien n'est débité deux fois ; si l'autre onglet a acheté autre chose, son achat est dans le
+contenu relu et le nôtre s'y ajoute. Un rang d'arbre ou un point de compétence vise la valeur vue à l'écran : si elle a
+changé, refus `modifie_ailleurs` (pas d'achat d'un rang de plus par surprise). Monnaie et achat sont dans le même document, écrit
+d'un bloc : on ne paie jamais sans recevoir. Les opérations dont l'écriture a échoué restent en attente et sont rejouées avec
+l'écriture suivante (une seule fois). Sans Web Locks, deux onglets qui écrivent à la milliseconde près peuvent s'écraser ;
+l'écrasé perd son opération entière (rien n'est débité à tort) et sa vue se corrige au message suivant du canal.
+
+**Migration v2 vers v3** : progression, réglages et partie en cours sont gardés tels quels, `meta` part de son état de départ
+(écrit en dur dans la migration). Rien n'est perdu : les étoiles déjà gagnées sont toutes disponibles pour l'arbre. Les
+victoires passées ne rapportent pas d'arêtes ni de braises rétroactives. Fixture figée : `src/save/fixtures/sauvegarde-v2.json`.
+
+**Export et import** : le code porte `progression`, `reglages` et `meta` (pas la partie en cours). Un code d'avant la v3 est
+migré (méta de départ). L'import valide tout (taille, somme, JSON, migration, validation stricte avec les `defs` de la session)
+avant de toucher à quoi que ce soit, puis remplace progression, réglages et méta d'un bloc.
+
+**Config de partie étendue** : `validerConfig` (partie en cours) accepte, tous ensemble ou pas du tout, les champs que le moteur
+ajoute au jalon 2 (`heros`, `competencesHeros`, `ameliorations`, `objets`) ; une fois `ConfigPartie` étendue côté moteur, les
+rendre obligatoires dans `validation.ts`.
 
 ## Niveaux de la campagne (`src/data/niveaux/`)
 - `cartes.ts` : cartes dessinées à la main (chemins, socles et ralliements, départ du héros, zones de sol, décor).

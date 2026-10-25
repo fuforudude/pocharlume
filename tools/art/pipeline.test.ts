@@ -115,6 +115,40 @@ b
     expect(lettres(cadre(sprites.get('habille'), 'repos', 1))[1]).toBe('..b.');
   });
 
+  it('rogne le cadre d’un autre sprite de taille différente (rogne x y l h)', () => {
+    const sprites = dessiner(`${ENTETE}
+sprite grand
+taille 6 4
+anim repos
+cadre
+......
+..ab..
+..ca..
+......
+
+sprite portrait
+taille 2 2
+anim repos
+cadre grand/repos.0 rogne 2 1 2 2
+`);
+    expect(lettres(cadre(sprites.get('portrait'), 'repos', 0))).toEqual(['ab', 'ca']);
+  });
+
+  it('refuse un cadre d’une autre taille sans rogne', () => {
+    expect(() => dessiner(`${ENTETE}
+sprite grand
+taille 6 4
+anim repos
+cadre
+a
+
+sprite petit
+taille 2 2
+anim repos
+cadre grand/repos.0
+`)).toThrow(/n'a pas la taille/);
+  });
+
   it('applique les retouches sur les cadres déjà définis', () => {
     const s = dessiner(`${ENTETE}sprite t
 anim repos
