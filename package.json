@@ -15,6 +15,7 @@
     "art": "node tools/art/index.ts",
     "niveaux": "node --import ./tools/niveaux/enregistrer.ts tools/niveaux/generer.ts",
     "niveaux:bilan": "node --import ./tools/niveaux/enregistrer.ts tools/niveaux/bilan.ts",
+    "niveaux:resume": "node --import ./tools/niveaux/enregistrer.ts tools/niveaux/resume.ts",
     "niveaux:apercu": "node --import ./tools/niveaux/enregistrer.ts tools/niveaux/apercu.ts",
     "verifier": "npm run lint && tsc --noEmit && npm run test && npm run build"
   },
