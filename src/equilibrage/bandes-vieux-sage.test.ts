@@ -1,4 +1,4 @@
-// Bandes du Vieux Sage : le bot soigneux gagne au moins 80 % des parties, le héros seul ne gagne jamais.
+// Bandes du Vieux Sage : le bot soigneux gagne entre 60 et 85 % des parties, le héros seul ne gagne jamais.
 import { beforeAll, describe, expect, it } from 'vitest';
 import { ecartsSansDefense, ecartsVieuxSage } from './bandes';
 import type { Evaluation } from './campagne';
@@ -10,7 +10,7 @@ beforeAll(() => {
 }, DELAI_EVALUATION);
 
 describe('bandes en Vieux Sage', () => {
-  it('le bot soigneux gagne au moins 80 % des niveaux', () => {
+  it('le bot soigneux gagne entre 60 et 85 % des niveaux', () => {
     expect(ecartsVieuxSage(evaluations)).toEqual([]);
   });
 

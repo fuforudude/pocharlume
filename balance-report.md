@@ -6,20 +6,38 @@ affichage dans les trois difficultés par deux bots, sur 10 graines chacun (vers
 - **Soigneux** : achète à chaque fois ce qui apporte le plus de puissance par arête dépensée (socle, famille, niveau,
   spécialisation), après une petite recherche entre dix variantes (5 préférences × 2 diversités) jouées sur des graines d’entraînement ; place le
   héros dans la zone de feu de ses tours, lance la Chute du Colosse sur les grappes d’ennemis et les Renforts devant ses tours,
-  appelle les vagues en avance quand le terrain est vide et qu’il n’a plus rien à acheter.
+  appelle les vagues en avance quand le terrain est vide et qu’il n’a plus rien à acheter. Il lit la composition des vagues futures, ce qu’un joueur ne voit pas : il est un peu optimiste.
 - **Naïf** : construit sur les socles proches du chemin, famille au hasard, améliore et spécialise au hasard dès qu’il peut, sans
   sorts ni ordres au héros, sans appel de vague en avance.
 - **Sans défense** : aucune action, seul le héros à son poste.
 
 ## Bandes cibles
 
-Toutes les bandes sont respectées.
+**7 écart(s)** :
+
+- Matou : le bot naïf gagne 77 % des parties, la bande est 30 % à 70 %
+- Matou : le bot soigneux perd au moins une vie sur 2 niveaux seulement, il en faut au moins 5 sur 10
+- Matou : le niveau 5 laisse 265 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou : le niveau 8 laisse 276 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou : le niveau 9 laisse 470 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou : le niveau 10 laisse 1710 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Vieux Sage : le bot soigneux gagne 97 % des parties, la bande est 60 % à 85 %
 
 | Difficulté | Naïf | Bande naïf | Soigneux | Bande soigneux | Sans défense |
 | --- | --- | --- | --- | --- | --- |
 | Chaton | 100 % | 100 % | 100 % | — | 3 % |
-| Matou | 77 % | 50 % à 90 % | 100 % | 100 % | 0 % |
-| Vieux Sage | 26 % | — | 97 % | au moins 80 % | 0 % |
+| Matou | 77 % | 30 % à 70 % | 100 % | 100 % | 0 % |
+| Vieux Sage | 26 % | — | 97 % | 60 % à 85 % | 0 % |
+
+Bilan par difficulté, moyennes sur tous les niveaux et toutes les graines. Arêtes inutilisées : arêtes non dépensées en fin de partie
+(bande en Matou pour le soigneux : moins de 250 dans chaque niveau). Niveaux avec perte : niveaux où le soigneux perd en moyenne au moins
+1 vie (bande en Matou : au moins 50 % des niveaux).
+
+| Difficulté | Naïf : vies | Soigneux : vies | Naïf : arêtes inutilisées | Soigneux : arêtes inutilisées (moyenne / pire niveau) | Soigneux : niveaux avec perte |
+| --- | --- | --- | --- | --- | --- |
+| Chaton | 24,6 | 25,0 | 962 | 1118 / 4903 | 0/10 |
+| Matou | 11,8 | 19,5 | 163 | 378 / 1710 | 2/10 |
+| Vieux Sage | 2,4 | 12,3 | 83 | 169 / 323 | 5/10 |
 
 Vies de départ : Chaton 25, Matou 20, Vieux Sage 15. Facteur sur les arêtes de départ des niveaux : Chaton ×1.5, Matou ×1, Vieux Sage ×0.9.
 
@@ -79,7 +97,7 @@ Durée en secondes de jeu. Vague la plus meurtrière : celle où l’on perd le 
 
 ## Courbe de difficulté
 
-Vies restantes moyennes du bot naïf en Matou, niveau par niveau : elle doit globalement décroître, le niveau 10 étant le plus dur.
+Vies restantes moyennes du bot naïf en Matou, niveau par niveau : la courbe doit décroître (corrélation de rang d’au plus -0,6) et le niveau 10 figurer parmi les 3 plus durs.
 
 | Niveau | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |

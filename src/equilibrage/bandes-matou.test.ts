@@ -1,7 +1,8 @@
-// Bandes du Matou : le bot soigneux gagne tout, le bot naïf entre 50 et 90 %, le héros seul ne gagne jamais,
-// et la difficulté monte du niveau 1 au niveau 10.
+// Bandes du Matou : le bot soigneux gagne tout mais pas sans perdre de vies (au moins une vie sur la moitié des
+// niveaux) et sans laisser d'arêtes inutilisées (moins de 250 par niveau), le bot naïf gagne entre 30 et 70 %,
+// le héros seul ne gagne jamais, et la difficulté monte du niveau 1 au niveau 10.
 import { beforeAll, describe, expect, it } from 'vitest';
-import { correlationDeRang, courbeDifficulte, ecartsMatou, ecartsSansDefense } from './bandes';
+import { ecartsCourbe, ecartsMatou, ecartsSansDefense } from './bandes';
 import type { Evaluation } from './campagne';
 import { DELAI_EVALUATION, evaluerRegion1 } from './bandes.test-utils';
 
@@ -11,7 +12,7 @@ beforeAll(() => {
 }, DELAI_EVALUATION);
 
 describe('bandes en Matou', () => {
-  it('le bot soigneux gagne 100 % des niveaux, le bot naïf entre 50 et 90 %, et tous les niveaux ne se gagnent pas sans perte', () => {
+  it('le soigneux gagne tout en perdant des vies sans laisser d’arêtes, le naïf gagne entre 30 et 70 %', () => {
     expect(ecartsMatou(evaluations)).toEqual([]);
   });
 
@@ -19,12 +20,7 @@ describe('bandes en Matou', () => {
     expect(ecartsSansDefense(evaluations)).toEqual([]);
   });
 
-  it('la difficulté monte : les vies restantes du bot naïf baissent globalement, le niveau 10 est le plus dur', () => {
-    const courbe = courbeDifficulte(evaluations);
-    expect(courbe.length).toBe(10);
-    expect(correlationDeRang(courbe)).toBeLessThanOrEqual(-0.6);
-    const dernier = courbe[9]?.vies ?? 0;
-    const premiers = courbe.slice(0, 5).map((c) => c.vies);
-    expect(dernier).toBeLessThan(Math.min(...premiers));
+  it('la difficulté monte : les vies restantes du bot naïf baissent (corrélation de rang ≤ −0,6), le niveau 10 est parmi les plus durs', () => {
+    expect(ecartsCourbe(evaluations)).toEqual([]);
   });
 });

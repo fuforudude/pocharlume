@@ -5,8 +5,8 @@ import { EQUILIBRAGE } from '../data/equilibrage';
 import { FAMILLES, TOURS } from '../data/tours';
 import { VERSION_DONNEES } from '../data/version';
 import { t, type CleTexte } from '../i18n';
-import { BANDES, correlationDeRang, courbeDifficulte, verifierBandes } from './bandes';
-import { DIFFICULTES_EVALUEES, synthetiser, trouver, type Evaluation, type IdBot } from './campagne';
+import { BANDES, correlationDeRang, courbeDifficulte, niveauxAvecPertes, verifierBandes } from './bandes';
+import { DIFFICULTES_EVALUEES, synthetiser, trouver, type Evaluation, type IdBot, type Synthese } from './campagne';
 import { puissancesParPalier } from './puissance';
 
 const NOM_DIFFICULTE: Readonly<Record<string, string>> = { chaton: 'Chaton', matou: 'Matou', vieux_sage: 'Vieux Sage' };
@@ -84,7 +84,7 @@ export function redigerRapport(evaluations: readonly Evaluation[], graines: numb
     '- **Soigneux** : achète à chaque fois ce qui apporte le plus de puissance par arête dépensée (socle, famille, niveau,',
     '  spécialisation), après une petite recherche entre dix variantes (5 préférences × 2 diversités) jouées sur des graines d’entraînement ; place le',
     '  héros dans la zone de feu de ses tours, lance la Chute du Colosse sur les grappes d’ennemis et les Renforts devant ses tours,',
-    '  appelle les vagues en avance quand le terrain est vide et qu’il n’a plus rien à acheter.',
+    '  appelle les vagues en avance quand le terrain est vide et qu’il n’a plus rien à acheter. Il lit la composition des vagues futures, ce qu’un joueur ne voit pas : il est un peu optimiste.',
     '- **Naïf** : construit sur les socles proches du chemin, famille au hasard, améliore et spécialise au hasard dès qu’il peut, sans',
     '  sorts ni ordres au héros, sans appel de vague en avance.',
     '- **Sans défense** : aucune action, seul le héros à son poste.',
@@ -107,9 +107,30 @@ export function redigerRapport(evaluations: readonly Evaluation[], graines: numb
         taux(d, 'naif'),
         d === 'chaton' ? '100 %' : d === 'matou' ? `${pct(BANDES.matou.naifMin)} à ${pct(BANDES.matou.naifMax)}` : '—',
         taux(d, 'soigneux'),
-        d === 'chaton' ? '—' : d === 'matou' ? '100 %' : `au moins ${pct(BANDES.vieux_sage.soigneuxMin)}`,
+        d === 'chaton' ? '—' : d === 'matou' ? '100 %' : `${pct(BANDES.vieux_sage.soigneuxMin)} à ${pct(BANDES.vieux_sage.soigneuxMax)}`,
         taux(d, 'inactif'),
       ]),
+    ),
+    '',
+    'Bilan par difficulté, moyennes sur tous les niveaux et toutes les graines. Arêtes inutilisées : arêtes non dépensées en fin de partie',
+    `(bande en Matou pour le soigneux : moins de ${String(BANDES.matou.aretesInutiliseesMax)} dans chaque niveau). Niveaux avec perte : niveaux où le soigneux perd en moyenne au moins`,
+    `${String(BANDES.matou.pertesParNiveauMin)} vie (bande en Matou : au moins ${pct(BANDES.matou.partNiveauxAvecPertesMin)} des niveaux).`,
+    '',
+    tableau(
+      ['Difficulté', 'Naïf : vies', 'Soigneux : vies', 'Naïf : arêtes inutilisées', 'Soigneux : arêtes inutilisées (moyenne / pire niveau)', 'Soigneux : niveaux avec perte'],
+      DIFFICULTES_EVALUEES.map((d) => {
+        const parBot = (bot: IdBot): Synthese => synthetiser(evaluations.filter((e) => e.difficulte === d && e.bot === bot).flatMap((e) => [...e.parties]));
+        const soigneux = evaluations.filter((e) => e.difficulte === d && e.bot === 'soigneux');
+        const pire = Math.max(0, ...soigneux.map((e) => synthetiser(e.parties).aretesFinMoyennes));
+        return [
+          nomDifficulte(d),
+          un(parBot('naif').viesMoyennes),
+          un(parBot('soigneux').viesMoyennes),
+          entier(parBot('naif').aretesFinMoyennes),
+          `${entier(parBot('soigneux').aretesFinMoyennes)} / ${entier(pire)}`,
+          `${String(niveauxAvecPertes(evaluations, d).length)}/${String(soigneux.length)}`,
+        ];
+      }),
     ),
     '',
     `Vies de départ : ${DIFFICULTES_EVALUEES.map((d) => `${nomDifficulte(d)} ${String(DIFFICULTES[d].vies)}`).join(', ')}. ` +
@@ -157,7 +178,7 @@ export function redigerRapport(evaluations: readonly Evaluation[], graines: numb
   sortie.push(
     '## Courbe de difficulté',
     '',
-    'Vies restantes moyennes du bot naïf en Matou, niveau par niveau : elle doit globalement décroître, le niveau 10 étant le plus dur.',
+    `Vies restantes moyennes du bot naïf en Matou, niveau par niveau : la courbe doit décroître (corrélation de rang d’au plus ${un(BANDES.courbeCorrelationMax)}) et le niveau 10 figurer parmi les ${String(BANDES.courbeRangDuDernierMax)} plus durs.`,
     '',
     tableau(['Niveau', ...courbe.map((c) => String(c.niveau))], [['Vies restantes', ...courbe.map((c) => un(c.vies))]]),
     '',

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { REGION1 } from '../data/niveaux/region1';
-import { BANDES, correlationDeRang, courbeDifficulte, ecartsChaton, ecartsMatou, ecartsSansDefense, ecartsVieuxSage } from './bandes';
+import { BANDES, correlationDeRang, courbeDifficulte, ecartsChaton, ecartsCourbe, ecartsMatou, ecartsSansDefense, ecartsVieuxSage } from './bandes';
 import { evaluerCampagne, partiesDe, synthetiser, trouver, type Evaluation } from './campagne';
 import { VARIANTES } from './bot-soigneux';
 import { redigerRapport } from './rapport';
@@ -24,6 +24,8 @@ describe('synthetiser', () => {
     expect(s.victoires).toBe(1);
     expect(s.tauxVictoire).toBe(0.5);
     expect(s.viesMoyennes).toBe(9);
+    // 2 vies perdues dans la victoire, les 20 dans la défaite.
+    expect(s.viesPerduesMoyennes).toBe(11);
     expect(s.aretesFinMoyennes).toBe(50);
     expect(s.secondesMoyennes).toBe(150);
     expect(s.aPerduDesVies).toBe(true);
@@ -51,26 +53,47 @@ describe('bandes', () => {
     expect(ecartsChaton([evaluation(1, 'chaton', 'naif', [...gagne(4), ...perdu(1)])])).toHaveLength(1);
   });
 
-  it('Matou : bande du bot naïf de 50 à 90 %, soigneux à 100 %, et des pertes de vies dans au moins 6 niveaux', () => {
-    const niveaux = (gagnees: number): Evaluation[] =>
-      Array.from({ length: 10 }, (_, i) => i + 1).flatMap((n) => [
-        evaluation(n, 'matou', 'soigneux', gagne(4)),
-        evaluation(n, 'matou', 'naif', [...gagne(gagnees), ...perdu(4 - gagnees)]),
-      ]);
-    expect(ecartsMatou(niveaux(3))).toEqual([]);
-    expect(ecartsMatou(niveaux(4)).join()).toContain('bande');
-    expect(ecartsMatou(niveaux(1)).join()).toContain('bande');
-    // Les 5 premiers niveaux sans la moindre perte, les 5 derniers à moitié perdus : 75 % de victoires, mais trop peu de niveaux avec pertes.
-    const sansPertes = niveaux(2).map((e) => (e.bot === 'naif' && e.niveau <= 5 ? { ...e, parties: gagne(4) } : e));
-    expect(ecartsMatou(sansPertes).join()).toContain('perd des vies');
-    const faible = niveaux(3).map((e) => (e.bot === 'soigneux' ? { ...e, parties: perdu(4) } : e));
-    expect(ecartsMatou(faible).join()).toContain('soigneux');
-    expect(BANDES.matou.naifMin).toBe(0.5);
+  it('Matou : naïf de 30 à 70 %, soigneux à 100 % avec des pertes de vies sur la moitié des niveaux et moins de 250 arêtes inutilisées', () => {
+    // Soigneux : 2 vies perdues en moyenne (18 restantes) sur les niveaux « avec perte », 20 restantes sinon.
+    const soigneux = (avecPerte: number, aretes = 100): Evaluation[] =>
+      Array.from({ length: 10 }, (_, n) =>
+        evaluation(n + 1, 'matou', 'soigneux', n < avecPerte ? [partie('victoire', 18, [], { aretesFin: aretes }), partie('victoire', 18, [], { aretesFin: aretes })] : [partie('victoire', 20, [], { aretesFin: aretes })]),
+      );
+    const naif = (gagnees: number, total = 10): Evaluation[] =>
+      Array.from({ length: 10 }, (_, n) => evaluation(n + 1, 'matou', 'naif', [...gagne(Math.round((gagnees * total) / 10)), ...perdu(total - Math.round((gagnees * total) / 10))]));
+    expect(ecartsMatou([...soigneux(5), ...naif(5)])).toEqual([]);
+
+    // Bande du naïf : 30 % et 70 % passent, 20 % et 80 % non.
+    expect(ecartsMatou([...soigneux(5), ...naif(3)])).toEqual([]);
+    expect(ecartsMatou([...soigneux(5), ...naif(7)])).toEqual([]);
+    expect(ecartsMatou([...soigneux(5), ...naif(2)]).join()).toContain('naïf');
+    expect(ecartsMatou([...soigneux(5), ...naif(8)]).join()).toContain('naïf');
+
+    // Pertes : 5 niveaux sur 10 suffisent, 4 non ; une perte moyenne inférieure à une vie ne compte pas.
+    expect(ecartsMatou([...soigneux(4), ...naif(5)]).join()).toContain('perd au moins une vie sur 4 niveaux');
+    const demiVie = Array.from({ length: 10 }, (_, n) => evaluation(n + 1, 'matou', 'soigneux', [partie('victoire', 19), partie('victoire', 20), partie('victoire', 20)]));
+    expect(ecartsMatou([...demiVie, ...naif(5)]).join()).toContain('perd au moins une vie sur 0 niveaux');
+
+    // Arêtes inutilisées : 249 passe, 250 est un écart, signalé pour le niveau en cause.
+    expect(ecartsMatou([...soigneux(5, 249), ...naif(5)])).toEqual([]);
+    expect(ecartsMatou([...soigneux(5, 250), ...naif(5)]).filter((e) => e.includes('arêtes inutilisées'))).toHaveLength(10);
+    const unSeul = soigneux(5).map((e) => (e.niveau === 10 ? { ...e, parties: [partie('victoire', 20, [], { aretesFin: 1710 })] } : e));
+    expect(ecartsMatou([...unSeul, ...naif(5)])).toEqual([expect.stringContaining('niveau 10 laisse 1710 arêtes inutilisées')]);
+
+    // Soigneux : une défaite est un écart.
+    const faible = soigneux(5).map((e) => (e.niveau === 1 ? { ...e, parties: perdu(2) } : e));
+    expect(ecartsMatou([...faible, ...naif(5)]).join()).toContain('soigneux gagne');
+    expect(BANDES.matou.naifMin).toBe(0.3);
+    expect(BANDES.matou.naifMax).toBe(0.7);
   });
 
-  it('Vieux Sage : le bot soigneux doit gagner au moins 80 %', () => {
-    expect(ecartsVieuxSage([evaluation(1, 'vieux_sage', 'soigneux', [...gagne(8), ...perdu(2)])])).toEqual([]);
-    expect(ecartsVieuxSage([evaluation(1, 'vieux_sage', 'soigneux', [...gagne(7), ...perdu(3)])])).toHaveLength(1);
+  it('Vieux Sage : le bot soigneux doit gagner entre 60 et 85 %', () => {
+    const taux = (gagnees: number) => [evaluation(1, 'vieux_sage', 'soigneux', [...gagne(gagnees), ...perdu(20 - gagnees)])];
+    expect(ecartsVieuxSage(taux(12))).toEqual([]);
+    expect(ecartsVieuxSage(taux(17))).toEqual([]);
+    expect(ecartsVieuxSage(taux(11)).join()).toContain('55 %');
+    expect(ecartsVieuxSage(taux(18)).join()).toContain('90 %');
+    expect(ecartsVieuxSage(taux(20))).toHaveLength(1);
   });
 
   it('sans défense : une victoire est un écart, sauf en Chaton au niveau 1', () => {
@@ -78,6 +101,22 @@ describe('bandes', () => {
     expect(ecartsSansDefense([evaluation(2, 'matou', 'inactif', [...perdu(2), ...gagne(1)])])).toHaveLength(1);
     expect(ecartsSansDefense([evaluation(2, 'chaton', 'inactif', gagne(1))])).toHaveLength(1);
     expect(ecartsSansDefense([evaluation(1, 'chaton', 'inactif', gagne(1))])).toEqual([]);
+  });
+});
+
+describe('garde de la courbe de difficulté en Matou', () => {
+  const courbe = (vies: number[]): Evaluation[] => vies.map((v, i) => evaluation(i + 1, 'matou', 'naif', [partie(v > 0 ? 'victoire' : 'defaite', v)]));
+
+  it('accepte une courbe qui descend avec le niveau 10 parmi les plus durs', () => {
+    expect(ecartsCourbe(courbe([20, 19, 18, 15, 12, 10, 8, 5, 2, 1]))).toEqual([]);
+    // Le niveau 10 est le troisième plus dur (égalité comprise) : accepté.
+    expect(ecartsCourbe(courbe([20, 19, 18, 16, 14, 12, 10, 2, 1, 2]))).toEqual([]);
+  });
+
+  it('refuse une courbe plate ou croissante, ou un niveau 10 facile', () => {
+    expect(ecartsCourbe(courbe([10, 10, 10, 10, 10, 10, 10, 10, 10, 10])).join()).toContain('corrélation');
+    expect(ecartsCourbe(courbe([1, 2, 5, 8, 10, 12, 15, 18, 19, 20])).join()).toContain('corrélation');
+    expect(ecartsCourbe(courbe([20, 19, 18, 15, 12, 10, 8, 5, 2, 9])).join()).toContain('niveau 10');
   });
 });
 
@@ -121,6 +160,8 @@ describe('évaluation d’une région et rapport', () => {
     }
     expect(rapport).toContain('Vague la plus meurtrière');
     expect(rapport).toContain('Arêtes inutilisées');
+    expect(rapport).toContain('Bilan par difficulté');
+    expect(rapport).toContain('Soigneux : niveaux avec perte');
     expect(rapport).toContain('dix variantes (5 préférences × 2 diversités)');
     // Le texte annonce le vrai nombre de variantes de la recherche.
     expect(VARIANTES).toHaveLength(10);

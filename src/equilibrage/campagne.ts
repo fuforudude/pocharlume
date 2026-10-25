@@ -78,6 +78,8 @@ export interface Synthese {
   readonly tauxVictoire: number;
   /** Vies restantes moyennes sur toutes les parties (0 pour une défaite). */
   readonly viesMoyennes: number;
+  /** Vies perdues en moyenne par partie (vies de départ moins vies restantes ; une défaite compte toutes les vies). */
+  readonly viesPerduesMoyennes: number;
   /** Au moins une vie perdue dans au moins une partie gagnée ou perdue. */
   readonly aPerduDesVies: boolean;
   readonly aretesFinMoyennes: number;
@@ -102,6 +104,7 @@ export function synthetiser(parties: readonly ResultatPartie[]): Synthese {
     victoires,
     tauxVictoire: parties.length === 0 ? 0 : victoires / parties.length,
     viesMoyennes: moyenne(parties.map((p) => p.vies)),
+    viesPerduesMoyennes: moyenne(parties.map((p) => p.viesDepart - p.vies)),
     aPerduDesVies: parties.some((p) => p.vies < p.viesDepart),
     aretesFinMoyennes: moyenne(parties.map((p) => p.aretesFin)),
     secondesMoyennes: moyenne(parties.map((p) => p.secondes)),
