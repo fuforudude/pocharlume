@@ -6,6 +6,7 @@ import { plancheGenerale, plancheSprite } from './apercu.ts';
 import { construire, DOSSIER_SORTIE, RACINE } from './construire.ts';
 import { encoderPng } from './png.ts';
 import { planScene } from './scene.ts';
+import { planHerosJ2 } from './scene-heros.ts';
 
 const debut = performance.now();
 const resultat = construire();
@@ -24,6 +25,7 @@ if (!process.argv.includes('--sans-apercu')) {
   for (const s of resultat.sprites) writeFileSync(join(dossier, `${s.nom}.png`), encoderPng(plancheSprite(s)));
   writeFileSync(join(dossier, '_tout.png'), encoderPng(plancheGenerale(resultat.sprites)));
   writeFileSync(join(dossier, '_scene.png'), encoderPng(planScene(resultat.sprites)));
-  console.log(`Aperçus agrandis dans art/apercu/ (_tout.png, _scene.png et une planche par sprite).`);
+  writeFileSync(join(dossier, '_heros.png'), encoderPng(planHerosJ2(resultat.sprites)));
+  console.log(`Aperçus agrandis dans art/apercu/ (_tout.png, _scene.png, _heros.png et une planche par sprite).`);
 }
 console.log(`Terminé en ${String(Math.round(performance.now() - debut))} ms.`);

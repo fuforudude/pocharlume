@@ -33,6 +33,9 @@
 //   cadre repos.0 duree 400         durée propre à ce cadre
 //   retouche attaque 1,2 [+ calque] grille posée sur des cadres déjà définis (`*` pour tous)
 //
+// `rogne x y l h` découpe le rectangle de l × h pixels dont le coin haut gauche est en (x, y) : le cadre d'un autre
+// sprite de taille différente peut ainsi servir de source (portraits recadrés sur le haut d'un héros).
+//
 // Une expression de cadre est une suite de termes séparés par `+`, posés dans l'ordre. Chaque terme a une source
 // (cadre, calque ou `mf`) suivie d'opérations : `decale dx dy`, `miroir`, `retourne`, `tourne 90|180|270`,
 // `couleurs a=b c=#112233 [dans x0 y0 x1 y1]` (#00000000 rend transparent). La grille éventuelle se pose par-dessus, à l'origine.
@@ -46,6 +49,7 @@ export type Operation =
   | { readonly type: 'miroir' }
   | { readonly type: 'retourne' }
   | { readonly type: 'tourne'; readonly quarts: number }
+  | { readonly type: 'rogne'; readonly x: number; readonly y: number; readonly largeur: number; readonly hauteur: number }
   | {
     readonly type: 'couleurs';
     readonly paires: readonly (readonly [JetonCouleur, JetonCouleur])[];
@@ -254,6 +258,11 @@ function lireOperations(jetons: readonly string[], debut: number, fichier: strin
       if (angle % 90 !== 0) throw new ErreurFormat(fichier, ligne, 'rotation par quarts de tour seulement');
       operations.push({ type: 'tourne', quarts: angle / 90 });
       i += 2;
+    } else if (mot === 'rogne') {
+      const [x, y, largeur, hauteur] = [1, 2, 3, 4].map((k) => entier(jetons[i + k], fichier, ligne)) as [number, number, number, number];
+      if (largeur <= 0 || hauteur <= 0) throw new ErreurFormat(fichier, ligne, 'rogne : largeur et hauteur positives attendues');
+      operations.push({ type: 'rogne', x, y, largeur, hauteur });
+      i += 5;
     } else if (mot === 'couleurs') {
       let fin = i + 1;
       while (fin < jetons.length && (jetons[fin] ?? '').includes('=')) fin++;
