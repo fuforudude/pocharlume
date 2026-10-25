@@ -1,0 +1,5 @@
+{
+  "branchesProtegees": ["main", "master"],
+  "pushBrancheProtegeeAutorise": true,
+  "cheminsProd": []
+}

@@ -1,0 +1,25 @@
+{
+  "name": "pocharlume",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tower defense de chats dans un Moyen Âge sombre, jouable au doigt et à la souris.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "verifier": "npm run lint && tsc --noEmit && npm run test && npm run build"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "eslint": "10.12.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.2",
+    "vite": "8.3.4",
+    "vitest": "5.0.4"
+  }
+}
