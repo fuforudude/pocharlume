@@ -1,0 +1,27 @@
+// Règles générales de la partie (revente, vagues, blocage, étoiles).
+import type { Regles } from '../engine/definitions';
+
+export const REGLES: Regles = {
+  tauxRevente: 70,
+  multiplicateurCritique: 2,
+  paliersProtection: [0, 0.3, 0.6, 0.9],
+  reapparitionHeros: 15,
+  delaiPremiereVague: 30,
+  delaiEntreVagues: 15,
+  aretesParSecondeAvance: 1,
+  distanceBlocage: 0.6,
+  distanceContact: 0.48,
+  niveauHerosMax: 10,
+  laisseEngagement: 1.6,
+  distanceMaxChemin: 1,
+  decalageLateralMax: 0.25,
+  formation: [
+    { x: 0, y: -0.45 },
+    { x: -0.45, y: 0.35 },
+    { x: 0.45, y: 0.35 },
+    { x: -0.6, y: -0.3 },
+    { x: 0.6, y: -0.3 },
+    { x: 0, y: 0.6 },
+  ],
+  seuilDeuxEtoiles: 0.5,
+};

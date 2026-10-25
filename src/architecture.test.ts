@@ -41,6 +41,16 @@ describe('frontières du moteur', () => {
       }
     });
 
+    it(`${dossier} n'utilise pas de fonctions mathématiques qui varient entre moteurs JS`, async () => {
+      for (const appel of ['Math.hypot(3, 4)', 'Math.sin(1)', 'Math.cos(1)', 'Math.atan2(1, 2)', 'Math.pow(2, 3)', 'Math.exp(1)', 'Math.log(2)', 'Math.cbrt(8)']) {
+        expect(await reglesEnfreintes(`export const y = ${appel};\n`, `${dossier}/essai.ts`))
+          .toEqual(['no-restricted-properties']);
+      }
+      expect(await reglesEnfreintes('export const y = 2 ** 3;\n', `${dossier}/essai.ts`)).toEqual(['no-restricted-syntax']);
+      expect(await reglesEnfreintes('let y = 2;\ny **= 3;\nexport { y };\n', `${dossier}/essai.ts`)).toEqual(['no-restricted-syntax']);
+      expect(await reglesEnfreintes('export const y = Math.sqrt(2) * Math.imul(3, 4) + Math.floor(1.5);\n', `${dossier}/essai.ts`)).toEqual([]);
+    });
+
     it(`${dossier} peut importer depuis le moteur et les données`, async () => {
       expect(await reglesEnfreintes(`import { x } from '../engine/etat';\nimport { z } from './tours';\nexport const y = [x, z];\n`, `${dossier}/essai.ts`))
         .toEqual([]);
