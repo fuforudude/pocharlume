@@ -17,18 +17,31 @@ import { jouerPartie, type Bot, type ResultatPartie } from './simulation';
 export interface VarianteSoigneux {
   readonly nom: string;
   readonly poids: Readonly<Record<IdFamille, number>>;
+  /** Décote par tour de la même famille déjà posée : la valeur d'une tour est divisée par 1 + diversité × (autres tours de sa famille). */
+  readonly diversite?: number;
 }
 
 const EQUILIBREE: VarianteSoigneux = { nom: 'équilibrée', poids: { caserne: 1, tir: 1, magie: 1, artillerie: 1 } };
 
-export const VARIANTES: readonly VarianteSoigneux[] = [
+/** Préférences de famille essayées par la recherche : tout équilibré, ou une famille un peu plus aimée. */
+const PREFERENCES: readonly Pick<VarianteSoigneux, 'nom' | 'poids'>[] = [
   EQUILIBREE,
   { nom: 'tir', poids: { caserne: 0.8, tir: 1.4, magie: 0.9, artillerie: 0.9 } },
   { nom: 'artillerie', poids: { caserne: 0.8, tir: 0.9, magie: 0.9, artillerie: 1.4 } },
   { nom: 'magie', poids: { caserne: 0.8, tir: 0.9, magie: 1.4, artillerie: 0.9 } },
   { nom: 'caserne', poids: { caserne: 1.5, tir: 0.9, magie: 0.9, artillerie: 0.9 } },
-  { nom: 'sans caserne', poids: { caserne: 0.01, tir: 1.1, magie: 1, artillerie: 1.1 } },
 ];
+
+/** Diversités essayées : de peu à fortement décotée la famille déjà bien représentée. */
+const DIVERSITES: readonly number[] = [0.4, 1];
+
+/** La variante du bot soigneux quand on ne lui en donne pas. */
+const VARIANTE_PAR_DEFAUT: VarianteSoigneux = { ...EQUILIBREE, diversite: 0.4 };
+
+/** Les variantes de la recherche : chaque préférence avec chaque diversité. */
+export const VARIANTES: readonly VarianteSoigneux[] = DIVERSITES.flatMap((diversite) =>
+  PREFERENCES.map((p) => ({ ...p, nom: `${p.nom}, diversité ${String(diversite)}`, diversite })),
+);
 
 export interface OptionsSoigneux {
   readonly variante?: VarianteSoigneux;
@@ -58,7 +71,7 @@ function defCourante(tour: Tour): DefNiveauTour | undefined {
 }
 
 export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
-  const variante = options.variante ?? EQUILIBREE;
+  const variante = options.variante ?? VARIANTE_PAR_DEFAUT;
   const appelerEnAvance = options.appelerEnAvance ?? true;
   const utiliserSorts = options.sorts ?? true;
 
@@ -91,7 +104,8 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
   }
 
   function valeur(etat: EtatPartie, socle: number, def: DefNiveauTour, famille: IdFamille): number {
-    return dps(def) * vue(etat, socle, def.portee) * variante.poids[famille];
+    const memeFamille = etat.tours.filter((t) => t.famille === famille && t.socle !== socle).length;
+    return (dps(def) * vue(etat, socle, def.portee) * variante.poids[famille]) / (1 + (variante.diversite ?? 0) * memeFamille);
   }
 
   /** Tous les achats possibles (construction, amélioration, spécialisation), classés par valeur gagnée par arête. */

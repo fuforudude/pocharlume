@@ -34,6 +34,20 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
 - Le chemin est supposé dessiné sur 2 tuiles de large (`DEMI_LARGEUR_CHEMIN` dans `habillage.ts`) : les socles
   sont à 2 tuiles de l'axe, le décor à au moins 1,25 tuile.
 
+## Équilibrage de la région 1 (`npm run balance`)
+Le simulateur de `src/equilibrage/` rejoue les 10 niveaux dans les 3 difficultés avec deux bots et écrit
+`balance-report.md` (à relancer et commiter après tout changement de `src/data/`). Les bandes cibles sont vérifiées par
+`src/equilibrage/bandes-*.test.ts` (5 graines, un fichier par difficulté pour tourner en parallèle) et par `npm run balance`
+(10 graines, code de sortie 1 si une bande n'est pas respectée). Ce qui a été réglé, et pourquoi :
+- Les défenses complètes arrêtent presque tout : la difficulté vient des premières vagues (défense encore maigre) et de la
+  densité des colonnes. D'où `intervalleReference` à 0,3 s (colonnes serrées), `croissanceVague` à 1,2 (dernières vagues
+  énormes, qui seules arrêtent le héros seul) et `budgetBase` 260, `croissanceNiveau` 0,15.
+- `aretesDepart` de chaque niveau est le levier fin : il fixe la courbe de difficulté (vies restantes du bot naïf en Matou,
+  de 18 à 19 aux niveaux 1 à 4 à 2,5 au niveau 10).
+- Chaton est nettement plus facile que Matou (ennemis à 60 % de leurs PV, 150 % des arêtes de départ, primes ×1,25) pour que
+  le bot naïf y gagne tout alors qu'il perd souvent en Matou ; Vieux Sage garde ses valeurs d'origine.
+- Quand les données changent : `npm run niveaux` (vagues figées), `VERSION_DONNEES` + 1, `npm run balance`, puis `npm run verifier`.
+
 ## Invariants vérifiés automatiquement
 `eslint.config.js` (bloc `reglesSimulationPure`, testé par `src/architecture.test.ts`) interdit à
 `src/engine/**` et `src/data/**` :
