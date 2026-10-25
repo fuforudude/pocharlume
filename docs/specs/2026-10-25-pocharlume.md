@@ -1,6 +1,6 @@
 # Pocharlume : tower defense de chats
 
-Statut : validée
+Statut : en cours (jalon 1 livré le 2026-10-25)
 Date : 2026-10-25
 
 ## Besoin
@@ -192,25 +192,27 @@ lot qu'on peut tirer.
 ## Jalons et critères d'acceptation
 
 ### Jalon 1 : le socle jouable
-- [ ] `npm run dev` ouvre le jeu. `npm run build` produit un site statique de moins de 3 Mo, sans erreur
+- [x] `npm run dev` ouvre le jeu. `npm run build` produit un site statique de moins de 3 Mo, sans erreur
   TypeScript (strict).
-- [ ] `npm test` passe : tests du moteur (déterminisme : même graine et mêmes actions donnent le même état final,
+- [x] `npm test` passe : tests du moteur (déterminisme : même graine et mêmes actions donnent le même état final,
   octet pour octet), de la sauvegarde (migration d'une sauvegarde v1), et de l'équilibrage de la région 1.
-- [ ] Les 4 tours communes se construisent sur les socles, s'améliorent jusqu'au niveau 3, puis choisissent une
+- [x] Les 4 tours communes se construisent sur les socles, s'améliorent jusqu'au niveau 3, puis choisissent une
   spécialisation, et se revendent à 70 % de leur coût total.
-- [ ] Les 10 niveaux de la région 1 et les 3 ennemis de la région plus son boss sont jouables. Victoire et défaite
+- [x] Les 10 niveaux de la région 1 et les 3 ennemis de la région plus son boss sont jouables. Victoire et défaite
   affichent un écran de fin. La victoire donne 1 à 3 étoiles selon la règle des vies.
-- [ ] Le dieu Charlie est jouable : héros déplaçable au doigt et à la souris, 2 sorts rechargeables, bonus de
+- [x] Le dieu Charlie est jouable : héros déplaçable au doigt et à la souris, 2 sorts rechargeables, bonus de
   caserne, Totem du Colosse.
-- [ ] Les sprites des 4 tours (3 niveaux et 2 spécialisations), de Charlie, des 4 ennemis et des tuiles de la
+- [x] Les sprites des 4 tours (3 niveaux et 2 spécialisations), de Charlie, des 4 ennemis et des tuiles de la
   région 1 viennent de `npm run art`, en cadres de 32×32 (16×16 pour les tuiles).
-- [ ] Sur un téléphone en paysage : socles et boutons d'au moins 44 px, zoom à deux doigts et glisser de la
+- [x] Sur un téléphone en paysage : socles et boutons d'au moins 44 px, zoom à deux doigts et glisser de la
   caméra. Pause au passage en arrière-plan. Après une fermeture, « Reprendre à la vague N ».
-- [ ] Vitesse ×1/×2, pause, raccourcis clavier listés plus haut.
-- [ ] La progression (niveaux, étoiles) survit à un rechargement. L'export produit un code, et l'import de ce code
+- [x] Vitesse ×1/×2, pause, raccourcis clavier listés plus haut.
+- [x] La progression (niveaux, étoiles) survit à un rechargement. L'export produit un code, et l'import de ce code
   sur un profil vide redonne la même progression.
-- [ ] `npm run balance` produit `balance-report.md` pour la région 1, et le test des bandes passe.
-- [ ] 60 images/s mesurées dans les outils de performance de Chrome (processeur ralenti ×4) avec 150 ennemis.
+- [x] `npm run balance` produit `balance-report.md` pour la région 1, et le test des bandes passe.
+- [x] 60 images/s mesurées dans les outils de performance de Chrome (processeur ralenti ×4) avec 150 ennemis.
+
+Écarts à la livraison du jalon 1 : les 60 images/s sont mesurées sur Chrome de bureau avec processeur ralenti ×4 (environ 140 i/s), pas encore sur un vrai téléphone Android ; Matou et Vieux Sage ont été durcis après la QA (bandes revues dans « Système d'équilibrage »).
 
 ### Jalon 2 : les trois dieux et la boutique
 - [ ] Plume et Pollen jouables (héros, sorts, bonus, tour divine). Choix du dieu et du héros avant un niveau.
