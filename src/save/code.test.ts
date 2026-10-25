@@ -67,10 +67,10 @@ describe('export et import d’un code', () => {
     expect(r.ok && r.sauvegarde.partie).toBeNull();
   });
 
-  it('est compact : une campagne complète tient en moins de 1000 caractères, une sauvegarde vide en moins de 200', async () => {
+  it('est compact : une campagne complète tient en moins de 1000 caractères, une sauvegarde vide en moins de 400', async () => {
     const complete = await exporterCode(campagneComplete());
     expect(complete.length).toBeLessThan(1000);
-    expect((await exporterCode(sauvegardeVide())).length).toBeLessThan(200);
+    expect((await exporterCode(sauvegardeVide())).length).toBeLessThan(400);
     expect(complete).toMatch(/^PCH1\.z\.[A-Za-z0-9_-]+\.[0-9a-f]{8}$/);
   });
 
@@ -87,7 +87,7 @@ describe('export et import d’un code', () => {
 
   it('comprend aussi le mode sans compression', async () => {
     const source = sauvegardeRemplie();
-    const json = JSON.stringify({ version: source.version, progression: source.progression, reglages: source.reglages });
+    const json = JSON.stringify({ version: source.version, progression: source.progression, reglages: source.reglages, meta: source.meta });
     const r = await importerCode(await fabriquerCode(json, 'j'));
     expect(r.ok && r.sauvegarde.progression).toEqual(source.progression);
   });

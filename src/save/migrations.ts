@@ -5,6 +5,7 @@
 //
 // Une migration reçoit un objet brut (JSON relu, non fiable) et en rend un nouveau, sans le modifier. Elle ne
 // valide rien : la validation finale (validation.ts) rejette tout ce qui reste incohérent.
+import type { DefsMeta } from './definitions';
 import { VERSION_SAUVEGARDE, type Sauvegarde } from './format';
 import { validerSauvegarde } from './validation';
 
@@ -51,11 +52,34 @@ function v1versV2(v1: Brut): Brut {
   };
 }
 
-/** `MIGRATIONS[n]` fait passer une sauvegarde de la version n à la version n + 1. */
-export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: v1versV2 };
+/**
+ * v2 vers v3 : la progression, les réglages et la partie en cours sont gardés tels quels ; la méta-progression
+ * (`meta`) démarre à son état de départ, écrit ici en dur (il ne suivra pas les évolutions ultérieures des valeurs
+ * par défaut). Rien n'est perdu : les étoiles déjà gagnées sont toutes disponibles pour l'arbre, puisque les
+ * étoiles dépensées se déduisent des rangs achetés (aucun pour l'instant).
+ */
+function v2versV3(v2: Brut): Brut {
+  return {
+    ...v2,
+    version: 3,
+    meta: {
+      monnaies: { aretes: 0, braises: 0 },
+      heros: { plume: { xp: 0, competences: {} }, charlie: { xp: 0, competences: {} }, pollen: { xp: 0, competences: {} } },
+      arbre: { caserne: 0, tir: 0, magie: 0, artillerie: 0, sorts: 0, heros: 0 },
+      objets: { fiole_soufre: 0, herbe_sabbat: 0, griffe_renfort: 0, sablier: 0 },
+      choix: { dieu: 'charlie', heros: 'charlie', objets: [] },
+    },
+  };
+}
 
-/** Migre une sauvegarde brute (n'importe quelle version connue) vers la version courante et la valide. */
-export function migrer(brut: unknown): ResultatMigration {
+/** `MIGRATIONS[n]` fait passer une sauvegarde de la version n à la version n + 1. */
+export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: v1versV2, 2: v2versV3 };
+
+/**
+ * Migre une sauvegarde brute (n'importe quelle version connue) vers la version courante et la valide. `defs`
+ * (facultatif) active la validation complète des héros (voir validation.ts), pour les imports.
+ */
+export function migrer(brut: unknown, defs?: DefsMeta): ResultatMigration {
   if (!estObjet(brut) || !Object.hasOwn(brut, 'version')) return { ok: false, cause: 'illisible', raison: 'pas de numéro de version' };
   let version = brut.version;
   if (typeof version !== 'number' || !Number.isInteger(version) || version < 1) return { ok: false, cause: 'illisible', raison: 'numéro de version invalide' };
@@ -74,7 +98,7 @@ export function migrer(brut: unknown): ResultatMigration {
   } catch (erreur) {
     return { ok: false, cause: 'invalide', raison: `migration impossible : ${erreur instanceof Error ? erreur.message : String(erreur)}` };
   }
-  const resultat = validerSauvegarde(courante);
+  const resultat = validerSauvegarde(courante, defs);
   if (!resultat.ok) return { ok: false, cause: 'invalide', raison: resultat.raison };
   return { ok: true, sauvegarde: resultat.valeur, depuis };
 }
