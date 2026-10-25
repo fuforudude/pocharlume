@@ -1,4 +1,6 @@
 // Tous les textes affichés du jeu, en français. Une clé par texte, groupées par écran.
+import { frNiveaux } from './fr-niveaux';
+
 export const fr = {
   'jeu.titre': 'Pocharlume',
 
@@ -110,4 +112,7 @@ export const fr = {
   'sort.chute_du_colosse': 'Chute du Colosse',
   'sort.renforts': 'Renforts',
   'tour.totem_du_colosse': 'Totem du Colosse',
+
+  // Niveaux de la campagne (fr-niveaux.ts)
+  ...frNiveaux,
 } as const;

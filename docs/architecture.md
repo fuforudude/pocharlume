@@ -13,12 +13,25 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
 | `src/render/` | Rendu Canvas 2D : caméra, zoom à pixels entiers sans lissage, sprites, animations, barres de vie, effets. Lit l'état du moteur, ne le modifie jamais. | `src/engine/`, `src/data/` |
 | `src/ui/` | Écrans, HUD, menus, toucher, souris, clavier. Traduit les gestes en actions du moteur. | tout `src/` |
 | `src/i18n/` | Textes affichés. `fr.ts` contient la table, `t('clé')` la lit avec une clé typée. | rien |
-| `src/save/` | Couche de stockage unique (IndexedDB, puis Preferences de Capacitor), format versionné avec migrations, export et import par code. | `src/engine/`, `src/data/` |
-| `tools/` | Scripts Node : `art` (grilles de pixels vers planches PNG et atlas JSON), `balance` (simulateur et `balance-report.md`). | `src/engine/`, `src/data/` |
+| `src/save/` | Sauvegarde. Fonctions pures : format versionné (`format.ts`), validation stricte, migrations en chaîne vN vers vN+1, progression (étoiles, déblocage), partie en cours, export et import par code (`code.ts`). Accès au stockage : interface `Stockage` (IndexedDB, repli localStorage, mémoire ; Capacitor Preferences plus tard) et `Depot`, qui ne lève jamais et garde une copie de secours d'une sauvegarde illisible. | `src/engine/`, `src/data/` |
+| `tools/` | Scripts Node : `art` (grilles de pixels vers planches PNG et atlas JSON), `niveaux` (génère les vagues figées de la région 1, aperçu texte des cartes, bilan du joueur automatique ; `enregistrer.ts` permet à Node d'importer `src/` sans extension), `balance` (simulateur et `balance-report.md`). | `src/engine/`, `src/data/` |
 | `art/` | Sources graphiques : pack Minifolks d'origine (`art/minifolks/`), grilles de pixels en texte (`art/sprites/<nom>.txt`, format décrit en tête de `tools/art/format.ts`), palettes partagées (`art/palettes/`). `npm run art` écrit aussi des aperçus agrandis dans `art/apercu/` (ignoré par git). | — |
 | `public/sprites/` | Atlas généré par `npm run art` (`atlas.png`, `atlas.json`), commité : le build n'exécute pas le pipeline, un test vérifie que l'atlas est à jour. | — |
 
 `src/main.ts` est le point d'entrée du navigateur.
+
+## Niveaux de la campagne (`src/data/niveaux/`)
+- `cartes.ts` : cartes dessinées à la main (chemins, socles et ralliements, départ du héros, zones de sol, décor).
+  Une carte propose plusieurs chemins et plus de socles que nécessaire.
+- `plan-region1.ts` : pour chacun des 10 niveaux, la carte, les chemins et les socles choisis, les ennemis
+  débloqués, le nombre de vagues, la graine. `assemblage.ts` en tire un `NiveauCampagne` et n'en garde que le
+  décor qui ne recouvre ni un chemin ni un socle utilisés.
+- `vagues-region1.ts` : vagues **figées**, générées par `npm run niveaux` avec le générateur d'équilibrage
+  (budget b(L, w)). Jamais de génération à l'exécution. Un niveau marqué `retouchees: true` dans le plan garde ses
+  vagues retouchées à la main ; un test vérifie que les autres correspondent au générateur.
+- `carte-du-monde.ts` : positions des 10 nœuds et tracé du chemin sur le fond de la carte de région (512 × 288).
+- Le chemin est supposé dessiné sur 2 tuiles de large (`DEMI_LARGEUR_CHEMIN` dans `habillage.ts`) : les socles
+  sont à 2 tuiles de l'axe, le décor à au moins 1,25 tuile.
 
 ## Invariants vérifiés automatiquement
 `eslint.config.js` (bloc `reglesSimulationPure`, testé par `src/architecture.test.ts`) interdit à
