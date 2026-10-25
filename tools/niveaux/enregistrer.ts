@@ -10,7 +10,8 @@ registerHooks({
       return suite(specifier, context);
     } catch (erreur) {
       const relatif = specifier.startsWith('./') || specifier.startsWith('../');
-      if (!relatif || (erreur as { code?: string }).code !== 'ERR_MODULE_NOT_FOUND') throw erreur;
+      const code = (erreur as { code?: string }).code;
+      if (!relatif || (code !== 'ERR_MODULE_NOT_FOUND' && code !== 'ERR_UNSUPPORTED_DIR_IMPORT')) throw erreur;
       try {
         return suite(`${specifier}.ts`, context);
       } catch {
