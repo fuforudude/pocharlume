@@ -15,36 +15,66 @@ function pourcent(x: number): string {
   return `${String(Math.round(x * 1000) / 10)} %`;
 }
 
-export function verifierBandes(evaluations: readonly Evaluation[]): string[] {
+function taux(evaluations: readonly Evaluation[], difficulte: string, bot: 'naif' | 'soigneux'): number {
+  return synthetiser(partiesDe(evaluations, difficulte, bot)).tauxVictoire;
+}
+
+/** Chaton : le bot naïf gagne tout. */
+export function ecartsChaton(evaluations: readonly Evaluation[]): string[] {
+  const t = taux(evaluations, 'chaton', 'naif');
+  return t < BANDES.chaton.naifMin ? [`Chaton : le bot naïf gagne ${pourcent(t)} des parties, il doit tout gagner`] : [];
+}
+
+/** Matou : le soigneux gagne tout, le naïf entre 50 et 90 %, et le niveau ne se gagne pas toujours sans perte. */
+export function ecartsMatou(evaluations: readonly Evaluation[]): string[] {
   const ecarts: string[] = [];
-  const taux = (difficulte: string, bot: 'naif' | 'soigneux'): number => synthetiser(partiesDe(evaluations, difficulte, bot)).tauxVictoire;
-
-  if (taux('chaton', 'naif') < BANDES.chaton.naifMin) ecarts.push(`Chaton : le bot naïf gagne ${pourcent(taux('chaton', 'naif'))} des parties, il doit tout gagner`);
-  if (taux('matou', 'soigneux') < BANDES.matou.soigneuxMin) ecarts.push(`Matou : le bot soigneux gagne ${pourcent(taux('matou', 'soigneux'))} des parties, il doit tout gagner`);
-  const naifMatou = taux('matou', 'naif');
-  if (naifMatou < BANDES.matou.naifMin || naifMatou > BANDES.matou.naifMax) {
-    ecarts.push(`Matou : le bot naïf gagne ${pourcent(naifMatou)} des parties, la bande est ${pourcent(BANDES.matou.naifMin)} à ${pourcent(BANDES.matou.naifMax)}`);
+  const soigneux = taux(evaluations, 'matou', 'soigneux');
+  if (soigneux < BANDES.matou.soigneuxMin) ecarts.push(`Matou : le bot soigneux gagne ${pourcent(soigneux)} des parties, il doit tout gagner`);
+  const naif = taux(evaluations, 'matou', 'naif');
+  if (naif < BANDES.matou.naifMin || naif > BANDES.matou.naifMax) {
+    ecarts.push(`Matou : le bot naïf gagne ${pourcent(naif)} des parties, la bande est ${pourcent(BANDES.matou.naifMin)} à ${pourcent(BANDES.matou.naifMax)}`);
   }
-  if (taux('vieux_sage', 'soigneux') < BANDES.vieux_sage.soigneuxMin) {
-    ecarts.push(`Vieux Sage : le bot soigneux gagne ${pourcent(taux('vieux_sage', 'soigneux'))} des parties, il doit en gagner au moins ${pourcent(BANDES.vieux_sage.soigneuxMin)}`);
-  }
-
-  // Le héros seul ne gagne jamais, sauf en Chaton sur le premier niveau (introduction).
-  for (const e of evaluations.filter((x) => x.bot === 'inactif')) {
-    const tolere = e.difficulte === 'chaton' && e.niveau === 1;
-    const gagnees = e.parties.filter((p) => p.statut === 'victoire').length;
-    if (!tolere && gagnees > 0) ecarts.push(`Sans défense : le niveau ${String(e.niveau)} est gagné ${String(gagnees)} fois sur ${String(e.parties.length)} en ${e.difficulte}`);
-  }
-
-  // Le niveau ne doit pas se gagner sans perdre une vie : au moins la moitié des niveaux en font perdre au bot naïf.
   const niveaux = evaluations.filter((e) => e.bot === 'naif' && e.difficulte === 'matou');
   const avecPertes = niveaux.filter((e) => synthetiser(e.parties).aPerduDesVies).length;
   if (niveaux.length === 10 && avecPertes < BANDES.niveauxAvecPertesMin) {
     ecarts.push(`Matou : le bot naïf perd des vies sur ${String(avecPertes)} niveaux seulement, il en faut au moins ${String(BANDES.niveauxAvecPertesMin)}`);
   }
-
-  for (const t of toursHorsTolerance()) ecarts.push(`Puissance : ${t.nom} (palier ${String(t.palier)}) est à ${pourcent(t.ecart)} de la moyenne de son palier`);
   return ecarts;
+}
+
+/** Vieux Sage : le soigneux gagne au moins 80 %. */
+export function ecartsVieuxSage(evaluations: readonly Evaluation[]): string[] {
+  const t = taux(evaluations, 'vieux_sage', 'soigneux');
+  return t < BANDES.vieux_sage.soigneuxMin
+    ? [`Vieux Sage : le bot soigneux gagne ${pourcent(t)} des parties, il doit en gagner au moins ${pourcent(BANDES.vieux_sage.soigneuxMin)}`]
+    : [];
+}
+
+/** Sans défense, le héros seul ne gagne jamais (sauf en Chaton au niveau 1, qui sert d'introduction). */
+export function ecartsSansDefense(evaluations: readonly Evaluation[]): string[] {
+  const ecarts: string[] = [];
+  for (const e of evaluations.filter((x) => x.bot === 'inactif')) {
+    const gagnees = e.parties.filter((p) => p.statut === 'victoire').length;
+    if (gagnees > 0 && !(e.difficulte === 'chaton' && e.niveau === 1)) {
+      ecarts.push(`Sans défense : le niveau ${String(e.niveau)} est gagné ${String(gagnees)} fois sur ${String(e.parties.length)} en ${e.difficulte}`);
+    }
+  }
+  return ecarts;
+}
+
+/** Aucune tour commune hors de la tolérance de puissance de son palier. */
+export function ecartsPuissance(): string[] {
+  return toursHorsTolerance().map((t) => `Puissance : ${t.nom} (palier ${String(t.palier)}) est à ${pourcent(t.ecart)} de la moyenne de son palier`);
+}
+
+export function verifierBandes(evaluations: readonly Evaluation[]): string[] {
+  return [
+    ...ecartsChaton(evaluations),
+    ...ecartsMatou(evaluations),
+    ...ecartsVieuxSage(evaluations),
+    ...ecartsSansDefense(evaluations),
+    ...ecartsPuissance(),
+  ];
 }
 
 /** Vies restantes moyennes du bot naïf en Matou, niveau par niveau (la courbe de difficulté). */

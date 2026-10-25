@@ -19,8 +19,10 @@ export interface VarianteSoigneux {
   readonly poids: Readonly<Record<IdFamille, number>>;
 }
 
+const EQUILIBREE: VarianteSoigneux = { nom: 'équilibrée', poids: { caserne: 1, tir: 1, magie: 1, artillerie: 1 } };
+
 export const VARIANTES: readonly VarianteSoigneux[] = [
-  { nom: 'équilibrée', poids: { caserne: 1, tir: 1, magie: 1, artillerie: 1 } },
+  EQUILIBREE,
   { nom: 'tir', poids: { caserne: 0.8, tir: 1.4, magie: 0.9, artillerie: 0.9 } },
   { nom: 'artillerie', poids: { caserne: 0.8, tir: 0.9, magie: 0.9, artillerie: 1.4 } },
   { nom: 'magie', poids: { caserne: 0.8, tir: 0.9, magie: 1.4, artillerie: 0.9 } },
