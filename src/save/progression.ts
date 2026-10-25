@@ -70,3 +70,31 @@ export function changerReglages(s: Sauvegarde, changements: Partial<Reglages>): 
   if (changements.vitesse === 1 || changements.vitesse === 2) reglages.vitesse = changements.vitesse;
   return { ...s, reglages };
 }
+
+/**
+ * Réunit la progression de `a` et celle de `b` : niveau débloqué le plus haut, meilleures étoiles par niveau et par
+ * difficulté. Les réglages et la partie en cours sont ceux de `a`. Rend `a` lui-même si `b` n'apporte rien. Sert
+ * quand deux onglets, ou une lecture qui avait échoué, ont chacun une part de la progression : aucune ne doit
+ * effacer l'autre.
+ */
+export function fusionnerProgressions(a: Sauvegarde, b: Sauvegarde): Sauvegarde {
+  let change = b.progression.niveauMax > a.progression.niveauMax;
+  const etoiles = { ...a.progression.etoiles };
+  for (const numero of Object.keys(b.progression.etoiles)) {
+    const autres = b.progression.etoiles[numero];
+    if (!autres) continue;
+    const miennes = Object.hasOwn(etoiles, numero) ? etoiles[numero] : undefined;
+    const reunies: EtoilesNiveau = { ...miennes };
+    for (const difficulte of DIFFICULTES_SAUVEGARDE) {
+      const avant = miennes?.[difficulte] ?? 0;
+      const apres = autres[difficulte] ?? 0;
+      if (apres > avant) {
+        reunies[difficulte] = apres as Etoiles;
+        change = true;
+      }
+    }
+    Object.defineProperty(etoiles, numero, { value: reunies, enumerable: true, writable: true, configurable: true });
+  }
+  if (!change) return a;
+  return { ...a, progression: { niveauMax: Math.max(a.progression.niveauMax, b.progression.niveauMax), etoiles } };
+}

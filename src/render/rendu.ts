@@ -162,6 +162,24 @@ export class Rendu {
     this.effets.nettoyer(temps);
   }
 
+  /**
+   * Montre l'état tel qu'il est, sans rejouer les événements de son dernier pas (ni effets, ni animations de
+   * coup) : à appeler pour une partie reprise, dont ce pas a déjà été vu avant l'interruption.
+   */
+  synchroniser(etat: EtatPartie, temps: number): void {
+    this.suivi.apresPas(etat, temps, false);
+    this.effets.nettoyer(temps);
+  }
+
+  /**
+   * Les bandes de l'écran que l'interface recouvre (pixels CSS) : la caméra peut dépasser la carte de leur
+   * largeur, pour qu'un socle collé au bord reste atteignable.
+   */
+  definirMarges(marges: { readonly haut: number; readonly bas: number; readonly gauche: number; readonly droite: number }): void {
+    const r = this.ratio;
+    this.camera.definirMarges(marges.haut * r, marges.bas * r, marges.gauche * r, marges.droite * r);
+  }
+
   // --- Conversions pour l'interface (coordonnées en pixels CSS du canvas, positions en tuiles) ---
 
   /** Pixels CSS d'une tuile à l'écran, au zoom actuel. */

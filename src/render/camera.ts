@@ -25,6 +25,15 @@ export class Camera {
   /** Taille de l'écran en pixels physiques. */
   ecranL = 1;
   ecranH = 1;
+  /**
+   * Bandes de l'écran recouvertes par l'interface (barres du HUD, encoche), en pixels physiques. La vue peut
+   * dépasser la carte de cette largeur de chaque côté, pour qu'un socle collé au bord puisse être amené dans la
+   * zone libre au lieu de rester sous un bouton.
+   */
+  private margeHaut = 0;
+  private margeBas = 0;
+  private margeGauche = 0;
+  private margeDroite = 0;
 
   private pret = false;
   private zoomDebutPincement = 1;
@@ -76,12 +85,31 @@ export class Camera {
     this.contraindre();
   }
 
-  /** Garde la vue sur la carte ; si la carte tient en entier dans la vue, elle est centrée. */
+  /** Marges de l'interface (pixels physiques) ; une valeur négative ou qui n'est pas un nombre fini compte pour 0. */
+  definirMarges(haut: number, bas: number, gauche: number, droite: number): void {
+    const propre = (v: number): number => (Number.isFinite(v) && v > 0 ? v : 0);
+    this.margeHaut = propre(haut);
+    this.margeBas = propre(bas);
+    this.margeGauche = propre(gauche);
+    this.margeDroite = propre(droite);
+    this.contraindre();
+  }
+
+  /**
+   * Garde la vue sur la carte, à ceci près qu'elle peut dépasser de la largeur des marges de l'interface. Si la
+   * carte tient en entier dans la zone libre, elle y est centrée.
+   */
   contraindre(): void {
-    const l = this.vueL;
-    const h = this.vueH;
-    this.x = this.mondeL <= l ? (this.mondeL - l) / 2 : borner(this.x, 0, this.mondeL - l);
-    this.y = this.mondeH <= h ? (this.mondeH - h) / 2 : borner(this.y, 0, this.mondeH - h);
+    this.x = this.borne(this.x, this.mondeL, this.vueL, this.margeGauche, this.margeDroite);
+    this.y = this.borne(this.y, this.mondeH, this.vueH, this.margeHaut, this.margeBas);
+  }
+
+  private borne(valeur: number, monde: number, vue: number, margeAvant: number, margeApres: number): number {
+    const avant = margeAvant / this.zoom;
+    const apres = margeApres / this.zoom;
+    const libre = vue - avant - apres;
+    if (monde <= libre) return (monde - libre) / 2 - avant;
+    return borner(valeur, 0 - avant, monde - vue + apres);
   }
 
   /** Glisser : le contenu suit le doigt de (dx, dy) pixels d'écran. */

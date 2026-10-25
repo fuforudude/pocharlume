@@ -25,6 +25,7 @@ import {
   type VueNoeud,
 } from './carte-monde-logique';
 import { bouton, el, image } from './dom';
+import { afficherConfirmation } from './ecrans';
 import { Gestes } from './gestes';
 
 export interface OptionsCarteMonde {
@@ -38,10 +39,19 @@ export interface OptionsCarteMonde {
   surOptions: () => void;
   /** « Retour » ou Échap sans fiche ouverte : l'écran est déjà arrêté. */
   surRetour: () => void;
+  /**
+   * Une partie en cours qu'on peut reprendre : lancer un niveau la remplacerait, donc « Lancer » demande d'abord
+   * confirmation.
+   */
+  readonly partieEnCours?: { readonly niveau: number; readonly vague: number } | null;
 }
 
 export interface EcranCarteMonde {
   readonly racine: HTMLElement;
+  /**
+   * Met l'écran en sommeil (options ouvertes par-dessus) : plus de clavier, plus de dessin. `false` le réveille.
+   */
+  suspendre(suspendue: boolean): void;
   /** Retire tout ce que l'écran a installé (boucle, écouteurs, DOM). */
   arreter(): void;
 }
@@ -59,6 +69,8 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   const controleur = new AbortController();
   const { signal } = controleur;
   let arretee = false;
+  let suspendue = false;
+  let avertissement: HTMLElement | null = null;
   let identifiantImage = 0;
   let selection = noeudInitial(vues);
   let difficulte = options.difficulte;
@@ -182,8 +194,30 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     const actions = el('div', 'rangee');
     const lancer = bouton('bouton grand', t('fiche.lancer'), () => {
       const choisie = difficulte;
-      arreter();
-      options.surLancer(niveau, choisie);
+      const lancerVraiment = (): void => {
+        arreter();
+        options.surLancer(niveau, choisie);
+      };
+      const enCours = options.partieEnCours;
+      if (!enCours) {
+        lancerVraiment();
+        return;
+      }
+      avertissement?.remove();
+      avertissement = afficherConfirmation(racine, {
+        titre: t('lancer.perte_titre'),
+        detail: t('lancer.perte_detail', { n: enCours.niveau, m: enCours.vague }),
+        confirmer: t('lancer.confirmer'),
+        annuler: t('lancer.annuler'),
+        surConfirmer: () => {
+          avertissement = null;
+          lancerVraiment();
+        },
+        surAnnuler: () => {
+          avertissement = null;
+          lancer.focus({ preventScroll: true });
+        },
+      });
     }, signal);
     lancer.textContent = t('fiche.lancer');
     const fermer = bouton('bouton grand secondaire', t('fiche.fermer'), fermerFiche, signal);
@@ -225,7 +259,16 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   }, { signal, passive: false });
 
   window.addEventListener('keydown', (e) => {
-    if (e.ctrlKey || e.altKey || e.metaKey) return;
+    if (suspendue || e.ctrlKey || e.altKey || e.metaKey) return;
+    if (avertissement) {
+      // L'avertissement est modal : Échap le ferme, les autres touches vont à ses boutons.
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        avertissement.remove();
+        avertissement = null;
+      }
+      return;
+    }
     // Un bouton qui a le focus garde Entrée et Espace.
     if ((e.key === 'Enter' || e.key === ' ') && e.target instanceof HTMLButtonElement) return;
     if (e.key === 'Escape' || e.key === 'Backspace') {
@@ -263,11 +306,18 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   // --- Boucle : le clignotement du prochain niveau et le chevron de sélection bougent à chaque image ---
 
   const boucle = (maintenant: number): void => {
-    if (arretee) return;
+    if (arretee || suspendue) return;
     identifiantImage = requestAnimationFrame(boucle);
     rendu.dessiner(vues, selection, maintenant);
   };
   identifiantImage = requestAnimationFrame(boucle);
+
+  const suspendre = (veutSuspendre: boolean): void => {
+    if (arretee || veutSuspendre === suspendue) return;
+    suspendue = veutSuspendre;
+    if (veutSuspendre) cancelAnimationFrame(identifiantImage);
+    else identifiantImage = requestAnimationFrame(boucle);
+  };
 
   function arreter(): void {
     if (arretee) return;
@@ -277,5 +327,5 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     racine.remove();
   }
 
-  return { racine, arreter };
+  return { racine, arreter, suspendre };
 }

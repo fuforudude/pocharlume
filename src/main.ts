@@ -8,7 +8,7 @@ import type { NiveauCampagne } from './data/visuel';
 import type { ConfigPartie, EtatPartie } from './engine';
 import { t } from './i18n';
 import { chargerAtlas } from './render/atlas';
-import { Depot, difficulteDe, ouvrirStockage, Session, type DifficulteSauvegarde } from './save';
+import { Depot, difficulteDe, ouvrirCanalNavigateur, ouvrirStockage, Session, type DifficulteSauvegarde } from './save';
 import { afficherCarteMonde, type EcranCarteMonde } from './ui/carte-monde';
 import { afficherAccueil, afficherAvis, type ChoixNiveau } from './ui/ecrans';
 import { NIVEAU_CAMPAGNE_TEST } from './ui/niveau-test';
@@ -77,6 +77,13 @@ function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, lanceme
     },
   ).catch((erreur: unknown) => {
     console.error(erreur);
+    // Pas d'écran noir : on prévient, on efface une reprise qui ne démarre pas, et on revient à l'écran d'avant.
+    document.body.classList.remove('en-partie');
+    app.replaceChildren();
+    afficherAvis(document.body, t('erreur.chargement'));
+    if (reprise && !horsSauvegarde) void session.effacerPartie();
+    if (reprise || horsSauvegarde) accueil();
+    else carte();
   });
 }
 
@@ -90,11 +97,14 @@ function carte(): void {
         atlas,
         sauvegarde: session.sauvegarde,
         difficulte: derniereDifficulte,
+        partieEnCours: partieEnCours(),
         surLancer: (niveau, difficulte) => {
           derniereDifficulte = difficulte;
           jouer(niveau, difficulte);
         },
         surOptions: () => {
+          // La carte dort sous les options : plus de clavier ni de dessin ; elle est rouverte à la fermeture.
+          carteOuverte?.suspendre(true);
           afficherOptions(app, session, carte);
         },
         surRetour: accueil,
@@ -102,7 +112,15 @@ function carte(): void {
     })
     .catch((erreur: unknown) => {
       console.error(erreur);
+      afficherAvis(document.body, t('erreur.chargement'));
+      accueil();
     });
+}
+
+/** La partie en cours qu'un nouveau lancement remplacerait, ou null. */
+function partieEnCours(): { niveau: number; vague: number } | null {
+  const reprise = session.partieAReprendre();
+  return reprise ? { niveau: reprise.niveau, vague: reprise.vague } : null;
 }
 
 /** Les raccourcis de test de l'accueil : jamais sur le site public. */
@@ -120,7 +138,8 @@ function accueil(): void {
   carteOuverte?.arreter();
   carteOuverte = null;
   app.replaceChildren();
-  const reprise = session.partieAReprendre();
+  const { reprise, oubliee } = session.examinerPartie();
+  if (oubliee) afficherAvis(document.body, t('sauvegarde.partie_oubliee'));
   const niveauRepris = reprise ? REGION1.find((n) => n.numero === reprise.niveau) : undefined;
   afficherAccueil(app, {
     surJouer: carte,
@@ -150,7 +169,7 @@ function avertirSauvegarde(origine: Session['origine'], stockageEnMemoire: boole
 
 async function demarrer(): Promise<void> {
   const { stockage, nom } = await ouvrirStockage();
-  session = await Session.ouvrir(new Depot(stockage));
+  session = await Session.ouvrir(new Depot(stockage), ouvrirCanalNavigateur());
   accueil();
   avertirSauvegarde(session.origine, nom === 'memoire');
 }

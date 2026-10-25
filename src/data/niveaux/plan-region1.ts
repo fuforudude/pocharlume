@@ -134,7 +134,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     numero: 10,
     carte: 'gue',
     chemins: [0, 1, 2],
-    socles: [0, 3, 4, 7, 9, 11, 12, 14, 18, 20],
+    socles: [0, 3, 4, 7, 9, 11, 12, 14, 17, 18],
     aretesDepart: 700,
     nom: 'niveau.r1.10.nom',
     ambiance: 'niveau.r1.10.ambiance',

@@ -1,5 +1,6 @@
 // API publique de la sauvegarde : ce que l'interface utilise. Fonctions pures d'un côté (progression, réglages,
 // partie en cours, export et import), accès au stockage de l'autre (Depot).
+export { ouvrirCanalNavigateur, type CanalSauvegarde } from './canal';
 export { exporterCode, importerCode, remplacerProgression, type RaisonImport, type ResultatImport } from './code';
 export {
   CLE_AVANT_MIGRATION,
@@ -7,6 +8,7 @@ export {
   CLE_SECOURS,
   Depot,
   type Chargement,
+  type Relecture,
   type OrigineChargement,
 } from './depot';
 export {
@@ -26,8 +28,8 @@ export {
 } from './format';
 export { migrer, type ResultatMigration } from './migrations';
 export { avecPartieEnCours, partieEnCours, reprendrePartie } from './partie';
-export { changerReglages, enregistrerVictoire, etoilesDe, meilleuresEtoiles, niveauDebloque, niveauReussi, totalEtoiles } from './progression';
-export { difficulteDe, Session, type FinDePartie, type Reprise } from './session';
+export { changerReglages, enregistrerVictoire, etoilesDe, fusionnerProgressions, meilleuresEtoiles, niveauDebloque, niveauReussi, totalEtoiles } from './progression';
+export { difficulteDe, Session, type ExamenPartie, type FinDePartie, type Reprise } from './session';
 export {
   ouvrirStockage,
   StockageIndexedDB,

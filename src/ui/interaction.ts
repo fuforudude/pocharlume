@@ -71,6 +71,9 @@ export function rayonSort(etat: EtatPartie, emplacement: number): number {
 
 export class Interaction {
   mode: Mode = LIBRE;
+  /** Dernier mode dont on a rédigé l'invite : l'invite est appelée à chaque image, le texte n'est refait que si le mode change. */
+  private modeInvite: Mode | null = null;
+  private texteInvite: string | null = null;
 
   /** Un point de la carte a été touché (coordonnées en tuiles). */
   toucher(etat: EtatPartie, x: number, y: number, rayon: number): Issue {
@@ -184,6 +187,13 @@ export class Interaction {
   /** Invite affichée pendant une visée (« Touche un point du chemin… »), ou null. */
   invite(etat: EtatPartie): string | null {
     const mode = this.mode;
+    if (mode === this.modeInvite) return this.texteInvite;
+    this.modeInvite = mode;
+    this.texteInvite = this.rediger(etat, mode);
+    return this.texteInvite;
+  }
+
+  private rediger(etat: EtatPartie, mode: Mode): string | null {
     switch (mode.type) {
       case 'heros':
         return tCle('invite.heros');

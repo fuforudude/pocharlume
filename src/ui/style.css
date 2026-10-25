@@ -888,3 +888,18 @@ button:focus-visible {
     flex-basis: 100%;
   }
 }
+
+/* Avertissement avant de perdre une partie en cours */
+
+.ecran.confirmation {
+  z-index: 20;
+}
+
+.ecran.confirmation .carte {
+  box-sizing: border-box;
+  width: min(480px, calc(100% - 16px));
+}
+
+.ecran.confirmation .titre {
+  font-size: 22px;
+}

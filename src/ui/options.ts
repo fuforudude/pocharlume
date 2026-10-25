@@ -48,10 +48,12 @@ export function afficherOptions(parent: HTMLElement, session: Session, surFermer
   ecran.setAttribute('aria-modal', 'true');
   ecran.setAttribute('aria-label', t('options.titre'));
   let arretee = false;
+  const controleur = new AbortController();
 
   const arreter = (): void => {
     if (arretee) return;
     arretee = true;
+    controleur.abort();
     ecran.remove();
     precedent?.focus({ preventScroll: true });
   };
@@ -67,6 +69,13 @@ export function afficherOptions(parent: HTMLElement, session: Session, surFermer
       fermer();
     }
   });
+
+  // Même si le focus est ailleurs (clic dans le vide), Échap ferme les options.
+  window.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || e.defaultPrevented) return;
+    e.preventDefault();
+    fermer();
+  }, { signal: controleur.signal });
 
   const carte = el('div', 'carte');
   // « Fermer » reste en haut : le contenu défile sur un petit écran, le bouton doit toujours se voir.

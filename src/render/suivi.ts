@@ -128,15 +128,19 @@ export class Suivi {
     private readonly effets: PoolEffets,
   ) {}
 
-  /** À appeler après chaque pas du moteur (`avancer` ou `step`), avec le temps de jeu en millisecondes. */
-  apresPas(etat: EtatPartie, temps: number): void {
+  /**
+   * À appeler après chaque pas du moteur (`avancer` ou `step`), avec le temps de jeu en millisecondes.
+   * `avecEvenements` à faux synchronise seulement les entités avec l'état, sans déclencher les effets des
+   * événements du pas : pour montrer une partie reprise, dont le dernier pas a déjà été joué.
+   */
+  apresPas(etat: EtatPartie, temps: number, avecEvenements = true): void {
     this.marque++;
     const marque = this.marque;
     this.suivreTours(etat, marque);
     this.suivreEnnemis(etat, temps, marque);
     this.suivreUnites(etat, temps, marque);
     this.suivreProjectiles(etat, marque);
-    for (const evenement of etat.evenements) this.evenement(etat, evenement, temps);
+    if (avecEvenements) for (const evenement of etat.evenements) this.evenement(etat, evenement, temps);
     if (this.tours.size !== etat.tours.length) this.retirer(this.tours, marque);
     if (this.ennemis.size !== etat.ennemis.length) this.retirer(this.ennemis, marque);
     if (this.unites.size !== etat.unites.length) this.retirer(this.unites, marque);

@@ -43,9 +43,13 @@ export const fr = {
   'accueil.niveau_test': 'Niveau de test',
   'accueil.options': 'Options',
 
+  // Chargement raté
+  'erreur.chargement': 'Le chargement a échoué. Réessaie dans un instant.',
+
   // Sauvegarde : avis discrets au démarrage
   'sauvegarde.corrompue': 'Ta sauvegarde était illisible : une copie est gardée de côté, tu repars de zéro.',
   'sauvegarde.trop_recente': 'Cette sauvegarde vient d’une version plus récente du jeu : une copie est gardée de côté, tu repars de zéro.',
+  'sauvegarde.partie_oubliee': 'Ta partie en cours venait d’une ancienne version du jeu : elle ne peut plus être reprise et a été oubliée.',
   'sauvegarde.indisponible': 'Le navigateur refuse de garder ta progression : elle sera perdue à la fermeture.',
 
   // Carte du monde et fiche de niveau
@@ -60,6 +64,10 @@ export const fr = {
   'fiche.etoiles': '{n} étoile(s) en {difficulte}',
   'fiche.lancer': 'Lancer',
   'fiche.fermer': 'Fermer',
+  'lancer.perte_titre': 'Une partie en cours sera perdue',
+  'lancer.perte_detail': 'Ta partie du niveau {n}, à la vague {m}, sera remplacée si tu lances ce niveau.',
+  'lancer.confirmer': 'Lancer quand même',
+  'lancer.annuler': 'Annuler',
 
   // Options
   'options.titre': 'Options',
@@ -104,6 +112,11 @@ export const fr = {
   'hud.heros': 'Héros',
   'hud.heros_revient': 'Revient dans {s} s',
   'hud.recharge': 'Recharge : {s} s',
+  // Rappel de la touche du clavier affiché sur un bouton
+  'hud.touche_heros': 'E',
+  'hud.touche_vague': '␣',
+  'hud.touche_sort_1': 'Q',
+  'hud.touche_sort_2': 'W',
 
   // Partie : familles de tours, menus et invites
   'famille.caserne': 'Caserne',

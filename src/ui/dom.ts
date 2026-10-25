@@ -28,6 +28,7 @@ export function image(url: string, classe = '', alt = ''): HTMLImageElement {
 /** Texte d'un noeud qu'on ne réécrit que s'il change : évite de toucher au DOM à chaque image. */
 export class TexteSuivi {
   private derniere = '';
+  private cle = Number.NaN;
 
   constructor(readonly noeud: HTMLElement) {}
 
@@ -35,6 +36,16 @@ export class TexteSuivi {
     if (valeur === this.derniere) return;
     this.derniere = valeur;
     this.noeud.textContent = valeur;
+  }
+
+  /**
+   * Comme `mettre`, mais le texte (traduction, formatage) n'est fabriqué que quand `cle` change : appelé à chaque
+   * image avec une valeur stable, il ne crée aucune chaîne.
+   */
+  mettreSelon(cle: number, fabriquer: () => string): void {
+    if (cle === this.cle) return;
+    this.cle = cle;
+    this.mettre(fabriquer());
   }
 }
 

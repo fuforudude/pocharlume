@@ -50,6 +50,47 @@ export function afficherAccueil(parent: HTMLElement, options: OptionsAccueil): H
   return ecran;
 }
 
+export interface OptionsConfirmation {
+  readonly titre: string;
+  readonly detail: string;
+  readonly confirmer: string;
+  readonly annuler: string;
+  /** L'écran est déjà retiré quand cette fonction est appelée. */
+  surConfirmer: () => void;
+  /** Idem, pour le bouton « annuler ». */
+  surAnnuler: () => void;
+}
+
+/**
+ * Demande de confirmation avant un geste qu'on ne peut pas défaire (perdre une partie en cours). Le focus va à
+ * « annuler », le choix prudent. Le clavier (Échap) est à l'appelant, qui peut retirer l'écran lui-même.
+ */
+export function afficherConfirmation(parent: HTMLElement, options: OptionsConfirmation): HTMLElement {
+  const ecran = el('div', 'ecran confirmation');
+  ecran.setAttribute('role', 'alertdialog');
+  ecran.setAttribute('aria-modal', 'true');
+  ecran.setAttribute('aria-label', options.titre);
+  const carte = el('div', 'carte');
+  carte.append(el('h2', 'titre', options.titre), el('p', 'detail', options.detail));
+  const rangee = el('div', 'rangee');
+  const annuler = bouton('bouton grand', options.annuler, () => {
+    ecran.remove();
+    options.surAnnuler();
+  });
+  annuler.textContent = options.annuler;
+  const confirmer = bouton('bouton grand secondaire', options.confirmer, () => {
+    ecran.remove();
+    options.surConfirmer();
+  });
+  confirmer.textContent = options.confirmer;
+  rangee.append(annuler, confirmer);
+  carte.append(rangee);
+  ecran.append(carte);
+  parent.append(ecran);
+  annuler.focus({ preventScroll: true });
+  return ecran;
+}
+
 const DUREE_AVIS_MS = 7000;
 
 /** Avis discret en bas de l'écran (sauvegarde illisible, stockage indisponible) : il disparaît seul ou au toucher. */

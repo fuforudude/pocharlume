@@ -29,6 +29,19 @@ export interface Chargement {
   readonly origine: OrigineChargement;
 }
 
+/**
+ * Ce que rend une relecture (`relire`) :
+ * - `ok` : la sauvegarde enregistrée, migrée en mémoire si elle est ancienne ;
+ * - `vide` : rien n'est enregistré ;
+ * - `echec` : le stockage ne répond pas, on ne sait pas ce qu'il contient ;
+ * - `illisible` : un contenu existe mais on ne sait pas le lire (corrompu, ou écrit par une version plus récente).
+ */
+export type Relecture =
+  | { readonly etat: 'ok'; readonly sauvegarde: Sauvegarde }
+  | { readonly etat: 'vide' }
+  | { readonly etat: 'echec' }
+  | { readonly etat: 'illisible' };
+
 export class Depot {
   private file: Promise<unknown> = Promise.resolve();
 
@@ -58,6 +71,28 @@ export class Depot {
       return { sauvegarde: migration.sauvegarde, origine: 'migree' };
     }
     return { sauvegarde: migration.sauvegarde, origine: 'chargee' };
+  }
+
+  /**
+   * Relit l'état actuel du stockage, sans rien écrire ni mettre de côté (contrairement à `charger`). Sert à
+   * fusionner avant une écriture, quand un autre onglet a pu écrire entre-temps.
+   */
+  async relire(): Promise<Relecture> {
+    let brut: string | null;
+    try {
+      brut = await this.stockage.get(CLE_SAUVEGARDE);
+    } catch {
+      return { etat: 'echec' };
+    }
+    if (brut === null) return { etat: 'vide' };
+    let analyse: unknown;
+    try {
+      analyse = JSON.parse(brut);
+    } catch {
+      return { etat: 'illisible' };
+    }
+    const migration = migrer(analyse);
+    return migration.ok ? { etat: 'ok', sauvegarde: migration.sauvegarde } : { etat: 'illisible' };
   }
 
   /** Écrit la sauvegarde. Rend false si elle est invalide ou si le stockage refuse ; ne lève jamais. */

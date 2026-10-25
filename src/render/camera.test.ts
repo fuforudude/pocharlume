@@ -187,3 +187,99 @@ describe('Camera : conversions', () => {
     expect(Number.isInteger(c.decalageY)).toBe(true);
   });
 });
+
+describe('Camera : marges du HUD', () => {
+  // iPhone en paysage : 844×390 pixels CSS à un ratio de 3.
+  const ECRAN_L = 844 * 3;
+  const ECRAN_H = 390 * 3;
+  const MARGES = { haut: 52 * 3, bas: 78 * 3, gauche: 0, droite: 0 };
+
+  function avecMarges(l = ECRAN_L, h = ECRAN_H): Camera {
+    const c = camera(l, h);
+    c.definirMarges(MARGES.haut, MARGES.bas, MARGES.gauche, MARGES.droite);
+    return c;
+  }
+
+  it('sans marge, rien ne change : la carte ne dépasse jamais de la vue', () => {
+    const c = camera(ECRAN_L, ECRAN_H);
+    c.definirZoom(c.zoomMax, 0, 0);
+    c.deplacer(100_000, 100_000);
+    expect(c.y).toBe(0);
+    c.deplacer(-100_000, -100_000);
+    expect(c.y).toBe(MONDE_H - c.vueH);
+  });
+
+  it('la vue peut dépasser le bord haut de la carte de la hauteur de la barre du haut', () => {
+    const c = avecMarges();
+    c.deplacer(0, 100_000);
+    expect(c.versEcranY(0)).toBeGreaterThanOrEqual(MARGES.haut - 2 * c.zoom);
+    expect(c.versEcranY(0)).toBeLessThanOrEqual(MARGES.haut + 2 * c.zoom);
+  });
+
+  it('la vue peut dépasser le bord bas de la carte de la hauteur de la barre du bas', () => {
+    const c = avecMarges();
+    c.deplacer(0, -100_000);
+    expect(c.versEcranY(MONDE_H)).toBeLessThanOrEqual(ECRAN_H - MARGES.bas + 2 * c.zoom);
+    expect(c.versEcranY(MONDE_H)).toBeGreaterThanOrEqual(ECRAN_H - MARGES.bas - 2 * c.zoom);
+  });
+
+  it('tout point de la carte peut être amené dans la zone libre entre les barres, à tous les zooms', () => {
+    for (const [l, h] of [[ECRAN_L, ECRAN_H], [844, 390], [1920, 1080], [2400, 1080]] as const) {
+      const base = camera(l, h);
+      const echelle = l === ECRAN_L ? 3 : 1;
+      for (let z = base.zoomMin; z <= base.zoomMax; z++) {
+        const c = camera(l, h);
+        c.definirMarges(52 * echelle, 78 * echelle, 0, 0);
+        c.definirZoom(z, l / 2, h / 2);
+        const hautZone = 52 * echelle;
+        const basZone = h - 78 * echelle;
+        for (const wy of [0, 1.5 * 16]) {
+          c.deplacer(0, 100_000);
+          const ecranY = c.versEcranY(wy);
+          expect(ecranY, `zoom ${String(z)} haut y=${String(wy)}`).toBeGreaterThanOrEqual(hautZone - 2 * c.zoom);
+          expect(ecranY, `zoom ${String(z)} haut y=${String(wy)}`).toBeLessThanOrEqual(basZone);
+        }
+        for (const wy of [MONDE_H - 1.5 * 16, MONDE_H]) {
+          c.deplacer(0, -100_000);
+          const ecranY = c.versEcranY(wy);
+          expect(ecranY, `zoom ${String(z)} bas y=${String(wy)}`).toBeLessThanOrEqual(basZone + 2 * c.zoom);
+          expect(ecranY, `zoom ${String(z)} bas y=${String(wy)}`).toBeGreaterThanOrEqual(hautZone);
+        }
+      }
+    }
+  });
+
+  it('les marges horizontales (encoche) jouent de la même façon', () => {
+    const c = camera(ECRAN_L, ECRAN_H);
+    c.definirMarges(0, 0, 47 * 3, 47 * 3);
+    c.definirZoom(c.zoomMax, 0, 0);
+    c.deplacer(100_000, 0);
+    expect(Math.abs(c.versEcranX(0) - 47 * 3)).toBeLessThanOrEqual(2 * c.zoom);
+    c.deplacer(-100_000, 0);
+    expect(Math.abs(c.versEcranX(MONDE_L) - (ECRAN_L - 47 * 3))).toBeLessThanOrEqual(2 * c.zoom);
+  });
+
+  it('quand la carte tient entre les barres, elle est centrée dans la zone libre', () => {
+    const c = camera(1920, 1080);
+    c.definirMarges(100, 40, 0, 0);
+    const haut = c.versEcranY(0);
+    const bas = 1080 - c.versEcranY(MONDE_H);
+    // Espace libre au-dessus de la carte : (zone libre - carte) / 2 en plus de la marge du haut.
+    expect(Math.abs((haut - 100) - (bas - 40))).toBeLessThanOrEqual(2 * c.zoom);
+  });
+
+  it('ignore une marge négative ou qui n’est pas un nombre', () => {
+    const c = camera(ECRAN_L, ECRAN_H);
+    c.definirMarges(-5, Number.NaN, Number.POSITIVE_INFINITY, -1);
+    c.deplacer(100_000, 100_000);
+    expect(Number.isFinite(c.x)).toBe(true);
+    expect(Number.isFinite(c.y)).toBe(true);
+  });
+
+  it('un changement de taille garde les marges et reste dans les bornes', () => {
+    const c = avecMarges();
+    c.redimensionner(ECRAN_L, ECRAN_H - 90);
+    c.deplacer(0, 100_000);
+    expect(c.versEcranY(0)).toBeLessThanOrEqual(MARGES.haut + 2 * c.zoom);
+  });
+});

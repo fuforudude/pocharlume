@@ -146,12 +146,9 @@ const GUE: CarteModele = {
     socle(16, 10, 18, 10), // 13
     socle(12, 14, 12, 12), // 14
     socle(6, 14, 8, 14), // 15
-    socle(10, 17, 8, 17), // 16
-    socle(18, 17, 18, 15), // 17
-    socle(22, 13, 22, 15), // 18
-    socle(22, 17, 22, 15), // 19
-    socle(26, 13, 26, 15), // 20
-    socle(26, 17, 26, 15), // 21
+    socle(10, 16, 8, 16), // 16
+    socle(22, 13, 22, 15), // 17
+    socle(26, 13, 26, 15), // 18
   ],
   departHeros: { x: 12, y: 12 },
   zones: [zone('boue', 9, 6, 8, 5), zone('boue', 19, 16, 8, 2), zone('paves', 13, 8, 3, 2)],
@@ -318,10 +315,9 @@ const CARREFOUR: CarteModele = {
     socle(24, 15, 24, 13), // 15
     socle(28, 15, 28, 13), // 16
     socle(4, 13, 4, 15), // 17
-    socle(4, 17, 4, 15), // 18
-    socle(6, 12, 8, 12), // 19
-    socle(14, 3, 16, 3), // 20
-    socle(18, 3, 16, 3), // 21
+    socle(6, 12, 8, 12), // 18
+    socle(14, 3, 16, 3), // 19
+    socle(18, 3, 16, 3), // 20
   ],
   departHeros: { x: 18, y: 9 },
   zones: [zone('paves', 10, 1, 5, 4), zone('boue', 11, 13, 7, 4), zone('boue', 25, 0, 6, 3)],

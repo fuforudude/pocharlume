@@ -25,6 +25,8 @@ const ATLAS = (JSON.parse(readFileSync(new URL('../../../public/sprites/atlas.js
 /** Portée de la plus courte des tours de tir, de magie ou d'artillerie au niveau 1 : un socle doit y voir le chemin. */
 const PORTEE_TIR_MIN = Math.min(...FAMILLES.filter((f) => f !== 'caserne').map((f) => TOURS[f].niveaux[0].portee));
 const PORTEE_CASERNE = TOURS.caserne.niveaux[0].portee;
+/** Distance minimale d'un socle au bord haut et au bord bas de la carte (tuiles). */
+const MARGE_HAUT_BAS_SOCLE = 1.5;
 
 function dist(a: Point, b: Point): number {
   return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
@@ -65,6 +67,8 @@ function verifierCarte(niveau: Niveau): void {
   carte.socles.forEach((s, i) => {
     const quoi = `${nom} socle ${String(i)} (${String(s.x)},${String(s.y)})`;
     expect(s.x >= 1 && s.x <= carte.largeur - 1 && s.y >= 1 && s.y <= carte.hauteur - 1, `${quoi} : trop près du bord`).toBe(true);
+    // Les barres du HUD recouvrent le haut et le bas de l'écran : la caméra ne peut pas dépasser de beaucoup la carte.
+    expect(s.y >= MARGE_HAUT_BAS_SOCLE && s.y <= carte.hauteur - MARGE_HAUT_BAS_SOCLE, `${quoi} : à moins de ${String(MARGE_HAUT_BAS_SOCLE)} tuile du bord haut ou bas`).toBe(true);
     const d = distanceAuNiveau(niveau, s);
     expect(d, `${quoi} : sur le chemin`).toBeGreaterThanOrEqual(1);
     expect(d, `${quoi} : hors de portée de tir du chemin`).toBeLessThanOrEqual(PORTEE_TIR_MIN);

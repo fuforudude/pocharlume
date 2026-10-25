@@ -40,8 +40,8 @@ interface BoutonSort {
   derniereFraction: number;
 }
 
-/** Touches associées aux deux sorts (rappel affiché sur les boutons). */
-const TOUCHES_SORTS = ['Q', 'W'] as const;
+/** Textes du rappel de touche des deux sorts (rappel affiché sur les boutons). */
+const TOUCHES_SORTS = ['hud.touche_sort_1', 'hud.touche_sort_2'] as const;
 const DUREE_MESSAGE = 2200;
 const MARGE_MENU = 30;
 
@@ -69,6 +69,7 @@ export class Hud {
   private viesPrecedentes = -1;
   private fractionPv = -1;
   private signatureMenu = '';
+  private versionMenu = -1;
   private menuX = Number.NaN;
   private menuY = Number.NaN;
 
@@ -108,7 +109,7 @@ export class Hud {
     const dieu = Object.hasOwn(DIEUX, etat.config.dieu) ? DIEUX[etat.config.dieu as keyof typeof DIEUX] : undefined;
     this.portrait = bouton('bouton portrait', dieu ? tCle(dieu.heros.nom) : t('hud.heros'), commandes.basculerHeros, signal);
     if (dieu) this.portrait.append(image(atlas.iconeUrl(spriteUnite('heros', dieu.heros.nom), 2), 'visage'));
-    this.portrait.append(el('span', 'touche', 'E'));
+    this.portrait.append(el('span', 'touche', t('hud.touche_heros')));
     const jauge = el('span', 'jauge');
     this.barrePv = el('span', 'rempli');
     jauge.append(this.barrePv);
@@ -122,7 +123,8 @@ export class Hud {
       noeud.append(image(atlas.iconeUrl(habillageSort(etat.config.dieu, i).icone, 3), 'icone'));
       const recharge = el('span', 'recharge');
       const secondes = new TexteSuivi(el('span', 'secondes'));
-      noeud.append(recharge, secondes.noeud, el('span', 'touche', TOUCHES_SORTS[i] ?? ''));
+      const cleTouche = TOUCHES_SORTS[i];
+      noeud.append(recharge, secondes.noeud, el('span', 'touche', cleTouche ? t(cleTouche) : ''));
       basGauche.append(noeud);
       this.sorts.push({ noeud, recharge, secondes, derniereFraction: -1 });
     });
@@ -132,7 +134,7 @@ export class Hud {
     this.boutonVague = bouton('bouton vague', t('hud.appeler_vague'), commandes.appelerVague, signal);
     this.libelleVague = new TexteSuivi(el('span', 'libelle'));
     this.compteVague = new TexteSuivi(el('span', 'compte'));
-    this.boutonVague.append(this.libelleVague.noeud, this.compteVague.noeud, el('span', 'touche', '␣'));
+    this.boutonVague.append(this.libelleVague.noeud, this.compteVague.noeud, el('span', 'touche', t('hud.touche_vague')));
     basDroite.append(this.boutonVague);
 
     // Invite de visée et messages de refus.
@@ -162,16 +164,16 @@ export class Hud {
   /** Reflète l'état de la partie. Appelée à chaque image : n'écrit dans le DOM que ce qui a changé. */
   mettreAJour(etat: EtatPartie, vue: VueHud, invite: string | null): void {
     // Vies : clignote en rouge quand on en perd.
-    this.vies.mettre(String(etat.vies));
+    this.vies.mettreSelon(etat.vies, () => String(etat.vies));
     if (this.viesPrecedentes !== -1 && etat.vies < this.viesPrecedentes) {
       this.puceVies.classList.remove('degat');
       this.puceVies.getBoundingClientRect(); // force le calcul de style pour relancer l'animation
       this.puceVies.classList.add('degat');
     }
     this.viesPrecedentes = etat.vies;
-    this.aretes.mettre(String(etat.aretes));
-    this.vague.mettre(t('hud.vague', { n: etat.vagues.lancees, m: etat.niveau.vagues.length }));
-    this.vitesse.mettre(t('hud.vitesse', { n: vue.vitesse }));
+    this.aretes.mettreSelon(etat.aretes, () => String(etat.aretes));
+    this.vague.mettreSelon(etat.vagues.lancees, () => t('hud.vague', { n: etat.vagues.lancees, m: etat.niveau.vagues.length }));
+    this.vitesse.mettreSelon(vue.vitesse, () => t('hud.vitesse', { n: vue.vitesse }));
     basculerClasse(this.boutonPause, 'actif', vue.pause);
 
     this.mettreAJourVague(etat);
@@ -190,8 +192,9 @@ export class Hud {
     this.boutonVague.setAttribute('aria-disabled', String(refus !== null));
     basculerClasse(this.boutonVague, 'grise', refus !== null);
     const bonus = v.lancees > 0 ? bonusAppel(etat) : 0;
-    this.libelleVague.mettre(bonus > 0 ? t('hud.appeler_vague_bonus', { n: bonus }) : t('hud.appeler_vague'));
-    this.compteVague.mettre(t('hud.vague_dans', { s: Math.max(0, Math.ceil((v.prochaine - etat.pas) / PAS_PAR_SECONDE)) }));
+    this.libelleVague.mettreSelon(bonus, () => (bonus > 0 ? t('hud.appeler_vague_bonus', { n: bonus }) : t('hud.appeler_vague')));
+    const secondes = Math.max(0, Math.ceil((v.prochaine - etat.pas) / PAS_PAR_SECONDE));
+    this.compteVague.mettreSelon(secondes, () => t('hud.vague_dans', { s: secondes }));
   }
 
   private mettreAJourHeros(etat: EtatPartie, mode: Mode): void {
@@ -205,7 +208,9 @@ export class Hud {
     const tombe = !heros || heros.mort;
     basculerClasse(this.portrait, 'grise', tombe);
     basculerClasse(this.portrait, 'actif', mode.type === 'heros');
-    this.etatHeros.mettre(tombe && heros ? t('hud.heros_revient', { s: Math.max(0, Math.ceil(heros.reapparition / PAS_PAR_SECONDE)) }) : '');
+    // -1 : le héros est en vie, rien à dire ; sinon le nombre de secondes avant son retour.
+    const retour = tombe && heros ? Math.max(0, Math.ceil(heros.reapparition / PAS_PAR_SECONDE)) : -1;
+    this.etatHeros.mettreSelon(retour, () => (retour >= 0 ? t('hud.heros_revient', { s: retour }) : ''));
   }
 
   private mettreAJourSorts(etat: EtatPartie, mode: Mode): void {
@@ -219,7 +224,8 @@ export class Hud {
         bouton.derniereFraction = pourcent;
         bouton.recharge.style.height = `${String(pourcent)}%`;
       }
-      bouton.secondes.mettre(restant > 0 ? String(Math.ceil(restant / PAS_PAR_SECONDE)) : '');
+      const secondes = restant > 0 ? Math.ceil(restant / PAS_PAR_SECONDE) : 0;
+      bouton.secondes.mettreSelon(secondes, () => (secondes > 0 ? String(secondes) : ''));
       basculerClasse(bouton.noeud, 'grise', restant > 0);
       basculerClasse(bouton.noeud, 'actif', mode.type === 'sort' && mode.emplacement === i);
     });
@@ -240,21 +246,29 @@ export class Hud {
    * Les boutons ne sont reconstruits que si leur contenu change (prix, grisé), et replacés que si le
    * point bouge.
    */
-  placerMenu(elements: readonly ElementMenu[] | null, cx: number, cy: number, largeur: number, hauteur: number, rayon: number): void {
+  placerMenu(elements: readonly ElementMenu[] | null, version: number, cx: number, cy: number, largeur: number, hauteur: number, rayon: number): void {
     if (!elements || elements.length === 0) {
       if (this.signatureMenu !== '') {
         this.signatureMenu = '';
+        this.versionMenu = -1;
         this.menu.replaceChildren();
       }
       return;
     }
-    const signature = elements.map((e) => `${e.id}|${String(e.prix)}|${String(e.gain)}|${String(e.refus)}`).join(';');
     const bouge = Math.abs(cx - this.menuX) > 0.5 || Math.abs(cy - this.menuY) > 0.5;
-    if (signature === this.signatureMenu && !bouge) return;
-    if (signature !== this.signatureMenu) {
-      this.signatureMenu = signature;
-      this.menu.replaceChildren(...elements.map((e) => this.boutonMenu(e)));
+    // La signature (id, prix, gain, refus de chaque élément) n'est recalculée que si le contenu a été recalculé
+    // (`version` change à chaque pas de simulation), pas à chaque image.
+    let reconstruit = false;
+    if (version !== this.versionMenu) {
+      this.versionMenu = version;
+      const signature = elements.map((e) => `${e.id}|${String(e.prix)}|${String(e.gain)}|${String(e.refus)}`).join(';');
+      if (signature !== this.signatureMenu) {
+        this.signatureMenu = signature;
+        this.menu.replaceChildren(...elements.map((e) => this.boutonMenu(e)));
+        reconstruit = true;
+      }
     }
+    if (!reconstruit && !bouge) return;
     this.menuX = cx;
     this.menuY = cy;
     const positions = positionsCercle(elements.length, rayon, cx, cy, largeur, hauteur, MARGE_MENU);

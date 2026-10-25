@@ -17,6 +17,7 @@ import { afficherFin, creerAvisPaysage, creerPause } from './ecrans';
 import { Gestes } from './gestes';
 import { Hud } from './hud';
 import { Interaction, type Issue, type Mode } from './interaction';
+import { mesurerMarges } from './marges';
 import { elementsMenu, type ElementMenu } from './menu-cercle';
 import { texteRefus } from './refus';
 import { el } from './dom';
@@ -122,7 +123,15 @@ export async function lancerNiveau(
   document.body.classList.add('en-partie');
   creerAvisPaysage(racine);
 
-  const rendu = new Rendu(canvas, atlas, niveau.niveau.carte, niveau.visuel);
+  let rendu: Rendu;
+  try {
+    rendu = new Rendu(canvas, atlas, etat.niveau.carte, niveau.visuel);
+  } catch (erreur) {
+    // Pas de contexte 2D : on ne laisse pas un écran noir derrière soi, l'appelant revient à l'écran précédent.
+    racine.remove();
+    document.body.classList.remove('en-partie');
+    throw erreur;
+  }
   const surbrillance = new Surbrillance();
   const interaction = new Interaction();
   const pas = new PasFixes();
@@ -138,9 +147,18 @@ export async function lancerNiveau(
   let pasMenu = -1;
   let elementsDuMenu: ElementMenu[] | null = null;
   let socleMenu = -1;
+  /** Change chaque fois que le contenu du menu est recalculé : le HUD ne compare ses boutons qu'à ce moment. */
+  let versionMenu = 0;
 
   const envoyer = (action: Action): void => {
     actions.push(action);
+  };
+  /** Un appel de vague déjà en file pour le prochain pas n'est pas doublé : le second serait refusé et ferait un message parasite. */
+  const demanderVague = (): void => {
+    if (actions.some((action) => action.type === 'appelerVague')) return;
+    const refus = validerAction(etat, { type: 'appelerVague' });
+    if (refus === null) envoyer({ type: 'appelerVague' });
+    else hud.afficherMessage(texteRefus(refus));
   };
   const traiter = (issue: Issue): void => {
     if (issue.action) envoyer(issue.action);
@@ -160,11 +178,7 @@ export async function lancerNiveau(
     : undefined;
   const ecranPause = creerPause(racine, () => { definirPause(false); }, quitter);
   const hud = new Hud(racine, atlas, etat, {
-    appelerVague: () => {
-      const refus = validerAction(etat, { type: 'appelerVague' });
-      if (refus === null) envoyer({ type: 'appelerVague' });
-      else hud.afficherMessage(texteRefus(refus));
-    },
+    appelerVague: demanderVague,
     changerVitesse: () => {
       pas.vitesse = pas.vitesse === 1 ? 2 : 1;
     },
@@ -173,6 +187,12 @@ export async function lancerNiveau(
     basculerHeros: () => { traiter(interaction.basculerHeros(etat)); },
     choisirElement: (element) => { traiter(interaction.choisirElement(element)); },
   }, signal);
+
+  // La carte peut dépasser de l'écran de la largeur des barres du HUD : un socle collé au bord reste atteignable.
+  const mesurerInterface = (): void => {
+    rendu.definirMarges(mesurerMarges(hud.racine, canvas.clientWidth, canvas.clientHeight));
+  };
+  mesurerInterface();
 
   // --- Entrées : toucher, glisser, pincer, molette, clavier ---
 
@@ -231,12 +251,9 @@ export async function lancerNiveau(
       case 'heros':
         traiter(interaction.basculerHeros(etat));
         break;
-      case 'vague': {
-        const refus = validerAction(etat, { type: 'appelerVague' });
-        if (refus === null) envoyer({ type: 'appelerVague' });
-        else hud.afficherMessage(texteRefus(refus));
+      case 'vague':
+        demanderVague();
         break;
-      }
       case 'vitesse':
         pas.vitesse = pas.vitesse === 1 ? 2 : 1;
         break;
@@ -270,10 +287,13 @@ export async function lancerNiveau(
   if (portrait.matches) definirPause(true);
   if (options.reprise) {
     // Une partie reprise montre d'abord ce qu'elle contient (tours, ennemis), et attend que le joueur soit prêt.
-    rendu.apresPas(etat, temps);
+    rendu.synchroniser(etat, temps);
     definirPause(true);
   }
-  const surRedimension = (): void => { rendu.redimensionner(); };
+  const surRedimension = (): void => {
+    rendu.redimensionner();
+    mesurerInterface();
+  };
   window.addEventListener('resize', surRedimension, { signal });
   window.addEventListener('orientationchange', surRedimension, { signal });
 
@@ -375,7 +395,7 @@ export async function lancerNiveau(
       if (elementsDuMenu) {
         elementsDuMenu = null;
         socleMenu = -1;
-        hud.placerMenu(null, 0, 0, 0, 0, 0);
+        hud.placerMenu(null, versionMenu, 0, 0, 0, 0, 0);
       }
       return;
     }
@@ -383,11 +403,12 @@ export async function lancerNiveau(
       elementsDuMenu = elementsMenu(etat, mode.socle);
       pasMenu = etat.pas;
       socleMenu = mode.socle;
+      versionMenu++;
     }
     const largeur = window.innerWidth;
     const hauteur = window.innerHeight;
     const rayon = Math.min(78, Math.max(56, hauteur * 0.19));
-    hud.placerMenu(elementsDuMenu, rendu.enCssX(socle.x), rendu.enCssY(socle.y - 0.6), largeur, hauteur, rayon);
+    hud.placerMenu(elementsDuMenu, versionMenu, rendu.enCssX(socle.x), rendu.enCssY(socle.y - 0.6), largeur, hauteur, rayon);
   };
 
   function arreter(): void {
