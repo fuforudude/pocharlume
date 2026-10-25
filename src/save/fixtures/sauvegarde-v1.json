@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "progression": {
+    "niveauMax": 4,
+    "etoiles": { "1": 3, "2": 2, "3": 1 }
+  },
+  "reglages": { "son": 0.5, "musique": 0.25 },
+  "partie": { "niveau": 4, "graine": 12, "vague": 2, "etat": "{\"version\":1}" }
+}
