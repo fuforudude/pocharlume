@@ -8,9 +8,9 @@ quand même, avec plaisir).
 
 | Pack | Page | Fichiers utilisés |
 | --- | --- | --- |
-| Impact Sounds 1.0 | https://kenney.nl/assets/impact-sounds | 11 |
+| Impact Sounds 1.0 | https://kenney.nl/assets/impact-sounds | 12 |
 | RPG Audio | https://kenney.nl/assets/rpg-audio | 6 |
-| Interface Sounds | https://kenney.nl/assets/interface-sounds | 8 |
+| Interface Sounds | https://kenney.nl/assets/interface-sounds | 7 |
 
 Licence : https://creativecommons.org/publicdomain/zero/1.0/
 
