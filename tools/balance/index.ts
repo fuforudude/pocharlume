@@ -147,8 +147,10 @@ if (miseAuPoint) {
       }
     }
   }
-  if (!options.has('dieux') && !options.has('difficultes')) {
-    const ecarts = verifierBandes(evaluations);
+  // Écarts aux bandes : tous si l'on a joué tous les dieux et toutes les difficultés, sinon seulement ceux des dieux joués.
+  if (!options.has('difficultes')) {
+    const complets = dieuxVoulus.length === DIEUX_EVALUES.length;
+    const ecarts = verifierBandes(evaluations).filter((e) => complets || dieuxVoulus.some((d) => e.includes(`(${nomDuDieu(d)})`)));
     console.log(ecarts.length === 0 ? 'Toutes les bandes sont respectées.' : [`${String(ecarts.length)} écart(s) aux bandes :`, ...ecarts.map((e) => `- ${e}`)].join('\n'));
   }
   const groupes = new Map<string, EvaluationProfil[]>();
