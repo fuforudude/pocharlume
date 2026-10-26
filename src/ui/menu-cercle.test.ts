@@ -100,7 +100,7 @@ describe('menu d’une tour construite', () => {
       { type: 'specialiser', socle: 0, voie: 'A' },
       { type: 'construire', socle: 1, tour: 'divine' },
     );
-    expect(elementsTour(etat, 0).map((e) => e.id)).toEqual(['vendre', 'ralliement']);
+    expect(elementsTour(etat, 0).map((e) => e.id)).toEqual(['competence:benediction', 'competence:mur', 'vendre', 'ralliement']);
     expect(elementsTour(etat, 1).map((e) => e.id)).toEqual(['vendre']);
   });
 
@@ -154,5 +154,60 @@ describe('positionsCercle', () => {
   it('un seul bouton se place en haut, aucun bouton ne donne une liste vide', () => {
     expect(positionsCercle(1, 50, 100, 100, 400, 400, 20)[0]?.y).toBeCloseTo(50, 6);
     expect(positionsCercle(0, 50, 100, 100, 400, 400, 20)).toEqual([]);
+  });
+});
+
+describe('menu d’une tour spécialisée : ses deux compétences', () => {
+  function garde(aretes = 5000): EtatPartie {
+    const etat = partie(aretes);
+    jouer(
+      etat,
+      { type: 'construire', socle: 0, tour: 'caserne' }, { type: 'ameliorer', socle: 0 }, { type: 'ameliorer', socle: 0 },
+      { type: 'specialiser', socle: 0, voie: 'A' },
+    );
+    return etat;
+  }
+
+  it('montre le rang, le prix du rang suivant (celui du moteur) et ce que validerAction permet', () => {
+    const etat = garde();
+    const [benediction, mur] = elementsTour(etat, 0);
+    expect(benediction).toMatchObject({ id: 'competence:benediction', rang: '0/3', prix: 90, refus: null, icone: 'icone-competence' });
+    expect(mur).toMatchObject({ id: 'competence:mur', rang: '0/3', prix: 80, refus: null });
+    expect(benediction?.libelle).toBe('Bénédiction : rang 0/3');
+    expect(benediction?.action).toEqual({ type: 'ameliorerCompetence', socle: 0, competence: 'benediction' });
+  });
+
+  it('acheter un rang (action du moteur) change le rang et le prix affichés', () => {
+    const etat = garde();
+    jouer(etat, { type: 'ameliorerCompetence', socle: 0, competence: 'benediction' });
+    expect(elementsTour(etat, 0)[0]).toMatchObject({ rang: '1/3', prix: 120 });
+  });
+
+  it('grise une compétence quand les arêtes manquent, et au rang maximal', () => {
+    const etat = garde();
+    etat.aretes = 10;
+    expect(elementsTour(etat, 0)[0]?.refus).toBe('aretes_insuffisantes');
+    etat.aretes = 5000;
+    jouer(
+      etat,
+      { type: 'ameliorerCompetence', socle: 0, competence: 'mur' },
+      { type: 'ameliorerCompetence', socle: 0, competence: 'mur' },
+      { type: 'ameliorerCompetence', socle: 0, competence: 'mur' },
+    );
+    expect(elementsTour(etat, 0)[1]).toMatchObject({ rang: '3/3', prix: null, refus: 'competence_au_maximum', libelle: 'Mur : au sommet' });
+  });
+
+  it('pas de compétence avant la spécialisation, ni sur la tour divine', () => {
+    const etat = partie();
+    jouer(etat, { type: 'construire', socle: 1, tour: 'tir' }, { type: 'construire', socle: 2, tour: 'divine' });
+    expect(elementsTour(etat, 1).some((e) => e.id.startsWith('competence:'))).toBe(false);
+    expect(elementsTour(etat, 2).some((e) => e.id.startsWith('competence:'))).toBe(false);
+  });
+
+  it('la tour divine du menu montre le sprite du dieu de la partie', () => {
+    const plume = creerPartie(NIVEAU_TEST, { ...CONFIG, dieu: 'plume', heros: 'plume' });
+    expect(elementsSocleVide(plume, 0).find((e) => e.id === 'construire:divine')?.icone).toBe('tour-sanctuaire');
+    const pollen = creerPartie(NIVEAU_TEST, { ...CONFIG, dieu: 'pollen', heros: 'pollen' });
+    expect(elementsSocleVide(pollen, 0).find((e) => e.id === 'construire:divine')?.icone).toBe('tour-atelier');
   });
 });

@@ -14,12 +14,14 @@ import type { AtlasRendu, SpriteAtlas } from './atlas';
 import { TUILE } from './camera';
 import { TYPE_EFFET, type Effet, type PoolEffets } from './effets';
 import {
+  effetObjet,
   habillageSort,
   nomPointDeTir,
   projectileTourne,
   spriteEnnemi,
   spriteImpact,
   spriteProjectile,
+  spriteStructure,
   spriteTireur,
   spriteTour,
   spriteUnite,
@@ -58,6 +60,8 @@ export class Visuel {
   actionDebut = -1e9;
   actionFin = -1e9;
   blesseFin = -1e9;
+  /** Instant avant lequel un halo de soin est déjà posé sur cette unité (pour ne pas en empiler un par pulsation). */
+  soinFin = -1e9;
   /** Instant de la mort d'une unité, -1 si elle vit. */
   mortDebut = -1;
   pvPrec = 0;
@@ -112,6 +116,8 @@ export class Suivi {
   readonly ennemis = new Map<number, Visuel>();
   readonly unites = new Map<number, Visuel>();
   readonly tours = new Map<number, Visuel>();
+  /** Tourelles construites par une tour divine ou un héros : dessinées comme des tours, dans l'ordre de profondeur. */
+  readonly structures = new Map<number, Visuel>();
   readonly projectiles = new Map<number, VisuelProjectile>();
   /** Tours, ennemis et unités : l'ordre est retrié par le rendu à chaque image. */
   readonly dessinables: Visuel[] = [];
@@ -140,8 +146,10 @@ export class Suivi {
     this.suivreEnnemis(etat, temps, marque);
     this.suivreUnites(etat, temps, marque);
     this.suivreProjectiles(etat, marque);
+    this.suivreStructures(etat, temps, marque);
     if (avecEvenements) for (const evenement of etat.evenements) this.evenement(etat, evenement, temps);
     if (this.tours.size !== etat.tours.length) this.retirer(this.tours, marque);
+    if (this.structures.size !== etat.structures.length) this.retirer(this.structures, marque);
     if (this.ennemis.size !== etat.ennemis.length) this.retirer(this.ennemis, marque);
     if (this.unites.size !== etat.unites.length) this.retirer(this.unites, marque);
     if (this.projectiles.size !== etat.projectiles.length) this.retirerProjectiles(marque);
@@ -165,6 +173,7 @@ export class Suivi {
     v.actionDebut = -1e9;
     v.actionFin = -1e9;
     v.blesseFin = -1e9;
+    v.soinFin = -1e9;
     v.mortDebut = -1;
     v.pvPrec = 0;
     v.vu = 0;
@@ -244,17 +253,17 @@ export class Suivi {
         v = this.creer(CATEGORIE.tour, t.id, t.x, t.y);
         this.tours.set(t.id, v);
       }
-      if (v.niveau !== t.niveau || v.voie !== t.voie || v.sprite === null) this.habillerTour(v, t);
+      if (v.niveau !== t.niveau || v.voie !== t.voie || v.sprite === null) this.habillerTour(v, t, etat.config.dieu);
       v.tour = t;
       v.vu = marque;
     }
   }
 
-  private habillerTour(v: Visuel, t: Tour): void {
+  private habillerTour(v: Visuel, t: Tour, dieu: string): void {
     v.famille = t.famille;
     v.niveau = t.niveau;
     v.voie = t.voie;
-    v.sprite = this.atlas.sprite(spriteTour(t.famille, t.niveau, t.voie)) ?? null;
+    v.sprite = this.atlas.sprite(spriteTour(t.famille, t.niveau, t.voie, dieu)) ?? null;
     const nomTireur = spriteTireur(t.famille, t.niveau, t.voie);
     v.tireur = nomTireur ? (this.atlas.sprite(nomTireur) ?? null) : null;
     const nomPoint = nomPointDeTir(t.famille);
@@ -265,6 +274,25 @@ export class Suivi {
     } else {
       v.tirX = 0;
       v.tirY = -12;
+    }
+  }
+
+  /** Une tourelle qui apparaît joue son « apparition » ; celle qui disparaît est jouée par l'événement `structure_fin`. */
+  private suivreStructures(etat: EtatPartie, temps: number, marque: number): void {
+    for (const s of etat.structures) {
+      let v = this.structures.get(s.id);
+      if (!v) {
+        v = this.creer(CATEGORIE.tour, s.id, s.x, s.y);
+        v.sprite = this.atlas.sprite(spriteStructure(s.stats.nom)) ?? null;
+        const point = v.sprite?.points?.tir;
+        if (point && v.sprite) {
+          v.tirX = point.x - v.sprite.ancre.x;
+          v.tirY = point.y - v.sprite.ancre.y;
+        }
+        this.lancerAction(v, 'apparition', temps);
+        this.structures.set(s.id, v);
+      }
+      v.vu = marque;
     }
   }
 
@@ -371,17 +399,27 @@ export class Suivi {
   }
 
   /** Joue une animation d'atlas une fois, centrée sur un point du monde (en tuiles). */
-  private effetSprite(nom: string, xTuiles: number, yTuiles: number, temps: number, echelle = 1, decalageY = 0): Effet | null {
+  private effetSprite(nom: string, xTuiles: number, yTuiles: number, temps: number, echelle = 1, decalageY = 0, animation = 'impact'): Effet | null {
     const sprite = this.atlas.sprite(nom);
     if (!sprite) return null;
-    const anim = this.atlas.animation(sprite, 'impact');
+    const anim = this.atlas.animation(sprite, animation);
     const e = this.effets.prendre(TYPE_EFFET.sprite, temps, anim ? dureeAnimation(anim) : 300);
     e.sprite = sprite;
-    e.anim = 'impact';
+    e.anim = animation;
     e.x = Math.round(xTuiles * TUILE);
     e.y = Math.round(yTuiles * TUILE + decalageY);
     e.echelle = echelle;
     return e;
+  }
+
+  /** Trait instantané d'un point du monde (pixels logiques) à un autre : tir d'un héros à distance ou d'une tourelle. */
+  private traitDeTir(x1: number, y1: number, x2: number, y2: number, temps: number, couleur: string): void {
+    const e = this.effets.prendre(TYPE_EFFET.rayon, temps, DUREE_RAYON);
+    e.x = Math.round(x1);
+    e.y = Math.round(y1);
+    e.x2 = Math.round(x2);
+    e.y2 = Math.round(y2);
+    e.couleur = couleur;
   }
 
   private marqueOrdre(x: number, y: number, temps: number, couleur: string): void {
@@ -473,15 +511,82 @@ export class Suivi {
         this.effetSprite('sang', ev.x, ev.y, temps, 1, -8);
         return;
       }
-      case 'reapparition':
+      case 'reapparition': {
+        const v = this.unites.get(ev.unite);
+        if (v?.unite?.stats.capacites?.ciblable === false) this.effetSprite('effet-ombre', v.x, v.y, temps, 1, -2);
+        return;
+      }
       case 'apparition':
       case 'fuite':
       case 'vague':
       case 'fin':
+      case 'regain_vies':
+      case 'zone':
+      case 'zone_fin':
+      case 'structure':
+      case 'boost':
+        // La zone, les structures et les tours boostées se dessinent d'après l'état, tant qu'elles durent.
         return;
-      case 'invocation':
-        this.effetSprite('fumee', ev.x, ev.y, temps, 1, -4);
+      case 'piege_pose':
+        this.effetSprite('fumee', ev.x, ev.y, temps, 1, -2);
         return;
+      case 'piege_declenche':
+        // Le piège a déjà quitté l'état : son animation de déclenchement (mâchoires qui se ferment) se joue ici.
+        this.effetSprite('piege', ev.x, ev.y, temps, 1, 0, 'declenche');
+        return;
+      case 'structure_fin':
+        this.effetSprite(spriteStructure(''), ev.x, ev.y, temps, 1, 0, 'destruction');
+        return;
+      case 'tir_structure': {
+        const tourelle = this.structures.get(ev.structure);
+        const cible = this.ennemis.get(ev.ennemi);
+        if (!tourelle || !cible) return;
+        this.regarder(tourelle, cible.x);
+        this.lancerAction(tourelle, 'attaque', temps);
+        const decalage = tourelle.miroir ? -tourelle.tirX : tourelle.tirX;
+        this.traitDeTir(ev.x * TUILE + decalage, ev.y * TUILE + tourelle.tirY, cible.x * TUILE, cible.y * TUILE - 8, temps, '#ffd28a');
+        return;
+      }
+      case 'tir_unite': {
+        const tireur = this.unites.get(ev.unite);
+        const cible = this.ennemis.get(ev.ennemi);
+        if (!tireur || !cible) return;
+        this.regarder(tireur, cible.x);
+        this.lancerAction(tireur, 'attaque', temps);
+        this.traitDeTir(tireur.x * TUILE, tireur.y * TUILE - 10, cible.x * TUILE, cible.y * TUILE - 8, temps, ev.critique ? '#ffe070' : '#d8c8a0');
+        return;
+      }
+      case 'esquive': {
+        // Le coup rate : un souffle d'ombre à l'endroit où l'unité était.
+        const v = this.unites.get(ev.unite);
+        if (v) this.effetSprite('effet-ombre', v.x, v.y, temps, 1, -2);
+        return;
+      }
+      case 'soin': {
+        const v = this.unites.get(ev.unite);
+        if (v && temps >= v.soinFin) {
+          const e = this.effetSprite('effet-soin', v.x, v.y, temps, 1, -2, 'repos');
+          if (e) v.soinFin = temps + e.duree;
+        }
+        return;
+      }
+      case 'execution':
+        this.effetSprite('effet-execution', ev.x, ev.y, temps, 1, -8);
+        return;
+      case 'objet':
+        this.effetSprite(effetObjet(ev.objet), ev.x, ev.y, temps, 1, -2);
+        return;
+      case 'competence_tour': {
+        const tour = this.tours.get(ev.tour);
+        if (tour) this.effetSprite('impact', tour.x, tour.y, temps, 2, -14);
+        return;
+      }
+      case 'invocation': {
+        const invoque = this.unites.get(ev.unite)?.unite;
+        // Un assassin du Sanctuaire sort de l'ombre ; les autres renforts sortent de la fumée.
+        this.effetSprite(invoque?.stats.capacites?.ciblable === false ? 'effet-ombre' : 'fumee', ev.x, ev.y, temps, 1, -4);
+        return;
+      }
       case 'construction': {
         const tour = this.tours.get(ev.tour);
         if (tour) this.effetSprite('fumee', tour.x, tour.y, temps, 2, -6);

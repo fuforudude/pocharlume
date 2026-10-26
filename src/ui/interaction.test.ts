@@ -3,7 +3,7 @@ import { NIVEAU_TEST } from '../data/niveaux/region1';
 import { avancer, creerPartie, type Action, type EtatPartie } from '../engine';
 import { avancerPas, CONFIG } from '../engine/aides.test-utils';
 import { Surbrillance } from '../render/rendu';
-import { cibleTouchee, Interaction, rayonSort } from './interaction';
+import { cibleTouchee, Interaction, rayonObjet, rayonSort } from './interaction';
 import { elementsMenu } from './menu-cercle';
 
 const RAYON = 0.9;
@@ -314,5 +314,75 @@ describe('surbrillance et invites', () => {
     ui.basculerSort(etat, 0);
     expect(ui.invite(etat)).toContain('Chute du Colosse');
     expect(rayonSort(etat, 9)).toBe(0);
+  });
+});
+
+describe('objets emportés', () => {
+  function avecObjets(...objets: string[]): EtatPartie {
+    return creerPartie(NIVEAU_TEST, { ...CONFIG, objets });
+  }
+
+  it('toucher l’objet puis un point du chemin l’utilise ; l’emplacement est alors grisé', () => {
+    const etat = avecObjets('fiole_soufre', 'sablier');
+    const interaction = new Interaction();
+    expect(interaction.basculerObjet(etat, 0)).toEqual({ action: null, refus: null });
+    expect(interaction.mode).toEqual({ type: 'objet', emplacement: 0 });
+    const issue = interaction.toucher(etat, 10, 5, RAYON);
+    expect(issue.action).toEqual({ type: 'utiliserObjet', emplacement: 0, x: 10, y: 5 });
+    expect(interaction.mode.type).toBe('libre');
+    envoyer(etat, issue.action);
+    expect(etat.objetsUtilises).toEqual([true, false]);
+    // Un objet utilisé n'est plus sélectionnable.
+    expect(interaction.basculerObjet(etat, 0)).toEqual({ action: null, refus: 'objet_utilise' });
+    expect(interaction.mode.type).toBe('libre');
+  });
+
+  it('un emplacement sans objet est refusé', () => {
+    const etat = avecObjets('sablier');
+    expect(new Interaction().basculerObjet(etat, 2)).toEqual({ action: null, refus: 'objet_inconnu' });
+  });
+
+  it('toucher de nouveau le même objet annule la visée', () => {
+    const etat = avecObjets('sablier');
+    const interaction = new Interaction();
+    interaction.basculerObjet(etat, 0);
+    interaction.basculerObjet(etat, 0);
+    expect(interaction.mode.type).toBe('libre');
+  });
+
+  it('un point refusé par le moteur laisse la visée ouverte, avec la raison', () => {
+    const etat = avecObjets('griffe_renfort');
+    const interaction = new Interaction();
+    interaction.basculerObjet(etat, 0);
+    const issue = interaction.toucher(etat, 25, 1, RAYON);
+    expect(issue).toEqual({ action: null, refus: 'hors_chemin' });
+    expect(interaction.mode).toEqual({ type: 'objet', emplacement: 0 });
+  });
+
+  it('un objet qui agit partout s’utilise en touchant n’importe où sur la carte', () => {
+    const etat = avecObjets('sablier');
+    const interaction = new Interaction();
+    interaction.basculerObjet(etat, 0);
+    expect(interaction.toucher(etat, 3, 1, RAYON).action).toEqual({ type: 'utiliserObjet', emplacement: 0, x: 3, y: 1 });
+  });
+
+  it('la visée tombe si l’objet est utilisé, et la surbrillance montre son rayon', () => {
+    const etat = avecObjets('fiole_soufre');
+    const interaction = new Interaction();
+    interaction.basculerObjet(etat, 0);
+    const surb = new Surbrillance();
+    interaction.surbrillance(etat, surb);
+    expect(surb.sortRayon).toBe(rayonObjet(etat, 0));
+    expect(surb.sortRayon).toBeGreaterThan(0);
+    etat.objetsUtilises[0] = true;
+    interaction.rafraichir(etat);
+    expect(interaction.mode.type).toBe('libre');
+  });
+
+  it('l’invite nomme l’objet', () => {
+    const etat = avecObjets('fiole_soufre');
+    const interaction = new Interaction();
+    interaction.basculerObjet(etat, 0);
+    expect(interaction.invite(etat)).toBe('Touche la carte pour utiliser : Fiole de Soufre.');
   });
 });

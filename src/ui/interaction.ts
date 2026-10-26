@@ -2,6 +2,7 @@
 // donne un ordre, toucher un sort puis la carte le lance. Machine à états pure (sans DOM) : elle ne modifie
 // jamais l'état de la partie, elle renvoie l'action à envoyer au moteur (qui la valide et la met au journal).
 import { DIEUX } from '../data/dieux';
+import { OBJETS } from '../data/objets';
 import type { Action, EtatPartie, RaisonRefus } from '../engine';
 import { validerAction } from '../engine';
 import type { FamilleTour } from '../engine/etat';
@@ -17,6 +18,8 @@ export type Mode =
   /** Le héros est sélectionné : le prochain point touché est son ordre. */
   | { readonly type: 'heros' }
   | { readonly type: 'sort'; readonly emplacement: number }
+  /** Un objet emporté est sélectionné : le prochain point touché est l'endroit où l'utiliser. */
+  | { readonly type: 'objet'; readonly emplacement: number }
   /** Une caserne attend son point de ralliement. */
   | { readonly type: 'ralliement'; readonly socle: number };
 
@@ -63,6 +66,12 @@ export function cibleTouchee(etat: EtatPartie, x: number, y: number, rayon: numb
   return meilleure;
 }
 
+/** Rayon (tuiles) de l'objet d'un emplacement, 0 s'il est inconnu (ou s'il agit partout). */
+export function rayonObjet(etat: EtatPartie, emplacement: number): number {
+  const id = etat.config.objets[emplacement];
+  return id !== undefined && Object.hasOwn(OBJETS, id) ? OBJETS[id as keyof typeof OBJETS].rayon : 0;
+}
+
 /** Rayon (tuiles) du sort d'un emplacement, 0 s'il est inconnu. */
 export function rayonSort(etat: EtatPartie, emplacement: number): number {
   const dieu = Object.hasOwn(DIEUX, etat.config.dieu) ? DIEUX[etat.config.dieu as keyof typeof DIEUX] : undefined;
@@ -85,6 +94,8 @@ export class Interaction {
         return this.ordonner(etat, { type: 'deplacerHeros', x, y });
       case 'sort':
         return this.ordonner(etat, { type: 'lancerSort', emplacement: mode.emplacement, x, y });
+      case 'objet':
+        return this.ordonner(etat, { type: 'utiliserObjet', emplacement: mode.emplacement, x, y });
       case 'ralliement':
         return this.ordonner(etat, { type: 'deplacerRalliement', socle: mode.socle, x, y });
       default:
@@ -140,6 +151,15 @@ export class Interaction {
     return RIEN;
   }
 
+  /** Bouton d'un objet ou touche A/Z/R : passe en visée, ou annule si cet objet était déjà en visée. */
+  basculerObjet(etat: EtatPartie, emplacement: number): Issue {
+    if (this.mode.type === 'objet' && this.mode.emplacement === emplacement) return this.annuler();
+    if (etat.config.objets[emplacement] === undefined) return { action: null, refus: 'objet_inconnu' };
+    if (etat.objetsUtilises[emplacement]) return { action: null, refus: 'objet_utilise' };
+    this.mode = { type: 'objet', emplacement };
+    return RIEN;
+  }
+
   /** Touches 1 à 5 : construit sur le socle dont le menu est ouvert (s'il est vide). */
   construireSurSelection(etat: EtatPartie, famille: FamilleTour): Issue {
     const mode = this.mode;
@@ -165,6 +185,8 @@ export class Interaction {
       if (!heros || heros.mort) this.mode = LIBRE;
     } else if (mode.type === 'sort') {
       if ((etat.sorts[mode.emplacement]?.recharge ?? 1) > 0) this.mode = LIBRE;
+    } else if (mode.type === 'objet') {
+      if (etat.objetsUtilises[mode.emplacement] === true) this.mode = LIBRE;
     } else if (mode.type === 'ralliement') {
       if (!etat.tours.some((tour) => tour.socle === mode.socle && tour.stats.soldats)) this.mode = LIBRE;
     }
@@ -176,7 +198,7 @@ export class Interaction {
     surb.socle = -1;
     surb.portee = 0;
     surb.heros = mode.type === 'heros';
-    surb.sortRayon = mode.type === 'sort' ? rayonSort(etat, mode.emplacement) : 0;
+    surb.sortRayon = mode.type === 'sort' ? rayonSort(etat, mode.emplacement) : mode.type === 'objet' ? rayonObjet(etat, mode.emplacement) : 0;
     if (mode.type === 'menu' || mode.type === 'ralliement') {
       surb.socle = mode.socle;
       const tour = etat.tours.find((autre) => autre.socle === mode.socle);
@@ -199,6 +221,10 @@ export class Interaction {
         return tCle('invite.heros');
       case 'ralliement':
         return tCle('invite.ralliement');
+      case 'objet': {
+        const id = etat.config.objets[mode.emplacement];
+        return id !== undefined && Object.hasOwn(OBJETS, id) ? tCle('invite.objet', { nom: tCle(OBJETS[id as keyof typeof OBJETS].nom) }) : null;
+      }
       case 'sort': {
         const dieu = Object.hasOwn(DIEUX, etat.config.dieu) ? DIEUX[etat.config.dieu as keyof typeof DIEUX] : undefined;
         const sort = dieu?.sorts[mode.emplacement];

@@ -38,9 +38,16 @@ const SPRITES_SPECIALISATIONS: Readonly<Record<string, Readonly<Record<Voie, str
   artillerie: { A: 'tour-artillerie-mortier', B: 'tour-artillerie-baliste' },
 };
 
-/** Sprite d'une tour selon sa famille, son niveau (1 à 4) et sa spécialisation. */
-export function spriteTour(famille: FamilleTour, niveau: number, voie: Voie | null): string {
-  if (famille === 'divine') return 'tour-totem';
+/** Tour divine de chaque dieu (le Totem du Colosse par défaut). */
+const TOURS_DIVINES: Readonly<Record<string, string>> = {
+  charlie: 'tour-totem',
+  plume: 'tour-sanctuaire',
+  pollen: 'tour-atelier',
+};
+
+/** Sprite d'une tour selon sa famille, son niveau (1 à 4), sa spécialisation et, pour la tour divine, le dieu de la partie. */
+export function spriteTour(famille: FamilleTour, niveau: number, voie: Voie | null, dieu = 'charlie'): string {
+  if (famille === 'divine') return Object.hasOwn(TOURS_DIVINES, dieu) ? (TOURS_DIVINES[dieu] ?? 'tour-totem') : 'tour-totem';
   if (niveau >= 4 && voie !== null) return SPRITES_SPECIALISATIONS[famille]?.[voie] ?? `tour-${famille}-3`;
   return `tour-${famille}-${String(Math.min(Math.max(niveau, 1), 3))}`;
 }
@@ -107,6 +114,16 @@ const SORTS: Readonly<Record<string, readonly [HabillageSort, HabillageSort]>> =
     { effet: 'onde-choc', animationHeros: 'competence', icone: 'icone-chute-colosse' },
     { effet: 'fumee', animationHeros: null, icone: 'icone-renforts' },
   ],
+  // Le Voile de Nuit lui-même est la zone durable que le rendu peint tant qu'elle dure ; le sort n'ajoute qu'un souffle d'ombre.
+  plume: [
+    { effet: 'effet-ombre', animationHeros: 'competence', icone: 'icone-voile-nuit' },
+    { effet: 'effet-griffes', animationHeros: 'competence', icone: 'icone-griffes-ombre' },
+  ],
+  // Les pièges et les roues de l'Ingéniosité sont dessinés d'après l'état (pièges posés, tours boostées).
+  pollen: [
+    { effet: 'fumee', animationHeros: 'competence', icone: 'icone-pieges-ressort' },
+    { effet: 'fumee', animationHeros: 'competence', icone: 'icone-ingeniosite' },
+  ],
 };
 
 const SORT_INCONNU: HabillageSort = { effet: 'fumee', animationHeros: null, icone: 'icone-etoile' };
@@ -115,12 +132,57 @@ export function habillageSort(dieu: string, emplacement: number): HabillageSort 
   return (Object.hasOwn(SORTS, dieu) ? SORTS[dieu]?.[emplacement] : undefined) ?? SORT_INCONNU;
 }
 
-/** Icône de chaque famille de tours dans les menus. */
-export function iconeFamille(famille: FamilleTour): string {
-  return famille === 'divine' ? 'tour-totem' : `icone-${famille}`;
+/** Icône de chaque famille de tours dans les menus ; la tour divine montre celle du dieu de la partie. */
+export function iconeFamille(famille: FamilleTour, dieu = 'charlie'): string {
+  return famille === 'divine' ? spriteTour('divine', 1, null, dieu) : `icone-${famille}`;
 }
 
 /** Sprite affiché dans le menu pour une tour qu'on peut construire (le premier niveau). */
 export function spriteMenuTour(famille: FamilleTour): string {
   return spriteTour(famille, 1, null);
+}
+
+// --- Objets, dieux, héros, branches de l'arbre -------------------------------------------------------------------
+
+/** Id avec tirets : `brise_os` devient `brise-os` (un nom de sprite n'a que a-z, 0-9 et -). */
+function avecTirets(id: string): string {
+  return id.replaceAll('_', '-');
+}
+
+export function iconeDieu(dieu: string): string {
+  return `icone-dieu-${avecTirets(dieu)}`;
+}
+
+export function portraitHeros(heros: string): string {
+  return `icone-portrait-${avecTirets(heros)}`;
+}
+
+export function iconeObjet(objet: string): string {
+  return `icone-${avecTirets(objet)}`;
+}
+
+export function iconeBranche(branche: string): string {
+  return `icone-branche-${avecTirets(branche)}`;
+}
+
+/** Effet joué là où un objet est utilisé (le point touché). */
+const EFFETS_OBJETS: Readonly<Record<string, string>> = {
+  fiole_soufre: 'effet-soufre',
+  herbe_sabbat: 'effet-sabbat',
+  griffe_renfort: 'fumee',
+  sablier: 'effet-sablier',
+};
+
+export function effetObjet(objet: string): string {
+  return Object.hasOwn(EFFETS_OBJETS, objet) ? (EFFETS_OBJETS[objet] ?? 'fumee') : 'fumee';
+}
+
+/** Sprite d'une tourelle construite (Atelier Boiteux, Rouage). */
+const SPRITES_STRUCTURES: Readonly<Record<string, string>> = {
+  'unite.tourelle_de_l_atelier': 'tourelle-atelier',
+  'unite.tourelle_de_rouage': 'tourelle-atelier',
+};
+
+export function spriteStructure(nomStats: string): string {
+  return Object.hasOwn(SPRITES_STRUCTURES, nomStats) ? (SPRITES_STRUCTURES[nomStats] ?? 'tourelle-atelier') : 'tourelle-atelier';
 }

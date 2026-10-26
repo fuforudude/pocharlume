@@ -1,0 +1,715 @@
+/* Méta-progression : monnaies de la carte, fiche de niveau (dieu, héros, objets), écran des héros, boutique, objets en
+   partie, bilan de fin. Même règle que style.css : toute cible tactile fait au moins 44 px, paysage d'abord. */
+
+/* --- Barre de la carte : monnaies --- */
+
+.carte-monnaies {
+  display: flex;
+  gap: 4px;
+}
+
+.puce.monnaie {
+  gap: 4px;
+  padding: 0 8px;
+  color: var(--or);
+}
+
+/* --- Fiche d'un niveau : deux colonnes en paysage --- */
+
+.ecran.fiche .carte {
+  width: min(780px, calc(100% - 16px));
+}
+
+.fiche-colonnes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+  width: 100%;
+}
+
+.fiche-colonne {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.fiche-message,
+.choix-message {
+  margin: 0;
+  min-height: 1.3em;
+  font-size: 12px;
+  color: var(--sang);
+}
+
+.choix-fiche {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+}
+
+.choix-section {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.choix-titre {
+  margin: 0;
+  font-size: 11px;
+  font-weight: normal;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--texte-doux);
+}
+
+.choix-rangee {
+  display: flex;
+  gap: 6px;
+}
+
+.choix-legende {
+  margin: 0;
+  font-size: 11px;
+  color: var(--texte-doux);
+}
+
+.bouton.choix-dieu {
+  flex: 1;
+  min-width: 0;
+  gap: 6px;
+  padding: 2px 6px;
+  font-size: 12px;
+}
+
+.bouton.choix-dieu .icone {
+  width: 32px;
+  height: 32px;
+}
+
+.bouton.choix-heros {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 1px;
+  padding: 2px;
+}
+
+.bouton.choix-heros .portrait {
+  width: 48px;
+  height: 48px;
+}
+
+.detail-heros {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: normal;
+  color: var(--texte-doux);
+}
+
+.bouton.verrouille,
+.ligne-heros.verrouille {
+  filter: grayscale(0.9) brightness(0.65);
+}
+
+.bouton.choix-heros .cadenas {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+}
+
+.detail-heros .petite {
+  width: 16px;
+  height: 16px;
+}
+
+.bouton.choix-slot {
+  flex: 1;
+  min-width: 0;
+  border-style: dashed;
+}
+
+.bouton.choix-slot .icone {
+  width: 32px;
+  height: 32px;
+}
+
+.bouton.choix-slot.vide {
+  opacity: 0.55;
+}
+
+.bouton.choix-objet {
+  flex: 1;
+  min-width: 0;
+  gap: 4px;
+  padding: 2px 6px;
+}
+
+.bouton.choix-objet .icone {
+  width: 32px;
+  height: 32px;
+}
+
+/* --- Panneau plein cadre (héros, boutique) --- */
+
+.ecran.panneau-meta {
+  position: fixed;
+}
+
+.ecran.panneau-meta > .carte {
+  box-sizing: border-box;
+  align-items: stretch;
+  gap: 6px;
+  width: min(820px, calc(100% - 16px));
+  height: calc(100% - 16px);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.meta-entete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.meta-entete .titre {
+  margin-right: auto;
+  font-size: 22px;
+}
+
+.meta-monnaies {
+  display: flex;
+  gap: 4px;
+}
+
+.meta-corps {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  touch-action: pan-y;
+}
+
+.meta-message {
+  margin: 0;
+  min-height: 1.4em;
+  font-size: 13px;
+  color: var(--or);
+  text-align: center;
+}
+
+.meta-message.refus {
+  color: var(--sang);
+}
+
+.pastilles {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.pastilles i {
+  display: block;
+  width: 9px;
+  height: 9px;
+  box-sizing: border-box;
+  border: 2px solid var(--bord);
+  background: transparent;
+}
+
+.pastilles i.pleine {
+  border-color: var(--or);
+  background: var(--or);
+}
+
+/* --- Écran des héros --- */
+
+.heros-corps {
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.heros-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.heros-dieux {
+  display: flex;
+  gap: 4px;
+}
+
+.bouton.onglet-dieu {
+  flex: 1;
+  min-width: 0;
+  padding: 2px;
+}
+
+.bouton.onglet-dieu .icone {
+  width: 32px;
+  height: 32px;
+}
+
+.heros-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bouton.ligne-heros {
+  position: relative;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 2px 6px;
+  text-align: left;
+  min-height: 52px;
+}
+
+.ligne-heros .portrait {
+  width: 48px;
+  height: 48px;
+  flex: none;
+}
+
+.ligne-heros .texte {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  font-size: 12px;
+}
+
+.ligne-heros .nom {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ligne-heros .sous {
+  font-size: 11px;
+  font-weight: normal;
+  color: var(--texte-doux);
+}
+
+.ligne-heros .cadenas {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 16px;
+  height: 16px;
+}
+
+.pastille-points {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  min-width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  padding: 0 3px;
+  border-radius: 8px;
+  background: var(--or);
+  color: #1a1208;
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
+}
+
+.heros-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.heros-tete {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.heros-tete .portrait.grand {
+  width: 72px;
+  height: 72px;
+  flex: none;
+}
+
+.heros-tete .identite {
+  flex: 1;
+  min-width: 0;
+}
+
+.heros-tete .identite > * {
+  margin: 0 0 3px;
+}
+
+.heros-tete .nom {
+  font-size: 16px;
+  color: var(--or);
+}
+
+.heros-tete .role,
+.heros-tete .desc,
+.heros-tete .xp {
+  font-size: 12px;
+  color: var(--texte-doux);
+}
+
+.heros-tete .niveau {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.barre-xp {
+  height: 8px;
+  max-width: 220px;
+  box-sizing: border-box;
+  border: 1px solid #000;
+  background: #1c0f10;
+}
+
+.barre-xp .rempli {
+  display: block;
+  height: 100%;
+  background: var(--or);
+}
+
+.heros-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.heros-actions .points {
+  margin: 0;
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--or);
+}
+
+.competences {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.competence {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 6px;
+  background: rgba(40, 30, 26, 0.7);
+  border: 2px solid var(--bord);
+  border-radius: 6px;
+}
+
+.competence.ultime {
+  border-color: var(--or);
+}
+
+.competence.verrouillee {
+  filter: grayscale(0.8) brightness(0.75);
+}
+
+.competence-entete {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.competence-entete .icone {
+  width: 32px;
+  height: 32px;
+  flex: none;
+}
+
+.competence-entete .noms {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.competence-entete .sous {
+  font-size: 10px;
+  font-weight: normal;
+  color: var(--texte-doux);
+}
+
+.etiquette-ultime {
+  margin-left: 6px;
+  padding: 0 4px;
+  border: 1px solid var(--or);
+  border-radius: 3px;
+  font-size: 9px;
+  color: var(--or);
+  text-transform: uppercase;
+}
+
+.competence .desc {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.25;
+  color: var(--texte-doux);
+}
+
+.bouton.placer {
+  flex: none;
+  min-width: var(--cible);
+  padding: 0;
+  font-size: 22px;
+  color: var(--or);
+}
+
+/* --- Boutique --- */
+
+.boutique-corps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.boutique-onglets {
+  display: flex;
+  gap: 6px;
+}
+
+.boutique-onglets > :last-child:not(.onglet) {
+  margin-left: auto;
+}
+
+.arbre,
+.objets {
+  display: grid;
+  gap: 6px;
+}
+
+.arbre,
+.objets {
+  grid-template-columns: 1fr 1fr;
+}
+
+.branche,
+.objet {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 8px;
+  background: rgba(40, 30, 26, 0.7);
+  border: 2px solid var(--bord);
+  border-radius: 6px;
+}
+
+.branche.sommet {
+  border-color: var(--or);
+}
+
+.branche .icone {
+  width: 32px;
+  height: 32px;
+  flex: none;
+}
+
+.objet .icone {
+  width: 48px;
+  height: 48px;
+  flex: none;
+}
+
+.branche .texte,
+.objet .texte {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.branche .nom,
+.objet .nom {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.branche .desc,
+.objet .desc {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.25;
+  color: var(--texte-doux);
+}
+
+.branche .rangs,
+.objet .stock {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--texte-doux);
+}
+
+.bouton.acheter {
+  flex: none;
+  min-width: 64px;
+  gap: 4px;
+  padding: 2px 8px;
+  color: var(--or);
+}
+
+.bouton.acheter .icone {
+  width: 16px;
+  height: 16px;
+}
+
+.sommet-texte {
+  flex: none;
+  color: var(--or);
+  font-weight: bold;
+  font-size: 12px;
+}
+
+/* --- Partie : objets emportés, rang d'une compétence dans le menu en cercle --- */
+
+.bouton.objet {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+}
+
+.bouton.objet .icone {
+  width: 32px;
+  height: 32px;
+}
+
+.element-menu .rang {
+  position: absolute;
+  right: -3px;
+  top: -3px;
+  padding: 0 3px;
+  border-radius: 6px;
+  background: var(--fond);
+  border: 1px solid var(--or);
+  font-size: 10px;
+  line-height: 14px;
+  color: var(--or);
+  pointer-events: none;
+}
+
+.element-menu.au-sommet .rang {
+  background: var(--or);
+  color: #1a1208;
+}
+
+/* --- Fin de partie : le butin --- */
+
+.bilan {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 220px;
+  padding: 6px 10px;
+  border: 2px solid var(--bord);
+  border-radius: 6px;
+  background: rgba(40, 30, 26, 0.7);
+}
+
+.bilan p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.bilan-ligne {
+  color: var(--or);
+}
+
+.bilan-attente {
+  color: var(--texte-doux);
+}
+
+.bilan-refus {
+  color: var(--sang);
+}
+
+/* --- Petits écrans --- */
+
+@media (max-width: 640px) {
+  .fiche-colonnes {
+    grid-template-columns: 1fr;
+  }
+
+  .heros-corps {
+    grid-template-columns: 1fr;
+  }
+
+  .competences,
+  .objets {
+    grid-template-columns: 1fr;
+  }
+
+  .arbre {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Fiche d'un niveau sur un petit écran en paysage : tout tient sans défiler. */
+@media (max-height: 460px) {
+  .fiche-colonne .difficultes {
+    flex-wrap: nowrap;
+    width: 100%;
+  }
+
+  .fiche-colonne .bouton.difficulte {
+    flex: 1;
+    min-width: 0;
+    gap: 2px;
+    padding: 4px 4px;
+  }
+
+  .fiche-colonne .etoiles.petites .etoile {
+    width: 24px;
+    height: 24px;
+  }
+
+  .fiche-colonne .rangee {
+    flex-wrap: nowrap;
+    width: 100%;
+  }
+
+  .fiche-colonne .rangee .bouton.grand {
+    flex: 1;
+    min-width: 0;
+    min-height: 44px;
+    font-size: 16px;
+  }
+
+  .ecran.fiche .ambiance {
+    font-size: 13px;
+  }
+
+  .ecran.fiche .titre {
+    font-size: 22px;
+  }
+
+  .ecran.fiche .carte {
+    gap: 4px;
+    padding: 8px 14px;
+  }
+
+  .fiche-colonne {
+    gap: 6px;
+  }
+}

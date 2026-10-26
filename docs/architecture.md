@@ -12,6 +12,7 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
 | `src/data/` | Tables d'équilibrage : tours, ennemis, dieux, difficultés, règles, formules et générateur de vagues (`equilibrage.ts`), version des données (`version.ts`, à incrémenter à chaque changement d'équilibrage), méta-progression (`meta.ts` : ids des dieux, héros, branches de l'arbre et objets, prix, plafonds, formules de gain hors partie). Aucune valeur de jeu en dur ailleurs. Les niveaux figés vont dans `src/data/niveaux/` (un fichier par région). | `src/engine/` : types, et le générateur à graine (`aleatoire.ts`) pour le générateur de vagues |
 | `src/render/` | Rendu Canvas 2D : caméra, zoom à pixels entiers sans lissage, sprites, animations, barres de vie, effets. Lit l'état du moteur, ne le modifie jamais. | `src/engine/`, `src/data/` |
 | `src/ui/` | Écrans, HUD, menus, toucher, souris, clavier. Traduit les gestes en actions du moteur. | tout `src/` |
+| `src/audio/` | Son : moteur Web Audio (`moteur.ts`), limiteur (`limiteur.ts`), données des sons et table événement vers son (`table.ts`), écouteurs du navigateur (`geste.ts`). Ne dépend que du type des événements du moteur et de `src/data/ennemis.ts`. | `src/engine/` (types), `src/data/` |
 | `src/i18n/` | Textes affichés. `fr.ts` contient la table, `t('clé')` la lit avec une clé typée. | rien |
 | `src/save/` | Sauvegarde. Fonctions pures : format versionné v3 (`format.ts`), validation stricte, migrations en chaîne vN vers vN+1, progression (étoiles, déblocage), méta-progression (`transactions.ts`, `config-partie.ts`, `definitions.ts`), partie en cours, export et import par code (`code.ts`). `Session` (`session.ts`) tient la sauvegarde courante en mémoire et l'écrit à chaque changement ; sa règle multi-onglets est décrite plus bas (« Méta-progression et sauvegarde v3 »). `verrou.ts` exclut les écritures entre onglets (Web Locks) ; `canal.ts` prévient les autres onglets par `BroadcastChannel`, qui se rafraîchissent. Accès au stockage : interface `Stockage` (IndexedDB, repli localStorage, mémoire ; Capacitor Preferences plus tard) et `Depot`, qui ne lève jamais et garde une copie de secours d'une sauvegarde illisible. | `src/engine/`, `src/data/` |
 | `src/equilibrage/` | Simulateur d'équilibrage sans affichage : partie jouée par un bot (`simulation.ts`), bot naïf (`bot-naif.ts`) et bot soigneux avec sa petite recherche de variante (`bot-soigneux.ts`), géométrie des cartes, évaluation d'une région (`campagne.ts`), bandes cibles (`bandes.ts`), puissance des tours (`puissance.ts`), rédaction de `balance-report.md` (`rapport.ts`). Les bots ne passent que par l'API publique du moteur (`avancer` avec des actions). Réutilisé par `tools/balance/` et par les tests des bandes. | `src/engine/`, `src/data/`, `src/i18n/` |
@@ -20,6 +21,30 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
 | `public/sprites/` | Atlas généré par `npm run art` (`atlas.png`, `atlas.json`), commité : le build n'exécute pas le pipeline, un test vérifie que l'atlas est à jour. | — |
 
 `src/main.ts` est le point d'entrée du navigateur.
+
+## Son
+- **Fichiers** : `public/sons/<id>.ogg` (25 bruitages Ogg Vorbis, 281 Ko), extraits de trois packs Kenney CC0. Le catalogue
+  source, nom, usage est `tools/sons/catalogue.ts` (`npm run sons -- <dossier des packs>` les recopie), les crédits
+  sont dans `CREDITS.md`. Un test vérifie que fichiers, catalogue et `SONS` sont identiques et que le total reste sous
+  600 Ko. Safari iOS lit l'Ogg Vorbis depuis iOS 17 ; pas de repli MP3 ajouté (iOS plus ancien : jeu muet, sans erreur).
+- **Moteur** (`src/audio/moteur.ts`) : l'`AudioContext` est créé au premier geste (`pointerup`, `click`, `keydown`,
+  `touchend`, branchés par `geste.ts`) et relancé à chaque geste s'il est suspendu. Chargement paresseux : rien n'est
+  téléchargé avant ce geste, puis les 25 sons le sont en tâche de fond (sauf volume à 0). Deux bus (effets, interface)
+  suivent le volume « son », un bus musique suit « musique » (`audio.busMusique`, pour la musique à venir). Courbe de
+  volume carrée. Volume à 0 : rien n'est chargé ni joué. Aucune méthode ne lève : sans `AudioContext`, contexte
+  suspendu, fichier introuvable ou son pas encore chargé, le son est simplement sauté.
+- **Table** (`src/audio/table.ts`) : `SONS` (volume, hauteur, variation aléatoire, priorité, nombre maximal par fenêtre,
+  bus) et `SON_DES_EVENEMENTS`, une entrée par type d'événement du moteur (`null` = silence voulu). Un test lit
+  `src/engine/evenements.ts` : un nouvel événement sans entrée fait échouer la CI. Les entrées-fonctions choisissent selon
+  la famille de la tour ou le genre de l'unité (la partie est passée au moteur de son) et selon `boss` des ennemis.
+- **Limitation** (`limiteur.ts`) : fenêtre de 80 ms, au plus `max` instances d'un même son, et un plafond total par
+  priorité (basse 4, normale 7, haute 12) : une rafale de tirs ne couvre jamais une cloche de vague, la mort d'un boss ou
+  la victoire. Le hasard de hauteur et de volume est `Math.random` du rendu, jamais celui du moteur.
+- **Branchements** : `main.ts` appelle `installerAudio(() => session.sauvegarde.reglages)` (volumes relus à chaque son, donc
+  les curseurs agissent en direct) ; la boucle de `partie.ts` appelle `audio.jouerEvenements(etat.evenements, etat)` après
+  chaque pas et `jouerInterface('refus')` sur un refus ; tout `<button>` joue « clic » (écouteur global en capture, bouton
+  `aria-disabled` muet) ; un curseur de volume relâché joue un clic de contrôle. La boutique appelle
+  `jouerInterface('achat')` quand un achat réussit (non branché : pas d'écran de boutique au moment de ce jalon).
 
 ## Rendu et interface
 - **Boucle** (`src/ui/partie.ts`, `lancerNiveau`) : une boucle `requestAnimationFrame` accumule le temps réel
@@ -31,18 +56,48 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
   d'un facteur entier sans lissage ; `camera.ts` (zoom entier, glisser, pincement, molette, bornes ; la vue peut dépasser la carte de la largeur des barres du HUD, mesurées dans le DOM par `src/ui/marges.ts`, pour que tout socle puisse sortir de dessous un bouton), `sol.ts`
   (sol précalculé depuis les chemins : herbe, chemin avec bords et coins, boue, pavés), `suivi.ts` (une
   représentation par entité du moteur, créée et retirée d'après les événements), `effets.ts` (effets en pool),
-  `animations.ts` et `atlas.ts` (sprites). Rien ne s'alloue dans la boucle chaude.
+  `animations.ts` et `atlas.ts` (sprites). Rien ne s'alloue dans la boucle chaude. **Nouveautés du jalon 2** :
+  ce qui dure se lit dans l'état (les zones du Voile de Nuit couvrent par `zones.ts` toutes les tuiles que le rayon
+  touche, avec la tuile `effet-voile-nuit-tuile` ; les pièges armés ; les tours dont `boostPas` > 0 portent
+  `effet-ingeniosite` ; la rage d'un héros blessé), les tourelles construites sont suivies comme des tours (`Suivi.structures` :
+  apparition à la création, destruction par l'événement `structure_fin`), et les événements lancent les effets
+  ponctuels (déclenchement d'un piège, exécution, soin, esquive, tir d'un héros à distance ou d'une tourelle, objets
+  de `effetObjet`, assassin qui sort de l'ombre). L'assassin du Sanctuaire (non ciblable) est dessiné translucide.
 - **Interface** (`src/ui/`) : `interaction.ts` (machine à états pure : menu d'un socle, héros, sort,
   ralliement ; renvoie l'action à envoyer ou la raison d'un refus), `menu-cercle.ts` (éléments du menu
   d'après `validerAction`), `gestes.ts` (toucher, glisser, pincer), `clavier.ts` (touches), `hud.ts`,
-  `ecrans.ts` (accueil, pause, fin, « Tourne ton téléphone », avis discret), `refus.ts` (raison de refus vers texte).
+  `ecrans.ts` (accueil, pause, fin avec son butin, « Tourne ton téléphone », avis discret), `refus.ts` (raison de refus
+  vers texte). **Raccourcis clavier** : `1`–`5` tours, `Q` `W` sorts du dieu, `A` `Z` `R` les trois objets emportés
+  (choix sans conflit avec `Q` `W` `E` `F` `P` ni `Espace`), `E` héros, `F` vitesse, `P` pause, `Échap` annule.
+  Un objet s'utilise en deux gestes comme un sort : toucher l'objet (ou sa touche), puis la carte ; une fois utilisé il
+  est grisé (`Interaction.basculerObjet`, mode `objet`). Le menu en cercle d'une tour spécialisée montre ses deux
+  compétences (rang `n/3` en pastille, prix de `coutCompetence`, grisé d'après `validerAction`, achat par
+  `ameliorerCompetence`) avant « Vendre » et « Ralliement » ; la tour divine y prend le sprite du dieu de la partie.
+- **Écrans de méta-progression** (depuis la carte du monde) : `fiche-choix.ts` (dans la fiche d'un niveau : le dieu en
+  trois symboles, le héros parmi ses trois — disciples pas recrutés grisés avec cadenas et prix —, trois emplacements
+  d'objets pris dans le stock ; chaque geste passe par `Session.choisirHeros` et `equiperObjets`, le dernier choix est
+  mémorisé), `ecran-heros.ts` (par dieu ses trois héros, niveau et barre d'expérience, quatre compétences avec rangs,
+  ultime verrouillée avant le niveau 6, placer un point, reprendre les points, recruter un disciple après
+  confirmation), `boutique.ts` (onglet Arbre : 6 branches de 5 rangs, coût en étoiles, tout reprendre après
+  confirmation ; onglet Objets : prix en arêtes, stock sur 10), `ecran-meta.ts` (ossature commune : barre du titre, monnaies,
+  message de refus, focus gardé au redessin). `meta-vues.ts` (lectures pures de la sauvegarde pour ces écrans),
+  `lancement.ts` (`configDuChoix` : la `ConfigPartie` d'après la sauvegarde via `configDepuisSauvegarde` et `DEFS_META`,
+  `configDeRelance` pour « Rejouer »), `raisons-meta.ts` (texte de chaque raison de refus d'une transaction ou d'un
+  lancement ; un type `Record` oblige à les traduire toutes). La barre de la carte montre arêtes, braises et étoiles à
+  dépenser. Un achat réussi (disciple, rang de l'arbre, objet) joue `jouerInterface('achat')`, un refus `'refus'`.
 - **Point d'entrée d'un niveau** : `lancerNiveau(niveauCampagne, config, surFin, options)`. `surFin` reçoit
   une fois le `ResultatPartie` (statut, étoiles, vies, pas, journal) ; `options.surQuitter` ajoute le bouton
   « Quitter » des écrans de pause et de fin ; `options.surDemarrage` donne la `PartieEnCours` (utile aux outils
   de mesure). `options.surVague` reçoit l'état juste après le lancement de chaque vague (sauvegarde de la
   partie en cours) ; `options.reprise` relance une partie depuis un état désérialisé (elle démarre en pause,
   « Rejouer » repart d'une partie neuve) ; `options.vitesse` donne la vitesse du réglage par défaut ;
-  `options.surContinuer` remplace « Quitter » par « Continuer » après une victoire.
+  `options.surContinuer` remplace « Quitter » par « Continuer » après une victoire. `surFin` peut rendre une promesse
+  du butin (`RetourFin` : le `BilanPartie` de `Session.enregistrerFin`, ou la raison du refus des gains) que l'écran de
+  fin affiche (arêtes, braises, expérience du héros, niveau gagné, objets consommés). `options.surQuitter(abandon)`
+  reçoit, quand la partie n'était pas finie, son résultat comme une **défaite** (objets utilisés consommés, moitié de
+  l'expérience, rien de plus) que `main.ts` enregistre ; null si la partie était déjà finie. `options.nouvelleConfig`
+  donne la config de « Rejouer » : même dieu, héros et objets (ceux que la partie a consommés ne sont plus emportés),
+  niveau et compétences du héros d'aujourd'hui.
 - **Carte du monde** (`src/ui/carte-monde.ts`, `src/render/carte-monde.ts`) : le fond de 512 × 288 est peint une
   fois avec `construireSol` et `peindreSol` (le tracé de `TRACE_REGION1`, seulement jusqu'au dernier niveau
   débloqué), le décor de `carte-monde-decor.ts`, un voile sombre et le pointillé de la suite du chemin. Les
@@ -50,15 +105,17 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
   image, avec la `Camera` de la partie (zoom entier : 2 pixels CSS par pixel du fond au départ, pincer ou
   molette pour tout voir). Ce que la carte montre (nœuds visibles, étoiles, tronçons, voisin d'une flèche,
   nœud touché) est calculé par des fonctions pures (`carte-monde-logique.ts`) d'après la sauvegarde. La fiche
-  d'un niveau (nom, ambiance, étoiles par difficulté, difficulté, dieu, Lancer) est en DOM. La sauvegarde est
-  lue à l'ouverture de l'écran : pour la voir changer (victoire, import), on rouvre la carte.
-- **Options** (`src/ui/options.ts`) : volumes (rangés dans les réglages, pas encore de son), vitesse par défaut,
+  d'un niveau (nom, ambiance, étoiles par difficulté, difficulté, choix du dieu, du héros et des objets, Lancer)
+  est en DOM, en deux colonnes en paysage. La sauvegarde est lue à l'ouverture de l'écran : pour la voir changer
+  (victoire, achat, import), on rouvre la carte (les écrans des héros et de la boutique la ferment, puis la rouvrent).
+- **Options** (`src/ui/options.ts`) : volumes du son et de la musique (lus par le moteur de son, voir « Son »), vitesse par défaut,
   export (code à copier) et import (un code refusé affiche sa raison via `import-refus.ts` et n'altère rien ;
   un code valide demande confirmation avant de remplacer la progression et abandonne la partie en cours).
-- **Enchaînement des écrans** (`src/main.ts`) : accueil, carte du monde, partie, options. Il ouvre le stockage et
-  une `Session` (`src/save/session.ts`) qui garde la sauvegarde courante et l'écrit à chaque changement :
-  `terminerPartie` (victoire : meilleur résultat conservé, niveau suivant débloqué ; toujours : partie en cours
-  effacée), `rangerPartie` (début de chaque vague), `effacerPartie` (abandon par « Quitter »),
+- **Enchaînement des écrans** (`src/main.ts`) : accueil, carte du monde, héros, boutique, partie, options. Il ouvre
+  le stockage et une `Session` (`src/save/session.ts`, avec `DEFS_META` de `src/data/heros.ts`) qui garde la
+  sauvegarde courante et l'écrit à chaque changement :
+  `enregistrerFin` (victoire : meilleur résultat conservé, niveau suivant débloqué, arêtes et braises ; toujours :
+  expérience du héros joué, objets utilisés retirés du stock, partie en cours effacée ; rend le bilan), `rangerPartie` (début de chaque vague), `effacerPartie` (abandon par « Quitter »),
   `partieAReprendre` (état relu pour « Reprendre à la vague N »), réglages, export et import. Les raccourcis de
   test « Niveau 10 » et « Niveau de test » de l'accueil n'existent qu'en développement (`import.meta.env.DEV`)
   et ne touchent pas à la sauvegarde.

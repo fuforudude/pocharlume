@@ -2,9 +2,10 @@
 // placement des boutons. Logique pure : le DOM est dans hud.ts. Les actions sont celles du moteur, et c'est
 // `validerAction` qui décide de ce qui est grisé : l'interface ne duplique aucune règle de jeu.
 import type { Action, RaisonRefus } from '../engine';
-import { coutConstruction, validerAction, valeurRevente } from '../engine';
+import { coutCompetence, coutConstruction, validerAction, valeurRevente } from '../engine';
 import type { EtatPartie, FamilleTour, Tour } from '../engine/etat';
 import { defNiveau, prix } from '../engine/tours';
+import { RANG_MAX_COMPETENCE } from '../data/meta';
 import { iconeFamille, spriteTour } from '../render/habillage';
 import { t, tCle } from '../i18n';
 
@@ -21,6 +22,8 @@ export interface ElementMenu {
   readonly prix: number | null;
   /** Arêtes rendues (vendre), sinon null. */
   readonly gain: number | null;
+  /** Rang atteint d'une compétence de spécialisation (« 1/3 »), sinon null. */
+  readonly rang: string | null;
   /** Pourquoi l'action est refusée en ce moment ; null si elle est permise. Un élément refusé est grisé. */
   readonly refus: RaisonRefus | null;
 }
@@ -39,10 +42,11 @@ export function elementsSocleVide(etat: EtatPartie, socle: number): ElementMenu[
     return {
       id: `construire:${famille}`,
       action,
-      icone: iconeFamille(famille),
+      icone: iconeFamille(famille, etat.config.dieu),
       libelle: t('menu.construire', { nom: def ? tCle(def.nom) : nomFamille(famille) }),
       prix: coutConstruction(etat, famille) ?? null,
       gain: null,
+      rang: null,
       refus: validerAction(etat, action),
     };
   });
@@ -69,6 +73,7 @@ export function elementsTour(etat: EtatPartie, socle: number): ElementMenu[] {
         libelle: `${t('menu.ameliorer')} : ${t('menu.niveau', { n: tour.niveau + 1 })}`,
         prix: def ? prix(etat, famille, def) : null,
         gain: null,
+        rang: null,
         refus: validerAction(etat, action),
       });
     } else if (tour.niveau === 3) {
@@ -82,9 +87,27 @@ export function elementsTour(etat: EtatPartie, socle: number): ElementMenu[] {
           libelle: def ? tCle(def.nom) : t('menu.specialisation'),
           prix: def ? prix(etat, famille, def) : null,
           gain: null,
+          rang: null,
           refus: validerAction(etat, action),
         });
       }
+    } else {
+      // Tour spécialisée : ses deux compétences, achetées avec des arêtes (le moteur dit le prix et ce qui est permis).
+      tour.stats.competences.forEach((competence, i) => {
+        const action: Action = { type: 'ameliorerCompetence', socle, competence: competence.id };
+        const rang = tour.rangs[i] ?? 0;
+        const nom = tCle(competence.nom);
+        elements.push({
+          id: `competence:${competence.id}`,
+          action,
+          icone: 'icone-competence',
+          libelle: rang >= RANG_MAX_COMPETENCE ? t('menu.competence_max', { nom }) : t('menu.competence', { nom, n: rang, m: RANG_MAX_COMPETENCE }),
+          prix: coutCompetence(etat, socle, competence.id) ?? null,
+          gain: null,
+          rang: t('menu.competence_rang', { n: rang, m: RANG_MAX_COMPETENCE }),
+          refus: validerAction(etat, action),
+        });
+      });
     }
   }
   const vente: Action = { type: 'vendre', socle };
@@ -95,10 +118,11 @@ export function elementsTour(etat: EtatPartie, socle: number): ElementMenu[] {
     libelle: t('menu.vendre'),
     prix: null,
     gain: valeurRevente(etat, socle),
+    rang: null,
     refus: validerAction(etat, vente),
   });
   if (tour.stats.soldats) {
-    elements.push({ id: 'ralliement', action: null, icone: 'icone-ralliement', libelle: t('menu.ralliement'), prix: null, gain: null, refus: null });
+    elements.push({ id: 'ralliement', action: null, icone: 'icone-ralliement', libelle: t('menu.ralliement'), prix: null, gain: null, rang: null, refus: null });
   }
   return elements;
 }
