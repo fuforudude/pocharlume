@@ -18,7 +18,11 @@ export const GRAINES_SANS_DEFENSE: readonly number[] = [101, 102, 103];
 export const DIFFICULTES_EVALUEES = ['chaton', 'matou', 'vieux_sage'] as const;
 export type DifficulteEvaluee = (typeof DIFFICULTES_EVALUEES)[number];
 
+/** Les dieux évalués, chacun avec son avatar, sans amélioration ni objet. */
+export const DIEUX_EVALUES = ['plume', 'charlie', 'pollen'] as const;
+
 export interface Evaluation {
+  readonly dieu: string;
   readonly niveau: number;
   readonly difficulte: string;
   readonly bot: IdBot;
@@ -30,12 +34,14 @@ export interface Evaluation {
 export interface OptionsCampagne {
   readonly niveaux: readonly NiveauCampagne[];
   readonly difficultes?: readonly string[];
+  /** Dieux évalués (tous par défaut), chacun joué avec son avatar. */
+  readonly dieux?: readonly string[];
   /** Graines des parties des bots naïf et soigneux. */
   readonly graines?: readonly number[];
   readonly grainesEntrainement?: readonly number[];
   readonly grainesSansDefense?: readonly number[];
   /** Rappel après chaque niveau et difficulté, pour afficher l'avancement. */
-  readonly progression?: (niveau: number, difficulte: string) => void;
+  readonly progression?: (niveau: number, difficulte: string, dieu: string) => void;
 }
 
 /** Évalue les trois bots sur chaque niveau et chaque difficulté demandés. */
@@ -46,26 +52,28 @@ export function evaluerCampagne(o: OptionsCampagne): Evaluation[] {
   const evaluations: Evaluation[] = [];
   for (const campagne of o.niveaux) {
     for (const difficulte of o.difficultes ?? DIFFICULTES_EVALUEES) {
-      const { niveau } = campagne;
-      const base = { niveau: campagne.numero, difficulte };
-      evaluations.push({
-        ...base,
-        bot: 'naif',
-        parties: graines.map((graine) => jouerPartie(niveau, creerBotNaif({ graine: graine * 31 + 7 }), { graine, difficulte })),
-      });
-      const { variante } = optimiserBot(niveau, difficulte, entrainement);
-      evaluations.push({
-        ...base,
-        bot: 'soigneux',
-        variante,
-        parties: graines.map((graine) => jouerPartie(niveau, creerBotSoigneux({ variante }), { graine, difficulte })),
-      });
-      evaluations.push({
-        ...base,
-        bot: 'inactif',
-        parties: sansDefense.map((graine) => jouerPartie(niveau, BOT_INACTIF, { graine, difficulte })),
-      });
-      o.progression?.(campagne.numero, difficulte);
+      for (const dieu of o.dieux ?? DIEUX_EVALUES) {
+        const { niveau } = campagne;
+        const base = { dieu, niveau: campagne.numero, difficulte };
+        evaluations.push({
+          ...base,
+          bot: 'naif',
+          parties: graines.map((graine) => jouerPartie(niveau, creerBotNaif({ graine: graine * 31 + 7 }), { graine, difficulte, dieu })),
+        });
+        const { variante } = optimiserBot(niveau, difficulte, entrainement, dieu);
+        evaluations.push({
+          ...base,
+          bot: 'soigneux',
+          variante,
+          parties: graines.map((graine) => jouerPartie(niveau, creerBotSoigneux({ variante }), { graine, difficulte, dieu })),
+        });
+        evaluations.push({
+          ...base,
+          bot: 'inactif',
+          parties: sansDefense.map((graine) => jouerPartie(niveau, BOT_INACTIF, { graine, difficulte, dieu })),
+        });
+        o.progression?.(campagne.numero, difficulte, dieu);
+      }
     }
   }
   return evaluations;
@@ -113,11 +121,23 @@ export function synthetiser(parties: readonly ResultatPartie[]): Synthese {
   };
 }
 
-export function trouver(evaluations: readonly Evaluation[], niveau: number, difficulte: string, bot: IdBot): Evaluation | undefined {
-  return evaluations.find((e) => e.niveau === niveau && e.difficulte === difficulte && e.bot === bot);
+export function trouver(evaluations: readonly Evaluation[], niveau: number, difficulte: string, bot: IdBot, dieu?: string): Evaluation | undefined {
+  return evaluations.find((e) => e.niveau === niveau && e.difficulte === difficulte && e.bot === bot && (dieu === undefined || e.dieu === dieu));
 }
 
-/** Toutes les parties d'un bot dans une difficulté, tous niveaux confondus. */
-export function partiesDe(evaluations: readonly Evaluation[], difficulte: string, bot: IdBot): ResultatPartie[] {
-  return evaluations.filter((e) => e.difficulte === difficulte && e.bot === bot).flatMap((e) => [...e.parties]);
+/** Les dieux présents dans les évaluations, dans l'ordre où ils apparaissent. */
+export function dieuxDe(evaluations: readonly Evaluation[]): string[] {
+  return [...new Set(evaluations.map((e) => e.dieu))];
+}
+
+/** Les évaluations d'un seul dieu. */
+export function duDieu(evaluations: readonly Evaluation[], dieu: string): Evaluation[] {
+  return evaluations.filter((e) => e.dieu === dieu);
+}
+
+/** Toutes les parties d'un bot dans une difficulté, tous niveaux confondus (d'un seul dieu si `dieu` est donné). */
+export function partiesDe(evaluations: readonly Evaluation[], difficulte: string, bot: IdBot, dieu?: string): ResultatPartie[] {
+  return evaluations
+    .filter((e) => e.difficulte === difficulte && e.bot === bot && (dieu === undefined || e.dieu === dieu))
+    .flatMap((e) => [...e.parties]);
 }

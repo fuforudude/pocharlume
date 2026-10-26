@@ -33,6 +33,10 @@ export interface ResultatPartie {
   readonly choix: readonly ChoixTour[];
   /** Nombre d'actions acceptées par le moteur. */
   readonly actions: number;
+  /** Lancers de chaque sort du dieu acceptés par le moteur (indice = emplacement). */
+  readonly sorts: readonly number[];
+  /** La tour divine du dieu a été construite au moins une fois. */
+  readonly tourDivine: boolean;
 }
 
 export interface OptionsPartie {
@@ -81,6 +85,8 @@ export function jouerPartie(niveau: Niveau, bot: Bot, options: OptionsPartie): R
   const vagueDe = new Map<number, number>();
   const choix: ChoixTour[] = [];
   const familleDuSocle = new Map<number, IdFamille>();
+  const sorts: number[] = [0, 0];
+  let tourDivine = false;
   let actions = 0;
 
   while (etat.statut === 'en_cours' && etat.pas < limite) {
@@ -89,6 +95,8 @@ export function jouerPartie(niveau: Niveau, bot: Bot, options: OptionsPartie): R
     aJouer.forEach((a, i) => {
       if (resultats[i]?.ok !== true) return;
       actions++;
+      if (a.type === 'lancerSort') sorts[a.emplacement] = (sorts[a.emplacement] ?? 0) + 1;
+      else if (a.type === 'construire' && a.tour === 'divine') tourDivine = true;
       if (a.type === 'construire' && a.tour !== 'divine') {
         familleDuSocle.set(a.socle, a.tour);
         choix.push({ famille: a.tour });
@@ -117,5 +125,7 @@ export function jouerPartie(niveau: Niveau, bot: Bot, options: OptionsPartie): R
     viesPerduesParVague,
     choix,
     actions,
+    sorts,
+    tourDivine,
   };
 }

@@ -1,14 +1,17 @@
 // Bot « soigneux » : un bon joueur. Il connaît la carte (longueur de chemin que chaque socle couvre, poids de
 // chaque chemin dans les vagues) et achète toujours ce qui rapporte le plus de puissance par arête dépensée
-// (recherche gloutonne sur le choix du socle, de la famille, du niveau et de la spécialisation). Il place son
-// héros là où ses tours concentrent leur feu, lance la Chute du Colosse sur les grappes d'ennemis et les
-// Renforts devant ses tours, et appelle la vague suivante dès que le terrain est vide et qu'il n'a plus rien à
-// acheter. Une petite recherche en amont (`optimiserBot`) choisit parmi quelques variantes de préférence de
-// famille celle qui joue le mieux le niveau, en simulant des parties d'entraînement.
-import { validerAction } from '../engine';
-import type { Action, DefDieu, DefNiveauTour, DefSort, EtatPartie, IdFamille, Niveau, Point, Tour, Voie } from '../engine';
+// (recherche gloutonne sur le choix du socle, de la famille, du niveau et de la spécialisation), bonus et remise
+// de famille de son dieu compris. Il place son héros là où ses tours concentrent leur feu, joue les sorts de
+// chaque dieu selon leur effet (zones de dégâts sur les grappes, Renforts et Voile de Nuit devant la zone de feu,
+// Pièges à Ressort un peu avant, Griffes d'Ombre sur la plus grosse grappe, Ingéniosité au cœur des tours),
+// construit la tour divine de son dieu, et appelle la vague suivante dès que le terrain est vide et qu'il n'a
+// plus rien à acheter. Une petite recherche en amont (`optimiserBot`) choisit parmi quelques variantes de
+// préférence de famille celle qui joue le mieux le niveau, en simulant des parties d'entraînement.
+import { ajusterMontant, validerAction } from '../engine';
+import type { Action, BonusFamille, DefDieu, DefNiveauTour, DefSort, Ennemi, EtatPartie, IdFamille, Niveau, Point, Tour, Voie } from '../engine';
 import { DIEUX } from '../data/dieux';
 import { dpsEfficace } from '../data/equilibrage';
+import { REGLES } from '../data/regles';
 import { FAMILLES, TOURS } from '../data/tours';
 import { distance, echantillonner, longueurVue, poidsDesChemins, type Echantillon } from './geometrie';
 import { jouerPartie, type Bot, type ResultatPartie } from './simulation';
@@ -49,10 +52,7 @@ export interface OptionsSoigneux {
   readonly appelerEnAvance?: boolean;
   /** Utilise le héros et les sorts. */
   readonly sorts?: boolean;
-  /**
-   * Construit la tour divine du dieu. Par défaut oui pour Plume et Pollen, non pour Charlie : le Totem n'a jamais
-   * fait partie du jeu du bot, et les bandes de la région 1 ont été réglées sans lui.
-   */
+  /** Construit la tour divine du dieu (oui par défaut, pour les trois dieux). */
   readonly tourDivine?: boolean;
 }
 
@@ -66,6 +66,26 @@ const dieux: Readonly<Record<string, DefDieu>> = DIEUX;
 function dpsMoyen(def: DefNiveauTour): number {
   const dps = dpsEfficace(def);
   return dps.reduce((a, b) => a + b, 0) / dps.length;
+}
+
+/** Le niveau de tour tel que le bonus de famille du dieu le rend (cadence, critique, PV des soldats) : ce que le joueur voit. */
+function avecBonus(def: DefNiveauTour, famille: IdFamille, bonus: BonusFamille): DefNiveauTour {
+  if (bonus.famille !== famille) return def;
+  const critique =
+    bonus.chanceCritique > 0
+      ? { chance: (def.critique?.chance ?? 0) + bonus.chanceCritique, multiplicateur: def.critique?.multiplicateur ?? REGLES.multiplicateurCritique }
+      : def.critique;
+  return {
+    ...def,
+    cadence: def.cadence > 0 ? def.cadence / (1 + bonus.cadence) : def.cadence,
+    critique,
+    soldats: def.soldats ? { ...def.soldats, pv: def.soldats.pv * (1 + bonus.pvSoldats) } : null,
+  };
+}
+
+/** Prix d'un niveau de tour pour ce dieu : remise (ou majoration) de famille comprise. */
+function prixDe(def: DefNiveauTour, famille: IdFamille, bonus: BonusFamille): number {
+  return bonus.famille === famille ? ajusterMontant(def.cout, 1 + bonus.prix) : def.cout;
 }
 
 function defCourante(tour: Tour): DefNiveauTour | undefined {
@@ -84,6 +104,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
   let poids: number[] = [];
   const vues = new Map<string, number>();
   const dpsParDef = new Map<DefNiveauTour, number>();
+  const dpsAvecBonusParDef = new Map<DefNiveauTour, number>();
   let zones: (Echantillon | undefined)[] = [];
   let clefZones = -1;
   let dernierOrdreHeros: Point | null = null;
@@ -108,9 +129,30 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     return v;
   }
 
+  function bonusDuDieu(etat: EtatPartie): BonusFamille | undefined {
+    return dieux[etat.config.dieu]?.bonus;
+  }
+
+  /** DPS d'un niveau de tour d'une famille, bonus de famille du dieu compris (les tours posées le portent déjà dans leurs stats). */
+  function dpsFamille(etat: EtatPartie, def: DefNiveauTour, famille: IdFamille): number {
+    const bonus = bonusDuDieu(etat);
+    if (!bonus || bonus.famille !== famille) return dps(def);
+    let v = dpsAvecBonusParDef.get(def);
+    if (v === undefined) {
+      v = dpsMoyen(avecBonus(def, famille, bonus));
+      dpsAvecBonusParDef.set(def, v);
+    }
+    return v;
+  }
+
+  function cout(etat: EtatPartie, def: DefNiveauTour, famille: IdFamille): number {
+    const bonus = bonusDuDieu(etat);
+    return bonus ? prixDe(def, famille, bonus) : def.cout;
+  }
+
   function valeur(etat: EtatPartie, socle: number, def: DefNiveauTour, famille: IdFamille): number {
     const memeFamille = etat.tours.filter((t) => t.famille === famille && t.socle !== socle).length;
-    return (dps(def) * vue(etat, socle, def.portee) * variante.poids[famille]) / (1 + (variante.diversite ?? 0) * memeFamille);
+    return (dpsFamille(etat, def, famille) * vue(etat, socle, def.portee) * variante.poids[famille]) / (1 + (variante.diversite ?? 0) * memeFamille);
   }
 
   /** Tous les achats possibles (construction, amélioration, spécialisation), classés par valeur gagnée par arête. */
@@ -121,7 +163,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
       if (!tour) {
         for (const famille of FAMILLES) {
           const def = TOURS[famille].niveaux[0];
-          liste.push({ action: { type: 'construire', socle, tour: famille }, ratio: valeur(etat, socle, def, famille) / def.cout });
+          liste.push({ action: { type: 'construire', socle, tour: famille }, ratio: valeur(etat, socle, def, famille) / cout(etat, def, famille) });
         }
         return;
       }
@@ -131,12 +173,12 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
       const avant = valeur(etat, socle, actuelle, tour.famille);
       if (tour.niveau < 3) {
         const suivante = famille.niveaux[tour.niveau];
-        if (suivante) liste.push({ action: { type: 'ameliorer', socle }, ratio: (valeur(etat, socle, suivante, tour.famille) - avant) / suivante.cout });
+        if (suivante) liste.push({ action: { type: 'ameliorer', socle }, ratio: (valeur(etat, socle, suivante, tour.famille) - avant) / cout(etat, suivante, tour.famille) });
         return;
       }
       for (const voie of ['A', 'B'] as const satisfies readonly Voie[]) {
         const spe = famille.specialisations[voie];
-        liste.push({ action: { type: 'specialiser', socle, voie }, ratio: (valeur(etat, socle, spe, tour.famille) - avant) / spe.cout });
+        liste.push({ action: { type: 'specialiser', socle, voie }, ratio: (valeur(etat, socle, spe, tour.famille) - avant) / cout(etat, spe, tour.famille) });
       }
     });
     liste.sort((a, b) => b.ratio - a.ratio);
@@ -150,7 +192,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
    * valeur juste au-dessus du meilleur autre achat (le bot ne sait pas la chiffrer comme une tour ordinaire).
    */
   function candidatDivine(etat: EtatPartie, meilleurRatio: number): Candidat | null {
-    if (!(options.tourDivine ?? etat.config.dieu !== 'charlie')) return null;
+    if (!(options.tourDivine ?? true)) return null;
     const dieu = dieux[etat.config.dieu];
     if (!dieu || etat.tours.length < 3 || etat.tours.some((t) => t.famille === 'divine')) return null;
     let socle = -1;
@@ -252,29 +294,56 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     return pressant ? { type: 'lancerSort', emplacement, x: c.x, y: c.y } : null;
   }
 
+  /** Compte les ennemis (hors boss, et le boss à part) dans le rayon du sort autour de chacun d'eux, et garde la plus grosse grappe. */
+  function plusGrosseGrappe(ennemis: readonly Ennemi[], rayon: number): { x: number; y: number; nombre: number; boss: boolean } | null {
+    let meilleur: { x: number; y: number; nombre: number; boss: boolean } | null = null;
+    const r2 = rayon * rayon;
+    for (const e of ennemis) {
+      let nombre = 0;
+      let boss = false;
+      for (const autre of ennemis) {
+        if ((e.x - autre.x) * (e.x - autre.x) + (e.y - autre.y) * (e.y - autre.y) <= r2) {
+          nombre++;
+          boss ||= autre.boss;
+        }
+      }
+      if (!meilleur || nombre > meilleur.nombre || (nombre === meilleur.nombre && boss && !meilleur.boss)) meilleur = { x: e.x, y: e.y, nombre, boss };
+    }
+    return meilleur;
+  }
+
+  /** Voile de Nuit : sur la zone de feu de chaque chemin, quand une colonne d'ennemis s'y présente. */
+  function viserZoneLente(etat: EtatPartie, emplacement: number, ennemis: readonly Ennemi[]): Action | null {
+    calculerZones(etat);
+    for (let chemin = 0; chemin < zones.length; chemin++) {
+      const zone = zones[chemin];
+      if (!zone) continue;
+      let nombre = 0;
+      for (const e of ennemis) {
+        if (e.chemin === chemin && e.distance >= zone.distance - 3 && e.distance <= zone.distance + 1.5) nombre++;
+      }
+      if (nombre >= 3) return { type: 'lancerSort', emplacement, x: zone.x, y: zone.y };
+    }
+    return null;
+  }
+
   function viserSort(etat: EtatPartie, sort: DefSort, emplacement: number): Action | null {
     if ((etat.sorts[emplacement]?.recharge ?? 1) > 0) return null;
     const ennemis = etat.ennemis.filter((e) => e.vivant);
     if (ennemis.length === 0) return null;
     if (sort.effets.some((e) => e.type === 'pieges')) return viserPieges(etat, emplacement);
     if (sort.effets.some((e) => e.type === 'boost')) return viserBoost(etat, sort, emplacement);
+    if (sort.effets.some((e) => e.type === 'zone')) return viserZoneLente(etat, emplacement, ennemis);
+    if (sort.effets.some((e) => e.type === 'execution')) {
+      // Griffes d'Ombre : tue net tout ce qui n'est pas un boss dans la grappe, donc la plus grosse grappe (ou le boss).
+      const grappe = plusGrosseGrappe(ennemis, sort.rayon);
+      return grappe && (grappe.nombre >= 4 || grappe.boss) ? { type: 'lancerSort', emplacement, x: grappe.x, y: grappe.y } : null;
+    }
     if (!sort.effets.some((e) => e.type === 'invoquer')) {
       // Dégâts de zone : centrer sur l'ennemi qui a le plus de voisins.
-      let meilleur: { x: number; y: number; nombre: number; boss: boolean } | null = null;
-      const r2 = sort.rayon * sort.rayon;
-      for (const e of ennemis) {
-        let nombre = 0;
-        let boss = false;
-        for (const autre of ennemis) {
-          if ((e.x - autre.x) * (e.x - autre.x) + (e.y - autre.y) * (e.y - autre.y) <= r2) {
-            nombre++;
-            boss ||= autre.boss;
-          }
-        }
-        if (!meilleur || nombre > meilleur.nombre) meilleur = { x: e.x, y: e.y, nombre, boss };
-      }
-      if (!meilleur || (meilleur.nombre < 3 && !meilleur.boss)) return null;
-      return { type: 'lancerSort', emplacement, x: meilleur.x, y: meilleur.y };
+      const grappe = plusGrosseGrappe(ennemis, sort.rayon);
+      if (!grappe || (grappe.nombre < 3 && !grappe.boss)) return null;
+      return { type: 'lancerSort', emplacement, x: grappe.x, y: grappe.y };
     }
     // Renforts : devant la zone de feu de chaque chemin, quand des ennemis s'y présentent.
     calculerZones(etat);
@@ -343,10 +412,10 @@ export function noterPartie(r: ResultatPartie): number {
  * Petite recherche : joue le niveau avec chaque variante sur des graines d'entraînement (qui ne servent
  * jamais à l'évaluation) et garde la meilleure. Déterministe.
  */
-export function optimiserBot(niveau: Niveau, difficulte: string, graines: readonly number[], variantes: readonly VarianteSoigneux[] = VARIANTES): ResultatRecherche {
+export function optimiserBot(niveau: Niveau, difficulte: string, graines: readonly number[], dieu = 'charlie', variantes: readonly VarianteSoigneux[] = VARIANTES): ResultatRecherche {
   const notes = variantes.map((variante) => {
     let note = 0;
-    for (const graine of graines) note += noterPartie(jouerPartie(niveau, creerBotSoigneux({ variante }), { graine, difficulte }));
+    for (const graine of graines) note += noterPartie(jouerPartie(niveau, creerBotSoigneux({ variante }), { graine, difficulte, dieu }));
     return { variante, note };
   });
   let meilleur = notes[0];
