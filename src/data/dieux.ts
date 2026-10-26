@@ -19,7 +19,7 @@ const plume: DefDieu = {
     {
       nom: 'sort.voile_de_nuit',
       description: 'sort.voile_de_nuit.desc',
-      recharge: 25,
+      recharge: 30,
       rechargeInitiale: 15,
       rayon: 3,
       surChemin: false,
@@ -126,7 +126,7 @@ const charlie: DefDieu = {
     nom: 'tour.totem_du_colosse',
     cout: 200,
     portee: 2.5,
-    cadence: 8,
+    cadence: 7,
     degats: [20, 30],
     effets: [{ type: 'etourdissement', chance: 1, duree: 1, valeur: 0 }],
     onde: true,
