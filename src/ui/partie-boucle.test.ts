@@ -17,6 +17,16 @@ const rendu = vi.hoisted(() => ({
   definirMarges: vi.fn(),
 }));
 
+const son = vi.hoisted(() => ({
+  jouerEvenements: vi.fn(),
+  jouerInterface: vi.fn(),
+}));
+
+vi.mock('../audio', () => ({
+  audio: { jouerEvenements: son.jouerEvenements },
+  jouerInterface: son.jouerInterface,
+}));
+
 vi.mock('../render/atlas', () => ({
   chargerAtlas: () =>
     Promise.resolve({
@@ -151,7 +161,7 @@ beforeEach(() => {
   parties = [];
   fins = [];
   vagues = [];
-  for (const spy of Object.values(rendu)) spy.mockClear();
+  for (const spy of [...Object.values(rendu), ...Object.values(son)]) spy.mockClear();
   vi.stubGlobal('requestAnimationFrame', (rappel: FrameRequestCallback): number => {
     prochainId++;
     file.set(prochainId, rappel);
@@ -293,6 +303,27 @@ describe('fin de partie', () => {
     // Une partie neuve ne démarre pas en pause.
     images(5);
     expect(neuve?.etat.pas).toBeGreaterThan(0);
+  });
+});
+
+describe('son', () => {
+  it('transmet au son les événements de chaque pas, avec l’état de la partie', async () => {
+    const partie = await demarrer();
+    imagesJusqua(() => partie.etat.vagues.lancees >= 1);
+    expect(son.jouerEvenements).toHaveBeenCalled();
+    expect(son.jouerEvenements.mock.calls.every(([, etat]) => etat === partie.etat)).toBe(true);
+    const types = son.jouerEvenements.mock.calls.flatMap((appel) => (appel[0] as readonly { type: string }[]).map((e) => e.type));
+    expect(types).toContain('vague');
+  });
+
+  it('joue « refus » quand un geste est refusé, et pas quand il passe', async () => {
+    const partie = await demarrer();
+    expect(son.jouerInterface).not.toHaveBeenCalled();
+    const sort = partie.etat.sorts[0];
+    if (!sort) throw new Error('pas de sort');
+    sort.recharge = 100;
+    boutonDe('.bouton.sort').click();
+    expect(son.jouerInterface).toHaveBeenCalledWith('refus');
   });
 });
 
