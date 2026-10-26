@@ -1,7 +1,11 @@
 // Écrans plein cadre en DOM : accueil, pause, fin de partie, « Tourne ton téléphone ».
-import { t } from '../i18n';
+import { HEROS } from '../data/heros';
+import { OBJETS } from '../data/objets';
+import { t, tCle } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
+import type { BilanPartie, RaisonFin } from '../save';
 import { bouton, el, image } from './dom';
+import { texteRefusMeta } from './raisons-meta';
 
 /** Un niveau proposé en plus de « Jouer » (raccourcis de développement seulement). */
 export interface ChoixNiveau {
@@ -111,6 +115,29 @@ export interface ResultatAffiche {
   readonly viesDepart: number;
 }
 
+/** Ce qu'une partie a rapporté, tel que l'écran de fin le reçoit (voir `afficherFin`). */
+export interface ButinFin {
+  readonly bilan: BilanPartie | null;
+  readonly refus: RaisonFin | null;
+}
+
+/** Les lignes du butin : arêtes, braises, expérience, niveau gagné, objets consommés. Vide si la partie n'a rien rapporté. */
+export function lignesBilan(bilan: BilanPartie): string[] {
+  const lignes: string[] = [];
+  if (bilan.aretes > 0) lignes.push(t('fin.bilan_aretes', { n: bilan.aretes }));
+  if (bilan.braises > 0) lignes.push(t('fin.bilan_braises', { n: bilan.braises }));
+  const heros = bilan.heros !== null && Object.hasOwn(HEROS, bilan.heros) ? HEROS[bilan.heros] : null;
+  const nom = heros ? tCle(heros.nom) : '';
+  if (heros && bilan.xp > 0) lignes.push(t('fin.bilan_xp', { n: bilan.xp, nom }));
+  if (heros && bilan.niveauHeros && bilan.niveauHeros.apres > bilan.niveauHeros.avant) {
+    lignes.push(t('fin.bilan_niveau', { nom, n: bilan.niveauHeros.apres }));
+  }
+  if (bilan.objetsConsommes.length > 0) {
+    lignes.push(t('fin.bilan_objets', { noms: bilan.objetsConsommes.map((o) => tCle(OBJETS[o].nom)).join(', ') }));
+  }
+  return lignes;
+}
+
 export interface ActionsFin {
   surRejouer: () => void;
   /** Absent : pas de bouton pour quitter (aucun écran où revenir). */
@@ -119,7 +146,17 @@ export interface ActionsFin {
   surContinuer?: () => void;
 }
 
-export function afficherFin(parent: HTMLElement, atlas: AtlasRendu, resultat: ResultatAffiche, actions: ActionsFin): HTMLElement {
+/**
+ * L'écran de fin. `butin` (facultatif) est la promesse de ce que la partie a rapporté : le bloc « Butin » montre
+ * « Enregistrement… » puis les gains, ou dit que les gains n'ont pas pu être enregistrés.
+ */
+export function afficherFin(
+  parent: HTMLElement,
+  atlas: AtlasRendu,
+  resultat: ResultatAffiche,
+  actions: ActionsFin,
+  butin: Promise<ButinFin | null> | null = null,
+): HTMLElement {
   const victoire = resultat.statut === 'victoire';
   const ecran = el('div', `ecran fin ${victoire ? 'victoire' : 'defaite'}`);
   ecran.setAttribute('role', 'dialog');
@@ -137,6 +174,29 @@ export function afficherFin(parent: HTMLElement, atlas: AtlasRendu, resultat: Re
     carte.append(etoiles);
   }
   carte.append(el('p', 'detail', t('fin.vies', { n: Math.max(0, resultat.vies), m: resultat.viesDepart })));
+  if (butin) {
+    const bloc = el('div', 'bilan');
+    bloc.setAttribute('role', 'status');
+    bloc.append(el('p', 'bilan-attente', t('fin.bilan_attente')));
+    carte.append(bloc);
+    void butin.then((retour) => {
+      bloc.replaceChildren();
+      if (!retour) {
+        bloc.remove();
+        return;
+      }
+      if (retour.refus !== null || !retour.bilan) {
+        bloc.append(el('p', 'bilan-refus', retour.refus !== null ? `${t('fin.bilan_refuse')} ${texteRefusMeta(retour.refus)}` : t('fin.bilan_refuse')));
+        return;
+      }
+      const lignes = lignesBilan(retour.bilan);
+      if (lignes.length === 0) {
+        bloc.remove();
+        return;
+      }
+      for (const ligne of lignes) bloc.append(el('p', 'bilan-ligne', ligne));
+    });
+  }
   const boutons = el('div', 'rangee');
   const continuer = victoire ? actions.surContinuer : undefined;
   const rejouer = bouton(continuer ? 'bouton grand secondaire' : 'bouton grand', t('fin.rejouer'), actions.surRejouer);

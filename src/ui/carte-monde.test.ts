@@ -65,10 +65,12 @@ function monter(supplement: Partial<OptionsCarteMonde> = {}): Montage {
   const surRetour = vi.fn();
   const ecran = afficherCarteMonde(document.body, {
     atlas: ATLAS,
-    sauvegarde: sauvegardeVide(),
+    session: { sauvegarde: sauvegardeVide(), choisirHeros: vi.fn(), equiperObjets: vi.fn() },
     difficulte: 'matou',
     surLancer,
     surOptions: vi.fn(),
+    surHeros: vi.fn(),
+    surBoutique: vi.fn(),
     surRetour,
     ...supplement,
   });

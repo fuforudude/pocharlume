@@ -39,8 +39,31 @@ describe('commandeClavier', () => {
   });
 
   it('ignore les autres touches', () => {
-    expect(touche('a', 'KeyA')).toBeNull();
+    expect(touche('x', 'KeyX')).toBeNull();
+    expect(touche('s', 'KeyS')).toBeNull();
     expect(touche('Enter', 'Enter')).toBeNull();
     expect(touche('Shift', 'ShiftLeft')).toBeNull();
+  });
+});
+
+describe('commandeClavier : objets emportés', () => {
+  it('A, Z et R utilisent les objets des emplacements 1, 2 et 3, majuscule ou non', () => {
+    expect(touche('a', 'KeyQ')).toEqual({ type: 'objet', emplacement: 0 });
+    expect(touche('z', 'KeyW')).toEqual({ type: 'objet', emplacement: 1 });
+    expect(touche('r', 'KeyR')).toEqual({ type: 'objet', emplacement: 2 });
+    expect(touche('A', 'KeyQ')).toEqual({ type: 'objet', emplacement: 0 });
+  });
+
+  it('ne prend rien aux touches des sorts, du héros, de la vague, de la pause et de la vitesse', () => {
+    expect(touche('q', 'KeyA')).toEqual({ type: 'sort', emplacement: 0 });
+    expect(touche('w', 'KeyZ')).toEqual({ type: 'sort', emplacement: 1 });
+    expect(touche('e', 'KeyE')).toEqual({ type: 'heros' });
+    expect(touche('f', 'KeyF')).toEqual({ type: 'vitesse' });
+    expect(touche('p', 'KeyP')).toEqual({ type: 'pause' });
+    expect(touche(' ', 'Space')).toEqual({ type: 'vague' });
+  });
+
+  it('Ctrl+R (recharger la page) reste au navigateur', () => {
+    expect(touche('r', 'KeyR', { ctrlKey: true })).toBeNull();
   });
 });

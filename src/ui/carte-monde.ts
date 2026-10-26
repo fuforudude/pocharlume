@@ -1,11 +1,12 @@
 // Écran de la carte du monde : le fond et les nœuds dans un canvas (render/carte-monde.ts), la barre du haut et
 // la fiche d'un niveau en DOM. Toucher ou Entrée sur un nœud ouvre la fiche (nom, ambiance, meilleures étoiles par
-// difficulté, choix de la difficulté, dieu, « Lancer »). Échap ou Retour arrière ferme la fiche, puis quitte la carte.
+// difficulté, choix de la difficulté, du dieu, du héros et des objets emportés, « Lancer »). Échap ou Retour arrière
+// ferme la fiche, puis quitte la carte. La barre du haut montre les monnaies (arêtes, braises, étoiles à dépenser) et
+// mène aux écrans des héros et de la boutique.
 //
 // Cet écran ne lance rien lui-même : il s'arrête puis appelle `surLancer` ou `surRetour`, et c'est l'appelant
 // (main.ts) qui enchaîne sur la partie ou l'accueil. La sauvegarde est lue une fois à l'ouverture : pour la voir
 // changer (victoire, import), on rouvre la carte.
-import { DIEUX } from '../data/dieux';
 import { NOEUDS_REGION1, TRACE_REGION1 } from '../data/niveaux/carte-du-monde';
 import { REGION1, TEXTES_REGION1 } from '../data/niveaux/region1';
 import type { NiveauCampagne } from '../data/visuel';
@@ -13,7 +14,7 @@ import { t, tCle } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
 import { RenduCarteMonde } from '../render/carte-monde';
 import { DECOR_MONDE_REGION1 } from '../render/carte-monde-decor';
-import { DIFFICULTES_SAUVEGARDE, NOMBRE_NIVEAUX, totalEtoiles, type DifficulteSauvegarde, type Sauvegarde } from '../save';
+import { DIFFICULTES_SAUVEGARDE, etoilesDisponibles, NOMBRE_NIVEAUX, totalEtoiles, type ChoixPartie, type DifficulteSauvegarde, type Sauvegarde } from '../save';
 import {
   directionDeTouche,
   etoilesParDifficulte,
@@ -26,17 +27,26 @@ import {
 } from './carte-monde-logique';
 import { bouton, el, image } from './dom';
 import { afficherConfirmation } from './ecrans';
+import { creerChoixFiche, type SessionChoix } from './fiche-choix';
 import { Gestes } from './gestes';
+import { configDuChoix } from './lancement';
+import { choixJouable } from './meta-vues';
+import { texteRefusMeta } from './raisons-meta';
 
 export interface OptionsCarteMonde {
   readonly atlas: AtlasRendu;
-  readonly sauvegarde: Sauvegarde;
+  /** La session : la sauvegarde courante est lue à l'ouverture, les choix de la fiche (héros, objets) y sont mémorisés. */
+  readonly session: SessionChoix;
   /** Difficulté cochée à l'ouverture d'une fiche. */
   readonly difficulte: DifficulteSauvegarde;
   /** « Lancer » dans la fiche : l'écran est déjà arrêté. */
-  surLancer: (niveau: NiveauCampagne, difficulte: DifficulteSauvegarde) => void;
+  surLancer: (niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, choix: ChoixPartie) => void;
   /** « Options » : l'écran reste ouvert, l'appelant affiche les options par-dessus. */
   surOptions: () => void;
+  /** « Héros » : l'écran reste ouvert, l'appelant affiche l'écran des héros par-dessus. */
+  surHeros: () => void;
+  /** « Boutique » : idem pour la boutique (arbre et objets). */
+  surBoutique: () => void;
   /** « Retour » ou Échap sans fiche ouverte : l'écran est déjà arrêté. */
   surRetour: () => void;
   /**
@@ -64,7 +74,8 @@ function nomDeDifficulte(d: DifficulteSauvegarde): string {
 }
 
 export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMonde): EcranCarteMonde {
-  const { atlas, sauvegarde } = options;
+  const { atlas, session } = options;
+  const sauvegarde: Sauvegarde = session.sauvegarde;
   const vues: readonly VueNoeud[] = vueNoeuds(sauvegarde, NOEUDS_REGION1);
   const controleur = new AbortController();
   const { signal } = controleur;
@@ -76,6 +87,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   let difficulte = options.difficulte;
   let fiche: HTMLElement | null = null;
   let boutonsDifficulte: readonly HTMLButtonElement[] = [];
+  let controleurFiche: AbortController | null = null;
 
   const racine = el('div', 'carte-monde');
   const canvas = el('canvas', 'jeu');
@@ -96,17 +108,29 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   }, signal);
   retour.textContent = t('carte.retour');
   const titre = el('div', 'carte-titre');
-  const total = el('div', 'puce total');
+  const monnaies = el('div', 'carte-monnaies');
+  const puceMonnaie = (sprite: string, libelle: string, valeur: number): HTMLElement => {
+    const puce = el('div', 'puce monnaie');
+    puce.title = libelle;
+    puce.setAttribute('aria-label', libelle);
+    puce.append(image(atlas.iconeUrl(sprite, 2), 'icone'), el('span', '', String(valeur)));
+    return puce;
+  };
   const libelleTotal = t('carte.total_etoiles_libelle', { n: totalEtoiles(sauvegarde), m: NOMBRE_NIVEAUX * 3 });
-  total.title = libelleTotal;
-  total.setAttribute('aria-label', libelleTotal);
-  total.append(
-    image(atlas.iconeUrl('icone-etoile', 2), 'icone'),
-    el('span', '', t('carte.total_etoiles', { n: totalEtoiles(sauvegarde), m: NOMBRE_NIVEAUX * 3 })),
+  const disponibles = etoilesDisponibles(sauvegarde);
+  const puceEtoiles = puceMonnaie('icone-etoile', `${t('monnaie.etoiles', { n: disponibles })} (${libelleTotal})`, disponibles);
+  monnaies.append(
+    puceMonnaie('icone-arete', t('monnaie.aretes', { n: sauvegarde.meta.monnaies.aretes }), sauvegarde.meta.monnaies.aretes),
+    puceMonnaie('icone-braise', t('monnaie.braises', { n: sauvegarde.meta.monnaies.braises }), sauvegarde.meta.monnaies.braises),
+    puceEtoiles,
   );
+  const heros = bouton('bouton', t('carte.heros'), options.surHeros, signal);
+  heros.textContent = t('carte.heros');
+  const boutique = bouton('bouton', t('carte.boutique'), options.surBoutique, signal);
+  boutique.textContent = t('carte.boutique');
   const reglages = bouton('bouton', t('carte.options'), options.surOptions, signal);
   reglages.textContent = t('carte.options');
-  barre.append(retour, titre, total, reglages);
+  barre.append(retour, titre, monnaies, heros, boutique, reglages);
   racine.append(barre);
 
   const textesDe = (numero: number): { nom: string; ambiance: string } | null => {
@@ -137,6 +161,8 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   // --- Fiche d'un niveau ---
 
   const fermerFiche = (): void => {
+    controleurFiche?.abort();
+    controleurFiche = null;
     fiche?.remove();
     fiche = null;
     boutonsDifficulte = [];
@@ -169,11 +195,18 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     }, { signal });
 
     const carte = el('div', 'carte');
+    // Deux colonnes en paysage : le niveau et sa difficulté à gauche, le dieu, le héros et les objets à droite.
+    const colonnes = el('div', 'fiche-colonnes');
+    const gauche = el('div', 'fiche-colonne');
+    const droite = el('div', 'fiche-colonne');
     const entete = el('div', 'fiche-entete');
     entete.append(el('span', 'fiche-numero', t('accueil.niveau', { n: vue.numero })));
     if (vue.boss) entete.append(el('span', 'etiquette-boss', t('fiche.boss')));
-    carte.append(entete, el('h2', 'titre', textes.nom), el('p', 'ambiance', textes.ambiance));
-    carte.append(el('p', 'detail', t('fiche.dieu', { nom: tCle(DIEUX.charlie.nom) })));
+    gauche.append(entete, el('h2', 'titre', textes.nom), el('p', 'ambiance', textes.ambiance));
+    controleurFiche = new AbortController();
+    const signalFiche = AbortSignal.any([signal, controleurFiche.signal]);
+    const choisir = creerChoixFiche(atlas, session, signalFiche);
+    droite.append(choisir.racine);
 
     const groupe = el('div', 'difficultes');
     groupe.setAttribute('role', 'radiogroup');
@@ -189,14 +222,21 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
       groupe.append(b);
     }
     boutonsDifficulte = boutons;
-    carte.append(groupe);
+    gauche.append(groupe);
 
     const actions = el('div', 'rangee');
     const lancer = bouton('bouton grand', t('fiche.lancer'), () => {
       const choisie = difficulte;
+      // Un choix qui ne tient plus (objet épuisé dans un autre onglet…) est refusé ici, avant de quitter la carte.
+      const choix = choixJouable(session.sauvegarde, choisir.choix());
+      const compose = configDuChoix(session.sauvegarde, choix, choisie, 0);
+      if (!compose.ok) {
+        message.textContent = t('fiche.lancement_refuse', { raison: texteRefusMeta(compose.raison) });
+        return;
+      }
       const lancerVraiment = (): void => {
         arreter();
-        options.surLancer(niveau, choisie);
+        options.surLancer(niveau, choisie, choix);
       };
       const enCours = options.partieEnCours;
       if (!enCours) {
@@ -223,7 +263,11 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     const fermer = bouton('bouton grand secondaire', t('fiche.fermer'), fermerFiche, signal);
     fermer.textContent = t('fiche.fermer');
     actions.append(lancer, fermer);
-    carte.append(actions);
+    const message = el('p', 'fiche-message');
+    message.setAttribute('role', 'status');
+    gauche.append(actions, message);
+    colonnes.append(gauche, droite);
+    carte.append(colonnes);
     ecran.append(carte);
     racine.append(ecran);
     fiche = ecran;

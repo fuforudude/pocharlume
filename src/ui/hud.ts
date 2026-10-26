@@ -5,6 +5,8 @@
 // d'écran), texte net à toute taille, aucune mise en page à recalculer à la main. Le coût reste faible : le
 // DOM n'est réécrit que quand une valeur change (`TexteSuivi`, `basculerClasse`), jamais à chaque image.
 import { DIEUX } from '../data/dieux';
+import { HEROS } from '../data/heros';
+import { OBJETS } from '../data/objets';
 import type { EtatPartie } from '../engine';
 import { validerAction } from '../engine';
 import { chercherParId } from '../engine/recherche';
@@ -12,7 +14,7 @@ import { PAS_PAR_SECONDE, enPas } from '../engine/temps';
 import { bonusAppel } from '../engine/vagues';
 import { t, tCle } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
-import { habillageSort, spriteUnite } from '../render/habillage';
+import { habillageSort, iconeObjet, spriteUnite } from '../render/habillage';
 import { basculerClasse, bouton, el, image, TexteSuivi } from './dom';
 import type { Mode } from './interaction';
 import { positionsCercle, type ElementMenu } from './menu-cercle';
@@ -22,6 +24,7 @@ export interface CommandesHud {
   changerVitesse: () => void;
   basculerPause: () => void;
   basculerSort: (emplacement: number) => void;
+  basculerObjet: (emplacement: number) => void;
   basculerHeros: () => void;
   choisirElement: (element: ElementMenu) => void;
 }
@@ -40,8 +43,14 @@ interface BoutonSort {
   derniereFraction: number;
 }
 
-/** Textes du rappel de touche des deux sorts (rappel affiché sur les boutons). */
+/** Textes du rappel de touche des deux sorts et des trois objets (rappel affiché sur les boutons). */
 const TOUCHES_SORTS = ['hud.touche_sort_1', 'hud.touche_sort_2'] as const;
+const TOUCHES_OBJETS = ['hud.touche_objet_1', 'hud.touche_objet_2', 'hud.touche_objet_3'] as const;
+
+interface BoutonObjet {
+  readonly noeud: HTMLButtonElement;
+  utilise: boolean;
+}
 const DUREE_MESSAGE = 2200;
 const MARGE_MENU = 30;
 
@@ -61,6 +70,7 @@ export class Hud {
   private readonly barrePv: HTMLElement;
   private readonly etatHeros: TexteSuivi;
   private readonly sorts: BoutonSort[] = [];
+  private readonly objets: BoutonObjet[] = [];
   private readonly invite: TexteSuivi;
   private readonly message: TexteSuivi;
   private readonly noeudMessage: HTMLElement;
@@ -107,8 +117,10 @@ export class Hud {
     // Bas gauche : héros et sorts.
     const basGauche = el('div', 'groupe bas-gauche');
     const dieu = Object.hasOwn(DIEUX, etat.config.dieu) ? DIEUX[etat.config.dieu as keyof typeof DIEUX] : undefined;
-    this.portrait = bouton('bouton portrait', dieu ? tCle(dieu.heros.nom) : t('hud.heros'), commandes.basculerHeros, signal);
-    if (dieu) this.portrait.append(image(atlas.iconeUrl(spriteUnite('heros', dieu.heros.nom), 2), 'visage'));
+    // Le héros emmené (l'avatar du dieu ou l'un de ses disciples) donne son nom et son visage au portrait.
+    const heros = Object.hasOwn(HEROS, etat.config.heros) ? HEROS[etat.config.heros as keyof typeof HEROS] : dieu?.heros;
+    this.portrait = bouton('bouton portrait', heros ? tCle(heros.nom) : t('hud.heros'), commandes.basculerHeros, signal);
+    if (heros) this.portrait.append(image(atlas.iconeUrl(spriteUnite('heros', heros.nom), 2), 'visage'));
     this.portrait.append(el('span', 'touche', t('hud.touche_heros')));
     const jauge = el('span', 'jauge');
     this.barrePv = el('span', 'rempli');
@@ -127,6 +139,18 @@ export class Hud {
       noeud.append(recharge, secondes.noeud, el('span', 'touche', cleTouche ? t(cleTouche) : ''));
       basGauche.append(noeud);
       this.sorts.push({ noeud, recharge, secondes, derniereFraction: -1 });
+    });
+
+    // Les objets emportés (3 emplacements au plus) : toucher l'objet, puis la carte ; utilisé, il est grisé.
+    etat.config.objets.forEach((id, i) => {
+      if (!Object.hasOwn(OBJETS, id)) return;
+      const libelle = t('hud.objet', { nom: tCle(OBJETS[id as keyof typeof OBJETS].nom) });
+      const noeud = bouton('bouton objet', libelle, () => { commandes.basculerObjet(i); }, signal);
+      noeud.append(image(atlas.iconeUrl(iconeObjet(id), 2), 'icone'));
+      const cleTouche = TOUCHES_OBJETS[i];
+      noeud.append(el('span', 'touche', cleTouche ? t(cleTouche) : ''));
+      basGauche.append(noeud);
+      this.objets.push({ noeud, utilise: false });
     });
 
     // Bas droite : appel de la vague suivante.
@@ -179,6 +203,7 @@ export class Hud {
     this.mettreAJourVague(etat);
     this.mettreAJourHeros(etat, vue.mode);
     this.mettreAJourSorts(etat, vue.mode);
+    this.mettreAJourObjets(etat, vue.mode);
     this.invite.mettre(invite ?? '');
     basculerClasse(this.invite.noeud, 'visible', invite !== null);
   }
@@ -231,6 +256,23 @@ export class Hud {
     });
   }
 
+  private mettreAJourObjets(etat: EtatPartie, mode: Mode): void {
+    this.objets.forEach((bouton, i) => {
+      const utilise = etat.objetsUtilises[i] === true;
+      if (utilise !== bouton.utilise) {
+        bouton.utilise = utilise;
+        const id = etat.config.objets[i];
+        if (id !== undefined && Object.hasOwn(OBJETS, id)) {
+          const libelle = t(utilise ? 'hud.objet_utilise' : 'hud.objet', { nom: tCle(OBJETS[id as keyof typeof OBJETS].nom) });
+          bouton.noeud.title = libelle;
+          bouton.noeud.setAttribute('aria-label', libelle);
+        }
+      }
+      basculerClasse(bouton.noeud, 'grise', utilise);
+      basculerClasse(bouton.noeud, 'actif', mode.type === 'objet' && mode.emplacement === i);
+    });
+  }
+
   /** Affiche un message court (refus d'un geste) qui s'efface seul. */
   afficherMessage(texte: string): void {
     this.message.mettre(texte);
@@ -261,7 +303,7 @@ export class Hud {
     let reconstruit = false;
     if (version !== this.versionMenu) {
       this.versionMenu = version;
-      const signature = elements.map((e) => `${e.id}|${String(e.prix)}|${String(e.gain)}|${String(e.refus)}`).join(';');
+      const signature = elements.map((e) => `${e.id}|${String(e.prix)}|${String(e.gain)}|${String(e.rang)}|${String(e.refus)}`).join(';');
       if (signature !== this.signatureMenu) {
         this.signatureMenu = signature;
         this.menu.replaceChildren(...elements.map((e) => this.boutonMenu(e)));
@@ -289,7 +331,9 @@ export class Hud {
     b.setAttribute('aria-disabled', String(element.refus !== null));
     if (element.refus !== null) b.classList.add('grise');
     if (element.refus === 'aretes_insuffisantes') b.classList.add('trop-cher');
+    if (element.refus === 'competence_au_maximum') b.classList.add('au-sommet');
     b.append(image(this.atlas.iconeUrl(element.icone, element.icone.startsWith('tour-') ? 1 : 2), 'icone'));
+    if (element.rang !== null) b.append(el('span', 'rang', element.rang));
     if (element.prix !== null || element.gain !== null) {
       const prix = el('span', 'prix');
       prix.append(image(this.atlas.iconeUrl('icone-arete', 1), 'arete'), el('span', '', `${element.gain !== null ? '+' : ''}${String(element.prix ?? element.gain)}`));

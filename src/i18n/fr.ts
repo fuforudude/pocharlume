@@ -1,5 +1,6 @@
 // Tous les textes affichés du jeu, en français. Une clé par texte, groupées par écran.
 import { frDieux } from './fr-dieux';
+import { frMeta } from './fr-meta';
 import { frNiveaux } from './fr-niveaux';
 
 export const fr = {
@@ -60,7 +61,6 @@ export const fr = {
   'carte.total_etoiles_libelle': 'Étoiles gagnées : {n} sur {m}',
   'carte.niveau': 'Niveau {n} : {nom}',
   'fiche.boss': 'Boss',
-  'fiche.dieu': 'Dieu : {nom}',
   'fiche.difficulte': 'Difficulté',
   'fiche.etoiles': '{n} étoile(s) en {difficulte}',
   'fiche.lancer': 'Lancer',
@@ -179,6 +179,9 @@ export const fr = {
 
   // Dieux, héros, sorts, tours divines, compétences, arbre, objets (fr-dieux.ts)
   ...frDieux,
+
+  // Méta-progression : fiche de niveau, héros, boutique, bilan, refus des transactions (fr-meta.ts)
+  ...frMeta,
 
   // Niveaux de la campagne (fr-niveaux.ts)
   ...frNiveaux,

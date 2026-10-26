@@ -2,18 +2,24 @@
 // de niveau, partie, options). Ce fichier ne contient que de l'enchaînement : la logique est dans src/save/
 // (session) et dans src/ui/ (carte-monde-logique, partie), où elle est testée.
 import './ui/style.css';
+import './ui/style-meta.css';
+import { DEFS_META } from './data/heros';
 import { REGION1 } from './data/niveaux/region1';
-import { VERSION_DONNEES } from './data/version';
 import type { NiveauCampagne } from './data/visuel';
-import type { ConfigPartie, EtatPartie } from './engine';
+import type { EtatPartie } from './engine';
 import { t } from './i18n';
 import { chargerAtlas } from './render/atlas';
-import { Depot, difficulteDe, ouvrirCanalNavigateur, ouvrirStockage, Session, type DifficulteSauvegarde } from './save';
+import { Depot, difficulteDe, ouvrirCanalNavigateur, ouvrirStockage, Session, type ChoixPartie, type DifficulteSauvegarde } from './save';
+import { afficherBoutique } from './ui/boutique';
 import { afficherCarteMonde, type EcranCarteMonde } from './ui/carte-monde';
+import { afficherEcranHeros } from './ui/ecran-heros';
 import { afficherAccueil, afficherAvis, type ChoixNiveau } from './ui/ecrans';
+import { configDeRelance, configDuChoix, nouvelleGraine } from './ui/lancement';
+import { choixJouable } from './ui/meta-vues';
 import { NIVEAU_CAMPAGNE_TEST } from './ui/niveau-test';
 import { afficherOptions } from './ui/options';
-import { lancerNiveau, type PartieEnCours } from './ui/partie';
+import { lancerNiveau, graineSuivante, type PartieEnCours } from './ui/partie';
+import { texteRefusMeta } from './ui/raisons-meta';
 
 const conteneur = document.querySelector<HTMLElement>('#app');
 if (!conteneur) throw new Error('Conteneur #app introuvable');
@@ -24,11 +30,9 @@ let carteOuverte: EcranCarteMonde | null = null;
 /** Difficulté cochée dans la fiche : celle du dernier niveau lancé. */
 let derniereDifficulte: DifficulteSauvegarde = 'matou';
 
-function nouvelleConfig(difficulte: DifficulteSauvegarde): ConfigPartie {
-  return { graine: Date.now() & 0x7fffffff, difficulte, dieu: 'charlie', heros: 'charlie', niveauHeros: 1, competencesHeros: {}, ameliorations: {}, objets: [], versionDonnees: VERSION_DONNEES };
-}
-
 interface OptionsLancement {
+  /** Dieu, héros et objets choisis sur la fiche ; absent : le dernier choix mémorisé dans la sauvegarde. */
+  readonly choix?: ChoixPartie;
   /** Partie sauvegardée à relancer. */
   readonly reprise?: EtatPartie;
   /** Raccourci de développement : la partie ne touche pas à la sauvegarde. */
@@ -40,7 +44,17 @@ function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, lanceme
   carteOuverte = null;
   app.replaceChildren();
   const { reprise, horsSauvegarde } = lancement;
-  const config = reprise ? reprise.config : nouvelleConfig(difficulte);
+  let config = reprise?.config;
+  if (!config) {
+    // Tout ce qui entre dans la partie (dieu, héros et son niveau, compétences, arbre, objets) est figé ici.
+    const composee = configDuChoix(session.sauvegarde, lancement.choix ?? choixJouable(session.sauvegarde), difficulte, nouvelleGraine());
+    if (!composee.ok) {
+      afficherAvis(document.body, t('fiche.lancement_refuse', { raison: texteRefusMeta(composee.raison) }));
+      carte();
+      return;
+    }
+    config = composee.config;
+  }
   // La partie reprise est déjà dans la sauvegarde ; une nouvelle partie n'y est qu'à partir de sa première vague.
   let enSauvegarde = reprise !== undefined;
   // En développement seulement : la console du navigateur peut piloter et mesurer la partie.
@@ -52,15 +66,20 @@ function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, lanceme
   lancerNiveau(
     niveau,
     config,
-    (resultat) => {
-      if (!horsSauvegarde) void session.terminerPartie(resultat);
-    },
+    // Victoire ou défaite : méta-progression et progression enregistrées ; le bilan (gains, niveau du héros) revient à l'écran de fin.
+    (resultat) => (horsSauvegarde ? Promise.resolve(null) : session.enregistrerFin(resultat)),
     {
       parent: app,
       vitesse: session.sauvegarde.reglages.vitesse,
-      surQuitter: () => {
-        // Abandon : la partie sauvegardée disparaît, sauf si celle-ci n'a encore rien sauvegardé.
-        if (enSauvegarde && !horsSauvegarde) void session.effacerPartie();
+      // « Rejouer » : même dieu, héros et objets (ceux que la partie a consommés ne sont plus emportés), nouvelle graine.
+      nouvelleConfig: (precedente) => configDeRelance(session.sauvegarde, precedente, graineSuivante(precedente.graine)),
+      surQuitter: (abandon) => {
+        // Abandon d'une partie en cours : une défaite (objets utilisés consommés, expérience de défaite, sans gain de
+        // victoire) qui efface aussi la partie sauvegardée. Une partie déjà finie a déjà été enregistrée.
+        if (!horsSauvegarde) {
+          if (abandon) void session.enregistrerFin(abandon);
+          else if (enSauvegarde) void session.effacerPartie();
+        }
         carte();
       },
       surContinuer: carte,
@@ -95,12 +114,21 @@ function carte(): void {
     .then((atlas) => {
       carteOuverte = afficherCarteMonde(app, {
         atlas,
-        sauvegarde: session.sauvegarde,
+        session,
         difficulte: derniereDifficulte,
         partieEnCours: partieEnCours(),
-        surLancer: (niveau, difficulte) => {
+        surLancer: (niveau, difficulte, choix) => {
           derniereDifficulte = difficulte;
-          jouer(niveau, difficulte);
+          jouer(niveau, difficulte, { choix });
+        },
+        // Les écrans des héros et de la boutique couvrent la carte, qui dort dessous puis est rouverte (elle relit la sauvegarde).
+        surHeros: () => {
+          carteOuverte?.suspendre(true);
+          afficherEcranHeros(app, { atlas, session, surFermer: carte });
+        },
+        surBoutique: () => {
+          carteOuverte?.suspendre(true);
+          afficherBoutique(app, { atlas, session, surFermer: carte });
         },
         surOptions: () => {
           // La carte dort sous les options : plus de clavier ni de dessin ; elle est rouverte à la fermeture.
@@ -169,7 +197,7 @@ function avertirSauvegarde(origine: Session['origine'], stockageEnMemoire: boole
 
 async function demarrer(): Promise<void> {
   const { stockage, nom } = await ouvrirStockage();
-  session = await Session.ouvrir(new Depot(stockage), ouvrirCanalNavigateur());
+  session = await Session.ouvrir(new Depot(stockage), ouvrirCanalNavigateur(), { defs: DEFS_META });
   accueil();
   avertirSauvegarde(session.origine, nom === 'memoire');
 }

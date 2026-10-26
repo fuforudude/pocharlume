@@ -5,6 +5,8 @@ export type Commande =
   /** Construit la tour sur le socle sélectionné. */
   | { readonly type: 'tour'; readonly famille: FamilleTour }
   | { readonly type: 'sort'; readonly emplacement: number }
+  /** Utilise l'objet d'un emplacement (A, Z, R). */
+  | { readonly type: 'objet'; readonly emplacement: number }
   | { readonly type: 'heros' }
   | { readonly type: 'vague' }
   | { readonly type: 'pause' }
@@ -42,6 +44,12 @@ export function commandeClavier(touche: ToucheClavier): Commande | null {
       return { type: 'sort', emplacement: 1 };
     case 'e':
       return { type: 'heros' };
+    case 'a':
+      return { type: 'objet', emplacement: 0 };
+    case 'z':
+      return { type: 'objet', emplacement: 1 };
+    case 'r':
+      return { type: 'objet', emplacement: 2 };
     case ' ':
     case 'Spacebar':
       return { type: 'vague' };

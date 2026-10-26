@@ -10,6 +10,7 @@ import type { NiveauCampagne } from '../data/visuel';
 import { avancer, creerPartie, validerAction } from '../engine';
 import type { Action, ConfigPartie, EntreeJournal, EtatPartie, ResultatAction } from '../engine';
 import { chargerAtlas } from '../render/atlas';
+import type { BilanPartie, RaisonFin } from '../save';
 import { ECART_MAX_MS, PasFixes } from '../render/pas-fixes';
 import { Rendu, Surbrillance } from '../render/rendu';
 import { commandeClavier, type Commande } from './clavier';
@@ -35,13 +36,27 @@ export interface ResultatPartie {
   readonly pas: number;
   readonly config: ConfigPartie;
   readonly journal: readonly EntreeJournal[];
+  /** Objets emportés que le joueur a utilisés (un par emplacement utilisé), à retirer du stock. */
+  readonly objetsUtilises: readonly string[];
+}
+
+/** Ce que l'enregistrement d'une fin de partie rend à l'écran de fin : le butin, ou la raison pour laquelle il est refusé. */
+export interface RetourFin {
+  readonly bilan: BilanPartie | null;
+  readonly refus: RaisonFin | null;
 }
 
 export interface OptionsPartie {
   /** Où monter la partie ; par défaut `document.body`. */
   parent?: HTMLElement;
-  /** Appelée par les boutons « Quitter » (pause et fin). Absente : ces boutons n'apparaissent pas. */
-  surQuitter?: () => void;
+  /**
+   * Appelée par les boutons « Quitter » (pause et fin). Absente : ces boutons n'apparaissent pas. `abandon` est le
+   * résultat d'une défaite quand la partie n'était pas finie (abandon : à enregistrer), null quand elle l'était (déjà
+   * enregistrée par `surFin`).
+   */
+  surQuitter?: (abandon: ResultatPartie | null) => void;
+  /** Config d'une nouvelle tentative (« Rejouer »), d'après celle de la partie. Par défaut : la même, avec une autre graine. */
+  nouvelleConfig?: (precedente: ConfigPartie) => ConfigPartie;
   /** Appelée dès que la partie tourne, y compris après « Rejouer » (qui lance une nouvelle partie). */
   surDemarrage?: (partie: PartieEnCours) => void;
   /**
@@ -101,13 +116,14 @@ export function graineSuivante(graine: number): number {
 
 /**
  * Lance un niveau : charge les sprites, crée la partie, monte l'interface et démarre la boucle.
- * `surFin` est appelée une seule fois, à la fin de la partie (victoire ou défaite), avec son résultat.
+ * `surFin` est appelée une seule fois, à la fin de la partie (victoire ou défaite), avec son résultat ; si elle rend une
+ * promesse, l'écran de fin montre le butin qu'elle donne (arêtes, braises, expérience, niveau du héros).
  * L'écran de fin propose « Rejouer » (nouvelle partie de ce niveau) et, si `options.surQuitter` existe, « Quitter ».
  */
 export async function lancerNiveau(
   niveau: NiveauCampagne,
   config: ConfigPartie,
-  surFin: (resultat: ResultatPartie) => void,
+  surFin: (resultat: ResultatPartie) => unknown,
   options: OptionsPartie = {},
 ): Promise<PartieEnCours> {
   const atlas = await chargerAtlas();
@@ -143,6 +159,8 @@ export async function lancerNiveau(
   let finie = false;
   let finVue = 0;
   let ecranFinAffiche = false;
+  /** Le butin de la partie, quand `surFin` en promet un. */
+  let retourFin: Promise<RetourFin | null> | null = null;
   let identifiantImage = 0;
   let pasMenu = -1;
   let elementsDuMenu: ElementMenu[] | null = null;
@@ -170,10 +188,25 @@ export async function lancerNiveau(
     pas.pause = pause;
     ecranPause.afficher(pause);
   };
+  /** Les objets emportés que la partie a utilisés, un par emplacement utilisé. */
+  const objetsUtilises = (): string[] => etat.config.objets.filter((_, i) => etat.objetsUtilises[i] === true);
+  const resultatDe = (statut: 'victoire' | 'defaite'): ResultatPartie => ({
+    niveau: niveau.numero,
+    statut,
+    etoiles: statut === 'victoire' ? etat.etoiles : 0,
+    vies: etat.vies,
+    viesDepart: etat.viesDepart,
+    pas: etat.pas,
+    config: etat.config,
+    journal: etat.journal,
+    objetsUtilises: objetsUtilises(),
+  });
   const quitter = options.surQuitter
     ? (): void => {
+        // Partir avant la fin, c'est perdre : l'appelant enregistre cette défaite (objets utilisés consommés).
+        const abandon = finie ? null : resultatDe('defaite');
         arreter();
-        options.surQuitter?.();
+        options.surQuitter?.(abandon);
       }
     : undefined;
   const ecranPause = creerPause(racine, () => { definirPause(false); }, quitter);
@@ -184,6 +217,7 @@ export async function lancerNiveau(
     },
     basculerPause: () => { definirPause(!pas.pause); },
     basculerSort: (emplacement) => { traiter(interaction.basculerSort(etat, emplacement)); },
+    basculerObjet: (emplacement) => { traiter(interaction.basculerObjet(etat, emplacement)); },
     basculerHeros: () => { traiter(interaction.basculerHeros(etat)); },
     choisirElement: (element) => { traiter(interaction.choisirElement(element)); },
   }, signal);
@@ -248,6 +282,9 @@ export async function lancerNiveau(
       case 'sort':
         traiter(interaction.basculerSort(etat, commande.emplacement));
         break;
+      case 'objet':
+        traiter(interaction.basculerObjet(etat, commande.emplacement));
+        break;
       case 'heros':
         traiter(interaction.basculerHeros(etat));
         break;
@@ -303,17 +340,13 @@ export async function lancerNiveau(
     finie = true;
     interaction.annuler();
     if (etat.statut === 'en_cours') return;
-    const resultat: ResultatPartie = {
-      niveau: niveau.numero,
-      statut: etat.statut,
-      etoiles: etat.etoiles,
-      vies: etat.vies,
-      viesDepart: etat.viesDepart,
-      pas: etat.pas,
-      config: etat.config,
-      journal: etat.journal,
-    };
-    surFin(resultat);
+    const retour = surFin(resultatDe(etat.statut));
+    if (retour instanceof Promise) {
+      retourFin = (retour as Promise<RetourFin | null>).catch((erreur: unknown) => {
+        console.error(erreur);
+        return null;
+      });
+    }
   };
   const montrerEcranFin = (): void => {
     ecranFinAffiche = true;
@@ -325,7 +358,8 @@ export async function lancerNiveau(
         // Une nouvelle tentative repart d'une partie neuve, jamais de la partie reprise.
         const relance: OptionsPartie = { ...options };
         delete relance.reprise;
-        lancerNiveau(niveau, { ...config, graine: graineSuivante(config.graine) }, surFin, relance).catch(console.error);
+        const suivante = options.nouvelleConfig ? options.nouvelleConfig(config) : { ...config, graine: graineSuivante(config.graine) };
+        lancerNiveau(niveau, suivante, surFin, relance).catch(console.error);
       },
       ...(etat.statut === 'victoire' && continuer
         ? {
@@ -337,7 +371,7 @@ export async function lancerNiveau(
         : quitter
           ? { surQuitter: quitter }
           : {}),
-    });
+    }, retourFin);
   };
 
   // --- Boucle ---
