@@ -14,7 +14,7 @@ import { availableParallelism } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { Worker } from 'node:worker_threads';
 import { REGION1 } from '../../src/data/niveaux/region1.ts';
-import { nomDuDieu, verifierBandes } from '../../src/equilibrage/bandes.ts';
+import { correlationDeRang, courbeDifficulte, nomDuDieu, verifierBandes } from '../../src/equilibrage/bandes.ts';
 import {
   DIEUX_EVALUES,
   DIFFICULTES_EVALUEES,
@@ -116,6 +116,10 @@ if (miseAuPoint) {
       console.log(
         `${difficulte.padEnd(10)} ${nomDuDieu(dieu).padEnd(8)} soigneux ${pct(s.tauxVictoire)} % vies ${un(s.viesMoyennes).padStart(4)} | naïf ${pct(n.tauxVictoire)} % vies ${un(n.viesMoyennes).padStart(4)}`,
       );
+      if (difficulte === 'matou') {
+        const courbe = courbeDifficulte(evaluations, 'matou', dieu);
+        console.log(`   courbe du naïf (vies par niveau) : ${courbe.map((c) => un(c.vies)).join(' ')} | rho ${un(correlationDeRang(courbe))}`);
+      }
       if (!options.has('detail')) continue;
       for (const niveau of numeros) {
         const es = trouver(evaluations, niveau, difficulte, 'soigneux', dieu);
@@ -134,9 +138,7 @@ if (miseAuPoint) {
   }
   if (!options.has('dieux') && !options.has('difficultes')) {
     const ecarts = verifierBandes(evaluations);
-    console.log(ecarts.length === 0 ? 'Toutes les bandes sont respectées.' : `${String(ecarts.length)} écart(s) aux bandes :
-${ecarts.map((e) => `- ${e}`).join('
-')}`);
+    console.log(ecarts.length === 0 ? 'Toutes les bandes sont respectées.' : [`${String(ecarts.length)} écart(s) aux bandes :`, ...ecarts.map((e) => `- ${e}`)].join('\n'));
   }
   console.log(`${String(Math.round((performance.now() - debut) / 100) / 10)} s.`);
 } else {
