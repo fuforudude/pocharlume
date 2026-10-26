@@ -42,7 +42,7 @@ const plume: DefDieu = {
       effets: [{ type: 'execution', volants: true, fractionBoss: 0.15 }],
     },
   ],
-  bonus: { famille: 'tir', pvSoldats: 0, cadence: 0.5, chanceCritique: 0.15, prix: 0, effets: [], piegeAuSol: null },
+  bonus: { famille: 'tir', pvSoldats: 0, cadence: 0.6, chanceCritique: 0.15, prix: 0, effets: [], piegeAuSol: null },
   tourDivine: niveau({
     nom: 'tour.sanctuaire_de_l_ombre',
     cout: 200,
@@ -50,7 +50,7 @@ const plume: DefDieu = {
     revele: true,
     soldats: soldats({
       nom: 'unite.assassin_du_sanctuaire',
-      nombre: 3,
+      nombre: 4,
       pv: 110,
       degats: [18, 26],
       cadence: 0.6,
@@ -126,7 +126,7 @@ const charlie: DefDieu = {
     nom: 'tour.totem_du_colosse',
     cout: 200,
     portee: 2.5,
-    cadence: 6,
+    cadence: 8,
     degats: [20, 30],
     effets: [{ type: 'etourdissement', chance: 1, duree: 1, valeur: 0 }],
     onde: true,

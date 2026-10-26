@@ -318,13 +318,13 @@ describe('profils des vérifications supplémentaires', () => {
   it('les configs des profils sont valides pour le moteur', () => {
     for (const dieu of ['plume', 'charlie', 'pollen']) {
       for (const id of ['arbre', 'heros10', 'tout'] as const) {
-        const { id: _id, ...joueur } = profilProgression(dieu, id);
-        expect(verifierConfig(configPartie({ ...joueur, graine: 1, difficulte: 'vieux_sage' })), `${dieu} ${id}`).toBeNull();
+        const { id: profil, ...joueur } = profilProgression(dieu, id);
+        expect(verifierConfig(configPartie({ ...joueur, graine: 1, difficulte: 'vieux_sage' })), `${dieu} ${profil}`).toBeNull();
       }
     }
     for (const p of profilsDisciples()) {
-      const { id: _id, ...joueur } = p;
-      expect(verifierConfig(configPartie({ ...joueur, graine: 1, difficulte: 'matou' })), p.id).toBeNull();
+      const { id, ...joueur } = p;
+      expect(verifierConfig(configPartie({ ...joueur, graine: 1, difficulte: 'matou' })), id).toBeNull();
     }
   });
 });

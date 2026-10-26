@@ -58,21 +58,30 @@ const dieuxVoulus = liste('dieux', DIEUX_EVALUES);
 const difficultesVoulues = liste('difficultes', DIFFICULTES_EVALUEES);
 const graines = Number(options.get('graines') ?? GRAINES_EVALUATION.length);
 const entrainement = Number(options.get('entrainement') ?? GRAINES_ENTRAINEMENT.length);
-const miseAuPoint = options.has('dieux') || options.has('difficultes') || options.has('graines') || options.has('entrainement');
+const profilsVoulus = (options.get('profils') ?? '').split(',').filter((x) => x !== '');
+const miseAuPoint = ['dieux', 'difficultes', 'graines', 'entrainement', 'profils'].some((cle) => options.has(cle));
 const numeros = REGION1.map((n) => n.numero);
 
 const debut = performance.now();
 const taches: Tache[] = numeros.flatMap((numero) =>
   difficultesVoulues.flatMap((difficulte) => dieuxVoulus.map((dieu): Tache => ({ type: 'bandes', numero, difficulte, dieu, graines, entrainement }))),
 );
-if (!miseAuPoint) {
-  const deuxBots = ['naif', 'soigneux'] as const;
-  for (const numero of numeros) {
-    for (const profil of profilsDisciples()) taches.push({ type: 'profil', numero, profil, difficulte: 'matou', graines, bots: deuxBots });
-    for (const dieu of DIEUX_EVALUES) {
+// Vérifications supplémentaires : toutes dans le rapport complet, au choix (`--profils=disciples,progression,divine`) en mise au point.
+const complet = !miseAuPoint;
+const deuxBots = ['naif', 'soigneux'] as const;
+for (const numero of numeros) {
+  if (complet || profilsVoulus.includes('disciples')) {
+    for (const profil of profilsDisciples().filter((p) => complet || dieuxVoulus.includes(p.dieu))) {
+      taches.push({ type: 'profil', numero, profil, difficulte: 'matou', graines, bots: deuxBots });
+    }
+  }
+  for (const dieu of DIEUX_EVALUES.filter((d) => complet || dieuxVoulus.includes(d))) {
+    if (complet || profilsVoulus.includes('progression')) {
       for (const id of ['arbre', 'heros10', 'tout'] as const) {
         taches.push({ type: 'profil', numero, profil: profilProgression(dieu, id), difficulte: 'vieux_sage', graines, bots: deuxBots });
       }
+    }
+    if (complet || profilsVoulus.includes('divine')) {
       for (const difficulte of ['matou', 'vieux_sage']) {
         taches.push({ type: 'profil', numero, difficulte, graines, bots: ['soigneux'], profil: profilSansTourDivine(dieu) });
       }
@@ -101,7 +110,7 @@ const evaluations: Evaluation[] = [];
 const profils: EvaluationProfil[] = [];
 taches.forEach((tache, i) => {
   for (const e of resultats.get(i) ?? []) {
-    if (tache.type === 'bandes') evaluations.push(e as Evaluation);
+    if (tache.type === 'bandes') evaluations.push(e);
     else profils.push(e as EvaluationProfil);
   }
 });
@@ -141,6 +150,15 @@ if (miseAuPoint) {
   if (!options.has('dieux') && !options.has('difficultes')) {
     const ecarts = verifierBandes(evaluations);
     console.log(ecarts.length === 0 ? 'Toutes les bandes sont respectées.' : [`${String(ecarts.length)} écart(s) aux bandes :`, ...ecarts.map((e) => `- ${e}`)].join('\n'));
+  }
+  const groupes = new Map<string, EvaluationProfil[]>();
+  for (const e of profils) groupes.set(`${e.profil}|${e.dieu}|${e.difficulte}|${e.bot}`, [...(groupes.get(`${e.profil}|${e.dieu}|${e.difficulte}|${e.bot}`) ?? []), e]);
+  for (const [clef, liste] of groupes) {
+    const [profil, dieu, difficulte, bot] = clef.split('|');
+    const s = synthetiser(liste.flatMap((e) => [...e.parties]));
+    const avatar = synthetiser(evaluations.filter((e) => e.dieu === dieu && e.difficulte === difficulte && e.bot === bot).flatMap((e) => [...e.parties]));
+    const ecartAvatar = evaluations.length > 0 ? ` (écart à l'avatar ${un(s.viesMoyennes - avatar.viesMoyennes)})` : '';
+    console.log(`profil ${(profil ?? '').padEnd(10)} ${nomDuDieu(dieu ?? '').padEnd(8)} ${(difficulte ?? '').padEnd(10)} ${(bot ?? '').padEnd(8)} victoires ${pct(s.tauxVictoire)} % vies ${un(s.viesMoyennes).padStart(4)}${ecartAvatar}`);
   }
   console.log(`${String(Math.round((performance.now() - debut) / 100) / 10)} s.`);
 } else {

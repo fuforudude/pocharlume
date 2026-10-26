@@ -205,7 +205,7 @@ export function redigerRapport(evaluations: readonly Evaluation[], graines: numb
 
   // --- Un dieu par section ---
   for (const dieu of dieux) {
-    const def = DIEUX[dieu as keyof typeof DIEUX];
+    const def = DIEUX[dieu];
     const evalsDieu = duDieu(evaluations, dieu);
     sortie.push(
       `## ${nomDuDieu(dieu)}`,
@@ -288,7 +288,7 @@ export function redigerRapport(evaluations: readonly Evaluation[], graines: numb
     tableau(
       ['Dieu', 'Sort', 'Recharge', ...DIFFICULTES_EVALUEES.map(nomDifficulte)],
       dieux.flatMap((dieu) =>
-        DIEUX[dieu as keyof typeof DIEUX].sorts.map((sort, emplacement) => [
+        DIEUX[dieu].sorts.map((sort, emplacement) => [
           nomDuDieu(dieu),
           t(sort.nom as CleTexte),
           `${String(sort.recharge)} s`,
@@ -309,7 +309,7 @@ export function redigerRapport(evaluations: readonly Evaluation[], graines: numb
   );
   const lignesDivines: string[][] = [];
   for (const dieu of dieux) {
-    const def = DIEUX[dieu as keyof typeof DIEUX];
+    const def = DIEUX[dieu];
     for (const d of ['matou', 'vieux_sage']) {
       const avec = partiesDe(evaluations, d, 'soigneux', dieu);
       const sans = partiesDuProfil(profils, 'sans_divine', dieu, d, 'soigneux');
@@ -342,7 +342,7 @@ export function redigerRapport(evaluations: readonly Evaluation[], graines: numb
   );
 
   // --- Disciples ---
-  const disciples = profils.filter((p) => p.difficulte === 'matou' && HEROS_PAR_DIEU[p.dieu as keyof typeof HEROS_PAR_DIEU]?.some((h) => h === p.profil && h !== p.dieu));
+  const disciples = profils.filter((p) => p.difficulte === 'matou' && (HEROS_PAR_DIEU as Readonly<Record<string, readonly string[]>>)[p.dieu]?.some((h) => h === p.profil && h !== p.dieu));
   if (disciples.length > 0) {
     sortie.push(
       '## Disciples comparés à leur avatar (Matou)',
@@ -352,7 +352,7 @@ export function redigerRapport(evaluations: readonly Evaluation[], graines: numb
       tableau(
         ['Dieu', 'Héros', 'Rôle', 'Soigneux : victoires', 'Soigneux : vies', 'Écart à l’avatar', 'Naïf : victoires', 'Naïf : vies', 'Écart à l’avatar (naïf)'],
         dieux.flatMap((dieu) =>
-          HEROS_PAR_DIEU[dieu as keyof typeof HEROS_PAR_DIEU].map((heros) => {
+          HEROS_PAR_DIEU[dieu].map((heros) => {
             const estAvatar = heros === dieu;
             const soigneux = estAvatar ? partiesDe(evaluations, 'matou', 'soigneux', dieu) : partiesDuProfil(profils, heros, dieu, 'matou', 'soigneux');
             const naif = estAvatar ? partiesDe(evaluations, 'matou', 'naif', dieu) : partiesDuProfil(profils, heros, dieu, 'matou', 'naif');
@@ -362,8 +362,8 @@ export function redigerRapport(evaluations: readonly Evaluation[], graines: numb
             const sn = synthetiser(naif);
             return [
               nomDuDieu(dieu),
-              t((estAvatar ? HEROS[dieu as keyof typeof HEROS].nom : HEROS[heros as keyof typeof HEROS].nom) as CleTexte) + (estAvatar ? ' (avatar)' : ''),
-              t(HEROS[heros as keyof typeof HEROS].role as CleTexte),
+              t((estAvatar ? HEROS[dieu as keyof typeof HEROS].nom : HEROS[heros].nom) as CleTexte) + (estAvatar ? ' (avatar)' : ''),
+              t(HEROS[heros].role as CleTexte),
               pct(ss.tauxVictoire),
               un(ss.viesMoyennes),
               estAvatar ? '—' : `${signe(ss.viesMoyennes - avatarSoigneux.viesMoyennes)} vies`,
