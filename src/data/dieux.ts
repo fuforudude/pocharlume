@@ -149,7 +149,7 @@ const pollen: DefDieu = {
       rayon: 1.2,
       surChemin: true,
       global: false,
-      effets: [{ type: 'pieges', nombre: 3, ecart: 0.9, piege: PIEGE_A_RESSORT }],
+      effets: [{ type: 'pieges', nombre: 4, ecart: 0.9, piege: PIEGE_A_RESSORT }],
     },
     {
       nom: 'sort.ingeniosite',
@@ -160,8 +160,8 @@ const pollen: DefDieu = {
       surChemin: false,
       global: false,
       effets: [
-        { type: 'aretes', montant: 220 },
-        { type: 'boost', cadence: 0.3, duree: 10 },
+        { type: 'aretes', montant: 130 },
+        { type: 'boost', cadence: 0.8, duree: 10 },
       ],
     },
   ],

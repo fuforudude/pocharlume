@@ -6,8 +6,8 @@
 // Chaque tâche (niveau, difficulté, dieu ou profil) se calcule dans un fil à part ; le résultat ne dépend pas de leur
 // ordre d'arrivée (les évaluations sont remises dans l'ordre avant la rédaction).
 //
-// Mise au point : `npm run balance -- --dieux=plume,pollen --difficultes=matou --graines=5 --detail` ne joue que les
-// bandes demandées, affiche un résumé compact (`--detail` : niveau par niveau, avec sorts lancés et tour divine) et
+// Mise au point : `npm run balance -- --dieux=plume,pollen --difficultes=matou --graines=5 --entrainement=1 --detail`
+// (`--entrainement=1` reproduit les tests des bandes) ne joue que les bandes demandées, affiche un résumé compact (`--detail` : niveau par niveau, avec sorts lancés et tour divine) et
 // n'écrit pas le rapport.
 import { writeFileSync } from 'node:fs';
 import { availableParallelism } from 'node:os';
@@ -18,6 +18,7 @@ import { correlationDeRang, courbeDifficulte, nomDuDieu, verifierBandes } from '
 import {
   DIEUX_EVALUES,
   DIFFICULTES_EVALUEES,
+  GRAINES_ENTRAINEMENT,
   GRAINES_EVALUATION,
   synthetiser,
   trouver,
@@ -56,12 +57,13 @@ const liste = (cle: string, tout: readonly string[]): readonly string[] => (opti
 const dieuxVoulus = liste('dieux', DIEUX_EVALUES);
 const difficultesVoulues = liste('difficultes', DIFFICULTES_EVALUEES);
 const graines = Number(options.get('graines') ?? GRAINES_EVALUATION.length);
-const miseAuPoint = options.has('dieux') || options.has('difficultes') || options.has('graines');
+const entrainement = Number(options.get('entrainement') ?? GRAINES_ENTRAINEMENT.length);
+const miseAuPoint = options.has('dieux') || options.has('difficultes') || options.has('graines') || options.has('entrainement');
 const numeros = REGION1.map((n) => n.numero);
 
 const debut = performance.now();
 const taches: Tache[] = numeros.flatMap((numero) =>
-  difficultesVoulues.flatMap((difficulte) => dieuxVoulus.map((dieu): Tache => ({ type: 'bandes', numero, difficulte, dieu, graines }))),
+  difficultesVoulues.flatMap((difficulte) => dieuxVoulus.map((dieu): Tache => ({ type: 'bandes', numero, difficulte, dieu, graines, entrainement }))),
 );
 if (!miseAuPoint) {
   const deuxBots = ['naif', 'soigneux'] as const;
