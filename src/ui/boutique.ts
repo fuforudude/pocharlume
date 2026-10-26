@@ -1,6 +1,7 @@
 // Boutique (depuis la carte du monde) : l'arbre d'améliorations (6 branches de 5 rangs payés en étoiles, remise à
 // zéro gratuite après confirmation) et les objets consommables (prix en arêtes, stock de 10 au plus). Les règles
 // sont dans src/save/ : l'écran présente la sauvegarde, envoie les gestes à la session et affiche ses refus.
+import { jouerInterface } from '../audio';
 import { BRANCHES } from '../data/ameliorations';
 import { etoilesDepensees } from '../save';
 import { OBJETS } from '../data/objets';
@@ -46,12 +47,15 @@ export function afficherBoutique(parent: HTMLElement, options: OptionsBoutique):
     surFermer: options.surFermer,
   });
 
-  const agir = async (geste: () => Promise<{ readonly ok: true } | { readonly ok: false; readonly raison: Parameters<typeof texteRefusMeta>[0] }>, succes = ''): Promise<void> => {
+  /** `achat` : le geste est un achat, qui sonne quand il réussit ; un refus sonne toujours. */
+  const agir = async (geste: () => Promise<{ readonly ok: true } | { readonly ok: false; readonly raison: Parameters<typeof texteRefusMeta>[0] }>, succes = '', achat = false): Promise<void> => {
     if (occupe) return;
     occupe = true;
     try {
       const r = await geste();
       dessiner();
+      if (!r.ok) jouerInterface('refus');
+      else if (achat) jouerInterface('achat');
       ecran.dire(r.ok ? succes : texteRefusMeta(r.raison), !r.ok);
     } finally {
       occupe = false;
@@ -114,7 +118,7 @@ export function afficherBoutique(parent: HTMLElement, options: OptionsBoutique):
       } else {
         const libelle = t('boutique.acheter_rang', { n: vue.rang + 1, nom });
         const acheter = bouton('bouton acheter', libelle, () => {
-          void agir(() => session.acheterRangArbre(vue.id));
+          void agir(() => session.acheterRangArbre(vue.id), '', true);
         });
         acheter.dataset.cle = `rang:${vue.id}`;
         acheter.title = t('boutique.cout_rang', { n: vue.rang + 1, c: vue.cout });
@@ -137,7 +141,7 @@ export function afficherBoutique(parent: HTMLElement, options: OptionsBoutique):
       texte.append(el('span', 'nom', nom), el('p', 'desc', tCle(def.description)), el('span', 'stock', t('boutique.stock', { n: vue.stock, m: vue.stockMax })));
       carte.append(image(atlas.iconeUrl(iconeObjet(vue.id), 3), 'icone'), texte);
       const acheter = bouton('bouton acheter', t('boutique.acheter_objet', { nom }), () => {
-        void agir(() => session.acheterObjet(vue.id), t('boutique.achete', { nom }));
+        void agir(() => session.acheterObjet(vue.id), t('boutique.achete', { nom }), true);
       });
       acheter.dataset.cle = `objet:${vue.id}`;
       acheter.append(el('span', '', vue.stock >= vue.stockMax ? t('boutique.stock_plein') : String(vue.prix)));

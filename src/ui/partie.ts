@@ -6,6 +6,7 @@
 //   la boucle donne au prochain pas, on n'écrit jamais dans l'état ;
 // - la simulation avance par pas fixes (PasFixes), le rendu interpole entre deux pas ;
 // - tout ce que la partie installe (événements, DOM, boucle) est retiré par `arreter()`.
+import { audio, jouerInterface } from '../audio';
 import type { NiveauCampagne } from '../data/visuel';
 import { avancer, creerPartie, validerAction } from '../engine';
 import type { Action, ConfigPartie, EntreeJournal, EtatPartie, ResultatAction } from '../engine';
@@ -176,11 +177,17 @@ export async function lancerNiveau(
     if (actions.some((action) => action.type === 'appelerVague')) return;
     const refus = validerAction(etat, { type: 'appelerVague' });
     if (refus === null) envoyer({ type: 'appelerVague' });
-    else hud.afficherMessage(texteRefus(refus));
+    else {
+      jouerInterface('refus');
+      hud.afficherMessage(texteRefus(refus));
+    }
   };
   const traiter = (issue: Issue): void => {
     if (issue.action) envoyer(issue.action);
-    if (issue.refus !== null) hud.afficherMessage(texteRefus(issue.refus));
+    if (issue.refus !== null) {
+      jouerInterface('refus');
+      hud.afficherMessage(texteRefus(issue.refus));
+    }
   };
   const definirPause = (pause: boolean): void => {
     if (finie) return;
@@ -389,7 +396,13 @@ export async function lancerNiveau(
       const n = pas.avancer(ecart);
       for (let i = 0; i < n; i++) {
         const resultats: ResultatAction[] = avancer(etat, actions);
-        for (const r of resultats) if (!r.ok) hud.afficherMessage(texteRefus(r.raison));
+        for (const r of resultats) {
+          if (!r.ok) {
+            jouerInterface('refus');
+            hud.afficherMessage(texteRefus(r.raison));
+          }
+        }
+        audio.jouerEvenements(etat.evenements, etat);
         actions.length = 0;
         rendu.apresPas(etat, temps);
         mesures.pasSimules++;

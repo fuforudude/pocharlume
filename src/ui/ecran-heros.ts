@@ -2,6 +2,7 @@
 // compétences avec leurs rangs (l'ultime est verrouillée avant le niveau 6), points à placer ou à reprendre
 // gratuitement, et l'achat d'un disciple (30 braises) après confirmation. Les règles sont dans src/save/ : cet
 // écran présente la sauvegarde, envoie les gestes à la session et affiche ses refus.
+import { jouerInterface } from '../audio';
 import { DIEUX } from '../data/dieux';
 import { HEROS } from '../data/heros';
 import { dieuDuHeros, HEROS_PAR_DIEU, IDS_DIEUX, PRIX_DISCIPLE, type IdDieu, type IdHeros } from '../data/meta';
@@ -51,12 +52,14 @@ export function afficherEcranHeros(parent: HTMLElement, options: OptionsEcranHer
   const nomDe = (id: IdHeros): string => tCle(HEROS[id].nom);
 
   /** Passe un geste à la session, puis redessine ; le refus éventuel est dit. */
-  const agir = async (geste: () => Promise<{ readonly ok: true } | { readonly ok: false; readonly raison: Parameters<typeof texteRefusMeta>[0] }>, succes?: string): Promise<void> => {
+  const agir = async (geste: () => Promise<{ readonly ok: true } | { readonly ok: false; readonly raison: Parameters<typeof texteRefusMeta>[0] }>, succes?: string, achat = false): Promise<void> => {
     if (occupe) return;
     occupe = true;
     try {
       const r = await geste();
       dessiner();
+      if (!r.ok) jouerInterface('refus');
+      else if (achat) jouerInterface('achat');
       ecran.dire(r.ok ? (succes ?? '') : texteRefusMeta(r.raison), !r.ok);
     } finally {
       occupe = false;
@@ -71,7 +74,7 @@ export function afficherEcranHeros(parent: HTMLElement, options: OptionsEcranHer
       confirmer: t('heros.confirmer'),
       annuler: t('heros.annuler'),
       surConfirmer: () => {
-        void agir(() => session.acheterDisciple(id), t('heros.recrute', { nom: nomDe(id) }));
+        void agir(() => session.acheterDisciple(id), t('heros.recrute', { nom: nomDe(id) }), true);
       },
       surAnnuler: () => undefined,
     });

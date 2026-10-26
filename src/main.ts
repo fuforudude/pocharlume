@@ -3,6 +3,7 @@
 // (session) et dans src/ui/ (carte-monde-logique, partie), où elle est testée.
 import './ui/style.css';
 import './ui/style-meta.css';
+import { installerAudio } from './audio';
 import { DEFS_META } from './data/heros';
 import { REGION1 } from './data/niveaux/region1';
 import type { NiveauCampagne } from './data/visuel';
@@ -198,6 +199,7 @@ function avertirSauvegarde(origine: Session['origine'], stockageEnMemoire: boole
 async function demarrer(): Promise<void> {
   const { stockage, nom } = await ouvrirStockage();
   session = await Session.ouvrir(new Depot(stockage), ouvrirCanalNavigateur(), { defs: DEFS_META });
+  installerAudio(() => session.sauvegarde.reglages);
   accueil();
   avertirSauvegarde(session.origine, nom === 'memoire');
 }

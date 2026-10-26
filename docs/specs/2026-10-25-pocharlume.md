@@ -43,8 +43,8 @@ plan, pour rester publiable sur le Play Store (classement PEGI 12 visé).
 - Français seul en V1, mais tous les textes passent par `t('clé')` (fichier `src/i18n/fr.ts`).
 - Paysage sur téléphone, cartes en 16:9, zoom à deux doigts et glisser pour déplacer la caméra. Les menus hors
   partie marchent aussi en portrait.
-- Souris et doigt font tout. Raccourcis clavier en plus : `1`–`5` tours, `Q` `W` sorts, `E` héros, `Espace`
-  vague suivante, `P` pause, `F` vitesse.
+- Souris et doigt font tout. Raccourcis clavier en plus : `1`–`5` tours, `Q` `W` sorts, `A` `Z` `R` objets
+  emportés, `E` héros, `Espace` vague suivante, `P` pause, `F` vitesse.
 - Pause automatique quand l'appli perd le focus. L'état est sauvegardé au début de chaque vague, et après une
   fermeture le jeu propose « Reprendre à la vague N ».
 - Son : packs libres de droits (CC0, Kenney ou OpenGameArt) avec un fichier `CREDITS.md`. Chaque téléchargement

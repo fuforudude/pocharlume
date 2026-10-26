@@ -9,6 +9,9 @@ import { Depot, sauvegardeVide, Session, StockageMemoire, type Sauvegarde } from
 import { afficherBoutique } from './boutique';
 import { afficherEcranHeros } from './ecran-heros';
 
+const son = vi.hoisted(() => ({ jouerInterface: vi.fn() }));
+vi.mock('../audio', () => ({ jouerInterface: son.jouerInterface }));
+
 const ATLAS = { iconeUrl: () => 'icone.png' } as unknown as AtlasRendu;
 
 async function ouvrir(sauvegarde: Sauvegarde): Promise<Session> {
@@ -49,6 +52,7 @@ afterEach(() => {
 
 beforeEach(() => {
   document.body.replaceChildren();
+  son.jouerInterface.mockClear();
 });
 
 describe('écran des héros', () => {
@@ -241,5 +245,38 @@ describe('boutique', () => {
     parTexte(t('boutique.onglet_objets')).click();
     expect(document.querySelector('.arbre')).toBeNull();
     expect(document.querySelector('.objets')).not.toBeNull();
+  });
+});
+
+describe('sons d’interface des achats', () => {
+  it('un achat de disciple, de rang d’arbre ou d’objet réussi sonne « achat » ; un refus sonne « refus »', async () => {
+    const session = await ouvrir(avec((s) => ({ ...s, progression: { niveauMax: 2, etoiles: { '1': { matou: 2 } } }, meta: { ...s.meta, monnaies: { aretes: 99, braises: 30 } } })));
+    afficherBoutique(document.body, { atlas: ATLAS, session, surFermer: vi.fn() });
+    parTitre(t('boutique.acheter_rang', { n: 1, nom: 'Les Griffes' })).click();
+    await attendre();
+    expect(son.jouerInterface).toHaveBeenLastCalledWith('achat');
+    parTexte(t('boutique.onglet_objets')).click();
+    parTitre(t('boutique.acheter_objet', { nom: 'Sablier' })).click();
+    await attendre();
+    expect(son.jouerInterface).toHaveBeenLastCalledWith('refus');
+    parTitre(t('boutique.acheter_objet', { nom: 'Fiole de Soufre' })).click();
+    await attendre();
+    expect(son.jouerInterface).toHaveBeenLastCalledWith('achat');
+    document.body.replaceChildren();
+
+    afficherEcranHeros(document.body, { atlas: ATLAS, session, surFermer: vi.fn() });
+    parTitre('Mastoc').click();
+    parTitre(t('heros.acheter', { n: 30 })).click();
+    parTexte(t('heros.confirmer')).click();
+    await attendre();
+    expect(son.jouerInterface).toHaveBeenLastCalledWith('achat');
+  });
+
+  it('placer un point ou reprendre les points ne sonne pas comme un achat', async () => {
+    const session = await ouvrir(sauvegardeVide());
+    afficherEcranHeros(document.body, { atlas: ATLAS, session, surFermer: vi.fn() });
+    parTitre(t('heros.placer', { nom: 'Poigne de fer' })).click();
+    await attendre();
+    expect(son.jouerInterface).not.toHaveBeenCalledWith('achat');
   });
 });
