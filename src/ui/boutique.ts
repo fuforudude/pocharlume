@@ -104,13 +104,13 @@ export function afficherBoutique(parent: HTMLElement, options: OptionsBoutique):
       const nom = tCle(def.nom);
       const carte = el('div', 'branche');
       carte.classList.toggle('sommet', vue.cout === null);
-      const entete = el('div', 'branche-entete');
-      entete.append(image(atlas.iconeUrl(iconeBranche(vue.id), 2), 'icone'), el('span', 'nom', nom));
-      carte.append(entete, el('p', 'desc', tCle(def.description)));
-      const pied = el('div', 'branche-pied');
-      pied.append(pastilles(vue.rang, vue.rangMax), el('span', 'rang', t('boutique.rang', { n: vue.rang, m: vue.rangMax })));
+      const texte = el('div', 'texte');
+      const rangs = el('div', 'rangs');
+      rangs.append(pastilles(vue.rang, vue.rangMax), el('span', 'rang', t('boutique.rang', { n: vue.rang, m: vue.rangMax })));
+      texte.append(el('span', 'nom', nom), el('p', 'desc', tCle(def.description)), rangs);
+      carte.append(image(atlas.iconeUrl(iconeBranche(vue.id), 2), 'icone'), texte);
       if (vue.cout === null) {
-        pied.append(el('span', 'sommet-texte', t('boutique.au_maximum')));
+        carte.append(el('span', 'sommet-texte', t('boutique.au_maximum')));
       } else {
         const libelle = t('boutique.acheter_rang', { n: vue.rang + 1, nom });
         const acheter = bouton('bouton acheter', libelle, () => {
@@ -120,9 +120,8 @@ export function afficherBoutique(parent: HTMLElement, options: OptionsBoutique):
         acheter.title = t('boutique.cout_rang', { n: vue.rang + 1, c: vue.cout });
         acheter.append(el('span', '', String(vue.cout)), image(atlas.iconeUrl('icone-etoile', 1), 'icone'));
         acheter.classList.toggle('grise', !vue.achetable);
-        pied.append(acheter);
+        carte.append(acheter);
       }
-      carte.append(pied);
       grille.append(carte);
     }
     return grille;
@@ -134,11 +133,9 @@ export function afficherBoutique(parent: HTMLElement, options: OptionsBoutique):
       const def = OBJETS[vue.id];
       const nom = tCle(def.nom);
       const carte = el('div', 'objet');
-      const entete = el('div', 'objet-entete');
-      entete.append(image(atlas.iconeUrl(iconeObjet(vue.id), 3), 'icone'), el('span', 'nom', nom));
-      carte.append(entete, el('p', 'desc', tCle(def.description)));
-      const pied = el('div', 'objet-pied');
-      pied.append(el('span', 'stock', t('boutique.stock', { n: vue.stock, m: vue.stockMax })));
+      const texte = el('div', 'texte');
+      texte.append(el('span', 'nom', nom), el('p', 'desc', tCle(def.description)), el('span', 'stock', t('boutique.stock', { n: vue.stock, m: vue.stockMax })));
+      carte.append(image(atlas.iconeUrl(iconeObjet(vue.id), 3), 'icone'), texte);
       const acheter = bouton('bouton acheter', t('boutique.acheter_objet', { nom }), () => {
         void agir(() => session.acheterObjet(vue.id), t('boutique.achete', { nom }));
       });
@@ -147,8 +144,7 @@ export function afficherBoutique(parent: HTMLElement, options: OptionsBoutique):
       if (vue.stock < vue.stockMax) acheter.append(image(atlas.iconeUrl('icone-arete', 1), 'icone'));
       acheter.title = t('boutique.prix_objet', { n: vue.prix });
       acheter.classList.toggle('grise', !vue.achetable);
-      pied.append(acheter);
-      carte.append(pied);
+      carte.append(acheter);
       grille.append(carte);
     }
     return grille;

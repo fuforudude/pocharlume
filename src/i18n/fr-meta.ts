@@ -81,7 +81,6 @@ export const frMeta = {
   'menu.competence_rang': '{n}/{m}',
 
   // Fin de partie : ce que la partie a rapporté
-  'fin.bilan_titre': 'Butin',
   'fin.bilan_attente': 'Enregistrement…',
   'fin.bilan_aretes': '+{n} arêtes',
   'fin.bilan_braises': '+{n} braises',
