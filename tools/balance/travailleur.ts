@@ -7,4 +7,4 @@ import { evaluerCampagne, GRAINES_EVALUATION } from '../../src/equilibrage/campa
 const { numero, difficulte, dieu, graines } = workerData as { numero: number; difficulte: string; dieu: string; graines: number };
 const campagne = REGION1.find((n) => n.numero === numero);
 if (!campagne) throw new Error(`Niveau ${String(numero)} introuvable`);
-parentPort?.postMessage(evaluerCampagne({ niveaux: [campagne], difficultes: [difficulte], dieux: [dieu], graines: GRAINES_EVALUATION.slice(0, graines) }));
+parentPort?.postMessage(evaluerCampagne({ niveaux: [campagne], difficultes: [difficulte], dieux: [dieu], graines: graines <= GRAINES_EVALUATION.length ? GRAINES_EVALUATION.slice(0, graines) : Array.from({ length: graines }, (_, i) => 101 + i) }));

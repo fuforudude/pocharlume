@@ -27,7 +27,7 @@ const plume: DefDieu = {
       effets: [
         {
           type: 'zone',
-          zone: { duree: 8, effets: [{ type: 'ralentissement', chance: 1, duree: 0.2, valeur: 0.5 }], critique: 0.5, volants: true },
+          zone: { duree: 10, effets: [{ type: 'ralentissement', chance: 1, duree: 0.2, valeur: 0.4 }], critique: 0.5, volants: true },
         },
       ],
     },
@@ -42,7 +42,7 @@ const plume: DefDieu = {
       effets: [{ type: 'execution', volants: true, fractionBoss: 0.15 }],
     },
   ],
-  bonus: { famille: 'tir', pvSoldats: 0, cadence: 0.3, chanceCritique: 0.15, prix: 0, effets: [], piegeAuSol: null },
+  bonus: { famille: 'tir', pvSoldats: 0, cadence: 0.4, chanceCritique: 0.2, prix: 0, effets: [], piegeAuSol: null },
   tourDivine: niveau({
     nom: 'tour.sanctuaire_de_l_ombre',
     cout: 200,
@@ -168,9 +168,9 @@ const pollen: DefDieu = {
   bonus: {
     famille: 'artillerie',
     pvSoldats: 0,
-    cadence: 0.3,
+    cadence: 0.28,
     chanceCritique: 0,
-    prix: -0.2,
+    prix: -0.15,
     effets: [],
     piegeAuSol: { chance: 0.2, piege: { degats: 40, typeDegats: 'physique', immobilisation: 1, rayon: 0.6 } },
   },
