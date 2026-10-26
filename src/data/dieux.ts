@@ -42,7 +42,7 @@ const plume: DefDieu = {
       effets: [{ type: 'execution', volants: true, fractionBoss: 0.15 }],
     },
   ],
-  bonus: { famille: 'tir', pvSoldats: 0, cadence: 0.4, chanceCritique: 0.2, prix: 0, effets: [], piegeAuSol: null },
+  bonus: { famille: 'tir', pvSoldats: 0, cadence: 0.5, chanceCritique: 0.15, prix: 0, effets: [], piegeAuSol: null },
   tourDivine: niveau({
     nom: 'tour.sanctuaire_de_l_ombre',
     cout: 200,
@@ -160,7 +160,7 @@ const pollen: DefDieu = {
       surChemin: false,
       global: false,
       effets: [
-        { type: 'aretes', montant: 40 },
+        { type: 'aretes', montant: 220 },
         { type: 'boost', cadence: 0.3, duree: 10 },
       ],
     },
@@ -168,9 +168,9 @@ const pollen: DefDieu = {
   bonus: {
     famille: 'artillerie',
     pvSoldats: 0,
-    cadence: 0.28,
+    cadence: 0,
     chanceCritique: 0,
-    prix: -0.15,
+    prix: -0.1,
     effets: [],
     piegeAuSol: { chance: 0.2, piege: { degats: 40, typeDegats: 'physique', immobilisation: 1, rayon: 0.6 } },
   },

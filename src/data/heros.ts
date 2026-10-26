@@ -55,7 +55,7 @@ const plume = heros('plume', 'plume', {
   armure: 0,
   vitesse: 2,
   portee: 1.8,
-  zone: { rayon: 0.7, effets: [{ type: 'ralentissement', chance: 0.5, duree: 1.5, valeur: 0.5 }] },
+  zone: { rayon: 0.6, effets: [{ type: 'ralentissement', chance: 0.5, duree: 1.5, valeur: 0.5 }] },
   capacites: { esquive: 0.3, critique: { chance: 0.2, multiplicateur: 2 } },
   competences: [
     ordinaire('pas_de_velours', { esquive: [0.05, 0.1, 0.15] }),
@@ -172,7 +172,7 @@ const pollen = heros('pollen', 'pollen', {
   vitesse: 1.6,
   portee: 3.2,
   capacites: {
-    distance: { portee: 3.2, degats: [10, 16], cadence: 0.3, typeDegats: 'physique', volants: true, effets: [] },
+    distance: { portee: 3.2, degats: [10, 16], cadence: 0.22, typeDegats: 'physique', volants: true, effets: [] },
     ouvrage: {
       constructeur: null,
       pieges: { piege: { degats: 50, typeDegats: 'physique', immobilisation: 1.2, rayon: 0.6 }, cadence: 14, portee: 3 },
