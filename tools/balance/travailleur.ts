@@ -1,10 +1,33 @@
-// Fil de calcul de `npm run balance` : évalue un niveau dans une difficulté avec un dieu et renvoie les évaluations
-// au fil principal (tools/balance/index.ts).
+// Fil de calcul de `npm run balance` : évalue un niveau dans une difficulté (pour un dieu, ou pour un profil de
+// vérification supplémentaire) et renvoie les évaluations au fil principal (tools/balance/index.ts).
 import { parentPort, workerData } from 'node:worker_threads';
 import { REGION1 } from '../../src/data/niveaux/region1.ts';
-import { evaluerCampagne, GRAINES_EVALUATION } from '../../src/equilibrage/campagne.ts';
+import { evaluerCampagne, evaluerProfil, GRAINES_EVALUATION, type Profil } from '../../src/equilibrage/campagne.ts';
 
-const { numero, difficulte, dieu, graines } = workerData as { numero: number; difficulte: string; dieu: string; graines: number };
-const campagne = REGION1.find((n) => n.numero === numero);
-if (!campagne) throw new Error(`Niveau ${String(numero)} introuvable`);
-parentPort?.postMessage(evaluerCampagne({ niveaux: [campagne], difficultes: [difficulte], dieux: [dieu], graines: graines <= GRAINES_EVALUATION.length ? GRAINES_EVALUATION.slice(0, graines) : Array.from({ length: graines }, (_, i) => 101 + i) }));
+export interface TacheBandes {
+  readonly type: 'bandes';
+  readonly numero: number;
+  readonly difficulte: string;
+  readonly dieu: string;
+  readonly graines: number;
+}
+
+export interface TacheProfil {
+  readonly type: 'profil';
+  readonly numero: number;
+  readonly difficulte: string;
+  readonly profil: Profil;
+  readonly graines: number;
+  readonly bots: readonly ('naif' | 'soigneux')[];
+}
+
+const tache = workerData as TacheBandes | TacheProfil;
+const campagne = REGION1.find((n) => n.numero === tache.numero);
+if (!campagne) throw new Error(`Niveau ${String(tache.numero)} introuvable`);
+const graines =
+  tache.graines <= GRAINES_EVALUATION.length ? GRAINES_EVALUATION.slice(0, tache.graines) : Array.from({ length: tache.graines }, (_, i) => 101 + i);
+parentPort?.postMessage(
+  tache.type === 'bandes'
+    ? evaluerCampagne({ niveaux: [campagne], difficultes: [tache.difficulte], dieux: [tache.dieu], graines })
+    : evaluerProfil(campagne, tache.difficulte, tache.profil, { graines, bots: tache.bots }),
+);

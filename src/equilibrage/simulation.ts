@@ -39,9 +39,8 @@ export interface ResultatPartie {
   readonly tourDivine: boolean;
 }
 
-export interface OptionsPartie {
-  readonly graine: number;
-  readonly difficulte: string;
+/** Ce qu'apporte le joueur à une partie : son dieu, son héros et ce que la méta-progression lui a donné. */
+export interface Joueur {
   /** Dieu joué (Charlie par défaut) et son héros (son avatar par défaut). */
   readonly dieu?: string;
   readonly heros?: string;
@@ -49,6 +48,11 @@ export interface OptionsPartie {
   readonly competencesHeros?: Readonly<Record<string, number>>;
   readonly ameliorations?: Readonly<Record<string, number>>;
   readonly objets?: readonly string[];
+}
+
+export interface OptionsPartie extends Joueur {
+  readonly graine: number;
+  readonly difficulte: string;
   /** Temps de jeu au-delà duquel on abandonne la partie (jamais atteint en pratique). */
   readonly secondesMax?: number;
   /** Pas entre deux décisions du bot (15 = deux fois par seconde). */

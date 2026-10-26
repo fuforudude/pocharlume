@@ -6,8 +6,8 @@ import type { Evaluation } from './campagne';
 import { DELAI_EVALUATION, evaluerRegion1 } from './bandes.test-utils';
 
 let evaluations: Evaluation[] = [];
-beforeAll(() => {
-  evaluations = evaluerRegion1('chaton');
+beforeAll(async () => {
+  evaluations = await evaluerRegion1('chaton');
 }, DELAI_EVALUATION);
 
 describe('bandes en Chaton', () => {

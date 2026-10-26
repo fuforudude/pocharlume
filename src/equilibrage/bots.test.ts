@@ -124,7 +124,7 @@ describe('bot soigneux', () => {
   }, DELAI_PARTIE_LONGUE);
 
   it('noterPartie préfère toujours une victoire, puis plus de vies, à une défaite', () => {
-    const base = { viesDepart: 20, etoiles: 0, secondes: 500, aretesFin: 0, viesPerduesParVague: [], choix: [], actions: 0 } as const;
+    const base = { viesDepart: 20, etoiles: 0, secondes: 500, aretesFin: 0, viesPerduesParVague: [], choix: [], actions: 0, sorts: [], tourDivine: false } as const;
     expect(noterPartie({ ...base, statut: 'victoire', vies: 1 })).toBeGreaterThan(noterPartie({ ...base, statut: 'defaite', vies: 0, secondes: 3000 }));
     expect(noterPartie({ ...base, statut: 'victoire', vies: 12 })).toBeGreaterThan(noterPartie({ ...base, statut: 'victoire', vies: 11 }));
   });
@@ -147,14 +147,37 @@ describe('bot soigneux avec chaque dieu', () => {
     expect(serialiser(rejoue)).toBe(serialiser(etat));
   }, DELAI_PARTIE_LONGUE);
 
-  it('Plume et Pollen construisent leur tour divine et lancent leurs sorts ; Charlie reste sans Totem', () => {
-    for (const dieu of ['plume', 'pollen']) {
+  it('les trois dieux construisent leur tour divine, sauf si on la retire au bot', () => {
+    for (const dieu of ['plume', 'charlie', 'pollen']) {
       const etat = jouer(dieu, 33);
-      const sorts = new Set(etat.journal.flatMap((e) => (e.action.type === 'lancerSort' ? [e.action.emplacement] : [])));
       expect(etat.tours.some((t) => t.famille === 'divine'), dieu).toBe(true);
-      expect(sorts.size, dieu).toBeGreaterThanOrEqual(1);
     }
-    expect(jouer('charlie', 33).tours.some((t) => t.famille === 'divine')).toBe(false);
+    const sans = creerBotSoigneux({ tourDivine: false });
+    const etat = creerPartie(niveau3, configPartie({ graine: 33, difficulte: 'matou', dieu: 'charlie' }));
+    while (etat.statut === 'en_cours' && etat.pas < 30 * 2400) avancer(etat, etat.pas % 15 === 0 ? sans.decider(etat) : []);
+    expect(etat.tours.some((t) => t.famille === 'divine')).toBe(false);
+  }, DELAI_PARTIE_LONGUE);
+
+  it('chaque dieu lance ses deux sorts dans une partie longue, et le résultat les compte', () => {
+    const niveau = REGION1[7]?.niveau ?? niveau3;
+    for (const dieu of ['plume', 'charlie', 'pollen']) {
+      const r = jouerPartie(niveau, creerBotSoigneux(), { graine: 41, difficulte: 'matou', dieu });
+      expect(r.sorts.length, dieu).toBe(2);
+      expect(r.sorts[0], `${dieu} : premier sort`).toBeGreaterThan(0);
+      expect(r.sorts[1], `${dieu} : second sort`).toBeGreaterThan(0);
+      expect(r.tourDivine, dieu).toBe(true);
+      expect(r.sorts.reduce((a, b) => a + b, 0)).toBeLessThanOrEqual(r.actions);
+    }
+  }, DELAI_PARTIE_LONGUE);
+
+  it('Pollen compte la remise de famille sur l’artillerie : à budget égal, son bot en construit plus souvent que Charlie', () => {
+    const compte = (dieu: string): number => {
+      const bot = creerBotSoigneux({ variante: { nom: 'artillerie', poids: { caserne: 0.5, tir: 0.5, magie: 0.5, artillerie: 2 } } });
+      const etat = creerPartie(niveau3, configPartie({ graine: 5, difficulte: 'matou', dieu }));
+      while (etat.statut === 'en_cours' && etat.pas < 30 * 600) avancer(etat, etat.pas % 15 === 0 ? bot.decider(etat) : []);
+      return etat.tours.filter((t) => t.famille === 'artillerie').length;
+    };
+    expect(compte('pollen')).toBeGreaterThanOrEqual(compte('charlie'));
   }, DELAI_PARTIE_LONGUE);
 });
 

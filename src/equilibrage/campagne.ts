@@ -4,7 +4,7 @@
 import type { NiveauCampagne } from '../data/visuel';
 import { creerBotNaif } from './bot-naif';
 import { creerBotSoigneux, optimiserBot, type VarianteSoigneux } from './bot-soigneux';
-import { BOT_INACTIF, jouerPartie, type ResultatPartie } from './simulation';
+import { BOT_INACTIF, jouerPartie, type Joueur, type ResultatPartie } from './simulation';
 
 export type IdBot = 'naif' | 'soigneux' | 'inactif';
 
@@ -60,7 +60,7 @@ export function evaluerCampagne(o: OptionsCampagne): Evaluation[] {
           bot: 'naif',
           parties: graines.map((graine) => jouerPartie(niveau, creerBotNaif({ graine: graine * 31 + 7 }), { graine, difficulte, dieu })),
         });
-        const { variante } = optimiserBot(niveau, difficulte, entrainement, dieu);
+        const { variante } = optimiserBot(niveau, difficulte, entrainement, { dieu });
         evaluations.push({
           ...base,
           bot: 'soigneux',
@@ -74,6 +74,56 @@ export function evaluerCampagne(o: OptionsCampagne): Evaluation[] {
         });
         o.progression?.(campagne.numero, difficulte, dieu);
       }
+    }
+  }
+  return evaluations;
+}
+
+/**
+ * Une façon de jouer évaluée à part des bandes : un héros (avatar ou disciple), un niveau de héros et ses compétences,
+ * un arbre d'améliorations, ou le soigneux privé de la tour divine. Sert aux vérifications supplémentaires du rapport.
+ */
+export interface Profil extends Joueur {
+  readonly id: string;
+  readonly dieu: string;
+  /** Faux : le soigneux n'a pas de tour divine (il dépense ses 200 arêtes en tours communes). */
+  readonly tourDivine?: boolean;
+}
+
+export interface EvaluationProfil {
+  readonly profil: string;
+  readonly dieu: string;
+  readonly heros: string;
+  readonly niveau: number;
+  readonly difficulte: string;
+  readonly bot: 'naif' | 'soigneux';
+  readonly parties: readonly ResultatPartie[];
+}
+
+export interface OptionsProfil {
+  readonly graines?: readonly number[];
+  readonly grainesEntrainement?: readonly number[];
+  /** Les bots joués (les deux par défaut). */
+  readonly bots?: readonly ('naif' | 'soigneux')[];
+}
+
+/** Évalue un niveau dans une difficulté pour un profil, avec le bot naïf et/ou le bot soigneux (même recherche de variante que les bandes). */
+export function evaluerProfil(campagne: NiveauCampagne, difficulte: string, profil: Profil, o: OptionsProfil = {}): EvaluationProfil[] {
+  const graines = o.graines ?? GRAINES_EVALUATION;
+  const entrainement = o.grainesEntrainement ?? GRAINES_ENTRAINEMENT;
+  const { id, ...joueur } = profil;
+  const { niveau } = campagne;
+  const base = { profil: id, dieu: profil.dieu, heros: profil.heros ?? profil.dieu, niveau: campagne.numero, difficulte };
+  const evaluations: EvaluationProfil[] = [];
+  for (const bot of o.bots ?? ['naif', 'soigneux']) {
+    if (bot === 'naif') {
+      const parties = graines.map((graine) => jouerPartie(niveau, creerBotNaif({ graine: graine * 31 + 7 }), { ...joueur, graine, difficulte }));
+      evaluations.push({ ...base, bot, parties });
+    } else {
+      const options = profil.tourDivine === undefined ? {} : { tourDivine: profil.tourDivine };
+      const { variante } = optimiserBot(niveau, difficulte, entrainement, joueur, options);
+      const parties = graines.map((graine) => jouerPartie(niveau, creerBotSoigneux({ ...options, variante }), { ...joueur, graine, difficulte }));
+      evaluations.push({ ...base, bot, parties });
     }
   }
   return evaluations;

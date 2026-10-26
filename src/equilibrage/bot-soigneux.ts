@@ -14,7 +14,7 @@ import { dpsEfficace } from '../data/equilibrage';
 import { REGLES } from '../data/regles';
 import { FAMILLES, TOURS } from '../data/tours';
 import { distance, echantillonner, longueurVue, poidsDesChemins, type Echantillon } from './geometrie';
-import { jouerPartie, type Bot, type ResultatPartie } from './simulation';
+import { jouerPartie, type Bot, type Joueur, type ResultatPartie } from './simulation';
 
 /** Une préférence de famille : le poids multiplie la valeur d'une tour de cette famille. */
 export interface VarianteSoigneux {
@@ -415,10 +415,17 @@ export function noterPartie(r: ResultatPartie): number {
  * Petite recherche : joue le niveau avec chaque variante sur des graines d'entraînement (qui ne servent
  * jamais à l'évaluation) et garde la meilleure. Déterministe.
  */
-export function optimiserBot(niveau: Niveau, difficulte: string, graines: readonly number[], dieu = 'charlie', variantes: readonly VarianteSoigneux[] = VARIANTES): ResultatRecherche {
+export function optimiserBot(
+  niveau: Niveau,
+  difficulte: string,
+  graines: readonly number[],
+  joueur: Joueur = {},
+  options: Pick<OptionsSoigneux, 'tourDivine'> = {},
+  variantes: readonly VarianteSoigneux[] = VARIANTES,
+): ResultatRecherche {
   const notes = variantes.map((variante) => {
     let note = 0;
-    for (const graine of graines) note += noterPartie(jouerPartie(niveau, creerBotSoigneux({ variante }), { graine, difficulte, dieu }));
+    for (const graine of graines) note += noterPartie(jouerPartie(niveau, creerBotSoigneux({ ...options, variante }), { ...joueur, graine, difficulte }));
     return { variante, note };
   });
   let meilleur = notes[0];
