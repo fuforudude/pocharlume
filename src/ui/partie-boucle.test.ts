@@ -353,3 +353,132 @@ function pointHorsChemin(etat: EtatPartie, modele: Action = { type: 'deplacerHer
   }
   throw new Error('aucun point hors chemin');
 }
+
+describe('objets emportés', () => {
+  const AVEC_OBJETS: ConfigPartie = { ...CONFIG, objets: ['herbe_sabbat', 'fiole_soufre'] };
+
+  it('le HUD montre un bouton par objet emporté, avec sa touche', async () => {
+    await demarrer({}, AVEC_OBJETS);
+    const boutons = [...document.querySelectorAll('.bouton.objet')];
+    expect(boutons).toHaveLength(2);
+    expect(boutons.map((b) => b.querySelector('.touche')?.textContent)).toEqual(['A', 'Z']);
+    expect(boutons[0]?.getAttribute('aria-label')).toBe(t('hud.objet', { nom: 'Herbe de Sabbat' }));
+  });
+
+  it('sans objet emporté, aucun bouton d’objet', async () => {
+    await demarrer();
+    expect(document.querySelectorAll('.bouton.objet')).toHaveLength(0);
+  });
+
+  it('toucher l’objet puis la carte l’utilise ; il est ensuite grisé et ne sert plus', async () => {
+    const partie = await demarrer({}, AVEC_OBJETS);
+    partie.etat.vies = partie.etat.viesDepart - 3;
+    boutonDe('.bouton.objet').click();
+    expect(partie.mode).toEqual({ type: 'objet', emplacement: 0 });
+    toucherCarte(10, 5);
+    images(3);
+    expect(journalDe(partie, 'utiliserObjet')).toBe(1);
+    expect(partie.etat.objetsUtilises).toEqual([true, false]);
+    // L'Herbe de Sabbat rend 5 vies sans dépasser les vies de départ.
+    expect(partie.etat.vies).toBe(partie.etat.viesDepart);
+    expect(document.querySelector('.bouton.objet')?.classList.contains('grise')).toBe(true);
+    // Un second essai est refusé avec sa raison, sans autre action au journal.
+    boutonDe('.bouton.objet').click();
+    expect(messageAffiche()).toBe(t('refus.objet_utilise'));
+    expect(journalDe(partie, 'utiliserObjet')).toBe(1);
+  });
+
+  it('les touches A et Z passent en visée de l’objet 1 et 2 ; Échap annule', async () => {
+    const partie = await demarrer({}, AVEC_OBJETS);
+    appuyer('a');
+    expect(partie.mode).toEqual({ type: 'objet', emplacement: 0 });
+    appuyer('Escape');
+    appuyer('z');
+    expect(partie.mode).toEqual({ type: 'objet', emplacement: 1 });
+    images(1);
+    expect(document.querySelector('.invite')?.textContent).toBe(t('invite.objet', { nom: 'Fiole de Soufre' }));
+    appuyer('r');
+    expect(messageAffiche()).toBe(t('refus.objet_inconnu'));
+  });
+});
+
+describe('butin et abandon', () => {
+  const BILAN = {
+    aretes: 48,
+    braises: 2,
+    xp: 120,
+    nouvellesEtoiles: 3,
+    heros: 'charlie' as const,
+    niveauHeros: { avant: 1, apres: 2 },
+    objetsConsommes: ['sablier' as const],
+  };
+
+  it('l’écran de fin montre le butin que surFin promet : arêtes, braises, expérience, niveau gagné, objets consommés', async () => {
+    const partie = await lancerNiveau(NIVEAU, CONFIG, () => Promise.resolve({ bilan: BILAN, refus: null }), { parent: document.body });
+    parties.push(partie);
+    partie.etat.vies = 0;
+    imagesJusqua(() => document.querySelector('.ecran.fin') !== null);
+    await vi.waitFor(() => { expect(document.querySelectorAll('.bilan-ligne').length).toBeGreaterThan(0); });
+    const lignes = [...document.querySelectorAll('.bilan-ligne')].map((l) => l.textContent);
+    expect(lignes).toEqual([
+      t('fin.bilan_aretes', { n: 48 }),
+      t('fin.bilan_braises', { n: 2 }),
+      t('fin.bilan_xp', { n: 120, nom: 'Charlie, le Colosse' }),
+      t('fin.bilan_niveau', { nom: 'Charlie, le Colosse', n: 2 }),
+      t('fin.bilan_objets', { noms: 'Sablier' }),
+    ]);
+  });
+
+  it('un butin refusé est dit, sans bloquer l’écran de fin', async () => {
+    const partie = await lancerNiveau(NIVEAU, CONFIG, () => Promise.resolve({ bilan: null, refus: 'objets_invalides' as const }), { parent: document.body });
+    parties.push(partie);
+    partie.etat.vies = 0;
+    imagesJusqua(() => document.querySelector('.ecran.fin') !== null);
+    await vi.waitFor(() => { expect(document.querySelector('.bilan-refus')).not.toBeNull(); });
+    expect(document.querySelector('.bilan-refus')?.textContent).toContain(t('meta.refus.objets_invalides'));
+    expect(boutonTexte(t('fin.rejouer'))).toBeDefined();
+  });
+
+  it('la défaite et la victoire donnent à surFin les objets utilisés', async () => {
+    const partie = await demarrer({}, { ...CONFIG, objets: ['herbe_sabbat', 'sablier'] });
+    partie.envoyer({ type: 'utiliserObjet', emplacement: 1, x: 5, y: 5 });
+    images(2);
+    partie.etat.vies = 0;
+    imagesJusqua(() => fins.length > 0);
+    expect(fins[0]?.objetsUtilises).toEqual(['sablier']);
+  });
+
+  it('« Quitter » depuis la pause pendant la partie rend une défaite à enregistrer, avec les objets utilisés', async () => {
+    const surQuitter = vi.fn();
+    const partie = await demarrer({ surQuitter }, { ...CONFIG, objets: ['sablier'] });
+    partie.envoyer({ type: 'utiliserObjet', emplacement: 0, x: 5, y: 5 });
+    images(2);
+    appuyer('p');
+    boutonTexte(t('fin.quitter')).click();
+    expect(surQuitter).toHaveBeenCalledTimes(1);
+    const abandon = surQuitter.mock.calls[0]?.[0] as ResultatPartie | null;
+    expect(abandon).toMatchObject({ statut: 'defaite', etoiles: 0, objetsUtilises: ['sablier'], niveau: NIVEAU.numero });
+    expect(fins).toHaveLength(0);
+  });
+
+  it('« Quitter » après la fin ne rend rien à enregistrer : surFin l’a déjà fait', async () => {
+    const surQuitter = vi.fn();
+    const partie = await demarrer({ surQuitter });
+    partie.etat.vies = 0;
+    imagesJusqua(() => document.querySelector('.ecran.fin') !== null);
+    boutonTexte(t('fin.quitter')).click();
+    expect(surQuitter).toHaveBeenCalledWith(null);
+    expect(fins).toHaveLength(1);
+  });
+
+  it('« Rejouer » demande la config de la nouvelle tentative à nouvelleConfig', async () => {
+    const nouvelleConfig = vi.fn((precedente: ConfigPartie): ConfigPartie => ({ ...precedente, graine: 999, objets: [] }));
+    const partie = await demarrer({ nouvelleConfig }, { ...CONFIG, objets: ['sablier'] });
+    partie.etat.vies = 0;
+    imagesJusqua(() => document.querySelector('.ecran.fin') !== null);
+    boutonTexte(t('fin.rejouer')).click();
+    await vi.waitFor(() => { expect(parties).toHaveLength(2); });
+    expect(nouvelleConfig).toHaveBeenCalledTimes(1);
+    expect(parties[1]?.etat.config).toMatchObject({ graine: 999, objets: [] });
+  });
+});

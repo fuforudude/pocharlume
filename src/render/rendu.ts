@@ -16,6 +16,7 @@ import { Camera, TUILE } from './camera';
 import { PoolEffets, TYPE_EFFET, type Effet } from './effets';
 import { dessinerNombre, largeurNombre } from './police';
 import { construireSol, peindreSol } from './sol';
+import { tuileTouchee } from './zones';
 import { CATEGORIE, Suivi, type Visuel, type VisuelProjectile } from './suivi';
 
 const FOND = '#0b0a0d';
@@ -31,6 +32,11 @@ const MARQUEUR_PLACEHOLDER = '#ff00ff';
 const ALTITUDE_VOL = 10;
 const FONDU_CADAVRE = 300;
 const DUREE_BLESSE = 180;
+/** Un assassin du Sanctuaire (non ciblable) est dessiné translucide. */
+const OPACITE_FURTIF = 0.55;
+/** Durée (ms) du fondu d'une zone qui se termine. */
+const FONDU_ZONE = 600;
+const MS_PAR_PAS = 1000 / 30;
 const POINTS_ETAT: readonly (readonly [number, string])[] = [
   [EFFET.ralentissement, '#5fa8e8'],
   [EFFET.brulure, '#f08030'],
@@ -115,6 +121,10 @@ export class Rendu {
   private readonly sol: HTMLCanvasElement;
   private readonly statiques: Statique[] = [];
   private readonly etourdi: SpriteAtlas | undefined;
+  private readonly piege: SpriteAtlas | undefined;
+  private readonly tuileVoile: SpriteAtlas | undefined;
+  private readonly boost: SpriteAtlas | undefined;
+  private readonly rage: SpriteAtlas | undefined;
 
   constructor(
     private readonly canvas: HTMLCanvasElement,
@@ -132,6 +142,10 @@ export class Rendu {
     this.sol = peindreSol(construireSol(carte, visuel), atlas);
     this.suivi = new Suivi(atlas, this.effets);
     this.etourdi = atlas.sprite('etourdi');
+    this.piege = atlas.sprite('piege');
+    this.tuileVoile = atlas.sprite('effet-voile-nuit-tuile');
+    this.boost = atlas.sprite('effet-ingeniosite');
+    this.rage = atlas.sprite('effet-rage');
     for (const d of visuel.decor) {
       const py = Math.round(d.y * TUILE);
       this.statiques.push({ cle: py, sprite: atlas.sprite(d.sprite) ?? null, px: Math.round(d.x * TUILE), py, miroir: d.miroir ?? false, socle: -1 });
@@ -222,6 +236,7 @@ export class Rendu {
     ctx.drawImage(this.sol, -ox, -oy);
 
     this.dessinerCadavres(temps, ox, oy);
+    this.dessinerAuSol(etat, temps, ox, oy);
     this.interpoler(alpha, ox, oy);
     this.trier();
     this.dessinerOmbres(l, h);
@@ -278,6 +293,58 @@ export class Rendu {
       if (reste < FONDU_CADAVRE) ctx.globalAlpha = Math.max(0, reste / FONDU_CADAVRE);
       this.atlas.dessiner(ctx, e.sprite, cadreA(anim, t), e.x - ox, e.y - oy, e.miroir);
       ctx.globalAlpha = 1;
+    }
+  }
+
+  /** Ce qui reste posé sur le sol, sous les entités : zones qui durent (Voile de Nuit, nappe de soufre) et pièges armés. */
+  private dessinerAuSol(etat: EtatPartie, temps: number, ox: number, oy: number): void {
+    const ctx = this.ctx;
+    const zones = etat.zones;
+    for (let i = 0; i < zones.length; i++) {
+      const z = zones[i];
+      if (!z) continue;
+      const cx = z.x * TUILE;
+      const cy = z.y * TUILE;
+      const r = z.rayon * TUILE;
+      const reste = z.restant * MS_PAR_PAS;
+      const alpha = reste < FONDU_ZONE ? Math.max(0, reste / FONDU_ZONE) : 1;
+      const tuile = this.tuileVoile;
+      const anim = tuile ? this.atlas.animation(tuile, 'repos') : undefined;
+      if (z.critique > 0 && tuile && anim) {
+        // Voile de Nuit : une tuile d'ombre sur chaque case que le rayon touche, donc toute la zone réelle.
+        const cadre = cadreA(anim, temps);
+        ctx.globalAlpha = alpha;
+        const x0 = Math.floor((cx - r) / TUILE);
+        const x1 = Math.floor((cx + r) / TUILE);
+        const y0 = Math.floor((cy - r) / TUILE);
+        const y1 = Math.floor((cy + r) / TUILE);
+        for (let ty = y0; ty <= y1; ty++) {
+          for (let tx = x0; tx <= x1; tx++) {
+            if (tuileTouchee(tx, ty, cx, cy, r, TUILE)) this.atlas.dessiner(ctx, tuile, cadre, tx * TUILE + TUILE / 2 - ox, ty * TUILE + TUILE / 2 - oy, false);
+          }
+        }
+        ctx.globalAlpha = 1;
+      } else {
+        // Nappe de soufre et autres zones : disque chaud et bord pointillé.
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = 'rgba(240, 130, 40, 0.22)';
+        ctx.beginPath();
+        ctx.arc(Math.round(cx) - ox, Math.round(cy) - oy, r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#f09040';
+        cerclePointille(ctx, Math.round(cx) - ox, Math.round(cy) - oy, r, Math.floor(temps / 120));
+        ctx.globalAlpha = 1;
+      }
+    }
+    const piege = this.piege;
+    const animPiege = piege ? this.atlas.animation(piege, 'repos') : undefined;
+    if (piege && animPiege) {
+      const cadre = cadreA(animPiege, 0);
+      const pieges = etat.pieges;
+      for (let i = 0; i < pieges.length; i++) {
+        const p = pieges[i];
+        if (p) this.atlas.dessiner(ctx, piege, cadre, Math.round(p.x * TUILE) - ox, Math.round(p.y * TUILE) - oy, false);
+      }
     }
   }
 
@@ -354,14 +421,30 @@ export class Rendu {
     // Une unité tombée reste étendue un moment, puis disparaît jusqu'à sa réapparition.
     if (nom === 'mort' && t > 1800) return;
     const y = v.py - (v.ennemi?.volant ? ALTITUDE_VOL : 0);
+    const unite = v.unite;
+    const capacites = unite?.stats.capacites;
+    // Les flammes de la rage sous les pieds d'un héros blessé, avant lui ; l'assassin du Sanctuaire est translucide.
+    if (unite && (capacites?.rage ?? 0) > 0 && !unite.mort && unite.pv < unite.stats.pv) this.dessinerBoucle(this.rage, v.px, v.py, temps);
+    const furtif = capacites?.ciblable === false;
+    if (furtif) ctx.globalAlpha = OPACITE_FURTIF;
     this.atlas.dessiner(ctx, sprite, cadreA(anim, t), v.px, y, v.miroir);
+    if (furtif) ctx.globalAlpha = 1;
 
     if (v.categorie === CATEGORIE.tour) {
       this.dessinerTireur(v, temps);
+      // Ingéniosité : les roues d'or tournent sur chaque tour dont la cadence est boostée.
+      if (v.tour && v.tour.boostPas > 0) this.dessinerBoucle(this.boost, v.px, v.py - 8, temps);
     } else if (v.ennemi && (v.ennemi.effetsPas[EFFET.etourdissement] ?? 0) > 0 && this.etourdi) {
       const a = this.atlas.animation(this.etourdi, 'repos');
       if (a) this.atlas.dessiner(ctx, this.etourdi, cadreA(a, temps), v.px, y - Math.round(sprite.ancre.y * 0.8) - 4, false);
     }
+  }
+
+  /** Pose un sprite à animation en boucle (halo, flammes, roues) sur un point du tampon. */
+  private dessinerBoucle(sprite: SpriteAtlas | undefined, px: number, py: number, temps: number): void {
+    if (!sprite) return;
+    const anim = this.atlas.animation(sprite, 'repos');
+    if (anim) this.atlas.dessiner(this.ctx, sprite, cadreA(anim, temps), px, py, false);
   }
 
   /** Le chat tireur posté au sommet d'une tour de tir. */
