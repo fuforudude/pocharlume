@@ -12,6 +12,7 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
 | `src/data/` | Tables d'équilibrage : tours, ennemis, dieux, difficultés, règles, formules et générateur de vagues (`equilibrage.ts`), version des données (`version.ts`, à incrémenter à chaque changement d'équilibrage), méta-progression (`meta.ts` : ids des dieux, héros, branches de l'arbre et objets, prix, plafonds, formules de gain hors partie). Aucune valeur de jeu en dur ailleurs. Les niveaux figés vont dans `src/data/niveaux/` (un fichier par région). | `src/engine/` : types, et le générateur à graine (`aleatoire.ts`) pour le générateur de vagues |
 | `src/render/` | Rendu Canvas 2D : caméra, zoom à pixels entiers sans lissage, sprites, animations, barres de vie, effets. Lit l'état du moteur, ne le modifie jamais. | `src/engine/`, `src/data/` |
 | `src/ui/` | Écrans, HUD, menus, toucher, souris, clavier. Traduit les gestes en actions du moteur. | tout `src/` |
+| `src/audio/` | Son : moteur Web Audio (`moteur.ts`), limiteur (`limiteur.ts`), données des sons et table événement vers son (`table.ts`), écouteurs du navigateur (`geste.ts`). Ne dépend que du type des événements du moteur et de `src/data/ennemis.ts`. | `src/engine/` (types), `src/data/` |
 | `src/i18n/` | Textes affichés. `fr.ts` contient la table, `t('clé')` la lit avec une clé typée. | rien |
 | `src/save/` | Sauvegarde. Fonctions pures : format versionné v3 (`format.ts`), validation stricte, migrations en chaîne vN vers vN+1, progression (étoiles, déblocage), méta-progression (`transactions.ts`, `config-partie.ts`, `definitions.ts`), partie en cours, export et import par code (`code.ts`). `Session` (`session.ts`) tient la sauvegarde courante en mémoire et l'écrit à chaque changement ; sa règle multi-onglets est décrite plus bas (« Méta-progression et sauvegarde v3 »). `verrou.ts` exclut les écritures entre onglets (Web Locks) ; `canal.ts` prévient les autres onglets par `BroadcastChannel`, qui se rafraîchissent. Accès au stockage : interface `Stockage` (IndexedDB, repli localStorage, mémoire ; Capacitor Preferences plus tard) et `Depot`, qui ne lève jamais et garde une copie de secours d'une sauvegarde illisible. | `src/engine/`, `src/data/` |
 | `src/equilibrage/` | Simulateur d'équilibrage sans affichage : partie jouée par un bot (`simulation.ts`), bot naïf (`bot-naif.ts`) et bot soigneux avec sa petite recherche de variante (`bot-soigneux.ts`), géométrie des cartes, évaluation d'une région (`campagne.ts`), bandes cibles (`bandes.ts`), puissance des tours (`puissance.ts`), rédaction de `balance-report.md` (`rapport.ts`). Les bots ne passent que par l'API publique du moteur (`avancer` avec des actions). Réutilisé par `tools/balance/` et par les tests des bandes. | `src/engine/`, `src/data/`, `src/i18n/` |
@@ -20,6 +21,30 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
 | `public/sprites/` | Atlas généré par `npm run art` (`atlas.png`, `atlas.json`), commité : le build n'exécute pas le pipeline, un test vérifie que l'atlas est à jour. | — |
 
 `src/main.ts` est le point d'entrée du navigateur.
+
+## Son
+- **Fichiers** : `public/sons/<id>.ogg` (25 bruitages Ogg Vorbis, 281 Ko), extraits de trois packs Kenney CC0. Le catalogue
+  source, nom, usage est `tools/sons/catalogue.ts` (`npm run sons -- <dossier des packs>` les recopie), les crédits
+  sont dans `CREDITS.md`. Un test vérifie que fichiers, catalogue et `SONS` sont identiques et que le total reste sous
+  600 Ko. Safari iOS lit l'Ogg Vorbis depuis iOS 17 ; pas de repli MP3 ajouté (iOS plus ancien : jeu muet, sans erreur).
+- **Moteur** (`src/audio/moteur.ts`) : l'`AudioContext` est créé au premier geste (`pointerup`, `click`, `keydown`,
+  `touchend`, branchés par `geste.ts`) et relancé à chaque geste s'il est suspendu. Chargement paresseux : rien n'est
+  téléchargé avant ce geste, puis les 25 sons le sont en tâche de fond (sauf volume à 0). Deux bus (effets, interface)
+  suivent le volume « son », un bus musique suit « musique » (`audio.busMusique`, pour la musique à venir). Courbe de
+  volume carrée. Volume à 0 : rien n'est chargé ni joué. Aucune méthode ne lève : sans `AudioContext`, contexte
+  suspendu, fichier introuvable ou son pas encore chargé, le son est simplement sauté.
+- **Table** (`src/audio/table.ts`) : `SONS` (volume, hauteur, variation aléatoire, priorité, nombre maximal par fenêtre,
+  bus) et `SON_DES_EVENEMENTS`, une entrée par type d'événement du moteur (`null` = silence voulu). Un test lit
+  `src/engine/evenements.ts` : un nouvel événement sans entrée fait échouer la CI. Les entrées-fonctions choisissent selon
+  la famille de la tour ou le genre de l'unité (la partie est passée au moteur de son) et selon `boss` des ennemis.
+- **Limitation** (`limiteur.ts`) : fenêtre de 80 ms, au plus `max` instances d'un même son, et un plafond total par
+  priorité (basse 4, normale 7, haute 12) : une rafale de tirs ne couvre jamais une cloche de vague, la mort d'un boss ou
+  la victoire. Le hasard de hauteur et de volume est `Math.random` du rendu, jamais celui du moteur.
+- **Branchements** : `main.ts` appelle `installerAudio(() => session.sauvegarde.reglages)` (volumes relus à chaque son, donc
+  les curseurs agissent en direct) ; la boucle de `partie.ts` appelle `audio.jouerEvenements(etat.evenements, etat)` après
+  chaque pas et `jouerInterface('refus')` sur un refus ; tout `<button>` joue « clic » (écouteur global en capture, bouton
+  `aria-disabled` muet) ; un curseur de volume relâché joue un clic de contrôle. La boutique appelle
+  `jouerInterface('achat')` quand un achat réussit (non branché : pas d'écran de boutique au moment de ce jalon).
 
 ## Rendu et interface
 - **Boucle** (`src/ui/partie.ts`, `lancerNiveau`) : une boucle `requestAnimationFrame` accumule le temps réel
