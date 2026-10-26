@@ -274,11 +274,14 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     return null;
   }
 
-  /** Ingéniosité : au cœur du plus gros groupe de tours, quand des ennemis sont à portée de l'une d'elles. */
+  /**
+   * Ingéniosité : au cœur du plus gros groupe de tours (une tour seule fait l'affaire : les arêtes du sort sont
+   * gagnées de toute façon), quand des ennemis sont à portée de l'une d'elles.
+   */
   function viserBoost(etat: EtatPartie, sort: DefSort, emplacement: number): Action | null {
     const r2 = sort.rayon * sort.rayon;
     let centre: Tour | undefined;
-    let meilleur = 1;
+    let meilleur = 0;
     for (const t of etat.tours) {
       let voisines = 0;
       for (const autre of etat.tours) if ((t.x - autre.x) * (t.x - autre.x) + (t.y - autre.y) * (t.y - autre.y) <= r2) voisines++;

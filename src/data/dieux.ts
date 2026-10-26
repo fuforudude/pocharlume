@@ -50,9 +50,9 @@ const plume: DefDieu = {
     revele: true,
     soldats: soldats({
       nom: 'unite.assassin_du_sanctuaire',
-      nombre: 2,
-      pv: 90,
-      degats: [14, 20],
+      nombre: 3,
+      pv: 110,
+      degats: [18, 26],
       cadence: 0.6,
       vitesse: 3,
       portee: 2.8,
@@ -128,7 +128,7 @@ const charlie: DefDieu = {
     portee: 2.5,
     cadence: 6,
     degats: [20, 30],
-    effets: [{ type: 'etourdissement', chance: 1, duree: 1.5, valeur: 0 }],
+    effets: [{ type: 'etourdissement', chance: 1, duree: 1, valeur: 0 }],
     onde: true,
   }),
 };

@@ -55,7 +55,7 @@ const plume = heros('plume', 'plume', {
   armure: 0,
   vitesse: 2,
   portee: 1.8,
-  zone: { rayon: 0.8, effets: [] },
+  zone: { rayon: 0.7, effets: [{ type: 'ralentissement', chance: 0.5, duree: 1.5, valeur: 0.5 }] },
   capacites: { esquive: 0.3, critique: { chance: 0.2, multiplicateur: 2 } },
   competences: [
     ordinaire('pas_de_velours', { esquive: [0.05, 0.1, 0.15] }),
