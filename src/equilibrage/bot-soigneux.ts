@@ -5,7 +5,9 @@
 // chaque dieu selon leur effet (zones de dégâts sur les grappes, Renforts et Voile de Nuit devant la zone de feu,
 // Pièges à Ressort un peu avant, Griffes d'Ombre sur la plus grosse grappe, Ingéniosité au cœur des tours),
 // construit la tour divine de son dieu, et appelle la vague suivante dès que le terrain est vide et qu'il n'a
-// plus rien à acheter. Une petite recherche en amont (`optimiserBot`) choisit parmi quelques variantes de
+// plus rien à acheter. Il sait ce que ne touchent pas les tours (la caserne et l'artillerie ignorent les volants : leur valeur
+// baisse de la part de volants du niveau) et qu'il faut au moins une tour de Guetteurs des Toits par chemin pour révéler les
+// furtifs. Une petite recherche en amont (`optimiserBot`) choisit parmi quelques variantes de
 // préférence de famille celle qui joue le mieux le niveau, en simulant des parties d'entraînement.
 import { ajusterMontant, validerAction } from '../engine';
 import type { Action, BonusFamille, DefDieu, DefNiveauTour, DefSort, Ennemi, EtatPartie, IdFamille, Niveau, Point, Tour, Voie } from '../engine';
@@ -13,7 +15,7 @@ import { DIEUX } from '../data/dieux';
 import { dpsEfficace } from '../data/equilibrage';
 import { REGLES } from '../data/regles';
 import { FAMILLES, TOURS } from '../data/tours';
-import { distance, echantillonner, longueurVue, poidsDesChemins, type Echantillon } from './geometrie';
+import { distance, echantillonner, longueurVue, partsSpeciales, poidsDesChemins, type Echantillon } from './geometrie';
 import { jouerPartie, type Bot, type Joueur, type ResultatPartie } from './simulation';
 
 /** Une préférence de famille : le poids multiplie la valeur d'une tour de cette famille. */
@@ -63,6 +65,9 @@ interface Candidat {
 
 const dieux: Readonly<Record<string, DefDieu>> = DIEUX;
 
+/** Part de menace furtive à partir de laquelle le bot se soucie des Guetteurs des Toits. */
+const PART_FURTIFS_MIN = 0.02;
+
 function dpsMoyen(def: DefNiveauTour): number {
   const dps = dpsEfficace(def);
   return dps.reduce((a, b) => a + b, 0) / dps.length;
@@ -102,6 +107,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
 
   let echantillons: Echantillon[] = [];
   let poids: number[] = [];
+  let parts = { volants: 0, furtifs: 0 };
   const vues = new Map<string, number>();
   const dpsParDef = new Map<DefNiveauTour, number>();
   const dpsAvecBonusParDef = new Map<DefNiveauTour, number>();
@@ -152,7 +158,9 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
 
   function valeur(etat: EtatPartie, socle: number, def: DefNiveauTour, famille: IdFamille): number {
     const memeFamille = etat.tours.filter((t) => t.famille === famille && t.socle !== socle).length;
-    return (dpsFamille(etat, def, famille) * vue(etat, socle, def.portee) * variante.poids[famille]) / (1 + (variante.diversite ?? 0) * memeFamille);
+    // Une tour qui ne touche pas les volants perd la part de menace qu'ils représentent (rien à retrancher quand il n'y en a pas).
+    const touchee = def.volants ? 1 : 1 - parts.volants;
+    return (dpsFamille(etat, def, famille) * touchee * vue(etat, socle, def.portee) * variante.poids[famille]) / (1 + (variante.diversite ?? 0) * memeFamille);
   }
 
   /** Tous les achats possibles (construction, amélioration, spécialisation), classés par valeur gagnée par arête. */
@@ -184,7 +192,37 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     liste.sort((a, b) => b.ratio - a.ratio);
     const divine = candidatDivine(etat, liste[0]?.ratio ?? 0);
     if (divine) liste.unshift(divine);
+    const guetteurs = candidatGuetteurs(etat, liste[0]?.ratio ?? 0);
+    if (guetteurs) liste.unshift(guetteurs);
     return liste;
+  }
+
+  /**
+   * Contre les furtifs, une tour de Guetteurs des Toits (spécialisation A de la tour de tir, qui révèle les furtifs à portée)
+   * par chemin : la tour de tir la plus avancée est montée puis spécialisée, ou construite sur le socle qui voit le plus de
+   * chemin. Une valeur juste au-dessus du meilleur autre achat : le bot économise jusqu'à pouvoir la payer.
+   */
+  function candidatGuetteurs(etat: EtatPartie, meilleurRatio: number): Candidat | null {
+    if (parts.furtifs < PART_FURTIFS_MIN) return null;
+    const requis = etat.niveau.carte.chemins.length;
+    if (etat.tours.filter((t) => t.famille === 'tir' && t.voie === 'A').length >= requis) return null;
+    const tir = etat.tours.filter((t) => t.famille === 'tir' && t.voie !== 'A').sort((a, b) => b.niveau - a.niveau)[0];
+    const ratio = meilleurRatio * 1.02;
+    if (tir) {
+      if (tir.niveau >= 3) return { action: { type: 'specialiser', socle: tir.socle, voie: 'A' }, ratio };
+      return { action: { type: 'ameliorer', socle: tir.socle }, ratio };
+    }
+    let socle = -1;
+    let meilleurVue = -1;
+    etat.niveau.carte.socles.forEach((_, i) => {
+      if (etat.tours.some((t) => t.socle === i)) return;
+      const v = vue(etat, i, TOURS.tir.niveaux[0].portee);
+      if (v > meilleurVue) {
+        meilleurVue = v;
+        socle = i;
+      }
+    });
+    return socle < 0 ? null : { action: { type: 'construire', socle, tour: 'tir' }, ratio };
   }
 
   /**
@@ -383,6 +421,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
       if (echantillons.length === 0) {
         echantillons = echantillonner(etat);
         poids = poidsDesChemins(etat.niveau);
+        parts = partsSpeciales(etat.niveau);
       }
       const actions: Action[] = [];
       const achat = acheter(etat);

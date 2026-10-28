@@ -47,6 +47,27 @@ export function poidsDesChemins(niveau: Niveau): number[] {
   return menaces.map((m) => (total > 0 ? m / total : 1 / menaces.length));
 }
 
+/**
+ * Parts (0 à 1) de la menace du niveau portées par des volants et par des furtifs : ce que le bot soigneux doit savoir pour
+ * ne pas acheter de tours qui ne touchent pas les volants, et pour penser aux Guetteurs des Toits contre les furtifs.
+ */
+export function partsSpeciales(niveau: Niveau): { volants: number; furtifs: number } {
+  let total = 0;
+  let volants = 0;
+  let furtifs = 0;
+  for (const vague of niveau.vagues) {
+    for (const p of vague.paquets) {
+      const def = table[p.ennemi];
+      if (!def) continue;
+      const menace = p.nombre * menaceEnnemi(def);
+      total += menace;
+      if (def.volant) volants += menace;
+      if (def.furtif) furtifs += menace;
+    }
+  }
+  return total > 0 ? { volants: volants / total, furtifs: furtifs / total } : { volants: 0, furtifs: 0 };
+}
+
 /** Longueur de chemin (en tuiles) à moins de `portee` du point, chaque chemin pesé par `poids`. */
 export function longueurVue(echantillons: readonly Echantillon[], poids: readonly number[], p: Point, portee: number): number {
   let total = 0;

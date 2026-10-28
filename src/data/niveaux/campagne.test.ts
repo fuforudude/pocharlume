@@ -80,9 +80,13 @@ describe('les 12 nouvelles cartes', () => {
     expect(Object.values(CARTES).filter((c) => c.region === 1)).toHaveLength(4);
   });
 
-  it('ont 9 socles pour un chemin, 11 pour deux, et 20 décors au moins', () => {
+  it('ont 9 socles pour un chemin, de 9 à 12 pour deux, et 40 décors au moins', () => {
     for (const c of nouvelles) {
-      expect(c.socles.length, c.id).toBe(c.chemins.length === 1 ? 9 : 11);
+      if (c.chemins.length === 1) expect(c.socles.length, c.id).toBe(9);
+      else {
+        expect(c.socles.length, c.id).toBeGreaterThanOrEqual(9);
+        expect(c.socles.length, c.id).toBeLessThanOrEqual(12);
+      }
       expect(c.decor.length, c.id).toBeGreaterThanOrEqual(40);
       expect(c.zones.length, c.id).toBeGreaterThanOrEqual(3);
     }

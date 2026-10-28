@@ -1,19 +1,21 @@
-// `npm run balance` : rejoue les 10 niveaux de la région 1 dans les trois difficultés avec chacun des trois dieux
+// `npm run balance` : rejoue les 50 niveaux des régions 1 à 5 dans les trois difficultés avec chacun des trois dieux
 // (son avatar, sans amélioration ni objet) et les bots (naïf, soigneux, sans défense) sur toutes les graines
-// d'évaluation, plus les vérifications supplémentaires (disciples, arbre au maximum, héros de niveau 10, soigneux sans
-// tour divine). Écrit balance-report.md à la racine et affiche les écarts aux bandes cibles. Code de sortie 1 si une
-// bande n'est pas respectée.
+// d'évaluation, plus, pour la région 1, les vérifications supplémentaires (disciples, arbre au maximum, héros de niveau 10,
+// soigneux sans tour divine). Écrit balance-report.md à la racine et affiche les écarts aux bandes cibles. Code de sortie 1
+// si une bande de la région 1 n'est pas respectée ; les écarts des régions 2 à 5, qui n'ont pas encore de bandes imposées
+// (tâche 6 du jalon 3), sont affichés et écrits dans le rapport mais ne font pas échouer la commande.
 // Chaque tâche (niveau, difficulté, dieu ou profil) se calcule dans un fil à part ; le résultat ne dépend pas de leur
 // ordre d'arrivée (les évaluations sont remises dans l'ordre avant la rédaction).
 //
 // Mise au point : `npm run balance -- --dieux=plume,pollen --difficultes=matou --graines=5 --entrainement=1 --detail`
 // (`--entrainement=1` reproduit les tests des bandes) ne joue que les bandes demandées, affiche un résumé compact (`--detail` : niveau par niveau, avec sorts lancés et tour divine) et
-// n'écrit pas le rapport.
+// n'écrit pas le rapport. `--niveaux=11-20` (ou `--niveaux=3,12,40-42`) limite les niveaux joués ; sans lui, la mise au point
+// porte sur la région 1 comme avant.
 import { writeFileSync } from 'node:fs';
 import { availableParallelism } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { Worker } from 'node:worker_threads';
-import { REGION1 } from '../../src/data/niveaux/region1.ts';
+import { CAMPAGNE } from '../../src/data/niveaux/campagne.ts';
 import { correlationDeRang, courbeDifficulte, nomDuDieu, verifierBandes } from '../../src/equilibrage/bandes.ts';
 import {
   DIEUX_EVALUES,
@@ -27,6 +29,7 @@ import {
 } from '../../src/equilibrage/campagne.ts';
 import { profilProgression, profilsDisciples, profilSansTourDivine } from '../../src/equilibrage/profils.ts';
 import { redigerRapport } from '../../src/equilibrage/rapport.ts';
+import { ecartsDeRegion, evaluationsDeRegion, redigerRegions } from '../../src/equilibrage/rapport-regions.ts';
 import type { TacheBandes, TacheProfil } from './travailleur.ts';
 
 const SORTIE = fileURLToPath(new URL('../../balance-report.md', import.meta.url));
@@ -59,8 +62,20 @@ const difficultesVoulues = liste('difficultes', DIFFICULTES_EVALUEES);
 const graines = Number(options.get('graines') ?? GRAINES_EVALUATION.length);
 const entrainement = Number(options.get('entrainement') ?? GRAINES_ENTRAINEMENT.length);
 const profilsVoulus = (options.get('profils') ?? '').split(',').filter((x) => x !== '');
-const miseAuPoint = ['dieux', 'difficultes', 'graines', 'entrainement', 'profils'].some((cle) => options.has(cle));
-const numeros = REGION1.map((n) => n.numero);
+const miseAuPoint = ['dieux', 'difficultes', 'graines', 'entrainement', 'profils', 'niveaux'].some((cle) => options.has(cle));
+/** `11-20` ou `3,12,40-42` : la liste des numéros de campagne voulus. */
+function lireNiveaux(texte: string): number[] {
+  return texte.split(',').flatMap((morceau) => {
+    const [debut, fin] = morceau.split('-').map(Number);
+    return Array.from({ length: (fin ?? debut ?? 0) - (debut ?? 0) + 1 }, (_, i) => (debut ?? 0) + i);
+  });
+}
+const NIVEAUX_REGION1 = CAMPAGNE.slice(0, 10).map((n) => n.numero);
+const numeros = options.has('niveaux')
+  ? lireNiveaux(options.get('niveaux') ?? '').filter((n) => CAMPAGNE.some((c) => c.numero === n))
+  : miseAuPoint
+    ? NIVEAUX_REGION1
+    : CAMPAGNE.map((n) => n.numero);
 
 const debut = performance.now();
 const taches: Tache[] = numeros.flatMap((numero) =>
@@ -69,7 +84,8 @@ const taches: Tache[] = numeros.flatMap((numero) =>
 // Vérifications supplémentaires : toutes dans le rapport complet, au choix (`--profils=disciples,progression,divine`) en mise au point.
 const complet = !miseAuPoint;
 const deuxBots = ['naif', 'soigneux'] as const;
-for (const numero of numeros) {
+// Les vérifications supplémentaires ne portent que sur la région 1.
+for (const numero of numeros.filter((n) => NIVEAUX_REGION1.includes(n))) {
   if (complet || profilsVoulus.includes('disciples')) {
     for (const profil of profilsDisciples().filter((p) => complet || dieuxVoulus.includes(p.dieu))) {
       taches.push({ type: 'profil', numero, profil, difficulte: 'matou', graines, bots: deuxBots });
@@ -150,7 +166,9 @@ if (miseAuPoint) {
   // Écarts aux bandes : tous si l'on a joué tous les dieux et toutes les difficultés, sinon seulement ceux des dieux joués.
   if (!options.has('difficultes')) {
     const complets = dieuxVoulus.length === DIEUX_EVALUES.length;
-    const ecarts = verifierBandes(evaluations).filter((e) => complets || dieuxVoulus.some((d) => e.includes(`(${nomDuDieu(d)})`)));
+    const ecarts = (numeros.every((n) => NIVEAUX_REGION1.includes(n)) ? verifierBandes(evaluations) : ecartsDeRegion(evaluations)).filter(
+      (e) => complets || dieuxVoulus.some((d) => e.includes(`(${nomDuDieu(d)})`)),
+    );
     console.log(ecarts.length === 0 ? 'Toutes les bandes sont respectées.' : [`${String(ecarts.length)} écart(s) aux bandes :`, ...ecarts.map((e) => `- ${e}`)].join('\n'));
   }
   const groupes = new Map<string, EvaluationProfil[]>();
@@ -164,14 +182,23 @@ if (miseAuPoint) {
   }
   console.log(`${String(Math.round((performance.now() - debut) / 100) / 10)} s.`);
 } else {
-  writeFileSync(SORTIE, redigerRapport(evaluations, graines, profils));
-  const ecarts = verifierBandes(evaluations);
+  // Rapport principal : région 1, comme avant ; puis la section des régions 2 à 5 (premier passage).
+  const region1 = evaluationsDeRegion(evaluations, 1);
+  writeFileSync(SORTIE, `${redigerRapport(region1, graines, profils).trimEnd()}
+
+${redigerRegions(evaluations, [2, 3, 4, 5]).trimEnd()}
+`);
+  const ecarts = verifierBandes(region1);
   console.log(`balance-report.md écrit en ${String(Math.round((performance.now() - debut) / 100) / 10)} s.`);
   if (ecarts.length === 0) {
-    console.log('Toutes les bandes sont respectées.');
+    console.log('Toutes les bandes de la région 1 sont respectées.');
   } else {
-    console.log(`${String(ecarts.length)} écart(s) aux bandes :`);
+    console.log(`${String(ecarts.length)} écart(s) aux bandes de la région 1 :`);
     for (const e of ecarts) console.log(`- ${e}`);
     process.exitCode = 1;
+  }
+  for (const region of [2, 3, 4, 5]) {
+    const ecartsRegion = ecartsDeRegion(evaluationsDeRegion(evaluations, region));
+    console.log(`Région ${String(region)} (bandes pas encore imposées) : ${String(ecartsRegion.length)} écart(s).`);
   }
 }

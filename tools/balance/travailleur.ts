@@ -1,7 +1,7 @@
 // Fil de calcul de `npm run balance` : évalue un niveau dans une difficulté (pour un dieu, ou pour un profil de
 // vérification supplémentaire) et renvoie les évaluations au fil principal (tools/balance/index.ts).
 import { parentPort, workerData } from 'node:worker_threads';
-import { REGION1 } from '../../src/data/niveaux/region1.ts';
+import { niveauDeCampagne } from '../../src/data/niveaux/campagne.ts';
 import { evaluerCampagne, evaluerProfil, GRAINES_ENTRAINEMENT, GRAINES_EVALUATION, type Profil } from '../../src/equilibrage/campagne.ts';
 
 export interface TacheBandes {
@@ -24,7 +24,7 @@ export interface TacheProfil {
 }
 
 const tache = workerData as TacheBandes | TacheProfil;
-const campagne = REGION1.find((n) => n.numero === tache.numero);
+const campagne = niveauDeCampagne(tache.numero);
 if (!campagne) throw new Error(`Niveau ${String(tache.numero)} introuvable`);
 const graines =
   tache.graines <= GRAINES_EVALUATION.length ? GRAINES_EVALUATION.slice(0, tache.graines) : Array.from({ length: tache.graines }, (_, i) => 101 + i);

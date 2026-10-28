@@ -77,6 +77,20 @@ describe('budget de vague et arêtes attendues', () => {
     for (let w = 1; w < 30; w++) expect(budgetVague(5, w + 1)).toBeGreaterThan(budgetVague(5, w));
   });
 
+  it('la croissance par niveau est pleine jusqu’au niveau 10 (région 1) et plus lente ensuite', () => {
+    const { croissanceNiveau, croissanceNiveauSuite, niveauPleineCroissance, budgetBase, croissanceVague } = EQUILIBRAGE;
+    expect(niveauPleineCroissance).toBe(10);
+    expect(croissanceNiveauSuite).toBeLessThan(croissanceNiveau);
+    expect(croissanceNiveauSuite).toBeGreaterThan(0);
+    // Région 1 : la formule d'origine, à l'identique.
+    for (let l = 1; l <= 10; l++) expect(budgetVague(l, 1)).toBeCloseTo(budgetBase * (1 + croissanceNiveau * (l - 1)), 9);
+    expect(budgetVague(10, 5)).toBeCloseTo(budgetBase * (1 + croissanceNiveau * 9) * (1 + croissanceVague * 4), 9);
+    // Ensuite : pente réduite, sans saut au niveau 10.
+    expect(budgetVague(11, 1) - budgetVague(10, 1)).toBeCloseTo(budgetBase * croissanceNiveauSuite, 9);
+    expect(budgetVague(50, 1)).toBeCloseTo(budgetBase * (1 + croissanceNiveau * 9 + croissanceNiveauSuite * 40), 9);
+    expect(budgetVague(50, 1)).toBeLessThan(budgetBase * (1 + croissanceNiveau * 49));
+  });
+
   it('les arêtes attendues suivent le budget et leur cumul croît', () => {
     expect(aretesAttenduesVague(3, 4)).toBeCloseTo(budgetVague(3, 4) * EQUILIBRAGE.aretesParMenace);
     expect(aretesCumuleesAttendues(1, 0, 260)).toBe(260);

@@ -17,8 +17,16 @@ export const EQUILIBRAGE = {
   vitesseReference: 1,
   /** Menace de la vague 1 du niveau 1. */
   budgetBase: 260,
-  /** Croissance du budget par niveau de campagne (1 à 100). */
+  /** Croissance du budget par niveau de campagne, jusqu'au niveau `niveauPleineCroissance` (la région 1). */
   croissanceNiveau: 0.15,
+  /** Dernier niveau de campagne qui croît à la pleine vitesse : le boss de la région 1. */
+  niveauPleineCroissance: 10,
+  /**
+   * Croissance du budget par niveau au-delà : plus lente, car les tours n'ont que quatre niveaux et un nombre de socles
+   * borné (les régions suivantes ajoutent des mécaniques d'ennemis plutôt que des armées dix fois plus grosses). Réglé avec
+   * le simulateur (voir docs/architecture.md).
+   */
+  croissanceNiveauSuite: 0.03,
   /**
    * Croissance du budget par vague dans un niveau. Haute à dessein : une défense complète finit par tout arrêter,
    * ce sont les dernières vagues qui empêchent le héros seul (ou une défense négligée) de gagner.
@@ -131,7 +139,10 @@ export function menaceEnnemi(def: DefEnnemi): number {
 
 /** Budget de menace b(L, w) de la vague w (1, 2…) du niveau de campagne L (1 à 100). */
 export function budgetVague(niveau: number, vague: number): number {
-  return EQUILIBRAGE.budgetBase * (1 + EQUILIBRAGE.croissanceNiveau * (niveau - 1)) * (1 + EQUILIBRAGE.croissanceVague * (vague - 1));
+  const { croissanceNiveau, croissanceNiveauSuite, niveauPleineCroissance } = EQUILIBRAGE;
+  const pleine = Math.min(niveau, niveauPleineCroissance) - 1;
+  const suite = Math.max(0, niveau - niveauPleineCroissance);
+  return EQUILIBRAGE.budgetBase * (1 + croissanceNiveau * pleine + croissanceNiveauSuite * suite) * (1 + EQUILIBRAGE.croissanceVague * (vague - 1));
 }
 
 /** Arêtes attendues des primes de la vague w du niveau L. */
