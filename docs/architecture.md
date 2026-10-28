@@ -396,8 +396,7 @@ est le centre de la case** (`tour.x = (cx + 0,5) × 2`). Deux tours ne partagent
   fût ; le rendu dessine donc une tour posée `DECALAGE_BASE_TOUR` = 6 pixels plus bas (`suivi.ts`), pour que l'empreinte au sol, qui
   s'étend sous le pied, soit centrée (tireur, projectiles et fumées suivent). Horizontalement les sprites sont déjà centrés à 2 pixels
   près (test sur l'atlas, `decalage-tour.test.ts`). Les tourelles des héros et des tours divines, posées n'importe où, ne sont pas
-  décalées. Les tours de 32 px de large (artillerie, atelier, sanctuaire, caserne de niveau 3) touchent la case voisine : l'écart visible
-  entre deux tours voisines dépend de l'art, pas du code. Ordre de dessin : clé de tri = ordonnée du centre de la case, donc une tour plus au
+  décalées. Une tour posée ne dépasse pas 28 px de large (contour compris, tous cadres), pour garder un écart visible entre deux tours voisines :  le vérifie sur l’atlas, centrage à 2 px près. Ordre de dessin : clé de tri = ordonnée du centre de la case, donc une tour plus au
   sud recouvre le haut des tours qu'elle masque (les tours hautes de 48 px s'empilent en colonne sur des cases voisines).
 - **Simulateur** : les bots jouent toutes les cases libres. Le naïf les classe par distance au chemin (avec un bruit). Le soigneux
   garde une recherche raisonnable : pour chaque famille et pour la tour divine, il classe une fois pour toutes les cases où la tour voit
