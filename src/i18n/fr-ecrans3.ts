@@ -33,7 +33,7 @@ export const frEcrans3 = {
 
   // Bilan de fin de partie : défi réussi, disciple offert, région ouverte
   'fin.bilan_defi': 'Défi {defi} réussi : +{n} braises',
-  'fin.bilan_defi_sans_prime': 'Défi {defi} réussi',
+  'fin.bilan_region_numero': 'Région {n} ouverte',
   'fin.bilan_disciple': '{nom} rejoint tes héros !',
   'fin.bilan_region': 'Région ouverte : {nom}',
 
