@@ -564,6 +564,8 @@ export interface Difficulte {
   readonly vies: number;
   readonly aretesDepart: number;
   readonly primes: number;
+  /** Nombre de dernières vagues dont les groupes (boss exceptés) sont d'élite : 0 = aucune. */
+  readonly vaguesElites: number;
 }
 
 /** Règles générales de la partie. */

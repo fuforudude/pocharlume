@@ -71,6 +71,16 @@ function vaguesDuDefi(vagues: readonly Vague[], defi: DefiPartie | null): readon
   return vagues;
 }
 
+/**
+ * Les `nombre` dernières vagues avec leurs groupes (boss exceptés) en élite : la difficulté Vieux Sage les joue ainsi.
+ * Les défis se jouent avec les règles de Matou, qui n'en demande aucune.
+ */
+function vaguesAvecElites(vagues: readonly Vague[], nombre: number): readonly Vague[] {
+  if (nombre <= 0) return vagues;
+  const debut = vagues.length - nombre;
+  return vagues.map((v, i) => (i < debut ? v : { paquets: v.paquets.map((p) => (estBoss(p.ennemi) ? p : { ...p, elite: true })) }));
+}
+
 function verifierVersionDonnees(version: unknown): void {
   if (version !== VERSION_DONNEES) {
     throw new Error(`Partie prévue pour la version des données ${String(version)}, le jeu est en version ${String(VERSION_DONNEES)}`);
@@ -87,7 +97,7 @@ export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
   const defi = config.defi ?? null;
   if (defi === 'fer' && !niveau.defiFer) throw new Error(`Défi Fer : le niveau ${niveau.id} n’a pas de familles imposées`);
   const copieBrute = JSON.parse(JSON.stringify(niveau)) as Niveau;
-  const copie: Niveau = { ...copieBrute, vagues: vaguesDuDefi(copieBrute.vagues, defi) };
+  const copie: Niveau = { ...copieBrute, vagues: vaguesAvecElites(vaguesDuDefi(copieBrute.vagues, defi), difficulte.vaguesElites) };
   const vies = defi === 'heroique' ? REGLES.heroique.vies : difficulte.vies;
   const etat: EtatPartie = {
     version: VERSION_ETAT,
