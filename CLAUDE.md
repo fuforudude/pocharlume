@@ -36,6 +36,10 @@ En bref :
 - Tout en français : interface, commentaires, noms, messages de commit.
 - TypeScript strict (`strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`), sans framework UI ni
   dépendance de jeu. Versions des dépendances épinglées.
+- Dépendances minimales : **aucune dépendance d'exécution** (le jeu livré n'embarque que notre code). Une
+  dépendance de développement ne s'ajoute que si l'écrire nous-mêmes serait déraisonnable ; l'agent la justifie
+  dans son rendu (besoin, taille, maintenance, licence) et le chef de projet la valide avant la fusion. Sinon,
+  on écrit le code.
 - Tests Vitest à côté du code (`*.test.ts`), écrits avant le code pour le moteur.
 
 ## Git et déploiement
