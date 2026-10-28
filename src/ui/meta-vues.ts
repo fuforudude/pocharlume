@@ -19,7 +19,9 @@ import {
   type IdHeros,
   type IdObjet,
 } from '../data/meta';
-import { etoilesDisponibles, niveauDuHeros, pointsDisponibles, type ChoixPartie, type Sauvegarde } from '../save';
+import type { NiveauCampagne } from '../data/visuel';
+import type { DefiPartie } from '../engine';
+import { etoilesDisponibles, meilleuresEtoiles, niveauDuHeros, pointsDisponibles, type ChoixPartie, type Sauvegarde } from '../save';
 
 // --- Choix avant un niveau ------------------------------------------------------------------------------------
 
@@ -75,6 +77,40 @@ export function vueObjetsChoix(s: Sauvegarde, choisis: readonly IdObjet[]): VueO
     const emporte = choisis.filter((o) => o === id).length;
     return { id, stock, emporte, libre: Math.max(0, stock - emporte) };
   });
+}
+
+// --- Modes d'un niveau : Normal, Héroïque, Fer -----------------------------------------------------------------
+
+export type ModeNiveau = 'normal' | DefiPartie;
+
+export interface VueMode {
+  readonly mode: ModeNiveau;
+  /** Le joueur peut choisir ce mode maintenant. */
+  readonly ouvert: boolean;
+  /** Pourquoi il est fermé : les trois étoiles manquent, ou le niveau n'a pas de défi Fer (pas de familles imposées). */
+  readonly manque: 'trois_etoiles' | 'pas_de_fer' | null;
+  /** Le défi a déjà été réussi sur ce niveau. */
+  readonly reussi: boolean;
+}
+
+/** Les deux familles de tours que le défi Fer impose sur ce niveau, ou null s'il n'a pas de défi Fer. */
+export function famillesDuFer(niveau: NiveauCampagne): readonly string[] | null {
+  return niveau.niveau.defiFer?.familles ?? null;
+}
+
+/**
+ * Les trois modes d'un niveau. Un défi s'ouvre avec les trois étoiles (toutes difficultés confondues, comme
+ * `configDepuisSauvegarde` qui le refuse sinon) ; le défi Fer demande en plus que le niveau fixe ses familles.
+ */
+export function vueModes(s: Sauvegarde, niveau: NiveauCampagne): VueMode[] {
+  const troisEtoiles = meilleuresEtoiles(s, niveau.numero) >= 3;
+  const cle = String(niveau.numero);
+  const reussis = Object.hasOwn(s.meta.defis, cle) ? (s.meta.defis[cle] ?? {}) : {};
+  const defi = (mode: DefiPartie): VueMode => {
+    const manque = !troisEtoiles ? 'trois_etoiles' : mode === 'fer' && famillesDuFer(niveau) === null ? 'pas_de_fer' : null;
+    return { mode, ouvert: manque === null, manque, reussi: reussis[mode] === true };
+  };
+  return [{ mode: 'normal', ouvert: true, manque: null, reussi: false }, defi('heroique'), defi('fer')];
 }
 
 // --- Écran des héros ------------------------------------------------------------------------------------------

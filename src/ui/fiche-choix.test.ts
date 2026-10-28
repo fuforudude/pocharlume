@@ -46,6 +46,35 @@ afterEach(() => {
   document.body.replaceChildren();
 });
 
+describe('fiche : en défi', () => {
+  it('les objets disparaissent (rien n’est emporté en défi), le dieu et le héros restent', () => {
+    const { session } = sessionTruquee(avecStock());
+    const fiche = creerChoixFiche(ATLAS, session, new AbortController().signal);
+    document.body.append(fiche.racine);
+    expect(fiche.racine.querySelector('.choix-slot')).not.toBeNull();
+    fiche.definirDefi(true);
+    expect(fiche.racine.querySelector('.choix-slot')).toBeNull();
+    expect(fiche.racine.querySelector('.choix-objet')).toBeNull();
+    expect(fiche.racine.textContent).toContain(t('fiche.defi_sans_objet'));
+    expect(fiche.racine.querySelectorAll('.choix-dieu')).toHaveLength(3);
+    expect(fiche.racine.querySelectorAll('.choix-heros')).toHaveLength(3);
+  });
+
+  it('le choix d’objets mémorisé revient en quittant le défi', async () => {
+    const s = avecStock();
+    const { session, equipements } = sessionTruquee(s);
+    const fiche = creerChoixFiche(ATLAS, session, new AbortController().signal);
+    document.body.append(fiche.racine);
+    toucher(fiche.racine, 'objet:sablier');
+    equipements[0]?.(OK(s));
+    await attendre();
+    fiche.definirDefi(true);
+    fiche.definirDefi(false);
+    expect(emplacements(fiche.racine)).toBe(1);
+    expect(fiche.choix().objets).toEqual(['sablier']);
+  });
+});
+
 describe('fiche : réponses périmées', () => {
   it('le refus du premier choix, arrivé après le second, est ignoré : le second reste, aucun message', async () => {
     const s = avecStock();

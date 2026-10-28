@@ -4,7 +4,8 @@ import { REGION1 } from '../data/niveaux/region1';
 import { PRIX_DISCIPLE } from '../data/meta';
 import { sauvegardeVide, type Sauvegarde } from '../save';
 import { configDuChoix } from './lancement';
-import { choixJouable, objetsDansLeStock, vueArbre, vueFicheHeros, vueHerosDuDieu, vueObjetsBoutique, vueObjetsChoix } from './meta-vues';
+import type { NiveauCampagne } from '../data/visuel';
+import { choixJouable, famillesDuFer, objetsDansLeStock, vueArbre, vueFicheHeros, vueHerosDuDieu, vueModes, vueObjetsBoutique, vueObjetsChoix } from './meta-vues';
 
 function riche(): Sauvegarde {
   const s = sauvegardeVide();
@@ -106,6 +107,49 @@ describe('vues de la boutique', () => {
     const plein = riche();
     const rempli = { ...plein, meta: { ...plein.meta, objets: { ...plein.meta.objets, sablier: 10 } } };
     expect(vueObjetsBoutique(rempli).find((o) => o.id === 'sablier')?.achetable).toBe(false);
+  });
+});
+
+describe('modes d’un niveau : Normal, Héroïque, Fer', () => {
+  const niveau1 = REGION1[0];
+  if (!niveau1) throw new Error('niveau 1 absent');
+  const avecFer: NiveauCampagne = { ...niveau1, niveau: { ...niveau1.niveau, defiFer: { familles: ['tir', 'magie'] } } };
+
+  function avecEtoiles(etoiles: number, defis: Sauvegarde['meta']['defis'] = {}): Sauvegarde {
+    const s = sauvegardeVide();
+    return { ...s, progression: { niveauMax: 2, etoiles: etoiles > 0 ? { '1': { matou: etoiles as 1 | 2 | 3 } } : {} }, meta: { ...s.meta, defis } };
+  }
+
+  it('Normal est toujours ouvert ; les défis demandent les trois étoiles', () => {
+    for (const etoiles of [0, 1, 2]) {
+      const vues = vueModes(avecEtoiles(etoiles), avecFer);
+      expect(vues.map((v) => v.mode)).toEqual(['normal', 'heroique', 'fer']);
+      expect(vues.map((v) => v.ouvert), `${String(etoiles)} étoile(s)`).toEqual([true, false, false]);
+      expect(vues[1]?.manque).toBe('trois_etoiles');
+      expect(vues[2]?.manque).toBe('trois_etoiles');
+    }
+  });
+
+  it('à trois étoiles (n’importe quelle difficulté), Héroïque et Fer s’ouvrent', () => {
+    const vues = vueModes(avecEtoiles(3), avecFer);
+    expect(vues.map((v) => v.ouvert)).toEqual([true, true, true]);
+    expect(vues.map((v) => v.manque)).toEqual([null, null, null]);
+  });
+
+  it('un niveau sans familles imposées n’a pas de défi Fer, même à trois étoiles', () => {
+    const vues = vueModes(avecEtoiles(3), niveau1);
+    expect(vues.map((v) => v.ouvert)).toEqual([true, true, false]);
+    expect(vues[2]?.manque).toBe('pas_de_fer');
+  });
+
+  it('les défis déjà réussis sont marqués', () => {
+    const vues = vueModes(avecEtoiles(3, { '1': { heroique: true } }), avecFer);
+    expect(vues.map((v) => v.reussi)).toEqual([false, true, false]);
+  });
+
+  it('les deux familles imposées du défi Fer, ou rien', () => {
+    expect(famillesDuFer(avecFer)).toEqual(['tir', 'magie']);
+    expect(famillesDuFer(niveau1)).toBeNull();
   });
 });
 

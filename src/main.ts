@@ -7,7 +7,7 @@ import { installerAudio } from './audio';
 import { DEFS_META } from './data/heros';
 import { REGION1 } from './data/niveaux/region1';
 import type { NiveauCampagne } from './data/visuel';
-import type { EtatPartie } from './engine';
+import type { DefiPartie, EtatPartie } from './engine';
 import { t } from './i18n';
 import { chargerAtlas } from './render/atlas';
 import { Depot, difficulteDe, ouvrirCanalNavigateur, ouvrirStockage, Session, type ChoixPartie, type DifficulteSauvegarde } from './save';
@@ -21,6 +21,7 @@ import { NIVEAU_CAMPAGNE_TEST } from './ui/niveau-test';
 import { afficherOptions } from './ui/options';
 import { lancerNiveau, graineSuivante, type PartieEnCours } from './ui/partie';
 import { texteRefusMeta } from './ui/raisons-meta';
+import { niveauDeCampagne } from './ui/regions-monde';
 
 const conteneur = document.querySelector<HTMLElement>('#app');
 if (!conteneur) throw new Error('Conteneur #app introuvable');
@@ -30,8 +31,12 @@ let session: Session;
 let carteOuverte: EcranCarteMonde | null = null;
 /** Difficulté cochée dans la fiche : celle du dernier niveau lancé. */
 let derniereDifficulte: DifficulteSauvegarde = 'matou';
+/** Région montrée sur la carte du monde : la dernière regardée (absente : la plus haute région ouverte). */
+let derniereRegion: number | undefined;
 
 interface OptionsLancement {
+  /** Défi joué (Héroïque, Fer) ; absent : partie ordinaire. */
+  readonly defi?: DefiPartie;
   /** Dieu, héros et objets choisis sur la fiche ; absent : le dernier choix mémorisé dans la sauvegarde. */
   readonly choix?: ChoixPartie;
   /** Partie sauvegardée à relancer. */
@@ -48,7 +53,8 @@ async function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, l
   let config = reprise?.config;
   if (!config) {
     // Tout ce qui entre dans la partie (dieu, héros et son niveau, compétences, arbre, objets) est figé ici.
-    const composee = configDuChoix(session.sauvegarde, lancement.choix ?? choixJouable(session.sauvegarde), difficulte, nouvelleGraine());
+    const demande = lancement.defi ? { niveau: niveau.numero, defi: lancement.defi } : undefined;
+    const composee = configDuChoix(session.sauvegarde, lancement.choix ?? choixJouable(session.sauvegarde), difficulte, nouvelleGraine(), demande);
     if (!composee.ok) {
       afficherAvis(document.body, t('fiche.lancement_refuse', { raison: texteRefusMeta(composee.raison) }));
       carte();
@@ -85,8 +91,8 @@ async function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, l
       // Comme tout lancement, il débite les objets du stock ; refusé, l'écran de fin reste en place.
       nouvelleConfig: async (precedente) => {
         const graine = graineSuivante(precedente.graine);
-        if (horsSauvegarde) return configDeRelance(session.sauvegarde, precedente, graine);
-        const r = await relancerAvecDebit(session, precedente, graine);
+        if (horsSauvegarde) return configDeRelance(session.sauvegarde, precedente, graine, niveau.numero);
+        const r = await relancerAvecDebit(session, precedente, graine, niveau.numero);
         if (r.ok) return r.config;
         afficherAvis(document.body, r.refus);
         return null;
@@ -139,9 +145,14 @@ function carte(): void {
         session,
         difficulte: derniereDifficulte,
         partieEnCours: partieEnCours(),
-        surLancer: (niveau, difficulte, choix) => {
-          derniereDifficulte = difficulte;
-          jouer(niveau, difficulte, { choix }).catch(console.error);
+        ...(derniereRegion === undefined ? {} : { region: derniereRegion }),
+        surRegion: (numero) => {
+          derniereRegion = numero;
+        },
+        surLancer: (niveau, difficulte, choix, defi) => {
+          // Un défi se joue en Matou, imposé : la difficulté cochée dans la fiche n'est pas changée.
+          if (defi === null) derniereDifficulte = difficulte;
+          jouer(niveau, difficulte, { choix, ...(defi === null ? {} : { defi }) }).catch(console.error);
         },
         // Les écrans des héros et de la boutique couvrent la carte, qui dort dessous puis est rouverte (elle relit la sauvegarde).
         surHeros: () => {
@@ -190,7 +201,7 @@ function accueil(): void {
   app.replaceChildren();
   const { reprise, oubliee } = session.examinerPartie();
   if (oubliee) afficherAvis(document.body, t('sauvegarde.partie_oubliee'));
-  const niveauRepris = reprise ? REGION1.find((n) => n.numero === reprise.niveau) : undefined;
+  const niveauRepris = reprise ? niveauDeCampagne(reprise.niveau) : undefined;
   afficherAccueil(app, {
     surJouer: carte,
     surOptions: () => {

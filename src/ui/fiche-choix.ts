@@ -34,6 +34,11 @@ export interface ChoixFiche {
   readonly racine: HTMLElement;
   /** Le choix courant (dieu, héros, objets), déjà corrigé pour être jouable. */
   choix(): ChoixPartie;
+  /**
+   * En défi, rien ne s'emporte : la section des objets est remplacée par une phrase. Le choix mémorisé n'est pas touché
+   * (il revient en quittant le défi).
+   */
+  definirDefi(enDefi: boolean): void;
 }
 
 function icone(atlas: AtlasRendu, nom: string, echelle: number, classe = 'icone'): HTMLImageElement {
@@ -45,6 +50,7 @@ export function creerChoixFiche(atlas: AtlasRendu, session: SessionChoix, signal
   const racine = el('div', 'choix-fiche');
   let choix = choixJouable(session.sauvegarde);
   let message = '';
+  let enDefi = false;
 
   const dire = (texte: string, cleFocus?: string): void => {
     message = texte;
@@ -165,6 +171,10 @@ export function creerChoixFiche(atlas: AtlasRendu, session: SessionChoix, signal
   function sectionObjets(): HTMLElement {
     const section = el('div', 'choix-section');
     section.append(el('h3', 'choix-titre', t('fiche.choix_objets')));
+    if (enDefi) {
+      section.append(el('p', 'choix-legende', t('fiche.defi_sans_objet')));
+      return section;
+    }
     const emplacements = el('div', 'choix-rangee emplacements');
     for (let i = 0; i < EMPLACEMENTS_OBJETS; i++) {
       const objet = choix.objets[i];
@@ -222,5 +232,13 @@ export function creerChoixFiche(atlas: AtlasRendu, session: SessionChoix, signal
   }
 
   rendre();
-  return { racine, choix: () => ({ ...choix, objets: [...choix.objets] }) };
+  return {
+    racine,
+    choix: () => ({ ...choix, objets: [...choix.objets] }),
+    definirDefi: (valeur) => {
+      if (valeur === enDefi) return;
+      enDefi = valeur;
+      rendre();
+    },
+  };
 }
