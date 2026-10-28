@@ -4,7 +4,7 @@
 import type { DefEnnemi, Vague } from '../../engine/definitions';
 import { ENNEMIS, type IdEnnemi } from '../ennemis';
 import { genererVague } from '../equilibrage';
-import type { PlanNiveau } from './plan-region1';
+import type { PlanNiveau } from './plan-niveau';
 
 /** Un boss ajouté à une vague, en plus de ses ennemis ordinaires (son budget dépasse celui de la vague). */
 export interface BossDeVague {

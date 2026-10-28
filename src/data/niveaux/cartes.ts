@@ -4,45 +4,17 @@
 // Les chemins vont d'une entrée hors de la carte à une sortie hors de la carte ; les chemins d'une même carte
 // peuvent partager leur fin. Un socle est toujours à 2 tuiles de l'axe du chemin qu'il garde, et son
 // ralliement de caserne est le point de cet axe le plus proche.
-import type { CheminCarte, Point, Socle } from '../../engine/definitions';
-import type { Decor, ZoneSol } from '../visuel';
-
-export type IdCarte = 'chaumes' | 'gue' | 'pendus' | 'carrefour';
-
-export interface CarteModele {
-  readonly id: IdCarte;
-  readonly largeur: number;
-  readonly hauteur: number;
-  readonly chemins: readonly CheminCarte[];
-  readonly socles: readonly Socle[];
-  /** Où attend le héros : sur la fin commune des chemins, donc sur le chemin de tous les niveaux. */
-  readonly departHeros: Point;
-  readonly zones: readonly ZoneSol[];
-  readonly decor: readonly Decor[];
-}
-
-function chemin(...points: [number, number][]): CheminCarte {
-  return { points: points.map(([x, y]) => ({ x, y })) };
-}
-
-function socle(x: number, y: number, rx: number, ry: number): Socle {
-  return { x, y, ralliement: { x: rx, y: ry } };
-}
-
-function decor(sprite: string, x: number, y: number, miroir = false): Decor {
-  return miroir ? { sprite, x, y, miroir } : { sprite, x, y };
-}
-
-function zone(sol: ZoneSol['sol'], x: number, y: number, largeur: number, hauteur: number): ZoneSol {
-  return { sol, x, y, largeur, hauteur };
-}
+// Les cartes des régions 2 à 5 sont dans cartes-region2.ts à cartes-region5.ts, même structure (modele-carte.ts) ;
+// `CARTES` (cartes-toutes.ts) les rassemble.
+import { chemin, decor, socle, zone, type CarteModele } from './modele-carte';
 
 /**
  * Les Chaumes : un grand serpent. Le chemin 0 descend du nord-ouest, le chemin 1 arrive du sud-ouest et le
  * rejoint au milieu de la première descente ; ils partagent la fin du parcours.
  */
-const CHAUMES: CarteModele = {
+export const CHAUMES: CarteModele = {
   id: 'chaumes',
+  region: 1,
   largeur: 32,
   hauteur: 18,
   chemins: [
@@ -120,8 +92,9 @@ const CHAUMES: CarteModele = {
  * Le Gué : un chemin qui s'enroule autour d'un îlot. Le chemin 0 arrive du nord, le chemin 1 de l'est, le
  * chemin 2 du sud-est ; tous finissent par la même descente vers le sud.
  */
-const GUE: CarteModele = {
+export const GUE: CarteModele = {
   id: 'gue',
+  region: 1,
   largeur: 32,
   hauteur: 18,
   chemins: [
@@ -203,8 +176,9 @@ const GUE: CarteModele = {
  * La Route des Pendus : une arche. Le chemin 0 longe le bas puis monte sur la gauche, le chemin 1 arrive du
  * nord-ouest et le chemin 2 du nord-est ; tous finissent par la descente de droite.
  */
-const PENDUS: CarteModele = {
+export const PENDUS: CarteModele = {
   id: 'pendus',
+  region: 1,
   largeur: 32,
   hauteur: 18,
   chemins: [
@@ -287,8 +261,9 @@ const PENDUS: CarteModele = {
  * Le Carrefour : trois chemins (deux à l'ouest, un au nord) se rejoignent sur une longue ligne droite, puis
  * descendent d'un cran vers la sortie à l'est.
  */
-const CARREFOUR: CarteModele = {
+export const CARREFOUR: CarteModele = {
   id: 'carrefour',
+  region: 1,
   largeur: 32,
   hauteur: 18,
   chemins: [
@@ -366,11 +341,3 @@ const CARREFOUR: CarteModele = {
     decor('tonneau', 15, 1.5),
   ],
 };
-
-export const CARTES: Readonly<Record<IdCarte, CarteModele>> = {
-  chaumes: CHAUMES,
-  gue: GUE,
-  pendus: PENDUS,
-  carrefour: CARREFOUR,
-};
-

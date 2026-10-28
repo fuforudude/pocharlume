@@ -1,7 +1,6 @@
-// Plan des 10 niveaux du Village Affamé : quelle carte, quels chemins et socles, quels ennemis, combien de
-// vagues. Les vagues elles-mêmes ne sont pas ici : `npm run niveaux` les génère depuis ce plan et les fige
-// dans vagues-region1.ts. Changer ce plan (ennemis, nombre de vagues, graine, nombre de chemins) demande de
-// relancer `npm run niveaux`, un test le rappelle.
+// Plan des 10 niveaux du Village Affamé (type et règles communes : plan-niveau.ts). Les vagues elles-mêmes ne sont pas ici :
+// `npm run niveaux` les génère depuis ce plan et les fige dans vagues-region1.ts. Changer ce plan (ennemis, nombre de
+// vagues, graine, nombre de chemins) demande de relancer `npm run niveaux`, un test le rappelle.
 //
 // `aretesDepart` est réglé niveau par niveau avec le simulateur (`npm run balance`, voir docs/architecture.md) : il
 // donne la difficulté de chaque carte (nombre de chemins et de socles) sans toucher aux budgets de vagues. Il n'est
@@ -10,30 +9,7 @@
 // Progression : le niveau 1 a un chemin simple et 6 socles ; le mendiant arrive au 3, le chien errant au 5 ;
 // plusieurs entrées du 5 au 9 ; le niveau 10 est le combat contre le Boucher de Vaudrelle.
 import type { IdEnnemi } from '../ennemis';
-import type { BossDeVague } from './generation';
-import type { IdCarte } from './cartes';
-
-export interface PlanNiveau {
-  /** 1 à 10 dans la région. */
-  readonly numero: number;
-  readonly carte: IdCarte;
-  /** Chemins de la carte utilisés (entrées), dans l'ordre : le paquet `chemin: i` suit `chemins[i]`. */
-  readonly chemins: readonly number[];
-  /** Socles de la carte utilisés, dans l'ordre : leur indice dans le niveau est leur rang ici. */
-  readonly socles: readonly number[];
-  readonly aretesDepart: number;
-  /** Clés de src/i18n/fr.ts. */
-  readonly nom: string;
-  readonly ambiance: string;
-  readonly vagues: {
-    readonly nombre: number;
-    readonly ennemis: readonly IdEnnemi[];
-    readonly graine: number;
-    readonly boss?: BossDeVague;
-    /** Vagues retouchées à la main : le test de cohérence avec le générateur les laisse de côté. */
-    readonly retouchees?: boolean;
-  };
-}
+import type { PlanNiveau } from './plan-niveau';
 
 const PAYSAN: readonly IdEnnemi[] = ['paysan_affame'];
 const PAYSAN_MENDIANT: readonly IdEnnemi[] = ['paysan_affame', 'mendiant'];
@@ -46,6 +22,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     chemins: [0],
     socles: [0, 3, 5, 6, 9, 12],
     aretesDepart: 210,
+    defiFer: { familles: ['caserne', 'tir'] },
     nom: 'niveau.r1.01.nom',
     ambiance: 'niveau.r1.01.ambiance',
     vagues: { nombre: 6, ennemis: PAYSAN, graine: 1101 },
@@ -56,6 +33,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     chemins: [0],
     socles: [0, 3, 4, 6, 7, 12, 16],
     aretesDepart: 315,
+    defiFer: { familles: ['caserne', 'magie'] },
     nom: 'niveau.r1.02.nom',
     ambiance: 'niveau.r1.02.ambiance',
     vagues: { nombre: 7, ennemis: PAYSAN, graine: 1102 },
@@ -66,6 +44,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     chemins: [0],
     socles: [1, 4, 6, 8, 9, 14, 20],
     aretesDepart: 200,
+    defiFer: { familles: ['caserne', 'artillerie'] },
     nom: 'niveau.r1.03.nom',
     ambiance: 'niveau.r1.03.ambiance',
     vagues: { nombre: 7, ennemis: PAYSAN_MENDIANT, graine: 1103 },
@@ -76,6 +55,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     chemins: [0],
     socles: [1, 3, 5, 8, 10, 12, 14, 16],
     aretesDepart: 240,
+    defiFer: { familles: ['tir', 'magie'] },
     nom: 'niveau.r1.04.nom',
     ambiance: 'niveau.r1.04.ambiance',
     vagues: { nombre: 8, ennemis: PAYSAN_MENDIANT, graine: 1104 },
@@ -86,6 +66,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     chemins: [0, 1],
     socles: [0, 3, 5, 7, 10, 13, 14, 16],
     aretesDepart: 530,
+    defiFer: { familles: ['tir', 'artillerie'] },
     nom: 'niveau.r1.05.nom',
     ambiance: 'niveau.r1.05.ambiance',
     vagues: { nombre: 8, ennemis: TOUS, graine: 1105 },
@@ -96,6 +77,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     chemins: [0, 1],
     socles: [0, 3, 6, 8, 9, 11, 12, 16],
     aretesDepart: 515,
+    defiFer: { familles: ['magie', 'artillerie'] },
     nom: 'niveau.r1.06.nom',
     ambiance: 'niveau.r1.06.ambiance',
     vagues: { nombre: 9, ennemis: TOUS, graine: 1106 },
@@ -106,6 +88,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     chemins: [0, 1],
     socles: [0, 4, 5, 8, 9, 12, 14, 16, 20],
     aretesDepart: 340,
+    defiFer: { familles: ['caserne', 'tir'] },
     nom: 'niveau.r1.07.nom',
     ambiance: 'niveau.r1.07.ambiance',
     vagues: { nombre: 10, ennemis: TOUS, graine: 1107 },
@@ -116,6 +99,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     chemins: [0, 1],
     socles: [0, 2, 3, 5, 8, 10, 12, 15, 17],
     aretesDepart: 330,
+    defiFer: { familles: ['caserne', 'magie'] },
     nom: 'niveau.r1.08.nom',
     ambiance: 'niveau.r1.08.ambiance',
     vagues: { nombre: 10, ennemis: TOUS, graine: 1108 },
@@ -126,6 +110,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     chemins: [0, 1, 2],
     socles: [0, 4, 6, 9, 12, 13, 16, 17, 19, 21],
     aretesDepart: 700,
+    defiFer: { familles: ['caserne', 'artillerie'] },
     nom: 'niveau.r1.09.nom',
     ambiance: 'niveau.r1.09.ambiance',
     vagues: { nombre: 11, ennemis: TOUS, graine: 1109 },
@@ -136,6 +121,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     chemins: [0, 1, 2],
     socles: [0, 3, 4, 7, 9, 11, 12, 14, 17, 18],
     aretesDepart: 610,
+    defiFer: { familles: ['tir', 'magie'] },
     nom: 'niveau.r1.10.nom',
     ambiance: 'niveau.r1.10.ambiance',
     vagues: {

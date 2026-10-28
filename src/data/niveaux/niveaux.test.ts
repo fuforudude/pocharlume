@@ -7,13 +7,14 @@ import { budgetVague, menaceVague } from '../equilibrage';
 import { REGLES } from '../regles';
 import { FAMILLES, TOURS } from '../tours';
 import type { NiveauCampagne } from '../visuel';
-import { CARTES } from './cartes';
+import { CARTES } from './cartes-toutes';
 import { vaguesDuPlan } from './generation';
 import { distancePointChemin, distanceRectChemin, rectsSeChevauchent } from './geometrie';
 import { DEMI_LARGEUR_CHEMIN, empriseDecor, empriseSocle, empriseSprite, GRANDS_DECORS, MARGE_DECOR } from './habillage';
+import { CAMPAGNE, TEXTES_REGIONS, VAGUES_REGIONS } from './campagne';
 import { PLANS_REGION1 } from './plan-region1';
-import { NIVEAU_TEST, REGION1, TEXTES_REGION1 } from './region1';
-import { VAGUES_REGION1 } from './vagues-region1';
+import { PLANS_REGIONS } from './plans';
+import { NIVEAU_TEST, REGION1 } from './region1';
 
 interface SpriteAtlas {
   readonly categorie: string;
@@ -101,7 +102,7 @@ function verifierCarte(niveau: Niveau): void {
 }
 
 describe('validité des cartes', () => {
-  for (const campagne of REGION1) {
+  for (const campagne of CAMPAGNE) {
     it(`niveau ${String(campagne.numero)} : chemins, socles, ralliements, héros et paquets sont valides`, () => {
       verifierCarte(campagne.niveau);
     });
@@ -212,11 +213,14 @@ describe('progression de la région', () => {
 
 describe('vagues figées', () => {
   it('correspondent à ce que produit le générateur depuis le plan (sinon : npm run niveaux)', () => {
-    PLANS_REGION1.forEach((plan, i) => {
-      if (plan.vagues.retouchees === true) return;
-      expect(VAGUES_REGION1[i], `niveau ${String(plan.numero)} : relancer npm run niveaux`).toEqual(vaguesDuPlan(plan));
+    PLANS_REGIONS.forEach((plans, region) => {
+      const vagues = VAGUES_REGIONS[region] ?? [];
+      plans.forEach((plan, i) => {
+        if (plan.vagues.retouchees === true) return;
+        expect(vagues[i], `niveau ${String(plan.numero)} : relancer npm run niveaux`).toEqual(vaguesDuPlan(plan));
+      });
+      expect(vagues.length, `région ${String(region + 1)}`).toBe(plans.length);
     });
-    expect(VAGUES_REGION1.length).toBe(PLANS_REGION1.length);
   });
 });
 
@@ -234,12 +238,12 @@ describe('habillage', () => {
     }
   });
 
-  it('chaque niveau est habillé : région 1, décor de la région, des zones de boue ou de pavés', () => {
-    for (const n of REGION1) {
-      expect(n.visuel.region).toBe(1);
+  it('chaque niveau est habillé : jeu de tuiles de sa région, décor, des zones de boue ou de pavés', () => {
+    for (const n of CAMPAGNE) {
+      expect(n.visuel.region, `niveau ${String(n.numero)}`).toBe(Math.floor((n.numero - 1) / 10) + 1);
       expect(n.visuel.decor.length, `niveau ${String(n.numero)}`).toBeGreaterThanOrEqual(20);
       expect(n.visuel.zones.length).toBeGreaterThanOrEqual(2);
-      expect(new Set(decorsUtilises(n)).size).toBeGreaterThanOrEqual(8);
+      expect(new Set(decorsUtilises(n)).size, `niveau ${String(n.numero)}`).toBeGreaterThanOrEqual(8);
     }
     const tous = new Set(REGION1.flatMap(decorsUtilises));
     for (const attendu of ['maison-ruine-1', 'maison-ruine-2', 'arbre-mort-1', 'arbre-mort-2', 'puits', 'potence', 'bucher-eteint', 'cloture-h', 'tonneau', 'croix']) {
@@ -249,7 +253,7 @@ describe('habillage', () => {
 
   it('le décor ne recouvre ni un chemin ni un socle du niveau, et reste dans la carte', () => {
     const problemes: string[] = [];
-    for (const n of REGION1) {
+    for (const n of CAMPAGNE) {
       const { carte } = n.niveau;
       for (const d of n.visuel.decor) {
         const quoi = `niveau ${String(n.numero)} : ${d.sprite} en (${String(d.x)},${String(d.y)})`;
@@ -263,7 +267,7 @@ describe('habillage', () => {
   });
 
   it('les zones de sol restent dans la carte, en tuiles entières', () => {
-    for (const n of REGION1) {
+    for (const n of CAMPAGNE) {
       for (const z of n.visuel.zones) {
         expect(['boue', 'paves']).toContain(z.sol);
         expect([z.x, z.y, z.largeur, z.hauteur].every(Number.isInteger)).toBe(true);
@@ -284,11 +288,11 @@ describe('habillage', () => {
 
 describe('textes', () => {
   it('chaque niveau a un nom et une phrase d’ambiance en français, distincts', () => {
-    expect(TEXTES_REGION1.length).toBe(10);
+    expect(TEXTES_REGIONS.map((t) => t.length)).toEqual([10, 10, 10, 10, 10]);
     const cles = new Set(Object.keys(fr));
     const textes = fr as Record<string, string>;
     const vus = new Set<string>();
-    for (const t of TEXTES_REGION1) {
+    for (const t of TEXTES_REGIONS.flat()) {
       for (const cle of [t.nom, t.ambiance]) {
         expect(cles.has(cle), cle).toBe(true);
         const texte = textes[cle] ?? '';

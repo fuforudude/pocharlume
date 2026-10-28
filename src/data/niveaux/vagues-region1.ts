@@ -1,4 +1,4 @@
-// Vagues figées des 10 niveaux du Village Affamé.
+// Vagues figées des 10 niveaux de la région 1, du Village Affamé.
 // GÉNÉRÉ par `npm run niveaux` (tools/niveaux/generer.ts) depuis plan-region1.ts : ne pas modifier à la main.
 // Pour retoucher les vagues d'un niveau, marquer `retouchees: true` dans son plan : le script les conserve.
 import type { Vague } from '../../engine/definitions';
