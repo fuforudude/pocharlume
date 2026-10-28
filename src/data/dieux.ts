@@ -46,7 +46,7 @@ const plume: DefDieu = {
   tourDivine: niveau({
     nom: 'tour.sanctuaire_de_l_ombre',
     cout: 200,
-    portee: 3,
+    portee: 3.5,
     revele: true,
     soldats: soldats({
       nom: 'unite.assassin_du_sanctuaire',

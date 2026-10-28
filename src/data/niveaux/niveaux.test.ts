@@ -1,12 +1,14 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import type { Niveau, Point } from '../../engine/definitions';
-import { caseExiste, casesLibres, centreCase, estCaseInterdite } from '../../engine/grille';
+import { calculerChemin } from '../../engine/chemins';
+import { caseExiste, casesLibres, centreCase, estCaseInterdite, ralliementParDefaut } from '../../engine/grille';
 import { fr } from '../../i18n/fr';
 import { ENNEMIS } from '../ennemis';
 import { budgetVague, menaceVague } from '../equilibrage';
 import { REGLES } from '../regles';
 import { FAMILLES, TOURS } from '../tours';
+import { DIEUX } from '../dieux';
 import type { NiveauCampagne } from '../visuel';
 import { CARTES } from './cartes-toutes';
 import { vaguesDuPlan } from './generation';
@@ -159,6 +161,38 @@ describe('grille de construction des 50 niveaux', () => {
       expect(libres.length, `niveau ${String(n.numero)}`).toBeGreaterThanOrEqual(40);
       const utiles = libres.filter((c) => distanceAuNiveau(n.niveau, centreCase(c.cx, c.cy)) <= PORTEE_TIR_MIN);
       expect(utiles.length, `niveau ${String(n.numero)}`).toBeGreaterThanOrEqual(8);
+    }
+  });
+});
+
+describe('cases jouables des casernes et des familles du défi Fer', () => {
+  const CASES_MIN = 4;
+  /** Cases libres où une tour de cette portée voit un chemin (pour une caserne : où sa règle de ralliement l'accepte). */
+  function casesJouables(n: NiveauCampagne, famille: string): number {
+    const libres = casesLibres({ niveau: n.niveau, tours: [] });
+    if (famille === 'caserne') {
+      const chemins = n.niveau.carte.chemins.map(calculerChemin);
+      return libres.filter((c) => ralliementParDefaut(chemins, c.cx, c.cy, TOURS.caserne.niveaux[0].portee) !== null).length;
+    }
+    const portee = TOURS[famille as keyof typeof TOURS].niveaux[0].portee;
+    return libres.filter((c) => distanceAuNiveau(n.niveau, centreCase(c.cx, c.cy)) <= portee).length;
+  }
+
+  it('la portée de ralliement de la caserne et de la tour divine de Plume est d’au moins 3,5 tuiles dès le niveau 1', () => {
+    expect(TOURS.caserne.niveaux[0].portee).toBeGreaterThanOrEqual(3.5);
+    for (const n of [...TOURS.caserne.niveaux, TOURS.caserne.specialisations.A, TOURS.caserne.specialisations.B]) expect(n.portee).toBeGreaterThanOrEqual(3.5);
+    expect(DIEUX.plume.tourDivine.portee).toBeGreaterThanOrEqual(3.5);
+  });
+
+  it('aucun des 50 niveaux n’est sans case de caserne', () => {
+    for (const n of CAMPAGNE) expect(casesJouables(n, 'caserne'), `niveau ${String(n.numero)}`).toBeGreaterThanOrEqual(CASES_MIN);
+  });
+
+  it('chaque défi Fer a ses deux familles jouables', () => {
+    for (const n of CAMPAGNE) {
+      for (const famille of n.niveau.defiFer?.familles ?? []) {
+        expect(casesJouables(n, famille), `niveau ${String(n.numero)} : ${famille}`).toBeGreaterThanOrEqual(CASES_MIN);
+      }
     }
   });
 });

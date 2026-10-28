@@ -360,7 +360,7 @@ describe('caserne', () => {
     expect(appliquerAction(etat, { type: 'deplacerRalliement', ...ce(1), x: 11.5, y: 5 })).toEqual({ ok: true });
     avancerSecondes(etat, 3);
     for (const s of etat.unites.filter((u) => u.genre === 'soldat')) expect(distance(s.x, s.y, 11.5, 5)).toBeLessThan(1);
-    expect(appliquerAction(etat, { type: 'deplacerRalliement', ...ce(1), x: 13, y: 5 })).toEqual({ ok: false, raison: 'hors_portee' });
+    expect(appliquerAction(etat, { type: 'deplacerRalliement', ...ce(1), x: 15, y: 5 })).toEqual({ ok: false, raison: 'hors_portee' });
     expect(appliquerAction(etat, { type: 'deplacerRalliement', ...ce(1), x: 10, y: 8.5 })).toEqual({ ok: false, raison: 'hors_chemin' });
     expect(appliquerAction(etat, { type: 'deplacerRalliement', ...ce(0), x: 5, y: 5 })).toEqual({ ok: false, raison: 'pas_une_caserne' });
     expect(appliquerAction(etat, { type: 'deplacerRalliement', ...ce(2), x: 15, y: 5 })).toEqual({ ok: false, raison: 'case_vide' });

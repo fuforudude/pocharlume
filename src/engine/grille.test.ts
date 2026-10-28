@@ -177,7 +177,7 @@ describe('construire sur une case', () => {
 
 describe('casernes et point de ralliement par défaut', () => {
   // Chemin 0 : y = 5, tuiles 4 et 5. Cases de la ligne 1 (centre y = 3) et 3 (centre y = 7) : à 2 tuiles de l'axe.
-  // Lignes 0 et 4 (centres y = 1 et 9) : à 4 tuiles, hors de la portée de la caserne (2,5) ; la ligne 4 est à 3 tuiles du chemin 1.
+  // Lignes 0 et 4 (centres y = 1 et 9) : à 4 tuiles, hors de la portée de la caserne (3,5) ; la ligne 4 est à 3 tuiles du chemin 1, donc à portée.
   const PORTEE_CASERNE = TOURS.caserne.niveaux[0].portee;
 
   it('la caserne se pose là où un chemin est à portée, et son ralliement est le point du chemin le plus proche', () => {
@@ -197,37 +197,40 @@ describe('casernes et point de ralliement par défaut', () => {
 
   it('refuse la caserne sur une case sans chemin à portée, avec une raison claire, mais permet les autres familles', () => {
     const etat = partieEssai();
-    // Case (4, 7) : centre (9, 15), à 3 tuiles du chemin 1 (y = 12) et 10 du chemin 0 : hors de portée (2,5).
-    expect(PORTEE_CASERNE).toBe(2.5);
-    expect(validerAction(etat, construire(4, 7, 'caserne'))).toBe('caserne_sans_chemin');
-    expect(appliquerAction(etat, construire(4, 7, 'caserne'))).toEqual({ ok: false, raison: 'caserne_sans_chemin' });
+    // Case (3, 0) : centre (7, 1), à 4 tuiles du chemin 0 (y = 5) et 11 du chemin 1 : hors de portée (3,5).
+    expect(PORTEE_CASERNE).toBe(3.5);
+    expect(validerAction(etat, construire(3, 0, 'caserne'))).toBe('caserne_sans_chemin');
+    expect(appliquerAction(etat, construire(3, 0, 'caserne'))).toEqual({ ok: false, raison: 'caserne_sans_chemin' });
     expect(etat.tours).toEqual([]);
     expect(etat.aretes).toBe(5000);
     for (const tour of ['tir', 'magie', 'artillerie', 'divine'] as const) {
-      expect(validerAction(etat, construire(4, 7, tour)), tour).toBeNull();
+      expect(validerAction(etat, construire(3, 0, tour)), tour).toBeNull();
     }
-    expect(appliquerAction(etat, construire(4, 7, 'artillerie'))).toEqual({ ok: true });
-    // Une case encore plus loin du chemin : 4 tuiles.
-    expect(validerAction(etat, construire(10, 0, 'caserne'))).toBe('caserne_sans_chemin');
+    expect(appliquerAction(etat, construire(3, 0, 'artillerie'))).toEqual({ ok: true });
+    // Une case à une case du chemin, quel que soit l'axe, est à portée : (4, 7) est à 3 tuiles du chemin 1.
+    expect(validerAction(etat, construire(4, 7, 'caserne'))).toBeNull();
   });
 
   it('la portée se compte depuis le centre de la case, bornes comprises', () => {
     const etat = partieEssai();
-    // Centre à 2 tuiles de l'axe : à portée. Centre à 3 (de l'axe du chemin 1) : hors de la portée de 2,5, à portée de 3.
+    // Centre à 2 tuiles de l'axe : à portée. Centre à 3 (de l'axe du chemin 1) : à portée de 3,5 et de 3 (borne comprise), pas de 2,9.
+    // Centre à 4 tuiles (ligne 0) : hors de la portée de 3,5.
     expect(ralliementParDefaut(etat.chemins, 2, 3, PORTEE_CASERNE)).toEqual({ x: 5, y: 5 });
-    expect(ralliementParDefaut(etat.chemins, 2, 4, PORTEE_CASERNE)).toBeNull();
+    expect(ralliementParDefaut(etat.chemins, 2, 4, PORTEE_CASERNE)).toEqual({ x: 5, y: 12 });
     expect(ralliementParDefaut(etat.chemins, 2, 4, 3)).toEqual({ x: 5, y: 12 });
+    expect(ralliementParDefaut(etat.chemins, 2, 4, 2.9)).toBeNull();
+    expect(ralliementParDefaut(etat.chemins, 2, 0, PORTEE_CASERNE)).toBeNull();
     expect(ralliementParDefaut([], 2, 3, 100)).toBeNull();
   });
 
   it('prend le chemin le plus proche quand il y en a deux', () => {
     const etat = partieEssai();
-    // Case (3, 4) : centre (7, 9) ; chemin 0 (y = 5) à 4 tuiles, chemin 1 (y = 12) à 3 : le plus proche, mais 3 > 2,5.
-    expect(validerAction(etat, construire(3, 4, 'caserne'))).toBe('caserne_sans_chemin');
-    expect(ralliementParDefaut(etat.chemins, 3, 4, 3)).toEqual({ x: 7, y: 12 });
+    // Case (3, 4) : centre (7, 9) ; chemin 0 (y = 5) à 4 tuiles, chemin 1 (y = 12) à 3 : le plus proche, puis la caserne s'y pose (3 <= 3,5).
+    expect(validerAction(etat, construire(3, 4, 'caserne'))).toBeNull();
+    expect(ralliementParDefaut(etat.chemins, 3, 4, PORTEE_CASERNE)).toEqual({ x: 7, y: 12 });
   });
 
-  it('la tour divine de Plume (assassins, portée 3) suit la même règle ; celles de Charlie et de Pollen (sans soldats) non', () => {
+  it('la tour divine de Plume (assassins, portée 3,5) suit la même règle ; celles de Charlie et de Pollen (sans soldats) non', () => {
     const plume = partieEssai(configDe('plume'));
     // Case (10, 0) : centre (21, 1), à 4 tuiles du chemin 0 ; case (2, 4) : centre (5, 9), à 3 tuiles du chemin 1.
     expect(validerAction(plume, construire(10, 0, 'divine'))).toBe('caserne_sans_chemin');
@@ -249,7 +252,7 @@ describe('casernes et point de ralliement par défaut', () => {
     const niveau: Niveau = { ...niveauEssai(), defiFer: { familles: ['caserne', 'tir'] } };
     const etat = creerPartie(niveau, { ...CONFIG, defi: 'fer', bonus: { tours: {}, heros: {} } });
     etat.aretes = 5000;
-    expect(validerAction(etat, construire(4, 7, 'caserne'))).toBe('caserne_sans_chemin');
+    expect(validerAction(etat, construire(3, 0, 'caserne'))).toBe('caserne_sans_chemin');
     expect(validerAction(etat, construire(4, 7, 'magie'))).toBe('famille_interdite');
     expect(validerAction(etat, construire(4, 7, 'tir'))).toBeNull();
     expect(validerAction(etat, construire(2, 3, 'caserne'))).toBeNull();

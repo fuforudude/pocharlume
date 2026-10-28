@@ -11,6 +11,11 @@ export const EQUILIBRAGE = {
   presenceChaine: 0.6,
   /** Part du temps où un nécromancien a ses spectres sur le terrain. */
   presenceSpectres: 0.5,
+  /**
+   * Part de la portée d'une tour à soldats sans tir (caserne, Sanctuaire) qui n'est que de l'étendue de ralliement : jusqu'à
+   * 3,5 tuiles pour qu'une caserne à une case du chemin l'atteigne quel que soit l'axe. La puissance ne la compte pas.
+   */
+  elargissementRalliement: 1,
   /** Valeur d'un point de vie (effectif) de bloqueur, en DPS équivalent. */
   valeurBlocageParPv: 0.013,
   /** Vitesse (tuiles/s) dont le facteur de menace vaut 1. */
@@ -100,10 +105,15 @@ export function dpsEfficace(def: DefNiveauTour): number[] {
   });
 }
 
+/** Portée comptée dans la puissance : celle de la tour, moins l'élargissement du ralliement pour une tour à soldats sans tir. */
+export function porteePourPuissance(def: DefNiveauTour): number {
+  return def.soldats && def.cadence === 0 ? def.portee - EQUILIBRAGE.elargissementRalliement : def.portee;
+}
+
 /** Puissance = DPS efficace moyen sur les paliers × portée ÷ coût cumulé. */
 export function puissanceTour(def: DefNiveauTour, coutCumule: number): number {
   const dps = dpsEfficace(def);
-  return ((dps.reduce((a, b) => a + b, 0) / dps.length) * def.portee) / coutCumule;
+  return ((dps.reduce((a, b) => a + b, 0) / dps.length) * porteePourPuissance(def)) / coutCumule;
 }
 
 export interface PalierTour {
