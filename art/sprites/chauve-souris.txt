@@ -1,0 +1,129 @@
+# Chauve-Souris (région 6, dessinée) : petite chauve-souris de charnier, pelage prune sombre, ailes de membrane. Volante :
+# le rendu la soulève de son ombre, le sprite reste posé sur sa ligne des pieds. Rapide et fragile, elle arrive par groupes
+# de 5. 32×32, de profil vers la droite. Version d'élite (chauve-souris-elite) : même recette (modele), tout assombri
+# (sombre), yeux rouges (calque yeux, vide dans la version normale).
+# Ailes tracées par un script jetable (polygones et nervures), puis à retoucher à la main ici.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+couleur 6 2e1a28
+couleur 7 6a3a50
+couleur 3 6c4a78
+
+calque yeux
+.
+
+calque aile-haut 3 7
+.k...........
+kkk.....k....
+kkkkkkkkkk...
+.kkk7k77kk...
+..kkkkk7kkk..
+...kk7k77kk..
+....kk7k7kk..
+.....kkk7kk..
+.....kkkk7kk.
+......kkkkkk.
+.......kkkkk.
+........kkk7k
+.........kkkk
+..........kkk
+...........k.
+
+calque loin-haut 16 9
+......kk..
+.....k66k.
+....k6666k
+....k6666k
+...k6666k.
+...k666k..
+..k666k...
+..k666k...
+.k666k....
+.k66k.....
+k66k......
+.kk.......
+
+calque aile-mid 1 16
+.kkk...........
+kkkkkkkk.......
+.kkkkkkkkkkk...
+...k777kkkkkkk.
+....kkkkkkkkkkk
+.....kkkkkkkkk.
+...........kk..
+
+calque loin-mid 16 18
+.kkkkkkkkkk.
+k6666666666k
+.k666666666k
+..kkkkkkkkk.
+
+calque aile-bas 3 19
+...........k.
+.........kkkk
+........kkkkk
+.......kkkk7k
+.....kkkkkkk.
+....kkkk7kk..
+..kkkkk7kk...
+.kkkkk77kk...
+kkkkkkkkk....
+.kk....k.....
+
+calque loin-bas 17 20
+.k......
+k6k.....
+k66k....
+.k66k...
+..k66k..
+...k66k.
+....k66k
+.....kk.
+
+calque corps 13 17
+.....k.k.
+....k333k.
+...k333333k
+..k3333333kk
+..k33333333k
+...k333333k.
+....kkkkkk..
+....k....k..
+
+calque oeil 19 19
+e
+
+sprite chauve-souris
+anim repos 120
+cadre loin-mid + corps + aile-mid + oeil
+cadre loin-haut + corps decale 0 -1 + aile-haut decale 0 -1 + oeil decale 0 -1
+
+anim marche 70
+cadre loin-haut + corps decale 0 -1 + aile-haut decale 0 -1 + oeil decale 0 -1
+cadre loin-mid + corps + aile-mid + oeil
+cadre loin-bas + corps decale 0 1 + aile-bas decale 0 1 + oeil decale 0 1
+cadre loin-mid + corps + aile-mid + oeil
+
+# Elle fond sur sa proie, ailes rabattues, puis crochète.
+anim attaque 80
+cadre loin-haut + corps decale 0 -1 + aile-haut decale 0 -1 + oeil decale 0 -1 duree 120
+cadre loin-bas + corps decale 3 2 + aile-bas decale 2 2 + oeil decale 3 2
+cadre loin-mid + corps decale 4 3 + aile-mid decale 3 3 + oeil decale 4 3 duree 110
+cadre loin-mid + corps + aile-mid + oeil
+
+anim blesse 100
+cadre loin-bas + corps decale -1 1 + aile-bas decale -1 1 + oeil decale -1 1
+cadre loin-haut + corps decale 0 1 + aile-haut decale 0 1 + oeil decale 0 1
+
+# Elle tombe puis reste sur le dos, les ailes ouvertes.
+anim mort 130
+cadre loin-bas decale 0 3 + corps decale 0 3 + aile-bas decale 0 3 + oeil decale 0 3
+cadre corps retourne decale 0 19 + aile-bas retourne decale 0 19 duree 900
+
+sprite chauve-souris-elite
+modele chauve-souris
+sombre
+calque yeux 19 19
+x

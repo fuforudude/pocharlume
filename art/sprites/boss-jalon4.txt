@@ -1,0 +1,255 @@
+# Les cinq boss des régions 6 à 10 (jalon 4) : humains du pack recolorés et agrandis ×2 (cadres de 64×64, ancre 32 61),
+# comme le Boucher de Vaudrelle et le Juge des Flammes. Mêmes animations (repos, marche, attaque, blesse, mort).
+#   roi-fosses (région 6, le hallebardier)   prince-croise (région 7, l'homme à cheval)   grand-inquisiteur (région 8, le mage)
+#   roi-fou (région 9, le roi)   soleil-bleme (région 10, l'archimage ; identifiant du moteur soleil_bleme)
+# Pas d'élite pour un boss. Fichier généré une première fois par un script puis retouché à la main : on le modifie ici.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+agrandi 2
+couleur S d4b088
+couleur 1 7a7458
+couleur 2 3a2850
+couleur 3 6c4a78
+couleur 4 8a8250
+couleur 5 5e5834
+couleur 6 2e1a28
+couleur 7 4a2438
+
+
+sprite roi-fosses
+minifolks Without Outline/MiniHalberdMan.png
+recolore 4058c0=m 6098e8=M 8cadc6=P b5d6de=q 5a7b94=p ffffff=w f8c090=E 705030=d 623f2a=h c88850=E b07040=e
+# Le Roi des Fosses : le hallebardier du pack, roi pourri, peau verdâtre, manteau de boue, couronne d'os ; la hallebarde est sa pelle.
+
+anim repos 180
+cadre mf 0.0 + couronne decale 0 0 + regard decale 0 0
+cadre mf 0.1 + couronne decale 0 1 + regard decale 0 1
+cadre mf 0.2 + couronne decale 0 1 + regard decale 0 1
+cadre mf 0.3 + couronne decale 0 0 + regard decale 0 0
+
+anim marche 110
+cadre mf 1.0 + couronne decale 0 1 + regard decale 0 1
+cadre mf 1.1 + couronne decale 0 0 + regard decale 0 0
+cadre mf 1.2 + couronne decale 0 -1 + regard decale 0 -1
+cadre mf 1.3 + couronne decale 0 1 + regard decale 0 1
+cadre mf 1.4 + couronne decale 0 0 + regard decale 0 0
+cadre mf 1.5 + couronne decale 0 -1 + regard decale 0 -1
+
+anim attaque 100
+cadre mf 3.0 + couronne decale -1 0 + regard decale -1 0
+cadre mf 3.1 + couronne decale -1 0 + regard decale -1 0
+cadre mf 3.2 + couronne decale 1 0 + regard decale 1 0
+cadre mf 3.3 + couronne decale 1 0 + regard decale 1 0
+cadre mf 3.4 + couronne decale 1 0 + regard decale 1 0
+cadre mf 3.5 + couronne decale 0 0 + regard decale 0 0
+
+anim blesse 120
+cadre mf 4.1 + couronne decale -3 0 + regard decale -3 0
+cadre mf 4.2 + couronne decale -1 0 + regard decale -1 0
+
+anim mort 150
+cadre mf 5.0 + couronne decale -1 1 + regard decale -1 1
+cadre mf 5.1 + couronne decale -2 2 + regard decale -2 2
+cadre mf 5.2
+cadre mf 5.3
+cadre mf 5.4 duree 600
+
+calque couronne 15 18
+q.q.q.q
+qqqqqqq
+
+calque regard 17 22
+E.E
+
+sprite prince-croise
+minifolks Without Outline/MiniHorseMan.png
+recolore b07040=u 705030=k 623f2a=k efc68c=U b58c63=U 373757=g 6098e8=R 4058c0=r b5d6de=P 8cadc6=p 5a7b94=G ffffff=q
+# Le Prince Croisé : l'homme à cheval du pack, destrier noir caparaçonné de rouge sang, armure noircie.
+
+anim repos 120
+cadre mf 0.0
+cadre mf 0.1
+cadre mf 0.2
+cadre mf 0.3
+cadre mf 0.4
+cadre mf 0.5
+cadre mf 0.6
+cadre mf 0.7
+
+anim marche 70
+cadre mf 1.0
+cadre mf 1.1
+cadre mf 1.2
+cadre mf 1.3
+cadre mf 1.4
+cadre mf 1.5
+
+anim attaque 80
+cadre mf 2.0
+cadre mf 2.1
+cadre mf 2.2
+cadre mf 2.3
+cadre mf 2.4
+cadre mf 2.5
+
+anim blesse 120
+cadre mf 3.0
+cadre mf 3.1
+cadre mf 3.2
+
+anim mort 150
+cadre mf 6.1
+cadre mf 6.2
+cadre mf 6.3
+cadre mf 6.4
+cadre mf 6.5 duree 700
+
+sprite grand-inquisiteur
+minifolks Without Outline/MiniMage.png
+recolore 4058c0=6 6098e8=7 98d8f8=x d8f8f8=x f0d50a=Y e09128=Y f8c090=S
+# Le Grand Inquisiteur : le mage du pack, bure noire, haute mitre rouge et or (calque mitre) ; son bâton luit de rouge.
+
+anim repos 180
+cadre mf 0.0 + mitre decale 0 0
+cadre mf 0.1 + mitre decale 0 1
+cadre mf 0.2 + mitre decale 0 1
+cadre mf 0.3 + mitre decale 0 0
+
+anim marche 100
+cadre mf 1.0 + mitre decale 0 -1
+cadre mf 1.1 + mitre decale 0 1
+cadre mf 1.2 + mitre decale 0 0
+cadre mf 1.3 + mitre decale 0 -1
+cadre mf 1.4 + mitre decale 0 1
+cadre mf 1.5 + mitre decale 0 0
+
+anim attaque 90
+cadre mf 3.0 + mitre decale 0 0
+cadre mf 3.1 + mitre decale 0 0
+cadre mf 3.2 + mitre decale 0 0
+cadre mf 3.3 + mitre decale 0 0
+cadre mf 3.4 + mitre decale 0 0
+cadre mf 3.5 + mitre decale 1 0
+
+anim blesse 120
+cadre mf 6.0 + mitre decale -3 0
+cadre mf 6.1 + mitre decale -1 0
+
+anim mort 150
+cadre mf 7.0 + mitre decale -1 0
+cadre mf 7.1 + mitre decale -2 3
+cadre mf 7.2 + mitre decale -2 2
+cadre mf 7.3 + mitre decale -2 2
+cadre mf 7.4 + mitre decale -2 2
+cadre mf 7.8 duree 600
+
+calque mitre 13 14
+...rr...
+..rrrr..
+..rYYr..
+.rrYYrr.
+.rrrrrr.
+.ZZZZZZ.
+
+sprite roi-fou
+minifolks Without Outline/MiniKingMan.png
+recolore 4058c0=2 6098e8=3 8cadc6=p b5d6de=P 5a7b94=g ffffff=q f7f757=Y dfc76f=Y f8c090=S
+# Le Roi Fou : le roi du pack, manteau violet de nuit, couronne d'or tordue, yeux rouges (calque regard).
+
+anim repos 200
+cadre mf 0.0 + regard decale 0 0
+cadre mf 0.1 + regard decale 0 1
+cadre mf 0.2 + regard decale 0 1
+cadre mf 0.3 + regard decale 0 0
+
+anim marche 140
+cadre mf 1.0 + regard decale -1 0
+cadre mf 1.1 + regard decale -1 0
+cadre mf 1.2 + regard decale -1 1
+cadre mf 1.3 + regard decale -1 0
+cadre mf 1.4 + regard decale 0 0
+
+anim attaque 100
+cadre mf 4.0 + regard decale 0 0
+cadre mf 4.1 + regard decale 0 0
+cadre mf 4.2 + regard decale 0 0
+cadre mf 4.3 + regard decale 0 0
+cadre mf 4.4 + regard decale -5 -1
+cadre mf 4.5 + regard decale 1 0
+
+anim blesse 140
+cadre mf 5.1 + regard decale -2 0
+cadre mf 5.2 + regard decale -1 0
+
+anim mort 180
+cadre mf 6.0 + regard decale 1 1
+cadre mf 6.1 + regard decale 1 1
+cadre mf 6.2 + regard decale 4 1
+cadre mf 6.3
+cadre mf 6.4
+cadre mf 6.5 duree 900
+
+calque regard 17 22
+x.x
+
+sprite soleil-bleme
+minifolks Without Outline/MiniArchMage.png
+recolore e5e9de=Z aeb6a1=1 4058c0=5 6098e8=4 98d8f8=y d8f8f8=z f8c090=z 4e4b49=g 3e3b39=g f7f757=Y
+# Le Soleil Blême : l'archimage du pack en vêtements de lin blême et d'ocre, un disque pâle rayonnant derrière la tête (calque halo).
+
+anim repos 200
+cadre halo decale 0 0 + mf 0.0
+cadre halo decale 0 1 + mf 0.1
+cadre halo decale 0 1 + mf 0.2
+cadre halo decale 0 0 + mf 0.3
+
+anim marche 140
+cadre halo decale 0 -1 + mf 1.0
+cadre halo decale 0 1 + mf 1.1
+cadre halo decale 0 0 + mf 1.2
+cadre halo decale 0 -1 + mf 1.3
+cadre halo decale 0 1 + mf 1.4
+cadre halo decale 0 0 + mf 1.5
+
+anim attaque 100
+cadre halo decale 0 0 + mf 3.0
+cadre halo decale 0 0 + mf 3.1
+cadre halo decale 0 0 + mf 3.2
+cadre halo decale 0 0 + mf 3.3
+cadre halo decale 0 0 + mf 3.4
+cadre halo decale 0 0 + mf 3.5
+
+anim blesse 140
+cadre halo decale -3 0 + mf 7.0
+cadre halo decale -1 0 + mf 7.1
+
+anim mort 180
+cadre halo decale -1 0 + mf 8.0
+cadre halo decale -3 3 + mf 8.1
+cadre halo decale -3 2 + mf 8.2
+cadre halo decale -2 2 + mf 8.3
+cadre halo decale -2 2 + mf 8.4
+cadre mf 8.8 duree 900
+
+calque halo 8 11
+.........Z.........
+.........Z.........
+.........Z.........
+...ZZ..YYYYY..ZZ...
+...ZZ.YYZZZYY.ZZ...
+.....YZZZZZZZY.....
+....YZZZzzzZZZY....
+...YYZZzzzzzZZYY...
+...YZZzzzzzzzZZY...
+ZZZYZZzzzzzzzZZYZZZ
+...YZZzzzzzzzZZY...
+...YYZZzzzzzZZYY...
+....YZZZzzzZZZY....
+.....YZZZZZZZY.....
+...ZZ.YYZZZYY.ZZ...
+...ZZ..YYYYY..ZZ...
+.........Z.........
+.........Z.........
+.........Z.........

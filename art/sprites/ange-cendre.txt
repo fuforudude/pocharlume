@@ -1,0 +1,161 @@
+# Ange de Cendre (région 10, dessiné) : un ange brûlé du Soleil Blême, robe grise de cendre, visage pâle sous la capuche,
+# auréole éteinte, ailes de plumes noircies. Volant : le rendu le soulève de son ombre, le sprite reste posé sur sa ligne des
+# pieds. 32×32, de face (trois quarts) ; ailes tracées par un script jetable, puis à retoucher à la main ici. Version d'élite
+# (ange-cendre-elite) : même recette (modele), tout assombri (sombre), yeux rouges (calque yeux).
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+
+calque yeux
+.
+
+calque aile-haut 4 2
+........k...
+....k..kvk..
+...kvk.kvk..
+...kvUkkUk..
+.kkkUUkkUk..
+kvUkkUUkUUk.
+kvUUkUUkkUk.
+.kUUUkUUkUk.
+kvkUUUkUkUk.
+kvUUkUUUUUk.
+.kUUUUUUUUk.
+.kvUUUUUUUUk
+.kvUUUUUUUUk
+..kUUUUUUUUk
+...kkkkkUUUk
+........kkk.
+
+calque loin-haut 17 6
+..k..k...
+.kUkkUk..
+.kUkkUkk.
+.kukuukUk
+.kukukuUk
+.kuuuuuk.
+.kuuuuuUk
+kuuuuuuUk
+kuuuuuuUk
+kuuuuuuUk
+kuuukkkk.
+.kkk.....
+
+calque aile-mid 0 8
+....k...........
+...kvkk.........
+...kvUUkk.......
+.kkkkUUUUkk.....
+kvUUUkkUUUUk....
+kvUUUUUUUUUUkk..
+.kkkUUUUUUUUUUk.
+.kvUUUUUUUUUUUUk
+.kvUUUUUUUUUUUUk
+..kkkUUUUUUUUUk.
+...kvUUUUUUUkk..
+...kvUkvUUUk....
+....kkkvUkk.....
+.......kk.......
+
+calque loin-mid 17 10
+.......kk...
+.....kkuUk..
+....kuuuUkk.
+..kkuuuuuuUk
+.kuuuuuuuuUk
+kuuuuuuuuUk.
+kuuuuuuuuUk.
+.kuuuuuuUk..
+..kkuuUuUk..
+....kkUkk...
+......k.....
+
+calque aile-bas 3 14
+...........k.
+.........kkUk
+.......kkUUUk
+.....kkUUUUUk
+....kUUUUUUUk
+..kkUUUUUUUUk
+.kUUUUUUUUUUk
+kvUUkUUkUUUUk
+kvkkUUkUUUUUk
+.kkUUkkUkUkvk
+.kvUkkUUkUkvk
+.kvk.kUkkvkk.
+..k.kvUkkvk..
+....kvk..k...
+.....k.......
+
+calque loin-bas 17 14
+.k........
+kukk......
+kuuukk....
+kuuuuukk..
+kuuuuuuuk.
+kuuuuuuuUk
+kuuuuuuuUk
+kUuuukuUk.
+kUuUuUkUk.
+.kkUkUkk..
+...k.k....
+
+calque corps 10 6
+...eeee.....
+..e....e....
+...eeef.....
+....kkkk....
+...kUUUUk...
+..kUUvvUUk..
+..kUvkvkvUk.
+..kUUvvvUUk.
+...kUUvUUk..
+....kuUUuk..
+...kuuUUuuk.
+..kuuUuuUuuk
+..kuuUuuUuuk
+..kuUUuuUUuk
+..kuuUuuUuuk
+..kuUuuuuUuk
+.kuuUuuuuUuuk
+.kukukukukuk.
+..k.k.k.k.k..
+
+calque braise 22 12
+.ff.
+ffyf
+.ff.
+
+sprite ange-cendre
+anim repos 150
+cadre loin-mid + aile-mid + corps
+cadre loin-haut decale 0 -1 + aile-haut decale 0 -1 + corps decale 0 -1
+
+anim marche 90
+cadre loin-haut decale 0 -1 + aile-haut decale 0 -1 + corps decale 0 -1
+cadre loin-mid + aile-mid + corps
+cadre loin-bas decale 0 1 + aile-bas decale 0 1 + corps decale 0 1
+cadre loin-mid + aile-mid + corps
+
+# Il lève la main : une braise naît dans sa paume et part vers la cible.
+anim attaque 100
+cadre loin-haut decale 0 -1 + aile-haut decale 0 -1 + corps decale 0 -1 duree 150
+cadre loin-haut + aile-haut + corps decale 1 0 + braise decale 0 0
+cadre loin-mid + aile-mid + corps decale 1 0 + braise decale 3 0
+cadre loin-mid + aile-mid + corps
+
+anim blesse 110
+cadre loin-bas decale -1 1 + aile-bas decale -1 1 + corps decale -1 1
+cadre loin-haut decale 0 1 + aile-haut decale 0 1 + corps decale 0 1
+
+# Il chute puis reste sur le dos, les ailes ouvertes.
+anim mort 140
+cadre loin-bas decale 0 4 + aile-bas decale 0 4 + corps decale 0 4
+cadre loin-bas retourne decale 0 8 + aile-bas retourne decale 0 8 + corps retourne decale 0 8 duree 900
+
+sprite ange-cendre-elite
+modele ange-cendre
+sombre
+calque yeux 14 11
+x.x

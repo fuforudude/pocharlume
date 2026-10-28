@@ -1,0 +1,602 @@
+# Ennemis humains des régions 6 à 10 (jalon 4) : les humains du pack Minifolks recolorés, avec quelques retouches, comme
+# art/sprites/ennemis-humains.txt. Chacun a sa version d'élite (`<nom>-elite`) : même recette (`modele`), tout assombri
+# (`sombre`), yeux rouges (le calque `yeux` est vide dans la version normale et posé sur la tête dans chaque cadre).
+# Sprites 32×32, ancre aux pieds. Les identifiants sont ceux du moteur avec _ remplacé par - (fossoyeur, creux, fantassin,
+# porte-banniere, cavalier, flagellant, inquisiteur, exorciste, garde-royal, arbaletrier-elite, chevalier, acolyte-cendre).
+# Chauve-Souris et Ange de Cendre, dessinés, sont dans chauve-souris.txt et ange-cendre.txt.
+# Fichier généré une première fois par un script puis retouché à la main : on le modifie ici.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+couleur S d4b088
+couleur 1 7a7458
+couleur 2 3a2850
+couleur 3 6c4a78
+couleur 4 8a8250
+couleur 5 5e5834
+couleur 6 2e1a28
+couleur 7 4a2438
+couleur 8 b09070
+couleur 9 7e6a5a
+
+calque yeux
+.
+
+
+sprite fossoyeur
+minifolks Without Outline/MiniSpearMan.png
+recolore 4058c0=M 6098e8=N 8cadc6=g b5d6de=p 5a7b94=G ffffff=P f8c090=S 705030=d 623f2a=h c88850=n b07040=m
+# Fossoyeur : le lancier du pack, vieux manteau de terre, chapeau à larges bords ; la lance est une pelle.
+
+anim repos 160
+cadre mf 0.0 + chapeau decale 0 0 + yeux decale 0 0
+cadre mf 0.1 + chapeau decale 0 1 + yeux decale 0 1
+cadre mf 0.2 + chapeau decale 0 1 + yeux decale 0 1
+cadre mf 0.3 + chapeau decale 0 0 + yeux decale 0 0
+
+anim marche 90
+cadre mf 1.0 + chapeau decale 0 1 + yeux decale 0 1
+cadre mf 1.1 + chapeau decale 0 0 + yeux decale 0 0
+cadre mf 1.2 + chapeau decale 0 -1 + yeux decale 0 -1
+cadre mf 1.3 + chapeau decale 0 1 + yeux decale 0 1
+cadre mf 1.4 + chapeau decale 0 0 + yeux decale 0 0
+cadre mf 1.5 + chapeau decale 0 -1 + yeux decale 0 -1
+
+anim attaque 80
+cadre mf 3.0 + chapeau decale 0 0 + yeux decale 0 0
+cadre mf 3.1 + chapeau decale -1 0 + yeux decale -1 0
+cadre mf 3.2 + chapeau decale -1 0 + yeux decale -1 0
+cadre mf 3.3 + chapeau decale 1 0 + yeux decale 1 0
+cadre mf 3.4 + chapeau decale 1 0 + yeux decale 1 0
+cadre mf 3.5 + chapeau decale 1 0 + yeux decale 1 0
+cadre mf 3.6 + chapeau decale 0 0 + yeux decale 0 0
+
+anim blesse 120
+cadre mf 4.1 + chapeau decale -1 0 + yeux decale -1 0
+cadre mf 4.2 + chapeau decale -1 0 + yeux decale -1 0
+
+anim mort 150
+cadre mf 5.0 + chapeau decale -1 1 + yeux decale -1 1
+cadre mf 5.1 + chapeau decale 0 2 + yeux decale 0 2
+cadre mf 5.2 + chapeau decale -5 4 + yeux decale -5 4
+cadre mf 5.3
+cadre mf 5.4 duree 600
+
+calque chapeau 12 18
+..kkkk..
+.kddddk.
+kkddddkk
+kddddddk
+
+sprite fossoyeur-elite
+modele fossoyeur
+sombre
+calque yeux 15 22
+x.x
+
+sprite creux
+minifolks Without Outline/MiniSwordMan.png
+recolore 8cadc6=P b5d6de=q 5a7b94=p ffffff=P 4058c0=g 6098e8=G f8c090=q b07040=P c88850=q 705030=u
+# Creux : l'épéiste du pack réduit à une carcasse d'os gris et de lambeaux, orbites vides (calque orbites).
+
+anim repos 180
+cadre mf 0.0 + orbites decale 0 0 + yeux decale 0 0
+cadre mf 0.1 + orbites decale 0 1 + yeux decale 0 1
+cadre mf 0.2 + orbites decale 0 1 + yeux decale 0 1
+cadre mf 0.3 + orbites decale 0 0 + yeux decale 0 0
+
+anim marche 100
+cadre mf 1.0 + orbites decale 0 -1 + yeux decale 0 -1
+cadre mf 1.1 + orbites decale 0 1 + yeux decale 0 1
+cadre mf 1.2 + orbites decale 0 0 + yeux decale 0 0
+cadre mf 1.3 + orbites decale 0 -1 + yeux decale 0 -1
+cadre mf 1.4 + orbites decale 0 1 + yeux decale 0 1
+cadre mf 1.5 + orbites decale 0 0 + yeux decale 0 0
+
+anim attaque 90
+cadre mf 3.0 + orbites decale -1 0 + yeux decale -1 0
+cadre mf 3.1 + orbites decale -5 0 + yeux decale -5 0
+cadre mf 3.2 + orbites decale 1 0 + yeux decale 1 0
+cadre mf 3.3 + orbites decale 1 0 + yeux decale 1 0
+cadre mf 3.4 + orbites decale 1 0 + yeux decale 1 0
+cadre mf 3.5 + orbites decale 0 0 + yeux decale 0 0
+
+anim blesse 120
+cadre mf 4.1 + orbites decale -3 0 + yeux decale -3 0
+cadre mf 4.2 + orbites decale -1 0 + yeux decale -1 0
+
+anim mort 150
+cadre mf 5.0 + orbites decale -1 1 + yeux decale -1 1
+cadre mf 5.1 + orbites decale 1 2 + yeux decale 1 2
+cadre mf 5.2 + orbites decale -5 5 + yeux decale -5 5
+cadre mf 5.3 + orbites decale -5 6 + yeux decale -5 6 duree 600
+
+calque orbites 16 23
+k.k
+
+sprite creux-elite
+modele creux
+sombre
+calque yeux 16 23
+x.x
+
+sprite fantassin
+minifolks Without Outline/MiniShieldMan.png
+recolore 8cadc6=p b5d6de=P 5a7b94=g ffffff=q 4058c0=5 6098e8=4 f8c090=S 623f2a=d
+# Fantassin de la Croisade : le porte-bouclier du pack, cotte de mailles noircie, surcot d'ocre sourd (armure lourde).
+
+anim repos 180
+cadre mf 0.0 + yeux decale 0 0
+cadre mf 0.1 + yeux decale 0 1
+cadre mf 0.2 + yeux decale 0 1
+cadre mf 0.3 + yeux decale 0 0
+
+anim marche 110
+cadre mf 1.0 + yeux decale 0 1
+cadre mf 1.1 + yeux decale 0 0
+cadre mf 1.2 + yeux decale 0 -1
+cadre mf 1.3 + yeux decale 0 1
+cadre mf 1.4 + yeux decale 0 0
+cadre mf 1.5 + yeux decale 0 -1
+
+anim attaque 100
+cadre mf 3.0 + yeux decale -1 0
+cadre mf 3.1 + yeux decale -1 0
+cadre mf 3.2 + yeux decale 1 0
+cadre mf 3.3 + yeux decale 1 0
+cadre mf 3.4 + yeux decale 1 0
+cadre mf 3.5 + yeux decale 0 0
+
+anim blesse 120
+cadre mf 5.0 + yeux decale -1 0
+cadre mf 5.1 + yeux decale -3 2
+
+anim mort 150
+cadre mf 6.0
+cadre mf 6.1
+cadre mf 6.2
+cadre mf 6.3 duree 600
+
+sprite fantassin-elite
+modele fantassin
+sombre
+calque yeux 17 23
+x.x
+
+sprite porte-banniere
+minifolks Without Outline/MiniSpearMan.png
+recolore 4058c0=r 6098e8=R 8cadc6=p b5d6de=P 5a7b94=g ffffff=q f8c090=S 705030=d 623f2a=d
+# Porte-Bannière : le lancier du pack, surcot rouge sang, une hampe et une bannière (calque banniere) dressées dans son dos.
+
+anim repos 160
+cadre mf 0.0 + banniere decale 0 0 + yeux decale 0 0
+cadre mf 0.1 + banniere decale 0 1 + yeux decale 0 1
+cadre mf 0.2 + banniere decale 0 1 + yeux decale 0 1
+cadre mf 0.3 + banniere decale 0 0 + yeux decale 0 0
+
+anim marche 90
+cadre mf 1.0 + banniere decale 0 1 + yeux decale 0 1
+cadre mf 1.1 + banniere decale 0 0 + yeux decale 0 0
+cadre mf 1.2 + banniere decale 0 -1 + yeux decale 0 -1
+cadre mf 1.3 + banniere decale 0 1 + yeux decale 0 1
+cadre mf 1.4 + banniere decale 0 0 + yeux decale 0 0
+cadre mf 1.5 + banniere decale 0 -1 + yeux decale 0 -1
+
+anim attaque 80
+cadre mf 3.0 + banniere decale 0 0 + yeux decale 0 0
+cadre mf 3.1 + banniere decale -1 0 + yeux decale -1 0
+cadre mf 3.2 + banniere decale -1 0 + yeux decale -1 0
+cadre mf 3.3 + banniere decale 1 0 + yeux decale 1 0
+cadre mf 3.4 + banniere decale 1 0 + yeux decale 1 0
+cadre mf 3.5 + banniere decale 1 0 + yeux decale 1 0
+cadre mf 3.6 + banniere decale 0 0 + yeux decale 0 0
+
+anim blesse 120
+cadre mf 4.1 + banniere decale -1 0 + yeux decale -1 0
+cadre mf 4.2 + banniere decale -1 0 + yeux decale -1 0
+
+anim mort 150
+cadre mf 5.0 + banniere decale -1 1 + yeux decale -1 1
+cadre mf 5.1 + banniere decale 0 2 + yeux decale 0 2
+cadre mf 5.2 + banniere decale -5 4 + yeux decale -5 4
+cadre mf 5.3
+cadre mf 5.4 duree 600
+
+calque banniere 11 5
+.dddddddd
+.drrRRrrd
+.drYYYrrd
+.drYxYrrd
+.drYYYrrd
+.drrRRrrd
+.drr.rr..
+.dr...r..
+.d.......
+.d.......
+.d.......
+.d.......
+.d.......
+.d.......
+
+sprite porte-banniere-elite
+modele porte-banniere
+sombre
+calque yeux 15 22
+x.x
+
+sprite cavalier
+minifolks Without Outline/MiniCavalierMan.png
+recolore a7afc7=P 6f7f97=g 6098e8=r 4058c0=R b5d6de=p 5a7b94=G 8cadc6=P ffffff=q f7f747=Z 705030=d b07040=d
+# Cavalier : le cavalier cuirassé du pack, destrier caparaçonné de rouge sombre, galons d'ocre.
+
+anim repos 120
+cadre mf 0.0 + yeux decale 0 0
+cadre mf 0.1 + yeux decale 0 0
+cadre mf 0.2 + yeux decale 0 0
+cadre mf 0.3 + yeux decale 0 0
+cadre mf 0.4 + yeux decale 0 0
+cadre mf 0.5 + yeux decale 0 0
+cadre mf 0.6 + yeux decale 0 0
+cadre mf 0.7 + yeux decale 0 0
+
+anim marche 70
+cadre mf 1.0 + yeux decale 1 0
+cadre mf 1.1 + yeux decale 1 0
+cadre mf 1.2 + yeux decale 1 -2
+cadre mf 1.3 + yeux decale 1 -1
+cadre mf 1.4 + yeux decale 1 1
+cadre mf 1.5 + yeux decale 1 0
+
+anim attaque 80
+cadre mf 2.0 + yeux decale 1 0
+cadre mf 2.1 + yeux decale 1 0
+cadre mf 2.2 + yeux decale 1 -2
+cadre mf 2.3 + yeux decale 1 -1
+cadre mf 2.4 + yeux decale 1 1
+cadre mf 2.5 + yeux decale 1 0
+
+anim blesse 120
+cadre mf 3.0 + yeux decale 0 -1
+cadre mf 3.1 + yeux decale 0 -2
+cadre mf 3.2 + yeux decale 0 2
+
+anim mort 150
+cadre mf 6.1 + yeux decale -1 1
+cadre mf 6.2
+cadre mf 6.3
+cadre mf 6.4
+cadre mf 6.5 duree 700
+
+sprite cavalier-elite
+modele cavalier
+sombre
+calque yeux 15 16
+x.x
+
+sprite flagellant
+minifolks Without Outline/MiniSwordMan.png
+recolore 8cadc6=m b5d6de=M 5a7b94=d ffffff=n 4058c0=8 6098e8=S f8c090=S 705030=r b07040=d c88850=h 901000=x
+# Flagellant : l'épéiste du pack à moitié nu, peau pâle zébrée de rouge, le fouet de cordes remplace l'épée.
+
+anim repos 180
+cadre mf 0.0 + stries decale 0 0 + yeux decale 0 0
+cadre mf 0.1 + stries decale 0 1 + yeux decale 0 1
+cadre mf 0.2 + stries decale 0 1 + yeux decale 0 1
+cadre mf 0.3 + stries decale 0 0 + yeux decale 0 0
+
+anim marche 100
+cadre mf 1.0 + stries decale 0 -1 + yeux decale 0 -1
+cadre mf 1.1 + stries decale 0 1 + yeux decale 0 1
+cadre mf 1.2 + stries decale 0 0 + yeux decale 0 0
+cadre mf 1.3 + stries decale 0 -1 + yeux decale 0 -1
+cadre mf 1.4 + stries decale 0 1 + yeux decale 0 1
+cadre mf 1.5 + stries decale 0 0 + yeux decale 0 0
+
+anim attaque 90
+cadre mf 3.0 + stries decale -1 0 + yeux decale -1 0
+cadre mf 3.1 + stries decale -5 0 + yeux decale -5 0
+cadre mf 3.2 + stries decale 1 0 + yeux decale 1 0
+cadre mf 3.3 + stries decale 1 0 + yeux decale 1 0
+cadre mf 3.4 + stries decale 1 0 + yeux decale 1 0
+cadre mf 3.5 + stries decale 0 0 + yeux decale 0 0
+
+anim blesse 120
+cadre mf 4.1 + stries decale -3 0 + yeux decale -3 0
+cadre mf 4.2 + stries decale -1 0 + yeux decale -1 0
+
+anim mort 150
+cadre mf 5.0 + stries decale -1 1 + yeux decale -1 1
+cadre mf 5.1 + stries decale 1 2 + yeux decale 1 2
+cadre mf 5.2 + stries decale -5 5 + yeux decale -5 5
+cadre mf 5.3 + stries decale -5 6 + yeux decale -5 6 duree 600
+
+calque stries 16 25
+x.x
+.x.
+
+sprite flagellant-elite
+modele flagellant
+sombre
+calque yeux 16 23
+x.x
+
+sprite inquisiteur
+minifolks Without Outline/MiniMage.png
+recolore 4058c0=6 6098e8=7 98d8f8=x d8f8f8=x f0d50a=Y e09128=Z f8c090=S
+# Inquisiteur : le mage du pack, bure noire à reflets prune, capuche rouge sombre ; le bâton luit d'un rouge d'inquisition.
+
+anim repos 180
+cadre mf 0.0 + yeux decale 0 0
+cadre mf 0.1 + yeux decale 0 1
+cadre mf 0.2 + yeux decale 0 1
+cadre mf 0.3 + yeux decale 0 0
+
+anim marche 100
+cadre mf 1.0 + yeux decale 0 -1
+cadre mf 1.1 + yeux decale 0 1
+cadre mf 1.2 + yeux decale 0 0
+cadre mf 1.3 + yeux decale 0 -1
+cadre mf 1.4 + yeux decale 0 1
+cadre mf 1.5 + yeux decale 0 0
+
+anim attaque 90
+cadre mf 3.0 + yeux decale 0 0
+cadre mf 3.1 + yeux decale 0 0
+cadre mf 3.2 + yeux decale 0 0
+cadre mf 3.3 + yeux decale 0 0
+cadre mf 3.4 + yeux decale 0 0
+cadre mf 3.5 + yeux decale 1 0
+
+anim blesse 120
+cadre mf 6.0 + yeux decale -3 0
+cadre mf 6.1 + yeux decale -1 0
+
+anim mort 150
+cadre mf 7.0 + yeux decale -1 0
+cadre mf 7.1 + yeux decale -2 3
+cadre mf 7.2 + yeux decale -2 2
+cadre mf 7.3 + yeux decale -2 2
+cadre mf 7.4 + yeux decale -2 2
+cadre mf 7.8 duree 600
+
+sprite inquisiteur-elite
+modele inquisiteur
+sombre
+calque yeux 16 23
+x.x
+
+sprite exorciste
+minifolks Without Outline/MiniMage.png
+recolore 4058c0=1 6098e8=8 98d8f8=y d8f8f8=y f0d50a=Y e09128=Y f8c090=S 3e3b39=d 4e4b49=b
+# Exorciste : le mage du pack en surplis de lin sale et étole dorée, la lueur de son bâton est un jaune d'hostie.
+
+anim repos 180
+cadre mf 0.0 + etole decale 0 0 + yeux decale 0 0
+cadre mf 0.1 + etole decale 0 1 + yeux decale 0 1
+cadre mf 0.2 + etole decale 0 1 + yeux decale 0 1
+cadre mf 0.3 + etole decale 0 0 + yeux decale 0 0
+
+anim marche 100
+cadre mf 1.0 + etole decale 0 -1 + yeux decale 0 -1
+cadre mf 1.1 + etole decale 0 1 + yeux decale 0 1
+cadre mf 1.2 + etole decale 0 0 + yeux decale 0 0
+cadre mf 1.3 + etole decale 0 -1 + yeux decale 0 -1
+cadre mf 1.4 + etole decale 0 1 + yeux decale 0 1
+cadre mf 1.5 + etole decale 0 0 + yeux decale 0 0
+
+anim attaque 90
+cadre mf 3.0 + etole decale 0 0 + yeux decale 0 0
+cadre mf 3.1 + etole decale 0 0 + yeux decale 0 0
+cadre mf 3.2 + etole decale 0 0 + yeux decale 0 0
+cadre mf 3.3 + etole decale 0 0 + yeux decale 0 0
+cadre mf 3.4 + etole decale 0 0 + yeux decale 0 0
+cadre mf 3.5 + etole decale 1 0 + yeux decale 1 0
+
+anim blesse 120
+cadre mf 6.0 + etole decale -3 0 + yeux decale -3 0
+cadre mf 6.1 + etole decale -1 0 + yeux decale -1 0
+
+anim mort 150
+cadre mf 7.0 + etole decale -1 0 + yeux decale -1 0
+cadre mf 7.1 + etole decale -2 3 + yeux decale -2 3
+cadre mf 7.2 + etole decale -2 2 + yeux decale -2 2
+cadre mf 7.3 + etole decale -2 2 + yeux decale -2 2
+cadre mf 7.4 + etole decale -2 2 + yeux decale -2 2
+cadre mf 7.8 duree 600
+
+calque etole 14 28
+.Y.Y
+.YYY
+..Y.
+
+sprite exorciste-elite
+modele exorciste
+sombre
+calque yeux 16 23
+x.x
+
+sprite garde-royal
+minifolks Without Outline/MiniHalberdMan.png
+recolore 4058c0=2 6098e8=3 8cadc6=p b5d6de=P 5a7b94=g ffffff=q f8c090=S 705030=d 623f2a=d b07040=Y
+# Garde Royal : le hallebardier du pack, plates noircies et surcot violet de cour (armure maximale, lent).
+
+anim repos 180
+cadre mf 0.0 + yeux decale 0 0
+cadre mf 0.1 + yeux decale 0 1
+cadre mf 0.2 + yeux decale 0 1
+cadre mf 0.3 + yeux decale 0 0
+
+anim marche 110
+cadre mf 1.0 + yeux decale 0 1
+cadre mf 1.1 + yeux decale 0 0
+cadre mf 1.2 + yeux decale 0 -1
+cadre mf 1.3 + yeux decale 0 1
+cadre mf 1.4 + yeux decale 0 0
+cadre mf 1.5 + yeux decale 0 -1
+
+anim attaque 100
+cadre mf 3.0 + yeux decale -1 0
+cadre mf 3.1 + yeux decale -1 0
+cadre mf 3.2 + yeux decale 1 0
+cadre mf 3.3 + yeux decale 1 0
+cadre mf 3.4 + yeux decale 1 0
+cadre mf 3.5 + yeux decale 0 0
+
+anim blesse 120
+cadre mf 4.1 + yeux decale -3 0
+cadre mf 4.2 + yeux decale -1 0
+
+anim mort 150
+cadre mf 5.0 + yeux decale -1 1
+cadre mf 5.1 + yeux decale -2 2
+cadre mf 5.2
+cadre mf 5.3
+cadre mf 5.4 duree 600
+
+sprite garde-royal-elite
+modele garde-royal
+sombre
+calque yeux 17 22
+x.x
+
+sprite arbaletrier-elite
+minifolks Without Outline/MiniCrossBowMan.png
+recolore 4058c0=2 6098e8=3 8cadc6=p b5d6de=P 5a7b94=g ffffff=q f8c090=S b07040=Y c88850=Y
+# Arbalétrier d'Élite : l'arbalétrier du pack, livrée violette de la garde, casque sombre, passementeries d'or.
+
+anim repos 180
+cadre mf 0.0 + yeux decale 0 0
+cadre mf 0.1 + yeux decale 0 2
+cadre mf 0.2 + yeux decale 0 1
+cadre mf 0.3 + yeux decale 0 0
+
+anim marche 100
+cadre mf 1.0 + yeux decale 0 2
+cadre mf 1.1 + yeux decale 0 0
+cadre mf 1.2 + yeux decale 0 -1
+cadre mf 1.3 + yeux decale 0 2
+cadre mf 1.4 + yeux decale 0 0
+cadre mf 1.5 + yeux decale 0 -1
+
+anim attaque 90
+cadre mf 3.0 + yeux decale 0 0
+cadre mf 3.1 + yeux decale 1 0
+cadre mf 3.2 + yeux decale 1 1
+cadre mf 3.3 + yeux decale 1 0
+cadre mf 3.4 + yeux decale 0 0
+cadre mf 3.5 + yeux decale -4 0
+
+anim blesse 120
+cadre mf 5.1 + yeux decale -3 0
+cadre mf 5.2 + yeux decale -1 0
+
+anim mort 150
+cadre mf 6.0 + yeux decale -1 1
+cadre mf 6.1 + yeux decale -4 1
+cadre mf 6.2 + yeux decale -6 2
+cadre mf 6.3 duree 600
+
+sprite arbaletrier-elite-elite
+modele arbaletrier-elite
+sombre
+calque yeux 16 24
+x.x
+
+sprite chevalier
+minifolks Without Outline/MiniPrinceMan.png
+recolore 901000=2 d01000=3 98d8f8=p 6098e8=g 4058c0=G ffffff=q f8c090=S b5d6de=P 705030=g 623f2a=g c88850=p b07040=P f7f757=Y dfc76f=Y
+# Chevalier : le prince du pack en armure complète, heaume fermé (calque heaume), manteau violet sombre.
+
+anim repos 180
+cadre mf 0.0 + heaume decale 0 0 + yeux decale 0 0
+cadre mf 0.1 + heaume decale 0 1 + yeux decale 0 1
+cadre mf 0.2 + heaume decale 0 1 + yeux decale 0 1
+cadre mf 0.3 + heaume decale 0 0 + yeux decale 0 0
+
+anim marche 100
+cadre mf 1.0 + heaume decale 0 1 + yeux decale 0 1
+cadre mf 1.1 + heaume decale 0 0 + yeux decale 0 0
+cadre mf 1.2 + heaume decale 0 -1 + yeux decale 0 -1
+cadre mf 1.3 + heaume decale 0 1 + yeux decale 0 1
+cadre mf 1.4 + heaume decale 0 0 + yeux decale 0 0
+cadre mf 1.5 + heaume decale 0 -1 + yeux decale 0 -1
+
+anim attaque 90
+cadre mf 3.0 + heaume decale -1 0 + yeux decale -1 0
+cadre mf 3.1 + heaume decale -1 0 + yeux decale -1 0
+cadre mf 3.2 + heaume decale 1 0 + yeux decale 1 0
+cadre mf 3.3 + heaume decale 1 0 + yeux decale 1 0
+cadre mf 3.4 + heaume decale 1 0 + yeux decale 1 0
+cadre mf 3.5 + heaume decale 0 0 + yeux decale 0 0
+
+anim blesse 120
+cadre mf 4.1 + heaume decale -2 0 + yeux decale -2 0
+cadre mf 4.2 + heaume decale -1 0 + yeux decale -1 0
+
+anim mort 150
+cadre mf 5.0 + heaume decale 1 1 + yeux decale 1 1
+cadre mf 5.1 + heaume decale 1 1 + yeux decale 1 1
+cadre mf 5.2 + heaume decale 3 1 + yeux decale 3 1
+cadre mf 5.3 + heaume decale 6 6 + yeux decale 6 6
+cadre mf 5.4 + heaume decale 6 5 + yeux decale 6 5
+cadre mf 5.5 + heaume decale 6 6 + yeux decale 6 6 duree 600
+
+calque heaume 15 18
+..kkkkk.
+.kppPPpk
+.kpPPPpk
+.kpkkkpk
+.kppppgk
+..kgggk.
+
+sprite chevalier-elite
+modele chevalier
+sombre
+calque yeux 17 21
+x.x
+
+sprite acolyte-cendre
+minifolks Without Outline/MiniMage.png
+recolore 4058c0=u 6098e8=U 98d8f8=L d8f8f8=L f0d50a=f e09128=e f8c090=S 3e3b39=g 4e4b49=G
+# Acolyte de Cendre : le mage du pack, robe grise de cendre et capuche ; la lueur de son bâton est une braise.
+
+anim repos 180
+cadre mf 0.0 + yeux decale 0 0
+cadre mf 0.1 + yeux decale 0 1
+cadre mf 0.2 + yeux decale 0 1
+cadre mf 0.3 + yeux decale 0 0
+
+anim marche 100
+cadre mf 1.0 + yeux decale 0 -1
+cadre mf 1.1 + yeux decale 0 1
+cadre mf 1.2 + yeux decale 0 0
+cadre mf 1.3 + yeux decale 0 -1
+cadre mf 1.4 + yeux decale 0 1
+cadre mf 1.5 + yeux decale 0 0
+
+anim attaque 90
+cadre mf 3.0 + yeux decale 0 0
+cadre mf 3.1 + yeux decale 0 0
+cadre mf 3.2 + yeux decale 0 0
+cadre mf 3.3 + yeux decale 0 0
+cadre mf 3.4 + yeux decale 0 0
+cadre mf 3.5 + yeux decale 1 0
+
+anim blesse 120
+cadre mf 6.0 + yeux decale -3 0
+cadre mf 6.1 + yeux decale -1 0
+
+anim mort 150
+cadre mf 7.0 + yeux decale -1 0
+cadre mf 7.1 + yeux decale -2 3
+cadre mf 7.2 + yeux decale -2 2
+cadre mf 7.3 + yeux decale -2 2
+cadre mf 7.4 + yeux decale -2 2
+cadre mf 7.8 duree 600
+
+sprite acolyte-cendre-elite
+modele acolyte-cendre
+sombre
+calque yeux 16 23
+x.x
