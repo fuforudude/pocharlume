@@ -296,6 +296,28 @@ describe('boutique', () => {
   });
 });
 
+describe('boutique : accès aux caisses et à la collection', () => {
+  it('« Caisses » et « Collection » appellent leur écran, sur les deux onglets', async () => {
+    const session = await ouvrir(sauvegardeVide());
+    const surCaisses = vi.fn();
+    const surCollection = vi.fn();
+    afficherBoutique(document.body, { atlas: ATLAS, session, surFermer: vi.fn(), surCaisses, surCollection });
+    for (const onglet of ['arbre', 'objets']) {
+      document.querySelector<HTMLButtonElement>(`[data-cle="onglet:${onglet}"]`)?.click();
+      parTexte(t('caisses.titre')).click();
+      parTexte(t('collection.titre')).click();
+    }
+    expect(surCaisses).toHaveBeenCalledTimes(2);
+    expect(surCollection).toHaveBeenCalledTimes(2);
+  });
+
+  it('sans rappel donné, ces boutons n’existent pas', async () => {
+    const session = await ouvrir(sauvegardeVide());
+    afficherBoutique(document.body, { atlas: ATLAS, session, surFermer: vi.fn() });
+    expect([...document.querySelectorAll('button')].some((b) => b.textContent === t('caisses.titre'))).toBe(false);
+  });
+});
+
 describe('sons d’interface des achats', () => {
   it('un achat de disciple, de rang d’arbre ou d’objet réussi sonne « achat » ; un refus sonne « refus »', async () => {
     const session = await ouvrir(avec((s) => ({ ...s, progression: { niveauMax: 2, etoiles: { '1': { matou: 2 } } }, meta: { ...s.meta, monnaies: { aretes: 99, braises: 30 } } })));

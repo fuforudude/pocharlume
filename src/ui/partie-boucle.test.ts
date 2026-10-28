@@ -358,7 +358,7 @@ describe('retour visible des gestes refusés', () => {
   });
 
   it('en défi Fer, le menu d’un socle ne propose que les familles du niveau, et une touche interdite dit pourquoi', async () => {
-    const avecFer = { ...NIVEAU as NonNullable<typeof NIVEAU>, niveau: { ...NIVEAU?.niveau as NonNullable<typeof NIVEAU>['niveau'], defiFer: { familles: ['tir', 'magie'] as [string, string] } } };
+    const avecFer = { ...NIVEAU, niveau: { ...NIVEAU.niveau, defiFer: { familles: ['tir', 'magie'] as [string, string] } } };
     const partie = await lancerNiveau(avecFer, { ...CONFIG, defi: 'fer', bonus: { tours: {}, heros: {} } }, () => undefined, {
       parent: document.body,
       surDemarrage: (p) => { parties.push(p); },
@@ -621,7 +621,7 @@ describe('apparence : skins équipés et familier du héros', () => {
   });
 
   it('en défi Fer, l’apparence reste : seul le bonus est ignoré', async () => {
-    const avecFer = { ...NIVEAU as NonNullable<typeof NIVEAU>, niveau: { ...NIVEAU?.niveau as NonNullable<typeof NIVEAU>['niveau'], defiFer: { familles: ['tir', 'caserne'] as [string, string] } } };
+    const avecFer = { ...NIVEAU, niveau: { ...NIVEAU.niveau, defiFer: { familles: ['tir', 'caserne'] as [string, string] } } };
     const partie = await lancerNiveau(avecFer, { ...CONFIG, defi: 'fer', bonus: { tours: {}, heros: {} } }, () => undefined, {
       parent: document.body,
       surDemarrage: (p) => { parties.push(p); },

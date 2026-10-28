@@ -174,7 +174,7 @@ export function vuePorteurs(s: Sauvegarde): VuePorteur[] {
     const skin = valideSkin(famille);
     const brut = skin === null ? 0 : bonusDe(skin, rangDe(collection, skin));
     const fractions = bonusDeCollection(collection, 'charlie', null).tours[famille] ?? {};
-    const total = arrondi(Object.values(fractions).reduce<number>((somme, v) => somme + (v ?? 0), 0) * 100);
+    const total = arrondi(Object.values(fractions).reduce<number>((somme, v) => somme + v, 0) * 100);
     porteurs.push({ id: famille, genre: 'tour', skin, familier: null, brutPourcent: brut, totalPourcent: total, plafonne: brut > PLAFOND_BONUS_POURCENT });
   }
   for (const heros of herosRecrutes(s)) {
@@ -185,7 +185,7 @@ export function vuePorteurs(s: Sauvegarde): VuePorteur[] {
     const brutFamilier = familier === null ? 0 : bonusDe(familier, rangDe(collection, familier));
     const brut = arrondi(brutSkin + brutFamilier);
     const fractions = bonusDeCollection(collection, heros, null).heros;
-    const total = arrondi(Object.values(fractions).reduce<number>((somme, v) => somme + (v ?? 0), 0) * 100);
+    const total = arrondi(Object.values(fractions).reduce<number>((somme, v) => somme + v, 0) * 100);
     porteurs.push({ id: heros, genre: 'heros', skin, familier, brutPourcent: brut, totalPourcent: total, plafonne: brut > PLAFOND_BONUS_POURCENT });
   }
   return porteurs;

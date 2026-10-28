@@ -38,8 +38,6 @@ export const frEcrans3 = {
   'fin.bilan_region': 'Région ouverte : {nom}',
 
   // Boutique : accès aux caisses et à la collection
-  'boutique.onglet_caisses': 'Caisses',
-  'boutique.onglet_collection': 'Collection',
   'monnaie.eclats': 'Éclats : {n}',
 
   // Caisses
@@ -63,7 +61,6 @@ export const frEcrans3 = {
   'caisses.resultat_doublon': 'Doublon : {nom}',
   'caisses.resultat_eclats': '+{n} éclats',
   'caisses.resultat_garantie': 'La garantie a joué.',
-  'caisses.resultat_rarete': '{rarete}',
   'caisses.continuer': 'Continuer',
 
   // Collection
@@ -72,6 +69,7 @@ export const frEcrans3 = {
   'collection.caisses': 'Caisses',
   'collection.onglet_skins': 'Skins',
   'collection.onglet_familiers': 'Familiers',
+  'collection.onglet_equipement': 'Équipement',
   'collection.possedes': '{n} sur {m}',
   'collection.bonus_total': 'Bonus de ce porteur : +{n} % (plafond {m} %)',
   'collection.bonus_total_plafonne': 'Bonus de ce porteur : +{n} % (plafond de {m} % atteint)',
@@ -81,25 +79,21 @@ export const frEcrans3 = {
   'collection.rang': 'Rang {n}/{m}',
   'collection.rang_max': 'Rang maximal',
   'collection.verrouille': 'Pas encore à toi',
-  'collection.monter': 'Monter au rang {n}',
-  'collection.monter_cout': 'Monter au rang {n} : {c} éclats',
-  'collection.acheter': 'Acheter : {c} éclats',
+  'collection.monter': 'Rang {n}',
+  'collection.monter_libelle': 'Monter {nom} au rang {n} : {c} éclats',
   'collection.acheter_libelle': 'Acheter {nom} : {c} éclats',
   'collection.equiper': 'Équiper',
   'collection.retirer': 'Retirer',
-  'collection.equipe': 'Équipé',
+  'collection.equiper_libelle': 'Équiper {nom}',
+  'collection.retirer_libelle': 'Retirer {nom}',
+  'collection.equiper_sur': 'Équiper sur…',
+  'collection.equiper_sur_libelle': 'Choisir le héros qui porte {nom}',
   'collection.equipe_sur': 'Équipé sur {noms}',
-  'collection.porteur_tour': 'Tour : {nom}',
-  'collection.porteur_heros': 'Héros : {nom}',
-  'collection.choisir_porteur': 'Équiper sur…',
   'collection.porteur_libelle': 'Équiper {objet} sur {porteur}',
-  'collection.retirer_libelle': 'Retirer {objet} de {porteur}',
+  'collection.retirer_porteur_libelle': 'Retirer {objet} de {porteur}',
   'collection.monte': '{nom} passe au rang {n}.',
   'collection.achete': '{nom} rejoint ta collection.',
   'collection.equipe_ok': '{nom} est équipé sur {porteur}.',
   'collection.retire_ok': '{nom} est retiré de {porteur}.',
-  'collection.heros_non_recrute': 'Pas recruté',
-  'collection.aucun_porteur': 'Aucun',
   'collection.rien_equipe': 'Rien d’équipé',
-  'collection.choix_porteur': 'Porteur',
 } as const;

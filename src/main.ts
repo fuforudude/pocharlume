@@ -9,10 +9,12 @@ import { REGION1 } from './data/niveaux/region1';
 import type { NiveauCampagne } from './data/visuel';
 import type { DefiPartie, EtatPartie } from './engine';
 import { t } from './i18n';
-import { chargerAtlas } from './render/atlas';
+import { chargerAtlas, type AtlasRendu } from './render/atlas';
 import { Depot, difficulteDe, ouvrirCanalNavigateur, ouvrirStockage, Session, type ChoixPartie, type DifficulteSauvegarde } from './save';
 import { afficherBoutique } from './ui/boutique';
+import { afficherCaisses } from './ui/caisses';
 import { afficherCarteMonde, type EcranCarteMonde } from './ui/carte-monde';
+import { afficherCollection } from './ui/collection';
 import { afficherEcranHeros } from './ui/ecran-heros';
 import { afficherAccueil, afficherAvis, type ChoixNiveau } from './ui/ecrans';
 import { configDeRelance, configDuChoix, debiterAuLancement, nouvelleGraine, relancerAvecDebit } from './ui/lancement';
@@ -163,7 +165,7 @@ function carte(): void {
         },
         surBoutique: () => {
           carteOuverte?.suspendre(true);
-          afficherBoutique(app, { atlas, session, surFermer: carte });
+          ouvrirBoutique(atlas);
         },
         surOptions: () => {
           // La carte dort sous les options : plus de clavier ni de dessin ; elle est rouverte à la fermeture.
@@ -178,6 +180,36 @@ function carte(): void {
       afficherAvis(document.body, t('erreur.chargement'));
       accueil();
     });
+}
+
+// La boutique, les caisses et la collection se passent la main : elles couvrent la carte (qui dort dessous), « Fermer » dans
+// les caisses ou la collection revient à la boutique, « Fermer » dans la boutique rouvre la carte.
+function ouvrirBoutique(atlas: AtlasRendu): void {
+  const ecran = afficherBoutique(app, {
+    atlas,
+    session,
+    surFermer: carte,
+    surCaisses: () => { ecran.arreter(); ouvrirCaisses(atlas); },
+    surCollection: () => { ecran.arreter(); ouvrirCollection(atlas); },
+  });
+}
+
+function ouvrirCaisses(atlas: AtlasRendu): void {
+  const ecran = afficherCaisses(app, {
+    atlas,
+    session,
+    surFermer: () => { ouvrirBoutique(atlas); },
+    surCollection: () => { ecran.arreter(); ouvrirCollection(atlas); },
+  });
+}
+
+function ouvrirCollection(atlas: AtlasRendu): void {
+  const ecran = afficherCollection(app, {
+    atlas,
+    session,
+    surFermer: () => { ouvrirBoutique(atlas); },
+    surCaisses: () => { ecran.arreter(); ouvrirCaisses(atlas); },
+  });
 }
 
 /** La partie en cours qu'un nouveau lancement remplacerait, ou null. */
