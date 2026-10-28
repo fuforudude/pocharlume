@@ -27,7 +27,7 @@ export const REGLES: Regles = {
   seuilDeuxEtoiles: 0.5,
   piegesMax: 12,
   dureeRevelation: 0.1,
-  elite: { facteurPv: 1.8, facteurPrime: 1.5, viesEnPlus: 1 },
+  elite: { facteurPv: 1.4, facteurPrime: 1.5, viesEnPlus: 0 },
   heroique: { vies: 1 },
   fer: { facteurEffectifs: 1.5 },
   plafondBonus: 0.1,

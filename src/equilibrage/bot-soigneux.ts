@@ -70,6 +70,8 @@ export interface OptionsSoigneux {
 interface Candidat {
   readonly action: Action;
   readonly ratio: number;
+  /** Achat qu'on attend plutôt que de dépenser ailleurs (un furtif non révélé passe sans qu'aucune tour le touche). */
+  readonly imperatif?: boolean;
 }
 
 const dieux: Readonly<Record<string, DefDieu>> = DIEUX;
@@ -88,7 +90,7 @@ function utilite(dps: number): number {
 }
 
 /** Part de menace furtive à partir de laquelle le bot se soucie des Guetteurs des Toits. */
-const PART_FURTIFS_MIN = 0.02;
+const PART_FURTIFS_MIN = 0.001;
 
 function dpsMoyen(def: DefNiveauTour): number {
   const dps = dpsEfficace(def);
@@ -343,14 +345,15 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     if (parts.furtifs < PART_FURTIFS_MIN || !famillePermise(etat, 'tir')) return null;
     const requis = etat.niveau.carte.chemins.length;
     if (etat.tours.filter((t) => t.famille === 'tir' && t.voie === 'A').length >= requis) return null;
-    const tir = etat.tours.filter((t) => t.famille === 'tir' && t.voie !== 'A').sort((a, b) => b.niveau - a.niveau)[0];
+    // Une tour de tir déjà spécialisée (voie B) ne peut plus devenir Guetteurs : seules celles du niveau 1 à 3 servent.
+    const tir = etat.tours.filter((t) => t.famille === 'tir' && t.niveau < 4).sort((a, b) => b.niveau - a.niveau)[0];
     const ratio = meilleurRatio * 1.02;
     if (tir) {
-      if (tir.niveau >= 3) return { action: { type: 'specialiser', cx: tir.cx, cy: tir.cy, voie: 'A' }, ratio };
-      return { action: { type: 'ameliorer', cx: tir.cx, cy: tir.cy }, ratio };
+      if (tir.niveau >= 3) return { action: { type: 'specialiser', cx: tir.cx, cy: tir.cy, voie: 'A' }, ratio, imperatif: true };
+      return { action: { type: 'ameliorer', cx: tir.cx, cy: tir.cy }, ratio, imperatif: true };
     }
     const meilleure = meilleureCase(etat, 'tir', TOURS.tir.niveaux[0].portee);
-    return meilleure ? { action: { type: 'construire', cx: meilleure.cx, cy: meilleure.cy, tour: 'tir' }, ratio } : null;
+    return meilleure ? { action: { type: 'construire', cx: meilleure.cx, cy: meilleure.cy, tour: 'tir' }, ratio, imperatif: true } : null;
   }
 
   /**
@@ -372,6 +375,8 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     const liste = candidats(etat);
     const meilleur = liste[0];
     if (!meilleur) return null;
+    // Les Guetteurs des Toits face à des furtifs se paient d'abord : on économise plutôt que de dépenser ailleurs.
+    if (meilleur.imperatif && validerAction(etat, meilleur.action) === 'aretes_insuffisantes') return null;
     for (const c of liste) {
       if (c.ratio < meilleur.ratio * 0.75) break;
       if (validerAction(etat, c.action) === null) return c.action;

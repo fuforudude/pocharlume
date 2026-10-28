@@ -79,8 +79,8 @@ const charlie: DefDieu = {
       surChemin: false,
       global: false,
       effets: [
-        { type: 'degats', degats: [50, 80], typeDegats: 'physique', volants: false },
-        { type: 'effet', effet: { type: 'etourdissement', chance: 1, duree: 2.5, valeur: 0 }, volants: false },
+        { type: 'degats', degats: [50, 80], typeDegats: 'physique', volants: true },
+        { type: 'effet', effet: { type: 'etourdissement', chance: 1, duree: 2.5, valeur: 0 }, volants: true },
       ],
     },
     {
@@ -115,7 +115,7 @@ const charlie: DefDieu = {
   ],
   bonus: {
     famille: 'caserne',
-    pvSoldats: 0.25,
+    pvSoldats: 0.5,
     cadence: 0,
     chanceCritique: 0,
     prix: 0,
