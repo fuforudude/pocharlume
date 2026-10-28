@@ -160,10 +160,10 @@ calque extra
 .d
 .d
 .d
-B.B.......................B.B
-d.d.......................d.d
-dBd.......................dBd
-dbd.......................dbd
+B.B....................B.B
+d.d....................d.d
+dBd....................dBd
+dbd....................dbd
 
 calque extra-b
 .
@@ -187,10 +187,10 @@ calque extra-b
 .d
 .d
 .d
-B.B.......................B.B
-d.d.......................d.d
-dBd.......................dBd
-dbd.......................dbd
+B.B....................B.B
+d.d....................d.d
+dBd....................dBd
+dbd....................dbd
 
 calque batiment
 .
@@ -236,7 +236,7 @@ retouche attaque * + clocheton
 sprite tour-caserne-ecorcheurs
 derive tour-caserne-3 couleurs B=d b=b J=B j=b R=r x=R
 
-calque peaux 24 12
+calque peaux 22 12
 d..d
 dOOd
 dOod
