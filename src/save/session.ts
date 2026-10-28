@@ -76,6 +76,7 @@ import {
   type RaisonEquipementCollection,
   type RaisonRang,
 } from './transactions-collection';
+import { enregistrerFinInfinie, type BilanInfini, type FinInfinie, type RaisonFinInfinie } from './transactions-infini';
 import { ouvrirVerrouNavigateur, type VerrouSauvegarde } from './verrou';
 
 /** Ce que la session a besoin de savoir d'une partie terminée (un sous-ensemble du `ResultatPartie` de l'interface). */
@@ -421,6 +422,20 @@ export class Session {
     };
     const issue = await this.lancer(operation);
     return issue.ok ? { ecrite: issue.ecrite, ...issue.detail } : { ecrite: false, bilan: null, refus: null };
+  }
+
+  /**
+   * Une partie infinie est finie (ou arrêtée) : le record de la carte est mis à jour s'il est battu et chaque palier atteint
+   * qui n'a jamais été payé l'est, une seule fois au total. Comme toute transaction, l'opération est rejouée sous verrou
+   * sur le contenu frais du stockage : deux onglets qui atteignent le même palier ne le paient pas deux fois. Rend le bilan
+   * de l'écriture, ou la raison du refus. La partie sauvegardée n'est pas touchée (elle ne peut pas être une partie infinie).
+   */
+  async enregistrerFinInfini(fin: FinInfinie): Promise<ResultatTransactionAvecDetail<BilanInfini, RaisonFinInfinie>> {
+    const issue = await this.lancer<BilanInfini, RaisonFinInfinie>((s) => {
+      const r = enregistrerFinInfinie(s, fin);
+      return r.ok ? { ok: true, sauvegarde: r.sauvegarde, detail: r.bilan } : r;
+    });
+    return issue.ok ? { ok: true, sauvegarde: issue.sauvegarde, ecrite: issue.ecrite, detail: issue.detail } : issue;
   }
 
   /**

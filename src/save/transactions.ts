@@ -137,7 +137,7 @@ export function acheterObjet(s: Sauvegarde, objet: string, quantite = 1): Transa
 }
 
 /** Les ids reconnus d'une liste d'objets, ou null si ce n'est pas une liste d'objets connus. */
-function listeObjets(x: unknown): IdObjet[] | null {
+export function listeObjets(x: unknown): IdObjet[] | null {
   if (!Array.isArray(x)) return null;
   const liste: IdObjet[] = [];
   for (const objet of x as unknown[]) {
@@ -266,7 +266,7 @@ export type ResultatFin =
   | { readonly ok: false; readonly raison: RaisonFin };
 
 /** `utilises` est-il inclus dans `equipes`, avec les répétitions ? */
-function inclus(utilises: readonly IdObjet[], equipes: readonly IdObjet[]): boolean {
+export function inclus(utilises: readonly IdObjet[], equipes: readonly IdObjet[]): boolean {
   const reste = [...equipes];
   for (const objet of utilises) {
     const i = reste.indexOf(objet);
@@ -277,7 +277,7 @@ function inclus(utilises: readonly IdObjet[], equipes: readonly IdObjet[]): bool
 }
 
 /** `equipes` privé de `utilises` (avec les répétitions) : les objets emportés qui n'ont pas servi. */
-function nonUtilises(equipes: readonly IdObjet[], utilises: readonly IdObjet[]): IdObjet[] {
+export function nonUtilises(equipes: readonly IdObjet[], utilises: readonly IdObjet[]): IdObjet[] {
   const reste = [...equipes];
   for (const objet of utilises) {
     const i = reste.indexOf(objet);

@@ -35,6 +35,7 @@ export {
   type DefisNiveau,
   type DifficulteSauvegarde,
   type Etoiles,
+  type Infini,
   type EtoilesNiveau,
   type Meta,
   type Monnaies,
@@ -45,6 +46,16 @@ export {
   type Sauvegarde,
   type VitesseJeu,
 } from './format';
+export {
+  cartesInfiniJouables,
+  enregistrerFinInfinie,
+  infiniOuvert,
+  recordDeLaCarte,
+  type BilanInfini,
+  type FinInfinie,
+  type RaisonFinInfinie,
+  type ResultatFinInfinie,
+} from './transactions-infini';
 export { migrer, type ResultatMigration } from './migrations';
 export { normaliserImport } from './normalisation';
 export { avecPartieEnCours, partieEnCours, reprendrePartie } from './partie';

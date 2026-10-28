@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { sauvegardeRemplie } from './aides.test-utils';
-import { sauvegardeVide } from './format';
+import { sauvegardeVide, type Sauvegarde } from './format';
 import { enregistrerVictoire, etoilesDe, fusionnerProgressions } from './progression';
 import { validerSauvegarde } from './validation';
 
@@ -51,5 +51,29 @@ describe('fusion de deux progressions', () => {
     fusionnerProgressions(a, b);
     expect(a).toEqual(copieA);
     expect(b).toEqual(copieB);
+  });
+
+  describe('mode infini', () => {
+    const avecInfini = (records: Record<string, number>, paliers: Sauvegarde['meta']['infini']['paliers']): Sauvegarde => {
+      const s = sauvegardeRemplie();
+      return { ...s, meta: { ...s.meta, infini: { records, paliers } } };
+    };
+
+    it('garde le meilleur record de chaque carte', () => {
+      const m = fusionnerProgressions(avecInfini({ chaumes: 12, gue: 40 }, [10, 20, 30]), avecInfini({ chaumes: 25, pendus: 3 }, [10, 20]));
+      expect(m.meta.infini.records).toEqual({ chaumes: 25, gue: 40, pendus: 3 });
+      expect(validerSauvegarde(m).ok).toBe(true);
+    });
+
+    it('ne paie jamais deux fois : les paliers payés restent ceux de la première sauvegarde', () => {
+      const m = fusionnerProgressions(avecInfini({ chaumes: 12 }, [10]), avecInfini({ chaumes: 25 }, [10, 20]));
+      expect(m.meta.infini.paliers).toEqual([10]);
+      expect(m.meta.monnaies).toEqual(sauvegardeRemplie().meta.monnaies);
+    });
+
+    it('ne change rien (même objet) quand la seconde n’a pas de meilleur record', () => {
+      const a = avecInfini({ chaumes: 25 }, [10, 20]);
+      expect(fusionnerProgressions(a, avecInfini({ chaumes: 25 }, [10]))).toBe(a);
+    });
   });
 });

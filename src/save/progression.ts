@@ -115,7 +115,19 @@ export function fusionnerProgressions(a: Sauvegarde, b: Sauvegarde): Sauvegarde 
     }
     Object.defineProperty(defis, numero, { value: reunis, enumerable: true, writable: true, configurable: true });
   }
+  // Les records de l'infini : le meilleur de chaque carte. Les paliers payés restent ceux de `a` (leurs arêtes et leurs
+  // braises sont dans les monnaies de `a`, que la fusion ne touche pas) : un palier de `b` que `a` n'a pas payé le sera
+  // à la prochaine partie qui l'atteint, sans que `a` ait jamais payé deux fois.
+  const records = { ...a.meta.infini.records };
+  for (const carte of Object.keys(b.meta.infini.records)) {
+    const autre = b.meta.infini.records[carte] ?? 0;
+    const mien = Object.hasOwn(records, carte) ? (records[carte] ?? 0) : 0;
+    if (autre > mien) {
+      Object.defineProperty(records, carte, { value: autre, enumerable: true, writable: true, configurable: true });
+      change = true;
+    }
+  }
   if (!change) return a;
   const niveauMax = Math.max(a.progression.niveauMax, b.progression.niveauMax);
-  return { ...a, progression: { niveauMax, etoiles }, meta: { ...a.meta, regionMax: regionOuverte(niveauMax), defis } };
+  return { ...a, progression: { niveauMax, etoiles }, meta: { ...a.meta, regionMax: regionOuverte(niveauMax), defis, infini: { ...a.meta.infini, records } } };
 }
