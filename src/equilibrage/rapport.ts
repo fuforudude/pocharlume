@@ -8,7 +8,7 @@ import { HEROS_PAR_DIEU } from '../data/meta';
 import { FAMILLES, TOURS } from '../data/tours';
 import { VERSION_DONNEES } from '../data/version';
 import { t, type CleTexte } from '../i18n';
-import { BANDES, correlationDeRang, courbeDifficulte, courbeMoyenne, nomDuDieu, niveauxAvecPertes, verifierBandes } from './bandes';
+import { BANDES, BANDES_IMPOSEES, correlationDeRang, courbeDifficulte, courbeMoyenne, nomDuDieu, niveauxAvecPertes, verifierBandes } from './bandes';
 import {
   DIEUX_EVALUES,
   DIFFICULTES_EVALUEES,
@@ -139,7 +139,7 @@ export function redigerRapport(evaluations: readonly Evaluation[], graines: numb
     '',
     '## Bandes cibles',
     '',
-    ecarts.length === 0 ? 'Toutes les bandes sont respectées.' : `**${String(ecarts.length)} écart(s)** :\n\n${ecarts.map((e) => `- ${e}`).join('\n')}`,
+    ecarts.length === 0 ? 'Toutes les bandes sont respectées.' : `**${String(ecarts.length)} écart(s)**${BANDES_IMPOSEES ? '' : ' (bandes suspendues le temps de l’équilibrage qui suit la pose libre des tours : à titre d’information)'} :\n\n${ecarts.map((e) => `- ${e}`).join('\n')}`,
     '',
     `Bandes, pour chaque dieu : Chaton, le naïf gagne tout ; Matou, le soigneux gagne tout en perdant au moins ${String(BANDES.matou.pertesParNiveauMin)} vie sur ${pct(BANDES.matou.partNiveauxAvecPertesMin)} des niveaux et en laissant moins de ${String(BANDES.matou.aretesInutiliseesMax)} arêtes inutilisées par niveau, le naïf gagne ${pct(BANDES.matou.naifMin)} à ${pct(BANDES.matou.naifMax)} ;`,
     `Vieux Sage, le soigneux gagne ${pct(BANDES.vieux_sage.soigneuxMin)} à ${pct(BANDES.vieux_sage.soigneuxMax)} ; sans défense on perd. Entre dieux : en Vieux Sage, au plus ${un(BANDES.vieux_sage.ecartVictoiresEntreDieuxMax * 100)} points d’écart de taux de victoire du soigneux ; en Matou, au plus ${String(BANDES.matou.ecartViesEntreDieuxMax)} vies d’écart de vies moyennes du soigneux.`,

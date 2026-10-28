@@ -165,7 +165,7 @@ describe('grille de construction des 50 niveaux', () => {
 
 describe('validité des cartes', () => {
   for (const campagne of CAMPAGNE) {
-    it(`niveau ${String(campagne.numero)} : chemins, socles, ralliements, héros et paquets sont valides`, () => {
+    it(`niveau ${String(campagne.numero)} : chemins, cases interdites, héros et paquets sont valides`, () => {
       verifierCarte(campagne.niveau);
     });
   }

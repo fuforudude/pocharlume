@@ -12,7 +12,7 @@ function tirsDe(etat: EtatPartie, tour: Tour, secondes: number): number {
   return evenementsPendant(etat, secondes).filter((e) => e.type === 'tir' && e.tour === tour.id).length;
 }
 
-function tourDuSocle(etat: EtatPartie, i: number): Tour {
+function tourDeLaCase(etat: EtatPartie, i: number): Tour {
   const t = tourDe(etat, i);
   if (!t) throw new Error(`pas de tour sur la case d'essai ${String(i)}`);
   return t;
@@ -25,7 +25,7 @@ describe('La Faim : chaque quart de PV perdu affame les tours à portée', () =>
     construireTour(etat, 3, 'tir');
     const boss = ennemiDonnees(etat, 'la_faim', 9, { pv: 1e6 });
     if (declencher) boss.pv = boss.pvMax * 0.7;
-    return { etat, proche: tourDuSocle(etat, 1), loin: tourDuSocle(etat, 3) };
+    return { etat, proche: tourDeLaCase(etat, 1), loin: tourDeLaCase(etat, 3) };
   }
 
   it('sous 75 % des PV, les tours à moins de 5 tuiles perdent 30 % de cadence pendant 5 s', () => {
@@ -71,8 +71,8 @@ describe('Le Juge des Flammes : met le feu à la tour la plus proche, appelle de
     construireTour(etat, 0, 'tir');
     construireTour(etat, 2, 'tir');
     ennemiDonnees(etat, 'juge_flammes', 14, { pv: 1e6 });
-    const loin = tourDuSocle(etat, 0);
-    const proche = tourDuSocle(etat, 2);
+    const loin = tourDeLaCase(etat, 0);
+    const proche = tourDeLaCase(etat, 2);
     avancerSecondes(etat, 11.9);
     expect(proche.desactivee).toBe(0);
     avancerSecondes(etat, 0.1);
@@ -88,7 +88,7 @@ describe('Le Juge des Flammes : met le feu à la tour la plus proche, appelle de
   it('une tour désactivée ne révèle plus les furtifs', () => {
     const etat = partieEssai();
     construireTour(etat, 1, 'tir', 'A');
-    const t = tourDuSocle(etat, 1);
+    const t = tourDeLaCase(etat, 1);
     const d = ennemiDonnees(etat, 'delateur', 10, { pv: 1e6 });
     t.desactivee = 100;
     avancerSecondes(etat, 2);

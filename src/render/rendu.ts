@@ -213,7 +213,7 @@ export class Rendu {
 
   /**
    * Les bandes de l'écran que l'interface recouvre (pixels CSS) : la caméra peut dépasser la carte de leur
-   * largeur, pour qu'un socle collé au bord reste atteignable.
+   * largeur, pour qu'une case collée au bord reste atteignable.
    */
   definirMarges(marges: { readonly haut: number; readonly bas: number; readonly gauche: number; readonly droite: number }): void {
     const r = this.ratio;

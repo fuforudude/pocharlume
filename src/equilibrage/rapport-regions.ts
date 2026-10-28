@@ -2,6 +2,7 @@
 // s'appliquent au rapport principal (rapport.ts) ; celles des régions 2 à 5 ne sont pas encore imposées (tâche 6, équilibrage
 // fin) : on donne les chiffres par région, difficulté et dieu, et les écarts aux bandes à titre d'information.
 import {
+  BANDES_IMPOSEES,
   ecartsChaton,
   ecartsCourbe,
   ecartsEntreDieux,
@@ -124,7 +125,10 @@ export function redigerRegions(evaluations: readonly Evaluation[], regions: read
   return [
     '## Régions 2 à 5 : premier passage',
     '',
-    'Les bandes de la région 1 (plus haut) sont imposées. Celles des régions 2 à 5 ne le sont pas encore : c’est le premier passage du ' +
+    (BANDES_IMPOSEES
+      ? 'Les bandes de la région 1 (plus haut) sont imposées. '
+      : 'Les bandes de la région 1 (plus haut) sont suspendues le temps de l’équilibrage qui suit la pose libre des tours (elles sont affichées, pas imposées). ') +
+      'Celles des régions 2 à 5 ne le sont pas encore : c’est le premier passage du ' +
       'simulateur sur ces niveaux (arêtes de départ réglées grossièrement, rien d’absurde), l’équilibrage fin et l’ajout des bandes ' +
       'viennent à la tâche 6 du jalon 3. Chiffres de ce passage, mêmes dieux, mêmes bots et mêmes graines que pour la région 1.',
     '',

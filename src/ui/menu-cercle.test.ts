@@ -180,7 +180,7 @@ describe('positionsCercle', () => {
     }
   });
 
-  it('garde tous les boutons dans l’écran quand le socle est près d’un bord ou d’un coin', () => {
+  it('garde tous les boutons dans l’écran quand la case est près d’un bord ou d’un coin', () => {
     for (const [cx, cy] of [[5, 5], [795, 5], [5, 395], [795, 395], [400, 2], [2, 200]] as const) {
       const p = positionsCercle(5, 60, cx, cy, 800, 400, 30);
       for (const point of p) {

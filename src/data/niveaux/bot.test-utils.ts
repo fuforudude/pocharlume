@@ -17,7 +17,7 @@ const FAMILLES_PLAN: readonly IdFamille[] = ['tir', 'caserne', 'magie', 'artille
 /** Spécialisation choisie pour chaque famille. */
 const VOIES: Readonly<Record<IdFamille, Voie>> = { tir: 'B', caserne: 'A', magie: 'A', artillerie: 'A' };
 
-/** Nombre de cases du plan : une défense de taille d'un niveau à socles (de 6 à 12), choisies parmi les plus proches du chemin. */
+/** Nombre de cases du plan : une défense de la taille de celles des anciens niveaux à socles (de 6 à 12), choisies parmi les plus proches du chemin. */
 const NOMBRE_DE_CASES = 10;
 
 /** Distance du centre de la case au point le plus proche d'un chemin du niveau (les chemins sont échantillonnés tous les 0,25 tuile). */
