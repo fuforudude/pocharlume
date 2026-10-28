@@ -361,6 +361,106 @@ Carreau perforant ; Mortier de Soufre, Nappe de soufre et Charge lourde.
 6. Équilibrage des trois dieux, bandes par dieu.
 7. Relecture, QA, corrections.
 
+## Détail du jalon 3
+
+### Régions 2 à 5
+- 10 niveaux par région, 3 cartes dessinées par région réutilisées avec d'autres entrées et vagues, le niveau 10
+  est le boss. Vagues générées par la formule d'équilibrage puis figées dans `src/data/niveaux/` comme la région 1.
+- Une région s'ouvre quand le boss de la précédente est battu. Ses niveaux mélangent ses ennemis et, à partir du
+  niveau 4, ceux des régions précédentes.
+- Mécaniques des ennemis (valeurs dans `src/data/ennemis.ts`) :
+
+| Ennemi | Mécanique |
+| --- | --- |
+| Glaneur | tire de loin sur les soldats et le héros (portée 2 tuiles) |
+| Corbeau | volant : ignoré par la Caserne et l'Artillerie, ne s'arrête pas aux soldats |
+| Épouvantail | se relève une fois avec 40 % de ses PV |
+| Porteur de Torche | brûle les soldats au contact (dégâts sur 3 s) |
+| Chasseur de Sorcières | armure 30 %, double dégâts contre le héros |
+| Délateur | furtif (visible des tours qui révèlent, du Voile et des Guetteurs) |
+| Noyeur | entraîne un soldat bloquant sous l'eau (le tue après 3 s s'il n'est pas tué avant) |
+| Pèlerin Voilé | résistance magique 60 % |
+| Sangsue | essaim : arrive par groupes de 6, fragile, draine 1 PV/s du soldat qu'elle touche |
+| Rat de Peste | essaim très rapide, coût en vies 1, par groupes de 8 |
+| Pestiféré | laisse un nuage toxique 3 s en mourant (blesse soldats et héros) |
+| Médecin de Peste | soigne de 5 % de leurs PV max les ennemis proches toutes les 4 s |
+
+- Boss :
+  - **La Faim** : chaque quart de PV perdu affame les tours à portée (cadence −30 % pendant 5 s).
+  - **Le Juge des Flammes** : met le feu à la tour la plus proche toutes les 12 s (désactivée 4 s) et appelle 3
+    Porteurs de Torche à 50 % de PV.
+  - **La Dame du Puits** : plonge à 66 % et 33 % de PV (invulnérable 3 s, réapparaît 3 tuiles plus loin) et
+    appelle 6 Sangsues à chaque plongée.
+  - **La Mère des Rats** : pond un groupe de 4 Rats de Peste toutes les 6 s.
+- **Élites** : chaque ennemi des régions 2 à 5 a sa version d'élite : PV ×1,8, un palier d'armure et de résistance
+  de plus (au plus 90 %), prime ×1,5, coût en vies +1, sprite recoloré (teinte sombre, yeux rouges). Elles
+  apparaissent dans les dernières vagues en Vieux Sage et partout en Héroïque.
+- Disciples offerts : la victoire sur le boss des régions 2 et 4 offre le premier disciple non possédé dans l'ordre
+  Suie, Mastoc, Rouage, Corbeau, Brise-Os, Lanterne.
+
+### Défis
+- Ouverts sur un niveau à 3 étoiles, joués avec les règles de Matou, sans objet consommable.
+- **Héroïque** : 1 vie, toutes les vagues en élite.
+- **Fer** : toutes les vagues fusionnées en une seule (budget de menace ×1,5), seules les 2 familles de tours
+  fixées pour le niveau dans les données sont constructibles, tour divine comprise si sa famille l'autorise ; bonus
+  des caisses désactivés.
+- Chaque défi réussi rapporte 4 braises une fois. Les réussites sont gardées par niveau et marquées sur la carte.
+
+### Caisses, skins et familiers
+- Deux caisses, payées 20 braises chacune : skins (tours communes et héros) et familiers.
+- Raretés et chances affichées : Commun 60 %, Rare 25 %, Épique 10 %, Légendaire 4 %, Mythique 1 %. Garantie : une
+  caisse qui suit 9 caisses du même type sans Épique ou mieux donne un Épique ou mieux (les chances Épique, Légendaire
+  et Mythique gardent leurs proportions). Le compteur est gardé par type de caisse.
+- Le tirage se fait hors du moteur (`src/meta/`), avec une source aléatoire injectée (crypto en jeu, graine en test),
+  par une transaction de session sous verrou comme les achats.
+- Catalogue (`src/data/collection.ts`) : 21 skins (3 par tour commune de base, soit 12, et 1 par héros, soit 9) et
+  12 familiers. Chaque objet a une rareté, une stat (dégâts, cadence, portée ou PV des soldats pour une tour ; PV,
+  dégâts, cadence ou régénération pour un héros) et un sprite recoloré.
+- Doublon : il donne des éclats (Commun 5, Rare 10, Épique 25, Légendaire 60, Mythique 150). Monter un objet du rang
+  r au rang r+1 coûte 20 × r éclats (5 rangs). Acheter un objet précis : Commun 50, Rare 120, Épique 300,
+  Légendaire 700, Mythique 1500 éclats.
+- Bonus : base selon la rareté (skin +1 à +5 % de Commun à Mythique, familier +1, +1,5, +2, +3, +4 %), multiplié
+  par 1 + 0,25 × (rang − 1). Un skin porté par tour de base (il vaut pour ses spécialisations), un familier par héros.
+  Le total par tour ou par héros est plafonné à +10 %. Les bonus entrent dans `ConfigPartie` au lancement et sont
+  ignorés en Fer.
+- Le bonus ne change que des stats : le simulateur joue sans caisses et les bandes restent valables.
+
+### Sauvegarde v4
+- Ajoute : région débloquée, défis réussis par niveau, collection (objets possédés et rangs), éclats, compteurs de
+  garantie, skins et familiers équipés. Migration v3 vers v4 testée, sans perte.
+
+### Équilibrage du jalon 3
+- Les bandes de la région 1 s'appliquent à chacune des régions 2 à 5, pour les 3 dieux.
+- Défis : sur chaque région, le bot soigneux réussit entre 40 et 90 % des Héroïques et des Fer.
+- Le niveau 10 de chaque région est parmi ses 3 niveaux les plus durs (moyenne des dieux, comme au jalon 2).
+
+### Critères d'acceptation détaillés du jalon 3
+- [ ] Les régions 2 à 5 sont jouables de bout en bout, chacune débloquée par le boss de la précédente.
+- [ ] Chaque mécanique d'ennemi, de boss et d'élite ci-dessus a un test moteur qui montre son effet.
+- [ ] `npm run balance` couvre les régions 1 à 5 et les défis, et toutes les bandes passent.
+- [ ] Sur 100 000 tirages d'une caisse sans garantie, chaque rareté sort à moins de 0,5 point de la chance affichée.
+- [ ] La 10e caisse sans Épique ou mieux en donne un ; un doublon donne les éclats prévus ; un rang et un achat
+  d'objet précis retirent les éclats prévus ; moins d'éclats ou de braises que le prix, refus.
+- [ ] Le bonus d'une tour ou d'un héros ne dépasse jamais +10 % (test sur toutes les combinaisons du catalogue), et
+  il vaut 0 en Fer.
+- [ ] Un défi s'ouvre à 3 étoiles, ses règles s'appliquent, sa récompense n'est donnée qu'une fois.
+- [ ] La sauvegarde passe en v4 avec une migration testée depuis la v3.
+- [ ] Les écrans caisses (chances affichées, ouverture, garantie restante) et collection (équiper, monter, acheter)
+  tiennent en paysage 812×375.
+
+## Tâches du jalon 3
+1. Moteur : mécaniques des 12 ennemis et des 4 boss, élites, défis (Héroïque, Fer), bonus de collection dans
+   `ConfigPartie`.
+2. Sprites : 12 ennemis, leurs élites, 4 boss, tuiles et décor des régions 2 à 5, 21 skins, 12 familiers, icônes
+   des caisses et des raretés.
+3. Méta et sauvegarde v4 : catalogue, tirage, garantie, éclats, rangs, défis, déblocage des régions, disciples
+   offerts.
+4. Niveaux : 12 cartes et 40 niveaux figés, familles imposées des défis Fer. (Après la tâche 1.)
+5. Interface : carte des régions 2 à 5, défis sur la fiche, écrans caisses et collection, bilan des défis. (Après les
+   tâches 1 et 3.)
+6. Équilibrage des régions 2 à 5 et des défis. (Après la tâche 4.)
+7. Relecture, QA, corrections.
+
 ## Impacts
 - Données / migrations : aucune base de données. Le format de sauvegarde est versionné dès la v1.
 - API : aucune en V1. Le journal d'actions et le moteur déterministe préparent le rejeu serveur.
