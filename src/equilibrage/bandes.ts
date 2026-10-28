@@ -4,7 +4,7 @@
 //
 // Le bot soigneux lit la composition des vagues futures (`poidsDesChemins`, geometrie.ts), ce qu'un joueur ne voit
 // pas : il est un peu optimiste. On le prend pourtant pour référence d'un joueur humain compétent.
-import { dieuxDe, duDieu, trouver, partiesDe, synthetiser, type Evaluation } from './campagne';
+import { DEFIS_EVALUES, dieuxDe, duDieu, trouver, partiesDe, synthetiser, type Evaluation } from './campagne';
 import { toursHorsTolerance } from './puissance';
 
 export const BANDES = {
@@ -28,6 +28,11 @@ export const BANDES = {
     /** Écart maximal, entre deux dieux, du taux de victoire du soigneux (10 points). */
     ecartVictoiresEntreDieuxMax: 0.1,
   },
+  /**
+   * Défis (jalon 3), sur chaque région : part des parties d'un défi (Héroïque, Fer) que le soigneux réussit, tous niveaux et
+   * dieux confondus, entre ces deux bornes.
+   */
+  defis: { reussiteMin: 0.4, reussiteMax: 0.9 },
   /** Courbe de difficulté du bot naïf en Matou (moyenne des dieux) : corrélation de rang au plus égale à ceci. */
   courbeCorrelationMax: -0.6,
   /** La courbe de chaque dieu, prise seule, doit aussi monter : corrélation de rang au plus égale à ceci. */
@@ -40,6 +45,7 @@ export const BANDES = {
 const EPSILON = 1e-9;
 
 const NOM_DIEU: Readonly<Record<string, string>> = { plume: 'Plume', charlie: 'Charlie', pollen: 'Pollen' };
+const NOM_DEFI: Readonly<Record<string, string>> = { heroique: 'Héroïque', fer: 'Fer' };
 
 /** Nom d'un dieu pour les messages d'écart et le rapport. */
 export function nomDuDieu(dieu: string): string {
@@ -221,7 +227,26 @@ export function courbeMoyenne(evaluations: readonly Evaluation[], difficulte = '
   });
 }
 
-export function verifierBandes(evaluations: readonly Evaluation[]): string[] {
+/**
+ * Défis, sur la région évaluée : le soigneux réussit entre 40 et 90 % des parties de chaque défi (Héroïque, Fer), tous
+ * niveaux et dieux confondus. Sans objet si les évaluations n'en portent aucun.
+ */
+export function ecartsDefis(evaluations: readonly Evaluation[]): string[] {
+  const { reussiteMin, reussiteMax } = BANDES.defis;
+  const ecarts: string[] = [];
+  for (const defi of DEFIS_EVALUES) {
+    const parties = partiesDe(evaluations, defi, 'soigneux');
+    if (parties.length === 0) continue;
+    const t = synthetiser(parties).tauxVictoire;
+    if (t < reussiteMin - EPSILON || t > reussiteMax + EPSILON) {
+      ecarts.push(`Défi ${NOM_DEFI[defi] ?? defi} : le bot soigneux réussit ${pourcent(t)} des parties, la bande est ${pourcent(reussiteMin)} à ${pourcent(reussiteMax)}`);
+    }
+  }
+  return ecarts;
+}
+
+/** Les écarts aux bandes d'une région, sans la puissance des tours (qui ne dépend pas de la région). */
+export function ecartsDeRegion(evaluations: readonly Evaluation[]): string[] {
   return [
     ...ecartsChaton(evaluations),
     ...ecartsMatou(evaluations),
@@ -229,8 +254,13 @@ export function verifierBandes(evaluations: readonly Evaluation[]): string[] {
     ...ecartsVieuxSage(evaluations),
     ...ecartsEntreDieux(evaluations),
     ...ecartsSansDefense(evaluations),
-    ...ecartsPuissance(),
+    ...ecartsDefis(evaluations),
   ];
+}
+
+/** Les écarts d'une région, plus la puissance des tours communes (une seule fois pour tout le jeu). */
+export function verifierBandes(evaluations: readonly Evaluation[]): string[] {
+  return [...ecartsDeRegion(evaluations), ...ecartsPuissance()];
 }
 
 /** Vies restantes moyennes du bot naïf en Matou, niveau par niveau (la courbe de difficulté), pour un dieu. */

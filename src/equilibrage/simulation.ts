@@ -2,7 +2,7 @@
 // moteur (`avancer` avec des actions), exactement comme l'interface : il lit l'état mais ne le modifie jamais
 // directement.
 import { avancer, creerPartie, PAS_PAR_SECONDE } from '../engine';
-import type { Action, ConfigPartie, EtatPartie, IdFamille, Niveau, Statut, Voie } from '../engine';
+import type { Action, ConfigPartie, DefiPartie, EtatPartie, IdFamille, Niveau, Statut, Voie } from '../engine';
 import { VERSION_DONNEES } from '../data/version';
 
 /** Un joueur automatique : il regarde l'état et renvoie les actions à jouer à ce pas. */
@@ -48,6 +48,8 @@ export interface Joueur {
   readonly competencesHeros?: Readonly<Record<string, number>>;
   readonly ameliorations?: Readonly<Record<string, number>>;
   readonly objets?: readonly string[];
+  /** Défi joué (Héroïque ou Fer) : le moteur le joue avec les règles de Matou, quelle que soit la difficulté demandée. */
+  readonly defi?: DefiPartie;
 }
 
 export interface OptionsPartie extends Joueur {
@@ -71,6 +73,7 @@ export function configPartie(o: OptionsPartie): ConfigPartie {
     ameliorations: { ...o.ameliorations },
     objets: [...(o.objets ?? [])],
     versionDonnees: VERSION_DONNEES,
+    ...(o.defi ? { defi: o.defi } : {}),
   };
 }
 

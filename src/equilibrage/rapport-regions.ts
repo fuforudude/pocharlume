@@ -1,16 +1,8 @@
-// Section du rapport d'équilibrage pour les régions 2 à 5 : premier passage du jalon 3 (tâche 4). Les bandes de la région 1
-// s'appliquent au rapport principal (rapport.ts) ; celles des régions 2 à 5 ne sont pas encore imposées (tâche 6, équilibrage
-// fin) : on donne les chiffres par région, difficulté et dieu, et les écarts aux bandes à titre d'information.
-import {
-  ecartsChaton,
-  ecartsCourbe,
-  ecartsEntreDieux,
-  ecartsMatou,
-  ecartsSansDefense,
-  ecartsVieuxSage,
-  nomDuDieu,
-} from './bandes';
-import { DIEUX_EVALUES, DIFFICULTES_EVALUEES, dieuxDe, partiesDe, synthetiser, trouver, type Evaluation } from './campagne';
+// Section du rapport d'équilibrage pour les régions 2 à 5 (jalon 3, tâche 6) et pour les défis des régions 1 à 5. Les bandes de la
+// région 1 sont celles de rapport.ts ; les mêmes bandes (et celle des défis) s'imposent à chacune des régions 2 à 5 : les écarts
+// listés ici font échouer `npm run balance` comme ceux de la région 1.
+import { ecartsDeRegion, ecartsDefis, nomDuDieu } from './bandes';
+import { DEFIS_EVALUES, DIEUX_EVALUES, DIFFICULTES_EVALUEES, dieuxDe, partiesDe, synthetiser, trouver, type Evaluation } from './campagne';
 
 /** Niveaux par région : le numéro de campagne se range par dizaines. */
 const NIVEAUX_PAR_REGION = 10;
@@ -23,7 +15,7 @@ const THEMES: Readonly<Record<number, string>> = {
   5: 'la Ville Pestiférée',
 };
 
-const NOM_DIFFICULTE: Readonly<Record<string, string>> = { chaton: 'Chaton', matou: 'Matou', vieux_sage: 'Vieux Sage' };
+const NOM_DIFFICULTE: Readonly<Record<string, string>> = { chaton: 'Chaton', matou: 'Matou', vieux_sage: 'Vieux Sage', heroique: 'Héroïque', fer: 'Fer' };
 
 /** Les évaluations des niveaux d'une région (numéros de campagne, 10 par région). */
 export function evaluationsDeRegion(evaluations: readonly Evaluation[], region: number): Evaluation[] {
@@ -31,16 +23,9 @@ export function evaluationsDeRegion(evaluations: readonly Evaluation[], region: 
   return evaluations.filter((e) => e.niveau >= premier && e.niveau < premier + NIVEAUX_PAR_REGION);
 }
 
-/** Les écarts aux bandes d'une région, sans la puissance des tours (qui ne dépend pas de la région). */
-export function ecartsDeRegion(evaluations: readonly Evaluation[]): string[] {
-  return [
-    ...ecartsChaton(evaluations),
-    ...ecartsMatou(evaluations),
-    ...ecartsCourbe(evaluations),
-    ...ecartsVieuxSage(evaluations),
-    ...ecartsEntreDieux(evaluations),
-    ...ecartsSansDefense(evaluations),
-  ];
+/** Les écarts aux bandes d'une région, chacun précédé de son numéro de région. */
+export function ecartsDeLaRegion(evaluations: readonly Evaluation[], region: number): string[] {
+  return ecartsDeRegion(evaluationsDeRegion(evaluations, region)).map((e) => `Région ${String(region)} : ${e}`);
 }
 
 function pct(x: number): string {
@@ -111,7 +96,7 @@ function sectionRegion(evaluations: readonly Evaluation[], region: number): stri
     '',
     tableau(['Niveau', 'Matou, soigneux', 'Matou, naïf', 'Matou, naïf : vies restantes', 'Matou, soigneux : arêtes en fin', 'Vieux Sage, soigneux', 'Vieux Sage, soigneux : vies restantes', 'Matou, sans défense'], parNiveau),
     '',
-    `Écarts aux bandes (à titre d’information) : ${ecarts.length === 0 ? 'aucun.' : String(ecarts.length)}`,
+    `Écarts aux bandes : ${ecarts.length === 0 ? 'aucun.' : String(ecarts.length)}`,
     ...(ecarts.length === 0 ? [] : ['', ...ecarts.map((e) => `- ${e}`)]),
   ].join('\n');
 }
@@ -122,12 +107,52 @@ function sectionRegion(evaluations: readonly Evaluation[], region: number): stri
  */
 export function redigerRegions(evaluations: readonly Evaluation[], regions: readonly number[]): string {
   return [
-    '## Régions 2 à 5 : premier passage',
+    '## Régions 2 à 5',
     '',
-    'Les bandes de la région 1 (plus haut) sont imposées. Celles des régions 2 à 5 ne le sont pas encore : c’est le premier passage du ' +
-      'simulateur sur ces niveaux (arêtes de départ réglées grossièrement, rien d’absurde), l’équilibrage fin et l’ajout des bandes ' +
-      'viennent à la tâche 6 du jalon 3. Chiffres de ce passage, mêmes dieux, mêmes bots et mêmes graines que pour la région 1.',
+    'Les bandes de la région 1 (plus haut) s’appliquent à chacune des régions 2 à 5, pour les trois dieux : mêmes bots, mêmes graines, ' +
+      'mêmes difficultés, courbe de difficulté jugée sur la moyenne des dieux, écart entre dieux comme au jalon 2. Un écart fait échouer ' +
+      '`npm run balance` comme ceux de la région 1.',
     '',
     ...regions.flatMap((r) => [sectionRegion(evaluations, r), '']),
+  ].join('\n');
+}
+
+function sectionDefisRegion(evaluations: readonly Evaluation[], region: number): string {
+  const deLaRegion = evaluationsDeRegion(evaluations, region);
+  const dieux = DIEUX_EVALUES.filter((d) => dieuxDe(deLaRegion).includes(d));
+  if (deLaRegion.length === 0 || dieux.length === 0) return `### Région ${String(region)}\n\nPas d’évaluation des défis pour cette région.`;
+  const parDefi = DEFIS_EVALUES.flatMap((defi) => [
+    ...dieux.map((dieu) => {
+      const s = synthetiser(partiesDe(deLaRegion, defi, 'soigneux', dieu));
+      return [NOM_DIFFICULTE[defi] ?? defi, nomDuDieu(dieu), victoires(deLaRegion, defi, 'soigneux', undefined, dieu), un(s.viesMoyennes)];
+    }),
+    [NOM_DIFFICULTE[defi] ?? defi, 'les trois', victoires(deLaRegion, defi, 'soigneux'), un(synthetiser(partiesDe(deLaRegion, defi, 'soigneux')).viesMoyennes)],
+  ]);
+  const niveaux = [...new Set(deLaRegion.map((e) => e.niveau))].sort((a, b) => a - b);
+  const parNiveau = niveaux.map((niveau) => [String(niveau), ...DEFIS_EVALUES.map((defi) => victoires(deLaRegion, defi, 'soigneux', niveau))]);
+  const ecarts = ecartsDefis(deLaRegion);
+  return [
+    `### Région ${String(region)} : ${THEMES[region] ?? ''}`,
+    '',
+    tableau(['Défi', 'Dieu', 'Soigneux : réussites', 'Soigneux : vies restantes'], parDefi),
+    '',
+    tableau(['Niveau', 'Héroïque, soigneux (trois dieux)', 'Fer, soigneux (trois dieux)'], parNiveau),
+    '',
+    `Écarts aux bandes des défis : ${ecarts.length === 0 ? 'aucun.' : String(ecarts.length)}`,
+    ...(ecarts.length === 0 ? [] : ['', ...ecarts.map((e) => `- ${e}`)]),
+  ].join('\n');
+}
+
+/** La section des défis des régions `regions` : réussite du soigneux (bande 40 à 90 % par région et par défi). */
+export function redigerDefis(evaluations: readonly Evaluation[], regions: readonly number[]): string {
+  return [
+    '## Défis, régions 1 à 5',
+    '',
+    'Le bot soigneux joue les défis avec les règles de Matou, sans objet ni amélioration : Héroïque (1 vie, groupes d’élite) et Fer ' +
+      '(toutes les vagues en une, deux familles de tours). Il cherche sa variante sur les graines d’entraînement du défi lui-même, ' +
+      'puis joue les dix graines d’évaluation. Bande : entre 40 et 90 % de réussites pour chaque défi de chaque région, trois dieux ' +
+      'confondus.',
+    '',
+    ...regions.flatMap((r) => [sectionDefisRegion(evaluations, r), '']),
   ].join('\n');
 }

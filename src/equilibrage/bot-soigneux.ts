@@ -93,6 +93,12 @@ function prixDe(def: DefNiveauTour, famille: IdFamille, bonus: BonusFamille): nu
   return bonus.famille === famille ? ajusterMontant(def.cout, 1 + bonus.prix) : def.cout;
 }
 
+/** Le défi Fer n'autorise que deux familles de tours ; hors Fer, toutes. */
+function famillePermise(etat: EtatPartie, famille: IdFamille): boolean {
+  if (etat.config.defi !== 'fer') return true;
+  return etat.niveau.defiFer?.familles.includes(famille) ?? true;
+}
+
 function defCourante(tour: Tour): DefNiveauTour | undefined {
   if (tour.famille === 'divine') return undefined;
   const famille = TOURS[tour.famille];
@@ -169,7 +175,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     etat.niveau.carte.socles.forEach((_, socle) => {
       const tour = etat.tours.find((t) => t.socle === socle);
       if (!tour) {
-        for (const famille of FAMILLES) {
+        for (const famille of FAMILLES.filter((f) => famillePermise(etat, f))) {
           const def = TOURS[famille].niveaux[0];
           liste.push({ action: { type: 'construire', socle, tour: famille }, ratio: valeur(etat, socle, def, famille) / cout(etat, def, famille) });
         }
@@ -203,7 +209,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
    * chemin. Une valeur juste au-dessus du meilleur autre achat : le bot économise jusqu'à pouvoir la payer.
    */
   function candidatGuetteurs(etat: EtatPartie, meilleurRatio: number): Candidat | null {
-    if (parts.furtifs < PART_FURTIFS_MIN) return null;
+    if (parts.furtifs < PART_FURTIFS_MIN || !famillePermise(etat, 'tir')) return null;
     const requis = etat.niveau.carte.chemins.length;
     if (etat.tours.filter((t) => t.famille === 'tir' && t.voie === 'A').length >= requis) return null;
     const tir = etat.tours.filter((t) => t.famille === 'tir' && t.voie !== 'A').sort((a, b) => b.niveau - a.niveau)[0];
@@ -233,6 +239,8 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     if (!(options.tourDivine ?? true)) return null;
     const dieu = dieux[etat.config.dieu];
     if (!dieu || etat.tours.length < 3 || etat.tours.some((t) => t.famille === 'divine')) return null;
+    // Au défi Fer, la tour divine suit la famille de son dieu : elle n'est permise que si cette famille l'est.
+    if (!famillePermise(etat, dieu.bonus.famille)) return null;
     let socle = -1;
     let meilleurVue = -1;
     etat.niveau.carte.socles.forEach((_, i) => {

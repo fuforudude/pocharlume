@@ -1,13 +1,16 @@
-// Fil de calcul des tests des bandes (voir bandes.test-utils.ts) : évalue la région 1 dans une difficulté pour un dieu.
-// Chargé par Node seul (avec le crochet de tools/niveaux/enregistrer.ts), comme les fils de `npm run balance`.
+// Fil de calcul des tests des bandes (voir bandes.test-utils.ts) : évalue les 10 niveaux d'une région dans une difficulté (ou un
+// défi) pour un dieu. Chargé par Node seul (avec le crochet de tools/niveaux/enregistrer.ts), comme les fils de `npm run balance`.
 import { parentPort, workerData } from 'node:worker_threads';
-import { REGION1 } from '../data/niveaux/region1';
+import { REGIONS } from '../data/niveaux/campagne';
 import { evaluerCampagne } from './campagne';
 
-const { difficulte, dieu, graines, grainesEntrainement } = workerData as {
+const { region, difficulte, dieu, graines, grainesEntrainement } = workerData as {
+  region: number;
   difficulte: string;
   dieu: string;
   graines: number[];
   grainesEntrainement: number[];
 };
-parentPort?.postMessage(evaluerCampagne({ niveaux: REGION1, difficultes: [difficulte], dieux: [dieu], graines, grainesEntrainement }));
+const niveaux = REGIONS[region - 1];
+if (!niveaux) throw new Error(`Région ${String(region)} inconnue`);
+parentPort?.postMessage(evaluerCampagne({ niveaux, difficultes: [difficulte], dieux: [dieu], graines, grainesEntrainement }));
