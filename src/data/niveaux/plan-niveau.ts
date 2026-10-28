@@ -1,4 +1,4 @@
-// Plan d'un niveau de campagne : quelle carte, quels chemins et socles, quels ennemis, combien de vagues, quelles
+// Plan d'un niveau de campagne : quelle carte, quels chemins, quels ennemis, combien de vagues, quelles
 // familles de tours pour le défi Fer. Les vagues elles-mêmes ne sont pas ici : `npm run niveaux` les génère depuis le
 // plan et les fige dans vagues-region<N>.ts. Changer un plan (ennemis, nombre de vagues, graine, nombre de chemins)
 // demande de relancer `npm run niveaux`, un test le rappelle.
@@ -13,8 +13,6 @@ export interface PlanNiveau {
   readonly carte: IdCarte;
   /** Chemins de la carte utilisés (entrées), dans l'ordre : le paquet `chemin: i` suit `chemins[i]`. */
   readonly chemins: readonly number[];
-  /** Socles de la carte utilisés, dans l'ordre : leur indice dans le niveau est leur rang ici. */
-  readonly socles: readonly number[];
   readonly aretesDepart: number;
   /** Les deux seules familles de tours du défi Fer sur ce niveau (choisies pour que le niveau reste jouable). */
   readonly defiFer: DefiFer;

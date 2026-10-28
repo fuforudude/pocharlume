@@ -2,7 +2,7 @@
 import type { FamilleTour } from '../engine/etat';
 
 export type Commande =
-  /** Construit la tour sur le socle sélectionné. */
+  /** Construit la tour sur la case sélectionnée. */
   | { readonly type: 'tour'; readonly famille: FamilleTour }
   | { readonly type: 'sort'; readonly emplacement: number }
   /** Utilise l'objet d'un emplacement (A, Z, R). */

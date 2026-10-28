@@ -570,6 +570,8 @@ export interface Difficulte {
 
 /** Règles générales de la partie. */
 export interface Regles {
+  /** Côté d'une case de la grille de construction, en tuiles (2 : cases de 2×2 tuiles, 16×9 sur une carte 32×18). */
+  readonly tailleCase: number;
   /** Pourcentage entier du coût cumulé rendu à la revente (70 = 70 %), pour un calcul sans arrondi. */
   readonly tauxRevente: number;
   /** Multiplicateur d'un coup critique donné par un bonus à une tour qui n'en a pas. */
@@ -633,9 +635,13 @@ export interface Vague {
   readonly paquets: readonly Paquet[];
 }
 
-export interface Socle extends Point {
-  /** Point de ralliement par défaut si on y construit une caserne. */
-  readonly ralliement: Point;
+/**
+ * Une case de la grille de construction : carré de `REGLES.tailleCase` tuiles de côté (2×2), colonne `cx` et ligne `cy`
+ * comptées depuis le coin nord-ouest de la carte. La tour posée sur une case est centrée dessus.
+ */
+export interface CaseGrille {
+  readonly cx: number;
+  readonly cy: number;
 }
 
 export interface CheminCarte {
@@ -647,7 +653,6 @@ export interface Carte {
   readonly largeur: number;
   readonly hauteur: number;
   readonly chemins: readonly CheminCarte[];
-  readonly socles: readonly Socle[];
   readonly departHeros: Point;
 }
 
@@ -663,6 +668,11 @@ export interface Niveau {
   readonly id: string;
   readonly carte: Carte;
   readonly vagues: readonly Vague[];
+  /**
+   * Cases de la grille où l'on ne construit pas (chemin, grands décors), calculées à l'assemblage du niveau : le moteur
+   * ne lit pas l'habillage. Toute autre case de la carte est constructible.
+   */
+  readonly casesInterdites: readonly CaseGrille[];
   readonly aretesDepart: number;
   /** Absent = pas de défi Fer sur ce niveau. */
   readonly defiFer?: DefiFer;

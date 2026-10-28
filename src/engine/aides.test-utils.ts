@@ -1,10 +1,12 @@
 // Outils réservés aux tests du moteur (suffixe .test-utils.ts : jamais importé par le jeu, donc absent du
 // build) : configuration type, cartes d'essai, avance rapide.
 import { ENNEMIS, type IdEnnemi } from '../data/ennemis';
+import { casesInterditesDuNiveau } from '../data/niveaux/grille-niveau';
 import { VERSION_DONNEES } from '../data/version';
-import type { DefEnnemi, IdFamille, Niveau, Vague, Voie } from './definitions';
+import type { CaseGrille, DefEnnemi, IdFamille, Niveau, Vague, Voie } from './definitions';
 import { ajouterEnnemi } from './ennemis';
-import type { ConfigPartie, Ennemi, EtatPartie, Unite } from './etat';
+import { casesLibres } from './grille';
+import type { ConfigPartie, Ennemi, EtatPartie, Tour, Unite } from './etat';
 import type { Evenement } from './evenements';
 import { PAS_PAR_SECONDE } from './temps';
 import { appliquerAction, creerPartie, step } from './partie';
@@ -37,34 +39,62 @@ export const VAGUE_LOINTAINE: Vague = {
 };
 
 /**
- * Carte d'essai : chemin 0 droit de (0,5) à (30,5), chemin 1 droit de (0,12) à (30,12).
- * Socles 0 à 3 sous le chemin 0 (x = 5, 10, 15, 20), socle 4 près du chemin 1, socle 5 au-dessus du
- * chemin 0 entre les socles 0 et 1.
+ * Cases de la carte d'essai (indices 0 à 5, pour écrire `ce(0)` plutôt que des coordonnées de grille) :
+ * 0 à 3 sous le chemin 0 (centres à x = 5, 11, 15, 19 ; y = 7, à 2 tuiles de l'axe : une caserne y a un chemin à portée),
+ * 4 sous le chemin 1 (centre (9, 15), à 3 tuiles de l'axe : pas de caserne), 5 au-dessus du chemin 0 (centre (7, 3)).
+ */
+export const CASES_ESSAI: readonly CaseGrille[] = [
+  { cx: 2, cy: 3 },
+  { cx: 5, cy: 3 },
+  { cx: 7, cy: 3 },
+  { cx: 9, cy: 3 },
+  { cx: 4, cy: 7 },
+  { cx: 3, cy: 1 },
+];
+
+/** La case d'essai numéro `i`. */
+export function ce(i: number): CaseGrille {
+  const c = CASES_ESSAI[i];
+  if (!c) throw new Error(`Pas de case d'essai ${String(i)}`);
+  return c;
+}
+
+/**
+ * Cases de `NIVEAU_TEST` (indices 0 à 5). 0 à 3 sont à 2 tuiles d'un axe de chemin impair (une caserne y a un chemin à portée) :
+ * centres (15, 11), (19, 15), (29, 5), (29, 9). 4 et 5 sont à 3 tuiles de l'axe : pas de caserne, mais tout le reste.
+ */
+export const CASES_TEST: readonly CaseGrille[] = [
+  { cx: 7, cy: 5 },
+  { cx: 9, cy: 7 },
+  { cx: 14, cy: 2 },
+  { cx: 14, cy: 4 },
+  { cx: 4, cy: 4 },
+  { cx: 10, cy: 4 },
+];
+
+/** La case numéro `i` de `NIVEAU_TEST`. */
+export function ct(i: number): CaseGrille {
+  const c = CASES_TEST[i];
+  if (!c) throw new Error(`Pas de case de test ${String(i)}`);
+  return c;
+}
+
+/**
+ * Carte d'essai : chemin 0 droit de (0,5) à (30,5), chemin 1 droit de (0,12) à (30,12), sans décor (seuls les chemins
+ * interdisent des cases ; cases d'essai : voir `CASES_ESSAI`).
  * Le héros attend loin des chemins pour ne pas gêner.
  */
 export function niveauEssai(vagues: readonly Vague[] = [VAGUE_LOINTAINE], aretesDepart = 5000): Niveau {
-  return {
-    id: 'essai',
-    aretesDepart,
-    carte: {
-      largeur: 32,
-      hauteur: 18,
-      chemins: [
-        { points: [{ x: 0, y: 5 }, { x: 30, y: 5 }] },
-        { points: [{ x: 0, y: 12 }, { x: 30, y: 12 }] },
-      ],
-      socles: [
-        { x: 5, y: 7, ralliement: { x: 5, y: 5 } },
-        { x: 10, y: 7, ralliement: { x: 10, y: 5 } },
-        { x: 15, y: 7, ralliement: { x: 15, y: 5 } },
-        { x: 20, y: 7, ralliement: { x: 20, y: 5 } },
-        { x: 10, y: 14, ralliement: { x: 10, y: 12 } },
-        { x: 7.5, y: 3, ralliement: { x: 7.5, y: 5 } },
-      ],
-      departHeros: { x: 28, y: 16 },
-    },
-    vagues,
+  const carte = {
+    largeur: 32,
+    hauteur: 18,
+    chemins: [
+      { points: [{ x: 0, y: 5 }, { x: 30, y: 5 }] },
+      { points: [{ x: 0, y: 12 }, { x: 30, y: 12 }] },
+    ],
+    departHeros: { x: 28, y: 16 },
   };
+  return { id: 'essai', aretesDepart, carte, casesInterdites: casesInterditesDuNiveau(carte, []), vagues };
 }
 
 export function ennemiEssai(surcharges: Partial<DefEnnemi> = {}): DefEnnemi {
@@ -85,13 +115,28 @@ export function partieEssai(config: ConfigPartie = CONFIG, aretes = 5000): EtatP
 }
 
 /** Construit une tour (et la spécialise si `voie` est donnée) en vérifiant que le moteur accepte chaque étape. */
-export function construireTour(etat: EtatPartie, socle: number, tour: IdFamille | 'divine', voie?: Voie): void {
-  const action = { type: 'construire', socle, tour } as const;
-  if (!appliquerAction(etat, action).ok) throw new Error(`Construction refusée sur le socle ${String(socle)}`);
+export function construireTour(etat: EtatPartie, i: number, tour: IdFamille | 'divine', voie?: Voie): void {
+  const { cx, cy } = ce(i);
+  const action = { type: 'construire', cx, cy, tour } as const;
+  const refus = appliquerAction(etat, action);
+  if (!refus.ok) throw new Error(`Construction refusée sur la case d'essai ${String(i)} : ${refus.raison}`);
   if (!voie) return;
-  for (const a of [{ type: 'ameliorer', socle }, { type: 'ameliorer', socle }, { type: 'specialiser', socle, voie }] as const) {
-    if (!appliquerAction(etat, a).ok) throw new Error(`Amélioration refusée sur le socle ${String(socle)}`);
+  for (const a of [{ type: 'ameliorer', cx, cy }, { type: 'ameliorer', cx, cy }, { type: 'specialiser', cx, cy, voie }] as const) {
+    if (!appliquerAction(etat, a).ok) throw new Error(`Amélioration refusée sur la case d'essai ${String(i)}`);
   }
+}
+
+/** La première case libre du niveau de la partie (la plus au nord-ouest). */
+export function premiereCaseLibre(etat: EtatPartie): CaseGrille {
+  const c = casesLibres(etat)[0];
+  if (!c) throw new Error('aucune case libre');
+  return c;
+}
+
+/** La tour posée sur la case d'essai numéro `i`, ou undefined. */
+export function tourDe(etat: EtatPartie, i: number): Tour | undefined {
+  const { cx, cy } = ce(i);
+  return etat.tours.find((t) => t.cx === cx && t.cy === cy);
 }
 
 /** Le héros de la partie. */

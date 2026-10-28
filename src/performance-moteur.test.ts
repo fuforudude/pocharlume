@@ -4,45 +4,52 @@
 import { describe, expect, it } from 'vitest';
 import { ENNEMIS } from './data/ennemis';
 import { CONFIG } from './engine/aides.test-utils';
-import type { IdFamille, Niveau, Socle } from './engine/definitions';
+import { casesInterditesDuNiveau } from './data/niveaux/grille-niveau';
+import type { CaseGrille, IdFamille, Niveau } from './engine/definitions';
 import { ajouterEnnemi } from './engine/ennemis';
 import type { ConfigPartie, EtatPartie } from './engine/etat';
 import { appliquerAction, creerPartie, step } from './engine/partie';
 
-const LIGNES = [2, 6, 10, 14];
+/** Axes des quatre lignes du serpentin : impairs, donc chacun n'interdit qu'une ligne de cases (lignes 1, 3, 5 et 7). */
+const LIGNES = [3, 7, 11, 15];
 
 function niveauBanc(): Niveau {
-  // Serpentin sur 4 lignes ; 30 socles entre les lignes, ralliement sur la ligne du dessus.
+  // Serpentin sur 4 lignes ; 30 cases entre les lignes (3 rangées de 10), chacune à 2 tuiles d'un axe.
   const points = LIGNES.flatMap((y, i) => (i % 2 === 0 ? [{ x: 0, y }, { x: 31, y }] : [{ x: 31, y }, { x: 0, y }]));
-  const socles: Socle[] = [];
-  for (const y of [4, 8, 12]) {
-    for (let x = 2; x <= 29; x += 3) socles.push({ x, y, ralliement: { x, y: y - 2 } });
-  }
+  const carte = { largeur: 32, hauteur: 18, chemins: [{ points }], departHeros: { x: 16, y: 7 } };
   return {
     id: 'banc',
     aretesDepart: 100000,
-    carte: { largeur: 32, hauteur: 18, chemins: [{ points }], socles, departHeros: { x: 16, y: 6 } },
+    carte,
+    casesInterdites: casesInterditesDuNiveau(carte, []),
     vagues: [{ paquets: [{ ennemi: 'paysan_affame', nombre: 1, intervalle: 0, chemin: 0, delai: 3600 }] }],
   };
 }
 
-/** Prépare le banc (30 tours, 150 ennemis) et mesure 600 pas. `divine` : la tour divine du dieu sur le socle 1. */
+/** Les 30 cases du banc : les rangées 2, 4 et 6 de la grille, 10 colonnes réparties entre les bords, qui sont traversés par les liaisons du serpentin. */
+function casesDuBanc(): CaseGrille[] {
+  const cases: CaseGrille[] = [];
+  for (const cy of [2, 4, 6]) for (let i = 0; i < 10; i++) cases.push({ cx: 1 + Math.floor(i * 1.4), cy });
+  return cases;
+}
+
+/** Prépare le banc (30 tours, 150 ennemis) et mesure 600 pas. `divine` : la tour divine du dieu sur la case 1. */
 function mesurer(config: ConfigPartie, divine: boolean): { parPas: number; etat: EtatPartie } {
   const niveau = niveauBanc();
   const etat = creerPartie(niveau, config);
   const familles: IdFamille[] = ['caserne', 'tir', 'magie', 'artillerie'];
-  niveau.carte.socles.forEach((_, socle) => {
-    if (divine && socle === 1) {
-      appliquerAction(etat, { type: 'construire', socle, tour: 'divine' });
+  casesDuBanc().forEach(({ cx, cy }, i) => {
+    if (divine && i === 1) {
+      appliquerAction(etat, { type: 'construire', cx, cy, tour: 'divine' });
       return;
     }
-    appliquerAction(etat, { type: 'construire', socle, tour: familles[socle % 4] ?? 'tir' });
-    appliquerAction(etat, { type: 'ameliorer', socle });
-    appliquerAction(etat, { type: 'ameliorer', socle });
-    if (socle % 3 === 0) {
-      appliquerAction(etat, { type: 'specialiser', socle, voie: socle % 2 === 0 ? 'A' : 'B' });
-      const competence = etat.tours.find((t) => t.socle === socle)?.stats.competences[0]?.id;
-      if (competence) appliquerAction(etat, { type: 'ameliorerCompetence', socle, competence });
+    appliquerAction(etat, { type: 'construire', cx, cy, tour: familles[i % 4] ?? 'tir' });
+    appliquerAction(etat, { type: 'ameliorer', cx, cy });
+    appliquerAction(etat, { type: 'ameliorer', cx, cy });
+    if (i % 3 === 0) {
+      appliquerAction(etat, { type: 'specialiser', cx, cy, voie: i % 2 === 0 ? 'A' : 'B' });
+      const competence = etat.tours.find((t) => t.cx === cx && t.cy === cy)?.stats.competences[0]?.id;
+      if (competence) appliquerAction(etat, { type: 'ameliorerCompetence', cx, cy, competence });
     }
   });
   for (let i = 0; i < 150; i++) {
@@ -52,8 +59,8 @@ function mesurer(config: ConfigPartie, divine: boolean): { parPas: number; etat:
 
   for (let i = 0; i < 100; i++) step(etat);
   // Un objet et les deux sorts jouent leurs effets pendant la mesure.
-  appliquerAction(etat, { type: 'utiliserObjet', emplacement: 0, x: 8, y: 6 });
-  for (let emplacement = 0; emplacement < 2; emplacement++) appliquerAction(etat, { type: 'lancerSort', emplacement, x: 8, y: 6 });
+  appliquerAction(etat, { type: 'utiliserObjet', emplacement: 0, x: 8, y: 7 });
+  for (let emplacement = 0; emplacement < 2; emplacement++) appliquerAction(etat, { type: 'lancerSort', emplacement, x: 8, y: 7 });
   const pas = 600;
   const debut = performance.now();
   for (let i = 0; i < pas; i++) step(etat);

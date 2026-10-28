@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { NIVEAU_TEST } from '../data/niveaux/region1';
-import { CONFIG } from './aides.test-utils';
+import { ct, CONFIG } from './aides.test-utils';
 import type { Action } from './actions';
 import { VERSION_ETAT, type ConfigPartie, type EntreeJournal, type EtatPartie } from './etat';
 import { avancer, creerPartie, deserialiser, rejouer, serialiser, step } from './partie';
@@ -8,22 +8,22 @@ import { PAS_PAR_SECONDE } from './temps';
 
 /** Une partie scénarisée qui touche à toutes les actions. */
 const SCENARIO: readonly { pas: number; action: Action }[] = [
-  { pas: 0, action: { type: 'construire', socle: 0, tour: 'caserne' } },
-  { pas: 0, action: { type: 'construire', socle: 1, tour: 'tir' } },
+  { pas: 0, action: { type: 'construire', ...ct(0), tour: 'caserne' } },
+  { pas: 0, action: { type: 'construire', ...ct(1), tour: 'tir' } },
   { pas: 5, action: { type: 'appelerVague' } },
-  { pas: 30, action: { type: 'construire', socle: 2, tour: 'artillerie' } },
+  { pas: 30, action: { type: 'construire', ...ct(2), tour: 'artillerie' } },
   { pas: 60, action: { type: 'deplacerHeros', x: 12, y: 8 } },
-  { pas: 90, action: { type: 'construire', socle: 9, tour: 'tir' } },
+  { pas: 90, action: { type: 'construire', cx: 99, cy: 0, tour: 'tir' } },
   { pas: 400, action: { type: 'lancerSort', emplacement: 0, x: 12, y: 6 } },
   { pas: 450, action: { type: 'lancerSort', emplacement: 1, x: 14, y: 13 } },
   { pas: 600, action: { type: 'appelerVague' } },
-  { pas: 700, action: { type: 'ameliorer', socle: 1 } },
-  { pas: 800, action: { type: 'deplacerRalliement', socle: 0, x: 9, y: 4 } },
-  { pas: 900, action: { type: 'construire', socle: 3, tour: 'divine' } },
+  { pas: 700, action: { type: 'ameliorer', ...ct(1) } },
+  { pas: 800, action: { type: 'deplacerRalliement', ...ct(0), x: 15, y: 13 } },
+  { pas: 900, action: { type: 'construire', ...ct(3), tour: 'divine' } },
   { pas: 1200, action: { type: 'appelerVague' } },
-  { pas: 1500, action: { type: 'construire', socle: 4, tour: 'magie' } },
-  { pas: 1800, action: { type: 'vendre', socle: 2 } },
-  { pas: 1801, action: { type: 'construire', socle: 2, tour: 'caserne' } },
+  { pas: 1500, action: { type: 'construire', ...ct(4), tour: 'magie' } },
+  { pas: 1800, action: { type: 'vendre', ...ct(2) } },
+  { pas: 1801, action: { type: 'construire', ...ct(2), tour: 'caserne' } },
   { pas: 2400, action: { type: 'appelerVague' } },
 ];
 
@@ -56,8 +56,8 @@ describe('déterminisme et rejeu', () => {
 
   it('ne journalise que les actions acceptées, horodatées en pas', () => {
     const etat = jouer(CONFIG, 3000);
-    expect(etat.journal.some((e) => e.action.type === 'construire' && e.action.socle === 9)).toBe(false);
-    expect(etat.journal[0]).toEqual({ pas: 0, action: { type: 'construire', socle: 0, tour: 'caserne' } });
+    expect(etat.journal.some((e) => e.action.type === 'construire' && e.action.cx === 99)).toBe(false);
+    expect(etat.journal[0]).toEqual({ pas: 0, action: { type: 'construire', ...ct(0), tour: 'caserne' } });
     expect(etat.journal.length).toBeGreaterThan(10);
   });
 
@@ -103,7 +103,7 @@ describe('déterminisme et rejeu', () => {
 
   it('rejoue sans lever d’exception un journal contenant des actions invalides', () => {
     const journal = [
-      { pas: 0, action: { type: 'construire', socle: 0, tour: 'constructor' } },
+      { pas: 0, action: { type: 'construire', ...ct(0), tour: 'constructor' } },
       { pas: 1, action: { type: '__proto__' } },
       { pas: 2, action: null },
       { pas: 3, action: { type: 'lancerSort', emplacement: 'toString', x: 1, y: 4 } },

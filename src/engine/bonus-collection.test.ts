@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { HEROS } from '../data/heros';
 import { REGLES } from '../data/regles';
 import { TOURS } from '../data/tours';
-import { CONFIG, configDe, construireTour, heros, niveauEssai } from './aides.test-utils';
+import { CONFIG, configDe, construireTour, heros, niveauEssai, tourDe } from './aides.test-utils';
 import { verifierConfig } from './config';
 import type { Niveau } from './definitions';
 import type { BonusCollection, ConfigPartie, EtatPartie } from './etat';
@@ -15,8 +15,8 @@ function partie(bonus: BonusCollection, surcharges: Partial<ConfigPartie> = {}, 
   return creerPartie(niveau, { ...CONFIG, bonus, ...surcharges });
 }
 
-function tour(etat: EtatPartie, socle: number) {
-  const t = etat.tours.find((autre) => autre.socle === socle);
+function tour(etat: EtatPartie, i: number) {
+  const t = tourDe(etat, i);
   if (!t) throw new Error('pas de tour');
   return t;
 }

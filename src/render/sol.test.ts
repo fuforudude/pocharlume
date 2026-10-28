@@ -1,9 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import type { VisuelCarte } from '../data/visuel';
+import { CAMPAGNE } from '../data/niveaux/campagne';
+import { tuilesDeChemin } from '../data/niveaux/grille-niveau';
 import { NIVEAU_TEST } from '../data/niveaux/region1';
 import type { Carte } from '../engine/definitions';
-import { bruit, construireSol, masqueChemin, nomTuile, type GrilleSol } from './sol';
+import { bruit, construireSol, masqueChemin, nomTuile, SEUILS_DEUX_VARIANTES, SEUILS_HERBE, type GrilleSol } from './sol';
 
 const SANS_ZONE: VisuelCarte = { region: 1, zones: [], decor: [] };
 const carte = NIVEAU_TEST.carte;
@@ -15,6 +17,12 @@ function tuile(grille: GrilleSol, x: number, y: number): string {
 const atlas = JSON.parse(readFileSync('public/sprites/atlas.json', 'utf-8')) as { sprites: Record<string, unknown> };
 
 describe('masque du chemin', () => {
+  it('est exactement ce qui rend les cases du chemin interdites à la construction (data/niveaux/grille-niveau.ts)', () => {
+    for (const n of [...CAMPAGNE.map((c) => c.niveau), NIVEAU_TEST]) {
+      expect(tuilesDeChemin(n.carte), n.id).toEqual(masqueChemin(n.carte));
+    }
+  });
+
   it('couvre 2 tuiles de large autour de l’axe du chemin', () => {
     const m = masqueChemin(carte);
     const estChemin = (x: number, y: number): boolean => m[y * carte.largeur + x] === 1;
@@ -169,6 +177,36 @@ describe('jeux de tuiles par région', () => {
       expect(g.tuiles.every((n) => n.startsWith(prefixe) && Object.hasOwn(atlas.sprites, n)), `région ${String(region)}`).toBe(true);
       // Les mêmes formes qu'en région 1 : seul le jeu change.
       expect(g.tuiles.map((n) => n.slice(prefixe.length))).toEqual(construireSol(carte, { ...visuel, region: 1 }).tuiles);
+    }
+  });
+});
+
+describe('répartition des variantes de sol', () => {
+  const grande: Carte = { ...carte, largeur: 120, hauteur: 120, chemins: [{ points: [{ x: 0, y: 2 }, { x: 1, y: 2 }] }] };
+  const part = (noms: readonly string[], nom: string): number => noms.filter((n) => n === nom).length / noms.length;
+
+  it('tire l’herbe unie au moins 3 fois sur 4, chaque variante à taches au plus une fois sur 8', () => {
+    expect(SEUILS_HERBE[0]).toBeGreaterThanOrEqual(0.75);
+    const herbe = construireSol(grande, SANS_ZONE).tuiles.filter((n) => n.startsWith('herbe-'));
+    expect(part(herbe, 'herbe-1')).toBeGreaterThan(0.74);
+    expect(part(herbe, 'herbe-2')).toBeLessThan(0.125);
+    expect(part(herbe, 'herbe-3')).toBeLessThan(0.125);
+    expect(part(herbe, 'herbe-2')).toBeGreaterThan(0.05);
+    expect(part(herbe, 'herbe-3')).toBeGreaterThan(0.05);
+  });
+
+  it('tire la boue et les pavés unis (variante 1) environ 4 fois sur 5', () => {
+    expect(SEUILS_DEUX_VARIANTES[0]).toBeGreaterThanOrEqual(0.75);
+    const zones: VisuelCarte = {
+      region: 1,
+      zones: [{ sol: 'boue', x: 0, y: 10, largeur: 120, hauteur: 50 }, { sol: 'paves', x: 0, y: 60, largeur: 120, hauteur: 60 }],
+      decor: [],
+    };
+    const g = construireSol(grande, zones).tuiles;
+    for (const sol of ['boue', 'paves']) {
+      const noms = g.filter((n) => n.startsWith(`${sol}-`));
+      expect(part(noms, `${sol}-1`)).toBeGreaterThan(0.75);
+      expect(part(noms, `${sol}-1`)).toBeLessThan(0.85);
     }
   });
 });

@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { DIFFICULTES } from '../data/difficultes';
 import { ENNEMIS } from '../data/ennemis';
-import { CONFIG, avancerSecondes, configDe, niveauEssai } from './aides.test-utils';
+import { ce, CONFIG, avancerSecondes, configDe, niveauEssai } from './aides.test-utils';
 import { verifierConfig } from './config';
 import type { Niveau, Vague } from './definitions';
 import type { ConfigPartie } from './etat';
@@ -86,11 +86,11 @@ describe('défi Fer : une seule vague', () => {
 
   it('seules les deux familles du niveau sont constructibles', () => {
     const etat = creerPartie(niveauFer(), config({ defi: 'fer' }));
-    expect(validerAction(etat, { type: 'construire', socle: 0, tour: 'caserne' })).toBeNull();
-    expect(validerAction(etat, { type: 'construire', socle: 0, tour: 'tir' })).toBeNull();
-    expect(validerAction(etat, { type: 'construire', socle: 0, tour: 'magie' })).toBe('famille_interdite');
-    expect(validerAction(etat, { type: 'construire', socle: 0, tour: 'artillerie' })).toBe('famille_interdite');
-    expect(appliquerAction(etat, { type: 'construire', socle: 0, tour: 'magie' })).toEqual({ ok: false, raison: 'famille_interdite' });
+    expect(validerAction(etat, { type: 'construire', ...ce(0), tour: 'caserne' })).toBeNull();
+    expect(validerAction(etat, { type: 'construire', ...ce(0), tour: 'tir' })).toBeNull();
+    expect(validerAction(etat, { type: 'construire', ...ce(0), tour: 'magie' })).toBe('famille_interdite');
+    expect(validerAction(etat, { type: 'construire', ...ce(0), tour: 'artillerie' })).toBe('famille_interdite');
+    expect(appliquerAction(etat, { type: 'construire', ...ce(0), tour: 'magie' })).toEqual({ ok: false, raison: 'famille_interdite' });
     expect(etat.tours).toHaveLength(0);
   });
 
@@ -98,7 +98,7 @@ describe('défi Fer : une seule vague', () => {
     // Charlie : caserne ; Plume : tir ; Pollen : artillerie.
     const peutConstruire = (dieu: string, familles: readonly [string, string]): boolean => {
       const etat = creerPartie(niveauFer(VAGUES, familles), configDe(dieu, { defi: 'fer' }));
-      return validerAction(etat, { type: 'construire', socle: 0, tour: 'divine' }) === null;
+      return validerAction(etat, { type: 'construire', ...ce(0), tour: 'divine' }) === null;
     };
     expect(peutConstruire('charlie', ['caserne', 'magie'])).toBe(true);
     expect(peutConstruire('charlie', ['tir', 'magie'])).toBe(false);
@@ -110,7 +110,7 @@ describe('défi Fer : une seule vague', () => {
 
   it('hors défi Fer, toutes les familles sont constructibles même sur un niveau qui a des familles imposées', () => {
     const etat = creerPartie(niveauFer(), CONFIG);
-    expect(validerAction(etat, { type: 'construire', socle: 0, tour: 'magie' })).toBeNull();
+    expect(validerAction(etat, { type: 'construire', ...ce(0), tour: 'magie' })).toBeNull();
     expect(etat.niveau.vagues).toHaveLength(VAGUES.length);
   });
 
@@ -193,7 +193,7 @@ describe('rétrocompatibilité : une config sans defi ni bonus', () => {
   it('se rejoue comme avant : mêmes parties avec defi null et bonus vide', () => {
     const journalDe = (c: ConfigPartie): string => {
       const etat = creerPartie(niveauEssai(VAGUES), c);
-      appliquerAction(etat, { type: 'construire', socle: 0, tour: 'caserne' });
+      appliquerAction(etat, { type: 'construire', ...ce(0), tour: 'caserne' });
       appliquerAction(etat, { type: 'appelerVague' });
       avancerSecondes(etat, 20);
       return JSON.stringify([etat.ennemis, etat.unites, etat.aretes, etat.vies, etat.rng]);
@@ -207,7 +207,7 @@ describe('rejeu et sérialisation des défis', () => {
     const c = config({ defi, bonus: { tours: { caserne: { pvSoldats: 0.05 } }, heros: { pv: 0.05 } } });
     const niveau = niveauFer([{ paquets: [groupe('paysan_affame', 4), groupe('mendiant', 3, 1)] }], ['caserne', 'tir']);
     const etat = creerPartie(niveau, c);
-    appliquerAction(etat, { type: 'construire', socle: 0, tour: 'caserne' });
+    appliquerAction(etat, { type: 'construire', ...ce(0), tour: 'caserne' });
     appliquerAction(etat, { type: 'appelerVague' });
     avancerSecondes(etat, 10);
     expect(etat.statut).toBe('en_cours');

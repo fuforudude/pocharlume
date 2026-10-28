@@ -1,6 +1,6 @@
-// Bot « soigneux » : un bon joueur. Il connaît la carte (longueur de chemin que chaque socle couvre, poids de
+// Bot « soigneux » : un bon joueur. Il connaît la carte (longueur de chemin que chaque case de la grille couvre, poids de
 // chaque chemin dans les vagues) et achète toujours ce qui rapporte le plus de puissance par arête dépensée
-// (recherche gloutonne sur le choix du socle, de la famille, du niveau et de la spécialisation), bonus et remise
+// (recherche gloutonne sur le choix de la case, de la famille, du niveau et de la spécialisation), bonus et remise
 // de famille de son dieu compris. Il place son héros là où ses tours concentrent leur feu, joue les sorts de
 // chaque dieu selon leur effet (zones de dégâts sur les grappes, Renforts et Voile de Nuit devant la zone de feu,
 // Pièges à Ressort un peu avant, Griffes d'Ombre sur la plus grosse grappe, Ingéniosité au cœur des tours),
@@ -9,13 +9,22 @@
 // baisse de la part de volants du niveau) et qu'il faut au moins une tour de Guetteurs des Toits par chemin pour révéler les
 // furtifs. Une petite recherche en amont (`optimiserBot`) choisit parmi quelques variantes de
 // préférence de famille celle qui joue le mieux le niveau, en simulant des parties d'entraînement.
-import { ajusterMontant, validerAction } from '../engine';
-import type { Action, BonusFamille, DefDieu, DefNiveauTour, DefSort, Ennemi, EtatPartie, IdFamille, Niveau, Point, Tour, Voie } from '../engine';
+//
+// Toutes les cases libres de la grille sont permises, mais la recherche reste raisonnable : pour chaque famille (et pour la tour
+// divine), le bot classe une fois pour toutes les cases où elle voit du chemin (longueur de chemin couverte, pesée par la menace de
+// chaque chemin, donc les virages et les zones où il se replie sur lui-même passent devant), et il n'examine à chaque achat que les
+// `CASES_PAR_FAMILLE` meilleures qui sont encore libres. Une caserne n'y est classée que là où elle a un chemin à portée.
+// Sur la grille, plusieurs cases voisines voient presque le même chemin : sans correctif, le bot empilerait tout sur le meilleur
+// virage. La puissance qui couvre un point du chemin est donc comptée avec un rendement décroissant (`SATURATION_DPS`) : une nouvelle
+// tour, ou le niveau suivant d'une tour, vaut ce qu'elle ajoute à ce que les tours posées couvrent déjà, comme le fait un joueur
+// qui répartit sa défense sur le chemin plutôt que de tout miser sur une seule tour.
+import { ajusterMontant, casesLibres, centreCase, ralliementParDefaut, tourSurCase, validerAction } from '../engine';
+import type { Action, BonusFamille, CaseGrille, DefDieu, DefNiveauTour, DefSort, Ennemi, EtatPartie, IdFamille, Niveau, Point, Tour, Voie } from '../engine';
 import { DIEUX } from '../data/dieux';
 import { dpsEfficace } from '../data/equilibrage';
 import { REGLES } from '../data/regles';
 import { FAMILLES, TOURS } from '../data/tours';
-import { distance, echantillonner, longueurVue, partsSpeciales, poidsDesChemins, type Echantillon } from './geometrie';
+import { distance, echantillonner, longueurVue, PAS_ECHANTILLON, partsSpeciales, poidsDesChemins, type Echantillon } from './geometrie';
 import { jouerPartie, type Bot, type Joueur, type ResultatPartie } from './simulation';
 
 /** Une préférence de famille : le poids multiplie la valeur d'une tour de cette famille. */
@@ -64,6 +73,19 @@ interface Candidat {
 }
 
 const dieux: Readonly<Record<string, DefDieu>> = DIEUX;
+
+/** Nombre de cases libres examinées par famille à chaque achat (les mieux classées d'abord). */
+const CASES_PAR_FAMILLE = 30;
+
+/**
+ * Puissance (dégâts par seconde) au-delà de laquelle un point du chemin rend peu : l'utilité d'une puissance D couvrant un point est
+ * D / (1 + D / SATURATION_DPS). Une tour de niveau 3 pèse environ 20 : seule, elle rend 60 % ; avec une voisine, 70 % chacune.
+ */
+const SATURATION_DPS = 30;
+
+function utilite(dps: number): number {
+  return dps / (1 + dps / SATURATION_DPS);
+}
 
 /** Part de menace furtive à partir de laquelle le bot se soucie des Guetteurs des Toits. */
 const PART_FURTIFS_MIN = 0.02;
@@ -115,21 +137,112 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
   let poids: number[] = [];
   let parts = { volants: 0, furtifs: 0 };
   const vues = new Map<string, number>();
+  /** Indices des points d'échantillonnage à portée d'une case, par (case, portée). */
+  const alentours = new Map<string, Int32Array>();
+  /** Puissance des tours posées qui couvre chaque point d'échantillonnage, et la situation (tours, niveaux) pour laquelle elle est calculée. */
+  let couverture = new Float32Array(0);
+  let situationCouverture = Number.NaN;
   const dpsParDef = new Map<DefNiveauTour, number>();
   const dpsAvecBonusParDef = new Map<DefNiveauTour, number>();
+  /** Cases utiles de chaque famille (et de la tour divine), classées par longueur de chemin vue décroissante. */
+  let classement: Readonly<Record<IdFamille | 'divine', readonly CaseGrille[]>> | null = null;
   let zones: (Echantillon | undefined)[] = [];
   let clefZones = -1;
   let dernierOrdreHeros: Point | null = null;
 
-  function vue(etat: EtatPartie, socle: number, portee: number): number {
-    const clef = `${String(socle)}:${String(portee)}`;
+  function vue(cx: number, cy: number, portee: number): number {
+    const clef = `${String(cx)},${String(cy)}:${String(portee)}`;
     let v = vues.get(clef);
     if (v === undefined) {
-      const s = etat.niveau.carte.socles[socle];
-      v = s ? longueurVue(echantillons, poids, s, portee) : 0;
+      v = longueurVue(echantillons, poids, centreCase(cx, cy), portee);
       vues.set(clef, v);
     }
     return v;
+  }
+
+  function alentoursDe(cx: number, cy: number, portee: number): Int32Array {
+    const clef = `${String(cx)},${String(cy)}:${String(portee)}`;
+    let indices = alentours.get(clef);
+    if (!indices) {
+      const centre = centreCase(cx, cy);
+      const trouves: number[] = [];
+      echantillons.forEach((e, i) => {
+        if (distance(e, centre) <= portee) trouves.push(i);
+      });
+      indices = Int32Array.from(trouves);
+      alentours.set(clef, indices);
+    }
+    return indices;
+  }
+
+  /** Recompte les tours qui couvrent chaque point d'échantillonnage quand la défense a changé (tour posée, vendue ou améliorée). */
+  function majCouverture(etat: EtatPartie): void {
+    let situation = 0;
+    for (const t of etat.tours) situation = (Math.imul(situation, 31) + t.id * 100003 + t.coutCumule) | 0;
+    if (situation === situationCouverture && couverture.length === echantillons.length) return;
+    situationCouverture = situation;
+    couverture = new Float32Array(echantillons.length);
+    for (const t of etat.tours) deplacerCouverture(t, 1);
+  }
+
+  /** Ajoute (+1) ou retire (-1) la puissance d'une tour posée, le temps d'évaluer son amélioration sans la compter deux fois. */
+  function deplacerCouverture(t: Tour, signe: number): void {
+    const puissance = signe * dps(t.stats);
+    for (const i of alentoursDe(t.cx, t.cy, t.stats.portee)) couverture[i] = (couverture[i] ?? 0) + puissance;
+  }
+
+  /**
+   * Ce qu'une tour de cette portée et de cette puissance ajoute aux tours posées : sur chaque point du chemin à sa portée, le gain
+   * d'utilité (rendement décroissant), pesé par la menace du chemin et la longueur de chemin que le point représente.
+   */
+  function utiliteAjoutee(cx: number, cy: number, portee: number, puissance: number): number {
+    let total = 0;
+    for (const i of alentoursDe(cx, cy, portee)) {
+      const e = echantillons[i];
+      if (!e) continue;
+      const deja = couverture[i] ?? 0;
+      total += (poids[e.chemin] ?? 0) * PAS_ECHANTILLON * (utilite(deja + puissance) - utilite(deja));
+    }
+    return total;
+  }
+
+  /** Les cases non interdites où une tour de cette portée voit du chemin, de la plus utile à la moins utile (égalité : ordre de la grille). */
+  function classer(etat: EtatPartie, portee: number, avecSoldats: boolean): CaseGrille[] {
+    const vide = { niveau: etat.niveau, tours: [] };
+    return casesLibres(vide)
+      .filter((c) => !avecSoldats || ralliementParDefaut(etat.chemins, c.cx, c.cy, portee) !== null)
+      .map((c) => ({ c, v: vue(c.cx, c.cy, portee) }))
+      .filter((m) => m.v > 0)
+      .sort((a, b) => b.v - a.v)
+      .map((m) => m.c);
+  }
+
+  function classements(etat: EtatPartie): Readonly<Record<IdFamille | 'divine', readonly CaseGrille[]>> {
+    if (classement) return classement;
+    const dieu = dieux[etat.config.dieu];
+    const parFamille = (famille: IdFamille): CaseGrille[] => {
+      const def = TOURS[famille].niveaux[0];
+      return classer(etat, def.portee, def.soldats !== null);
+    };
+    classement = {
+      caserne: parFamille('caserne'),
+      tir: parFamille('tir'),
+      magie: parFamille('magie'),
+      artillerie: parFamille('artillerie'),
+      divine: dieu ? classer(etat, dieu.tourDivine.portee, dieu.tourDivine.soldats !== null) : [],
+    };
+    return classement;
+  }
+
+  /** Les premières cases libres du classement d'une famille. */
+  function meilleuresCasesLibres(etat: EtatPartie, famille: IdFamille | 'divine', combien: number): CaseGrille[] {
+    const libres: CaseGrille[] = [];
+    for (const c of classements(etat)[famille]) {
+      if (tourSurCase(etat, c.cx, c.cy)) continue;
+      libres.push(c);
+      if (libres.length >= combien) break;
+    }
+    return libres;
   }
 
   function dps(def: DefNiveauTour): number {
@@ -162,39 +275,57 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     return bonus ? prixDe(def, famille, bonus) : def.cout;
   }
 
-  function valeur(etat: EtatPartie, socle: number, def: DefNiveauTour, famille: IdFamille): number {
-    const memeFamille = etat.tours.filter((t) => t.famille === famille && t.socle !== socle).length;
+  /** La case libre qui apporte le plus de couverture, parmi les mieux classées pour cette famille. */
+  function meilleureCase(etat: EtatPartie, famille: IdFamille | 'divine', portee: number): CaseGrille | undefined {
+    majCouverture(etat);
+    let meilleure: CaseGrille | undefined;
+    let meilleureVue = -1;
+    for (const c of meilleuresCasesLibres(etat, famille, CASES_PAR_FAMILLE)) {
+      const v = utiliteAjoutee(c.cx, c.cy, portee, SATURATION_DPS / 2);
+      if (v > meilleureVue) {
+        meilleureVue = v;
+        meilleure = c;
+      }
+    }
+    return meilleure;
+  }
+
+  function valeur(etat: EtatPartie, cx: number, cy: number, def: DefNiveauTour, famille: IdFamille): number {
+    const memeFamille = etat.tours.filter((t) => t.famille === famille && (t.cx !== cx || t.cy !== cy)).length;
     // Une tour qui ne touche pas les volants perd la part de menace qu'ils représentent (rien à retrancher quand il n'y en a pas).
     const touchee = def.volants ? 1 : 1 - parts.volants;
-    return (dpsFamille(etat, def, famille) * touchee * vue(etat, socle, def.portee) * variante.poids[famille]) / (1 + (variante.diversite ?? 0) * memeFamille);
+    return (utiliteAjoutee(cx, cy, def.portee, dpsFamille(etat, def, famille) * touchee) * variante.poids[famille]) / (1 + (variante.diversite ?? 0) * memeFamille);
   }
 
   /** Tous les achats possibles (construction, amélioration, spécialisation), classés par valeur gagnée par arête. */
   function candidats(etat: EtatPartie): Candidat[] {
     const liste: Candidat[] = [];
-    etat.niveau.carte.socles.forEach((_, socle) => {
-      const tour = etat.tours.find((t) => t.socle === socle);
-      if (!tour) {
-        for (const famille of FAMILLES.filter((f) => famillePermise(etat, f))) {
-          const def = TOURS[famille].niveaux[0];
-          liste.push({ action: { type: 'construire', socle, tour: famille }, ratio: valeur(etat, socle, def, famille) / cout(etat, def, famille) });
-        }
-        return;
+    majCouverture(etat);
+    for (const famille of FAMILLES.filter((f) => famillePermise(etat, f))) {
+      const def = TOURS[famille].niveaux[0];
+      for (const { cx, cy } of meilleuresCasesLibres(etat, famille, CASES_PAR_FAMILLE)) {
+        liste.push({ action: { type: 'construire', cx, cy, tour: famille }, ratio: valeur(etat, cx, cy, def, famille) / cout(etat, def, famille) });
       }
+    }
+    for (const tour of etat.tours) {
+      const { cx, cy } = tour;
       const actuelle = defCourante(tour);
-      if (tour.famille === 'divine' || !actuelle || tour.niveau >= 4) return;
+      if (tour.famille === 'divine' || !actuelle || tour.niveau >= 4) continue;
       const famille = TOURS[tour.famille];
-      const avant = valeur(etat, socle, actuelle, tour.famille);
+      // La tour ne compte pas dans la couverture qu'elle améliore.
+      deplacerCouverture(tour, -1);
+      const avant = valeur(etat, cx, cy, actuelle, tour.famille);
       if (tour.niveau < 3) {
         const suivante = famille.niveaux[tour.niveau];
-        if (suivante) liste.push({ action: { type: 'ameliorer', socle }, ratio: (valeur(etat, socle, suivante, tour.famille) - avant) / cout(etat, suivante, tour.famille) });
-        return;
+        if (suivante) liste.push({ action: { type: 'ameliorer', cx, cy }, ratio: (valeur(etat, cx, cy, suivante, tour.famille) - avant) / cout(etat, suivante, tour.famille) });
+      } else {
+        for (const voie of ['A', 'B'] as const satisfies readonly Voie[]) {
+          const spe = famille.specialisations[voie];
+          liste.push({ action: { type: 'specialiser', cx, cy, voie }, ratio: (valeur(etat, cx, cy, spe, tour.famille) - avant) / cout(etat, spe, tour.famille) });
+        }
       }
-      for (const voie of ['A', 'B'] as const satisfies readonly Voie[]) {
-        const spe = famille.specialisations[voie];
-        liste.push({ action: { type: 'specialiser', socle, voie }, ratio: (valeur(etat, socle, spe, tour.famille) - avant) / cout(etat, spe, tour.famille) });
-      }
-    });
+      deplacerCouverture(tour, 1);
+    }
     liste.sort((a, b) => b.ratio - a.ratio);
     const divine = candidatDivine(etat, liste[0]?.ratio ?? 0);
     if (divine) liste.unshift(divine);
@@ -205,7 +336,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
 
   /**
    * Contre les furtifs, une tour de Guetteurs des Toits (spécialisation A de la tour de tir, qui révèle les furtifs à portée)
-   * par chemin : la tour de tir la plus avancée est montée puis spécialisée, ou construite sur le socle qui voit le plus de
+   * par chemin : la tour de tir la plus avancée est montée puis spécialisée, ou construite sur la case libre qui voit le plus de
    * chemin. Une valeur juste au-dessus du meilleur autre achat : le bot économise jusqu'à pouvoir la payer.
    */
   function candidatGuetteurs(etat: EtatPartie, meilleurRatio: number): Candidat | null {
@@ -215,24 +346,15 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     const tir = etat.tours.filter((t) => t.famille === 'tir' && t.voie !== 'A').sort((a, b) => b.niveau - a.niveau)[0];
     const ratio = meilleurRatio * 1.02;
     if (tir) {
-      if (tir.niveau >= 3) return { action: { type: 'specialiser', socle: tir.socle, voie: 'A' }, ratio };
-      return { action: { type: 'ameliorer', socle: tir.socle }, ratio };
+      if (tir.niveau >= 3) return { action: { type: 'specialiser', cx: tir.cx, cy: tir.cy, voie: 'A' }, ratio };
+      return { action: { type: 'ameliorer', cx: tir.cx, cy: tir.cy }, ratio };
     }
-    let socle = -1;
-    let meilleurVue = -1;
-    etat.niveau.carte.socles.forEach((_, i) => {
-      if (etat.tours.some((t) => t.socle === i)) return;
-      const v = vue(etat, i, TOURS.tir.niveaux[0].portee);
-      if (v > meilleurVue) {
-        meilleurVue = v;
-        socle = i;
-      }
-    });
-    return socle < 0 ? null : { action: { type: 'construire', socle, tour: 'tir' }, ratio };
+    const meilleure = meilleureCase(etat, 'tir', TOURS.tir.niveaux[0].portee);
+    return meilleure ? { action: { type: 'construire', cx: meilleure.cx, cy: meilleure.cy, tour: 'tir' }, ratio } : null;
   }
 
   /**
-   * La tour divine, dès que la défense compte trois tours : sur le socle libre qui voit le plus de chemin, avec une
+   * La tour divine, dès que la défense compte trois tours : sur la case libre qui voit le plus de chemin, avec une
    * valeur juste au-dessus du meilleur autre achat (le bot ne sait pas la chiffrer comme une tour ordinaire).
    */
   function candidatDivine(etat: EtatPartie, meilleurRatio: number): Candidat | null {
@@ -241,17 +363,8 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     if (!dieu || etat.tours.length < 3 || etat.tours.some((t) => t.famille === 'divine')) return null;
     // Au défi Fer, la tour divine suit la famille de son dieu : elle n'est permise que si cette famille l'est.
     if (!famillePermise(etat, dieu.bonus.famille)) return null;
-    let socle = -1;
-    let meilleurVue = -1;
-    etat.niveau.carte.socles.forEach((_, i) => {
-      if (etat.tours.some((t) => t.socle === i)) return;
-      const v = vue(etat, i, dieu.tourDivine.portee);
-      if (v > meilleurVue) {
-        meilleurVue = v;
-        socle = i;
-      }
-    });
-    return socle < 0 ? null : { action: { type: 'construire', socle, tour: 'divine' }, ratio: meilleurRatio * 1.01 };
+    const meilleure = meilleureCase(etat, 'divine', dieu.tourDivine.portee);
+    return meilleure ? { action: { type: 'construire', cx: meilleure.cx, cy: meilleure.cy, tour: 'divine' }, ratio: meilleurRatio * 1.01 } : null;
   }
 
   /** Achat de ce tour-ci : le meilleur s'il est payable, sinon un presque aussi bon qui l'est, sinon on économise. */
@@ -268,7 +381,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
 
   /** Point de chaque chemin où les tours posées concentrent le plus de feu. */
   function calculerZones(etat: EtatPartie): void {
-    const clef = etat.tours.reduce((a, t) => a + t.coutCumule + 1000 * t.socle, 0);
+    const clef = etat.tours.reduce((a, t) => a + t.coutCumule + 1000 * (t.cx + 100 * t.cy), 0);
     if (clef === clefZones) return;
     clefZones = clef;
     zones = etat.chemins.map((_, chemin) => {

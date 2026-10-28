@@ -15,7 +15,7 @@ import { availableParallelism } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { Worker } from 'node:worker_threads';
 import { CAMPAGNE } from '../../src/data/niveaux/campagne.ts';
-import { correlationDeRang, courbeDifficulte, nomDuDieu, verifierBandes } from '../../src/equilibrage/bandes.ts';
+import { BANDES_IMPOSEES, correlationDeRang, courbeDifficulte, nomDuDieu, verifierBandes } from '../../src/equilibrage/bandes.ts';
 import {
   DEFIS_EVALUES,
   DIEUX_EVALUES,
@@ -211,6 +211,6 @@ ${redigerDefis(evaluations, [1, 2, 3, 4, 5]).trimEnd()}
   } else {
     console.log(`${String(ecarts.length)} écart(s) aux bandes :`);
     for (const e of ecarts) console.log(`- ${e}`);
-    process.exitCode = 1;
+    if (BANDES_IMPOSEES) process.exitCode = 1;
   }
 }

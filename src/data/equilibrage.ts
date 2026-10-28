@@ -22,7 +22,7 @@ export const EQUILIBRAGE = {
   /** Dernier niveau de campagne qui croît à la pleine vitesse : le boss de la région 1. */
   niveauPleineCroissance: 10,
   /**
-   * Croissance du budget par niveau au-delà : plus lente, car les tours n'ont que quatre niveaux et un nombre de socles
+   * Croissance du budget par niveau au-delà : plus lente, car les tours n'ont que quatre niveaux et un nombre de cases utiles
    * borné (les régions suivantes ajoutent des mécaniques d'ennemis plutôt que des armées dix fois plus grosses). Réglé avec
    * le simulateur (voir docs/architecture.md).
    */

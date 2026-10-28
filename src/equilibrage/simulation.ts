@@ -91,7 +91,7 @@ export function jouerPartie(niveau: Niveau, bot: Bot, options: OptionsPartie): R
   const viesPerduesParVague: number[] = niveau.vagues.map(() => 0);
   const vagueDe = new Map<number, number>();
   const choix: ChoixTour[] = [];
-  const familleDuSocle = new Map<number, IdFamille>();
+  const familleDeLaCase = new Map<string, IdFamille>();
   const sorts: number[] = [0, 0];
   let tourDivine = false;
   let actions = 0;
@@ -105,13 +105,13 @@ export function jouerPartie(niveau: Niveau, bot: Bot, options: OptionsPartie): R
       if (a.type === 'lancerSort') sorts[a.emplacement] = (sorts[a.emplacement] ?? 0) + 1;
       else if (a.type === 'construire' && a.tour === 'divine') tourDivine = true;
       if (a.type === 'construire' && a.tour !== 'divine') {
-        familleDuSocle.set(a.socle, a.tour);
+        familleDeLaCase.set(`${String(a.cx)},${String(a.cy)}`, a.tour);
         choix.push({ famille: a.tour });
       } else if (a.type === 'specialiser') {
-        const famille = familleDuSocle.get(a.socle);
+        const famille = familleDeLaCase.get(`${String(a.cx)},${String(a.cy)}`);
         if (famille) choix.push({ famille, voie: a.voie });
       } else if (a.type === 'vendre') {
-        familleDuSocle.delete(a.socle);
+        familleDeLaCase.delete(`${String(a.cx)},${String(a.cy)}`);
       }
     });
     for (const ev of etat.evenements) {

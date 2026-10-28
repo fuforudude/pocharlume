@@ -9,7 +9,7 @@
 // (presque trié d'une image à l'autre), les effets viennent d'un pool et les couleurs sont des constantes.
 import type { VisuelCarte } from '../data/visuel';
 import type { Carte } from '../engine/definitions';
-import { EFFET, type EtatPartie } from '../engine';
+import { caseExiste, centreCase, EFFET, type EtatPartie } from '../engine';
 import { cadreA } from './animations';
 import type { AtlasRendu, CadreAtlas, SpriteAtlas } from './atlas';
 import { Camera, TUILE } from './camera';
@@ -53,9 +53,10 @@ const POINTS_ETAT: readonly (readonly [number, string])[] = [
 
 /** Ce que l'interface fait mettre en valeur sur la carte (sélection, portées, cibles de sort). */
 export class Surbrillance {
-  /** Socle dont le menu est ouvert, -1 si aucun. */
-  socle = -1;
-  /** Portée à tracer autour de ce socle (tuiles), 0 si aucune. */
+  /** Case (colonne, ligne) dont le menu est ouvert, -1 si aucune. */
+  cx = -1;
+  cy = -1;
+  /** Portée à tracer autour du centre de cette case (tuiles), 0 si aucune. */
   portee = 0;
   /** Héros sélectionné : on attend le point où l'envoyer. */
   heros = false;
@@ -66,15 +67,13 @@ export class Surbrillance {
   curseurActif = false;
 }
 
-/** Élément fixe de la carte (décor ou socle vide), rangé une fois pour toutes par profondeur. */
+/** Élément fixe de la carte (décor), rangé une fois pour toutes par profondeur. */
 interface Statique {
   cle: number;
   sprite: SpriteAtlas | null;
   px: number;
   py: number;
   miroir: boolean;
-  /** Indice du socle, -1 pour un décor. */
-  socle: number;
 }
 
 function borner01(v: number): number {
@@ -171,12 +170,8 @@ export class Rendu {
     this.suivi.definirCollection(collection);
     for (const d of visuel.decor) {
       const py = Math.round(d.y * TUILE);
-      this.statiques.push({ cle: py, sprite: atlas.sprite(d.sprite) ?? null, px: Math.round(d.x * TUILE), py, miroir: d.miroir ?? false, socle: -1 });
+      this.statiques.push({ cle: py, sprite: atlas.sprite(d.sprite) ?? null, px: Math.round(d.x * TUILE), py, miroir: d.miroir ?? false });
     }
-    carte.socles.forEach((s, i) => {
-      const py = Math.round(s.y * TUILE);
-      this.statiques.push({ cle: py, sprite: atlas.sprite('socle') ?? null, px: Math.round(s.x * TUILE), py, miroir: false, socle: i });
-    });
     this.statiques.sort((a, b) => a.cle - b.cle);
     this.redimensionner();
   }
@@ -218,7 +213,7 @@ export class Rendu {
 
   /**
    * Les bandes de l'écran que l'interface recouvre (pixels CSS) : la caméra peut dépasser la carte de leur
-   * largeur, pour qu'un socle collé au bord reste atteignable.
+   * largeur, pour qu'une case collée au bord reste atteignable.
    */
   definirMarges(marges: { readonly haut: number; readonly bas: number; readonly gauche: number; readonly droite: number }): void {
     const r = this.ratio;
@@ -405,7 +400,7 @@ export class Rendu {
     }
   }
 
-  /** Décor, socles vides, tours, ennemis et unités, du plus au nord au plus au sud. */
+  /** Décor, tours, ennemis et unités, du plus au nord au plus au sud. */
   private dessinerProfondeur(temps: number, l: number, h: number): void {
     const statiques = this.statiques;
     const liste = this.suivi.dessinables;
@@ -422,7 +417,6 @@ export class Rendu {
 
   private dessinerStatique(st: Statique | undefined, l: number, h: number): void {
     if (!st) return;
-    if (st.socle >= 0 && this.suivi.socleOccupe[st.socle]) return;
     const px = st.px - this.camera.decalageX;
     const py = st.py - this.camera.decalageY;
     if (px < -48 || px > l + 48 || py < -16 || py > h + 80) return;
@@ -680,8 +674,8 @@ export class Rendu {
   private dessinerSurbrillance(etat: EtatPartie, surb: Surbrillance, temps: number, ox: number, oy: number): void {
     const ctx = this.ctx;
     const phase = Math.floor(temps / 90);
-    if (surb.socle >= 0) {
-      const s = etat.niveau.carte.socles[surb.socle];
+    if (surb.cx >= 0 && surb.cy >= 0) {
+      const s = caseExiste(etat.niveau.carte, surb.cx, surb.cy) ? centreCase(surb.cx, surb.cy) : null;
       if (s) {
         const cx = Math.round(s.x * TUILE) - ox;
         const cy = Math.round(s.y * TUILE) - oy;

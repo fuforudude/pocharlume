@@ -82,9 +82,9 @@ describe('branche artillerie : zone', () => {
     const eclabousse = (ameliorations: Record<string, number>): boolean => {
       const etat = avec(ameliorations);
       construireTour(etat, 1, 'artillerie');
-      const cible = ennemiFixe(etat, 13.1);
+      const cible = ennemiFixe(etat, 14.1);
       // Entre le rayon de base et le rayon élargi du rang 5.
-      const voisin = ennemiFixe(etat, 13.1 - TOURS.artillerie.niveaux[0].zone * (1 + effet('artillerie', 5).zone / 2));
+      const voisin = ennemiFixe(etat, 14.1 - TOURS.artillerie.niveaux[0].zone * (1 + effet('artillerie', 5).zone / 2));
       cible.decalage = 0;
       voisin.decalage = 0;
       avancerSecondes(etat, 4);

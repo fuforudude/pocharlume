@@ -17,7 +17,7 @@ import type {
 } from './definitions';
 import type { Evenement } from './evenements';
 
-export const VERSION_ETAT = 4;
+export const VERSION_ETAT = 5;
 
 export type Statut = 'en_cours' | 'victoire' | 'defaite';
 export type FamilleTour = IdFamille | 'divine';
@@ -178,7 +178,9 @@ export interface Unite {
 
 export interface Tour {
   id: number;
-  socle: number;
+  /** Case de la grille où la tour est posée ; (x, y) en est le centre. */
+  cx: number;
+  cy: number;
   famille: FamilleTour;
   niveau: number;
   voie: Voie | null;

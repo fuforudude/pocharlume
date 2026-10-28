@@ -5,7 +5,7 @@ import { ENNEMIS } from '../data/ennemis';
 import { REGION1 } from '../data/niveaux/region1';
 import { ajouterEnnemi, appliquerAction, creerPartie } from '../engine';
 import type { Ennemi, EtatPartie, Evenement } from '../engine';
-import { configDe } from '../engine/aides.test-utils';
+import { configDe, ct } from '../engine/aides.test-utils';
 import type { AtlasRendu, SpriteAtlas, SpriteHabille } from './atlas';
 import { PoolEffets, TYPE_EFFET } from './effets';
 import { Suivi } from './suivi';
@@ -236,7 +236,7 @@ describe('Suivi : effets d’état sur les unités, les tours et le sol', () => 
 describe('Suivi : skins équipés', () => {
   function avecTour(dieu = 'charlie') {
     const m = monter(dieu);
-    appliquerAction(m.etat, { type: 'construire', socle: 0, tour: 'tir' });
+    appliquerAction(m.etat, { type: 'construire', ...ct(0), tour: 'tir' });
     return m;
   }
 
@@ -250,7 +250,7 @@ describe('Suivi : skins équipés', () => {
 
   it('le skin de la famille habille sa tour de base et ses spécialisations, pas les autres familles', () => {
     const { suivi, etat, habilles } = avecTour();
-    appliquerAction(etat, { type: 'construire', socle: 1, tour: 'caserne' });
+    appliquerAction(etat, { type: 'construire', ...ct(1), tour: 'caserne' });
     suivi.definirCollection({ skins: { tir: 'skin_tir_2' } });
     suivi.apresPas(etat, 0);
     const tir = [...suivi.tours.values()].find((v) => v.famille === 'tir');
@@ -265,7 +265,7 @@ describe('Suivi : skins équipés', () => {
     suivi.definirCollection({ skins: { tir: 'skin_tir_2' } });
     suivi.apresPas(etat, 0);
     etat.aretes = 10000;
-    appliquerAction(etat, { type: 'ameliorer', socle: 0 });
+    appliquerAction(etat, { type: 'ameliorer', ...ct(0) });
     suivi.apresPas(etat, 33);
     expect([...suivi.tours.values()].find((v) => v.famille === 'tir')?.habille).toMatchObject({ nom: 'tour-tir-2', skin: 'skin_tir_2' });
   });

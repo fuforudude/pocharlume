@@ -5,7 +5,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { REGION1 } from '../data/niveaux/region1';
 import { VERSION_DONNEES } from '../data/version';
-import { creerPartie, deserialiser, serialiser, step, validerAction } from '../engine';
+import { casesLibres, centreCase, creerPartie, deserialiser, serialiser, step, validerAction } from '../engine';
 import type { Action, ConfigPartie, EtatPartie } from '../engine';
 import { t } from '../i18n';
 import { graineSuivante, lancerNiveau, type OptionsPartie, type PartieEnCours, type ResultatPartie } from './partie';
@@ -42,7 +42,8 @@ vi.mock('../render/atlas', () => ({
 // Un tuile = 16 pixels CSS, sans décalage : le test touche un point de la carte en multipliant ses tuiles par 16.
 vi.mock('../render/rendu', () => ({
   Surbrillance: class {
-    socle = -1;
+    cx = -1;
+    cy = -1;
     portee = 0;
     heros = false;
     sortRayon = 0;
@@ -71,6 +72,11 @@ vi.mock('../render/rendu', () => ({
 
 const NIVEAU = REGION1[0];
 if (!NIVEAU) throw new Error('niveau 1 absent');
+/** Une case libre du niveau 1 où toutes les familles se construisent (un chemin est à portée de la caserne), et son centre. */
+const ESSAI = creerPartie(NIVEAU.niveau, { graine: 1, difficulte: 'matou', dieu: 'charlie', heros: 'charlie', niveauHeros: 1, competencesHeros: {}, ameliorations: {}, objets: [], versionDonnees: VERSION_DONNEES });
+const CASE = casesLibres(ESSAI).find((c) => validerAction(ESSAI, { type: 'construire', ...c, tour: 'caserne' }) === null);
+if (!CASE) throw new Error('aucune case libre');
+const CENTRE = centreCase(CASE.cx, CASE.cy);
 const CONFIG: ConfigPartie = { graine: 7, difficulte: 'matou', dieu: 'charlie', heros: 'charlie', niveauHeros: 1, competencesHeros: {}, ameliorations: {}, objets: [], versionDonnees: VERSION_DONNEES };
 const IMAGE_MS = 50;
 
@@ -157,7 +163,7 @@ function journalDe(partie: PartieEnCours, type: Action['type']): number {
   return partie.etat.journal.filter((e) => e.action.type === type).length;
 }
 
-const CONSTRUIRE: Action = { type: 'construire', socle: 0, tour: 'tir' };
+const CONSTRUIRE: Action = { type: 'construire', ...CASE, tour: 'tir' };
 
 beforeEach(() => {
   horloge = 0;
@@ -343,12 +349,10 @@ describe('retour visible des gestes refusés', () => {
     expect(messageAffiche()).toBe(t('refus.sort_en_recharge'));
   });
 
-  it('un choix grisé du menu d’un socle affiche pourquoi', async () => {
+  it('un choix grisé du menu d’une case affiche pourquoi', async () => {
     const partie = await demarrer();
     partie.etat.aretes = 0;
-    const socle = partie.etat.niveau.carte.socles[0];
-    if (!socle) throw new Error('pas de socle');
-    toucherCarte(socle.x, socle.y - 0.5);
+    toucherCarte(CENTRE.x, CENTRE.y);
     images(2);
     expect(partie.mode.type).toBe('menu');
     const choix = document.querySelector<HTMLButtonElement>('.element-menu.grise');
@@ -357,16 +361,14 @@ describe('retour visible des gestes refusés', () => {
     expect(messageAffiche()).toBe(t('refus.aretes_insuffisantes'));
   });
 
-  it('en défi Fer, le menu d’un socle ne propose que les familles du niveau, et une touche interdite dit pourquoi', async () => {
+  it('en défi Fer, le menu d’une case ne propose que les familles du niveau, et une touche interdite dit pourquoi', async () => {
     const avecFer = { ...NIVEAU, niveau: { ...NIVEAU.niveau, defiFer: { familles: ['tir', 'magie'] as [string, string] } } };
     const partie = await lancerNiveau(avecFer, { ...CONFIG, defi: 'fer', bonus: { tours: {}, heros: {} } }, () => undefined, {
       parent: document.body,
       surDemarrage: (p) => { parties.push(p); },
     });
     partie.etat.aretes = 5000;
-    const socle = partie.etat.niveau.carte.socles[0];
-    if (!socle) throw new Error('pas de socle');
-    toucherCarte(socle.x, socle.y - 0.5);
+    toucherCarte(CENTRE.x, CENTRE.y);
     images(2);
     expect(partie.mode.type).toBe('menu');
     const libelles = [...document.querySelectorAll('.element-menu')].map((e) => e.getAttribute('aria-label') ?? '');

@@ -1,30 +1,30 @@
 // Partie complète sur le niveau de test, par l'API publique : une défense raisonnable gagne, rien ne perd.
 import { describe, expect, it } from 'vitest';
 import { NIVEAU_TEST } from '../data/niveaux/region1';
-import { CONFIG } from './aides.test-utils';
+import { ct, CONFIG } from './aides.test-utils';
 import { appliquerAction, creerPartie, rejouer, serialiser, step, validerAction, type Action, type EtatPartie } from './index';
 
 /** Plan fixe d'un joueur raisonnable : il exécute la prochaine étape dès qu'il en a les moyens. */
 const PLAN: readonly Action[] = [
-  { type: 'construire', socle: 1, tour: 'caserne' },
-  { type: 'construire', socle: 0, tour: 'tir' },
-  { type: 'construire', socle: 2, tour: 'tir' },
-  { type: 'construire', socle: 4, tour: 'magie' },
-  { type: 'ameliorer', socle: 0 },
-  { type: 'ameliorer', socle: 2 },
-  { type: 'construire', socle: 3, tour: 'artillerie' },
-  { type: 'construire', socle: 5, tour: 'tir' },
-  { type: 'ameliorer', socle: 1 },
-  { type: 'ameliorer', socle: 4 },
-  { type: 'ameliorer', socle: 0 },
-  { type: 'ameliorer', socle: 2 },
-  { type: 'ameliorer', socle: 1 },
-  { type: 'ameliorer', socle: 3 },
-  { type: 'ameliorer', socle: 5 },
-  { type: 'specialiser', socle: 0, voie: 'B' },
-  { type: 'specialiser', socle: 1, voie: 'A' },
-  { type: 'ameliorer', socle: 4 },
-  { type: 'specialiser', socle: 4, voie: 'A' },
+  { type: 'construire', ...ct(1), tour: 'caserne' },
+  { type: 'construire', ...ct(0), tour: 'tir' },
+  { type: 'construire', ...ct(2), tour: 'tir' },
+  { type: 'construire', ...ct(4), tour: 'magie' },
+  { type: 'ameliorer', ...ct(0) },
+  { type: 'ameliorer', ...ct(2) },
+  { type: 'construire', ...ct(3), tour: 'artillerie' },
+  { type: 'construire', ...ct(5), tour: 'tir' },
+  { type: 'ameliorer', ...ct(1) },
+  { type: 'ameliorer', ...ct(4) },
+  { type: 'ameliorer', ...ct(0) },
+  { type: 'ameliorer', ...ct(2) },
+  { type: 'ameliorer', ...ct(1) },
+  { type: 'ameliorer', ...ct(3) },
+  { type: 'ameliorer', ...ct(5) },
+  { type: 'specialiser', ...ct(0), voie: 'B' },
+  { type: 'specialiser', ...ct(1), voie: 'A' },
+  { type: 'ameliorer', ...ct(4) },
+  { type: 'specialiser', ...ct(4), voie: 'A' },
 ];
 
 function jouerAvecPlan(): EtatPartie {

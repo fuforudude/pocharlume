@@ -3,30 +3,30 @@
 import { describe, expect, it } from 'vitest';
 import { NIVEAU_TEST } from '../data/niveaux/region1';
 import type { Action } from './actions';
-import { configDe } from './aides.test-utils';
+import { ct, configDe } from './aides.test-utils';
 import type { ConfigPartie, EtatPartie } from './etat';
 import { avancer, creerPartie, deserialiser, rejouer, serialiser } from './partie';
 
 /** Scénario commun : tours, spécialisation, compétence, sorts, objets, ordres, appels de vagues. */
 function scenario(famille: 'tir' | 'caserne' | 'artillerie'): readonly { pas: number; action: Action }[] {
   return [
-    { pas: 0, action: { type: 'construire', socle: 0, tour: famille } },
-    { pas: 0, action: { type: 'construire', socle: 1, tour: 'tir' } },
+    { pas: 0, action: { type: 'construire', ...ct(0), tour: famille } },
+    { pas: 0, action: { type: 'construire', ...ct(1), tour: 'tir' } },
     { pas: 3, action: { type: 'appelerVague' } },
-    { pas: 10, action: { type: 'ameliorer', socle: 0 } },
-    { pas: 11, action: { type: 'ameliorer', socle: 0 } },
-    { pas: 12, action: { type: 'specialiser', socle: 0, voie: 'A' } },
-    { pas: 13, action: { type: 'ameliorerCompetence', socle: 0, competence: famille === 'tir' ? 'venin_noir' : famille === 'caserne' ? 'benediction' : 'nappe_de_soufre' } },
+    { pas: 10, action: { type: 'ameliorer', ...ct(0) } },
+    { pas: 11, action: { type: 'ameliorer', ...ct(0) } },
+    { pas: 12, action: { type: 'specialiser', ...ct(0), voie: 'A' } },
+    { pas: 13, action: { type: 'ameliorerCompetence', ...ct(0), competence: famille === 'tir' ? 'venin_noir' : famille === 'caserne' ? 'benediction' : 'nappe_de_soufre' } },
     { pas: 40, action: { type: 'deplacerHeros', x: 12, y: 6 } },
     { pas: 500, action: { type: 'lancerSort', emplacement: 0, x: 12, y: 6 } },
     { pas: 520, action: { type: 'utiliserObjet', emplacement: 0, x: 12, y: 6 } },
     { pas: 600, action: { type: 'lancerSort', emplacement: 1, x: 14, y: 13 } },
     { pas: 610, action: { type: 'utiliserObjet', emplacement: 1, x: 0, y: 0 } },
     { pas: 620, action: { type: 'utiliserObjet', emplacement: 2, x: 12, y: 6 } },
-    { pas: 700, action: { type: 'construire', socle: 3, tour: 'divine' } },
+    { pas: 700, action: { type: 'construire', ...ct(3), tour: 'divine' } },
     { pas: 900, action: { type: 'appelerVague' } },
     { pas: 1300, action: { type: 'appelerVague' } },
-    { pas: 1700, action: { type: 'vendre', socle: 1 } },
+    { pas: 1700, action: { type: 'vendre', ...ct(1) } },
   ];
 }
 

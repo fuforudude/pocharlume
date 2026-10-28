@@ -6,7 +6,7 @@
 // Tout est réutilisé d'un pas à l'autre : les objets sortis du jeu rejoignent une réserve, les effets
 // viennent d'un pool. Seule la création d'une entité nouvelle peut allouer (et seulement au début).
 import { DIEUX } from '../data/dieux';
-import type { Ennemi, EtatPartie, Evenement, Projectile, Tour, Unite } from '../engine';
+import { centreCase, type Ennemi, type EtatPartie, type Evenement, type Projectile, type Tour, type Unite } from '../engine';
 import type { Voie } from '../engine/definitions';
 import type { FamilleTour } from '../engine/etat';
 import { dureeAnimation } from './animations';
@@ -160,8 +160,6 @@ export class Suivi {
   /** Tours, ennemis et unités : l'ordre est retrié par le rendu à chaque image. */
   readonly dessinables: Visuel[] = [];
   readonly listeProjectiles: VisuelProjectile[] = [];
-  /** Par socle : une tour s'y dresse. */
-  socleOccupe: boolean[] = [];
   /** Le familier du héros, dessiné comme une unité (null tant qu'aucun n'est équipé). */
   familier: Visuel | null = null;
   /** Instant de début de chaque nuage toxique en cours (les autres zones n'y sont pas). */
@@ -311,11 +309,7 @@ export class Suivi {
   }
 
   private suivreTours(etat: EtatPartie, marque: number): void {
-    const occupe = this.socleOccupe;
-    occupe.length = etat.niveau.carte.socles.length;
-    occupe.fill(false);
     for (const t of etat.tours) {
-      occupe[t.socle] = true;
       let v = this.tours.get(t.id);
       if (!v) {
         v = this.creer(CATEGORIE.tour, t.id, t.x, t.y);
@@ -816,8 +810,8 @@ export class Suivi {
         return;
       }
       case 'vente': {
-        const socle = etat.niveau.carte.socles[ev.socle];
-        if (socle) this.effetSprite('fumee', socle.x, socle.y, temps, 2, -6);
+        const centre = centreCase(ev.cx, ev.cy);
+        this.effetSprite('fumee', centre.x, centre.y, temps, 2, -6);
         return;
       }
       case 'ralliement':
