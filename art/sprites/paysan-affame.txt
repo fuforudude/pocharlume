@@ -53,3 +53,27 @@ cadre mf 5.0 couleurs R=k
 cadre mf 5.1 couleurs R=k
 cadre mf 5.2 couleurs R=k
 cadre mf 5.3 couleurs R=k duree 600
+
+# Version d'élite : même recette (`modele`), tout assombri (`sombre`), yeux rouges (calque `yeux`, posé après coup sur chaque
+# cadre par `retouche` : les décalages sont ceux du Pestiféré, qui vient de la même planche d'épéiste).
+sprite paysan-affame-elite
+modele paysan-affame
+sombre
+calque yeux 16 24
+x.x
+
+retouche repos 0,3 + yeux decale 0 0
+retouche repos 1,2 + yeux decale 0 1
+retouche marche 0,3 + yeux decale 0 -1
+retouche marche 1,4 + yeux decale 0 1
+retouche marche 2,5 + yeux decale 0 0
+retouche attaque 0 + yeux decale -1 0
+retouche attaque 1 + yeux decale -5 0
+retouche attaque 2,3,4 + yeux decale 1 0
+retouche attaque 5 + yeux decale 0 0
+retouche blesse 0 + yeux decale -3 0
+retouche blesse 1 + yeux decale -1 0
+retouche mort 0 + yeux decale -1 1
+retouche mort 1 + yeux decale 1 2
+retouche mort 2 + yeux decale -5 5
+retouche mort 3 + yeux decale -5 6

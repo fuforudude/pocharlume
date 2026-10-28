@@ -93,3 +93,24 @@ cadre duree 1000
 N..NNMNMNMNMNNNNMMNkNnnn
 N..NNNNNNNNNNNNnNM.NNNNmk
 .....nNNnnNN.NN.....Nmmm
+
+# Version d'élite : même recette (`modele`), tout assombri (`sombre`), œil rouge (calque `yeux`, posé après coup sur chaque
+# cadre par `retouche` avec le décalage de la tête ; la gueule ouverte de l'attaque porte l'œil trois pixels plus loin).
+sprite chien-errant-elite
+modele chien-errant
+sombre
+calque yeux 15 3
+x
+
+retouche repos 0 + yeux decale 0 0
+retouche repos 1 + yeux decale 0 1
+retouche marche 0,2 + yeux decale 0 0
+retouche marche 1,3 + yeux decale 0 -1
+retouche attaque 3 + yeux decale 0 0
+retouche blesse 1 + yeux decale 0 0
+retouche attaque 0 + yeux decale -1 2
+retouche attaque 1 + yeux decale 3 -1
+retouche attaque 2 + yeux decale 3 0
+retouche blesse 0 + yeux decale -1 1
+retouche mort 0 + yeux decale -1 4
+retouche mort 1 + yeux decale 4 6

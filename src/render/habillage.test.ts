@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import type { AtlasJson } from '../../tools/art/atlas.ts';
 import { DIEUX } from '../data/dieux';
+import { IDS_FAMILIERS } from '../data/collection';
 import { ENNEMIS } from '../data/ennemis';
 import { HEROS } from '../data/heros';
 import { BRANCHES_ARBRE, IDS_DIEUX, IDS_HEROS, IDS_OBJETS } from '../data/meta';
@@ -14,10 +15,13 @@ import {
   iconeDieu,
   iconeFamille,
   iconeObjet,
+  idHerosDe,
   nomPointDeTir,
   portraitHeros,
   projectileTourne,
   spriteEnnemi,
+  spriteEnnemiElite,
+  spriteFamilier,
   spriteImpact,
   spriteProjectile,
   spriteStructure,
@@ -48,6 +52,20 @@ describe('habillage : chaque sprite demandé existe dans l’atlas', () => {
     for (const type of Object.keys(ENNEMIS)) {
       if (SPRITES_A_VENIR.has(type)) continue;
       expect(existe(spriteEnnemi(type)), type).toBe(true);
+    }
+  });
+
+  it('chaque ennemi ordinaire a sa version d’élite (les boss ne sont jamais élites)', () => {
+    for (const [type, def] of Object.entries(ENNEMIS)) {
+      if ((def as { boss: boolean }).boss) continue;
+      expect(existe(spriteEnnemiElite(type)), type).toBe(true);
+    }
+  });
+
+  it('familiers et effets d’état du jalon 3', () => {
+    for (const id of IDS_FAMILIERS) expect(existe(spriteFamilier(id)), id).toBe(true);
+    for (const nom of ['effet-nuage-toxique', 'effet-brulure', 'effet-tour-feu', 'effet-tour-affamee', 'effet-plongee']) {
+      expect(existe(nom), nom).toBe(true);
     }
   });
 
@@ -155,6 +173,13 @@ describe('habillage : cas particuliers', () => {
     expect(spriteImpact('__proto__')).toBe('impact');
     expect(habillageSort('constructor', 0).effet).toBe('fumee');
     expect(effetObjet('constructor')).toBe('fumee');
+  });
+
+  it('noms d’élites, de familiers et de héros', () => {
+    expect(spriteEnnemiElite('chien_errant')).toBe('chien-errant-elite');
+    expect(spriteFamilier('familier_papillon_nuit')).toBe('familier-papillon-nuit');
+    expect(idHerosDe('heros.brise_os')).toBe('brise_os');
+    expect(idHerosDe('unite.chat_de_grange')).toBeNull();
   });
 
   it('les flèches et traits se tournent vers leur cible, pas les boules et pierres', () => {

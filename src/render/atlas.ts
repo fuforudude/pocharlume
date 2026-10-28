@@ -2,7 +2,27 @@
 // seul code asynchrone du rendu ; ensuite tout est synchrone et sans allocation.
 import type { AnimationAtlas, AtlasJson, CadreAtlas, SpriteAtlas } from '../../tools/art/atlas.ts';
 
+import { estSkinConnu, imageDuSkin, spritesDuSkin, zoneDuSprite, type ImageDonnees, type Zone } from './palettes-skins';
+
 export type { AnimationAtlas, AtlasJson, CadreAtlas, SpriteAtlas };
+
+/**
+ * Un sprite recoloré par un skin : la zone de l'atlas qui contient tous ses cadres, copiée et recolorée une fois, et la même
+ * retournée de gauche à droite. Se dessine avec `AtlasRendu.dessinerHabille`, avec les mêmes cadres que le sprite de base.
+ */
+export interface SpriteHabille {
+  readonly nom: string;
+  readonly skin: string;
+  readonly zone: Zone;
+  readonly normal: HTMLCanvasElement;
+  readonly miroir: HTMLCanvasElement;
+}
+
+/** Rectangle source d'un cadre dans le canvas d'un sprite habillé (ou dans sa version retournée). Pur : testé sans canvas. */
+export function sourceHabille(zone: Zone, cadre: CadreAtlas, miroir: boolean): { x: number; y: number } {
+  const x = cadre.x - zone.x;
+  return { x: miroir ? zone.largeur - x - cadre.largeur : x, y: cadre.y - zone.y };
+}
 
 function creerCanvas(largeur: number, hauteur: number): { canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D } {
   const canvas = document.createElement('canvas');
@@ -20,6 +40,10 @@ export class AtlasRendu {
   private readonly miroir: HTMLCanvasElement;
   private readonly sprites: Readonly<Record<string, SpriteAtlas>>;
   private readonly icones = new Map<string, string>();
+  private readonly ctxPlanche: CanvasRenderingContext2D;
+  /** Pixels de la planche, lus une seule fois, à la première demande de skin (4 Mo : jamais lus si personne n'équipe de skin). */
+  private pixels: ImageDonnees | null = null;
+  private readonly habilles = new Map<string, SpriteHabille | null>();
 
   constructor(
     readonly json: AtlasJson,
@@ -29,6 +53,7 @@ export class AtlasRendu {
     const { canvas, ctx } = creerCanvas(json.largeur, json.hauteur);
     ctx.drawImage(image, 0, 0);
     this.planche = canvas;
+    this.ctxPlanche = ctx;
     const m = creerCanvas(json.largeur, json.hauteur);
     m.ctx.translate(json.largeur, 0);
     m.ctx.scale(-1, 1);
@@ -65,6 +90,42 @@ export class AtlasRendu {
     } else {
       ctx.drawImage(this.planche, cadre.x, cadre.y, cadre.largeur, cadre.hauteur, px - sprite.ancre.x + cadre.dx, y, cadre.largeur, cadre.hauteur);
     }
+  }
+
+  /**
+   * Le sprite `nom` recoloré avec la palette du skin `skin` (copie calculée une seule fois par sprite et skin), ou null si le
+   * sprite ou le skin n'existe pas, ou si ce skin n'habille pas ce sprite (un skin de tour sur un héros, par exemple).
+   */
+  habiller(nom: string, skin: string): SpriteHabille | null {
+    const cle = `${skin}|${nom}`;
+    if (this.habilles.has(cle)) return this.habilles.get(cle) ?? null;
+    let habille: SpriteHabille | null = null;
+    const sprite = this.sprite(nom);
+    if (sprite && estSkinConnu(skin) && spritesDuSkin(skin).includes(nom)) {
+      this.pixels ??= this.ctxPlanche.getImageData(0, 0, this.json.largeur, this.json.hauteur);
+      const zone = zoneDuSprite(sprite);
+      const image = imageDuSkin(this.pixels, skin, zone);
+      if (image) {
+        const { canvas, ctx } = creerCanvas(zone.largeur, zone.hauteur);
+        ctx.putImageData(new ImageData(new Uint8ClampedArray(image.data), image.width, image.height), 0, 0);
+        const m = creerCanvas(zone.largeur, zone.hauteur);
+        m.ctx.translate(zone.largeur, 0);
+        m.ctx.scale(-1, 1);
+        m.ctx.drawImage(canvas, 0, 0);
+        habille = { nom, skin, zone, normal: canvas, miroir: m.canvas };
+      }
+    }
+    this.habilles.set(cle, habille);
+    return habille;
+  }
+
+  /** Comme `dessiner`, avec les couleurs d'un skin. */
+  dessinerHabille(ctx: CanvasRenderingContext2D, habille: SpriteHabille, sprite: SpriteAtlas, cadre: CadreAtlas, px: number, py: number, miroir: boolean): void {
+    if (cadre.largeur === 0) return;
+    const source = sourceHabille(habille.zone, cadre, miroir);
+    const y = py - sprite.ancre.y + cadre.dy;
+    const x = miroir ? px + sprite.ancre.x - cadre.dx - cadre.largeur : px - sprite.ancre.x + cadre.dx;
+    ctx.drawImage(miroir ? habille.miroir : habille.normal, source.x, source.y, cadre.largeur, cadre.hauteur, x, y, cadre.largeur, cadre.hauteur);
   }
 
   /** Dessin agrandi d'un entier, sans lissage (ondes, icônes). L'ancre tombe sur (px, py). */

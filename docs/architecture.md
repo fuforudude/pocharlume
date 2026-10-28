@@ -38,6 +38,12 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
   bus) et `SON_DES_EVENEMENTS`, une entrée par type d'événement du moteur (`null` = silence voulu). Un test lit
   `src/engine/evenements.ts` : un nouvel événement sans entrée fait échouer la CI. Les entrées-fonctions choisissent selon
   la famille de la tour ou le genre de l'unité (la partie est passée au moteur de son) et selon `boss` des ennemis.
+  **Lectures réglées (jalon 3)** : une entrée peut rendre une `LectureSon` (`{ id, volume, hauteur, cle, max }`, facteurs
+  appliqués au son de base, clé et `max` du limiteur) au lieu d'un simple id : le même fichier sert plusieurs événements avec
+  des nuances, sans nouveau fichier. Les 9 événements des ennemis des régions 2 à 5 ont ainsi leur son ; ceux qui viennent en
+  grappe (`brulure`, `soin_ennemi`, `appel`) et la mort d'un ennemi d'essaim (sangsue, rat de peste : `pouvoirs.essaim`) ont
+  une clé propre limitée à une instance par fenêtre, donc pas de mitraille. `lectureDe` donne la lecture d'un événement,
+  `sonDe` son id.
 - **Limitation** (`limiteur.ts`) : fenêtre de 80 ms, au plus `max` instances d'un même son, et un plafond total par
   priorité (basse 4, normale 7, haute 12) : une rafale de tirs ne couvre jamais une cloche de vague, la mort d'un boss ou
   la victoire. Le hasard de hauteur et de volume est `Math.random` du rendu, jamais celui du moteur.
@@ -68,7 +74,24 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
   (`nomTuile` dans `sol.ts` : la région 1 garde `herbe-1`, les régions 2 à 5 ont `r2-herbe-1`…, 21 tuiles chacune), les
   boss en 64×64 (`la-faim`, `juge-flammes`, `dame-puits`, `mere-rats`), les élites (`<ennemi>-elite`) et les familiers
   (`familier-<bête>`) sont des sprites de l'atlas, et `palettes-skins.ts` donne les 21 palettes de skins (fonction pure
-  `appliquerPalette`, copie recolorée d'un sprite ou de l'atlas avec cache par `imageDuSkin`) qu'il restera à brancher.
+  `appliquerPalette`, copie recolorée d'un sprite ou de l'atlas avec cache par `imageDuSkin`).
+  **Branchement du rendu (jalon 3)** : un ennemi d'élite (`Ennemi.elite`) prend `<id>-elite` (retombe sur le sprite de base s'il
+  manque ; les ennemis de la région 1 ont les leurs, `paysan-affame-elite`, `mendiant-elite`, `chien-errant-elite`) et sa barre de
+  vie est dorée et toujours visible. L'Épouvantail dont `Ennemi.invulnerable` > 0 joue `mort` puis reste à terre, puis `releve` ;
+  la Dame du Puits joue `plonge`, reste sous l'eau (ripple), puis `emerge` d'un bond, avec une gerbe (`effet-plongee`) à la
+  plongée et à l'émergence ; la barre d'un ennemi intouchable est bleu pâle. `Unite.brulure` pose `effet-brulure`, `Unite.noyade`
+  enfonce l'unité sous une surface qui monte (clip + ondulation) ; `Tour.desactivee` et `Tour.affamePas` posent `effet-tour-feu`
+  et `effet-tour-affamee` ; une `ZoneDurable.degatsAllies` > 0 dessine `effet-nuage-toxique` (déploiement `impact` joué à
+  l'événement `zone`, puis le nuage qui tourne) ; `soin_ennemi` pose `effet-soin` sur l'ennemi soigné ; `appel` fait sortir les
+  appelés de la fumée ; `famine` trace un anneau gris du rayon de la zone.
+  **Collection équipée** : `new Rendu(canvas, atlas, carte, visuel, { skins, familier })` ou `rendu.definirCollection({ skins, familier })`
+  (type `OptionsCollection`, `src/render/suivi.ts`). `skins` est la table de `Collection.equipes.skins` : clé = famille de tours de
+  base (`caserne`, `tir`, `magie`, `artillerie`) ou id d'un héros, valeur = id de skin ; le skin d'une famille habille sa tour de base
+  et ses spécialisations (jamais la tour divine), seul le héros de la partie porte son skin. `familier` est l'id du familier du
+  héros de la partie (`Collection.equipes.familiers[héros]`, par exemple `familier_rat`), `null` pour aucun : le sprite
+  `familier-<bête>` trottine derrière le héros (suit d'une part de l'écart par pas, bondit s'il est loin, caché si le héros est
+  à terre). Les skins passent par `AtlasRendu.habiller` : pixels de la planche lus une fois (à la première demande), zone du sprite
+  recolorée par `imageDuSkin` (cache) puis copiée dans deux petits canvas (normal et retourné). Sans option, rien ne change.
 - **Interface** (`src/ui/`) : `interaction.ts` (machine à états pure : menu d'un socle, héros, sort,
   ralliement ; renvoie l'action à envoyer ou la raison d'un refus), `menu-cercle.ts` (éléments du menu
   d'après `validerAction`), `gestes.ts` (toucher, glisser, pincer), `clavier.ts` (touches), `hud.ts`,
@@ -485,6 +508,6 @@ valeurs de départ cohérentes avec `menaceEnnemi` : l'équilibrage fin est celu
   d'équilibrage l'incrémentera.
 - **Événements ajoutés** : `releve`, `plongee`, `emergence`, `brulure`, `noyade`, `soin_ennemi`, `famine`, `tour_desactivee`, `appel`
   (le nuage est un `zone` ordinaire, dont la zone d'état porte `degatsAllies`). Chacun a une entrée dans `src/audio/table.ts`
-  (silence provisoire sauf `soin_ennemi`, `famine`, `appel`) ; `RaisonRefus` gagne `famille_interdite` (texte dans `fr.ts`, `refus.ts`).
+  (son réglé par la tâche du rendu : voir « Son ») ; `RaisonRefus` gagne `famille_interdite` (texte dans `fr.ts`, `refus.ts`).
 - **Tests** : `ennemis-regions.test.ts` (12 ennemis), `boss-regions.test.ts` (4 boss), `elites.test.ts`, `defis.test.ts`,
   `bonus-collection.test.ts`, `src/data/ennemis-jalon3.test.ts` (données) et le bloc « essaims » de `src/data/equilibrage.test.ts`.

@@ -11,7 +11,7 @@ import { MoteurAudio, type ContexteAudio, type VolumesAudio } from './moteur';
 import type { IdSonInterface } from './table';
 
 export { MoteurAudio, gainDuVolume, type ContexteAudio, type VolumesAudio } from './moteur';
-export { sonDe, SONS, SON_DES_EVENEMENTS, type IdSon, type IdSonInterface } from './table';
+export { lectureDe, sonDe, SONS, SON_DES_EVENEMENTS, type IdSon, type IdSonInterface, type LectureSon } from './table';
 
 interface FenetreAudio {
   AudioContext?: new () => ContexteAudio;

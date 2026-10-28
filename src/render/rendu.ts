@@ -11,18 +11,25 @@ import type { VisuelCarte } from '../data/visuel';
 import type { Carte } from '../engine/definitions';
 import { EFFET, type EtatPartie } from '../engine';
 import { cadreA } from './animations';
-import type { AtlasRendu, SpriteAtlas } from './atlas';
+import type { AtlasRendu, CadreAtlas, SpriteAtlas } from './atlas';
 import { Camera, TUILE } from './camera';
 import { PoolEffets, TYPE_EFFET, type Effet } from './effets';
 import { dessinerNombre, largeurNombre } from './police';
 import { construireSol, peindreSol } from './sol';
 import { tuileTouchee } from './zones';
-import { CATEGORIE, Suivi, type Visuel, type VisuelProjectile } from './suivi';
+import { CATEGORIE, DEPLOIEMENT_NUAGE, Suivi, type OptionsCollection, type Visuel, type VisuelProjectile } from './suivi';
+
+export type { OptionsCollection } from './suivi';
 
 const FOND = '#0b0a0d';
 const OMBRE = 'rgba(0, 0, 0, 0.3)';
 const BARRE_FOND = '#14090b';
 const BARRE_ENNEMI = '#c8402f';
+/** Un ennemi d'élite a toujours sa barre, dorée ; un ennemi intouchable (à terre, plongé) l'a bleu pâle. */
+const BARRE_ELITE = '#e0a840';
+const BARRE_INTOUCHABLE = '#9cc4e8';
+/** Part de la hauteur d'une unité qui passe sous l'eau quand elle se noie. */
+const PART_NOYEE = 0.7;
 const BARRE_ALLIE = '#5fb85a';
 const BARRE_VIDE = '#4a2a2a';
 const ANNEAU = '#f3e6b0';
@@ -125,12 +132,22 @@ export class Rendu {
   private readonly tuileVoile: SpriteAtlas | undefined;
   private readonly boost: SpriteAtlas | undefined;
   private readonly rage: SpriteAtlas | undefined;
+  private readonly brulure: SpriteAtlas | undefined;
+  private readonly tourEnFeu: SpriteAtlas | undefined;
+  private readonly tourAffamee: SpriteAtlas | undefined;
+  private readonly nuage: SpriteAtlas | undefined;
+  private readonly ondulation: SpriteAtlas | undefined;
 
+  /**
+   * `collection` : les skins et le familier équipés par le joueur (voir `OptionsCollection`) ; on peut aussi les donner ou les
+   * changer ensuite avec `definirCollection`.
+   */
   constructor(
     private readonly canvas: HTMLCanvasElement,
     private readonly atlas: AtlasRendu,
     carte: Carte,
     visuel: VisuelCarte,
+    collection: OptionsCollection = {},
   ) {
     const ecran = canvas.getContext('2d');
     this.tampon = document.createElement('canvas');
@@ -146,6 +163,12 @@ export class Rendu {
     this.tuileVoile = atlas.sprite('effet-voile-nuit-tuile');
     this.boost = atlas.sprite('effet-ingeniosite');
     this.rage = atlas.sprite('effet-rage');
+    this.brulure = atlas.sprite('effet-brulure');
+    this.tourEnFeu = atlas.sprite('effet-tour-feu');
+    this.tourAffamee = atlas.sprite('effet-tour-affamee');
+    this.nuage = atlas.sprite('effet-nuage-toxique');
+    this.ondulation = atlas.sprite('effet-plongee');
+    this.suivi.definirCollection(collection);
     for (const d of visuel.decor) {
       const py = Math.round(d.y * TUILE);
       this.statiques.push({ cle: py, sprite: atlas.sprite(d.sprite) ?? null, px: Math.round(d.x * TUILE), py, miroir: d.miroir ?? false, socle: -1 });
@@ -168,6 +191,14 @@ export class Rendu {
       this.canvas.height = h;
     }
     this.camera.redimensionner(l, h);
+  }
+
+  /**
+   * Skins équipés (par famille de tours ou par héros) et familier du héros. Les tours et le héros déjà à l'écran sont rhabillés
+   * au prochain `apresPas`. Voir `OptionsCollection` pour la forme, qui est celle de `Collection.equipes` de la sauvegarde.
+   */
+  definirCollection(collection: OptionsCollection): void {
+    this.suivi.definirCollection(collection);
   }
 
   /** À appeler après chaque pas du moteur : suivi des entités et déclenchement des effets. */
@@ -310,7 +341,16 @@ export class Rendu {
       const alpha = reste < FONDU_ZONE ? Math.max(0, reste / FONDU_ZONE) : 1;
       const tuile = this.tuileVoile;
       const anim = tuile ? this.atlas.animation(tuile, 'repos') : undefined;
-      if (z.critique > 0 && tuile && anim) {
+      if (z.degatsAllies > 0 && this.nuage) {
+        // Nuage toxique : le nuage qui tourne, posé quand son déploiement (joué comme effet) est fini ; il s'efface à la fin.
+        const debut = this.suivi.debutNuage.get(z.id);
+        const animNuage = this.atlas.animation(this.nuage, 'repos');
+        if (animNuage && (debut === undefined || temps - debut >= DEPLOIEMENT_NUAGE)) {
+          ctx.globalAlpha = alpha;
+          this.atlas.dessinerEchelle(ctx, this.nuage, cadreA(animNuage, temps + z.id * 137), Math.round(cx) - ox, Math.round(cy) - oy, Math.max(1, Math.round(r / (this.nuage.largeur / 2))));
+          ctx.globalAlpha = 1;
+        }
+      } else if (z.critique > 0 && tuile && anim) {
         // Voile de Nuit : une tuile d'ombre sur chaque case que le rayon touche, donc toute la zone réelle.
         const cadre = cadreA(anim, temps);
         ctx.globalAlpha = alpha;
@@ -356,7 +396,9 @@ export class Rendu {
       const v = liste[i];
       if (!v || v.categorie === CATEGORIE.tour || !v.sprite) continue;
       if (v.px < -40 || v.px > l + 40 || v.py < -20 || v.py > h + 40) continue;
-      if (v.unite?.mort) continue;
+      if (v.unite?.mort || v.masque) continue;
+      // Un ennemi plongé n'a plus d'ombre sur le sol : il est sous l'eau (celui qui est à terre garde la sienne).
+      if (v.ennemi && v.ennemi.invulnerable > 0 && !v.ennemi.pouvoirs?.relevement) continue;
       const demi = Math.round(v.sprite.largeur / 6);
       ctx.fillRect(v.px - demi + 1, v.py - 3, demi * 2 - 2, 3);
       ctx.fillRect(v.px - demi, v.py - 2, demi * 2, 1);
@@ -402,9 +444,15 @@ export class Rendu {
       ctx.fillRect(v.px - 4, v.py - 12, 8, 12);
       return;
     }
+    if (v.masque) return;
     let nom = 'repos';
     let t = temps + v.phase;
-    if (v.categorie === CATEGORIE.unite && v.mortDebut >= 0) {
+    const ennemi = v.ennemi;
+    if (ennemi && ennemi.invulnerable > 0) {
+      // À terre (relèvement) ou plongé : la chute ou la plongée se joue une fois, puis le dernier cadre reste jusqu'à la fin.
+      nom = ennemi.pouvoirs?.relevement ? 'mort' : 'plonge';
+      t = temps - v.intouchableDebut;
+    } else if (v.categorie === CATEGORIE.unite && v.mortDebut >= 0) {
       nom = 'mort';
       t = temps - v.mortDebut;
     } else if (temps < v.actionFin) {
@@ -419,25 +467,59 @@ export class Rendu {
     const anim = this.atlas.animation(sprite, nom);
     if (!anim) return;
     // Une unité tombée reste étendue un moment, puis disparaît jusqu'à sa réapparition.
-    if (nom === 'mort' && t > 1800) return;
-    const y = v.py - (v.ennemi?.volant ? ALTITUDE_VOL : 0);
+    if (nom === 'mort' && t > 1800 && v.categorie !== CATEGORIE.ennemi) return;
+    const y = v.py - (ennemi?.volant ? ALTITUDE_VOL : 0);
     const unite = v.unite;
     const capacites = unite?.stats.capacites;
     // Les flammes de la rage sous les pieds d'un héros blessé, avant lui ; l'assassin du Sanctuaire est translucide.
     if (unite && (capacites?.rage ?? 0) > 0 && !unite.mort && unite.pv < unite.stats.pv) this.dessinerBoucle(this.rage, v.px, v.py, temps);
     const furtif = capacites?.ciblable === false;
     if (furtif) ctx.globalAlpha = OPACITE_FURTIF;
-    this.atlas.dessiner(ctx, sprite, cadreA(anim, t), v.px, y, v.miroir);
+    if (unite && !unite.mort && unite.noyade > 0 && v.noyadeMax > 0) this.dessinerNoyee(v, sprite, cadreA(anim, t), y, temps);
+    else this.poser(v, sprite, cadreA(anim, t), v.px, y);
     if (furtif) ctx.globalAlpha = 1;
 
     if (v.categorie === CATEGORIE.tour) {
       this.dessinerTireur(v, temps);
-      // Ingéniosité : les roues d'or tournent sur chaque tour dont la cadence est boostée.
-      if (v.tour && v.tour.boostPas > 0) this.dessinerBoucle(this.boost, v.px, v.py - 8, temps);
-    } else if (v.ennemi && (v.ennemi.effetsPas[EFFET.etourdissement] ?? 0) > 0 && this.etourdi) {
+      const tour = v.tour;
+      if (tour) {
+        // Ingéniosité : les roues d'or tournent sur chaque tour dont la cadence est boostée.
+        if (tour.boostPas > 0) this.dessinerBoucle(this.boost, v.px, v.py - 8, temps);
+        // Tour en feu (Juge des Flammes, désactivée) et tour affamée (La Faim, cadence réduite).
+        if (tour.desactivee > 0) this.dessinerBoucle(this.tourEnFeu, v.px, v.py - 8, temps);
+        if (tour.affamePas > 0) this.dessinerBoucle(this.tourAffamee, v.px, v.py - 8, temps);
+      }
+    } else if (ennemi && (ennemi.effetsPas[EFFET.etourdissement] ?? 0) > 0 && this.etourdi) {
       const a = this.atlas.animation(this.etourdi, 'repos');
       if (a) this.atlas.dessiner(ctx, this.etourdi, cadreA(a, temps), v.px, y - Math.round(sprite.ancre.y * 0.8) - 4, false);
     }
+    // Un soldat qui brûle : des flammes de part et d'autre, par-dessus lui.
+    if (unite && !unite.mort && unite.brulure > 0) this.dessinerBoucle(this.brulure, v.px, v.py, temps + v.phase);
+  }
+
+  /** Pose un cadre du sprite d'un visuel, avec les couleurs de son skin s'il en porte un. */
+  private poser(v: Visuel, sprite: SpriteAtlas, cadre: CadreAtlas, px: number, py: number): void {
+    if (v.habille) this.atlas.dessinerHabille(this.ctx, v.habille, sprite, cadre, px, py, v.miroir);
+    else this.atlas.dessiner(this.ctx, sprite, cadre, px, py, v.miroir);
+  }
+
+  /**
+   * Une unité entraînée sous l'eau par un noyeur : elle s'enfonce à mesure que son compte à rebours avance (seul le haut reste
+   * visible, coupé par la surface) et une ondulation marque la surface.
+   */
+  private dessinerNoyee(v: Visuel, sprite: SpriteAtlas, cadre: CadreAtlas, y: number, temps: number): void {
+    const unite = v.unite;
+    if (!unite) return;
+    const avance = 1 - Math.min(1, unite.noyade / v.noyadeMax);
+    const enfoncement = Math.round(avance * PART_NOYEE * sprite.hauteur);
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(v.px - sprite.largeur, y - sprite.hauteur - 8, sprite.largeur * 2, sprite.hauteur + 8 - enfoncement);
+    ctx.clip();
+    this.poser(v, sprite, cadre, v.px, y);
+    ctx.restore();
+    this.dessinerBoucle(this.ondulation, v.px, y - enfoncement, temps);
   }
 
   /** Pose un sprite à animation en boucle (halo, flammes, roues) sur un point du tampon. */
@@ -552,7 +634,7 @@ export class Rendu {
     const liste = this.suivi.dessinables;
     for (let i = 0; i < liste.length; i++) {
       const v = liste[i];
-      if (!v?.sprite || v.categorie === CATEGORIE.tour) continue;
+      if (!v?.sprite || v.categorie === CATEGORIE.tour || v.masque) continue;
       if (v.px < -40 || v.px > l + 40 || v.py < -16 || v.py > h + 80) continue;
       const e = v.ennemi;
       const u = v.unite;
@@ -562,10 +644,11 @@ export class Rendu {
       let pastilles = false;
       if (e) {
         ratio = e.pv / e.pvMax;
-        couleur = BARRE_ENNEMI;
+        couleur = e.invulnerable > 0 ? BARRE_INTOUCHABLE : e.elite ? BARRE_ELITE : BARRE_ENNEMI;
         if (e.boss) large = 28;
+        else if (e.elite) large = 14;
         for (let k = 0; k < POINTS_ETAT.length && !pastilles; k++) pastilles = (e.effetsPas[POINTS_ETAT[k]?.[0] ?? 0] ?? 0) > 0;
-        if (ratio >= 0.999 && !e.boss && !pastilles) continue;
+        if (ratio >= 0.999 && !e.boss && !e.elite && e.invulnerable === 0 && !pastilles) continue;
       } else if (u && !u.mort) {
         ratio = u.pv / u.stats.pv;
         couleur = BARRE_ALLIE;
