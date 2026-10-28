@@ -1,6 +1,6 @@
 # Pocharlume : tower defense de chats
 
-Statut : en cours (jalon 1 livré le 2026-10-25)
+Statut : en cours (jalon 1 livré le 2026-10-25, jalon 2 le 2026-10-28)
 Date : 2026-10-25
 
 ## Besoin
@@ -215,12 +215,14 @@ lot qu'on peut tirer.
 Écarts à la livraison du jalon 1 : les 60 images/s sont mesurées sur Chrome de bureau avec processeur ralenti ×4 (environ 140 i/s), pas encore sur un vrai téléphone Android ; Matou et Vieux Sage ont été durcis après la QA (bandes revues dans « Système d'équilibrage »).
 
 ### Jalon 2 : les trois dieux et la boutique
-- [ ] Plume et Pollen jouables (héros, sorts, bonus, tour divine). Choix du dieu et du héros avant un niveau.
-- [ ] 6 disciples, expérience et compétences des héros.
-- [ ] Arbre d'améliorations en étoiles (réinitialisable : toutes les étoiles reviennent), arêtes, braises,
+- [x] Plume et Pollen jouables (héros, sorts, bonus, tour divine). Choix du dieu et du héros avant un niveau.
+- [x] 6 disciples, expérience et compétences des héros.
+- [x] Arbre d'améliorations en étoiles (réinitialisable : toutes les étoiles reviennent), arêtes, braises,
   objets consommables (3 emplacements).
-- [ ] Trois difficultés sélectionnables, avec leurs bandes vérifiées par le simulateur.
-- [ ] Bruitages CC0 intégrés, réglages son, `CREDITS.md`.
+- [x] Trois difficultés sélectionnables, avec leurs bandes vérifiées par le simulateur.
+- [x] Bruitages CC0 intégrés, réglages son, `CREDITS.md`.
+
+Écarts à la livraison du jalon 2 : l'écoute réelle des bruitages n'est pas vérifiée (sons choisis sans écoute) ; la courbe de difficulté du bot naïf en Matou est jugée sur la moyenne des dieux (le boss du niveau 10 gêne les héros de mêlée plus que Pollen) ; la progression (arbre, niveaux de héros) a été divisée pour ne pas rendre Vieux Sage trivial, un rang ne vaut donc que quelques points ; chaque première victoire de niveau rapporte 5 braises, soit 80 au plus et 2 disciples avec la région 1 ; l'abandon ne rapporte rien.
 
 ### Jalon 3 : régions 2 à 5, caisses, défis
 - [ ] 40 niveaux de plus, avec leurs ennemis, élites et boss, et des tests d'équilibrage qui passent.
@@ -326,24 +328,24 @@ Carreau perforant ; Mortier de Soufre, Nappe de soufre et Charge lourde.
   compétences, rangs de l'arbre, objets emportés) pour que la partie reste rejouable à l'identique.
 
 ### Critères d'acceptation détaillés du jalon 2
-- [ ] Sur la fiche d'un niveau, on choisit le dieu puis l'un de ses héros possédés. La partie utilise ses sorts,
+- [x] Sur la fiche d'un niveau, on choisit le dieu puis l'un de ses héros possédés. La partie utilise ses sorts,
   son bonus, sa tour divine et son héros.
-- [ ] Chacun des 6 sorts, des 3 tours divines et des 9 héros a un test moteur qui montre son effet principal.
-- [ ] Gagner un niveau donne de l'expérience au héros joué. Un niveau de héros donne un point, placé ou
+- [x] Chacun des 6 sorts, des 3 tours divines et des 9 héros a un test moteur qui montre son effet principal.
+- [x] Gagner un niveau donne de l'expérience au héros joué. Un niveau de héros donne un point, placé ou
   redistribué sur l'écran des héros, et le changement se voit en partie.
-- [ ] Acheter un rang de l'arbre retire les étoiles. Réinitialiser les rend toutes. On ne peut pas dépenser plus
+- [x] Acheter un rang de l'arbre retire les étoiles. Réinitialiser les rend toutes. On ne peut pas dépenser plus
   d'étoiles qu'on n'en a gagné.
-- [ ] Acheter un disciple retire 30 braises. Avec moins de 30, l'achat est refusé.
-- [ ] Un objet consommable acheté s'équipe, quitte le stock au lancement, s'utilise une fois dans la partie ; s'il
+- [x] Acheter un disciple retire 30 braises. Avec moins de 30, l'achat est refusé.
+- [x] Un objet consommable acheté s'équipe, quitte le stock au lancement, s'utilise une fois dans la partie ; s'il
   n'a pas servi à la fin de la partie, il revient au stock (règle des consommables ci-dessus).
-- [ ] Un code d'export devenu incohérent avec les données d'aujourd'hui (seuils d'expérience, compétences) est
+- [x] Un code d'export devenu incohérent avec les données d'aujourd'hui (seuils d'expérience, compétences) est
   corrigé à l'import (le héros récupère ses points, un héros choisi non possédé devient l'avatar du dieu), pas refusé.
-- [ ] La sauvegarde passe en v3 avec une migration testée depuis la v2 : aucune progression perdue.
+- [x] La sauvegarde passe en v3 avec une migration testée depuis la v2 : aucune progression perdue.
 - [x] Les bandes du simulateur passent pour chacun des 3 dieux avec son avatar, sans amélioration ni objet.
   Aucun dieu ne dépasse de plus de 10 points le taux de victoire des autres en Vieux Sage. (Écart assumé : la courbe
   de difficulté du bot naïf en Matou est jugée sur la moyenne des dieux, et chaque dieu doit seulement avoir une courbe
   décroissante ; voir `docs/architecture.md`.)
-- [ ] Bruitages CC0 joués sur les événements (tir, impact, mort, construction, sorts, victoire, défaite),
+- [x] Bruitages CC0 joués sur les événements (tir, impact, mort, construction, sorts, victoire, défaite),
   volumes réglables, `CREDITS.md`.
 
 ## Tâches du jalon 2
