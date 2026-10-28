@@ -53,6 +53,96 @@ export interface DefEnnemi {
   readonly insensibleEtourdissement: boolean;
   /** Secondes entre deux soldats dévorés (tués d'un coup) quand il est bloqué ; 0 = jamais. */
   readonly devore: number;
+  /** Mécaniques propres à l'ennemi (régions 2 à 5) ; absent = ennemi ordinaire. */
+  readonly pouvoirs?: PouvoirsEnnemi;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Pouvoirs des ennemis des régions 2 à 5 et de leurs boss. Tout est piloté par les données : le moteur
+// ne connaît aucun ennemi par son nom, seulement ces mécaniques génériques.
+// ---------------------------------------------------------------------------------------------
+
+/** Chaque coup au corps-à-corps met le feu à l'unité alliée touchée : dégâts purs par seconde pendant `duree`. */
+export interface BrulureContact {
+  readonly duree: number;
+  /** Dégâts purs par seconde. */
+  readonly degats: number;
+}
+
+/** L'unité alliée qui le bloque (hors héros) est entraînée sous l'eau : elle meurt après `delai` s, sauf si lui meurt avant. */
+export interface Noyade {
+  readonly delai: number;
+}
+
+/** Tant qu'il touche une unité alliée, lui retire des PV chaque seconde et s'en soigne. */
+export interface Drain {
+  /** PV retirés par seconde. */
+  readonly degats: number;
+  /** Part des PV retirés qu'il récupère (1 = tout). */
+  readonly soin: number;
+}
+
+/** Soigne périodiquement les autres ennemis proches. */
+export interface SoinEnnemis {
+  readonly rayon: number;
+  /** Fraction des PV maximaux de chaque ennemi soigné. */
+  readonly quantite: number;
+  readonly cadence: number;
+}
+
+/** Nuage toxique laissé à sa mort : blesse les unités alliées (soldats, héros…) qui s'y trouvent. */
+export interface NuageMortel {
+  readonly rayon: number;
+  readonly duree: number;
+  /** Dégâts purs par seconde. */
+  readonly degats: number;
+}
+
+/** Se relève après avoir été tué, un nombre de fois limité. */
+export interface Relevement {
+  readonly fois: number;
+  /** Fraction des PV maximaux au relèvement. */
+  readonly pv: number;
+  /** Secondes à terre (intouchable) avant de repartir. */
+  readonly delai: number;
+}
+
+/** Action déclenchée par un palier de PV ou par une cadence (boss). */
+export type ActionEnnemi =
+  /** Les tours à `rayon` tuiles perdent `cadence` (0,3 = −30 %) de cadence de tir pendant `duree` s. */
+  | { readonly type: 'affamer'; readonly rayon: number; readonly cadence: number; readonly duree: number }
+  /** La tour la plus proche est désactivée (en feu) pendant `duree` s. */
+  | { readonly type: 'desactiver_tour'; readonly duree: number }
+  /** Appelle `nombre` ennemis sur son chemin, à sa hauteur, espacés de `ecart` tuiles vers l'entrée. */
+  | { readonly type: 'invoquer'; readonly ennemi: string; readonly nombre: number; readonly ecart: number }
+  /** Plonge : intouchable `duree` s, puis réapparaît `saut` tuiles plus loin sur son chemin. */
+  | { readonly type: 'plonger'; readonly duree: number; readonly saut: number };
+
+/** Se déclenche une fois quand ses PV passent sous `pv` (fraction des PV maximaux). Paliers par `pv` décroissant. */
+export interface PalierEnnemi {
+  readonly pv: number;
+  readonly actions: readonly ActionEnnemi[];
+}
+
+/** Se déclenche toutes les `cadence` secondes (la première fois après un délai égal). */
+export interface ActionPeriodique {
+  readonly cadence: number;
+  readonly actions: readonly ActionEnnemi[];
+}
+
+export interface PouvoirsEnnemi {
+  readonly brulure?: BrulureContact;
+  readonly noyade?: Noyade;
+  readonly drain?: Drain;
+  readonly soin?: SoinEnnemis;
+  readonly nuage?: NuageMortel;
+  readonly relevement?: Relevement;
+  /** Multiplicateur de ses dégâts contre un héros (2 = double). */
+  readonly degatsHeros?: number;
+  /** Arrive par groupes de cette taille : le générateur de vagues crée des paquets de multiples de ce nombre. */
+  readonly essaim?: number;
+  readonly paliers?: readonly PalierEnnemi[];
+  readonly periodiques?: readonly ActionPeriodique[];
 }
 
 export interface Critique {
@@ -195,6 +285,10 @@ export interface DefZoneDurable {
   /** Points de critique ajoutés aux tirs des tours sur un ennemi dans la zone. */
   readonly critique: number;
   readonly volants: boolean;
+  /** Les ennemis furtifs de la zone sont visibles de tous tant qu'ils y restent (Voile de Nuit). */
+  readonly revele?: boolean;
+  /** Dégâts purs par seconde aux unités alliées de la zone (nuage toxique) ; absent = les alliés ne sont pas touchés. */
+  readonly degatsAllies?: number;
 }
 
 /** Zone qu'un tir d'artillerie laisse à l'impact. */
@@ -504,6 +598,21 @@ export interface Regles {
   readonly piegesMax: number;
   /** Secondes pendant lesquelles un ennemi reste visible après avoir été révélé par une tour ou un assassin. */
   readonly dureeRevelation: number;
+  /** Version d'élite d'un ennemi (hors boss). */
+  readonly elite: {
+    readonly facteurPv: number;
+    readonly facteurPrime: number;
+    /** Vies de plus que coûte l'ennemi s'il s'échappe. */
+    readonly viesEnPlus: number;
+  };
+  /** Défi Héroïque : nombre de vies (tous les groupes non-boss en élite). */
+  readonly heroique: { readonly vies: number };
+  /** Défi Fer : toutes les vagues en une, effectifs multipliés (arrondi au-dessus), boss exceptés. */
+  readonly fer: { readonly facteurEffectifs: number };
+  /** Bonus de collection : total maximal (0,1 = +10 %) par tour de base ou pour le héros. */
+  readonly plafondBonus: number;
+  /** PV régénérés par seconde pour un bonus de régénération de 100 % (1 = +100 %) du héros. */
+  readonly regenerationBonusHeros: number;
 }
 
 export interface Paquet {
@@ -514,6 +623,8 @@ export interface Paquet {
   readonly chemin: number;
   /** Secondes après le lancement de la vague. */
   readonly delai: number;
+  /** Les ennemis de ce groupe sont des élites (PV, protections et prime en hausse). Ignoré pour un boss. */
+  readonly elite?: boolean;
 }
 
 export interface Vague {
@@ -538,9 +649,19 @@ export interface Carte {
   readonly departHeros: Point;
 }
 
+/**
+ * Défi Fer d'un niveau : les deux seules familles de tours constructibles (ids de IdFamille, vérifiés à la création
+ * de la partie). La tour divine est permise si la famille de son dieu en fait partie.
+ */
+export interface DefiFer {
+  readonly familles: readonly [string, string];
+}
+
 export interface Niveau {
   readonly id: string;
   readonly carte: Carte;
   readonly vagues: readonly Vague[];
   readonly aretesDepart: number;
+  /** Absent = pas de défi Fer sur ce niveau. */
+  readonly defiFer?: DefiFer;
 }

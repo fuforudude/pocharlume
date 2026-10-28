@@ -29,6 +29,7 @@ export const CLES_REFUS: Readonly<Record<RaisonRefus, CleTexte>> = {
   objet_utilise: 'refus.objet_utilise',
   vies_pleines: 'refus.vies_pleines',
   plus_de_vague: 'refus.plus_de_vague',
+  famille_interdite: 'refus.famille_interdite',
 };
 
 export function texteRefus(raison: RaisonRefus): string {

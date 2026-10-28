@@ -138,6 +138,16 @@ export const SON_DES_EVENEMENTS: TableEvenements = {
   boost: 'amelioration',
   ralliement: 'clic',
   ordre_heros: 'clic',
+  // Mécaniques des ennemis : le choix des sons est à faire avec les bruitages des régions 2 à 5 (silence provisoire).
+  releve: null,
+  plongee: null,
+  emergence: null,
+  brulure: null,
+  noyade: null,
+  soin_ennemi: 'soin',
+  famine: 'sort',
+  tour_desactivee: null,
+  appel: 'sort',
   fin: (e) => (e.statut === 'victoire' ? 'victoire' : e.statut === 'defaite' ? 'defaite' : null),
 };
 

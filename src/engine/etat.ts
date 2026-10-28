@@ -10,17 +10,32 @@ import type {
   IdFamille,
   Niveau,
   Point,
+  PouvoirsEnnemi,
   StatsCombattant,
   Voie,
   ZoneHeros,
 } from './definitions';
 import type { Evenement } from './evenements';
 
-export const VERSION_ETAT = 3;
+export const VERSION_ETAT = 4;
 
 export type Statut = 'en_cours' | 'victoire' | 'defaite';
 export type FamilleTour = IdFamille | 'divine';
 export type GenreUnite = 'soldat' | 'heros' | 'renfort' | 'spectre';
+
+/** Défi joué : Héroïque (1 vie, groupes d'élite) ou Fer (une seule vague, deux familles de tours). */
+export type DefiPartie = 'heroique' | 'fer';
+export type StatBonusTour = 'degats' | 'cadence' | 'portee' | 'pvSoldats';
+export type StatBonusHeros = 'pv' | 'degats' | 'cadence' | 'regeneration';
+
+/**
+ * Bonus de la collection (skins et familiers), en fractions (0,05 = +5 %). Le bonus d'une famille vaut pour sa tour de
+ * base et ses spécialisations ; le total par famille ou pour le héros ne dépasse pas `REGLES.plafondBonus`. Ignoré en Fer.
+ */
+export interface BonusCollection {
+  tours: Partial<Record<IdFamille, Partial<Record<StatBonusTour, number>>>>;
+  heros: Partial<Record<StatBonusHeros, number>>;
+}
 
 /**
  * Tout ce qui entre dans une partie, fixé au lancement : avec le niveau, la graine et le journal d'actions,
@@ -44,7 +59,17 @@ export interface ConfigPartie {
   objets: string[];
   /** VERSION_DONNEES de src/data/version.ts : une partie ne se rejoue qu'avec les données de sa version. */
   versionDonnees: number;
+  /**
+   * Défi joué, null (ou absent, pour une config d'avant le jalon 3) = partie ordinaire. Un défi se joue avec les règles
+   * de Matou et sans objet.
+   */
+  defi?: DefiPartie | null;
+  /** Bonus de collection ; absent = aucun. */
+  bonus?: BonusCollection;
 }
+
+/** Config rangée dans l'état : `defi` et `bonus` y sont toujours présents (`copierConfig`). */
+export type ConfigComplete = ConfigPartie & { defi: DefiPartie | null; bonus: BonusCollection };
 
 /** Chemin précalculé : longueurs cumulées et directions unitaires de chaque segment. */
 export interface CheminCalcule {
@@ -90,6 +115,22 @@ export interface Ennemi {
   insensibleEtourdissement: boolean;
   devore: number;
   rechargeDevore: number;
+  /** Version d'élite (PV, protections, prime et coût en vies déjà ajustés). */
+  elite: boolean;
+  /** Mécaniques propres à l'ennemi (copie des données) ; null = ennemi ordinaire. */
+  pouvoirs: PouvoirsEnnemi | null;
+  /** Relèvements encore possibles. */
+  releves: number;
+  /** Pas restants pendant lesquels il est intouchable (à terre, plongé) : ni ciblé, ni blessé, ni affecté, il ne bouge pas. */
+  invulnerable: number;
+  /** Tuiles dont il avance sur son chemin en réapparaissant (plongée). */
+  saut: number;
+  /** Indice du prochain palier de PV à déclencher. */
+  palier: number;
+  /** Pas restants avant chaque action périodique (même ordre que `pouvoirs.periodiques`). */
+  minuteurs: number[];
+  /** Pas restants avant le prochain soin des ennemis proches. */
+  rechargeSoin: number;
   /** Id de l'unité qui le bloque, -1 si libre. */
   bloqueur: number;
   vivant: boolean;
@@ -130,6 +171,12 @@ export interface Unite {
   zone: ZoneHeros | null;
   /** Pas restants avant la prochaine tourelle, le prochain piège, le prochain soin (indices de MINUTEUR). */
   minuteurs: number[];
+  /** Pas restants de brûlure, et dégâts purs par seconde. */
+  brulure: number;
+  brulureDegats: number;
+  /** Pas restants avant de se noyer (0 = pas entraînée sous l'eau) et id du noyeur qui la tient (-1 sinon). */
+  noyade: number;
+  noyeur: number;
 }
 
 export interface Tour {
@@ -151,6 +198,11 @@ export interface Tour {
   /** Fraction de cadence en plus tant que `boostPas` > 0 (Ingéniosité). */
   boostCadence: number;
   boostPas: number;
+  /** Pas restants de désactivation (en feu) : la tour ne tire pas, ne révèle pas, ne construit pas. */
+  desactivee: number;
+  /** Pas restants de famine et fraction de cadence perdue (0,3 = −30 %). */
+  affamePas: number;
+  affameCadence: number;
   /** Pas restants avant la prochaine tourelle et le prochain piège de l'Atelier (indices de MINUTEUR). */
   minuteurs: number[];
 }
@@ -189,6 +241,10 @@ export interface ZoneDurable {
   effets: readonly EffetCoup[];
   critique: number;
   volants: boolean;
+  /** Révèle les furtifs de la zone. */
+  revele: boolean;
+  /** Dégâts purs par seconde aux unités alliées de la zone (nuage toxique) ; 0 = aucun. */
+  degatsAllies: number;
 }
 
 /** Tourelle construite par une tour ou un héros : tire seule jusqu'à la fin de sa vie. */
@@ -211,6 +267,7 @@ export interface PaquetActif {
   restants: number;
   intervalle: number;
   prochain: number;
+  elite: boolean;
 }
 
 export interface EtatVagues {
@@ -233,7 +290,7 @@ export interface EtatPartie {
   version: number;
   versionDonnees: number;
   niveau: Niveau;
-  config: ConfigPartie;
+  config: ConfigComplete;
   chemins: CheminCalcule[];
   pas: number;
   rng: number;

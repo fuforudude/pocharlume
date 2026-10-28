@@ -8,3 +8,6 @@ export const DIFFICULTES = {
 } as const satisfies Record<string, Difficulte>;
 
 export type IdDifficulte = keyof typeof DIFFICULTES;
+
+/** Les défis (Héroïque, Fer) se jouent avec les règles de cette difficulté, quelle que soit celle de la config. */
+export const DIFFICULTE_DES_DEFIS: IdDifficulte = 'matou';

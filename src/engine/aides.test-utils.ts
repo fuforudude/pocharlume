@@ -1,6 +1,6 @@
 // Outils réservés aux tests du moteur (suffixe .test-utils.ts : jamais importé par le jeu, donc absent du
 // build) : configuration type, cartes d'essai, avance rapide.
-import { ENNEMIS } from '../data/ennemis';
+import { ENNEMIS, type IdEnnemi } from '../data/ennemis';
 import { VERSION_DONNEES } from '../data/version';
 import type { DefEnnemi, IdFamille, Niveau, Vague, Voie } from './definitions';
 import { ajouterEnnemi } from './ennemis';
@@ -122,4 +122,17 @@ export function evenementsPendant(etat: EtatPartie, secondes: number): Evenement
 /** Nombre d'événements d'un type dans une liste. */
 export function compter(evenements: readonly Evenement[], type: Evenement['type']): number {
   return evenements.filter((e) => e.type === type).length;
+}
+
+/**
+ * Ennemi tiré de la table des données (mécaniques comprises), immobile sauf si `surcharges` donne une vitesse.
+ * `elite` en fait une version d'élite.
+ */
+export function ennemiDonnees(etat: EtatPartie, id: IdEnnemi, x: number, surcharges: Partial<DefEnnemi> = {}, chemin = 0, elite = false): Ennemi {
+  return ajouterEnnemi(etat, { ...(ENNEMIS[id] as DefEnnemi), vitesse: 0, ...surcharges }, id, chemin, x, elite);
+}
+
+/** Les ennemis vivants d'un type donné. */
+export function ennemisDe(etat: EtatPartie, type: string): Ennemi[] {
+  return etat.ennemis.filter((e) => e.vivant && e.type === type);
 }

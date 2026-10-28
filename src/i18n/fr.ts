@@ -1,5 +1,6 @@
 // Tous les textes affichés du jeu, en français. Une clé par texte, groupées par écran.
 import { frDieux } from './fr-dieux';
+import { frEnnemis } from './fr-ennemis';
 import { frMeta } from './fr-meta';
 import { frNiveaux } from './fr-niveaux';
 
@@ -16,6 +17,9 @@ export const fr = {
   'ennemi.mendiant': 'Mendiant',
   'ennemi.chien_errant': 'Chien Errant',
   'ennemi.boucher_vaudrelle': 'Le Boucher de Vaudrelle',
+
+  // Ennemis et boss des régions 2 à 5 (fr-ennemis.ts)
+  ...frEnnemis,
 
   // Tours communes
   'tour.grenier_des_griffes': 'Grenier des Griffes',
@@ -163,6 +167,7 @@ export const fr = {
   'refus.objet_utilise': 'Cet objet est déjà utilisé.',
   'refus.vies_pleines': 'Tes vies sont pleines : l’Herbe est gardée pour plus tard.',
   'refus.plus_de_vague': 'Il ne reste plus de vague.',
+  'refus.famille_interdite': 'Ce défi n’autorise pas ce type de tour.',
 
   // Partie : pause, orientation et fin
   'pause.titre': 'Pause',
