@@ -1,0 +1,48 @@
+# Index des sprites du jalon 3 (fichier de commentaires seulement : aucune directive). Les noms sont stables.
+#
+# ENNEMIS DES RÉGIONS 2 À 5 (32×32, ancre 16 30 aux pieds, de profil vers la droite ; animations repos, marche, attaque,
+# blesse, mort ; id du moteur avec _ remplacé par - : `spriteEnnemi`). Chacun a sa version d'élite `<nom>-elite` (même
+# recette, directive `sombre` : tout assombri, yeux rouges par le calque `yeux`).
+#   région 2   glaneur (ennemis-humains.txt), corbeau-noir (corbeau-noir.txt, volant), epouvantail (epouvantail.txt, + animation `releve`)
+#   région 3   porteur-torche, chasseur-sorcieres, delateur (ennemis-humains.txt)
+#   région 4   noyeur, pelerin-voile (ennemis-humains.txt), sangsue (sangsue.txt)
+#   région 5   rat-peste (rat-peste.txt), pestifere, medecin-peste (ennemis-humains.txt)
+#   élites     glaneur-elite corbeau-noir-elite epouvantail-elite porteur-torche-elite chasseur-sorcieres-elite delateur-elite
+#              noyeur-elite pelerin-voile-elite sangsue-elite rat-peste-elite pestifere-elite medecin-peste-elite
+#
+# BOSS (cadres de 64×64, ancre 32 61 : dessinés en 32×32 puis agrandis ×2 comme boucher-vaudrelle ; mêmes animations)
+#   la-faim (la-faim.txt)   juge-flammes (juge-flammes.txt : archimage du pack)
+#   dame-puits (dame-puits.txt : animations de plus `plonge` et `emerge`, jouées une fois)   mere-rats (mere-rats.txt)
+#
+# EFFETS (effets-jalon3.txt, sans contour ; `repos` en boucle, `impact` joué une fois)
+#   effet-nuage-toxique   48×48 ancre 24 24  repos (nuage qui tourne) + impact (le nuage se déploie à la mort d'un pestiféré)
+#   effet-brulure         32×32 ancre 16 24  repos : flammes de part et d'autre d'un soldat qui brûle
+#   effet-tour-feu        32×32 ancre 16 24  repos : brasier sur une tour (Juge des Flammes), à poser comme effet-ingeniosite
+#   effet-tour-affamee    32×32 ancre 16 24  repos : brume grise et gueule qui s'ouvre (La Faim : cadence −30 %)
+#   effet-plongee         32×32 ancre 16 24  impact : éclaboussure de la Dame du Puits (+ repos : un cadre)
+#
+# TUILES DES RÉGIONS 2 À 5 (16×16, ancre 0 0, sans contour ; tuiles-region<N>.txt)
+#   Les mêmes 21 noms que la région 1, préfixés `r<N>-` : r2-herbe-1..3, r2-chemin-1..2, r2-chemin-bord-n|e|s|o,
+#   r2-chemin-coin-ext-no|ne|se|so, r2-chemin-coin-int-no|ne|se|so, r2-boue-1..2, r2-paves-1..2 (idem r3-, r4-, r5-).
+#   Le rendu les choisit d'après `region` du visuel (`nomTuile` dans src/render/sol.ts) ; la région 1 garde les noms d'origine.
+#   Les zones `boue` et `paves` prennent le sens de la région : r2 terre calcinée / aire de battage brûlée ; r3 boue de suie /
+#   pavés noircis ; r4 eau stagnante / ponton pourri ; r5 bourbe verte / pavés moussus.
+#
+# DÉCOR DES RÉGIONS 2 À 5 (catégorie decor, ancre au pied ; les 32×32 sont aussi dans GRANDS_DECORS, src/data/niveaux/habillage.ts)
+#   région 2   32×32 arbre-calcine-1 arbre-calcine-2 meule-brulee chariot-brise     16×16 gerbes-brulees sillon fourche-brisee souche-calcinee
+#   région 3   32×32 bucher-braises echafaud maison-brulee-1 maison-brulee-2         16×16 cendres fagots torche-fichee cloche-fendue
+#   région 4   32×32 saule-marais-1 saule-marais-2 barque-echouee puits-noir         16×16 roseaux nenuphars souche-moussue feu-follet
+#   région 5   32×32 maison-condamnee-1 maison-condamnee-2 charrette-linceuls fosse-commune     16×16 croix-rouge linceul lanterne-peste tas-ossements
+#
+# FAMILIERS (familiers.txt : catégorie icone, 16×16, ancre 8 14 aux pieds, animation d'attente `repos` en boucle)
+#   familier-rat familier-crapaud familier-chouette familier-chauve-souris familier-luciole familier-lezard
+#   familier-araignee familier-corneille familier-furet familier-escargot familier-papillon-nuit familier-salamandre
+#
+# SKINS : pas de sprites, des palettes (src/render/palettes-skins.ts) : substitutions de couleurs appliquées au sprite de base.
+#   tours (la tour de base d'une famille et ses spécialisations)   skin_caserne_1..3 skin_tir_1..3 skin_magie_1..3 skin_artillerie_1..3
+#   héros (un par héros, id du héros)   skin_plume skin_charlie skin_pollen skin_suie skin_corbeau skin_mastoc skin_brise_os skin_rouage skin_lanterne
+#
+# ICÔNES (icones-jalon3.txt, 16×16 ancre 8 8 avec contour)
+#   icone-caisse-skins icone-caisse-familiers icone-eclat
+#   icone-rarete-commun icone-rarete-rare icone-rarete-epique icone-rarete-legendaire icone-rarete-mythique
+#   icone-defi-heroique icone-defi-fer

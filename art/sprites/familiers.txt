@@ -1,0 +1,248 @@
+# Familiers (jalon 3) : douze petites bêtes de 16×16, de profil vers la droite, avec contour, qui accompagnent un héros.
+# Catégorie icone (16×16), ancre aux pieds (8 14). Chacun a une animation d'attente `repos` en boucle de deux ou trois
+# cadres (respiration, battement d'ailes, lueur). Nommage : familier-<bête>. Les skins sont des palettes appliquées au
+# sprite de base (voir src/rendu/palettes-skins.ts) ; les familiers ont leur propre teinte, ils n'en changent pas.
+categorie icone
+palette commune
+taille 16 16
+ancre 8 14
+couleur S d4b088
+
+# Rat : poil terne, queue nue, oreille rose.
+sprite familier-rat
+origine 1 5
+anim repos 300
+cadre
+......pO.....
+.....pPPp....
+.oo.ppppkPP..
+o..ppppppPPP.
+.o.pPpppppp..
+...pppppppp..
+...p.p..p.p..
+cadre repos.0 decale 0 1
+
+# Crapaud : verruqueux, deux gros yeux dorés, gorge qui gonfle.
+sprite familier-crapaud
+origine 1 5
+anim repos 350
+cadre
+...EE..EE...
+..EyEEEyE...
+.EEkEEEkEE..
+EEHEEEEEEHE.
+EEEEEEEEEEEE
+.EEjjEEjjEE.
+..EE....EE..
+cadre repos.0 decale 0 1
+cadre
+...EE..EE...
+..EyEEEyE...
+.EEkEEEkEE..
+EEHEEEEEEHEE
+EEEEEEEEEEEE
+.EEjjjjjjEE.
+..EE....EE..
+
+# Chouette : plumage brun, grands yeux jaunes, aigrettes.
+sprite familier-chouette
+origine 2 3
+anim repos 400
+cadre
+.B......B...
+.BBBBBBBB...
+BByyBByyBB..
+BykyBykyBB..
+BBBFFFBBBB..
+.BoooooooB..
+.BoBoBoBoB..
+.BoooooooB..
+..BoOooOB...
+...OO.OO....
+cadre repos.0 duree 120
+cadre repos.0 duree 700
+retouche repos 1
+.
+.
+BBBBBBBBBB
+BBBkkBBkkB
+
+# Chauve-souris : ailes déployées, petits yeux rouges.
+sprite familier-chauve-souris
+origine 1 4
+anim repos 250
+cadre
+u..........u
+uu........uu
+uUu..uu..uUu
+uUUuuuuuuUUu
+.uUUuuuuUUu.
+..uuuxxuuu..
+...uuuuuu...
+....u..u....
+cadre
+...........
+.u........u.
+.uu..uu..uu.
+.uUuuuuuuUu.
+..uUUuuUUu..
+...uuxxuu...
+....uuuu....
+.....uu.....
+
+# Luciole : un petit corps sombre aux ailes pâles et un abdomen qui s'allume, avec son halo.
+sprite familier-luciole
+couleur 1 f7f75788
+couleur 2 f7f75844
+origine 2 4
+anim repos 300
+cadre
+.1111.......
+122221.UU..
+12FFFF2kUUk
+12FFFF2kuuk
+122221.kkk.
+.1111......
+cadre
+...........
+.22222..UU.
+2211122kUUk
+2111112kuuk
+.22222.kkk.
+...........
+
+# Lézard : écailles vertes, queue en fouet, ventre pâle.
+sprite familier-lezard
+origine 0 6
+anim repos 350
+cadre
+...........EE..
+..HHHH...EEyEE.
+.EEEEEEEEEEEEEE
+HEEHEEHEEjEEEE.
+.HH.HH..HH.HH..
+cadre
+...........EE..
+..HHH.....EEyEE
+HEEEEEEEEEEEEEE
+.EEHEEHEEjEEEE.
+.HH.HH..HH.HH..
+
+# Araignée : abdomen luisant à la marque rouge, huit pattes fines.
+sprite familier-araignee
+origine 1 5
+anim repos 250
+cadre
+.k..........k.
+..k..kkkk..k..
+k.kkkuuuukk.k.
+.kkuuxxuuukk..
+k.kkuuuuukk.k.
+..k.kkkkk.k...
+.k..k...k..k..
+cadre
+..k........k..
+.k..kkkkkk..k.
+k.kkkuuuukkk.k
+.kkuuxxuuukk..
+.k.kuuuuuk.k..
+k..k.kkkk..k.k
+...k..k..k....
+
+# Corneille : petit corbeau perché, bec gris, œil pâle.
+sprite familier-corneille
+origine 0 4
+anim repos 350
+cadre
+.........uuu...
+........uuuuuP.
+........uvuuPP.
+.......uuuuuP..
+..uuuuuuuuuu...
+.uuuUuuuuuuu...
+uuuuuUuuuuu....
+.uuuuuuuuu.....
+..uuuuuuu......
+....o..o.......
+cadre repos.0 decale 0 1
+
+# Furet : long, souple, le masque sombre sur le museau.
+sprite familier-furet
+origine 0 6
+anim repos 300
+cadre
+.........cc....
+.cc.....cckcc..
+.OOcccccOkOwcc.
+OOOOOOOOOOOOOc.
+.OO.OO...OO.OO.
+cadre
+.........cc....
+.cc.....cckcc..
+.OOcccccOkOwcc.
+.OOOOOOOOOOOOcc
+.OO.OO...OO.OO.
+
+# Escargot : coquille en spirale, corps gris-vert luisant, deux antennes.
+sprite familier-escargot
+origine 1 4
+anim repos 400
+cadre
+.........k.k.
+..NNNN...k.k.
+.NnnnnN..lll.
+NnNNNnN.llkl.
+NnNnNnNlllll.
+NnNNNnNllll..
+.NnnnNlllll..
+..NNNNlllllll
+cadre
+.........k.k.
+..NNNN...kk..
+.NnnnnN..lll.
+NnNNNnN.llkl.
+NnNnNnNlllll.
+NnNNNnNllll..
+.NnnnNlllll..
+..NNNNlllllll
+
+# Papillon de nuit : grandes ailes poudrées de gris, taches en œil, antennes en plume.
+sprite familier-papillon-nuit
+origine 1 3
+anim repos 220
+cadre
+....k....k....
+.....k..k.....
+UUU..uuuu..UUU
+UvUUuUuuUuUUvU
+UvvUuuuuuuUvvU
+.UvUuuuuuuUvU.
+..UUUuuuuUUU..
+...UUuuuuUU...
+....UU..UU....
+cadre
+...............
+.....k..k.....
+..UU..uuuu..UU.
+.UvUUuUuuUuUUvU
+.UvvUuuuuuuUvvU
+..UvUuuuuuUvU..
+...UUUuuuUUU...
+....UU....UU...
+
+# Salamandre : peau noire tachée d'orange, queue qui ondule, un souffle de braise sur le dos.
+sprite familier-salamandre
+origine 0 6
+anim repos 300
+cadre
+.........f.f...
+...f..f..kkkk..
+.kkkkkkkkkkykk.
+kokkokkkokkkkk.
+.kk.kk..kk.kk..
+cadre
+.........f.f...
+..f..f...kkkk..
+.kkkkkkkkkkykk.
+.kokkokkkokkkkk
+.kk.kk..kk.kk..
