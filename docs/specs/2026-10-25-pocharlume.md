@@ -429,6 +429,31 @@ Carreau perforant ; Mortier de Soufre, Nappe de soufre et Charge lourde.
 - Ajoute : région débloquée, défis réussis par niveau, collection (objets possédés et rangs), éclats, compteurs de
   garantie, skins et familiers équipés. Migration v3 vers v4 testée, sans perte.
 
+### Pose libre des tours et sols moins granuleux (changement du 2026-10-28)
+Demande de l'utilisateur pendant le jalon 3 : les socles fixes disparaissent.
+- **Grille de construction invisible** : chaque carte (32×18 tuiles) est découpée en cases de 2×2 tuiles (16×9
+  cases). Une tour se pose sur n'importe quelle case libre, centrée dans la case. La case est un peu plus grande que
+  la tour : deux tours voisines restent séparées par un écart visible. Il n'y a pas d'autre règle d'écartement.
+- Une case est interdite si l'une de ses tuiles est du chemin, porte un grand décor (arbre, maison, rocher, bûcher…)
+  ou est hors carte ; l'herbe, les fleurs et les petits cailloux ne bloquent pas. Le moteur reçoit la liste des cases
+  interdites avec le niveau (il ne lit pas l'habillage).
+- Le point de ralliement d'une caserne est placé par défaut sur le point du chemin le plus proche à sa portée ; une
+  case d'où aucun chemin n'est à portée de caserne reste constructible pour les autres familles.
+- À l'écran : rien n'est dessiné tant qu'on ne vise pas ; la case sous le doigt ou la souris s'éclaire (libre ou
+  interdite) et le menu en cercle s'ouvre sur une case libre. Cibles tactiles : une case fait au moins 44 px au zoom
+  du téléphone, sinon on zoome.
+- Les bots du simulateur choisissent parmi toutes les cases libres ; l'équilibrage des 50 niveaux se fait après ce
+  changement.
+- **Sols moins granuleux** : les tuiles de sol des 5 régions passent à de grands aplats avec une variation douce
+  (moins de pixels isolés, motifs plus larges, transitions herbe-chemin adoucies), en gardant la palette sombre.
+- Critères :
+  - [ ] Une tour se pose sur toute case libre de la grille et jamais sur une case interdite (tests moteur, y compris
+    rejeu) ; deux tours ne partagent jamais une case.
+  - [ ] Les 50 niveaux ont leurs cases interdites tirées du chemin et des grands décors (test).
+  - [ ] La case visée s'éclaire, la tour est centrée dans sa case, et à 812×375 une case fait au moins 44 px ou le
+    zoom le permet.
+  - [ ] Les sols des 5 régions sont redessinés (planche d'aperçu avant / après).
+
 ### Équilibrage du jalon 3
 - Les bandes de la région 1 s'appliquent à chacune des régions 2 à 5, pour les 3 dieux.
 - Défis : sur chaque région, le bot soigneux réussit entre 40 et 90 % des Héroïques et des Fer.
