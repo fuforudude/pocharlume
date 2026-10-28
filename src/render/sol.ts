@@ -9,6 +9,14 @@ import { TUILE } from './camera';
 /** Largeur du chemin dessiné, de part et d'autre de l'axe suivi par les ennemis (en tuiles) : 2 tuiles en tout. */
 export const DEMI_LARGEUR_CHEMIN = 1;
 
+/**
+ * Nom d'une tuile dans l'atlas selon la région du visuel : la région 1 garde les noms d'origine (`herbe-1`), les
+ * suivantes ont leur jeu préfixé (`r2-herbe-1`, `r3-chemin-bord-n`…). Voir art/sprites/tuiles-region<N>.txt.
+ */
+export function nomTuile(region: number, base: string): string {
+  return region <= 1 ? base : `r${String(Math.trunc(region))}-${base}`;
+}
+
 export interface GrilleSol {
   readonly largeur: number;
   readonly hauteur: number;
@@ -104,11 +112,12 @@ export function construireSol(carte: Carte, visuel: VisuelCarte, demiLargeur: nu
   for (let y = 0; y < hauteur; y++) {
     for (let x = 0; x < largeur; x++) {
       if (masque[y * largeur + x] === 1) {
-        tuiles.push(tuileChemin(masque, largeur, hauteur, x, y));
+        tuiles.push(nomTuile(visuel.region, tuileChemin(masque, largeur, hauteur, x, y)));
         continue;
       }
       const zone = visuel.zones.find((z) => x >= z.x && x < z.x + z.largeur && y >= z.y && y < z.y + z.hauteur);
-      tuiles.push(zone ? `${zone.sol}-${String(variante(x, y, [0.7]))}` : `herbe-${String(variante(x, y, [0.62, 0.86]))}`);
+      const base = zone ? `${zone.sol}-${String(variante(x, y, [0.7]))}` : `herbe-${String(variante(x, y, [0.62, 0.86]))}`;
+      tuiles.push(nomTuile(visuel.region, base));
     }
   }
   return { largeur, hauteur, tuiles };

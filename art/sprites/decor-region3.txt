@@ -1,0 +1,123 @@
+# Décor du Bourg des Bûchers (région 3) : bûcher aux braises, échafaud, maison brûlée, cendres, fagots, torche, cloche fendue.
+# Comme le décor du village : avec contour, ancre au pied ; les grands objets font 32×32 (liste GRANDS_DECORS dans
+# src/data/niveaux/habillage.ts), les petits 16×16.
+categorie decor
+palette commune
+taille 32 32
+ancre 16 30
+
+# Bûcher : un poteau noirci, la chaîne qui pend, les fagots empilés et des braises encore vives.
+sprite bucher-braises
+origine 6 6
+.........d..........
+.........db.........
+.........d..........
+.........d..........
+.........d..........
+.........dp.........
+.........dp.........
+.........d..........
+.........d..........
+......b..d..b.......
+....bBdbBdBdbB......
+...dbBbdBbdbBbd.....
+..bBdbBdbbdBdbBb....
+.dbBbdBbdBbdbBbBd...
+dbBdBbdBbdbBdbBdbd..
+dBbefBdbBefdBbBeBbd.
+drKeFeKdKeFeKdeFeKd
+.kKeeKKKKeeKKKKeeKk.
+..gggggggggggggggg..
+
+# Échafaud : une estrade de planches, ses marches, un poteau et une corde qui pend.
+sprite echafaud
+origine 2 6
+......dddddddddddd.......
+......dbd........d.......
+......db.........B.......
+......db.........B.......
+......db.........B.......
+......db........BB.......
+......db.........B.......
+......db..................
+dddddddddddddddddddddddddd
+dBbBbBbBbBbBbBbBbBbBbBbBBd
+dbbbbbbbbbbbbbbbbbbbbbbbbd
+dBd..dBd..dBd..dBd..dBd..d
+ddbd.db...db...db...db...d
+.bBd.db...db...db...db....
+dbBd.dd...dd...dd...dd....
+
+# Maison brûlée : les murs noircis debout, la charpente effondrée, la lueur d'une fenêtre sur les braises.
+sprite maison-brulee-1
+origine 3 12
+.......k......k......
+......kdk....kdk.k...
+.....kdbdk..kdbdk....
+...kkdbKbdkkdKbKdk...
+..kdbKKbdKddKbKKdbk..
+.kdKKbdKKbbKKdbKKbdk.
+.kdKKkkKKdbKKkkKKKdk.
+.kdKKkfkKKKdKkfkKKdk.
+.kbKKkkkKbKKdkkkKKbk.
+.kdKKKKKKbKKKKKKKdKk.
+.kdKbKKKdKKKKbKKKKdk.
+.kgKKKKKKKKKKKKKKKgk.
+ggpggggggggggggggggpg
+
+sprite maison-brulee-2
+derive maison-brulee-1 miroir decale -1 0
+
+sprite cendres
+taille 16 16
+ancre 8 15
+contour non
+origine 2 10
+..gg.gg...
+.gKgKgKKg.
+gKKuKKgKKg
+.gKKKKuKg.
+
+sprite fagots
+taille 16 16
+ancre 8 15
+origine 2 6
+.d.d..d.
+dbdbddbd
+bBbBbbBb
+dbdbddbd
+BbBdbBbd
+.dbdbdb.
+
+sprite torche-fichee
+taille 16 16
+ancre 8 15
+origine 5 1
+..F..
+.FyF.
+.fyFf
+.xFfx
+..bB.
+..db.
+..db.
+..db.
+..db.
+..db.
+..db.
+.Mdb.
+MMMMM
+
+sprite cloche-fendue
+taille 16 16
+ancre 8 15
+origine 3 3
+..dBBd..
+..dBBd..
+.dBOOBd.
+dBOOOOBd
+dBOkOOBd
+dBOkOOBd
+dBOOkOBd
+dBOOOOBd
+dBBBBBBd
+.kddddk.
