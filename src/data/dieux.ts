@@ -168,7 +168,7 @@ const pollen: DefDieu = {
   bonus: {
     famille: 'artillerie',
     pvSoldats: 0,
-    cadence: 0,
+    cadence: 0.15,
     chanceCritique: 0,
     prix: -0.1,
     effets: [],
