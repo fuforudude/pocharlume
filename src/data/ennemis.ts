@@ -156,7 +156,7 @@ export const ENNEMIS = {
     cadence: 1.3,
     coutVies: 1,
     prime: 11,
-    pouvoirs: { degatsHeros: 2 },
+    pouvoirs: { degatsHeros: 1.5 },
   }),
   /** Furtif : invisible des tours, soldats et héros qui ne révèlent pas. */
   delateur: ennemi({ nom: 'ennemi.delateur', pv: 30, vitesse: 1.3, furtif: true, degats: [1, 2], cadence: 1, coutVies: 1, prime: 8 }),
@@ -190,7 +190,7 @@ export const ENNEMIS = {
     cadence: 1.4,
     coutVies: 1,
     prime: 11,
-    pouvoirs: { noyade: { delai: 3 } },
+    pouvoirs: { noyade: { delai: 5 } },
   }),
   /** Résistance magique 60 %. */
   pelerin_voile: ennemi({
@@ -259,7 +259,7 @@ export const ENNEMIS = {
     cadence: 1.2,
     coutVies: 1,
     prime: 10,
-    pouvoirs: { nuage: { rayon: 1.5, duree: 3, degats: 6 } },
+    pouvoirs: { nuage: { rayon: 1.5, duree: 3, degats: 4 } },
   }),
   /** Soigne de 5 % de leurs PV maximaux les ennemis proches toutes les 4 s. */
   medecin_peste: ennemi({
@@ -271,7 +271,7 @@ export const ENNEMIS = {
     cadence: 1.3,
     coutVies: 1,
     prime: 14,
-    pouvoirs: { soin: { rayon: 2.5, quantite: 0.03, cadence: 4 } },
+    pouvoirs: { soin: { rayon: 2.5, quantite: 0.02, cadence: 5 } },
   }),
   /** Pond un groupe de 4 Rats de Peste toutes les 6 s. */
   mere_rats: ennemi({

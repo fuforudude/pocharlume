@@ -20,7 +20,7 @@ export const EQUILIBRAGE = {
    * Dans un niveau qui compte des volants ou des furtifs, nombre de fois où chaque ennemi ordinaire figure dans la liste du tirage :
    * à 2, un volant ou un furtif est tiré deux fois moins souvent qu'un ennemi ordinaire.
    */
-  repetitionOrdinaires: 4,
+  repetitionOrdinaires: 5,
   /** Valeur d'un point de vie (effectif) de bloqueur, en DPS équivalent. */
   valeurBlocageParPv: 0.013,
   /** Vitesse (tuiles/s) dont le facteur de menace vaut 1. */

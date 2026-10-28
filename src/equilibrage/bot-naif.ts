@@ -6,7 +6,7 @@ import { casesLibres, centreCase, creerGenerateur, tirer, tourSurCase, validerAc
 import type { Action, CaseGrille, EtatPartie, Generateur, IdFamille, Voie } from '../engine';
 import { ENNEMIS } from '../data/ennemis';
 import { FAMILLES } from '../data/tours';
-import { distance, echantillonner, type Echantillon } from './geometrie';
+import { distance, echantillonner, PAS_ECHANTILLON, type Echantillon } from './geometrie';
 import type { Bot } from './simulation';
 
 export interface OptionsNaif {
@@ -20,23 +20,29 @@ function choisir<T>(g: Generateur, liste: readonly T[]): T | undefined {
   return liste[Math.floor(tirer(g) * liste.length)];
 }
 
+/** Nombre d'emplacements que le débutant juge bons : il y construit, puis il améliore. */
+const EMPLACEMENTS_DEBUTANT = 16;
+
+/** Distance (en tuiles) à laquelle le débutant juge qu'une case « voit » le chemin. */
+const PORTEE_VUE = 3.5;
+
 /**
- * Toutes les cases constructibles du niveau par distance croissante au chemin, avec un bruit : « proches du chemin » sans être
- * parfaitement triées.
+ * Toutes les cases constructibles du niveau, les mieux placées d'abord : un débutant construit là où le chemin passe le plus près et le
+ * plus longtemps (virages, boucles), à vue d'œil, donc avec un bruit. Il ne connaît pas les vagues : aucun chemin n'est pesé.
  */
 function ordreDesCases(etat: EtatPartie, g: Generateur, echantillons: readonly Echantillon[]): CaseGrille[] {
   const notes = casesLibres({ niveau: etat.niveau, tours: [] }).map((c) => {
     const centre = centreCase(c.cx, c.cy);
-    let min = Infinity;
-    for (const e of echantillons) min = Math.min(min, distance(e, centre));
-    return { c, note: min + tirer(g) * 1.5 };
+    let vue = 0;
+    for (const e of echantillons) if (distance(e, centre) <= PORTEE_VUE) vue += PAS_ECHANTILLON;
+    return { c, note: -vue + tirer(g) * 4 };
   });
   return notes.sort((a, b) => a.note - b.note).map((n) => n.c);
 }
 
 export function creerBotNaif(options: OptionsNaif): Bot {
   const g = creerGenerateur(options.graine);
-  const goutDeConstruire = options.goutDeConstruire ?? 0.7;
+  const goutDeConstruire = options.goutDeConstruire ?? 0.95;
   let ordre: CaseGrille[] | null = null;
   /** Achat voulu mais pas encore payable : le bot économise plutôt que d'en changer. */
   let envie: Action | null = null;
@@ -60,7 +66,8 @@ export function creerBotNaif(options: OptionsNaif): Bot {
     if (!ordre) return null;
     const guetteurs = envieGuetteurs(etat);
     if (guetteurs) return guetteurs;
-    const libres = ordre.filter((c) => !tourSurCase(etat, c.cx, c.cy));
+    // Un débutant n'occupe que les emplacements qui lui paraissent bons ; une fois ceux-là pris, il améliore ses tours.
+    const libres = ordre.slice(0, EMPLACEMENTS_DEBUTANT).filter((c) => !tourSurCase(etat, c.cx, c.cy));
     const ameliorables = etat.tours.filter((t) => t.famille !== 'divine' && t.niveau < 4);
     const construire = libres.length > 0 && (ameliorables.length === 0 || tirer(g) < goutDeConstruire);
     if (construire) {
