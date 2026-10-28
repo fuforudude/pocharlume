@@ -111,8 +111,11 @@ describe('vues de la boutique', () => {
 });
 
 describe('modes d’un niveau : Normal, Héroïque, Fer', () => {
-  const niveau1 = REGION1[0];
-  if (!niveau1) throw new Error('niveau 1 absent');
+  const premier = REGION1[0];
+  if (!premier) throw new Error('niveau 1 absent');
+  // Un niveau sans familles imposées : les niveaux de la campagne en ont tous, on retire celles du premier.
+  const sansFer = Object.fromEntries(Object.entries(premier.niveau).filter(([cle]) => cle !== 'defiFer')) as NiveauCampagne['niveau'];
+  const niveau1: NiveauCampagne = { ...premier, niveau: sansFer };
   const avecFer: NiveauCampagne = { ...niveau1, niveau: { ...niveau1.niveau, defiFer: { familles: ['tir', 'magie'] } } };
 
   function avecEtoiles(etoiles: number, defis: Sauvegarde['meta']['defis'] = {}): Sauvegarde {

@@ -6,7 +6,7 @@ import type { NiveauCampagne } from '../visuel';
 import { assemblerNiveau } from './assemblage';
 import type { PlanNiveau } from './plan-niveau';
 import { PLANS_REGIONS } from './plans';
-import type { TextesNiveau } from './region1';
+import { REGION1, TEXTES_REGION1, type TextesNiveau } from './region1';
 import { VAGUES_REGION1 } from './vagues-region1';
 import { VAGUES_REGION2 } from './vagues-region2';
 import { VAGUES_REGION3 } from './vagues-region3';
@@ -31,7 +31,7 @@ export function construireRegion(plans: readonly PlanNiveau[], vagues: readonly 
 }
 
 /** Les niveaux de chaque région, dans l'ordre (indice 0 = région 1), chacun avec son numéro de campagne. */
-export const REGIONS: readonly (readonly NiveauCampagne[])[] = PLANS_REGIONS.map((plans, i) => construireRegion(plans, VAGUES_REGIONS[i] ?? []));
+export const REGIONS: readonly (readonly NiveauCampagne[])[] = PLANS_REGIONS.map((plans, i) => (i === 0 ? REGION1 : construireRegion(plans, VAGUES_REGIONS[i] ?? [])));
 
 /** Les 50 niveaux des régions 1 à 5, dans l'ordre. */
 export const CAMPAGNE: readonly NiveauCampagne[] = REGIONS.flat();
@@ -41,6 +41,6 @@ export function niveauDeCampagne(numero: number): NiveauCampagne | undefined {
   return CAMPAGNE[numero - 1];
 }
 
-export const TEXTES_REGIONS: readonly (readonly TextesNiveau[])[] = PLANS_REGIONS.map((plans) =>
-  plans.map((p) => ({ numero: p.numero, nom: p.nom, ambiance: p.ambiance })),
+export const TEXTES_REGIONS: readonly (readonly TextesNiveau[])[] = PLANS_REGIONS.map((plans, i) =>
+  i === 0 ? TEXTES_REGION1 : plans.map((p) => ({ numero: p.numero, nom: p.nom, ambiance: p.ambiance })),
 );

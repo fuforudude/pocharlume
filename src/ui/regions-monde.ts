@@ -3,8 +3,9 @@
 // seulement ici, que la carte apprend l'existence d'une région : brancher une région livrée par la tâche « niveaux »
 // (src/data/niveaux/) se fait en remplaçant son `contenu: null` par ses données, sans toucher aux écrans.
 import { NIVEAUX_PAR_REGION } from '../data/meta';
-import { NOEUDS_REGION1, TRACE_REGION1, type NoeudNiveau } from '../data/niveaux/carte-du-monde';
-import { REGION1, TEXTES_REGION1, type TextesNiveau } from '../data/niveaux/region1';
+import { REGIONS, TEXTES_REGIONS } from '../data/niveaux/campagne';
+import { NOEUDS_REGIONS, TRACES_REGIONS, type NoeudNiveau } from '../data/niveaux/carte-du-monde';
+import type { TextesNiveau } from '../data/niveaux/region1';
 import type { NiveauCampagne } from '../data/visuel';
 import type { Point } from '../engine';
 import { tCle } from '../i18n';
@@ -37,13 +38,25 @@ function region(numero: number, nom: CleTexte, contenu: ContenuRegion | null): R
   return { numero, nom, premierNiveau: (numero - 1) * NIVEAUX_PAR_REGION + 1, contenu };
 }
 
+/**
+ * Le contenu de la région `numero` (1 à 5) : ses niveaux et leurs textes (numéros de campagne), ses nœuds (numéros 1 à 10) et son
+ * tracé. Le décor du fond n'existe encore que pour la région 1 : les autres ont un fond sans décor.
+ */
+function contenuDeRegion(numero: number): ContenuRegion {
+  const niveaux = REGIONS[numero - 1];
+  const noeuds = NOEUDS_REGIONS[numero - 1];
+  const trace = TRACES_REGIONS[numero - 1];
+  const textes = TEXTES_REGIONS[numero - 1];
+  if (!niveaux || !noeuds || !trace || !textes) throw new Error(`Région ${String(numero)} : données de campagne manquantes`);
+  return { niveaux, noeuds, trace, decor: numero === 1 ? DECOR_MONDE_REGION1 : [], textes };
+}
+
 export const REGIONS_MONDE: readonly RegionMonde[] = [
-  region(1, 'region.1', { niveaux: REGION1, noeuds: NOEUDS_REGION1, trace: TRACE_REGION1, decor: DECOR_MONDE_REGION1, textes: TEXTES_REGION1 }),
-  // Régions 2 à 5 : à brancher quand la tâche « niveaux » du jalon 3 livre leurs 40 niveaux, leurs cartes du monde et leurs textes.
-  region(2, 'region.2', null),
-  region(3, 'region.3', null),
-  region(4, 'region.4', null),
-  region(5, 'region.5', null),
+  region(1, 'region.1', contenuDeRegion(1)),
+  region(2, 'region.2', contenuDeRegion(2)),
+  region(3, 'region.3', contenuDeRegion(3)),
+  region(4, 'region.4', contenuDeRegion(4)),
+  region(5, 'region.5', contenuDeRegion(5)),
 ];
 
 /** Niveaux des régions d'avant : ce qu'on ajoute au numéro d'un nœud de la région pour avoir le niveau de campagne. */

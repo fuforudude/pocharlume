@@ -33,12 +33,17 @@ vi.mock('../render/carte-monde', () => ({
 
 const ATLAS = { iconeUrl: () => 'icone.png', sprite: () => undefined } as unknown as AtlasRendu;
 
+/** Le niveau sans ses familles imposées (les niveaux de la campagne en ont tous un). */
+function sansFer(niveau: NiveauCampagne['niveau']): NiveauCampagne['niveau'] {
+  return Object.fromEntries(Object.entries(niveau).filter(([cle]) => cle !== 'defiFer')) as NiveauCampagne['niveau'];
+}
+
 /** Une région de la campagne : les niveaux de la région 1 renumérotés à partir de `premier`, avec le défi Fer sur certains. */
 function regionCopiee(numero: number, premier: number, livree: boolean): RegionMonde {
   const niveaux: NiveauCampagne[] = REGION1.map((n, i) => ({
     ...n,
     numero: premier + i,
-    niveau: { ...n.niveau, ...(i % 2 === 0 ? { defiFer: { familles: ['tir', 'caserne'] as [string, string] } } : {}) },
+    niveau: i % 2 === 0 ? { ...n.niveau, defiFer: { familles: ['tir', 'caserne'] as [string, string] } } : sansFer(n.niveau),
   }));
   return {
     numero,
