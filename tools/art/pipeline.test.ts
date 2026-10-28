@@ -115,6 +115,39 @@ b
     expect(lettres(cadre(sprites.get('habille'), 'repos', 1))[1]).toBe('..b.');
   });
 
+  it('assombrit une version d’élite (sombre) mais pas son calque yeux, et reprend la planche et la recoloration de son modèle', () => {
+    const planche = nouvelleImage(8, 4);
+    const c = { ...coucheVide(8, 4), pixels: planche.pixels };
+    ecrirePixel(c, 0, 3, 0x808080ff);
+    ecrirePixel(c, 1, 3, 0x123456ff);
+    const sprites = dessiner(`${ENTETE}
+sprite base
+minifolks x.png
+recolore 123456=b
+calque yeux 1 0
+.
+anim repos
+cadre mf 0.0 + yeux
+cadre repos.0 decale 0 -1
+
+sprite elite
+modele base
+sombre
+calque yeux 1 0
+a
+`, planche);
+    const base = cadre(sprites.get('base'));
+    const elite = cadre(sprites.get('elite'));
+    expect(lirePixel(base, 0, 3)).toBe(0x808080ff);
+    // 128 × (0,52 ; 0,5 ; 0,6) : l'élite est plus sombre ; le vert du modèle (recolore) est repris puis assombri.
+    expect(lirePixel(elite, 0, 3)).toBe(0x43404dff);
+    expect(lirePixel(elite, 1, 3)).toBe(0x008000ff);
+    expect(lettres(elite)[0]).toBe('.a..');
+    expect(lettres(base)[0]).toBe('....');
+    // Un cadre repris d'un autre cadre n'est pas assombri une seconde fois.
+    expect(lirePixel(cadre(sprites.get('elite'), 'repos', 1), 0, 2)).toBe(0x43404dff);
+  });
+
   it('rogne le cadre d’un autre sprite de taille différente (rogne x y l h)', () => {
     const sprites = dessiner(`${ENTETE}
 sprite grand

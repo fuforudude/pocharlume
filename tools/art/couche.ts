@@ -104,6 +104,19 @@ export function recolorer(c: Couche, table: ReadonlyMap<number, number>, zone: r
   return sortie;
 }
 
+/** Facteurs rouge, vert, bleu des élites : plus sombre, avec un léger penchant froid. */
+export const FACTEURS_SOMBRE: readonly [number, number, number] = [0.52, 0.5, 0.6];
+
+/** Assombrit tous les pixels opaques (version d'élite) ; l'alpha et le masque d'effacement sont conservés. */
+export function assombrir(c: Couche): Couche {
+  const sortie: Couche = { ...c, pixels: c.pixels.slice(), efface: c.efface.slice() };
+  for (let i = 0; i < sortie.pixels.length; i += 4) {
+    if ((sortie.pixels[i + 3] ?? 0) === 0) continue;
+    for (let k = 0; k < 3; k++) sortie.pixels[i + k] = Math.round((sortie.pixels[i + k] ?? 0) * (FACTEURS_SOMBRE[k] ?? 1));
+  }
+  return sortie;
+}
+
 /** Pose `dessus` sur `dessous` (même taille) : pixels opaques remplacés, pixels effacés vidés. */
 export function superposer(dessous: Couche, dessus: Couche): Couche {
   const sortie: Couche = { ...dessous, pixels: dessous.pixels.slice(), efface: dessous.efface.slice() };

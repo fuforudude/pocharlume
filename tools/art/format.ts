@@ -17,7 +17,11 @@
 //   recolore 4058c0=a 6098e8=#5a2a1a              table de recoloration des cadres Minifolks
 //   derive soldat-grange couleurs o=u            reprend les cadres finis d'un autre sprite, transformés
 //   modele soldat-grange            reprend les animations et calques d'un autre sprite comme recette : en
-//                                   redéfinissant un calque (tête, arme…), tous les cadres qui l'utilisent changent
+//                                   redéfinissant un calque (tête, arme…), tous les cadres qui l'utilisent changent.
+//                                   La planche Minifolks et la recoloration du modèle sont reprises (les siennes passent devant).
+//   sombre                          version d'élite : la planche, les calques et les grilles que ce sprite compose sont
+//                                   assombris (teinte froide) ; le calque nommé `yeux` garde ses couleurs (yeux rouges) et
+//                                   les cadres repris d'un autre cadre ne sont pas assombris deux fois
 //
 //   calque fourche [x y]            grille réutilisable, posée à l'origine + (x, y) (puis `decale`)
 //   ..k
@@ -112,6 +116,8 @@ export interface Reglages {
   recolore: (readonly [JetonCouleur, JetonCouleur])[];
   derive: { readonly sprite: string; readonly operations: readonly Operation[] } | null;
   modele: string | null;
+  /** Version d'élite : tout ce que ce sprite compose (planche, calques, grilles) est assombri, sauf le calque `yeux`. */
+  sombre: boolean;
   /** Points nommés du cadre (poste du tireur, départ des projectiles…), en pixels du cadre. */
   points: Map<string, readonly [number, number]>;
 }
@@ -131,9 +137,9 @@ export const DUREE_DEFAUT = 120;
 const ANIMS_UNIQUES = new Set(['attaque', 'blesse', 'mort', 'competence', 'impact']);
 const MOTS_CLES = new Set([
   'categorie', 'taille', 'palette', 'couleur', 'ancre', 'origine', 'contour', 'agrandi', 'point', 'minifolks', 'recolore',
-  'derive', 'modele', 'calque', 'sprite', 'anim', 'cadre', 'retouche',
+  'derive', 'modele', 'sombre', 'calque', 'sprite', 'anim', 'cadre', 'retouche',
 ]);
-const REGLAGES = new Set(['categorie', 'taille', 'palette', 'couleur', 'ancre', 'origine', 'contour', 'agrandi', 'point']);
+const REGLAGES = new Set(['categorie', 'taille', 'palette', 'couleur', 'ancre', 'origine', 'contour', 'agrandi', 'point', 'sombre']);
 const CATEGORIES = new Set(['tour', 'unite', 'ennemi', 'projectile', 'effet', 'tuile', 'decor', 'icone']);
 /** Caractères réservés : ils ne peuvent pas désigner une couleur de palette. */
 export const TRANSPARENT = '.';
@@ -162,6 +168,7 @@ function reglagesParDefaut(): Reglages {
     recolore: [],
     derive: null,
     modele: null,
+    sombre: false,
     points: new Map(),
   };
 }
@@ -436,6 +443,9 @@ export function lireSprites(texte: string, fichier: string): SpriteSource[] {
       }
       case 'modele':
         enCours().modele = args[0] ?? '';
+        break;
+      case 'sombre':
+        enCours().sombre = true;
         break;
       case 'calque': {
         const nom = args[0] ?? '';
