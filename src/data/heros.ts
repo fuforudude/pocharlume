@@ -74,6 +74,7 @@ const suie = heros('suie', 'plume', {
   armure: 0,
   vitesse: 2.2,
   portee: 1.8,
+  zone: { rayon: 0.7, effets: [] },
   capacites: { execution: 0.2 },
   competences: [
     ordinaire('lame_courte', { degats: [0.08, 0.16, 0.24] }),
@@ -94,7 +95,7 @@ const corbeau = heros('corbeau', 'plume', {
   portee: 3.6,
   capacites: {
     ignoreArmure: 0.5,
-    distance: { portee: 3.6, degats: [14, 22], cadence: 1, typeDegats: 'physique', volants: true, effets: [] },
+    distance: { portee: 3.6, degats: [14, 22], cadence: 0.3, typeDegats: 'physique', volants: true, effets: [] },
   },
   competences: [
     ordinaire('oeil_noir', { portee: [0.4, 0.8, 1.2] }),
@@ -134,6 +135,7 @@ const mastoc = heros('mastoc', 'charlie', {
   vitesse: 1.2,
   portee: 1.8,
   capacite: 3,
+  zone: { rayon: 0.7, effets: [] },
   competences: [
     ordinaire('mur_de_chair', { pv: [0.1, 0.2, 0.3] }),
     ordinaire('cri_de_defi', { capacite: [0, 1, 2], portee: [0.2, 0.3, 0.4] }),
@@ -151,6 +153,7 @@ const briseOs = heros('brise_os', 'charlie', {
   armure: 0,
   vitesse: 1.6,
   portee: 1.8,
+  zone: { rayon: 0.7, effets: [] },
   capacites: { rage: 0.9 },
   competences: [
     ordinaire('colere', { rage: [0.2, 0.4, 0.6] }),
@@ -196,7 +199,7 @@ const rouage = heros('rouage', 'pollen', {
   vitesse: 1.4,
   portee: 3,
   capacites: {
-    distance: { portee: 3, degats: [8, 12], cadence: 1.2, typeDegats: 'physique', volants: false, effets: [] },
+    distance: { portee: 3, degats: [8, 12], cadence: 0.2, typeDegats: 'physique', volants: false, effets: [] },
     ouvrage: {
       constructeur: {
         tourelle: {
@@ -238,7 +241,7 @@ const lanterne = heros('lanterne', 'pollen', {
   vitesse: 1.5,
   portee: 3,
   capacites: {
-    distance: { portee: 3, degats: [10, 15], cadence: 1.4, typeDegats: 'magique', volants: true, effets: [] },
+    distance: { portee: 3, degats: [10, 15], cadence: 0.2, typeDegats: 'magique', volants: true, effets: [] },
     soin: { rayon: 2.5, quantite: 0.08, cadence: 3 },
   },
   competences: [
