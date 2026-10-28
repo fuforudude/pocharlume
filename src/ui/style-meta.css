@@ -626,6 +626,600 @@
   color: #1a1208;
 }
 
+/* --- Carte du monde : régions (jalon 3) --- */
+
+.carte-regions {
+  position: absolute;
+  top: calc(max(6px, env(safe-area-inset-top)) + 50px);
+  left: max(6px, env(safe-area-inset-left));
+  right: max(6px, env(safe-area-inset-right));
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.carte-regions > * {
+  pointer-events: auto;
+}
+
+.bouton.region-fleche {
+  font-size: 26px;
+  padding: 0;
+}
+
+.bouton.region-puce {
+  min-width: var(--cible);
+  padding: 0;
+  font-size: 16px;
+}
+
+.bouton.region-puce .cadenas {
+  position: absolute;
+  right: 1px;
+  bottom: 1px;
+  width: 16px;
+  height: 16px;
+}
+
+.region-nom {
+  min-width: 0;
+  max-width: 300px;
+  padding: 4px 8px;
+  box-sizing: border-box;
+  background: var(--panneau);
+  border: 2px solid var(--bord);
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.25;
+  text-align: left;
+  pointer-events: none;
+}
+
+.region-nom.refus {
+  border-color: var(--sang);
+  color: var(--sang);
+}
+
+.carte-region-vide {
+  position: absolute;
+  left: 50%;
+  top: 55%;
+  transform: translate(-50%, -50%);
+  max-width: min(420px, calc(100% - 32px));
+  margin: 0;
+  padding: 10px 14px;
+  background: var(--panneau);
+  border: 2px solid var(--bord);
+  border-radius: 6px;
+  font-size: 14px;
+  text-align: center;
+  color: var(--texte-doux);
+}
+
+.carte-region-vide[hidden] {
+  display: none;
+}
+
+/* --- Fiche d'un niveau : modes Normal, Héroïque, Fer --- */
+
+.modes {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+.bouton.mode {
+  flex: 1;
+  min-width: 0;
+  gap: 4px;
+  padding: 2px 4px;
+  font-size: 13px;
+}
+
+.bouton.mode .icone-mode {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.bouton.mode.reussi {
+  border-color: var(--or);
+}
+
+.bouton.mode .coche {
+  color: var(--or);
+}
+
+.defi-regles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px 8px;
+  background: rgba(40, 30, 26, 0.7);
+  border: 2px solid var(--bord);
+  border-radius: 6px;
+  text-align: left;
+}
+
+.defi-regles[hidden],
+.difficultes[hidden] {
+  display: none;
+}
+
+.defi-regles p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.defi-regles .defi-prime {
+  color: var(--or);
+}
+
+/* --- Caisses --- */
+
+.caisses {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.caisse {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 8px;
+  background: rgba(40, 30, 26, 0.7);
+  border: 2px solid var(--bord);
+  border-radius: 6px;
+}
+
+.caisse-tete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.caisse-tete .icone {
+  width: 48px;
+  height: 48px;
+  flex: none;
+}
+
+.caisse .noms {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.caisse .nom {
+  font-size: 15px;
+  font-weight: bold;
+  color: var(--or);
+}
+
+.caisse .desc {
+  font-size: 11px;
+  color: var(--texte-doux);
+}
+
+.chances {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 6px;
+}
+
+.chance {
+  font-size: 12px;
+}
+
+.garantie {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--texte-doux);
+}
+
+.garantie-texte {
+  min-width: 0;
+}
+
+.bouton.ouvrir {
+  align-self: stretch;
+  font-size: 15px;
+}
+
+.rarete-commun {
+  --couleur-rarete: #b8a888;
+}
+
+.rarete-rare {
+  --couleur-rarete: #5fa8e8;
+}
+
+.rarete-epique {
+  --couleur-rarete: #b878e8;
+}
+
+.rarete-legendaire {
+  --couleur-rarete: #e8a030;
+}
+
+.rarete-mythique {
+  --couleur-rarete: #e85050;
+}
+
+.chance.rarete-commun,
+.chance.rarete-rare,
+.chance.rarete-epique,
+.chance.rarete-legendaire,
+.chance.rarete-mythique {
+  color: var(--couleur-rarete);
+}
+
+/* La révélation : la caisse tremble, puis ce qu'elle contenait apparaît. */
+
+.revelation {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(8, 6, 8, 0.88);
+}
+
+.revelation .ouverture {
+  position: absolute;
+  animation: ouverture-caisse 0.7s ease-in-out both;
+}
+
+.revelation .ouverture .icone {
+  width: 96px;
+  height: 96px;
+}
+
+.revelation .resultat,
+.revelation > .bouton {
+  animation: revele 0.3s ease-out 0.7s both;
+}
+
+.objet-revele {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.objet-revele .icone {
+  width: 96px;
+  height: 96px;
+  filter: drop-shadow(0 0 10px var(--couleur-rarete));
+}
+
+.objet-revele .badge {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 32px;
+  height: 32px;
+}
+
+.revelation .resultat {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.revelation .lignes {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+}
+
+.revelation .nom-revele {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.revelation .rarete {
+  font-size: 15px;
+  color: var(--couleur-rarete);
+}
+
+.revelation .statut,
+.revelation .eclats-gagnes,
+.revelation .garantie-jouee {
+  font-size: 13px;
+}
+
+.revelation .eclats-gagnes {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--or);
+}
+
+.revelation .eclats-gagnes .petite {
+  width: 16px;
+  height: 16px;
+}
+
+.revelation .garantie-jouee {
+  color: var(--or);
+}
+
+@keyframes ouverture-caisse {
+  0% {
+    transform: rotate(0) scale(1);
+    opacity: 1;
+  }
+  15%,
+  45% {
+    transform: rotate(-8deg) scale(1.05);
+  }
+  30%,
+  60% {
+    transform: rotate(8deg) scale(1.1);
+  }
+  85% {
+    transform: rotate(0) scale(1.3);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes revele {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .revelation .ouverture,
+  .revelation .resultat,
+  .revelation > .bouton {
+    animation: none;
+  }
+
+  .revelation .ouverture {
+    display: none;
+  }
+}
+
+/* --- Collection --- */
+
+.collection-corps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.collection-onglets {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.collection-compte {
+  font-size: 12px;
+  color: var(--texte-doux);
+}
+
+.collection-onglets .vers-caisses {
+  margin-left: auto;
+}
+
+.collection-grille {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.objet-collection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 4px 6px;
+  background: rgba(40, 30, 26, 0.7);
+  border: 2px solid var(--couleur-rarete, var(--bord));
+  border-radius: 6px;
+}
+
+.objet-collection.equipe {
+  box-shadow: 0 0 0 2px rgba(232, 200, 96, 0.45);
+}
+
+.objet-collection .tete,
+.porteur .tete {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.objet-collection .icone {
+  width: 48px;
+  height: 48px;
+  flex: none;
+}
+
+.icone.silhouette {
+  filter: brightness(0) opacity(0.55);
+}
+
+.objet-collection .noms {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.objet-collection .nom,
+.porteur .nom {
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.objet-collection .rarete {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--couleur-rarete);
+}
+
+.objet-collection .rarete .petite {
+  width: 16px;
+  height: 16px;
+}
+
+.objet-collection .details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11px;
+  color: var(--texte-doux);
+}
+
+.objet-collection .details .rangs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.objet-collection .bonus {
+  color: var(--texte);
+}
+
+.objet-collection .equipe-sur {
+  color: var(--or);
+}
+
+.objet-collection.silhouette {
+  border-color: var(--bord);
+}
+
+.objet-collection.silhouette .nom {
+  color: var(--texte-doux);
+}
+
+.objet-collection .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.objet-collection .actions .bouton {
+  flex: 1;
+  min-width: 0;
+  padding: 2px 6px;
+  font-size: 12px;
+}
+
+.objet-collection .actions .bouton .icone {
+  width: 16px;
+  height: 16px;
+}
+
+.porteurs-possibles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.bouton.porteur-puce {
+  padding: 0;
+}
+
+.bouton.porteur-puce .portrait {
+  width: 32px;
+  height: 32px;
+}
+
+.porteurs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.porteur {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 6px;
+  background: rgba(40, 30, 26, 0.7);
+  border: 2px solid var(--bord);
+  border-radius: 6px;
+}
+
+.porteur.plafonne {
+  border-color: var(--or);
+}
+
+.porteur .tete .icone {
+  width: 32px;
+  height: 32px;
+}
+
+.porteur .portes {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.porteur .emplacement {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--texte-doux);
+}
+
+.porteur .emplacement .bouton {
+  padding: 2px 8px;
+  font-size: 12px;
+}
+
+.bonus-total {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.barre-bonus {
+  flex: none;
+  width: 60px;
+  height: 8px;
+  box-sizing: border-box;
+  border: 1px solid #000;
+  background: #1c0f10;
+}
+
+.barre-bonus .rempli {
+  display: block;
+  height: 100%;
+  background: var(--or);
+}
+
 /* --- Fin de partie : le butin --- */
 
 .bilan {

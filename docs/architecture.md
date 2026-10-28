@@ -256,11 +256,11 @@ regeneration } }`, en fractions. Vide en défi Fer. Un objet équipé mais non p
 `configDepuisSauvegarde(s, options)` accepte en plus `niveau` et `defi` (surcharge qui rend `ResultatConfigDefi`, avec les raisons
 `defi_inconnu` et `defi_verrouille`, à part de `RaisonConfig` pour ne pas changer le code existant de l'interface). Un défi est
 refusé tant que le niveau n'a pas ses 3 étoiles (meilleur résultat, toutes difficultés) ; il se joue en Matou et **sans objet
-emporté** (la difficulté et les objets demandés sont ignorés, le stock n'est pas regardé). **Note d'alignement avec le moteur** :
-`defi` et `bonus` sont déclarés dans `ConfigMeta` (src/save) en attendant `ConfigPartie` (src/engine/etat.ts) étendue par la tâche
-moteur du jalon 3 ; à la fusion, remplacer par les types du moteur, rendre `defi` et `bonus` obligatoires dans `validerConfig`
-(aujourd'hui facultatifs, tous deux ou aucun, pour qu'une partie en cours enregistrée avec le moteur actuel reste lisible), et
-transmettre `defi` et `bonus` dans `configDuChoix` (`src/ui/lancement.ts` copie la config champ par champ).
+emporté** (la difficulté et les objets demandés sont ignorés, le stock n'est pas regardé). **Alignement avec le moteur** (fait
+avec l'interface du jalon 3) : `ConfigMeta.defi` et `.bonus`, et l'extension de la config d'une partie en cours
+(`ExtensionConfigV4`), utilisent `DefiPartie` et `BonusCollection` de `src/engine` ; `defi` et `bonus` restent **facultatifs, tous
+deux ou aucun**, dans `validerConfig` (une partie enregistrée avant le jalon 3 reste lisible) ; `configDuChoix`
+(`src/ui/lancement.ts`) les transmet.
 
 **Format v4** (`format.ts`) : `meta` reçoit trois champs. `regionMax` (1 à 10) : plus haute région ouverte, toujours égale à
 `regionOuverte(progression.niveauMax)` (la région r + 1 s'ouvre quand le boss, niveau 10 r, est battu) ; `defis` : par niveau en
@@ -298,6 +298,48 @@ un autre onglet l'a déjà monté), `acheterObjetPrecis`, `equiperSkin`, `equipe
 types existants de l'interface restent compilables) : `RaisonDefi`, `RaisonCaisse`, `RaisonRang`, `RaisonAchatPrecis`,
 `RaisonEquipementCollection`, plus `aleatoire_indisponible` et `modifie_ailleurs` ; leurs phrases sont dans `src/i18n/fr-collection.ts`
 sous `collection.refus.*` (le préfixe `meta.refus.*` est réservé à `raisons-meta.ts`, dont un test exige que chaque phrase serve).
+Elles sont maintenant dans `RaisonMeta` (`raisons-meta.ts`), les sept phrases `collection.refus.*` comprises.
+
+**Écrans du jalon 3** (`src/ui/`, textes dans `src/i18n/fr-ecrans3.ts`) :
+- **Régions** (`regions-monde.ts`) : `REGIONS_MONDE`, les cinq régions montrées, chacune avec son nom, son premier niveau de campagne
+  et un `contenu` (10 niveaux, nœuds, tracé, décor et textes) qui vaut `null` tant que ses niveaux ne sont pas livrés. **Seule la
+  région 1 est branchée** : pour les régions 2 à 5, remplacer `contenu: null` par les données de `src/data/niveaux/` (numéros de
+  campagne dans `niveaux` et `textes`, numéros 1 à 10 dans `noeuds`) ; rien d'autre n'est à toucher. `niveauDeCampagne(numero)` et
+  `textesDuNiveau(numero)` retrouvent un niveau dans les régions livrées (reprise d'une partie, bilan).
+- **Carte du monde** (`carte-monde.ts`, `carte-monde-logique.ts`, `carte-monde-defis.ts`) : une rangée de flèches et de
+  pastilles (un cadenas et le grisé pour une région pas ouverte, qui dit comment l'ouvrir ; PageHaut et PageBas au clavier) passe
+  d'une région ouverte (`meta.regionMax`) à l'autre ; chaque changement refait le rendu de la carte pour la région
+  (`RenduCarteMonde` est recréé) et se signale par `surRegion` (main.ts garde la dernière région vue). Une région ouverte sans
+  contenu annonce que ses niveaux ne sont pas encore dans le jeu. Les numéros affichés et lus dans la sauvegarde sont ceux de la
+  campagne (`vueNoeuds(s, noeuds, decalage)`). Les défis réussis sont marqués par `icone-defi-heroique` et `icone-defi-fer`
+  posées par l'interface sur le canvas juste après le rendu de la carte (le rendu de la carte n'a pas à les connaître).
+- **Fiche d'un niveau** : trois modes (`vueModes` de `meta-vues.ts`). Héroïque et Fer demandent les trois étoiles ; Fer demande en
+  plus que le niveau porte `defiFer.familles` (sinon « Ce niveau n'a pas de défi Fer »). Un défi remplace la difficulté par ses règles
+  (Matou imposé, aucun objet, familles imposées en Fer, prime de 4 braises la première fois seulement) et retire la section des
+  objets (`ChoixFiche.definirDefi`). `surLancer(niveau, difficulte, choix, defi)` donne le défi ; `main.ts` le passe à `configDuChoix`
+  et le numéro du niveau à « Rejouer » (`relancerAvecDebit(…, niveau)`), qui garde le défi et prend les bonus d'aujourd'hui.
+- **Partie en Fer** : `elementsSocleVide` (menu en cercle) ne propose pas une famille que `validerAction` refuse par
+  `famille_interdite` ; une touche d'une famille interdite affiche `refus.famille_interdite`.
+- **Apparence** (`apparence.ts`) : `lancerNiveau` reçoit `options.equipes` (`meta.collection.equipes`) et donne au rendu
+  (`new Rendu(…, apparenceDeLaPartie(equipes, héros joué))`) tous les skins équipés et le familier du héros joué. L'apparence ne
+  dépend pas du défi : en Fer les skins restent visibles, seul le bonus est ignoré (`config.bonus` vide).
+- **Caisses** (`caisses.ts`) : depuis la boutique (boutons « Caisses » et « Collection » ; « Fermer » des deux écrans revient à la
+  boutique, `main.ts` les enchaîne). Les deux caisses, le prix (20 braises), les cinq chances lues dans `CHANCES_RARETE`, la
+  garantie restante (`CAISSES_AVANT_GARANTIE` moins le compteur : « Épique garanti dans N caisses », « à la prochaine caisse » à 9) et
+  l'ouverture par `Session.ouvrirCaisse` : une révélation en CSS (la caisse tremble 0,7 s, puis l'objet, sa rareté, « Nouveau » ou
+  « Doublon » avec les éclats, « La garantie a joué »), « Continuer » ou Échap la ferme. Tant que la révélation est affichée ou
+  qu'une ouverture est en cours, aucun second geste ne part (pas de double débit) ; un refus (braises, hasard indisponible,
+  écriture impossible) est dit et rien n'est révélé.
+- **Collection** (`collection.ts`, lectures pures dans `collection-vues.ts`) : trois onglets. *Skins* et *Familiers* : tout le
+  catalogue, les objets possédés en couleur et les autres en silhouette, rareté, rang (pastilles), bonus actuel (ou au rang 1), monter
+  d'un rang (20 × rang éclats), acheter un objet précis en éclats, équiper un skin sur sa tour de base ou son héros (un skin d'un
+  même emplacement remplace l'autre), choisir le héros recruté qui porte un familier (un par héros, le même familier peut aller sur
+  plusieurs). *Équipement* : les quatre tours et les héros recrutés, ce qu'ils portent, « Retirer », et le total de leur bonus
+  lu dans `bonusDeCollection` (donc plafonné à +10 %, avec l'indication « plafond atteint » quand le brut le dépasse). Les skins
+  s'affichent avec l'icône de la tour ou du héros qu'ils habillent (la silhouette sert aux objets pas possédés) : montrer le skin
+  recoloré demanderait que `AtlasRendu` expose ses pixels.
+- **Bilan de fin** (`lignesBilan`, `ecrans.ts`) : en plus du butin, « Défi Héroïque réussi : +4 braises », « <disciple> rejoint tes
+  héros ! » et « Région ouverte : <nom> » quand le `BilanPartie` les porte.
 
 ## Niveaux de la campagne (`src/data/niveaux/`)
 - `cartes.ts` : cartes dessinées à la main (chemins, socles et ralliements, départ du héros, zones de sol, décor).
