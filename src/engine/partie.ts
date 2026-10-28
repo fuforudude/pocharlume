@@ -97,7 +97,7 @@ export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
   const defi = config.defi ?? null;
   if (defi === 'fer' && !niveau.defiFer) throw new Error(`Défi Fer : le niveau ${niveau.id} n’a pas de familles imposées`);
   const copieBrute = JSON.parse(JSON.stringify(niveau)) as Niveau;
-  const copie: Niveau = { ...copieBrute, vagues: vaguesAvecElites(vaguesDuDefi(copieBrute.vagues, defi), difficulte.vaguesElites) };
+  const copie: Niveau = { ...copieBrute, vagues: vaguesAvecElites(vaguesDuDefi(copieBrute.vagues, defi), niveau.sansElites === true ? 0 : difficulte.vaguesElites) };
   const vies = defi === 'heroique' ? REGLES.heroique.vies : difficulte.vies;
   const etat: EtatPartie = {
     version: VERSION_ETAT,

@@ -61,6 +61,14 @@ describe('élites selon la difficulté', () => {
     expect(etat.ennemis.some((e) => e.elite)).toBe(true);
   });
 
+  it('un niveau marqué sans élites reste ordinaire en Vieux Sage, mais pas en Héroïque', () => {
+    const niveau = { ...niveauEssai(VAGUES), sansElites: true };
+    const sage = creerPartie(niveau, { ...CONFIG, difficulte: 'vieux_sage' });
+    expect(elites(sage.niveau.vagues).flat().some(Boolean)).toBe(false);
+    const heroique = creerPartie(niveau, configDe('charlie', { difficulte: 'vieux_sage', defi: 'heroique' }));
+    expect(elites(heroique.niveau.vagues)[0]).toEqual([true]);
+  });
+
   it('ne modifie pas le niveau donné', () => {
     const niveau = niveauEssai(VAGUES);
     creerPartie(niveau, { ...CONFIG, difficulte: 'vieux_sage' });

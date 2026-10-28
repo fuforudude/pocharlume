@@ -29,6 +29,13 @@ export function decorVisible(modele: CarteModele, carte: Carte): Decor[] {
 /** Niveaux par région : le numéro de campagne 1 à 100 se range par dizaines. */
 const NIVEAUX_PAR_REGION = 10;
 
+/**
+ * Régions dont les niveaux ne jouent pas d'élites en Vieux Sage. La région 1, réglée au jalon 2 sans élites, ne tient pas ses
+ * bandes de Vieux Sage avec elles (les trois dieux ne les subissent pas pareillement) : le réglage fin est à refaire avec les
+ * autres régions (tâche 6 du jalon 3). Le défi Héroïque y garde toutes ses élites.
+ */
+const REGIONS_SANS_ELITES: readonly number[] = [1];
+
 export function assemblerNiveau(plan: PlanNiveau, vagues: readonly Vague[]): NiveauCampagne {
   const modele = CARTES[plan.carte];
   const region = Math.floor((plan.numero - 1) / NIVEAUX_PAR_REGION) + 1;
@@ -38,6 +45,7 @@ export function assemblerNiveau(plan: PlanNiveau, vagues: readonly Vague[]): Niv
     id: `r${String(region)}-${String(rang).padStart(2, '0')}`,
     aretesDepart: plan.aretesDepart,
     defiFer: plan.defiFer,
+    ...(REGIONS_SANS_ELITES.includes(region) ? { sansElites: true } : {}),
     carte: {
       largeur: modele.largeur,
       hauteur: modele.hauteur,

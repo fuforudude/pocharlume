@@ -666,4 +666,6 @@ export interface Niveau {
   readonly aretesDepart: number;
   /** Absent = pas de défi Fer sur ce niveau. */
   readonly defiFer?: DefiFer;
+  /** Vrai : la difficulté Vieux Sage n'y joue pas ses dernières vagues en élite (le défi Héroïque, lui, les joue toutes en élite). */
+  readonly sansElites?: boolean;
 }

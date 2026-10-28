@@ -215,6 +215,12 @@ describe('vagues', () => {
   });
 });
 
+describe('élites en Vieux Sage', () => {
+  it('la région 1 n’en joue pas (ses bandes de Vieux Sage ne les supportent pas), les régions 2 à 5 si', () => {
+    for (const n of CAMPAGNE) expect(n.niveau.sansElites === true, `niveau ${String(n.numero)}`).toBe(n.numero <= 10);
+  });
+});
+
 describe('défi Fer', () => {
   const paires = CAMPAGNE.map((n) => n.niveau.defiFer?.familles);
 

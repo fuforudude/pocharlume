@@ -1,7 +1,7 @@
 # Rapport d’équilibrage
 
 Généré par `npm run balance` (tools/balance/) : ne pas modifier à la main. Chaque niveau de la région 1 est rejoué sans
-affichage dans les trois difficultés, avec chacun des trois dieux jouant son avatar (sans amélioration ni objet), par deux bots, sur 10 graines chacun (version des données 6).
+affichage dans les trois difficultés, avec chacun des trois dieux jouant son avatar (sans amélioration ni objet), par deux bots, sur 10 graines chacun (version des données 7).
 
 - **Soigneux** : achète à chaque fois ce qui apporte le plus de puissance par arête dépensée (socle, famille, niveau,
   spécialisation, bonus et remise de famille du dieu compris), après une petite recherche entre dix variantes (5 préférences × 2 diversités) jouées sur des graines d’entraînement ;
@@ -368,3 +368,309 @@ Puissance = DPS efficace moyen × portée ÷ coût cumulé. Chaque tour doit res
 | 4 | Nécromancien des Neuf Vies | 800 | 0,2 | −5,0 % |
 | 4 | Mortier de Soufre | 985 | 0,2 | −0,4 % |
 | 4 | Baliste à Chaînes | 985 | 0,2 | −0,6 % |
+
+## Régions 2 à 5 : premier passage
+
+Les bandes de la région 1 (plus haut) sont imposées. Celles des régions 2 à 5 ne le sont pas encore : c’est le premier passage du simulateur sur ces niveaux (arêtes de départ réglées grossièrement, rien d’absurde), l’équilibrage fin et l’ajout des bandes viennent à la tâche 6 du jalon 3. Chiffres de ce passage, mêmes dieux, mêmes bots et mêmes graines que pour la région 1.
+
+### Région 2 : les Champs Brûlés
+
+Par difficulté et par dieu (tous les niveaux de la région) :
+
+| Difficulté | Dieu | Soigneux : victoires | Naïf : victoires | Soigneux : vies restantes | Soigneux : arêtes en fin | Sans défense : victoires |
+| --- | --- | --- | --- | --- | --- | --- |
+| Chaton | Plume | 100 % (100/100) | 96 % (96/100) | 25,0 | 7466 | 0 % (0/30) |
+| Chaton | Charlie | 100 % (100/100) | 66 % (66/100) | 20,3 | 6893 | 0 % (0/30) |
+| Chaton | Pollen | 100 % (100/100) | 99 % (99/100) | 25,0 | 7589 | 0 % (0/30) |
+| Matou | Plume | 100 % (100/100) | 23 % (23/100) | 20,0 | 2300 | 0 % (0/30) |
+| Matou | Charlie | 57 % (57/100) | 3 % (3/100) | 5,6 | 1197 | 0 % (0/30) |
+| Matou | Pollen | 98 % (98/100) | 34 % (34/100) | 16,0 | 2338 | 0 % (0/30) |
+| Vieux Sage | Plume | 26 % (26/100) | 0 % (0/100) | 2,7 | 1358 | 0 % (0/30) |
+| Vieux Sage | Charlie | 10 % (10/100) | 0 % (0/100) | 1,5 | 128 | 0 % (0/30) |
+| Vieux Sage | Pollen | 10 % (10/100) | 1 % (1/100) | 1,5 | 621 | 0 % (0/30) |
+
+Par niveau (trois dieux ensemble) :
+
+| Niveau | Matou, soigneux | Matou, naïf | Matou, naïf : vies restantes | Matou, soigneux : arêtes en fin | Vieux Sage, soigneux | Vieux Sage, soigneux : vies restantes | Matou, sans défense |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 11 | 100 % (30/30) | 20 % (6/30) | 3,1 | 258 | 100 % (30/30) | 14,5 | 0 % (0/9) |
+| 12 | 67 % (20/30) | 10 % (3/30) | 1,1 | 987 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 13 | 67 % (20/30) | 30 % (9/30) | 4,2 | 1047 | 20 % (6/30) | 1,4 | 0 % (0/9) |
+| 14 | 87 % (26/30) | 7 % (2/30) | 0,8 | 1309 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 15 | 70 % (21/30) | 17 % (5/30) | 2,2 | 2405 | 10 % (3/30) | 0,6 | 0 % (0/9) |
+| 16 | 90 % (27/30) | 3 % (1/30) | 0,2 | 353 | 23 % (7/30) | 2,4 | 0 % (0/9) |
+| 17 | 87 % (26/30) | 27 % (8/30) | 2,1 | 1881 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 18 | 90 % (27/30) | 30 % (9/30) | 2,2 | 2293 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 19 | 93 % (28/30) | 27 % (8/30) | 3,2 | 3846 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 20 | 100 % (30/30) | 30 % (9/30) | 3,8 | 5070 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+
+Écarts aux bandes (à titre d’information) : 43
+
+- Chaton (Plume) : le bot naïf gagne 96 % des parties, il doit tout gagner
+- Chaton (Charlie) : le bot naïf gagne 66 % des parties, il doit tout gagner
+- Chaton (Pollen) : le bot naïf gagne 99 % des parties, il doit tout gagner
+- Matou (Plume) : le bot naïf gagne 23 % des parties, la bande est 30 % à 70 %
+- Matou (Plume) : le bot soigneux perd au moins une vie sur 0 niveaux seulement, il en faut au moins 5 sur 10
+- Matou (Plume) : le niveau 12 laisse 1407 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 13 laisse 1554 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 14 laisse 1598 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 15 laisse 3362 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 16 laisse 726 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 17 laisse 2240 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 18 laisse 2896 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 19 laisse 3842 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 20 laisse 5190 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le bot soigneux gagne 57 % des parties, il doit tout gagner
+- Matou (Charlie) : le bot naïf gagne 3 % des parties, la bande est 30 % à 70 %
+- Matou (Charlie) : le niveau 11 laisse 337 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 14 laisse 564 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 15 laisse 521 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 17 laisse 1127 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 18 laisse 1393 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 19 laisse 3328 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 20 laisse 4505 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le bot soigneux gagne 98 % des parties, il doit tout gagner
+- Matou (Pollen) : le niveau 11 laisse 253 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 12 laisse 1491 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 13 laisse 1525 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 14 laisse 1766 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 15 laisse 3332 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 16 laisse 263 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 17 laisse 2277 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 18 laisse 2591 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 19 laisse 4369 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 20 laisse 5515 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou : la courbe de difficulté du bot naïf (moyenne des dieux) a une corrélation de rang de 0,2, elle doit être d'au plus -0,6
+- Matou : le niveau 20 (3,8 vies restantes au bot naïf, moyenne des dieux) n'est pas parmi les 3 plus durs
+- Matou (Plume) : la courbe de difficulté du bot naïf a une corrélation de rang de 0,2, elle doit être d'au plus -0,3
+- Matou (Pollen) : la courbe de difficulté du bot naïf a une corrélation de rang de 0,4, elle doit être d'au plus -0,3
+- Vieux Sage (Plume) : le bot soigneux gagne 26 % des parties, la bande est 60 % à 85 %
+- Vieux Sage (Charlie) : le bot soigneux gagne 10 % des parties, la bande est 60 % à 85 %
+- Vieux Sage (Pollen) : le bot soigneux gagne 10 % des parties, la bande est 60 % à 85 %
+- Vieux Sage : Plume (26 %) et Charlie (10 %) sont à 16 points l'un de l'autre, il en faut au plus 10
+- Matou : Plume (20 vies) et Charlie (5,6 vies) sont à 14,4 vies l'un de l'autre, il en faut au plus 3
+
+### Région 3 : le Bourg des Bûchers
+
+Par difficulté et par dieu (tous les niveaux de la région) :
+
+| Difficulté | Dieu | Soigneux : victoires | Naïf : victoires | Soigneux : vies restantes | Soigneux : arêtes en fin | Sans défense : victoires |
+| --- | --- | --- | --- | --- | --- | --- |
+| Chaton | Plume | 100 % (100/100) | 54 % (54/100) | 25,0 | 8732 | 0 % (0/30) |
+| Chaton | Charlie | 100 % (100/100) | 48 % (48/100) | 23,9 | 8266 | 0 % (0/30) |
+| Chaton | Pollen | 100 % (100/100) | 56 % (56/100) | 25,0 | 9254 | 0 % (0/30) |
+| Matou | Plume | 100 % (100/100) | 6 % (6/100) | 17,1 | 2646 | 0 % (0/30) |
+| Matou | Charlie | 56 % (56/100) | 1 % (1/100) | 5,9 | 1167 | 0 % (0/30) |
+| Matou | Pollen | 96 % (96/100) | 9 % (9/100) | 14,8 | 2735 | 0 % (0/30) |
+| Vieux Sage | Plume | 22 % (22/100) | 0 % (0/100) | 2,3 | 1637 | 0 % (0/30) |
+| Vieux Sage | Charlie | 0 % (0/100) | 0 % (0/100) | 0,0 | 188 | 0 % (0/30) |
+| Vieux Sage | Pollen | 0 % (0/100) | 0 % (0/100) | 0,0 | 768 | 0 % (0/30) |
+
+Par niveau (trois dieux ensemble) :
+
+| Niveau | Matou, soigneux | Matou, naïf | Matou, naïf : vies restantes | Matou, soigneux : arêtes en fin | Vieux Sage, soigneux | Vieux Sage, soigneux : vies restantes | Matou, sans défense |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 21 | 97 % (29/30) | 10 % (3/30) | 1,8 | 195 | 33 % (10/30) | 2,7 | 0 % (0/9) |
+| 22 | 97 % (29/30) | 0 % (0/30) | 0,0 | 112 | 3 % (1/30) | 0,1 | 0 % (0/9) |
+| 23 | 100 % (30/30) | 0 % (0/30) | 0,0 | 1614 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 24 | 83 % (25/30) | 7 % (2/30) | 0,9 | 2404 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 25 | 60 % (18/30) | 3 % (1/30) | 0,2 | 3891 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 26 | 77 % (23/30) | 20 % (6/30) | 2,3 | 2754 | 33 % (10/30) | 5,0 | 0 % (0/9) |
+| 27 | 73 % (22/30) | 0 % (0/30) | 0,0 | 1724 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 28 | 87 % (26/30) | 0 % (0/30) | 0,0 | 1607 | 3 % (1/30) | 0,0 | 0 % (0/9) |
+| 29 | 100 % (30/30) | 0 % (0/30) | 0,0 | 3409 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 30 | 67 % (20/30) | 13 % (4/30) | 1,6 | 4117 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+
+Écarts aux bandes (à titre d’information) : 41
+
+- Chaton (Plume) : le bot naïf gagne 54 % des parties, il doit tout gagner
+- Chaton (Charlie) : le bot naïf gagne 48 % des parties, il doit tout gagner
+- Chaton (Pollen) : le bot naïf gagne 56 % des parties, il doit tout gagner
+- Matou (Plume) : le bot naïf gagne 6 % des parties, la bande est 30 % à 70 %
+- Matou (Plume) : le niveau 23 laisse 2358 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 24 laisse 2261 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 25 laisse 4501 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 26 laisse 3020 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 27 laisse 2170 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 28 laisse 1912 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 29 laisse 3804 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 30 laisse 6094 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le bot soigneux gagne 56 % des parties, il doit tout gagner
+- Matou (Charlie) : le bot naïf gagne 1 % des parties, la bande est 30 % à 70 %
+- Matou (Charlie) : le niveau 21 laisse 284 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 23 laisse 861 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 24 laisse 1975 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 25 laisse 2799 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 26 laisse 1401 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 27 laisse 314 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 28 laisse 697 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 29 laisse 3108 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le bot soigneux gagne 96 % des parties, il doit tout gagner
+- Matou (Pollen) : le bot naïf gagne 9 % des parties, la bande est 30 % à 70 %
+- Matou (Pollen) : le niveau 23 laisse 1624 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 24 laisse 2975 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 25 laisse 4372 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 26 laisse 3840 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 27 laisse 2687 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 28 laisse 2214 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 29 laisse 3314 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 30 laisse 6135 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou : la courbe de difficulté du bot naïf (moyenne des dieux) a une corrélation de rang de -0,1, elle doit être d'au plus -0,6
+- Matou : le niveau 30 (1,6 vies restantes au bot naïf, moyenne des dieux) n'est pas parmi les 3 plus durs
+- Matou (Plume) : la courbe de difficulté du bot naïf a une corrélation de rang de 0,1, elle doit être d'au plus -0,3
+- Matou (Pollen) : la courbe de difficulté du bot naïf a une corrélation de rang de 0, elle doit être d'au plus -0,3
+- Vieux Sage (Plume) : le bot soigneux gagne 22 % des parties, la bande est 60 % à 85 %
+- Vieux Sage (Charlie) : le bot soigneux gagne 0 % des parties, la bande est 60 % à 85 %
+- Vieux Sage (Pollen) : le bot soigneux gagne 0 % des parties, la bande est 60 % à 85 %
+- Vieux Sage : Plume (22 %) et Charlie (0 %) sont à 22 points l'un de l'autre, il en faut au plus 10
+- Matou : Plume (17,1 vies) et Charlie (5,9 vies) sont à 11,3 vies l'un de l'autre, il en faut au plus 3
+
+### Région 4 : les Marais de l’Ordalie
+
+Par difficulté et par dieu (tous les niveaux de la région) :
+
+| Difficulté | Dieu | Soigneux : victoires | Naïf : victoires | Soigneux : vies restantes | Soigneux : arêtes en fin | Sans défense : victoires |
+| --- | --- | --- | --- | --- | --- | --- |
+| Chaton | Plume | 100 % (100/100) | 54 % (54/100) | 25,0 | 10757 | 0 % (0/30) |
+| Chaton | Charlie | 96 % (96/100) | 48 % (48/100) | 22,5 | 9975 | 0 % (0/30) |
+| Chaton | Pollen | 100 % (100/100) | 58 % (58/100) | 24,4 | 10929 | 0 % (0/30) |
+| Matou | Plume | 100 % (100/100) | 7 % (7/100) | 19,9 | 3860 | 0 % (0/30) |
+| Matou | Charlie | 70 % (70/100) | 6 % (6/100) | 7,8 | 1949 | 0 % (0/30) |
+| Matou | Pollen | 69 % (69/100) | 9 % (9/100) | 10,9 | 2396 | 0 % (0/30) |
+| Vieux Sage | Plume | 6 % (6/100) | 0 % (0/100) | 0,4 | 2543 | 0 % (0/30) |
+| Vieux Sage | Charlie | 0 % (0/100) | 0 % (0/100) | 0,0 | 139 | 0 % (0/30) |
+| Vieux Sage | Pollen | 0 % (0/100) | 0 % (0/100) | 0,0 | 662 | 0 % (0/30) |
+
+Par niveau (trois dieux ensemble) :
+
+| Niveau | Matou, soigneux | Matou, naïf | Matou, naïf : vies restantes | Matou, soigneux : arêtes en fin | Vieux Sage, soigneux | Vieux Sage, soigneux : vies restantes | Matou, sans défense |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 31 | 87 % (26/30) | 20 % (6/30) | 3,9 | 191 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 32 | 100 % (30/30) | 7 % (2/30) | 0,9 | 1005 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 33 | 100 % (30/30) | 3 % (1/30) | 0,6 | 1080 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 34 | 90 % (27/30) | 0 % (0/30) | 0,0 | 3559 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 35 | 90 % (27/30) | 13 % (4/30) | 1,3 | 4818 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 36 | 37 % (11/30) | 30 % (9/30) | 4,5 | 2053 | 20 % (6/30) | 1,4 | 0 % (0/9) |
+| 37 | 100 % (30/30) | 0 % (0/30) | 0,0 | 3374 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 38 | 63 % (19/30) | 0 % (0/30) | 0,0 | 3426 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 39 | 97 % (29/30) | 0 % (0/30) | 0,0 | 5161 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 40 | 33 % (10/30) | 0 % (0/30) | 0,0 | 2682 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+
+Écarts aux bandes (à titre d’information) : 39
+
+- Chaton (Plume) : le bot naïf gagne 54 % des parties, il doit tout gagner
+- Chaton (Charlie) : le bot naïf gagne 48 % des parties, il doit tout gagner
+- Chaton (Pollen) : le bot naïf gagne 58 % des parties, il doit tout gagner
+- Matou (Plume) : le bot naïf gagne 7 % des parties, la bande est 30 % à 70 %
+- Matou (Plume) : le bot soigneux perd au moins une vie sur 0 niveaux seulement, il en faut au moins 5 sur 10
+- Matou (Plume) : le niveau 31 laisse 428 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 32 laisse 1285 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 33 laisse 1710 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 34 laisse 4126 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 35 laisse 5092 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 36 laisse 4721 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 37 laisse 3511 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 38 laisse 5250 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 39 laisse 5257 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 40 laisse 7219 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le bot soigneux gagne 70 % des parties, il doit tout gagner
+- Matou (Charlie) : le bot naïf gagne 6 % des parties, la bande est 30 % à 70 %
+- Matou (Charlie) : le niveau 32 laisse 798 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 33 laisse 780 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 34 laisse 2830 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 35 laisse 4181 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 37 laisse 2573 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 38 laisse 2651 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 39 laisse 4723 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 40 laisse 734 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le bot soigneux gagne 69 % des parties, il doit tout gagner
+- Matou (Pollen) : le bot naïf gagne 9 % des parties, la bande est 30 % à 70 %
+- Matou (Pollen) : le niveau 32 laisse 934 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 33 laisse 749 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 34 laisse 3721 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 35 laisse 5182 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 36 laisse 1311 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 37 laisse 4038 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 38 laisse 2377 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 39 laisse 5503 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Vieux Sage (Plume) : le bot soigneux gagne 6 % des parties, la bande est 60 % à 85 %
+- Vieux Sage (Charlie) : le bot soigneux gagne 0 % des parties, la bande est 60 % à 85 %
+- Vieux Sage (Pollen) : le bot soigneux gagne 0 % des parties, la bande est 60 % à 85 %
+- Matou : Plume (19,9 vies) et Charlie (7,8 vies) sont à 12,1 vies l'un de l'autre, il en faut au plus 3
+
+### Région 5 : la Ville Pestiférée
+
+Par difficulté et par dieu (tous les niveaux de la région) :
+
+| Difficulté | Dieu | Soigneux : victoires | Naïf : victoires | Soigneux : vies restantes | Soigneux : arêtes en fin | Sans défense : victoires |
+| --- | --- | --- | --- | --- | --- | --- |
+| Chaton | Plume | 100 % (100/100) | 58 % (58/100) | 25,0 | 13985 | 0 % (0/30) |
+| Chaton | Charlie | 100 % (100/100) | 44 % (44/100) | 23,8 | 13330 | 0 % (0/30) |
+| Chaton | Pollen | 100 % (100/100) | 61 % (61/100) | 25,0 | 14411 | 0 % (0/30) |
+| Matou | Plume | 98 % (98/100) | 5 % (5/100) | 17,7 | 5335 | 0 % (0/30) |
+| Matou | Charlie | 45 % (45/100) | 2 % (2/100) | 5,1 | 2604 | 0 % (0/30) |
+| Matou | Pollen | 61 % (61/100) | 12 % (12/100) | 8,4 | 4245 | 0 % (0/30) |
+| Vieux Sage | Plume | 0 % (0/100) | 0 % (0/100) | 0,0 | 2729 | 0 % (0/30) |
+| Vieux Sage | Charlie | 0 % (0/100) | 0 % (0/100) | 0,0 | 201 | 0 % (0/30) |
+| Vieux Sage | Pollen | 0 % (0/100) | 0 % (0/100) | 0,0 | 972 | 0 % (0/30) |
+
+Par niveau (trois dieux ensemble) :
+
+| Niveau | Matou, soigneux | Matou, naïf | Matou, naïf : vies restantes | Matou, soigneux : arêtes en fin | Vieux Sage, soigneux | Vieux Sage, soigneux : vies restantes | Matou, sans défense |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 41 | 100 % (30/30) | 3 % (1/30) | 0,3 | 78 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 42 | 100 % (30/30) | 20 % (6/30) | 2,8 | 2130 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 43 | 30 % (9/30) | 0 % (0/30) | 0,0 | 1629 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 44 | 63 % (19/30) | 13 % (4/30) | 1,7 | 4871 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 45 | 33 % (10/30) | 10 % (3/30) | 1,1 | 3408 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 46 | 87 % (26/30) | 3 % (1/30) | 0,7 | 4243 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 47 | 87 % (26/30) | 0 % (0/30) | 0,0 | 4060 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 48 | 73 % (22/30) | 7 % (2/30) | 1,0 | 6175 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 49 | 60 % (18/30) | 0 % (0/30) | 0,0 | 4382 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+| 50 | 47 % (14/30) | 7 % (2/30) | 0,7 | 9637 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+
+Écarts aux bandes (à titre d’information) : 43
+
+- Chaton (Plume) : le bot naïf gagne 58 % des parties, il doit tout gagner
+- Chaton (Charlie) : le bot naïf gagne 44 % des parties, il doit tout gagner
+- Chaton (Pollen) : le bot naïf gagne 61 % des parties, il doit tout gagner
+- Matou (Plume) : le bot soigneux gagne 98 % des parties, il doit tout gagner
+- Matou (Plume) : le bot naïf gagne 5 % des parties, la bande est 30 % à 70 %
+- Matou (Plume) : le bot soigneux perd au moins une vie sur 3 niveaux seulement, il en faut au moins 5 sur 10
+- Matou (Plume) : le niveau 42 laisse 1847 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 43 laisse 4667 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 44 laisse 5912 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 45 laisse 6570 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 46 laisse 4875 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 47 laisse 5103 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 48 laisse 6769 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 49 laisse 6279 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 50 laisse 11243 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le bot soigneux gagne 45 % des parties, il doit tout gagner
+- Matou (Charlie) : le bot naïf gagne 2 % des parties, la bande est 30 % à 70 %
+- Matou (Charlie) : le niveau 42 laisse 1611 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 44 laisse 2555 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 45 laisse 2131 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 46 laisse 2913 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 47 laisse 2209 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 48 laisse 5709 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 49 laisse 276 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 50 laisse 8511 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le bot soigneux gagne 61 % des parties, il doit tout gagner
+- Matou (Pollen) : le bot naïf gagne 12 % des parties, la bande est 30 % à 70 %
+- Matou (Pollen) : le niveau 42 laisse 2931 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 44 laisse 6146 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 45 laisse 1525 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 46 laisse 4940 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 47 laisse 4867 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 48 laisse 6048 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 49 laisse 6591 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 50 laisse 9157 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou : la courbe de difficulté du bot naïf (moyenne des dieux) a une corrélation de rang de -0,2, elle doit être d'au plus -0,6
+- Matou : le niveau 50 (0,7 vies restantes au bot naïf, moyenne des dieux) n'est pas parmi les 3 plus durs
+- Matou (Plume) : la courbe de difficulté du bot naïf a une corrélation de rang de -0,1, elle doit être d'au plus -0,3
+- Matou (Pollen) : la courbe de difficulté du bot naïf a une corrélation de rang de -0,3, elle doit être d'au plus -0,3
+- Vieux Sage (Plume) : le bot soigneux gagne 0 % des parties, la bande est 60 % à 85 %
+- Vieux Sage (Charlie) : le bot soigneux gagne 0 % des parties, la bande est 60 % à 85 %
+- Vieux Sage (Pollen) : le bot soigneux gagne 0 % des parties, la bande est 60 % à 85 %
+- Matou : Plume (17,7 vies) et Charlie (5,1 vies) sont à 12,6 vies l'un de l'autre, il en faut au plus 3

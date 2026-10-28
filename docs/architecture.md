@@ -16,8 +16,8 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
 | `src/i18n/` | Textes affichés. `fr.ts` contient la table, `t('clé')` la lit avec une clé typée. | rien |
 | `src/meta/` | Logique pure de la collection (jalon 3), sans stockage ni DOM : types de la collection d'un joueur (`collection.ts`), sources aléatoires injectées (`aleatoire.ts` : `crypto.getRandomValues`, réserve rejouable), tirage d'une caisse avec sa garantie (`tirage.ts`), bonus de la collection équipée vers le contrat de `ConfigPartie` (`bonus.ts`). Lit les règles de `src/data/meta.ts` et le catalogue de `src/data/collection.ts`. | `src/data/` |
 | `src/save/` | Sauvegarde. Fonctions pures : format versionné v4 (`format.ts`), validation stricte (`validation.ts`, `validation-collection.ts`, briques communes `validation-base.ts`), migrations en chaîne vN vers vN+1, progression (étoiles, déblocage), méta-progression (`transactions.ts`, `transactions-collection.ts`, `config-partie.ts`, `definitions.ts`), partie en cours, export et import par code (`code.ts`). `Session` (`session.ts`) tient la sauvegarde courante en mémoire et l'écrit à chaque changement ; sa règle multi-onglets est décrite plus bas (« Méta-progression et sauvegarde v3 »). `verrou.ts` exclut les écritures entre onglets (Web Locks) ; `canal.ts` prévient les autres onglets par `BroadcastChannel`, qui se rafraîchissent. Accès au stockage : interface `Stockage` (IndexedDB, repli localStorage, mémoire ; Capacitor Preferences plus tard) et `Depot`, qui ne lève jamais et garde une copie de secours d'une sauvegarde illisible. | `src/engine/`, `src/data/`, `src/meta/` |
-| `src/equilibrage/` | Simulateur d'équilibrage sans affichage : partie jouée par un bot (`simulation.ts`), bot naïf (`bot-naif.ts`) et bot soigneux avec sa petite recherche de variante (`bot-soigneux.ts`), géométrie des cartes, évaluation d'une région (`campagne.ts`), bandes cibles (`bandes.ts`), puissance des tours et des tours divines (`puissance.ts`), profils des vérifications supplémentaires (`profils.ts` : disciples, arbre au maximum, héros de niveau 10, sans tour divine), rédaction de `balance-report.md` (`rapport.ts`). Les bots ne passent que par l'API publique du moteur (`avancer` avec des actions). Réutilisé par `tools/balance/` et par les tests des bandes. | `src/engine/`, `src/data/`, `src/i18n/` |
-| `tools/` | Scripts Node : `art` (grilles de pixels vers planches PNG et atlas JSON), `niveaux` (génère les vagues figées de la région 1, aperçu texte des cartes, bilan du joueur automatique ; `enregistrer.ts` permet à Node d'importer `src/` sans extension), `balance` (`npm run balance` : lance le simulateur de `src/equilibrage/` et écrit `balance-report.md` à la racine). | `src/engine/`, `src/data/` |
+| `src/equilibrage/` | Simulateur d'équilibrage sans affichage : partie jouée par un bot (`simulation.ts`), bot naïf (`bot-naif.ts`) et bot soigneux avec sa petite recherche de variante (`bot-soigneux.ts`), géométrie des cartes, évaluation d'une région (`campagne.ts`), bandes cibles (`bandes.ts`), puissance des tours et des tours divines (`puissance.ts`), profils des vérifications supplémentaires (`profils.ts` : disciples, arbre au maximum, héros de niveau 10, sans tour divine), rédaction de `balance-report.md` (`rapport.ts`, plus la section des régions 2 à 5 dans `rapport-regions.ts`). Le bot soigneux sait que la caserne et l'artillerie ne touchent pas les volants et qu'il faut des Guetteurs des Toits contre les furtifs (`partsSpeciales`, `geometrie.ts`). Les bots ne passent que par l'API publique du moteur (`avancer` avec des actions). Réutilisé par `tools/balance/` et par les tests des bandes. | `src/engine/`, `src/data/`, `src/i18n/` |
+| `tools/` | Scripts Node : `art` (grilles de pixels vers planches PNG et atlas JSON), `niveaux` (génère les vagues figées des 5 régions, aperçu texte et planche PNG des cartes (`planche.ts`), bilan du joueur automatique ; `enregistrer.ts` permet à Node d'importer `src/` sans extension), `balance` (`npm run balance` : lance le simulateur de `src/equilibrage/` et écrit `balance-report.md` à la racine). | `src/engine/`, `src/data/` |
 | `art/` | Sources graphiques : pack Minifolks d'origine (`art/minifolks/`), grilles de pixels en texte (`art/sprites/<nom>.txt`, format décrit en tête de `tools/art/format.ts`), palettes partagées (`art/palettes/`). `npm run art` écrit aussi des aperçus agrandis dans `art/apercu/` (ignoré par git). Les index de noms par jalon sont `art/sprites/jalon2-noms.txt` et `jalon3-noms.txt` (ennemis et élites, boss, effets, tuiles et décor des régions 2 à 5, familiers, icônes). Les versions d'élite se font avec la directive `sombre` (voir `tools/art/format.ts`) ; les skins ne sont pas des sprites mais des palettes (`src/render/palettes-skins.ts`). | — |
 | `public/sprites/` | Atlas généré par `npm run art` (`atlas.png`, `atlas.json`), commité : le build n'exécute pas le pipeline, un test vérifie que l'atlas est à jour. | — |
 
@@ -342,17 +342,37 @@ Elles sont maintenant dans `RaisonMeta` (`raisons-meta.ts`), les sept phrases `c
   héros ! » et « Région ouverte : <nom> » quand le `BilanPartie` les porte.
 
 ## Niveaux de la campagne (`src/data/niveaux/`)
-- `cartes.ts` : cartes dessinées à la main (chemins, socles et ralliements, départ du héros, zones de sol, décor).
-  Une carte propose plusieurs chemins et plus de socles que nécessaire.
-- `plan-region1.ts` : pour chacun des 10 niveaux, la carte, les chemins et les socles choisis, les ennemis
-  débloqués, le nombre de vagues, la graine. `assemblage.ts` en tire un `NiveauCampagne` et n'en garde que le
-  décor qui ne recouvre ni un chemin ni un socle utilisés.
-- `vagues-region1.ts` : vagues **figées**, générées par `npm run niveaux` avec le générateur d'équilibrage
-  (budget b(L, w)). Jamais de génération à l'exécution. Un niveau marqué `retouchees: true` dans le plan garde ses
-  vagues retouchées à la main ; un test vérifie que les autres correspondent au générateur.
-- `carte-du-monde.ts` : positions des 10 nœuds et tracé du chemin sur le fond de la carte de région (512 × 288).
+50 niveaux (régions 1 à 5), numérotés de 1 à 50 ; le numéro de campagne est le niveau L du budget b(L, w).
+- `modele-carte.ts` : la structure d'une carte et ses constructeurs. Les cartes dessinées à la main (chemins, socles et
+  ralliements, départ du héros, zones de sol, décor) sont dans `cartes.ts` (région 1, 4 cartes) et `cartes-region2.ts` à
+  `cartes-region5.ts` (3 cartes par région : une à un chemin, deux à deux chemins) ; `cartes-toutes.ts` les rassemble (`CARTES`).
+  Les cartes des régions 2 à 5 ont été produites par un script jetable (socles à 2 tuiles de l'axe, décor réparti, tuiles
+  `r<N>-…` choisies par `region`), puis se retouchent à la main. Un niveau n'emprunte qu'un chemin ou les deux, et ne garde
+  que les socles à portée (et au ralliement) des chemins empruntés ; chaque chemin seul garde au moins 6 socles.
+- `plan-niveau.ts` : le type `PlanNiveau`, les ennemis de chaque région (`ENNEMIS_REGIONS`), les boss (`BOSS_REGIONS`) et
+  `ennemisDuNiveau` : ceux de la région, un de plus à chaque niveau (tous au niveau 3), puis dès le niveau 4 ceux des
+  régions précédentes. `plan-region<N>.ts` : pour chacun des 10 niveaux, la carte, les chemins et les socles choisis, les
+  ennemis, le nombre de vagues, la graine, les arêtes de départ et **`defiFer`** (les deux familles du défi Fer : elles
+  savent toucher les volants et révéler les furtifs quand le niveau en compte, et varient d'un niveau à l'autre ; un test
+  le vérifie). `assemblage.ts` en tire un `NiveauCampagne` (identifiant `r<région>-<nn>`) et n'en garde que le décor qui ne
+  recouvre ni un chemin ni un socle utilisés. `campagne.ts` assemble les 50 niveaux (`CAMPAGNE`, `REGIONS`, `niveauDeCampagne`).
+- `vagues-region<N>.ts` : vagues **figées**, générées par `npm run niveaux` (`npm run niveaux -- 3` : une seule région) avec
+  le générateur d'équilibrage (budget b(L, w)). Jamais de génération à l'exécution. Un niveau marqué `retouchees: true` dans
+  le plan garde ses vagues retouchées à la main ; un test vérifie que les autres correspondent au générateur. Les essaims
+  arrivent par groupes entiers. Le niveau 10 de chaque région ajoute son boss à la dernière vague. Les fichiers des
+  régions 2 à 5 pèsent de 230 à 550 Ko de source : à charger à la demande si le poids du jeu devient un souci.
+- Budget : la croissance par niveau est pleine jusqu'au niveau 10 (`croissanceNiveau` 0,15) puis plus lente
+  (`croissanceNiveauSuite` 0,03), car les tours n'ont que quatre niveaux et un nombre de socles borné : sans cela les
+  régions 2 à 5 deviennent impossibles à tenir sans amélioration (voir `balance-report.md`).
+- `carte-du-monde.ts` : positions des 10 nœuds et tracé de la route de chacune des 5 régions sur le fond de 512 × 288
+  (`NOEUDS_REGIONS`, `TRACES_REGIONS`, `noeudsDeRegion`, `traceDeRegion`) ; `src/ui/regions-monde.ts` les branche.
 - Le chemin est supposé dessiné sur 2 tuiles de large (`DEMI_LARGEUR_CHEMIN` dans `habillage.ts`) : les socles
   sont à 2 tuiles de l'axe, le décor à au moins 1,25 tuile.
+- Aperçus : `npm run niveaux:apercu -- carte <id>` (texte), `-- planche` (PNG des 12 cartes des régions 2 à 5, avec les vrais
+  sprites : `docs/cartes/regions-2-a-5.png`) ou `-- planche <région>` (`art/apercu/`, non suivi).
+- **Élites en Vieux Sage** : `Difficulte.vaguesElites` (0 en Chaton et Matou, 2 en Vieux Sage) : le moteur joue les groupes (hors
+  boss) des dernières vagues en élite. `Niveau.sansElites` l'écarte : les niveaux de la région 1, dont les bandes de Vieux Sage
+  (jalon 2) ne tiennent pas avec elles, en sont marqués ; le défi Héroïque garde ses élites partout. `VERSION_DONNEES` 7.
 
 ## Équilibrage de la région 1 (`npm run balance`)
 Le simulateur de `src/equilibrage/` rejoue les 10 niveaux dans les 3 difficultés, pour **chacun des 3 dieux avec son avatar**
