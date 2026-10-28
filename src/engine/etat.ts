@@ -68,9 +68,6 @@ export interface ConfigPartie {
   bonus?: BonusCollection;
 }
 
-/** Config rangée dans l'état : `defi` et `bonus` y sont toujours présents (`copierConfig`). */
-export type ConfigComplete = ConfigPartie & { defi: DefiPartie | null; bonus: BonusCollection };
-
 /** Chemin précalculé : longueurs cumulées et directions unitaires de chaque segment. */
 export interface CheminCalcule {
   points: Point[];
@@ -290,7 +287,8 @@ export interface EtatPartie {
   version: number;
   versionDonnees: number;
   niveau: Niveau;
-  config: ConfigComplete;
+  /** Copie de la config reçue (`copierConfig`) : `defi` et `bonus` n'y sont que s'ils servent. */
+  config: ConfigPartie;
   chemins: CheminCalcule[];
   pas: number;
   rng: number;

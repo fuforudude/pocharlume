@@ -6,12 +6,13 @@ import { ajusterMontant } from './argent';
 import { calculerChemin } from './chemins';
 import { appliquerAction } from './commandes';
 import { copierConfig, verifierConfig } from './config';
-import { defDieu, defDifficulte, defEnnemi } from './contenu';
-import type { Niveau } from './definitions';
+import { defDieu, defEnnemi, defFamille, difficulteDeConfig } from './contenu';
+import type { Niveau, Vague } from './definitions';
 import { mettreAJourEnnemis } from './ennemis';
-import { VERSION_ETAT, type ConfigPartie, type EntreeJournal, type EtatPartie } from './etat';
+import { VERSION_ETAT, type ConfigPartie, type DefiPartie, type EntreeJournal, type EtatPartie } from './etat';
 import { ouvrirPas } from './evenements';
 import { resoudreHeros } from './modificateurs';
+import { laisserNuagesDesMorts, mettreAJourNuages, mettreAJourPouvoirsEnnemis } from './pouvoirs-ennemis';
 import { mettreAJourSorts, rechargeSort } from './sorts';
 import { mettreAJourPieges, mettreAJourStructures, mettreAJourZones } from './structures';
 import { enPas, PAS_PAR_SECONDE } from './temps';
@@ -41,6 +42,33 @@ function verifierNiveau(niveau: Niveau): void {
       if (!Number.isInteger(p.chemin) || p.chemin < 0 || p.chemin >= niveau.carte.chemins.length) throw new Error(`Vague ${String(i + 1)} : chemin inconnu ${String(p.chemin)}`);
     }
   });
+  const fer = niveau.defiFer;
+  if (fer) {
+    const [a, b] = fer.familles;
+    for (const famille of fer.familles) if (!defFamille(famille)) throw new Error(`Défi Fer : famille inconnue ${famille}`);
+    if (a === b) throw new Error('Défi Fer : deux familles différentes sont attendues');
+  }
+}
+
+function estBoss(ennemi: string): boolean {
+  return defEnnemi(ennemi)?.boss === true;
+}
+
+/**
+ * Les vagues telles que le défi les joue. Héroïque : chaque groupe (hors boss) est d'élite. Fer : toutes les vagues
+ * n'en font qu'une (les groupes gardent leurs délais), les effectifs sont multipliés (arrondi au-dessus), sauf ceux d'un
+ * boss. Sans défi, les vagues du niveau.
+ */
+function vaguesDuDefi(vagues: readonly Vague[], defi: DefiPartie | null): readonly Vague[] {
+  if (defi === 'heroique') {
+    return vagues.map((v) => ({ paquets: v.paquets.map((p) => (estBoss(p.ennemi) ? p : { ...p, elite: true })) }));
+  }
+  if (defi === 'fer' && vagues.length > 0) {
+    // La tolérance évite qu'un produit juste (4 × 1,5) monte d'un cran à cause des flottants.
+    const effectif = (p: Vague['paquets'][number]): number => (estBoss(p.ennemi) ? p.nombre : Math.ceil(p.nombre * REGLES.fer.facteurEffectifs - 1e-9));
+    return [{ paquets: vagues.flatMap((v) => v.paquets.map((p) => ({ ...p, nombre: effectif(p) }))) }];
+  }
+  return vagues;
 }
 
 function verifierVersionDonnees(version: unknown): void {
@@ -52,11 +80,15 @@ function verifierVersionDonnees(version: unknown): void {
 export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
   const refus = verifierConfig(config);
   if (refus !== null) throw new Error(refus);
-  const difficulte = defDifficulte(config.difficulte);
+  const difficulte = difficulteDeConfig(config);
   const dieu = defDieu(config.dieu);
   if (!difficulte || !dieu) throw new Error('Config de partie invalide');
   verifierNiveau(niveau);
-  const copie = JSON.parse(JSON.stringify(niveau)) as Niveau;
+  const defi = config.defi ?? null;
+  if (defi === 'fer' && !niveau.defiFer) throw new Error(`Défi Fer : le niveau ${niveau.id} n’a pas de familles imposées`);
+  const copieBrute = JSON.parse(JSON.stringify(niveau)) as Niveau;
+  const copie: Niveau = { ...copieBrute, vagues: vaguesDuDefi(copieBrute.vagues, defi) };
+  const vies = defi === 'heroique' ? REGLES.heroique.vies : difficulte.vies;
   const etat: EtatPartie = {
     version: VERSION_ETAT,
     versionDonnees: VERSION_DONNEES,
@@ -67,8 +99,8 @@ export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
     rng: config.graine >>> 0,
     statut: 'en_cours',
     etoiles: 0,
-    vies: difficulte.vies,
-    viesDepart: difficulte.vies,
+    vies,
+    viesDepart: vies,
     viePerdue: false,
     aretes: ajusterMontant(niveau.aretesDepart, difficulte.aretesDepart),
     vagues: { lancees: 0, prochaine: copie.vagues.length > 0 ? enPas(REGLES.delaiPremiereVague) : -1, paquets: [] },
@@ -133,6 +165,8 @@ function verifierFin(etat: EtatPartie): void {
 function simuler(etat: EtatPartie): void {
   ouvrirPas(etat);
   mettreAJourVagues(etat);
+  mettreAJourPouvoirsEnnemis(etat);
+  mettreAJourNuages(etat);
   mettreAJourZones(etat);
   mettreAJourEnnemis(etat);
   mettreAJourPieges(etat);
@@ -141,6 +175,7 @@ function simuler(etat: EtatPartie): void {
   mettreAJourStructures(etat);
   mettreAJourProjectiles(etat);
   mettreAJourSorts(etat);
+  laisserNuagesDesMorts(etat);
   retirerDisparus(etat);
   verifierFin(etat);
   etat.pas++;

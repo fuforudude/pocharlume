@@ -50,6 +50,10 @@ export function creerUnite(etat: EtatPartie, n: NouvelleUnite): Unite {
     enDeplacement: false,
     zone: n.zone,
     minuteurs: minuteursInitiaux(n.stats.capacites?.ouvrage ?? null, n.stats.capacites?.soin?.cadence ?? 0),
+    brulure: 0,
+    brulureDegats: 0,
+    noyade: 0,
+    noyeur: -1,
   };
   etat.unites.push(u);
   return u;
@@ -101,6 +105,10 @@ export function mourir(etat: EtatPartie, u: Unite): void {
   u.mort = true;
   u.pv = 0;
   u.enDeplacement = false;
+  u.brulure = 0;
+  u.brulureDegats = 0;
+  u.noyade = 0;
+  u.noyeur = -1;
   libererBloques(etat, u);
   u.reapparition = u.delaiReapparition;
   etat.evenements.push({ type: 'mort_unite', unite: u.id, genre: u.genre, x: u.x, y: u.y });
@@ -165,7 +173,34 @@ function avancerVers(u: Unite, x: number, y: number, arret: number): boolean {
 }
 
 function engageable(e: Ennemi): boolean {
-  return e.vivant && !e.volant && estVisible(e, false);
+  return e.vivant && !e.volant && e.invulnerable === 0 && estVisible(e, false);
+}
+
+/** Brûlure en cours : dégâts purs de ce pas. Vrai si l'unité en est morte. */
+function bruler(etat: EtatPartie, u: Unite): boolean {
+  u.brulure--;
+  u.pv -= u.brulureDegats / PAS_PAR_SECONDE;
+  if (u.brulure === 0) u.brulureDegats = 0;
+  if (u.pv > 0) return false;
+  mourir(etat, u);
+  return true;
+}
+
+/**
+ * Noyade en cours : elle se défait si le noyeur est mort ou ne la tient plus, sinon elle avance et noie l'unité à son
+ * terme. Vrai si l'unité en est morte.
+ */
+function noyer(etat: EtatPartie, u: Unite): boolean {
+  const noyeur = chercherParId(etat.ennemis, u.noyeur);
+  if (!noyeur?.vivant || noyeur.bloqueur !== u.id) {
+    u.noyade = 0;
+    u.noyeur = -1;
+    return false;
+  }
+  u.noyade--;
+  if (u.noyade > 0) return false;
+  mourir(etat, u);
+  return true;
 }
 
 /**
@@ -258,7 +293,7 @@ function assassiner(etat: EtatPartie, u: Unite, cap: CapacitesUnite): void {
   let cible: Ennemi | undefined;
   let min = Infinity;
   for (const e of etat.ennemis) {
-    if (!e.vivant || e.volant || !estVisible(e, cap.voitFurtifs) || distance2(e.x, e.y, u.ancreX, u.ancreY) > rayon2) continue;
+    if (!e.vivant || e.volant || e.invulnerable > 0 || !estVisible(e, cap.voitFurtifs) || distance2(e.x, e.y, u.ancreX, u.ancreY) > rayon2) continue;
     const d = distance2(e.x, e.y, u.x, u.y);
     if (d < min) {
       min = d;
@@ -292,6 +327,8 @@ function mettreAJourUnite(etat: EtatPartie, u: Unite): void {
       return;
     }
   }
+  if (u.brulure > 0 && bruler(etat, u)) return;
+  if (u.noyade > 0 && noyer(etat, u)) return;
   if (u.recharge > 0) u.recharge--;
   mettreAJourPouvoirs(etat, u);
 
@@ -344,7 +381,8 @@ function mettreAJourUnite(etat: EtatPartie, u: Unite): void {
   if (u.stats.capacite > 1 && u.bloques > 0) provoquer(etat, u);
   avancerVers(u, cible.x, cible.y, REGLES.distanceContact);
   const blocage = REGLES.distanceBlocage;
-  if (u.recharge === 0 && distance2(cible.x, cible.y, u.x, u.y) <= blocage * blocage) {
+  // Entraînée sous l'eau, l'unité ne frappe plus.
+  if (u.recharge === 0 && u.noyade === 0 && distance2(cible.x, cible.y, u.x, u.y) <= blocage * blocage) {
     u.recharge = Math.max(1, enPas(u.stats.cadence));
     frapper(etat, u, cible);
   }

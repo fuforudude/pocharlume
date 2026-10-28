@@ -166,16 +166,20 @@ export function genererVague(o: OptionsGeneration): Vague {
   const g = creerGenerateur((o.graine ^ Math.imul(o.niveau, 0x9e3779b1) ^ Math.imul(o.vague, 0x85ebca6b)) >>> 0);
   const candidats = o.ennemis
     .filter(([, def]) => o.boss === true || !def.boss)
-    .map(([id, def]) => ({ id, def, menace: menaceEnnemi(def) }));
+    // `groupe` : un essaim n'arrive que par groupes de cette taille (1 = un ennemi ordinaire).
+    .map(([id, def]) => ({ id, def, menace: menaceEnnemi(def), groupe: def.pouvoirs?.essaim ?? 1 }));
   let restant = budgetVague(o.niveau, o.vague);
   let delai = 0;
   const paquets: Paquet[] = [];
   for (;;) {
-    const abordables = candidats.filter((c) => c.menace <= restant);
+    const abordables = candidats.filter((c) => c.menace * c.groupe <= restant);
     const choix = abordables[Math.floor(tirer(g) * abordables.length)];
     if (!choix) break;
     const max = Math.min(Math.floor(restant / choix.menace), EQUILIBRAGE.tailleMaxPaquet);
-    const nombre = 1 + Math.floor(tirer(g) * max);
+    const nombre =
+      choix.groupe === 1
+        ? 1 + Math.floor(tirer(g) * max)
+        : choix.groupe * (1 + Math.floor(tirer(g) * Math.max(1, Math.floor(max / choix.groupe))));
     const intervalle = arrondiDixieme(EQUILIBRAGE.intervalleReference / facteurVitesse(choix.def.vitesse));
     paquets.push({ ennemi: choix.id, nombre, intervalle, chemin: Math.floor(tirer(g) * o.chemins), delai });
     restant -= nombre * choix.menace;

@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { DIEUX } from '../data/dieux';
 import { ENNEMIS } from '../data/ennemis';
-import { avancerSecondes, compter, configDe, construireTour, ennemiDonnees, ennemiEssai, ennemisDe, evenementsPendant, heros, partieEssai } from './aides.test-utils';
+import { avancerSecondes, compter, configDe, construireTour, ennemiDonnees, ennemiEssai, evenementsPendant, heros, partieEssai } from './aides.test-utils';
 import { appliquerEffet, infligerDegats } from './degats';
 import { ajouterEnnemi } from './ennemis';
 import { EFFET, type EtatPartie } from './etat';
@@ -220,7 +220,9 @@ describe('Noyeur : entraîne un soldat bloquant sous l’eau', () => {
     expect(noyade).toMatchObject({ type: 'noyade', delai: 3 });
     const id = noyade?.type === 'noyade' ? noyade.unite : -1;
     const unite = etat.unites.find((u) => u.id === id);
-    expect(unite?.noyade).toBe(enPas(3));
+    // L'unité a déjà avancé d'un pas dans le pas où la noyade a commencé.
+    expect(unite?.noyade).toBeGreaterThan(enPas(3) - 3);
+    expect(unite?.noyade).toBeLessThanOrEqual(enPas(3));
     expect(unite?.genre).toBe('soldat');
 
     const suite = evenementsPendant(etat, 3.2);

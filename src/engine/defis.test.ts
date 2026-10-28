@@ -151,7 +151,7 @@ describe('validation de la config : défi', () => {
   });
 
   it('refuse un défi inconnu', () => {
-    for (const defi of ['facile', '', 'Fer', 3, true, {}, []]) expect(refus({ defi }), String(defi)).not.toBeNull();
+    for (const defi of ['facile', '', 'Fer', 3, true, {}, []]) expect(refus({ defi }), JSON.stringify(defi)).not.toBeNull();
   });
 
   it('refuse un défi avec des objets, accepte un défi sans objet', () => {
@@ -167,14 +167,27 @@ describe('validation de la config : défi', () => {
 });
 
 describe('rétrocompatibilité : une config sans defi ni bonus', () => {
-  it('est valide, et l’état la complète (defi null, bonus vide)', () => {
+  it('est valide, se lit comme sans défi et sans bonus, et reste rangée telle quelle dans l’état', () => {
     const ancienne = { ...CONFIG };
     expect('defi' in ancienne).toBe(false);
     expect('bonus' in ancienne).toBe(false);
     expect(verifierConfig(ancienne)).toBeNull();
     const etat = creerPartie(niveauEssai(), ancienne);
-    expect(etat.config.defi).toBeNull();
-    expect(etat.config.bonus).toEqual({ tours: {}, heros: {} });
+    expect(etat.config).toEqual(CONFIG);
+    expect(Object.hasOwn(etat.config, 'defi')).toBe(false);
+    expect(Object.hasOwn(etat.config, 'bonus')).toBe(false);
+  });
+
+  it('defi null et bonus vide, donnés explicitement, ne changent pas non plus la config rangée', () => {
+    const etat = creerPartie(niveauEssai(), config({ defi: null, bonus: { tours: {}, heros: {} } }));
+    expect(etat.config).toEqual(CONFIG);
+  });
+
+  it('un défi et un bonus donnés sont rangés dans l’état', () => {
+    const bonus = { tours: { tir: { degats: 0.05 } }, heros: {} };
+    const etat = creerPartie(niveauFer(), config({ defi: 'fer', bonus }));
+    expect(etat.config.defi).toBe('fer');
+    expect(etat.config.bonus).toEqual(bonus);
   });
 
   it('se rejoue comme avant : mêmes parties avec defi null et bonus vide', () => {
@@ -196,7 +209,8 @@ describe('rejeu et sérialisation des défis', () => {
     const etat = creerPartie(niveau, c);
     appliquerAction(etat, { type: 'construire', socle: 0, tour: 'caserne' });
     appliquerAction(etat, { type: 'appelerVague' });
-    avancerSecondes(etat, 30);
+    avancerSecondes(etat, 10);
+    expect(etat.statut).toBe('en_cours');
     const rejoue = rejouer(niveau, c, etat.journal, etat.pas);
     expect(serialiser(rejoue)).toBe(serialiser(etat));
     expect(serialiser(deserialiser(serialiser(etat)))).toBe(serialiser(etat));

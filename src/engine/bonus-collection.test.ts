@@ -100,7 +100,8 @@ describe('bonus d’une famille de tours', () => {
   });
 
   it('caserne : PV, dégâts et cadence des soldats', () => {
-    const etat = partie({ tours: { caserne: { pvSoldats: 0.06, degats: 0.02, cadence: 0.02 } }, heros: {} });
+    // Plume n'a pas de bonus de caserne (celui de Charlie s'ajouterait).
+    const etat = creerPartie(niveauEssai(), { ...configDe('plume'), bonus: { tours: { caserne: { pvSoldats: 0.06, degats: 0.02, cadence: 0.02 } }, heros: {} } });
     construireTour(etat, 0, 'caserne');
     const soldats = tour(etat, 0).stats.soldats;
     const base = TOURS.caserne.niveaux[0].soldats;

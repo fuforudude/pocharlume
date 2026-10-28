@@ -54,6 +54,18 @@ function tourSurSocle(etat: EtatPartie, socle: number): Tour | undefined {
   return undefined;
 }
 
+/**
+ * Défi Fer : seules les deux familles du niveau se construisent ; la tour divine suit la famille de son dieu
+ * (Plume : tir, Charlie : caserne, Pollen : artillerie). Hors Fer, rien n'est interdit.
+ */
+function familleInterdite(etat: EtatPartie, tour: FamilleTour): boolean {
+  if (etat.config.defi !== 'fer') return false;
+  const imposees = etat.niveau.defiFer?.familles;
+  if (!imposees) return false;
+  const famille = tour === 'divine' ? dieuDe(etat).bonus.famille : tour;
+  return !imposees.includes(famille);
+}
+
 function horsCarte(etat: EtatPartie, x: number, y: number): boolean {
   const carte = etat.niveau.carte;
   return !(x >= 0 && x <= carte.largeur && y >= 0 && y <= carte.hauteur);
@@ -115,6 +127,7 @@ export function validerAction(etat: EtatPartie, action: Action): RaisonRefus | n
       if (!etat.niveau.carte.socles[action.socle]) return 'socle_inconnu';
       if (tourSurSocle(etat, action.socle)) return 'socle_occupe';
       if (action.tour === 'divine' && etat.tours.some((t) => t.famille === 'divine')) return 'tour_divine_unique';
+      if (familleInterdite(etat, action.tour)) return 'famille_interdite';
       const cout = coutConstruction(etat, action.tour);
       if (cout === undefined) return 'tour_inconnue';
       return cout > etat.aretes ? 'aretes_insuffisantes' : null;
@@ -198,6 +211,9 @@ function construire(etat: EtatPartie, socle: number, famille: FamilleTour): void
     rangs: [],
     boostCadence: 0,
     boostPas: 0,
+    desactivee: 0,
+    affamePas: 0,
+    affameCadence: 0,
     minuteurs: minuteursInitiaux(def.atelier, 0),
   };
   etat.tours.push(t);

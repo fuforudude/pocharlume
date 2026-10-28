@@ -44,7 +44,7 @@ export function mettreAJourPieges(etat: EtatPartie): void {
     const rayon2 = piege.stats.rayon * piege.stats.rayon;
     let pris = false;
     for (const e of etat.ennemis) {
-      if (!e.vivant || e.volant || (e.effetsPas[EFFET.etourdissement] ?? 0) > 0 || distance2(e.x, e.y, piege.x, piege.y) > rayon2) continue;
+      if (!e.vivant || e.volant || e.invulnerable > 0 || (e.effetsPas[EFFET.etourdissement] ?? 0) > 0 || distance2(e.x, e.y, piege.x, piege.y) > rayon2) continue;
       etat.evenements.push({ type: 'piege_declenche', piege: piege.id, ennemi: e.id, x: piege.x, y: piege.y });
       infligerDegats(etat, e, piege.stats.degats, piege.stats.typeDegats);
       appliquerEffet(etat, e, { type: 'etourdissement', chance: 1, duree: piege.stats.immobilisation, valeur: 0 });
@@ -68,21 +68,28 @@ export function creerZone(etat: EtatPartie, def: DefZoneDurable, x: number, y: n
     effets: def.effets,
     critique: def.critique,
     volants: def.volants,
+    revele: def.revele ?? false,
+    degatsAllies: def.degatsAllies ?? 0,
   };
   etat.zones.push(zone);
   etat.evenements.push({ type: 'zone', zone: zone.id, x, y, rayon, duree: def.duree });
   return zone;
 }
 
-/** Les zones rafraîchissent leurs effets sur les ennemis qui s'y trouvent, puis s'éteignent. */
+/**
+ * Les zones rafraîchissent leurs effets sur les ennemis qui s'y trouvent (et révèlent les furtifs, pour celles qui le
+ * font), puis s'éteignent. Un ennemi intouchable n'est affecté par rien.
+ */
 export function mettreAJourZones(etat: EtatPartie): void {
   if (etat.zones.length === 0) return;
+  const revelation = Math.max(1, enPas(REGLES.dureeRevelation));
   let garde = 0;
   for (const zone of etat.zones) {
     const rayon2 = zone.rayon * zone.rayon;
     for (const e of etat.ennemis) {
-      if (!e.vivant || (e.volant && !zone.volants) || distance2(e.x, e.y, zone.x, zone.y) > rayon2) continue;
+      if (!e.vivant || e.invulnerable > 0 || (e.volant && !zone.volants) || distance2(e.x, e.y, zone.x, zone.y) > rayon2) continue;
       appliquerEffets(etat, e, zone.effets);
+      if (zone.revele && e.furtif) e.revele = Math.max(e.revele, revelation);
     }
     zone.restant--;
     if (zone.restant > 0) etat.zones[garde++] = zone;
