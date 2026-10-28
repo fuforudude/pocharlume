@@ -2,12 +2,21 @@
 // placement des boutons. Logique pure : le DOM est dans hud.ts. Les actions sont celles du moteur, et c'est
 // `validerAction` qui décide de ce qui est grisé : l'interface ne duplique aucune règle de jeu.
 import type { Action, RaisonRefus } from '../engine';
-import { coutCompetence, coutConstruction, tourSurCase, validerAction, valeurRevente } from '../engine';
+import { coutCompetence, coutConstruction, ralliementParDefaut, tourSurCase, validerAction, valeurRevente } from '../engine';
+import type { Point } from '../engine/definitions';
 import type { EtatPartie, FamilleTour, Tour } from '../engine/etat';
-import { defNiveau, prix } from '../engine/tours';
+import { defNiveau, prix, statsTour } from '../engine/tours';
 import { RANG_MAX_COMPETENCE } from '../data/meta';
 import { iconeFamille, spriteTour } from '../render/habillage';
 import { t, tCle } from '../i18n';
+
+/** Ce que la tour de ce bouton couvrirait, montré sur la carte tant que le bouton est survolé. */
+export interface ApercuConstruction {
+  /** Portée (tuiles) de la tour de niveau 1, bonus compris, depuis le centre de la case. */
+  readonly portee: number;
+  /** Où ses soldats se rallieraient par défaut (le point du chemin le plus proche à portée) ; null pour une tour sans soldats. */
+  readonly ralliement: Point | null;
+}
 
 export interface ElementMenu {
   /** Identifiant stable (clé de comparaison entre deux images) : « construire:tir », « ameliorer », « vendre »… */
@@ -26,6 +35,8 @@ export interface ElementMenu {
   readonly rang: string | null;
   /** Pourquoi l'action est refusée en ce moment ; null si elle est permise. Un élément refusé est grisé. */
   readonly refus: RaisonRefus | null;
+  /** Portée et ralliement d'une tour à construire (éléments « construire » seulement), sinon null. */
+  readonly apercu: ApercuConstruction | null;
 }
 
 export const FAMILLES_MENU: readonly FamilleTour[] = ['caserne', 'tir', 'magie', 'artillerie', 'divine'];
@@ -51,6 +62,7 @@ export function elementsCaseVide(etat: EtatPartie, cx: number, cy: number): Elem
       gain: null,
       rang: null,
       refus: validerAction(etat, action),
+      apercu: def ? { portee: statsTour(etat, famille, def).portee, ralliement: def.soldats ? ralliementParDefaut(etat.chemins, cx, cy, def.portee) : null } : null,
     };
   }).filter((element) => element.refus !== 'famille_interdite');
 }
@@ -78,6 +90,7 @@ export function elementsTour(etat: EtatPartie, cx: number, cy: number): ElementM
         gain: null,
         rang: null,
         refus: validerAction(etat, action),
+        apercu: null,
       });
     } else if (tour.niveau === 3) {
       for (const voie of ['A', 'B'] as const) {
@@ -92,6 +105,7 @@ export function elementsTour(etat: EtatPartie, cx: number, cy: number): ElementM
           gain: null,
           rang: null,
           refus: validerAction(etat, action),
+          apercu: null,
         });
       }
     } else {
@@ -109,6 +123,7 @@ export function elementsTour(etat: EtatPartie, cx: number, cy: number): ElementM
           gain: null,
           rang: t('menu.competence_rang', { n: rang, m: RANG_MAX_COMPETENCE }),
           refus: validerAction(etat, action),
+          apercu: null,
         });
       });
     }
@@ -123,9 +138,10 @@ export function elementsTour(etat: EtatPartie, cx: number, cy: number): ElementM
     gain: valeurRevente(etat, cx, cy),
     rang: null,
     refus: validerAction(etat, vente),
+    apercu: null,
   });
   if (tour.stats.soldats) {
-    elements.push({ id: 'ralliement', action: null, icone: 'icone-ralliement', libelle: t('menu.ralliement'), prix: null, gain: null, rang: null, refus: null });
+    elements.push({ id: 'ralliement', action: null, icone: 'icone-ralliement', libelle: t('menu.ralliement'), prix: null, gain: null, rang: null, refus: null, apercu: null });
   }
   return elements;
 }

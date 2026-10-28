@@ -4,12 +4,13 @@
 import { DIEUX } from '../data/dieux';
 import { OBJETS } from '../data/objets';
 import type { Action, EtatPartie, RaisonRefus } from '../engine';
+import type { CaseGrille } from '../engine/definitions';
 import { caseSousPoint, estCaseInterdite, tourSurCase, validerAction } from '../engine';
 import type { FamilleTour } from '../engine/etat';
 import { chercherParId } from '../engine/recherche';
 import { tCle } from '../i18n';
 import type { Surbrillance } from '../render/rendu';
-import type { ElementMenu } from './menu-cercle';
+import type { ApercuConstruction, ElementMenu } from './menu-cercle';
 
 export type Mode =
   | { readonly type: 'libre' }
@@ -66,6 +67,10 @@ export function rayonSort(etat: EtatPartie, emplacement: number): number {
 
 export class Interaction {
   mode: Mode = LIBRE;
+  /** La case sous le pointeur (survol de la souris, ou doigt posé), null si on ne vise rien. */
+  visee: CaseGrille | null = null;
+  /** Le bouton « construire » du menu survolé : sa portée et son ralliement sont montrés sur la carte. */
+  private apercu: ApercuConstruction | null = null;
   /** Dernier mode dont on a rédigé l'invite : l'invite est appelée à chaque image, le texte n'est refait que si le mode change. */
   private modeInvite: Mode | null = null;
   private texteInvite: string | null = null;
@@ -93,6 +98,25 @@ export class Interaction {
     if (estCaseInterdite(etat.niveau, cible.cx, cible.cy) && !tourSurCase(etat, cible.cx, cible.cy)) return { action: null, refus: 'case_interdite' };
     this.mode = mode.type === 'menu' && mode.cx === cible.cx && mode.cy === cible.cy ? LIBRE : { type: 'menu', cx: cible.cx, cy: cible.cy };
     return RIEN;
+  }
+
+  /**
+   * Le pointeur est en (x, y) (tuiles) : la case dessous s'éclaire. On ne vise une case que lorsqu'un geste de cases est possible :
+   * pendant la visée du héros, d'un sort, d'un objet ou d'un ralliement, c'est un point libre qu'on désigne.
+   */
+  viser(etat: EtatPartie, x: number, y: number): void {
+    const mode = this.mode.type;
+    this.visee = mode === 'libre' || mode === 'menu' ? caseSousPoint(etat.niveau.carte, x, y) : null;
+  }
+
+  /** Le pointeur a quitté la carte, ou le doigt s'est levé : plus aucune case n'est éclairée. */
+  cesserDeViser(): void {
+    this.visee = null;
+  }
+
+  /** Un bouton du menu en cercle est survolé (ou rendu actif au clavier) ; null quand le pointeur le quitte. */
+  survolerElement(element: ElementMenu | null): void {
+    this.apercu = element?.apercu ?? null;
   }
 
   /** Envoie l'action visée ; si le moteur la refuse, on reste en visée pour que le joueur retouche ailleurs. */
@@ -155,16 +179,21 @@ export class Interaction {
     return RIEN;
   }
 
-  /** Touches 1 à 5 : construit sur la case dont le menu est ouvert (si elle est vide). */
+  /**
+   * Touches 1 à 5 : construit sur la case survolée par la souris ; sans survol, sur celle dont le menu est ouvert. Une case qui
+   * porte déjà une tour ne fait rien ; une case interdite ou un prix trop haut disent pourquoi (le moteur valide).
+   */
   construireSurSelection(etat: EtatPartie, famille: FamilleTour): Issue {
     const mode = this.mode;
-    if (mode.type !== 'menu' || tourSurCase(etat, mode.cx, mode.cy)) return RIEN;
-    return this.ordonner(etat, { type: 'construire', cx: mode.cx, cy: mode.cy, tour: famille });
+    const cible = this.visee ?? (mode.type === 'menu' ? mode : null);
+    if (!cible || tourSurCase(etat, cible.cx, cible.cy)) return RIEN;
+    return this.ordonner(etat, { type: 'construire', cx: cible.cx, cy: cible.cy, tour: famille });
   }
 
   /** Échap, ou un toucher dans le vide : ferme les menus et abandonne la visée. */
   annuler(): Issue {
     this.mode = LIBRE;
+    this.apercu = null;
     return RIEN;
   }
 
@@ -193,12 +222,34 @@ export class Interaction {
     surb.cx = -1;
     surb.cy = -1;
     surb.portee = 0;
+    surb.viseeCx = -1;
+    surb.viseeCy = -1;
+    surb.viseeInterdite = false;
+    surb.apercuPortee = 0;
+    surb.apercuRalliement = false;
     surb.heros = mode.type === 'heros';
     surb.sortRayon = mode.type === 'sort' ? rayonSort(etat, mode.emplacement) : mode.type === 'objet' ? rayonObjet(etat, mode.emplacement) : 0;
     if (mode.type === 'menu' || mode.type === 'ralliement') {
       surb.cx = mode.cx;
       surb.cy = mode.cy;
       surb.portee = tourSurCase(etat, mode.cx, mode.cy)?.stats.portee ?? 0;
+    }
+    const visee = this.visee;
+    if (visee && etat.statut === 'en_cours') {
+      surb.viseeCx = visee.cx;
+      surb.viseeCy = visee.cy;
+      // Rouge : le chemin, un grand décor. Une case qui porte une tour s'ouvre (améliorer, vendre) : elle reste claire.
+      surb.viseeInterdite = estCaseInterdite(etat.niveau, visee.cx, visee.cy) && !tourSurCase(etat, visee.cx, visee.cy);
+    }
+    // La portée d'une tour qu'on s'apprête à construire se mesure depuis la case du menu, qui l'accueillerait.
+    const apercu = mode.type === 'menu' && !tourSurCase(etat, mode.cx, mode.cy) ? this.apercu : null;
+    if (apercu) {
+      surb.apercuPortee = apercu.portee;
+      if (apercu.ralliement) {
+        surb.apercuRalliement = true;
+        surb.apercuRalliementX = apercu.ralliement.x;
+        surb.apercuRalliementY = apercu.ralliement.y;
+      }
     }
   }
 

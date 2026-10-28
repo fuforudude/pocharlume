@@ -35,6 +35,8 @@ export class Camera {
   private margeGauche = 0;
   private margeDroite = 0;
 
+  /** Zoom en dessous duquel on ne descend pas (cases assez grandes pour le doigt), 1 si aucun. */
+  private plancher = 1;
   private pret = false;
   private zoomDebutPincement = 1;
   private cumulMolette = 0;
@@ -72,7 +74,7 @@ export class Camera {
     this.ecranL = Math.max(1, Math.round(ecranL));
     this.ecranH = Math.max(1, Math.round(ecranH));
     const ajuste = Math.min(this.ecranL / this.mondeL, this.ecranH / this.mondeH);
-    this.zoomMin = Math.max(1, Math.floor(ajuste));
+    this.zoomMin = Math.max(1, Math.floor(ajuste), this.plancher);
     this.zoomMax = this.zoomMin + PALIERS_AU_DESSUS;
     if (this.pret) {
       this.zoom = borner(this.zoom, this.zoomMin, this.zoomMax);
@@ -83,6 +85,14 @@ export class Camera {
       this.pret = true;
     }
     this.contraindre();
+  }
+
+  /**
+   * Zoom minimal imposé par le joueur ou l'appareil (écran tactile : voir `zoomPourCase`), même si la carte entière tiendrait
+   * à un zoom plus petit. Prend effet au prochain `redimensionner`.
+   */
+  definirPlancherZoom(zoom: number): void {
+    this.plancher = Number.isFinite(zoom) && zoom > 1 ? Math.floor(zoom) : 1;
   }
 
   /** Marges de l'interface (pixels physiques) ; une valeur négative ou qui n'est pas un nombre fini compte pour 0. */

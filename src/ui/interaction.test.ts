@@ -429,3 +429,122 @@ describe('objets emportés', () => {
     expect(interaction.invite(etat)).toBe('Touche la carte pour utiliser : Fiole de Soufre.');
   });
 });
+
+describe('visée de case', () => {
+  it('éclaire la case sous le pointeur, libre ou interdite, et rien hors de la carte', () => {
+    const etat = partie();
+    const ui = new Interaction();
+    const surb = new Surbrillance();
+    ui.surbrillance(etat, surb);
+    expect(surb.viseeCx).toBe(-1);
+    ui.viser(etat, ...pt(0, 0.4, -0.3));
+    ui.surbrillance(etat, surb);
+    expect([surb.viseeCx, surb.viseeCy, surb.viseeInterdite]).toEqual([ct(0).cx, ct(0).cy, false]);
+    ui.viser(etat, 6, 4);
+    ui.surbrillance(etat, surb);
+    expect([surb.viseeCx, surb.viseeCy, surb.viseeInterdite]).toEqual([3, 2, true]);
+    ui.viser(etat, -1, 5);
+    ui.surbrillance(etat, surb);
+    expect(surb.viseeCx).toBe(-1);
+  });
+
+  it('une case qui porte une tour reste « libre » (on peut l’ouvrir) ; la case redevient claire si la tour est vendue', () => {
+    const etat = partie();
+    const ui = new Interaction();
+    const surb = new Surbrillance();
+    envoyer(etat, { type: 'construire', ...ct(1), tour: 'tir' });
+    ui.viser(etat, ...pt(1));
+    ui.surbrillance(etat, surb);
+    expect(surb.viseeInterdite).toBe(false);
+    expect(surb.viseeCx).toBe(ct(1).cx);
+  });
+
+  it('cesserDeViser efface la case ; pendant la visée du héros, d’un sort ou d’un objet, aucune case n’est éclairée', () => {
+    const etat = partie();
+    const ui = new Interaction();
+    const surb = new Surbrillance();
+    ui.viser(etat, ...pt(0));
+    ui.cesserDeViser();
+    ui.surbrillance(etat, surb);
+    expect(surb.viseeCx).toBe(-1);
+    ui.basculerHeros(etat);
+    ui.viser(etat, ...pt(0));
+    ui.surbrillance(etat, surb);
+    expect(surb.viseeCx).toBe(-1);
+  });
+
+  it('toucher une case interdite donne case_interdite sans ouvrir de menu, même quand on la visait', () => {
+    const etat = partie();
+    const ui = new Interaction();
+    ui.viser(etat, 6, 4);
+    expect(ui.toucher(etat, 6, 4, RAYON)).toEqual({ action: null, refus: 'case_interdite' });
+    expect(ui.mode).toEqual({ type: 'libre' });
+  });
+
+  it('les touches 1 à 5 construisent sur la case survolée, sans menu ouvert', () => {
+    const etat = partie();
+    const ui = new Interaction();
+    ui.viser(etat, ...pt(2));
+    const issue = ui.construireSurSelection(etat, 'tir');
+    expect(issue).toEqual({ action: { type: 'construire', ...ct(2), tour: 'tir' }, refus: null });
+  });
+
+  it('la case survolée passe avant celle du menu ; sur une case interdite, la touche dit pourquoi', () => {
+    const etat = partie();
+    const ui = new Interaction();
+    ui.toucher(etat, ...pt(0), RAYON);
+    ui.viser(etat, ...pt(2));
+    expect(ui.construireSurSelection(etat, 'tir').action).toEqual({ type: 'construire', ...ct(2), tour: 'tir' });
+    ui.mode = { type: 'menu', ...ct(0) };
+    ui.viser(etat, 6, 4);
+    expect(ui.construireSurSelection(etat, 'tir')).toEqual({ action: null, refus: 'case_interdite' });
+    ui.cesserDeViser();
+    expect(ui.construireSurSelection(etat, 'tir').action).toEqual({ type: 'construire', ...ct(0), tour: 'tir' });
+  });
+
+  it('sans case visée ni menu, une touche de construction ne fait rien', () => {
+    const etat = partie();
+    expect(new Interaction().construireSurSelection(etat, 'tir')).toEqual({ action: null, refus: null });
+  });
+});
+
+describe('aperçu de la tour au survol du menu', () => {
+  it('montre la portée de la famille survolée depuis la case du menu, et le ralliement de la caserne', () => {
+    const etat = partie();
+    const ui = new Interaction();
+    const surb = new Surbrillance();
+    ui.toucher(etat, ...pt(0), RAYON);
+    const elements = elementsMenu(etat, 0);
+    const tir = elements.find((e) => e.id === 'construire:tir');
+    const caserne = elements.find((e) => e.id === 'construire:caserne');
+    if (!tir || !caserne) throw new Error('éléments manquants');
+    ui.survolerElement(tir);
+    ui.surbrillance(etat, surb);
+    expect(surb.apercuPortee).toBeGreaterThan(0);
+    expect(surb.apercuRalliement).toBe(false);
+    ui.survolerElement(caserne);
+    ui.surbrillance(etat, surb);
+    expect(surb.apercuRalliement).toBe(true);
+    expect(Number.isFinite(surb.apercuRalliementX) && Number.isFinite(surb.apercuRalliementY)).toBe(true);
+    ui.survolerElement(null);
+    ui.surbrillance(etat, surb);
+    expect([surb.apercuPortee, surb.apercuRalliement]).toEqual([0, false]);
+  });
+
+  it('un aperçu disparaît avec le menu, et un bouton grisé montre quand même sa portée', () => {
+    const etat = partie();
+    etat.aretes = 0;
+    const ui = new Interaction();
+    const surb = new Surbrillance();
+    ui.toucher(etat, ...pt(0), RAYON);
+    const tir = elementsMenu(etat, 0).find((e) => e.id === 'construire:tir');
+    if (!tir) throw new Error('élément manquant');
+    expect(tir.refus).toBe('aretes_insuffisantes');
+    ui.survolerElement(tir);
+    ui.surbrillance(etat, surb);
+    expect(surb.apercuPortee).toBeGreaterThan(0);
+    ui.annuler();
+    ui.surbrillance(etat, surb);
+    expect(surb.apercuPortee).toBe(0);
+  });
+});

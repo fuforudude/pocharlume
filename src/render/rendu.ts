@@ -13,10 +13,12 @@ import { caseExiste, centreCase, EFFET, type EtatPartie } from '../engine';
 import { cadreA } from './animations';
 import type { AtlasRendu, CadreAtlas, SpriteAtlas } from './atlas';
 import { Camera, TUILE } from './camera';
+import { REGLES } from '../data/regles';
 import { PoolEffets, TYPE_EFFET, type Effet } from './effets';
 import { dessinerNombre, largeurNombre } from './police';
 import { construireSol, peindreSol } from './sol';
 import { tuileTouchee } from './zones';
+import { zoomPourCase } from './zoom-tactile';
 import { CATEGORIE, DEPLOIEMENT_NUAGE, Suivi, type OptionsCollection, type Visuel, type VisuelProjectile } from './suivi';
 
 export type { OptionsCollection } from './suivi';
@@ -34,6 +36,13 @@ const BARRE_ALLIE = '#5fb85a';
 const BARRE_VIDE = '#4a2a2a';
 const ANNEAU = '#f3e6b0';
 const ANNEAU_PORTEE = '#f3e6b0';
+/** Case visée libre : léger voile clair et coins de la couleur des anneaux ; interdite : voile rouge sombre et coins rouges. */
+const VISEE_LIBRE_VOILE = 'rgba(243, 230, 176, 0.16)';
+const VISEE_LIBRE_COIN = '#f3e6b0';
+const VISEE_INTERDITE_VOILE = 'rgba(96, 18, 18, 0.38)';
+const VISEE_INTERDITE_COIN = '#9a3030';
+/** Longueur (pixels logiques) des coins qui cadrent la case visée. */
+const COIN_VISEE = 5;
 const MARQUEUR_PLACEHOLDER = '#ff00ff';
 /** Un ennemi volant est dessiné plus haut que son ombre. */
 const ALTITUDE_VOL = 10;
@@ -58,6 +67,16 @@ export class Surbrillance {
   cy = -1;
   /** Portée à tracer autour du centre de cette case (tuiles), 0 si aucune. */
   portee = 0;
+  /** Case sous le pointeur (souris ou doigt posé), -1 si aucune : elle s'éclaire, en rouge sombre si on ne peut pas y construire. */
+  viseeCx = -1;
+  viseeCy = -1;
+  viseeInterdite = false;
+  /** Portée (tuiles) de la tour qu'on survole dans le menu de construction, tracée depuis la case du menu ; 0 si aucune. */
+  apercuPortee = 0;
+  /** Ralliement par défaut de la caserne survolée, en tuiles. */
+  apercuRalliement = false;
+  apercuRalliementX = 0;
+  apercuRalliementY = 0;
   /** Héros sélectionné : on attend le point où l'envoyer. */
   heros = false;
   /** Rayon du sort en cours de visée (tuiles), 0 si aucun, et position du curseur (tuiles). */
@@ -120,6 +139,8 @@ export class Rendu {
   readonly suivi: Suivi;
   /** Pixels physiques par pixel CSS. */
   ratio = 1;
+  /** Côté minimal (pixels CSS) d'une case à l'écran, 0 s'il n'y en a pas (souris) : la caméra ne dézoome pas en dessous. */
+  private cibleCaseCss = 0;
 
   private readonly ecran: CanvasRenderingContext2D;
   private readonly tampon: HTMLCanvasElement;
@@ -185,7 +206,17 @@ export class Rendu {
       this.canvas.width = l;
       this.canvas.height = h;
     }
+    this.camera.definirPlancherZoom(this.cibleCaseCss > 0 ? zoomPourCase(this.ratio, this.cibleCaseCss) : 1);
     this.camera.redimensionner(l, h);
+  }
+
+  /**
+   * Écran tactile : une case de construction fait au moins `cssPx` pixels CSS de côté (44 px, la taille d'un doigt). La caméra
+   * garde alors un zoom plancher, et la carte défile quand elle ne tient plus en entier. 0 : aucune exigence.
+   */
+  definirCibleCase(cssPx: number): void {
+    this.cibleCaseCss = cssPx > 0 ? cssPx : 0;
+    this.redimensionner();
   }
 
   /**
@@ -267,6 +298,7 @@ export class Rendu {
     this.trier();
     this.dessinerOmbres(l, h);
     this.dessinerProfondeur(temps, l, h);
+    this.dessinerVisee(etat, surb, ox, oy);
     this.dessinerProjectiles(alpha, temps, ox, oy);
     this.dessinerEffets(temps, ox, oy);
     this.dessinerBarres(temps, l, h);
@@ -671,6 +703,47 @@ export class Rendu {
     }
   }
 
+  /** Disque clair et cercle pointillé : la portée d'une tour, centrée en (cx, cy) du tampon. */
+  private dessinerPortee(cx: number, cy: number, rayon: number, phase: number): void {
+    const ctx = this.ctx;
+    ctx.fillStyle = 'rgba(243, 230, 176, 0.1)';
+    ctx.beginPath();
+    ctx.arc(cx, cy, rayon, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = ANNEAU_PORTEE;
+    cerclePointille(ctx, cx, cy, rayon, phase);
+  }
+
+  /** Point de ralliement d'une caserne : un petit carré cerné d'un anneau, relié à la tour par une ligne. */
+  private dessinerRalliement(cx: number, cy: number, rx: number, ry: number, phase: number): void {
+    const ctx = this.ctx;
+    ctx.fillStyle = ANNEAU;
+    ligne(ctx, cx, cy, rx, ry);
+    cerclePointille(ctx, rx, ry, 5, phase);
+    ctx.fillRect(rx - 1, ry - 1, 3, 3);
+  }
+
+  /**
+   * La case sous le pointeur : un voile et quatre coins. Dessinée par-dessus le décor et les tours (un grand décor qui interdit
+   * la case la cacherait sinon), mais en voile léger. Rien n'est dessiné tant qu'on ne vise pas.
+   */
+  private dessinerVisee(etat: EtatPartie, surb: Surbrillance, ox: number, oy: number): void {
+    if (surb.viseeCx < 0 || surb.viseeCy < 0 || !caseExiste(etat.niveau.carte, surb.viseeCx, surb.viseeCy)) return;
+    const ctx = this.ctx;
+    const cote = REGLES.tailleCase * TUILE;
+    const x = surb.viseeCx * cote - ox;
+    const y = surb.viseeCy * cote - oy;
+    ctx.fillStyle = surb.viseeInterdite ? VISEE_INTERDITE_VOILE : VISEE_LIBRE_VOILE;
+    ctx.fillRect(x + 1, y + 1, cote - 2, cote - 2);
+    ctx.fillStyle = surb.viseeInterdite ? VISEE_INTERDITE_COIN : VISEE_LIBRE_COIN;
+    const fin = cote - 1;
+    for (const [px, py, sx, sy] of [[1, 1, 1, 1], [fin, 1, -1, 1], [1, fin, 1, -1], [fin, fin, -1, -1]] as const) {
+      // Un coin : deux traits d'un pixel, l'un horizontal et l'autre vertical.
+      ctx.fillRect(sx > 0 ? x + px : x + px - COIN_VISEE + 1, y + py, COIN_VISEE, 1);
+      ctx.fillRect(x + px, sy > 0 ? y + py : y + py - COIN_VISEE + 1, 1, COIN_VISEE);
+    }
+  }
+
   private dessinerSurbrillance(etat: EtatPartie, surb: Surbrillance, temps: number, ox: number, oy: number): void {
     const ctx = this.ctx;
     const phase = Math.floor(temps / 90);
@@ -679,14 +752,11 @@ export class Rendu {
       if (s) {
         const cx = Math.round(s.x * TUILE) - ox;
         const cy = Math.round(s.y * TUILE) - oy;
-        if (surb.portee > 0) {
-          const r = surb.portee * TUILE;
-          ctx.fillStyle = 'rgba(243, 230, 176, 0.1)';
-          ctx.beginPath();
-          ctx.arc(cx, cy, r, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = ANNEAU_PORTEE;
-          cerclePointille(ctx, cx, cy, r, phase);
+        if (surb.portee > 0) this.dessinerPortee(cx, cy, surb.portee * TUILE, phase);
+        else if (surb.apercuPortee > 0) {
+          // Menu de construction : la tour survolée couvrirait ceci, et ses soldats se rallieraient là.
+          this.dessinerPortee(cx, cy, surb.apercuPortee * TUILE, phase);
+          if (surb.apercuRalliement) this.dessinerRalliement(cx, cy, Math.round(surb.apercuRalliementX * TUILE) - ox, Math.round(surb.apercuRalliementY * TUILE) - oy, phase);
         }
         ctx.fillStyle = ANNEAU;
         cerclePointille(ctx, cx, cy - 2, 13, phase);

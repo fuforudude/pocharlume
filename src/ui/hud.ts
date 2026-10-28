@@ -27,6 +27,8 @@ export interface CommandesHud {
   basculerObjet: (emplacement: number) => void;
   basculerHeros: () => void;
   choisirElement: (element: ElementMenu) => void;
+  /** Un bouton du menu en cercle est survolé à la souris ou pris au clavier (portée de la tour à construire) ; null quand il est quitté. */
+  survolerElement: (element: ElementMenu | null) => void;
 }
 
 /** Ce que le HUD affiche et qui ne vient pas de l'état du moteur. */
@@ -294,6 +296,7 @@ export class Hud {
         this.signatureMenu = '';
         this.versionMenu = -1;
         this.menu.replaceChildren();
+        this.commandes.survolerElement(null);
       }
       return;
     }
@@ -306,8 +309,14 @@ export class Hud {
       const signature = elements.map((e) => `${e.id}|${String(e.prix)}|${String(e.gain)}|${String(e.rang)}|${String(e.refus)}`).join(';');
       if (signature !== this.signatureMenu) {
         this.signatureMenu = signature;
-        this.menu.replaceChildren(...elements.map((e) => this.boutonMenu(e)));
+        const boutons = elements.map((e) => this.boutonMenu(e));
+        this.menu.replaceChildren(...boutons);
         reconstruit = true;
+        // Les boutons remplacés n'envoient pas de « pointeur parti » : on redit lequel est survolé, s'il y en a un.
+        this.commandes.survolerElement(null);
+        boutons.forEach((b, i) => {
+          if (b.matches(':hover') || b === document.activeElement) this.commandes.survolerElement(elements[i] ?? null);
+        });
       }
     }
     if (!reconstruit && !bouge) return;
@@ -339,6 +348,15 @@ export class Hud {
       prix.append(image(this.atlas.iconeUrl('icone-arete', 1), 'arete'), el('span', '', `${element.gain !== null ? '+' : ''}${String(element.prix ?? element.gain)}`));
       b.append(prix);
     }
+    // Souris seulement : au doigt, toucher un bouton le choisit tout de suite, il n'y a pas de survol.
+    b.addEventListener('pointerenter', (e) => {
+      if (e.pointerType === 'mouse') this.commandes.survolerElement(element);
+    });
+    b.addEventListener('pointerleave', (e) => {
+      if (e.pointerType === 'mouse') this.commandes.survolerElement(null);
+    });
+    b.addEventListener('focus', () => { this.commandes.survolerElement(element); });
+    b.addEventListener('blur', () => { this.commandes.survolerElement(null); });
     b.addEventListener('click', (e) => {
       e.stopPropagation();
       this.commandes.choisirElement(element);

@@ -257,3 +257,25 @@ describe('menu d’une tour spécialisée : ses deux compétences', () => {
     expect(elementsCaseVide(pollen, 0).find((e) => e.id === 'construire:divine')?.icone).toBe('tour-atelier');
   });
 });
+
+describe('aperçu des éléments « construire »', () => {
+  it('donne la portée de chaque famille et le ralliement de la seule caserne ; les actions sur une tour n’en ont pas', () => {
+    const etat = partie();
+    const parId = Object.fromEntries(elementsCaseVide(etat, 0).map((e) => [e.id, e.apercu]));
+    for (const id of ['construire:caserne', 'construire:tir', 'construire:magie', 'construire:artillerie', 'construire:divine']) {
+      expect(parId[id]?.portee ?? 0).toBeGreaterThan(0);
+    }
+    expect(parId['construire:caserne']?.ralliement).not.toBeNull();
+    expect(parId['construire:tir']?.ralliement).toBeNull();
+    avancer(etat, [{ type: 'construire', ...ct(0), tour: 'tir' }]);
+    expect(elementsMenu(etat, 0).every((e) => e.apercu === null)).toBe(true);
+  });
+
+  it('le ralliement montré est celui que le moteur donnera à la caserne', () => {
+    const etat = partie();
+    const apercu = elementsCaseVide(etat, 0).find((e) => e.id === 'construire:caserne')?.apercu;
+    avancer(etat, [{ type: 'construire', ...ct(0), tour: 'caserne' }]);
+    const tour = etat.tours[0];
+    expect(apercu?.ralliement).toEqual({ x: tour?.ralliementX, y: tour?.ralliementY });
+  });
+});

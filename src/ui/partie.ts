@@ -122,6 +122,8 @@ export interface PartieEnCours {
 /** Zone de toucher autour du héros : 44 px CSS de large au moins, soit un rayon de 22 px. */
 const RAYON_TOUCHE_CSS = 24;
 const RAYON_TOUCHE_MIN_TUILES = 0.9;
+/** Côté minimal d'une case de construction à l'écran sur un écran tactile (pixels CSS) : un doigt. */
+const CIBLE_TACTILE_CSS = 44;
 /** Délai avant l'écran de fin, pour laisser voir la dernière mort. */
 const DELAI_ECRAN_FIN_MS = 1100;
 const LIGNE_PIXELS = 40;
@@ -246,6 +248,7 @@ export async function lancerNiveau(
     basculerObjet: (emplacement) => { traiter(interaction.basculerObjet(etat, emplacement)); },
     basculerHeros: () => { traiter(interaction.basculerHeros(etat)); },
     choisirElement: (element) => { traiter(interaction.choisirElement(element)); },
+    survolerElement: (element) => { interaction.survolerElement(element); },
   }, signal);
 
   // La carte peut dépasser de l'écran de la largeur des barres du HUD : une case collée au bord reste atteignable.
@@ -256,10 +259,18 @@ export async function lancerNiveau(
 
   // --- Entrées : toucher, glisser, pincer, molette, clavier ---
 
+  // Écran tactile : une case fait au moins 44 px CSS (la caméra ne dézoome pas en dessous, la carte défile).
+  if (window.matchMedia('(pointer: coarse)').matches) rendu.definirCibleCase(CIBLE_TACTILE_CSS);
+
+  /** Un glissé de caméra est en cours : la case sous le doigt ne s'éclaire pas, on ne vise pas. */
+  let enGlissement = false;
   const pointeurSurTuiles = (x: number, y: number): void => {
-    surbrillance.curseurX = rendu.enTuilesX(x);
-    surbrillance.curseurY = rendu.enTuilesY(y);
+    const tx = rendu.enTuilesX(x);
+    const ty = rendu.enTuilesY(y);
+    surbrillance.curseurX = tx;
+    surbrillance.curseurY = ty;
     surbrillance.curseurActif = true;
+    if (!enGlissement && !finie) interaction.viser(etat, tx, ty);
   };
   const gestes = new Gestes({
     toucher: (x, y) => {
@@ -267,14 +278,27 @@ export async function lancerNiveau(
       const rayon = Math.max(RAYON_TOUCHE_MIN_TUILES, RAYON_TOUCHE_CSS / rendu.pixelsCssParTuile);
       traiter(interaction.toucher(etat, rendu.enTuilesX(x), rendu.enTuilesY(y), rayon));
     },
-    glisser: (dx, dy) => { rendu.camera.deplacer(dx * rendu.ratio, dy * rendu.ratio); },
-    debutPincement: () => { rendu.camera.debutPincement(); },
+    glisser: (dx, dy) => {
+      enGlissement = true;
+      interaction.cesserDeViser();
+      rendu.camera.deplacer(dx * rendu.ratio, dy * rendu.ratio);
+    },
+    debutPincement: () => {
+      enGlissement = true;
+      interaction.cesserDeViser();
+      rendu.camera.debutPincement();
+    },
     pincer: (facteur, x, y) => { rendu.camera.pincement(facteur, x * rendu.ratio, y * rendu.ratio); },
-    survol: pointeurSurTuiles,
+    // La souris bouge sans appui : le glissé précédent est fini, on vise de nouveau.
+    survol: (x, y) => {
+      enGlissement = false;
+      pointeurSurTuiles(x, y);
+    },
   });
   canvas.addEventListener('pointerdown', (e) => {
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     canvas.setPointerCapture(e.pointerId);
+    enGlissement = false;
     pointeurSurTuiles(e.clientX, e.clientY);
     gestes.appuyer(e.pointerId, e.clientX, e.clientY);
   }, { signal });
@@ -282,8 +306,18 @@ export async function lancerNiveau(
     if (e.pointerType !== 'mouse' || e.buttons !== 0) pointeurSurTuiles(e.clientX, e.clientY);
     gestes.bouger(e.pointerId, e.clientX, e.clientY);
   }, { signal });
-  canvas.addEventListener('pointerup', (e) => { gestes.relacher(e.pointerId, e.clientX, e.clientY); }, { signal });
-  canvas.addEventListener('pointercancel', (e) => { gestes.annuler(e.pointerId); }, { signal });
+  canvas.addEventListener('pointerup', (e) => {
+    gestes.relacher(e.pointerId, e.clientX, e.clientY);
+    // Le doigt levé ne vise plus rien ; la souris, elle, reste au-dessus de la case.
+    if (e.pointerType !== 'mouse') interaction.cesserDeViser();
+  }, { signal });
+  canvas.addEventListener('pointercancel', (e) => {
+    gestes.annuler(e.pointerId);
+    interaction.cesserDeViser();
+  }, { signal });
+  canvas.addEventListener('pointerleave', (e) => {
+    if (e.pointerType === 'mouse') interaction.cesserDeViser();
+  }, { signal });
   canvas.addEventListener('wheel', (e) => {
     e.preventDefault();
     const facteur = e.deltaMode === 1 ? LIGNE_PIXELS : e.deltaMode === 2 ? PAGE_PIXELS : 1;
