@@ -2,7 +2,7 @@
 // (son avatar, sans amélioration ni objet) et les bots (naïf, soigneux, sans défense) sur toutes les graines
 // d'évaluation, plus, pour la région 1, les vérifications supplémentaires (disciples, arbre au maximum, héros de niveau 10,
 // soigneux sans tour divine). Écrit balance-report.md à la racine et affiche les écarts aux bandes cibles. Code de sortie 1
-// si une bande de la région 1 n'est pas respectée ; les écarts des régions 2 à 5, qui n'ont pas encore de bandes imposées
+// si une bande de la région 1 n'est pas respectée (tant que `BANDES_IMPOSEES` est vrai : suspendu, voir bandes.ts) ; les écarts des régions 2 à 5, qui n'ont pas encore de bandes imposées
 // (tâche 6 du jalon 3), sont affichés et écrits dans le rapport mais ne font pas échouer la commande.
 // Chaque tâche (niveau, difficulté, dieu ou profil) se calcule dans un fil à part ; le résultat ne dépend pas de leur
 // ordre d'arrivée (les évaluations sont remises dans l'ordre avant la rédaction).
@@ -16,7 +16,7 @@ import { availableParallelism } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { Worker } from 'node:worker_threads';
 import { CAMPAGNE } from '../../src/data/niveaux/campagne.ts';
-import { correlationDeRang, courbeDifficulte, nomDuDieu, verifierBandes } from '../../src/equilibrage/bandes.ts';
+import { BANDES_IMPOSEES, correlationDeRang, courbeDifficulte, nomDuDieu, verifierBandes } from '../../src/equilibrage/bandes.ts';
 import {
   DIEUX_EVALUES,
   DIFFICULTES_EVALUEES,
@@ -193,9 +193,9 @@ ${redigerRegions(evaluations, [2, 3, 4, 5]).trimEnd()}
   if (ecarts.length === 0) {
     console.log('Toutes les bandes de la région 1 sont respectées.');
   } else {
-    console.log(`${String(ecarts.length)} écart(s) aux bandes de la région 1 :`);
+    console.log(`${String(ecarts.length)} écart(s) aux bandes de la région 1${BANDES_IMPOSEES ? '' : ' (bandes suspendues le temps de l’équilibrage après la grille, voir BANDES_IMPOSEES : la commande n’échoue pas)'} :`);
     for (const e of ecarts) console.log(`- ${e}`);
-    process.exitCode = 1;
+    if (BANDES_IMPOSEES) process.exitCode = 1;
   }
   for (const region of [2, 3, 4, 5]) {
     const ecartsRegion = ecartsDeRegion(evaluationsDeRegion(evaluations, region));

@@ -72,8 +72,9 @@ vi.mock('../render/rendu', () => ({
 
 const NIVEAU = REGION1[0];
 if (!NIVEAU) throw new Error('niveau 1 absent');
-/** Une case libre du niveau 1 (au hasard de la grille, mais toujours la même) et son centre. */
-const CASE = casesLibres({ niveau: NIVEAU.niveau, tours: [] })[5];
+/** Une case libre du niveau 1 où toutes les familles se construisent (un chemin est à portée de la caserne), et son centre. */
+const ESSAI = creerPartie(NIVEAU.niveau, { graine: 1, difficulte: 'matou', dieu: 'charlie', heros: 'charlie', niveauHeros: 1, competencesHeros: {}, ameliorations: {}, objets: [], versionDonnees: VERSION_DONNEES });
+const CASE = casesLibres(ESSAI).find((c) => validerAction(ESSAI, { type: 'construire', ...c, tour: 'caserne' }) === null);
 if (!CASE) throw new Error('aucune case libre');
 const CENTRE = centreCase(CASE.cx, CASE.cy);
 const CONFIG: ConfigPartie = { graine: 7, difficulte: 'matou', dieu: 'charlie', heros: 'charlie', niveauHeros: 1, competencesHeros: {}, ameliorations: {}, objets: [], versionDonnees: VERSION_DONNEES };

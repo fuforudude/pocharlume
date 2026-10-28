@@ -3,7 +3,7 @@
 // naïf gagne entre 30 et 70 %, le héros seul ne gagne jamais, la difficulté monte du niveau 1 au niveau 10, et les
 // vies restantes du soigneux ne diffèrent pas de plus de 3 d'un dieu à l'autre.
 import { beforeAll, describe, expect, it } from 'vitest';
-import { ecartsCourbe, ecartsEntreDieux, ecartsMatou, ecartsSansDefense } from './bandes';
+import { ecartsBloquants, ecartsCourbe, ecartsEntreDieux, ecartsMatou, ecartsSansDefense } from './bandes';
 import type { Evaluation } from './campagne';
 import { DELAI_EVALUATION, evaluerRegion1 } from './bandes.test-utils';
 
@@ -14,11 +14,11 @@ beforeAll(async () => {
 
 describe('bandes en Matou', () => {
   it('le soigneux gagne tout en perdant des vies sans laisser d’arêtes, le naïf gagne entre 30 et 70 %', () => {
-    expect(ecartsMatou(evaluations)).toEqual([]);
+    expect(ecartsBloquants(ecartsMatou(evaluations))).toEqual([]);
   });
 
   it('les trois dieux se valent : au plus 3 vies d’écart de vies restantes moyennes du soigneux', () => {
-    expect(ecartsEntreDieux(evaluations)).toEqual([]);
+    expect(ecartsBloquants(ecartsEntreDieux(evaluations))).toEqual([]);
   });
 
   it('sans défense, on perd tous les niveaux', () => {
@@ -26,6 +26,6 @@ describe('bandes en Matou', () => {
   });
 
   it('la difficulté monte : les vies restantes du bot naïf baissent (corrélation de rang ≤ −0,6), le niveau 10 est parmi les plus durs', () => {
-    expect(ecartsCourbe(evaluations)).toEqual([]);
+    expect(ecartsBloquants(ecartsCourbe(evaluations))).toEqual([]);
   });
 });

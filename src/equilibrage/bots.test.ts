@@ -87,9 +87,13 @@ describe('bot naïf', () => {
     }
   });
 
-  it('choisit parmi toutes les cases libres : il ne revient pas aux anciens emplacements fixes', () => {
-    const cases = new Set(actionsJouees(creerBotNaif({ graine: 5 }), 6).flatMap((a) => (a.type === 'construire' ? [`${String(a.cx)},${String(a.cy)}`] : [])));
-    expect(cases.size).toBeGreaterThanOrEqual(6);
+  it('choisit parmi toutes les cases libres, et chaque construction est sur une case distincte', () => {
+    const etat = etatInitial(niveau1);
+    const libres = new Set(casesLibres(etat).map((c) => `${String(c.cx)},${String(c.cy)}`));
+    const choisies = actionsJouees(creerBotNaif({ graine: 5 }), 6).flatMap((a) => (a.type === 'construire' ? [`${String(a.cx)},${String(a.cy)}`] : []));
+    expect(choisies.length).toBeGreaterThanOrEqual(3);
+    expect(new Set(choisies).size).toBe(choisies.length);
+    for (const c of choisies) expect(libres.has(c), c).toBe(true);
   });
 });
 

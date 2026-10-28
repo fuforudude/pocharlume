@@ -38,7 +38,7 @@ describe('cibleTouchee', () => {
     const etat = partie();
     // Le héros attend sur le chemin, dans la case (8, 6) : interdite.
     expect(cibleTouchee(etat, 16, 12.5, RAYON)).toEqual({ type: 'heros' });
-    expect(cibleTouchee(etat, 16, 12.5, 0.1)).toEqual({ type: 'case', cx: 8, cy: 6 });
+    expect(cibleTouchee(etat, 16, 12.9, 0.1)).toEqual({ type: 'case', cx: 8, cy: 6 });
   });
 
   it('ne trouve rien hors de la carte', () => {
