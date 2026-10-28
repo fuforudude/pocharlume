@@ -1,9 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { NIVEAU_TEST } from '../data/niveaux/region1';
 import { avancer, creerPartie } from '../engine';
-import { CONFIG } from '../engine/aides.test-utils';
+import { ct, CONFIG } from '../engine/aides.test-utils';
 import type { Action, EtatPartie } from '../engine';
-import { elementsMenu, elementsSocleVide, elementsTour, positionsCercle } from './menu-cercle';
+import { elementsCaseVide as caseVide, elementsMenu as menuDe, elementsTour as tourDe, positionsCercle } from './menu-cercle';
+
+/** Les éléments du menu de la case de test numéro `i` (voir `CASES_TEST`). */
+const elementsCaseVide = (etat: EtatPartie, i: number) => caseVide(etat, ct(i).cx, ct(i).cy);
+const elementsTour = (etat: EtatPartie, i: number) => tourDe(etat, ct(i).cx, ct(i).cy);
+const elementsMenu = (etat: EtatPartie, i: number) => menuDe(etat, ct(i).cx, ct(i).cy);
 
 function partie(aretes = 5000): EtatPartie {
   const etat = creerPartie(NIVEAU_TEST, CONFIG);
@@ -18,9 +23,9 @@ function jouer(etat: EtatPartie, ...actions: Action[]): void {
   }
 }
 
-describe('menu d’un socle vide', () => {
+describe('menu d’une case libre', () => {
   it('propose les 4 familles puis la tour divine, avec leur prix', () => {
-    const elements = elementsSocleVide(partie(), 0);
+    const elements = elementsCaseVide(partie(), 0);
     expect(elements.map((e) => e.id)).toEqual([
       'construire:caserne', 'construire:tir', 'construire:magie', 'construire:artillerie', 'construire:divine',
     ]);
@@ -42,29 +47,29 @@ describe('menu d’un socle vide', () => {
     }
 
     it('ne propose que les familles autorisées (la tour divine suit la famille du dieu)', () => {
-      expect(elementsSocleVide(partieFer(), 0).map((e) => e.id)).toEqual(['construire:tir', 'construire:magie']);
-      expect(elementsSocleVide(partieFer(['tir', 'caserne']), 0).map((e) => e.id)).toEqual(['construire:caserne', 'construire:tir', 'construire:divine']);
+      expect(elementsCaseVide(partieFer(), 0).map((e) => e.id)).toEqual(['construire:tir', 'construire:magie']);
+      expect(elementsCaseVide(partieFer(['tir', 'caserne']), 0).map((e) => e.id)).toEqual(['construire:caserne', 'construire:tir', 'construire:divine']);
     });
 
     it('ce qui est proposé n’est jamais refusé pour sa famille', () => {
-      for (const e of elementsSocleVide(partieFer(), 0)) expect(e.refus).not.toBe('famille_interdite');
+      for (const e of elementsCaseVide(partieFer(), 0)) expect(e.refus).not.toBe('famille_interdite');
     });
 
     it('le moteur refuse une famille interdite demandée au clavier, avec la raison à dire', () => {
       const etat = partieFer();
-      const [r] = avancer(etat, [{ type: 'construire', socle: 0, tour: 'artillerie' }]);
+      const [r] = avancer(etat, [{ type: 'construire', ...ct(0), tour: 'artillerie' }]);
       expect(r).toEqual({ ok: false, raison: 'famille_interdite' });
     });
 
     it('en Héroïque, toutes les familles restent proposées', () => {
       const heroique = creerPartie(NIVEAU_TEST, { ...CONFIG, defi: 'heroique', bonus: { tours: {}, heros: {} } });
       heroique.aretes = 5000;
-      expect(elementsSocleVide(heroique, 0)).toHaveLength(5);
+      expect(elementsCaseVide(heroique, 0)).toHaveLength(5);
     });
   });
 
   it('grise ce qu’on ne peut pas payer, d’après le moteur', () => {
-    const elements = elementsSocleVide(partie(90), 0);
+    const elements = elementsCaseVide(partie(90), 0);
     const refus = Object.fromEntries(elements.map((e) => [e.id, e.refus]));
     expect(refus['construire:caserne']).toBeNull();
     expect(refus['construire:tir']).toBeNull();
@@ -74,20 +79,20 @@ describe('menu d’un socle vide', () => {
 
   it('grise la tour divine quand elle est déjà construite ailleurs', () => {
     const etat = partie();
-    jouer(etat, { type: 'construire', socle: 1, tour: 'divine' });
-    const divine = elementsSocleVide(etat, 0).find((e) => e.id === 'construire:divine');
+    jouer(etat, { type: 'construire', ...ct(1), tour: 'divine' });
+    const divine = elementsCaseVide(etat, 0).find((e) => e.id === 'construire:divine');
     expect(divine?.refus).toBe('tour_divine_unique');
   });
 
   it('chaque libellé est un texte traduit, jamais une clé', () => {
-    for (const e of elementsSocleVide(partie(), 0)) expect(e.libelle).not.toMatch(/^(menu|tour|famille)\./);
+    for (const e of elementsCaseVide(partie(), 0)) expect(e.libelle).not.toMatch(/^(menu|tour|famille)\./);
   });
 });
 
 describe('menu d’une tour construite', () => {
   it('niveaux 1 et 2 : améliorer, vendre et, pour une caserne, le ralliement', () => {
     const etat = partie();
-    jouer(etat, { type: 'construire', socle: 0, tour: 'caserne' }, { type: 'construire', socle: 1, tour: 'tir' });
+    jouer(etat, { type: 'construire', ...ct(0), tour: 'caserne' }, { type: 'construire', ...ct(1), tour: 'tir' });
     expect(elementsTour(etat, 0).map((e) => e.id)).toEqual(['ameliorer', 'vendre', 'ralliement']);
     expect(elementsTour(etat, 1).map((e) => e.id)).toEqual(['ameliorer', 'vendre']);
     expect(elementsMenu(etat, 0)).toEqual(elementsTour(etat, 0));
@@ -95,17 +100,17 @@ describe('menu d’une tour construite', () => {
 
   it('affiche le prix de l’amélioration et le montant de la revente (70 % du coût cumulé)', () => {
     const etat = partie();
-    jouer(etat, { type: 'construire', socle: 1, tour: 'tir' });
+    jouer(etat, { type: 'construire', ...ct(1), tour: 'tir' });
     const [ameliorer, vendre] = elementsTour(etat, 1);
     expect(ameliorer?.prix).toBe(110);
     expect(vendre?.gain).toBe(Math.floor((70 * 70) / 100));
-    jouer(etat, { type: 'ameliorer', socle: 1 });
+    jouer(etat, { type: 'ameliorer', ...ct(1) });
     expect(elementsTour(etat, 1)[1]?.gain).toBe(Math.floor((180 * 70) / 100));
   });
 
   it('niveau 3 : les deux spécialisations avec leur prix, plus d’amélioration simple', () => {
     const etat = partie();
-    jouer(etat, { type: 'construire', socle: 1, tour: 'tir' }, { type: 'ameliorer', socle: 1 }, { type: 'ameliorer', socle: 1 });
+    jouer(etat, { type: 'construire', ...ct(1), tour: 'tir' }, { type: 'ameliorer', ...ct(1) }, { type: 'ameliorer', ...ct(1) });
     const elements = elementsTour(etat, 1);
     expect(elements.map((e) => e.id)).toEqual(['specialiser:A', 'specialiser:B', 'vendre']);
     expect(elements[0]?.prix).toBe(230);
@@ -116,7 +121,7 @@ describe('menu d’une tour construite', () => {
 
   it('grise l’amélioration quand les arêtes manquent', () => {
     const etat = partie();
-    jouer(etat, { type: 'construire', socle: 1, tour: 'tir' });
+    jouer(etat, { type: 'construire', ...ct(1), tour: 'tir' });
     etat.aretes = 50;
     expect(elementsTour(etat, 1)[0]?.refus).toBe('aretes_insuffisantes');
     expect(elementsTour(etat, 1)[1]?.refus).toBeNull();
@@ -126,15 +131,15 @@ describe('menu d’une tour construite', () => {
     const etat = partie();
     jouer(
       etat,
-      { type: 'construire', socle: 0, tour: 'caserne' }, { type: 'ameliorer', socle: 0 }, { type: 'ameliorer', socle: 0 },
-      { type: 'specialiser', socle: 0, voie: 'A' },
-      { type: 'construire', socle: 1, tour: 'divine' },
+      { type: 'construire', ...ct(0), tour: 'caserne' }, { type: 'ameliorer', ...ct(0) }, { type: 'ameliorer', ...ct(0) },
+      { type: 'specialiser', ...ct(0), voie: 'A' },
+      { type: 'construire', ...ct(1), tour: 'divine' },
     );
     expect(elementsTour(etat, 0).map((e) => e.id)).toEqual(['competence:benediction', 'competence:mur', 'vendre', 'ralliement']);
     expect(elementsTour(etat, 1).map((e) => e.id)).toEqual(['vendre']);
   });
 
-  it('un socle vide n’a pas de menu de tour', () => {
+  it('une case libre n’a pas de menu de tour', () => {
     expect(elementsTour(partie(), 3)).toEqual([]);
   });
 });
@@ -192,8 +197,8 @@ describe('menu d’une tour spécialisée : ses deux compétences', () => {
     const etat = partie(aretes);
     jouer(
       etat,
-      { type: 'construire', socle: 0, tour: 'caserne' }, { type: 'ameliorer', socle: 0 }, { type: 'ameliorer', socle: 0 },
-      { type: 'specialiser', socle: 0, voie: 'A' },
+      { type: 'construire', ...ct(0), tour: 'caserne' }, { type: 'ameliorer', ...ct(0) }, { type: 'ameliorer', ...ct(0) },
+      { type: 'specialiser', ...ct(0), voie: 'A' },
     );
     return etat;
   }
@@ -204,12 +209,12 @@ describe('menu d’une tour spécialisée : ses deux compétences', () => {
     expect(benediction).toMatchObject({ id: 'competence:benediction', rang: '0/3', prix: 90, refus: null, icone: 'icone-competence' });
     expect(mur).toMatchObject({ id: 'competence:mur', rang: '0/3', prix: 80, refus: null });
     expect(benediction?.libelle).toBe('Bénédiction : rang 0/3');
-    expect(benediction?.action).toEqual({ type: 'ameliorerCompetence', socle: 0, competence: 'benediction' });
+    expect(benediction?.action).toEqual({ type: 'ameliorerCompetence', ...ct(0), competence: 'benediction' });
   });
 
   it('acheter un rang (action du moteur) change le rang et le prix affichés', () => {
     const etat = garde();
-    jouer(etat, { type: 'ameliorerCompetence', socle: 0, competence: 'benediction' });
+    jouer(etat, { type: 'ameliorerCompetence', ...ct(0), competence: 'benediction' });
     expect(elementsTour(etat, 0)[0]).toMatchObject({ rang: '1/3', prix: 120 });
   });
 
@@ -220,24 +225,24 @@ describe('menu d’une tour spécialisée : ses deux compétences', () => {
     etat.aretes = 5000;
     jouer(
       etat,
-      { type: 'ameliorerCompetence', socle: 0, competence: 'mur' },
-      { type: 'ameliorerCompetence', socle: 0, competence: 'mur' },
-      { type: 'ameliorerCompetence', socle: 0, competence: 'mur' },
+      { type: 'ameliorerCompetence', ...ct(0), competence: 'mur' },
+      { type: 'ameliorerCompetence', ...ct(0), competence: 'mur' },
+      { type: 'ameliorerCompetence', ...ct(0), competence: 'mur' },
     );
     expect(elementsTour(etat, 0)[1]).toMatchObject({ rang: '3/3', prix: null, refus: 'competence_au_maximum', libelle: 'Mur : au sommet' });
   });
 
   it('pas de compétence avant la spécialisation, ni sur la tour divine', () => {
     const etat = partie();
-    jouer(etat, { type: 'construire', socle: 1, tour: 'tir' }, { type: 'construire', socle: 2, tour: 'divine' });
+    jouer(etat, { type: 'construire', ...ct(1), tour: 'tir' }, { type: 'construire', ...ct(2), tour: 'divine' });
     expect(elementsTour(etat, 1).some((e) => e.id.startsWith('competence:'))).toBe(false);
     expect(elementsTour(etat, 2).some((e) => e.id.startsWith('competence:'))).toBe(false);
   });
 
   it('la tour divine du menu montre le sprite du dieu de la partie', () => {
     const plume = creerPartie(NIVEAU_TEST, { ...CONFIG, dieu: 'plume', heros: 'plume' });
-    expect(elementsSocleVide(plume, 0).find((e) => e.id === 'construire:divine')?.icone).toBe('tour-sanctuaire');
+    expect(elementsCaseVide(plume, 0).find((e) => e.id === 'construire:divine')?.icone).toBe('tour-sanctuaire');
     const pollen = creerPartie(NIVEAU_TEST, { ...CONFIG, dieu: 'pollen', heros: 'pollen' });
-    expect(elementsSocleVide(pollen, 0).find((e) => e.id === 'construire:divine')?.icone).toBe('tour-atelier');
+    expect(elementsCaseVide(pollen, 0).find((e) => e.id === 'construire:divine')?.icone).toBe('tour-atelier');
   });
 });

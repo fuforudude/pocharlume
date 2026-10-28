@@ -1,5 +1,5 @@
 // Géométrie des cartes pour les bots : points d'échantillonnage le long des chemins, longueur de chemin vue
-// depuis un socle, poids de chaque chemin dans les vagues du niveau.
+// depuis une case de la grille, poids de chaque chemin dans les vagues du niveau.
 import { creerPartie, pointSurChemin } from '../engine';
 import type { DefEnnemi, EtatPartie, Niveau, Point } from '../engine';
 import { ENNEMIS } from '../data/ennemis';

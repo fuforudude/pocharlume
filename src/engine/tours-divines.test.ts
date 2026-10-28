@@ -1,7 +1,7 @@
 // Tours divines de Plume (Sanctuaire de l'Ombre) et de Pollen (Atelier Boiteux). Le Totem de Charlie est dans tours.test.ts.
 import { describe, expect, it } from 'vitest';
 import { DIEUX } from '../data/dieux';
-import { avancerSecondes, compter, configDe, construireTour, ennemiFixe, evenementsPendant, partieEssai } from './aides.test-utils';
+import { ce, avancerSecondes, compter, configDe, construireTour, ennemiFixe, evenementsPendant, partieEssai } from './aides.test-utils';
 import type { Evenement } from './evenements';
 import { appliquerAction } from './partie';
 import { PAS_PAR_SECONDE } from './temps';
@@ -13,7 +13,7 @@ describe('Sanctuaire de l’Ombre (Plume)', () => {
     const etat = partieEssai(configDe('plume'));
     construireTour(etat, 0, 'divine');
     expect(etat.aretes).toBe(5000 - 200);
-    expect(appliquerAction(etat, { type: 'construire', socle: 1, tour: 'divine' })).toEqual({ ok: false, raison: 'tour_divine_unique' });
+    expect(appliquerAction(etat, { type: 'construire', ...ce(1), tour: 'divine' })).toEqual({ ok: false, raison: 'tour_divine_unique' });
     const assassins = etat.unites.filter((u) => u.genre === 'soldat');
     expect(assassins).toHaveLength(sanctuaire.soldats?.nombre ?? 0);
     expect(assassins.length).toBeGreaterThan(0);
@@ -160,7 +160,7 @@ describe('Atelier Boiteux (Pollen)', () => {
     construireTour(etat, 0, 'divine');
     avancerSecondes(etat, 12);
     expect(etat.structures.length).toBeGreaterThan(0);
-    appliquerAction(etat, { type: 'vendre', socle: 0 });
+    appliquerAction(etat, { type: 'vendre', ...ce(0) });
     expect(etat.structures).toHaveLength(0);
   });
 });

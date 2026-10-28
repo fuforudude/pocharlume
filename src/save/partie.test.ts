@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { REGION1 } from '../data/niveaux/region1';
 import type { EtatPartie } from '../engine/etat';
+import { premiereCaseLibre } from '../engine/aides.test-utils';
 import { appliquerAction, creerPartie, serialiser, step } from '../engine/partie';
 import { Depot } from './depot';
 import { enregistrerVictoire } from './progression';
@@ -20,7 +21,7 @@ function niveau1(): EtatPartie {
 
 /** Avance jusqu'à ce que `n` vagues soient lancées. */
 function jusquaVague(etat: EtatPartie, n: number): void {
-  appliquerAction(etat, { type: 'construire', socle: 0, tour: 'tir' });
+  appliquerAction(etat, { type: 'construire', ...premiereCaseLibre(etat), tour: 'tir' });
   while (etat.vagues.lancees < n && etat.statut === 'en_cours') step(etat);
 }
 

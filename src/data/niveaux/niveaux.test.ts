@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import type { Niveau, Point } from '../../engine/definitions';
+import { caseExiste, casesLibres, centreCase, estCaseInterdite } from '../../engine/grille';
 import { fr } from '../../i18n/fr';
 import { ENNEMIS } from '../ennemis';
 import { budgetVague, menaceVague } from '../equilibrage';
@@ -10,7 +11,8 @@ import type { NiveauCampagne } from '../visuel';
 import { CARTES } from './cartes-toutes';
 import { vaguesDuPlan } from './generation';
 import { distancePointChemin, distanceRectChemin, rectsSeChevauchent } from './geometrie';
-import { DEMI_LARGEUR_CHEMIN, empriseDecor, empriseSocle, empriseSprite, GRANDS_DECORS, MARGE_DECOR } from './habillage';
+import { DEMI_LARGEUR_CHEMIN, empriseDecor, GRANDS_DECORS, MARGE_DECOR } from './habillage';
+import { casesInterditesDuNiveau, tuilesDeChemin } from './grille-niveau';
 import { CAMPAGNE, TEXTES_REGIONS, VAGUES_REGIONS } from './campagne';
 import { PLANS_REGION1 } from './plan-region1';
 import { PLANS_REGIONS } from './plans';
@@ -23,11 +25,8 @@ interface SpriteAtlas {
 }
 const ATLAS = (JSON.parse(readFileSync(new URL('../../../public/sprites/atlas.json', import.meta.url), 'utf8')) as { sprites: Record<string, SpriteAtlas> }).sprites;
 
-/** Portée de la plus courte des tours de tir, de magie ou d'artillerie au niveau 1 : un socle doit y voir le chemin. */
+/** Portée de la plus courte des tours de tir, de magie ou d'artillerie au niveau 1 : une case utile doit y voir le chemin. */
 const PORTEE_TIR_MIN = Math.min(...FAMILLES.filter((f) => f !== 'caserne').map((f) => TOURS[f].niveaux[0].portee));
-const PORTEE_CASERNE = TOURS.caserne.niveaux[0].portee;
-/** Distance minimale d'un socle au bord haut et au bord bas de la carte (tuiles). */
-const MARGE_HAUT_BAS_SOCLE = 1.5;
 
 function dist(a: Point, b: Point): number {
   return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
@@ -65,27 +64,24 @@ function verifierCarte(niveau: Niveau): void {
     expect(dehors(dernier), `${nom} chemin ${String(i)} : la sortie doit être hors de la carte`).toBe(true);
   });
 
-  carte.socles.forEach((s, i) => {
-    const quoi = `${nom} socle ${String(i)} (${String(s.x)},${String(s.y)})`;
-    expect(s.x >= 1 && s.x <= carte.largeur - 1 && s.y >= 1 && s.y <= carte.hauteur - 1, `${quoi} : trop près du bord`).toBe(true);
-    // Les barres du HUD recouvrent le haut et le bas de l'écran : la caméra ne peut pas dépasser de beaucoup la carte.
-    expect(s.y >= MARGE_HAUT_BAS_SOCLE && s.y <= carte.hauteur - MARGE_HAUT_BAS_SOCLE, `${quoi} : à moins de ${String(MARGE_HAUT_BAS_SOCLE)} tuile du bord haut ou bas`).toBe(true);
-    const d = distanceAuNiveau(niveau, s);
-    expect(d, `${quoi} : sur le chemin`).toBeGreaterThanOrEqual(1);
-    expect(d, `${quoi} : hors de portée de tir du chemin`).toBeLessThanOrEqual(PORTEE_TIR_MIN);
-    // La pierre du socle ne mord pas sur le couloir dessiné du chemin.
-    const pierre = empriseSocle(s.x, s.y);
-    for (const c of carte.chemins) {
-      expect(distanceRectChemin(pierre, c.points), `${quoi} : la pierre touche le couloir du chemin`).toBeGreaterThanOrEqual(DEMI_LARGEUR_CHEMIN);
+  // Grille de construction : cases interdites dans la grille, sans doublon, et qui couvrent chaque tuile du chemin.
+  const vues = new Set<string>();
+  for (const c of niveau.casesInterdites) {
+    expect(caseExiste(carte, c.cx, c.cy), `${nom} : case interdite (${String(c.cx)},${String(c.cy)}) hors de la grille`).toBe(true);
+    const cle = `${String(c.cx)},${String(c.cy)}`;
+    expect(vues.has(cle), `${nom} : case interdite ${cle} en double`).toBe(false);
+    vues.add(cle);
+  }
+  const tuiles = tuilesDeChemin(carte);
+  for (let ty = 0; ty < carte.hauteur; ty++) {
+    for (let tx = 0; tx < carte.largeur; tx++) {
+      if (tuiles[ty * carte.largeur + tx] === 1) {
+        const cx = Math.floor(tx / REGLES.tailleCase);
+        const cy = Math.floor(ty / REGLES.tailleCase);
+        expect(estCaseInterdite(niveau, cx, cy), `${nom} : la tuile (${String(tx)},${String(ty)}) du chemin est dans une case libre`).toBe(true);
+      }
     }
-    // Le ralliement de la caserne est sur le chemin et à portée de la tour.
-    expect(distanceAuNiveau(niveau, s.ralliement), `${quoi} : ralliement hors du chemin`).toBeLessThanOrEqual(0.01);
-    expect(dist(s, s.ralliement), `${quoi} : ralliement hors de portée de la caserne`).toBeLessThanOrEqual(PORTEE_CASERNE);
-    expect(s.ralliement.x >= 0 && s.ralliement.x <= carte.largeur && s.ralliement.y >= 0 && s.ralliement.y <= carte.hauteur, `${quoi} : ralliement hors carte`).toBe(true);
-    carte.socles.forEach((autre, j) => {
-      if (j > i) expect(rectsSeChevauchent(empriseSprite(s.x, s.y), empriseSprite(autre.x, autre.y)), `${quoi} chevauche le socle ${String(j)}`).toBe(false);
-    });
-  });
+  }
 
   expect(distanceAuNiveau(niveau, carte.departHeros), `${nom} : le héros doit partir du chemin`).toBeLessThanOrEqual(REGLES.distanceMaxChemin);
   for (const p of [carte.departHeros]) expect(p.x >= 0 && p.x <= carte.largeur && p.y >= 0 && p.y <= carte.hauteur).toBe(true);
@@ -101,6 +97,72 @@ function verifierCarte(niveau: Niveau): void {
   });
 }
 
+describe('grille de construction des 50 niveaux', () => {
+  const taille = REGLES.tailleCase;
+
+  it('chaque niveau a ses cases interdites tirées de son chemin et de ses grands décors visibles', () => {
+    for (const n of CAMPAGNE) {
+      const { carte } = n.niveau;
+      expect(n.niveau.casesInterdites, `niveau ${String(n.numero)}`).toEqual(casesInterditesDuNiveau(carte, n.visuel.decor));
+      expect(n.niveau.casesInterdites.length, `niveau ${String(n.numero)}`).toBeGreaterThan(0);
+    }
+  });
+
+  it('une tuile entière couverte par un grand décor visible est dans une case interdite', () => {
+    const problemes: string[] = [];
+    for (const n of CAMPAGNE) {
+      for (const d of n.visuel.decor.filter((v) => GRANDS_DECORS.has(v.sprite))) {
+        // Les tuiles dont le centre est franchement dans le rectangle du sprite (32×32, ancré au pied).
+        for (let ty = Math.floor(d.y - 2); ty < d.y; ty++) {
+          for (let tx = Math.floor(d.x - 1); tx < d.x + 1; tx++) {
+            const dedans = tx + 0.5 > d.x - 0.9 && tx + 0.5 < d.x + 0.9 && ty + 0.5 > d.y - 1.9 && ty + 0.5 < d.y - 0.1;
+            const cx = Math.floor(tx / taille);
+            const cy = Math.floor(ty / taille);
+            if (dedans && caseExiste(n.niveau.carte, cx, cy) && !estCaseInterdite(n.niveau, cx, cy)) {
+              problemes.push(`niveau ${String(n.numero)} : ${d.sprite} en (${String(d.x)},${String(d.y)}), case (${String(cx)},${String(cy)}) libre`);
+            }
+          }
+        }
+      }
+    }
+    expect(problemes).toEqual([]);
+  });
+
+  it('une case interdite l’est pour une raison : chemin ou grand décor visible sur l’une de ses tuiles', () => {
+    const problemes: string[] = [];
+    for (const n of CAMPAGNE) {
+      const { carte } = n.niveau;
+      const chemin = tuilesDeChemin(carte);
+      const grands = n.visuel.decor.filter((d) => GRANDS_DECORS.has(d.sprite)).map(empriseDecor);
+      for (const c of n.niveau.casesInterdites) {
+        const rect = { x0: c.cx * taille, y0: c.cy * taille, x1: (c.cx + 1) * taille, y1: (c.cy + 1) * taille };
+        let surChemin = false;
+        for (let ty = rect.y0; ty < rect.y1; ty++) for (let tx = rect.x0; tx < rect.x1; tx++) surChemin ||= chemin[ty * carte.largeur + tx] === 1;
+        if (!surChemin && !grands.some((g) => rectsSeChevauchent(rect, g))) problemes.push(`niveau ${String(n.numero)} : case (${String(c.cx)},${String(c.cy)}) interdite sans raison`);
+      }
+    }
+    expect(problemes).toEqual([]);
+  });
+
+  it('les petits décors (cailloux, touffes, tonneaux, croix…) ne bloquent aucune case', () => {
+    for (const n of CAMPAGNE) {
+      const petits = n.visuel.decor.filter((d) => !GRANDS_DECORS.has(d.sprite));
+      expect(petits.length, `niveau ${String(n.numero)}`).toBeGreaterThan(0);
+      const sans = casesInterditesDuNiveau(n.niveau.carte, n.visuel.decor.filter((d) => GRANDS_DECORS.has(d.sprite)));
+      expect(sans, `niveau ${String(n.numero)}`).toEqual(n.niveau.casesInterdites);
+    }
+  });
+
+  it('laisse assez de cases libres, dont assez à portée de tir du chemin', () => {
+    for (const n of CAMPAGNE) {
+      const libres = casesLibres({ niveau: n.niveau, tours: [] });
+      expect(libres.length, `niveau ${String(n.numero)}`).toBeGreaterThanOrEqual(40);
+      const utiles = libres.filter((c) => distanceAuNiveau(n.niveau, centreCase(c.cx, c.cy)) <= PORTEE_TIR_MIN);
+      expect(utiles.length, `niveau ${String(n.numero)}`).toBeGreaterThanOrEqual(8);
+    }
+  });
+});
+
 describe('validité des cartes', () => {
   for (const campagne of CAMPAGNE) {
     it(`niveau ${String(campagne.numero)} : chemins, socles, ralliements, héros et paquets sont valides`, () => {
@@ -112,12 +174,14 @@ describe('validité des cartes', () => {
     verifierCarte(NIVEAU_TEST);
   });
 
-  it('chaque carte dessinée est valide avec tous ses chemins et tous ses socles', () => {
+  it('chaque carte dessinée est valide avec tous ses chemins et tout son décor', () => {
     for (const modele of Object.values(CARTES)) {
+      const carte = { largeur: modele.largeur, hauteur: modele.hauteur, chemins: modele.chemins, departHeros: modele.departHeros };
       verifierCarte({
         id: modele.id,
         aretesDepart: 0,
-        carte: { largeur: modele.largeur, hauteur: modele.hauteur, chemins: modele.chemins, socles: modele.socles, departHeros: modele.departHeros },
+        carte,
+        casesInterdites: casesInterditesDuNiveau(carte, modele.decor),
         vagues: [{ paquets: [{ ennemi: 'paysan_affame', nombre: 1, intervalle: 1, chemin: 0, delai: 0 }] }],
       });
     }
@@ -127,12 +191,12 @@ describe('validité des cartes', () => {
     const base = REGION1[0]?.niveau;
     if (!base) throw new Error('niveau 1 absent');
     const copie = (modif: (n: Niveau) => Niveau): Niveau => modif(JSON.parse(JSON.stringify(base)) as Niveau);
-    const socleSurChemin = copie((n) => ({ ...n, carte: { ...n.carte, socles: [{ x: 8, y: 4, ralliement: { x: 8, y: 4 } }] } }));
-    expect(() => { verifierCarte(socleSurChemin); }).toThrow();
-    const socleLoin = copie((n) => ({ ...n, carte: { ...n.carte, socles: [{ x: 20, y: 1.5, ralliement: { x: 20, y: 4 } }] } }));
-    expect(() => { verifierCarte(socleLoin); }).toThrow();
-    const ralliementHorsChemin = copie((n) => ({ ...n, carte: { ...n.carte, socles: [{ x: 4, y: 6, ralliement: { x: 4, y: 6 } }] } }));
-    expect(() => { verifierCarte(ralliementHorsChemin); }).toThrow();
+    const cheminLibre = copie((n) => ({ ...n, casesInterdites: [] }));
+    expect(() => { verifierCarte(cheminLibre); }).toThrow();
+    const caseHorsGrille = copie((n) => ({ ...n, casesInterdites: [...n.casesInterdites, { cx: 16, cy: 0 }] }));
+    expect(() => { verifierCarte(caseHorsGrille); }).toThrow();
+    const caseEnDouble = copie((n) => ({ ...n, casesInterdites: [...n.casesInterdites, ...n.casesInterdites.slice(0, 1)] }));
+    expect(() => { verifierCarte(caseEnDouble); }).toThrow();
     const heros = copie((n) => ({ ...n, carte: { ...n.carte, departHeros: { x: 2, y: 10 } } }));
     expect(() => { verifierCarte(heros); }).toThrow();
     const cheminDegenere = copie((n) => ({ ...n, carte: { ...n.carte, chemins: [{ points: [{ x: -1, y: 4 }, { x: -1, y: 4 }] }] } }));
@@ -154,18 +218,13 @@ describe('progression de la région', () => {
     for (const n of REGION1) expect([n.niveau.carte.largeur, n.niveau.carte.hauteur]).toEqual([32, 18]);
   });
 
-  it('le niveau 1 a un chemin et 6 socles ; les entrées multiples viennent ensuite', () => {
+  it('le niveau 1 a un chemin ; les entrées multiples viennent ensuite', () => {
     const n1 = REGION1[0]?.niveau;
     expect(n1?.carte.chemins.length).toBe(1);
-    expect(n1?.carte.socles.length).toBe(6);
     const entrees = REGION1.map((n) => n.niveau.carte.chemins.length);
     expect(entrees.slice(0, 4)).toEqual([1, 1, 1, 1]);
     for (const e of entrees.slice(4)) expect(e).toBeGreaterThanOrEqual(2);
     expect(Math.max(...entrees)).toBe(3);
-    for (const n of REGION1) {
-      expect(n.niveau.carte.socles.length).toBeGreaterThanOrEqual(6);
-      expect(n.niveau.carte.socles.length).toBeLessThanOrEqual(10);
-    }
   });
 
   it('le niveau 10 est le seul boss : le Boucher de Vaudrelle arrive dans sa dernière vague', () => {
@@ -251,7 +310,7 @@ describe('habillage', () => {
     }
   });
 
-  it('le décor ne recouvre ni un chemin ni un socle du niveau, et reste dans la carte', () => {
+  it('le décor ne recouvre pas un chemin du niveau, et reste dans la carte', () => {
     const problemes: string[] = [];
     for (const n of CAMPAGNE) {
       const { carte } = n.niveau;
@@ -260,7 +319,6 @@ describe('habillage', () => {
         const r = empriseDecor(d);
         if (!(r.x0 >= 0 && r.x1 <= carte.largeur && r.y0 >= 0 && r.y1 <= carte.hauteur)) problemes.push(`${quoi} sort de la carte`);
         if (carte.chemins.some((c) => distanceRectChemin(r, c.points) < DEMI_LARGEUR_CHEMIN + MARGE_DECOR)) problemes.push(`${quoi} sur le chemin`);
-        if (carte.socles.some((s) => rectsSeChevauchent(r, empriseSprite(s.x, s.y)))) problemes.push(`${quoi} sur un socle`);
       }
     }
     expect(problemes).toEqual([]);
@@ -276,7 +334,7 @@ describe('habillage', () => {
     }
   });
 
-  it('les décors posés sur un chemin ou un socle inutilisé réapparaissent là où ils sont libres', () => {
+  it('les décors posés sur un chemin inutilisé réapparaissent là où ils sont libres', () => {
     // Le décor du couloir du chemin 1 de la carte des Chaumes est visible au niveau 1 (un seul chemin), pas au niveau 5.
     const niveau1 = REGION1[0];
     const niveau5 = REGION1[4];

@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { NIVEAU_TEST } from '../data/niveaux/region1';
 import { REGLES } from '../data/regles';
-import { CONFIG, avancerSecondes, distance, ennemiEssai, niveauEssai } from './aides.test-utils';
+import { ce, CONFIG, avancerSecondes, distance, ennemiEssai, niveauEssai } from './aides.test-utils';
 import type { Action } from './actions';
 import { ajouterEnnemi } from './ennemis';
 import type { EtatPartie } from './etat';
@@ -14,10 +14,10 @@ const COORDONNEES_PIEGES: unknown[] = [Number.NaN, Infinity, -Infinity, '5', nul
 
 function partiePrete(): EtatPartie {
   const etat = creerPartie(niveauEssai(), CONFIG);
-  appliquerAction(etat, { type: 'construire', socle: 0, tour: 'caserne' });
-  appliquerAction(etat, { type: 'construire', socle: 1, tour: 'tir' });
-  appliquerAction(etat, { type: 'ameliorer', socle: 1 });
-  appliquerAction(etat, { type: 'ameliorer', socle: 1 });
+  appliquerAction(etat, { type: 'construire', ...ce(0), tour: 'caserne' });
+  appliquerAction(etat, { type: 'construire', ...ce(1), tour: 'tir' });
+  appliquerAction(etat, { type: 'ameliorer', ...ce(1) });
+  appliquerAction(etat, { type: 'ameliorer', ...ce(1) });
   avancerSecondes(etat, 20);
   return etat;
 }
@@ -25,18 +25,21 @@ function partiePrete(): EtatPartie {
 function actionsPiegees(): unknown[] {
   const actions: unknown[] = [null, undefined, 42, 'appelerVague', [], {}];
   for (const type of [...NOMS_PIEGES, 'inconnue']) actions.push({ type });
-  for (const tour of [...NOMS_PIEGES, 'divine ', 'TIR', 1]) actions.push({ type: 'construire', socle: 2, tour });
-  for (const socle of NOMBRES_PIEGES) {
-    actions.push({ type: 'construire', socle, tour: 'tir' });
-    for (const type of ['ameliorer', 'vendre']) actions.push({ type, socle });
-    actions.push({ type: 'specialiser', socle, voie: 'A' });
-    actions.push({ type: 'deplacerRalliement', socle, x: 5, y: 5 });
+  for (const tour of [...NOMS_PIEGES, 'divine ', 'TIR', 1]) actions.push({ type: 'construire', ...ce(2), tour });
+  // Une colonne ou une ligne de case absurde, l'autre coordonnée valide.
+  for (const valeur of NOMBRES_PIEGES) {
+    for (const [cx, cy] of [[valeur, 3], [2, valeur], [valeur, valeur]]) {
+      actions.push({ type: 'construire', cx, cy, tour: 'tir' });
+      for (const type of ['ameliorer', 'vendre']) actions.push({ type, cx, cy });
+      actions.push({ type: 'specialiser', cx, cy, voie: 'A' });
+      actions.push({ type: 'deplacerRalliement', cx, cy, x: 5, y: 5 });
+    }
   }
-  for (const voie of ['C', 'a', '', ...NOMS_PIEGES, 1, null]) actions.push({ type: 'specialiser', socle: 1, voie });
+  for (const voie of ['C', 'a', '', ...NOMS_PIEGES, 1, null]) actions.push({ type: 'specialiser', ...ce(1), voie });
   for (const emplacement of NOMBRES_PIEGES) actions.push({ type: 'lancerSort', emplacement, x: 12, y: 5 });
   for (const c of COORDONNEES_PIEGES) {
     actions.push({ type: 'deplacerHeros', x: c, y: 5 }, { type: 'deplacerHeros', x: 12, y: c });
-    actions.push({ type: 'deplacerRalliement', socle: 0, x: c, y: 5 }, { type: 'deplacerRalliement', socle: 0, x: 5, y: c });
+    actions.push({ type: 'deplacerRalliement', ...ce(0), x: c, y: 5 }, { type: 'deplacerRalliement', ...ce(0), x: 5, y: c });
     actions.push({ type: 'lancerSort', emplacement: 1, x: c, y: 5 }, { type: 'lancerSort', emplacement: 1, x: 12, y: c });
   }
   return actions;
@@ -74,10 +77,10 @@ describe('actions non fiables', () => {
 describe('blocage', () => {
   it('relâche un ennemi bloqué par une unité qui n’est plus au contact et ne le vise pas', () => {
     const etat = creerPartie(niveauEssai(), CONFIG);
-    appliquerAction(etat, { type: 'construire', socle: 1, tour: 'caserne' });
-    appliquerAction(etat, { type: 'ameliorer', socle: 1 });
-    appliquerAction(etat, { type: 'ameliorer', socle: 1 });
-    appliquerAction(etat, { type: 'specialiser', socle: 1, voie: 'A' });
+    appliquerAction(etat, { type: 'construire', ...ce(1), tour: 'caserne' });
+    appliquerAction(etat, { type: 'ameliorer', ...ce(1) });
+    appliquerAction(etat, { type: 'ameliorer', ...ce(1) });
+    appliquerAction(etat, { type: 'specialiser', ...ce(1), voie: 'A' });
     avancerSecondes(etat, 3);
     const garde = etat.unites.find((u) => u.genre === 'soldat');
     if (!garde) throw new Error('pas de garde');
@@ -98,11 +101,11 @@ describe('blocage', () => {
 
   it('n’a jamais de blocage fantôme : un ennemi qui avance n’est bloqué que par l’unité qui le vise', () => {
     const etat = creerPartie(niveauEssai(), CONFIG);
-    appliquerAction(etat, { type: 'construire', socle: 1, tour: 'caserne' });
-    appliquerAction(etat, { type: 'ameliorer', socle: 1 });
-    appliquerAction(etat, { type: 'ameliorer', socle: 1 });
-    appliquerAction(etat, { type: 'specialiser', socle: 1, voie: 'A' });
-    appliquerAction(etat, { type: 'construire', socle: 2, tour: 'caserne' });
+    appliquerAction(etat, { type: 'construire', ...ce(1), tour: 'caserne' });
+    appliquerAction(etat, { type: 'ameliorer', ...ce(1) });
+    appliquerAction(etat, { type: 'ameliorer', ...ce(1) });
+    appliquerAction(etat, { type: 'specialiser', ...ce(1), voie: 'A' });
+    appliquerAction(etat, { type: 'construire', ...ce(2), tour: 'caserne' });
     avancerSecondes(etat, 3);
     for (let i = 0; i < 16; i++) {
       ajouterEnnemi(etat, ennemiEssai({ pv: 400, vitesse: 1.2 + (i % 3) * 0.4, degats: [1, 2] }), 'paysan_affame', 0, 7.5 - i * 0.4);

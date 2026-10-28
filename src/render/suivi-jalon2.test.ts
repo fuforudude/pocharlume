@@ -159,13 +159,14 @@ describe('Suivi : zones, boost et tour divine par dieu', () => {
       etat.aretes = 5000;
       etat.tours.push({
         id: 50,
-        socle: 0,
+        cx: 4,
+        cy: 3,
         famille: 'divine',
         niveau: 1,
         voie: null,
         coutCumule: 200,
-        x: 8,
-        y: 6,
+        x: 9,
+        y: 7,
         recharge: 0,
         ralliementX: 0,
         ralliementY: 0,

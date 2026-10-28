@@ -1,6 +1,6 @@
 // Mécaniques des 4 boss des régions 2 à 5 (jalon 3), jouées avec les valeurs des données : un test par mécanique.
 import { describe, expect, it } from 'vitest';
-import { avancerSecondes, compter, construireTour, ennemiDonnees, ennemisDe, evenementsPendant, partieEssai } from './aides.test-utils';
+import { avancerSecondes, compter, construireTour, ennemiDonnees, ennemisDe, evenementsPendant, partieEssai, tourDe } from './aides.test-utils';
 import { premierEnnemi } from './ciblage';
 import { appliquerEffet, infligerDegats } from './degats';
 import { EFFET, type EtatPartie, type Tour } from './etat';
@@ -12,9 +12,9 @@ function tirsDe(etat: EtatPartie, tour: Tour, secondes: number): number {
   return evenementsPendant(etat, secondes).filter((e) => e.type === 'tir' && e.tour === tour.id).length;
 }
 
-function tourDuSocle(etat: EtatPartie, socle: number): Tour {
-  const t = etat.tours.find((autre) => autre.socle === socle);
-  if (!t) throw new Error(`pas de tour sur le socle ${String(socle)}`);
+function tourDuSocle(etat: EtatPartie, i: number): Tour {
+  const t = tourDe(etat, i);
+  if (!t) throw new Error(`pas de tour sur la case d'essai ${String(i)}`);
   return t;
 }
 

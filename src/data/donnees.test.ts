@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { calculerChemin, distanceAuxChemins } from '../engine/chemins';
+import { centreCase, colonnes, lignes, toutesLesCases } from '../engine/grille';
 import type { DefNiveauTour, StatsCombattant } from '../engine/definitions';
 import { fr } from '../i18n/fr';
 import { DIEUX } from './dieux';
@@ -101,24 +102,28 @@ describe('niveau de test de la région 1', () => {
   const carte = NIVEAU_TEST.carte;
   const chemins = carte.chemins.map(calculerChemin);
 
-  it('a une carte 16:9 de 32 × 18 tuiles, 6 socles et 5 vagues', () => {
+  it('a une carte 16:9 de 32 × 18 tuiles (grille de 16 × 9 cases) et 5 vagues', () => {
     expect(NIVEAUX_REGION1).toContain(NIVEAU_TEST);
     expect([carte.largeur, carte.hauteur]).toEqual([32, 18]);
-    expect(carte.socles).toHaveLength(6);
+    expect([colonnes(carte), lignes(carte)]).toEqual([16, 9]);
     expect(NIVEAU_TEST.vagues).toHaveLength(5);
   });
 
-  it('place les socles dans la carte, hors du chemin, et les ralliements sur le chemin à portée de caserne', () => {
-    const porteeCaserne = TOURS.caserne.niveaux[0].portee;
-    for (const s of carte.socles) {
-      expect(s.x).toBeGreaterThan(0);
-      expect(s.x).toBeLessThan(carte.largeur);
-      expect(s.y).toBeGreaterThan(0);
-      expect(s.y).toBeLessThan(carte.hauteur);
-      expect(distanceAuxChemins(chemins, s.x, s.y)).toBeGreaterThan(1);
-      expect(distanceAuxChemins(chemins, s.ralliement.x, s.ralliement.y)).toBeLessThanOrEqual(REGLES.distanceMaxChemin);
-      expect(Math.sqrt((s.ralliement.x - s.x) * (s.ralliement.x - s.x) + (s.ralliement.y - s.y) * (s.ralliement.y - s.y))).toBeLessThanOrEqual(porteeCaserne);
+  it('interdit les cases du chemin et laisse libre le reste de la grille (aucun décor)', () => {
+    const interdites = new Set(NIVEAU_TEST.casesInterdites.map((c) => `${String(c.cx)},${String(c.cy)}`));
+    expect(interdites.size).toBe(NIVEAU_TEST.casesInterdites.length);
+    // Le centre d'une case libre est à plus d'une tuile de l'axe du chemin ; celui d'une case interdite en est tout près.
+    let libres = 0;
+    for (const c of toutesLesCases(carte)) {
+      const centre = centreCase(c.cx, c.cy);
+      const d = distanceAuxChemins(chemins, centre.x, centre.y);
+      if (interdites.has(`${String(c.cx)},${String(c.cy)}`)) expect(d, `case interdite (${String(c.cx)},${String(c.cy)})`).toBeLessThanOrEqual(2);
+      else {
+        libres++;
+        expect(d, `case libre (${String(c.cx)},${String(c.cy)})`).toBeGreaterThan(1.9);
+      }
     }
+    expect(libres).toBe(144 - NIVEAU_TEST.casesInterdites.length);
     expect(distanceAuxChemins(chemins, carte.departHeros.x, carte.departHeros.y)).toBeLessThanOrEqual(REGLES.distanceMaxChemin);
   });
 

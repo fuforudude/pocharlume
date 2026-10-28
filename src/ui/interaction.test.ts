@@ -1,12 +1,20 @@
 import { describe, expect, it } from 'vitest';
 import { NIVEAU_TEST } from '../data/niveaux/region1';
-import { avancer, creerPartie, type Action, type EtatPartie } from '../engine';
-import { avancerPas, CONFIG } from '../engine/aides.test-utils';
+import { avancer, centreCase, creerPartie, type Action, type EtatPartie } from '../engine';
+import { ct, avancerPas, CONFIG } from '../engine/aides.test-utils';
 import { Surbrillance } from '../render/rendu';
 import { cibleTouchee, Interaction, rayonObjet, rayonSort } from './interaction';
-import { elementsMenu } from './menu-cercle';
+import { elementsMenu as menuDe } from './menu-cercle';
 
 const RAYON = 0.9;
+
+const elementsMenu = (etat: EtatPartie, i: number) => menuDe(etat, ct(i).cx, ct(i).cy);
+
+/** Un point au centre de la case de test numéro `i` (voir `CASES_TEST`), décalé de (dx, dy) tuiles. */
+function pt(i: number, dx = 0, dy = 0): [number, number] {
+  const c = centreCase(ct(i).cx, ct(i).cy);
+  return [c.x + dx, c.y + dy];
+}
 
 function partie(): EtatPartie {
   return creerPartie(NIVEAU_TEST, CONFIG);
@@ -19,66 +27,75 @@ function envoyer(etat: EtatPartie, action: Action | null): void {
 }
 
 describe('cibleTouchee', () => {
-  it('trouve un socle sur son corps, pas seulement à ses pieds', () => {
+  it('trouve la case qui contient le point, n’importe où dans la case', () => {
     const etat = partie();
-    expect(cibleTouchee(etat, 8, 6, RAYON)).toEqual({ type: 'socle', socle: 0 });
-    expect(cibleTouchee(etat, 8.2, 5.5, RAYON)).toEqual({ type: 'socle', socle: 0 });
+    expect(cibleTouchee(etat, ...pt(0), RAYON)).toEqual({ type: 'case', ...ct(0) });
+    expect(cibleTouchee(etat, ...pt(0, 0.9, -0.9), RAYON)).toEqual({ type: 'case', ...ct(0) });
+    expect(cibleTouchee(etat, ...pt(0, -0.9, 0.9), RAYON)).toEqual({ type: 'case', ...ct(0) });
   });
 
-  it('trouve le héros et le préfère au socle quand il est plus proche', () => {
+  it('trouve aussi une case interdite (le refus se dit au toucher), mais le héros passe avant dans son rayon', () => {
     const etat = partie();
+    // Le héros attend sur le chemin, dans la case (8, 6) : interdite.
     expect(cibleTouchee(etat, 16, 12.5, RAYON)).toEqual({ type: 'heros' });
+    expect(cibleTouchee(etat, 16, 12.5, 0.1)).toEqual({ type: 'case', cx: 8, cy: 6 });
   });
 
-  it('ne trouve rien au-delà du rayon', () => {
+  it('ne trouve rien hors de la carte', () => {
     const etat = partie();
-    expect(cibleTouchee(etat, 3, 12, RAYON)).toBeNull();
-    expect(cibleTouchee(etat, 8, 6, 0.1)).toBeNull();
-  });
-
-  it('un rayon plus grand rend le toucher plus tolérant (cible tactile de 44 px)', () => {
-    const etat = partie();
-    expect(cibleTouchee(etat, 9.4, 5.5, 0.9)).toBeNull();
-    expect(cibleTouchee(etat, 9.4, 5.5, 1.5)).toEqual({ type: 'socle', socle: 0 });
+    expect(cibleTouchee(etat, -1, 5, RAYON)).toBeNull();
+    expect(cibleTouchee(etat, 5, 18.5, RAYON)).toBeNull();
+    expect(cibleTouchee(etat, 32.5, 5, RAYON)).toBeNull();
+    expect(cibleTouchee(etat, Number.NaN, 5, RAYON)).toBeNull();
   });
 
   it('ignore le héros tombé', () => {
     const etat = partie();
     const heros = etat.unites.find((u) => u.id === etat.heros);
     if (heros) heros.mort = true;
-    expect(cibleTouchee(etat, 16, 12.5, RAYON)).toBeNull();
+    expect(cibleTouchee(etat, 16, 12.5, RAYON)).toEqual({ type: 'case', cx: 8, cy: 6 });
   });
 });
 
-describe('socles et menu', () => {
-  it('toucher un socle ouvre son menu, le retoucher le ferme', () => {
+describe('cases et menu', () => {
+  it('toucher une case libre ouvre son menu, la retoucher le ferme', () => {
     const etat = partie();
     const ui = new Interaction();
-    expect(ui.toucher(etat, 8, 5.5, RAYON)).toEqual({ action: null, refus: null });
-    expect(ui.mode).toEqual({ type: 'menu', socle: 0 });
-    ui.toucher(etat, 8, 5.5, RAYON);
+    expect(ui.toucher(etat, ...pt(0), RAYON)).toEqual({ action: null, refus: null });
+    expect(ui.mode).toEqual({ type: 'menu', ...ct(0) });
+    ui.toucher(etat, ...pt(0), RAYON);
     expect(ui.mode).toEqual({ type: 'libre' });
   });
 
-  it('toucher un autre socle déplace le menu, toucher le vide le ferme', () => {
+  it('toucher une autre case déplace le menu, toucher hors de la carte le ferme', () => {
     const etat = partie();
     const ui = new Interaction();
-    ui.toucher(etat, 8, 5.5, RAYON);
-    ui.toucher(etat, 10, 8.5, RAYON);
-    expect(ui.mode).toEqual({ type: 'menu', socle: 1 });
-    ui.toucher(etat, 3, 12, RAYON);
+    ui.toucher(etat, ...pt(0), RAYON);
+    ui.toucher(etat, ...pt(1), RAYON);
+    expect(ui.mode).toEqual({ type: 'menu', ...ct(1) });
+    ui.toucher(etat, -1, 5, RAYON);
     expect(ui.mode).toEqual({ type: 'libre' });
+  });
+
+  it('toucher une case interdite (le chemin) dit pourquoi et n’ouvre rien', () => {
+    const etat = partie();
+    const ui = new Interaction();
+    expect(ui.toucher(etat, 6, 4, RAYON)).toEqual({ action: null, refus: 'case_interdite' });
+    expect(ui.mode).toEqual({ type: 'libre' });
+    ui.toucher(etat, ...pt(0), RAYON);
+    expect(ui.toucher(etat, 6, 4, RAYON)).toEqual({ action: null, refus: 'case_interdite' });
+    expect(ui.mode).toEqual({ type: 'menu', ...ct(0) });
   });
 
   it('choisir une tour dans le menu renvoie l’action de construction et ferme le menu', () => {
     const etat = partie();
     const ui = new Interaction();
-    ui.toucher(etat, 8, 5.5, RAYON);
+    ui.toucher(etat, ...pt(0), RAYON);
     const tir = elementsMenu(etat, 0).find((e) => e.id === 'construire:tir');
     expect(tir).toBeDefined();
     if (!tir) return;
     const issue = ui.choisirElement(tir);
-    expect(issue).toEqual({ action: { type: 'construire', socle: 0, tour: 'tir' }, refus: null });
+    expect(issue).toEqual({ action: { type: 'construire', ...ct(0), tour: 'tir' }, refus: null });
     expect(ui.mode).toEqual({ type: 'libre' });
     envoyer(etat, issue.action);
     expect(etat.tours).toHaveLength(1);
@@ -88,59 +105,59 @@ describe('socles et menu', () => {
     const etat = partie();
     etat.aretes = 10;
     const ui = new Interaction();
-    ui.toucher(etat, 8, 5.5, RAYON);
+    ui.toucher(etat, ...pt(0), RAYON);
     const magie = elementsMenu(etat, 0).find((e) => e.id === 'construire:magie');
     if (!magie) throw new Error('élément manquant');
     expect(ui.choisirElement(magie)).toEqual({ action: null, refus: 'aretes_insuffisantes' });
-    expect(ui.mode).toEqual({ type: 'menu', socle: 0 });
+    expect(ui.mode).toEqual({ type: 'menu', ...ct(0) });
   });
 
   it('le menu d’une tour offre améliorer, spécialiser et vendre, validés par le moteur', () => {
     const etat = partie();
     const ui = new Interaction();
-    envoyer(etat, { type: 'construire', socle: 1, tour: 'tir' });
-    ui.toucher(etat, 10, 8.5, RAYON);
+    envoyer(etat, { type: 'construire', ...ct(1), tour: 'tir' });
+    ui.toucher(etat, ...pt(1), RAYON);
     const ameliorer = elementsMenu(etat, 1).find((e) => e.id === 'ameliorer');
     if (!ameliorer) throw new Error('élément manquant');
     envoyer(etat, ui.choisirElement(ameliorer).action);
     expect(etat.tours[0]?.niveau).toBe(2);
-    ui.toucher(etat, 10, 8.5, RAYON);
+    ui.toucher(etat, ...pt(1), RAYON);
     const vendre = elementsMenu(etat, 1).find((e) => e.id === 'vendre');
     if (!vendre) throw new Error('élément manquant');
-    const arentes = etat.aretes;
+    const avant = etat.aretes;
     envoyer(etat, ui.choisirElement(vendre).action);
     expect(etat.tours).toHaveLength(0);
-    expect(etat.aretes).toBe(arentes + Math.floor((180 * 70) / 100));
+    expect(etat.aretes).toBe(avant + Math.floor((180 * 70) / 100));
   });
 
   it('la caserne : ralliement puis toucher le chemin déplace le point de ralliement', () => {
     const etat = partie();
     const ui = new Interaction();
-    envoyer(etat, { type: 'construire', socle: 1, tour: 'caserne' });
-    ui.toucher(etat, 10, 8.5, RAYON);
+    envoyer(etat, { type: 'construire', ...ct(1), tour: 'caserne' });
+    ui.toucher(etat, ...pt(1), RAYON);
     const ralliement = elementsMenu(etat, 1).find((e) => e.id === 'ralliement');
     if (!ralliement) throw new Error('élément manquant');
     expect(ui.choisirElement(ralliement)).toEqual({ action: null, refus: null });
-    expect(ui.mode).toEqual({ type: 'ralliement', socle: 1 });
+    expect(ui.mode).toEqual({ type: 'ralliement', ...ct(1) });
     // Trop loin de la tour : refusé, on reste en visée.
     expect(ui.toucher(etat, 24, 7, RAYON).refus).toBe('hors_portee');
     expect(ui.mode.type).toBe('ralliement');
-    const issue = ui.toucher(etat, 11.8, 9, RAYON);
-    expect(issue.action).toEqual({ type: 'deplacerRalliement', socle: 1, x: 11.8, y: 9 });
+    const issue = ui.toucher(etat, 20.5, 13, RAYON);
+    expect(issue.action).toEqual({ type: 'deplacerRalliement', ...ct(1), x: 20.5, y: 13 });
     expect(ui.mode.type).toBe('libre');
     envoyer(etat, issue.action);
-    expect(etat.tours[0]?.ralliementX).toBe(11.8);
+    expect(etat.tours[0]?.ralliementX).toBe(20.5);
   });
 
-  it('touches 1 à 5 : construisent sur le socle sélectionné, sinon rien', () => {
+  it('touches 1 à 5 : construisent sur la case sélectionnée, sinon rien', () => {
     const etat = partie();
     const ui = new Interaction();
     expect(ui.construireSurSelection(etat, 'tir')).toEqual({ action: null, refus: null });
-    ui.toucher(etat, 8, 5.5, RAYON);
+    ui.toucher(etat, ...pt(0), RAYON);
     const issue = ui.construireSurSelection(etat, 'magie');
-    expect(issue.action).toEqual({ type: 'construire', socle: 0, tour: 'magie' });
+    expect(issue.action).toEqual({ type: 'construire', ...ct(0), tour: 'magie' });
     envoyer(etat, issue.action);
-    ui.toucher(etat, 8, 5.5, RAYON);
+    ui.toucher(etat, ...pt(0), RAYON);
     expect(ui.construireSurSelection(etat, 'tir')).toEqual({ action: null, refus: null });
   });
 
@@ -148,7 +165,7 @@ describe('socles et menu', () => {
     const etat = partie();
     etat.aretes = 150;
     const ui = new Interaction();
-    ui.toucher(etat, 8, 5.5, RAYON);
+    ui.toucher(etat, ...pt(0), RAYON);
     expect(ui.construireSurSelection(etat, 'divine')).toEqual({ action: null, refus: 'aretes_insuffisantes' });
     expect(ui.mode.type).toBe('menu');
   });
@@ -251,7 +268,7 @@ describe('annulation et fin de partie', () => {
   it('Échap ferme les menus et abandonne la visée', () => {
     const etat = partie();
     const ui = new Interaction();
-    ui.toucher(etat, 8, 5.5, RAYON);
+    ui.toucher(etat, ...pt(0), RAYON);
     ui.annuler();
     expect(ui.mode.type).toBe('libre');
     ui.basculerHeros(etat);
@@ -262,7 +279,7 @@ describe('annulation et fin de partie', () => {
   it('la fin de la partie ferme tout', () => {
     const etat = partie();
     const ui = new Interaction();
-    ui.toucher(etat, 8, 5.5, RAYON);
+    ui.toucher(etat, ...pt(0), RAYON);
     etat.statut = 'defaite';
     ui.rafraichir(etat);
     expect(ui.mode.type).toBe('libre');
@@ -270,22 +287,22 @@ describe('annulation et fin de partie', () => {
 });
 
 describe('surbrillance et invites', () => {
-  it('montre la portée de la tour dont le menu est ouvert, rien pour un socle vide', () => {
+  it('montre la portée de la tour dont le menu est ouvert, rien pour une case libre', () => {
     const etat = partie();
     const ui = new Interaction();
     const surb = new Surbrillance();
-    envoyer(etat, { type: 'construire', socle: 1, tour: 'tir' });
-    ui.toucher(etat, 8, 5.5, RAYON);
+    envoyer(etat, { type: 'construire', ...ct(1), tour: 'tir' });
+    ui.toucher(etat, ...pt(0), RAYON);
     ui.surbrillance(etat, surb);
-    expect(surb.socle).toBe(0);
+    expect([surb.cx, surb.cy]).toEqual([ct(0).cx, ct(0).cy]);
     expect(surb.portee).toBe(0);
-    ui.toucher(etat, 10, 8.5, RAYON);
+    ui.toucher(etat, ...pt(1), RAYON);
     ui.surbrillance(etat, surb);
-    expect(surb.socle).toBe(1);
+    expect([surb.cx, surb.cy]).toEqual([ct(1).cx, ct(1).cy]);
     expect(surb.portee).toBe(3.5);
     ui.annuler();
     ui.surbrillance(etat, surb);
-    expect(surb.socle).toBe(-1);
+    expect([surb.cx, surb.cy]).toEqual([-1, -1]);
     expect(surb.portee).toBe(0);
   });
 

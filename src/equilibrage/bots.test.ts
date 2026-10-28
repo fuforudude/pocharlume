@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DIFFICULTES } from '../data/difficultes';
 import { NIVEAU_TEST, REGION1 } from '../data/niveaux/region1';
-import { avancer, creerPartie, rejouer, serialiser } from '../engine';
+import { avancer, casesLibres, centreCase, creerPartie, rejouer, serialiser } from '../engine';
 import type { Action } from '../engine';
 import { creerBotNaif } from './bot-naif';
 import { creerBotSoigneux, noterPartie, optimiserBot, VARIANTES } from './bot-soigneux';
@@ -73,14 +73,23 @@ describe('bot naïf', () => {
     }
   });
 
-  it('construit d’abord sur les socles les plus proches du chemin', () => {
+  it('construit d’abord sur les cases libres les plus proches du chemin', () => {
     const etat = etatInitial(niveau1);
     const echantillons = echantillonner(etat);
-    const proximite = etat.niveau.carte.socles.map((s) => Math.min(...echantillons.map((e) => distance(e, s))));
-    const premiers = actionsJouees(creerBotNaif({ graine: 3 }), 4).flatMap((a) => (a.type === 'construire' ? [a.socle] : [])).slice(0, 2);
-    const mediane = [...proximite].sort((a, b) => a - b)[Math.floor(proximite.length / 2)] ?? 0;
+    const libres = casesLibres(etat);
+    const proximite = (c: { cx: number; cy: number }): number => Math.min(...echantillons.map((e) => distance(e, centreCase(c.cx, c.cy))));
+    const premiers = actionsJouees(creerBotNaif({ graine: 3 }), 4).flatMap((a) => (a.type === 'construire' ? [{ cx: a.cx, cy: a.cy }] : [])).slice(0, 2);
+    const mediane = libres.map(proximite).sort((a, b) => a - b)[Math.floor(libres.length / 2)] ?? 0;
     expect(premiers.length).toBe(2);
-    for (const socle of premiers) expect(proximite[socle] ?? Infinity).toBeLessThanOrEqual(mediane + 1.5);
+    for (const c of premiers) {
+      expect(libres.some((l) => l.cx === c.cx && l.cy === c.cy)).toBe(true);
+      expect(proximite(c)).toBeLessThanOrEqual(mediane + 1.5);
+    }
+  });
+
+  it('choisit parmi toutes les cases libres : il ne revient pas aux anciens emplacements fixes', () => {
+    const cases = new Set(actionsJouees(creerBotNaif({ graine: 5 }), 6).flatMap((a) => (a.type === 'construire' ? [`${String(a.cx)},${String(a.cy)}`] : [])));
+    expect(cases.size).toBeGreaterThanOrEqual(6);
   });
 });
 
@@ -186,14 +195,16 @@ describe('bot soigneux avec chaque dieu', () => {
 });
 
 describe('géométrie des cartes', () => {
-  it('les poids des chemins somment à 1 et chaque socle voit du chemin', () => {
+  it('les poids des chemins somment à 1 et chaque case libre dont un chemin est proche voit du chemin', () => {
     for (const campagne of REGION1) {
       const poids = poidsDesChemins(campagne.niveau);
       expect(poids.length).toBe(campagne.niveau.carte.chemins.length);
       expect(poids.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 9);
       const etat = etatInitial(campagne.niveau);
       const echantillons = echantillonner(etat);
-      for (const s of campagne.niveau.carte.socles) expect(longueurVue(echantillons, poids, s, 4)).toBeGreaterThan(0);
+      const proches = casesLibres(etat).filter((c) => Math.min(...echantillons.map((e) => distance(e, centreCase(c.cx, c.cy)))) <= 3);
+      expect(proches.length, `niveau ${String(campagne.numero)}`).toBeGreaterThanOrEqual(10);
+      for (const c of proches) expect(longueurVue(echantillons, poids, centreCase(c.cx, c.cy), 4)).toBeGreaterThan(0);
     }
   });
 });
