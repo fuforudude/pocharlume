@@ -1,5 +1,5 @@
-// Outils réservés aux tests de la sauvegarde (jamais importés par le jeu) : sauvegardes d'exemple, fixtures v1 et
-// v2, définitions de héros d'essai, stockages truqués.
+// Outils réservés aux tests de la sauvegarde (jamais importés par le jeu) : sauvegardes d'exemple, fixtures v1, v2 et
+// v3, définitions de héros d'essai, stockages truqués.
 import { readFileSync } from 'node:fs';
 import { IDS_HEROS } from '../data/meta';
 import { VERSION_DONNEES } from '../data/version';
@@ -10,6 +10,7 @@ import type { Stockage } from './stockage';
 
 export const FIXTURE_V1 = readFileSync(new URL('./fixtures/sauvegarde-v1.json', import.meta.url), 'utf8');
 export const FIXTURE_V2 = readFileSync(new URL('./fixtures/sauvegarde-v2.json', import.meta.url), 'utf8');
+export const FIXTURE_V3 = readFileSync(new URL('./fixtures/sauvegarde-v3.json', import.meta.url), 'utf8');
 
 /**
  * Définitions de héros d'essai (les vraies viennent de src/data/heros.ts) : 4 compétences par héros, les trois
@@ -58,6 +59,16 @@ export function sauvegardeRemplie(): Sauvegarde {
       arbre: { caserne: 2, tir: 3, magie: 0, artillerie: 0, sorts: 1, heros: 0 },
       objets: { fiole_soufre: 3, herbe_sabbat: 0, griffe_renfort: 0, sablier: 5 },
       choix: { dieu: 'plume', heros: 'suie', objets: ['sablier', 'sablier', 'fiole_soufre'] },
+      // Le niveau 10 (boss de la région 1) est gagné : la région 2 est ouverte.
+      regionMax: 2,
+      // Seuls les niveaux à 3 étoiles ont des défis : le 2 et le 4 le sont ici.
+      defis: { '2': { heroique: true }, '4': { heroique: true, fer: true } },
+      collection: {
+        possedes: { skin_tir_1: 2, skin_caserne_3: 1, skin_suie: 3, familier_rat: 1, familier_chouette: 4 },
+        eclats: 77,
+        garanties: { skins: 4, familiers: 0 },
+        equipes: { skins: { tir: 'skin_tir_1', suie: 'skin_suie' }, familiers: { suie: 'familier_chouette' } },
+      },
     },
     partie: PARTIE,
   };

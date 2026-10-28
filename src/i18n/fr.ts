@@ -1,4 +1,5 @@
 // Tous les textes affichés du jeu, en français. Une clé par texte, groupées par écran.
+import { frCollection } from './fr-collection';
 import { frDieux } from './fr-dieux';
 import { frMeta } from './fr-meta';
 import { frNiveaux } from './fr-niveaux';
@@ -184,6 +185,9 @@ export const fr = {
 
   // Méta-progression : fiche de niveau, héros, boutique, bilan, refus des transactions (fr-meta.ts)
   ...frMeta,
+
+  // Collection : raretés, stats, skins et familiers (fr-collection.ts)
+  ...frCollection,
 
   // Niveaux de la campagne (fr-niveaux.ts)
   ...frNiveaux,

@@ -35,6 +35,10 @@ describe('configDepuisSauvegarde', () => {
       ameliorations: { caserne: 2, tir: 3, magie: 0, artillerie: 0, sorts: 1, heros: 0 },
       objets: ['sablier', 'sablier'],
       versionDonnees: VERSION_DONNEES,
+      defi: null,
+      // Skin Collier de Cendre (Épique, rang 3 : 3 % × 1,5) et familier Chouette (Rare, rang 4 : 1,5 % × 1,75) de Suie,
+      // skin de tir Clocher de Suie (Commun, rang 2 : 1 % × 1,25).
+      bonus: { tours: { tir: { cadence: 0.0125 } }, heros: { degats: 0.045, cadence: 0.02625 } },
     });
   });
 

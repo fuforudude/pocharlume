@@ -125,3 +125,98 @@ export function xpDePartie(niveau: number, victoire: boolean): number {
   const xp = 100 + 20 * niveau;
   return victoire ? xp : xp / 2;
 }
+
+// --- Régions et défis ------------------------------------------------------------------------------------------
+
+/** Niveaux par région, et nombre de régions de la campagne. */
+export const NIVEAUX_PAR_REGION = 10;
+export const NOMBRE_REGIONS = 10;
+
+/** Région d'un niveau de campagne (1 à 10), ou 0 pour un numéro qui n'en est pas un. */
+export function regionDuNiveau(niveau: number): number {
+  return Number.isInteger(niveau) && niveau >= 1 && niveau <= NIVEAUX_PAR_REGION * NOMBRE_REGIONS ? Math.floor((niveau - 1) / NIVEAUX_PAR_REGION) + 1 : 0;
+}
+
+/**
+ * Plus haute région ouverte quand le plus haut niveau jouable est `niveauMax` : la région r + 1 s'ouvre quand le boss
+ * (niveau 10 r) de la région r est battu, c'est-à-dire quand `niveauMax` dépasse 10 r.
+ */
+export function regionOuverte(niveauMax: number): number {
+  return Math.min(NOMBRE_REGIONS, Math.max(1, regionDuNiveau(niveauMax)));
+}
+
+/** Défis d'un niveau à 3 étoiles : Héroïque (1 vie, vagues d'élite) et Fer (une énorme vague, 2 familles de tours). */
+export const IDS_DEFIS = ['heroique', 'fer'] as const;
+export type IdDefi = (typeof IDS_DEFIS)[number];
+export function estIdDefi(x: unknown): x is IdDefi {
+  return typeof x === 'string' && (IDS_DEFIS as readonly string[]).includes(x);
+}
+/** Braises que rapporte la première réussite d'un défi sur un niveau. */
+export const BRAISES_DEFI = 4;
+
+/** Niveaux (boss) dont la première victoire offre un disciple : fin des régions 2 et 4 (6 et 8 au jalon 4). */
+export const NIVEAUX_DISCIPLE_OFFERT: readonly number[] = [20, 40];
+/** Ordre dans lequel les disciples sont offerts : le premier que le joueur n'a pas encore. */
+export const DISCIPLES_OFFERTS: readonly IdHeros[] = ['suie', 'mastoc', 'rouage', 'corbeau', 'brise_os', 'lanterne'];
+
+// --- Collection : caisses, raretés, éclats, rangs, bonus ------------------------------------------------------
+
+/** Les deux caisses : skins (tours de base et héros) et familiers (un par héros). */
+export const TYPES_CAISSE = ['skins', 'familiers'] as const;
+export type TypeCaisse = (typeof TYPES_CAISSE)[number];
+export function estTypeCaisse(x: unknown): x is TypeCaisse {
+  return typeof x === 'string' && (TYPES_CAISSE as readonly string[]).includes(x);
+}
+
+/** Prix d'une caisse, en braises (les deux caisses coûtent pareil). */
+export const PRIX_CAISSE = 20;
+
+/** Raretés, de la plus commune à la plus rare. */
+export const RARETES = ['commun', 'rare', 'epique', 'legendaire', 'mythique'] as const;
+export type Rarete = (typeof RARETES)[number];
+export function estRarete(x: unknown): x is Rarete {
+  return typeof x === 'string' && (RARETES as readonly string[]).includes(x);
+}
+
+/** Chances affichées, en pourcents entiers (leur somme fait 100) : ce sont aussi celles du tirage. */
+export const CHANCES_RARETE: Readonly<Record<Rarete, number>> = { commun: 60, rare: 25, epique: 10, legendaire: 4, mythique: 1 };
+
+/** Rareté à partir de laquelle une caisse « tient » la garantie : Épique ou mieux. */
+export const RARETE_GARANTIE: Rarete = 'epique';
+/**
+ * Garantie : la caisse numéro 10 d'un type, si les 9 précédentes n'ont donné ni Épique ni mieux, en donne un. Le
+ * compteur gardé par type de caisse compte donc les caisses sans Épique, de 0 à 9.
+ */
+export const CAISSES_AVANT_GARANTIE = 10;
+
+/** Éclats donnés par un doublon, selon sa rareté. */
+export const ECLATS_DOUBLON: Readonly<Record<Rarete, number>> = { commun: 5, rare: 10, epique: 25, legendaire: 60, mythique: 150 };
+/** Éclats que coûte l'achat direct d'un objet précis, selon sa rareté. */
+export const PRIX_ECLATS_OBJET: Readonly<Record<Rarete, number>> = { commun: 50, rare: 120, epique: 300, legendaire: 700, mythique: 1500 };
+
+/** Rang maximal d'un objet de la collection ; on commence au rang 1. */
+export const RANG_MAX_COLLECTION = 5;
+/** Éclats que coûte le passage du rang `rang` au rang `rang + 1` : 20 × rang. */
+export function coutRangEclats(rang: number): number {
+  return 20 * rang;
+}
+
+/** Bonus de base d'un skin, en pourcents, selon sa rareté (Commun +1 % à Mythique +5 %). */
+export const BONUS_SKIN_POURCENT: Readonly<Record<Rarete, number>> = { commun: 1, rare: 2, epique: 3, legendaire: 4, mythique: 5 };
+/** Bonus de base d'un familier, en pourcents, selon sa rareté. */
+export const BONUS_FAMILIER_POURCENT: Readonly<Record<Rarete, number>> = { commun: 1, rare: 1.5, epique: 2, legendaire: 3, mythique: 4 };
+/** Chaque rang au-dessus du premier ajoute 25 % du bonus de base (multiplicateur 1 + 0,25 × (rang − 1)). */
+export const PAS_RANG_BONUS_POURCENT = 25;
+/** Plafond du bonus total d'une tour ou d'un héros, en pourcents. */
+export const PLAFOND_BONUS_POURCENT = 10;
+/** Les bonus se calculent en entiers de 1/100 000 (1 % = 1 000) pour que sommes et plafond soient exacts. */
+export const ECHELLE_BONUS = 100_000;
+
+/** Bonus d'un objet de rang `rang` dont le bonus de base est `basePourcent`, en entiers de 1/100 000 (voir `ECHELLE_BONUS`). */
+export function bonusEnEntiers(basePourcent: number, rang: number): number {
+  const base = Math.round(basePourcent * (ECHELLE_BONUS / 100));
+  return Math.round((base * (100 + PAS_RANG_BONUS_POURCENT * (rang - 1))) / 100);
+}
+
+/** Le plafond de bonus, dans la même unité. */
+export const PLAFOND_BONUS_ENTIERS = Math.round(PLAFOND_BONUS_POURCENT * (ECHELLE_BONUS / 100));

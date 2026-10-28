@@ -6,13 +6,17 @@
 import {
   aretesDeVictoire,
   braisesDeVictoire,
+  BRAISES_DEFI,
   coutRangArbre,
+  DISCIPLES_OFFERTS,
   EMPLACEMENTS_OBJETS,
   estIdBranche,
+  estIdDefi,
   estIdDieu,
   estIdHeros,
   estIdObjet,
   HEROS_PAR_DIEU,
+  NIVEAUX_DISCIPLE_OFFERT,
   OBJETS,
   PLAFOND_MONNAIE,
   PLAFOND_XP,
@@ -20,6 +24,7 @@ import {
   RANG_MAX_ARBRE,
   STOCK_MAX_OBJET,
   xpDePartie,
+  type IdDefi,
   type IdHeros,
   type IdObjet,
 } from '../data/meta';
@@ -222,9 +227,20 @@ export interface FinDePartieMeta {
   readonly objetsEquipes?: readonly string[];
   /** Objets que le joueur a utilisés pendant la partie, un par emplacement utilisé : consommés pour de bon. */
   readonly objetsUtilises?: readonly string[];
+  /**
+   * Défi joué (« heroique », « fer »), absent ou null pour une partie ordinaire. Seule une victoire en défi compte : elle
+   * doit porter sur un niveau déjà à 3 étoiles (refus `niveau_invalide` sinon), marque le défi réussi et rapporte ses
+   * braises la première fois. Elle ne touche ni aux étoiles, ni au niveau suivant, ni aux arêtes, ni aux braises de
+   * première victoire, ni aux disciples offerts (le niveau est déjà gagné) ; l'expérience du héros est donnée comme
+   * pour une victoire.
+   */
+  readonly defi?: string | null;
 }
 
-/** Ce qu'une partie a rapporté, pour l'écran de fin. */
+/**
+ * Ce qu'une partie a rapporté, pour l'écran de fin. Les champs facultatifs (jalon 3) sont absents quand il n'y a rien à
+ * signaler : pas de défi réussi, pas de disciple offert, pas de région ouverte.
+ */
 export interface BilanPartie {
   readonly aretes: number;
   readonly braises: number;
@@ -237,6 +253,12 @@ export interface BilanPartie {
   readonly objetsConsommes: readonly IdObjet[];
   /** Objets emportés mais pas utilisés, recrédités au stock (dans la limite du stock maximal). */
   readonly objetsRendus: readonly IdObjet[];
+  /** Le défi réussi pour la première fois sur ce niveau (ses braises sont comprises dans `braises`). */
+  readonly defiReussi?: IdDefi;
+  /** Le disciple offert par la première victoire sur le boss de la région 2 ou 4 : le premier non possédé dans l'ordre fixé. */
+  readonly discipleOffert?: IdHeros;
+  /** La région que cette victoire a ouverte (le boss de la région précédente vient d'être battu). */
+  readonly regionDebloquee?: number;
 }
 
 export type ResultatFin =
@@ -284,16 +306,37 @@ export function enregistrerFinDePartie(s: Sauvegarde, fin: FinDePartieMeta, defs
   const utilises = listeObjets(fin.objetsUtilises ?? []);
   if (!equipes || !utilises || equipes.length > EMPLACEMENTS_OBJETS || !inclus(utilises, equipes)) return refus('objets_invalides');
 
+  // Une victoire en défi ne compte que sur un niveau déjà à 3 étoiles (un défi inconnu ou fermé est refusé en entier).
+  let defi: IdDefi | null = null;
+  if (victoire && fin.defi !== undefined && fin.defi !== null) {
+    if (!estIdDefi(fin.defi) || meilleuresEtoiles(s, fin.niveau) < 3) return refus('niveau_invalide');
+    defi = fin.defi;
+  }
+
   let suivante = s;
   const etoilesAvant = meilleuresEtoiles(s, fin.niveau);
-  if (victoire && difficulte !== undefined) suivante = enregistrerVictoire(s, fin.niveau, difficulte, fin.etoiles);
+  if (victoire && defi === null && difficulte !== undefined) suivante = enregistrerVictoire(s, fin.niveau, difficulte, fin.etoiles);
   const etoilesApres = meilleuresEtoiles(suivante, fin.niveau);
   const nouvellesEtoiles = etoilesApres - etoilesAvant;
 
-  const aretesGagnees = victoire ? aretesDeVictoire(fin.niveau, nouvellesEtoiles) : 0;
-  const braisesGagnees = victoire ? braisesDeVictoire(fin.niveau, etoilesAvant === 0, etoilesAvant < 3 && etoilesApres === 3) : 0;
+  // Défi : ses braises la première fois seulement, rien de la campagne. Partie ordinaire : arêtes et braises habituelles.
+  const defiDejaReussi = defi !== null && Object.hasOwn(s.meta.defis, String(fin.niveau)) && s.meta.defis[String(fin.niveau)]?.[defi] === true;
+  const defiReussi = defi !== null && !defiDejaReussi ? defi : null;
+  const aretesGagnees = victoire && defi === null ? aretesDeVictoire(fin.niveau, nouvellesEtoiles) : 0;
+  const braisesGagnees =
+    victoire && defi === null
+      ? braisesDeVictoire(fin.niveau, etoilesAvant === 0, etoilesAvant < 3 && etoilesApres === 3)
+      : defiReussi !== null
+        ? BRAISES_DEFI
+        : 0;
   const aretes = Math.min(PLAFOND_MONNAIE, s.meta.monnaies.aretes + aretesGagnees);
   const braises = Math.min(PLAFOND_MONNAIE, s.meta.monnaies.braises + braisesGagnees);
+
+  let defis = suivante.meta.defis;
+  if (defiReussi !== null) {
+    defis = { ...defis };
+    poser(defis, String(fin.niveau), { ...(Object.hasOwn(defis, String(fin.niveau)) ? defis[String(fin.niveau)] : undefined), [defiReussi]: true });
+  }
 
   let herosMeta = s.meta.heros;
   let xpGagnee = 0;
@@ -307,6 +350,14 @@ export function enregistrerFinDePartie(s: Sauvegarde, fin: FinDePartieMeta, defs
     if (defs) niveauHeros = { avant: niveauHerosDepuisXp(xpAvant, defs.seuilsXp), apres: niveauHerosDepuisXp(xpApres, defs.seuilsXp) };
   }
 
+  // La première victoire sur le boss de la région 2 ou 4 offre le premier disciple non encore possédé.
+  const discipleOffert =
+    victoire && defi === null && etoilesAvant === 0 && NIVEAUX_DISCIPLE_OFFERT.includes(fin.niveau)
+      ? DISCIPLES_OFFERTS.find((disciple) => !Object.hasOwn(herosMeta, disciple))
+      : undefined;
+  if (discipleOffert !== undefined) herosMeta = { ...herosMeta, [discipleOffert]: { xp: 0, competences: {} } };
+  const regionDebloquee = suivante.meta.regionMax > s.meta.regionMax ? suivante.meta.regionMax : undefined;
+
   // Les objets emportés ont été débités au lancement : on rend ceux qui n'ont pas servi, sans dépasser le stock maximal.
   const objets = { ...s.meta.objets };
   const rendus: IdObjet[] = [];
@@ -318,7 +369,7 @@ export function enregistrerFinDePartie(s: Sauvegarde, fin: FinDePartieMeta, defs
 
   return {
     ok: true,
-    sauvegarde: { ...suivante, meta: { ...s.meta, monnaies: { aretes, braises }, heros: herosMeta, objets } },
+    sauvegarde: { ...suivante, meta: { ...suivante.meta, monnaies: { aretes, braises }, heros: herosMeta, objets, defis } },
     bilan: {
       aretes: aretes - s.meta.monnaies.aretes,
       braises: braises - s.meta.monnaies.braises,
@@ -328,6 +379,9 @@ export function enregistrerFinDePartie(s: Sauvegarde, fin: FinDePartieMeta, defs
       niveauHeros,
       objetsConsommes: utilises,
       objetsRendus: rendus,
+      ...(defiReussi !== null ? { defiReussi } : {}),
+      ...(discipleOffert !== undefined ? { discipleOffert } : {}),
+      ...(regionDebloquee !== undefined ? { regionDebloquee } : {}),
     },
   };
 }
