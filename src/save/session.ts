@@ -24,8 +24,17 @@
 //
 // Si le stockage ne répond pas alors qu'on ne sait pas ce qu'il contient (démarrage dont la lecture avait échoué),
 // ou si son contenu est illisible, rien n'est écrit (on garde ce qu'on ne sait pas relire).
+//
+// Caisses : le hasard est tiré UNE fois par appel (deux nombres, dans une réserve rejouable : `sourceRejouable`) puis
+// rejoué à l'identique à chaque passage de l'opération. Le résultat d'une caisse dépend donc seulement de l'état du joueur
+// au moment de l'écriture (compteur de garantie, objets déjà possédés, braises), jamais d'un second jet : une caisse
+// ouverte depuis une vue périmée est revalidée sous verrou, et ce qu'on rend est ce qui a vraiment été écrit.
 import { estIdBranche, estIdHeros } from '../data/meta';
 import type { ConfigPartie, EtatPartie } from '../engine/etat';
+import { sourceCrypto, sourceRejouable, type SourceAleatoire } from '../meta/aleatoire';
+import { rangDe } from '../meta/collection';
+import { JETS_PAR_TIRAGE } from '../meta/tirage';
+import { estIdCollection } from '../data/collection';
 import type { CanalSauvegarde } from './canal';
 import { exporterCode, importerCode, remplacerProgression, type ResultatImport } from './code';
 import type { DefsMeta } from './definitions';
@@ -55,6 +64,18 @@ import {
   type RaisonPoints,
   type RaisonReinitialisation,
 } from './transactions';
+import {
+  acheterObjetPrecis,
+  equiperFamilier,
+  equiperSkin,
+  monterRang,
+  ouvrirCaisse,
+  type OuvertureCaisse,
+  type RaisonAchatPrecis,
+  type RaisonCaisse,
+  type RaisonEquipementCollection,
+  type RaisonRang,
+} from './transactions-collection';
 import { ouvrirVerrouNavigateur, type VerrouSauvegarde } from './verrou';
 
 /** Ce que la session a besoin de savoir d'une partie terminée (un sous-ensemble du `ResultatPartie` de l'interface). */
@@ -70,6 +91,8 @@ export interface FinDePartie {
   readonly objetsEquipes?: readonly string[];
   /** Objets utilisés pendant la partie (un par emplacement utilisé) : consommés ; les autres objets emportés sont rendus. */
   readonly objetsUtilises?: readonly string[];
+  /** Défi joué (« heroique », « fer »). Par défaut, celui de la config du moteur (`config.defi`) s'il y en a un. */
+  readonly defi?: string | null;
 }
 
 /** Une partie sauvegardée qu'on peut relancer. */
@@ -97,6 +120,11 @@ export type ResultatTransaction<R extends string> =
   | { readonly ok: true; readonly sauvegarde: Sauvegarde; readonly ecrite: boolean }
   | { readonly ok: false; readonly raison: R };
 
+/** Une transaction qui a quelque chose à raconter en plus (ce que la caisse a donné). */
+export type ResultatTransactionAvecDetail<D, R extends string> =
+  | { readonly ok: true; readonly sauvegarde: Sauvegarde; readonly ecrite: boolean; readonly detail: D }
+  | { readonly ok: false; readonly raison: R };
+
 /** Ce que rend `enregistrerFin` : toujours la partie effacée ; le bilan, ou la raison pour laquelle les gains sont refusés. */
 export interface ResultatFin {
   readonly ecrite: boolean;
@@ -112,6 +140,12 @@ export interface OptionsSession {
   readonly verrou?: VerrouSauvegarde | null;
   /** Compétences des héros et seuils d'expérience (de `src/data/heros.ts`) : pour placer des points et valider les imports. */
   readonly defs?: DefsMeta;
+  /**
+   * Source du hasard des caisses. Par défaut `crypto.getRandomValues` ; les tests injectent un générateur à graine. `null` :
+   * aucune source (plateforme sans crypto) — les caisses sont alors refusées (`aleatoire_indisponible`), jamais tirées
+   * avec un hasard faible.
+   */
+  readonly aleatoire?: SourceAleatoire | null;
 }
 
 /** La difficulté de la config si c'en est une que la sauvegarde connaît. */
@@ -155,7 +189,7 @@ function ecrite(issue: Issue<unknown, string>): boolean {
 }
 
 /** Un champ facultatif de la config du moteur (le jalon 2 y ajoute `heros` et `objets`), lu sans en dépendre. */
-function champ(config: ConfigPartie, nom: 'heros' | 'objets'): unknown {
+function champ(config: ConfigPartie, nom: 'heros' | 'objets' | 'defi'): unknown {
   return Object.hasOwn(config, nom) ? (config as unknown as Record<string, unknown>)[nom] : undefined;
 }
 
@@ -179,6 +213,7 @@ export class Session {
   private file: Promise<unknown> = Promise.resolve();
   private readonly verrou: VerrouSauvegarde | null;
   private readonly defs: DefsMeta | undefined;
+  private readonly aleatoire: SourceAleatoire | null;
 
   private constructor(
     private readonly depot: Depot,
@@ -192,6 +227,7 @@ export class Session {
     this.contenuConnu = chargement.origine !== 'indisponible';
     this.verrou = options.verrou === undefined ? ouvrirVerrouNavigateur() : options.verrou;
     this.defs = options.defs;
+    this.aleatoire = options.aleatoire === undefined ? sourceCrypto() : options.aleatoire;
     canal?.ecouter(() => { this.rafraichir().catch(() => undefined); });
   }
 
@@ -357,6 +393,7 @@ export class Session {
   async enregistrerFin(fin: FinDePartie): Promise<ResultatFin> {
     const heros = fin.heros !== undefined ? fin.heros : champ(fin.config, 'heros');
     const equipes = fin.objetsEquipes ?? champ(fin.config, 'objets');
+    const defi = fin.defi !== undefined ? fin.defi : champ(fin.config, 'defi');
     const operation: Operation<{ bilan: BilanPartie | null; refus: RaisonFin | null }, never> = (s) => {
       const r = enregistrerFinDePartie(
         s,
@@ -368,6 +405,7 @@ export class Session {
           heros: typeof heros === 'string' ? heros : null,
           objetsEquipes: Array.isArray(equipes) ? equipes : [],
           objetsUtilises: fin.objetsUtilises ?? [],
+          defi: typeof defi === 'string' ? defi : null,
         },
         this.defs,
       );
@@ -501,6 +539,52 @@ export class Session {
   /** Reprend tous les points placés d'un héros. */
   async reinitialiserPoints(heros: string): Promise<ResultatTransaction<RaisonPoints>> {
     return sansDetail(await this.lancer((s) => depuisTransaction(reinitialiserPoints(s, heros))));
+  }
+
+  // --- Collection : caisses, rangs, achats précis, équipement -------------------------------------------------
+
+  /**
+   * Ouvre une caisse (20 braises) et rend ce qu'elle a donné. Le hasard est tiré une fois ici puis rejoué à l'identique sur
+   * le contenu frais du stockage (voir l'en-tête) : le tirage rendu est celui qui a été écrit, garantie et doublons
+   * compris, même si un autre onglet a ouvert une caisse entre-temps. Refusé si la plateforme n'a pas de source aléatoire.
+   */
+  async ouvrirCaisse(type: string): Promise<ResultatTransactionAvecDetail<OuvertureCaisse, RaisonCaisse | 'aleatoire_indisponible'>> {
+    if (this.aleatoire === null) return { ok: false, raison: 'aleatoire_indisponible' };
+    const rejouable = sourceRejouable(this.aleatoire, JETS_PAR_TIRAGE);
+    const issue = await this.lancer<OuvertureCaisse, RaisonCaisse>((s) => {
+      const r = ouvrirCaisse(s, type, rejouable());
+      return r.ok ? { ok: true, sauvegarde: r.sauvegarde, detail: r.tirage } : r;
+    });
+    return issue.ok ? { ok: true, sauvegarde: issue.sauvegarde, ecrite: issue.ecrite, detail: issue.detail } : issue;
+  }
+
+  /**
+   * Monte un objet de la collection d'un rang (20 × rang éclats). Vise le rang vu à l'écran, comme `acheterRangArbre` :
+   * si un autre onglet l'a déjà monté, refus `modifie_ailleurs` plutôt qu'un rang de plus par surprise.
+   */
+  async monterRang(objet: string): Promise<ResultatTransaction<RaisonRang | 'modifie_ailleurs'>> {
+    const vu = estIdCollection(objet) ? rangDe(this.courante.meta.collection, objet) : null;
+    return sansDetail(
+      await this.lancer<undefined, RaisonRang | 'modifie_ailleurs'>((s) => {
+        if (estIdCollection(objet) && vu !== null && rangDe(s.meta.collection, objet) !== vu) return { ok: false, raison: 'modifie_ailleurs' };
+        return depuisTransaction(monterRang(s, objet));
+      }),
+    );
+  }
+
+  /** Achète un objet précis de la collection avec des éclats (50 à 1 500 selon la rareté). */
+  async acheterObjetPrecis(objet: string): Promise<ResultatTransaction<RaisonAchatPrecis>> {
+    return sansDetail(await this.lancer((s) => depuisTransaction(acheterObjetPrecis(s, objet))));
+  }
+
+  /** Équipe un skin à son emplacement (tour de base ou héros), ou le retire avec `null`. */
+  async equiperSkin(cible: string, skin: string | null): Promise<ResultatTransaction<RaisonEquipementCollection>> {
+    return sansDetail(await this.lancer((s) => depuisTransaction(equiperSkin(s, cible, skin))));
+  }
+
+  /** Équipe un familier sur un héros, ou le retire avec `null`. */
+  async equiperFamilier(heros: string, familier: string | null): Promise<ResultatTransaction<RaisonEquipementCollection>> {
+    return sansDetail(await this.lancer((s) => depuisTransaction(equiperFamilier(s, heros, familier))));
   }
 
   // --- Export et import ---------------------------------------------------------------------------------------
