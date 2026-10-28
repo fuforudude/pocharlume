@@ -3,6 +3,7 @@
 import { REGLES } from '../data/regles';
 import { tirer, tirerEntre } from './aleatoire';
 import { ajusterMontant } from './argent';
+import { appliquerBonusTour, bonusDeFamille, bonusEffectif } from './bonus';
 import { placerSurChemin, segmentPour } from './chemins';
 import { premierEnnemi } from './ciblage';
 import { defFamille, dieuDe } from './contenu';
@@ -27,10 +28,18 @@ export function defNiveau(etat: EtatPartie, famille: FamilleTour, niveau: number
 
 /**
  * Stats effectives d'un niveau de tour : la définition, les rangs de compétence achetés (`rangs`, même ordre que
- * `def.competences`), l'arbre d'améliorations, puis le bonus de famille du dieu. Les PV des soldats de ces trois
- * sources s'additionnent.
+ * `def.competences`), l'arbre d'améliorations, le bonus de famille du dieu (les PV des soldats de ces trois sources
+ * s'additionnent), puis le bonus de collection de la famille (sa tour de base et ses spécialisations ; rien en Fer, rien
+ * pour la tour divine).
  */
 export function statsTour(etat: EtatPartie, famille: FamilleTour, def: DefNiveauTour, rangs: readonly number[] = []): DefNiveauTour {
+  const stats = statsTourDuDieu(etat, famille, def, rangs);
+  if (famille === 'divine') return stats;
+  const collection = bonusDeFamille(bonusEffectif(etat.config), famille);
+  return collection ? appliquerBonusTour(stats, collection) : stats;
+}
+
+function statsTourDuDieu(etat: EtatPartie, famille: FamilleTour, def: DefNiveauTour, rangs: readonly number[]): DefNiveauTour {
   const bonus = dieuDe(etat).bonus;
   let base = def;
   let fractionPv = 0;
@@ -234,12 +243,26 @@ function reveler(etat: EtatPartie, t: Tour): void {
   }
 }
 
+/** Pas entre deux tirs : la cadence de la tour, accélérée par le boost (Ingéniosité) et ralentie par la famine. */
+function periodeDeTir(t: Tour): number {
+  return Math.max(1, enPas(t.stats.cadence / ((1 + t.boostCadence) * (1 - t.affameCadence))));
+}
+
 export function mettreAJourTours(etat: EtatPartie): void {
   for (const t of etat.tours) {
     if (t.recharge > 0) t.recharge--;
     if (t.boostPas > 0) {
       t.boostPas--;
       if (t.boostPas === 0) t.boostCadence = 0;
+    }
+    if (t.affamePas > 0) {
+      t.affamePas--;
+      if (t.affamePas === 0) t.affameCadence = 0;
+    }
+    // En feu : la tour ne tire pas, ne révèle pas, ne construit pas (ses soldats, eux, restent là).
+    if (t.desactivee > 0) {
+      t.desactivee--;
+      continue;
     }
     const s = t.stats;
     if (s.revele) reveler(etat, t);
@@ -249,13 +272,13 @@ export function mettreAJourTours(etat: EtatPartie): void {
     }
     if (t.recharge > 0 || s.soldats) continue;
     if (s.onde) {
-      if (ondeDeChoc(etat, t)) t.recharge = Math.max(1, enPas(s.cadence / (1 + t.boostCadence)));
+      if (ondeDeChoc(etat, t)) t.recharge = periodeDeTir(t);
       continue;
     }
     const cible = premierEnnemi(etat, t.x, t.y, s.portee, s.volants, s.revele);
     if (!cible) continue;
     tirerSur(etat, t, cible);
-    t.recharge = Math.max(1, enPas(s.cadence / (1 + t.boostCadence)));
+    t.recharge = periodeDeTir(t);
   }
 }
 

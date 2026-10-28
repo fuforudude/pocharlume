@@ -53,8 +53,10 @@ describe('valeurs des données', () => {
   });
 
   it('la région 1 a ses 3 ennemis et son boss', () => {
-    expect(Object.keys(ENNEMIS).sort()).toEqual(['boucher_vaudrelle', 'chien_errant', 'mendiant', 'paysan_affame']);
-    expect(Object.values(ENNEMIS).filter((e) => e.boss)).toHaveLength(1);
+    // Les régions 2 à 5 ont leurs propres tests (ennemis-jalon3.test.ts).
+    expect(Object.keys(ENNEMIS)).toEqual(expect.arrayContaining(['boucher_vaudrelle', 'chien_errant', 'mendiant', 'paysan_affame']));
+    expect(ENNEMIS.boucher_vaudrelle.boss).toBe(true);
+    for (const id of ['paysan_affame', 'mendiant', 'chien_errant'] as const) expect(ENNEMIS[id].boss, id).toBe(false);
     expect(ENNEMIS.mendiant.vitesse).toBeGreaterThan(ENNEMIS.paysan_affame.vitesse);
     expect(ENNEMIS.mendiant.pv).toBeLessThan(ENNEMIS.paysan_affame.pv);
     expect(ENNEMIS.chien_errant.vitesse).toBeGreaterThan(ENNEMIS.mendiant.vitesse);

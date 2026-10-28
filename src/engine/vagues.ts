@@ -15,7 +15,15 @@ export function lancerVague(etat: EtatPartie, bonus: number): void {
   for (const p of vague.paquets) {
     const debut = enPas(p.delai);
     const intervalle = enPas(p.intervalle);
-    v.paquets.push({ vague: index, ennemi: p.ennemi, chemin: p.chemin, restants: p.nombre, intervalle, prochain: etat.pas + debut });
+    v.paquets.push({
+      vague: index,
+      ennemi: p.ennemi,
+      chemin: p.chemin,
+      restants: p.nombre,
+      intervalle,
+      prochain: etat.pas + debut,
+      elite: p.elite === true,
+    });
     duree = Math.max(duree, debut + intervalle * Math.max(0, p.nombre - 1));
   }
   v.lancees++;
@@ -40,7 +48,7 @@ export function mettreAJourVagues(etat: EtatPartie): void {
     while (p.restants > 0 && etat.pas >= p.prochain) {
       const def = defEnnemi(p.ennemi);
       if (!def) throw new Error(`Ennemi inconnu : ${p.ennemi}`);
-      ajouterEnnemi(etat, def, p.ennemi, p.chemin, 0);
+      ajouterEnnemi(etat, def, p.ennemi, p.chemin, 0, p.elite);
       p.restants--;
       p.prochain += p.intervalle;
     }

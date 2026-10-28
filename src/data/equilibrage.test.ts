@@ -16,7 +16,8 @@ import {
 import { FAMILLES, TOURS } from './tours';
 
 const paysan: DefEnnemi = ENNEMIS.paysan_affame;
-const ennemisRegion1 = Object.entries(ENNEMIS) as [string, DefEnnemi][];
+const ennemis = (ids: readonly (keyof typeof ENNEMIS)[]): [string, DefEnnemi][] => ids.map((id) => [id, ENNEMIS[id] as DefEnnemi]);
+const ennemisRegion1 = ennemis(['paysan_affame', 'mendiant', 'chien_errant', 'boucher_vaudrelle']);
 
 describe('puissance des tours', () => {
   it('chaque tour commune reste à ±15 % de la moyenne de son palier de coût', () => {
@@ -116,5 +117,40 @@ describe('générateur de vagues', () => {
     }
     const avecBoss = genererVague({ ...options, niveau: 100, vague: 30, boss: true, graine: 3 });
     expect(menaceVague(avecBoss, ENNEMIS)).toBeLessThanOrEqual(budgetVague(100, 30));
+  });
+});
+
+describe('essaims', () => {
+  const marais = ennemis(['paysan_affame', 'sangsue', 'rat_peste']);
+
+  it('un ennemi en essaim n’arrive que par groupes de sa taille', () => {
+    let vus = 0;
+    for (let graine = 0; graine < 60; graine++) {
+      const vague = genererVague({ niveau: 25, vague: 4, ennemis: marais, graine, chemins: 2 });
+      for (const p of vague.paquets) {
+        const taille = (ENNEMIS as Record<string, DefEnnemi>)[p.ennemi]?.pouvoirs?.essaim ?? 1;
+        expect(p.nombre % taille, `${p.ennemi} ×${String(p.nombre)}`).toBe(0);
+        if (taille > 1) vus++;
+      }
+    }
+    expect(vus).toBeGreaterThan(0);
+  });
+
+  it('remplit toujours le budget sans le dépasser', () => {
+    for (let graine = 0; graine < 60; graine++) {
+      const vague = genererVague({ niveau: 25, vague: 4, ennemis: marais, graine, chemins: 2 });
+      expect(menaceVague(vague, ENNEMIS)).toBeLessThanOrEqual(budgetVague(25, 4));
+    }
+  });
+
+  it('les rats de peste arrivent par 8, les sangsues par 6 ou 12', () => {
+    const tailles = new Map<string, Set<number>>();
+    for (let graine = 0; graine < 200; graine++) {
+      for (const p of genererVague({ niveau: 30, vague: 5, ennemis: marais, graine, chemins: 1 }).paquets) {
+        tailles.set(p.ennemi, (tailles.get(p.ennemi) ?? new Set<number>()).add(p.nombre));
+      }
+    }
+    expect([...(tailles.get('rat_peste') ?? [])]).toEqual([8]);
+    expect([...(tailles.get('sangsue') ?? [])].sort((a, b) => a - b)).toEqual([6, 12]);
   });
 });

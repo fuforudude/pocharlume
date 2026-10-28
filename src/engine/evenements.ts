@@ -47,6 +47,25 @@ export type Evenement =
   | { type: 'boost'; tour: number; duree: number }
   | { type: 'ralliement'; tour: number; x: number; y: number }
   | { type: 'ordre_heros'; x: number; y: number }
+  // --- Mécaniques des ennemis (régions 2 à 5) ---
+  /** Un ennemi tué se relève : à terre `delai` s (intouchable), puis il repart avec une part de ses PV. */
+  | { type: 'releve'; ennemi: number; x: number; y: number; delai: number }
+  /** Un ennemi plonge : intouchable `delai` s, puis il réapparaît plus loin sur son chemin. */
+  | { type: 'plongee'; ennemi: number; x: number; y: number; delai: number }
+  /** Fin de l'intouchabilité (relèvement ou plongée) : l'ennemi est de nouveau là, à (x, y). */
+  | { type: 'emergence'; ennemi: number; x: number; y: number }
+  /** Une unité alliée prend feu au contact d'un ennemi. */
+  | { type: 'brulure'; ennemi: number; unite: number }
+  /** Une unité alliée est entraînée sous l'eau : elle meurt dans `delai` s si le noyeur vit encore. */
+  | { type: 'noyade'; ennemi: number; unite: number; delai: number }
+  /** Un ennemi en soigne un autre. */
+  | { type: 'soin_ennemi'; source: number; ennemi: number; pv: number }
+  /** Un boss affame les tours à portée : cadence réduite pendant `duree` s. */
+  | { type: 'famine'; ennemi: number; x: number; y: number; rayon: number; duree: number }
+  /** Une tour est mise hors service (en feu) pendant `duree` s. */
+  | { type: 'tour_desactivee'; ennemi: number; tour: number; duree: number }
+  /** Un ennemi en appelle d'autres (leurs `apparition` suivent). */
+  | { type: 'appel'; ennemi: number; typeEnnemi: string; nombre: number }
   | { type: 'fin'; statut: Statut; etoiles: number };
 
 /** Ouvre la liste d'événements du pas courant : celle d'un pas précédent est remplacée. */

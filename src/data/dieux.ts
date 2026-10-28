@@ -27,7 +27,7 @@ const plume: DefDieu = {
       effets: [
         {
           type: 'zone',
-          zone: { duree: 10, effets: [{ type: 'ralentissement', chance: 1, duree: 0.2, valeur: 0.4 }], critique: 0.5, volants: true },
+          zone: { duree: 10, effets: [{ type: 'ralentissement', chance: 1, duree: 0.2, valeur: 0.4 }], critique: 0.5, volants: true, revele: true },
         },
       ],
     },

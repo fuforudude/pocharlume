@@ -3,13 +3,13 @@
 // « toString »… ne sont pas des ids).
 import { BRANCHES } from '../data/ameliorations';
 import { DIEUX } from '../data/dieux';
-import { DIFFICULTES } from '../data/difficultes';
+import { DIFFICULTE_DES_DEFIS, DIFFICULTES } from '../data/difficultes';
 import { ENNEMIS } from '../data/ennemis';
 import { HEROS } from '../data/heros';
 import { OBJETS } from '../data/objets';
 import { TOURS } from '../data/tours';
 import type { DefBranche, DefDieu, DefEnnemi, DefFamille, DefHeros, DefObjet, Difficulte } from './definitions';
-import type { EtatPartie } from './etat';
+import type { ConfigPartie, EtatPartie } from './etat';
 
 const ennemis: Readonly<Record<string, DefEnnemi>> = ENNEMIS;
 const dieux: Readonly<Record<string, DefDieu>> = DIEUX;
@@ -70,8 +70,13 @@ export function herosDe(etat: EtatPartie): DefHeros {
   return h;
 }
 
+/** Difficulté qui s'applique à une config : celle de Matou en défi (Héroïque, Fer), sinon celle de la config. */
+export function difficulteDeConfig(config: ConfigPartie): Difficulte | undefined {
+  return defDifficulte(config.defi ? DIFFICULTE_DES_DEFIS : config.difficulte);
+}
+
 export function difficulteDe(etat: EtatPartie): Difficulte {
-  const difficulte = defDifficulte(etat.config.difficulte);
+  const difficulte = difficulteDeConfig(etat.config);
   if (!difficulte) throw new Error(`Difficulté inconnue : ${etat.config.difficulte}`);
   return difficulte;
 }

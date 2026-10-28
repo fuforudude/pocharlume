@@ -2,8 +2,10 @@
 export type { Action, RaisonRefus, ResultatAction } from './actions';
 export type * from './definitions';
 export type {
+  BonusCollection,
   CheminCalcule,
   ConfigPartie,
+  DefiPartie,
   Ennemi,
   EntreeJournal,
   EtatPartie,
@@ -14,6 +16,8 @@ export type {
   PaquetActif,
   Piege,
   Projectile,
+  StatBonusHeros,
+  StatBonusTour,
   Statut,
   Structure,
   Tour,

@@ -12,7 +12,7 @@ export function premierEnnemi(etat: EtatPartie, x: number, y: number, portee: nu
   let meilleur: Ennemi | undefined;
   let restantMin = Infinity;
   for (const e of etat.ennemis) {
-    if (!e.vivant || (e.volant && !volants) || !estVisible(e, revele)) continue;
+    if (!e.vivant || e.invulnerable > 0 || (e.volant && !volants) || !estVisible(e, revele)) continue;
     if (distance2(e.x, e.y, x, y) > portee2) continue;
     const restant = (etat.chemins[e.chemin]?.longueur ?? 0) - e.distance;
     if (restant < restantMin) {

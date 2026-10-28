@@ -173,6 +173,9 @@ describe('Suivi : zones, boost et tour divine par dieu', () => {
         rangs: [],
         boostCadence: 0,
         boostPas: 0,
+        desactivee: 0,
+        affamePas: 0,
+        affameCadence: 0,
         minuteurs: [],
       });
       suivi.apresPas(etat, 0);

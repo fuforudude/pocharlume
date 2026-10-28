@@ -40,6 +40,8 @@ export type RaisonRefus =
   | 'objet_utilise'
   | 'vies_pleines'
   | 'vague_en_cours'
-  | 'plus_de_vague';
+  | 'plus_de_vague'
+  /** Défi Fer : cette famille de tours n'est pas constructible sur ce niveau. */
+  | 'famille_interdite';
 
 export type ResultatAction = { ok: true } | { ok: false; raison: RaisonRefus };

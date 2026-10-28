@@ -422,3 +422,64 @@ ce qui est demandé et affiche un résumé (sans écrire le rapport). Ce qui a �
   `zone_fin`, `piege_pose`, `piege_declenche`, `structure`, `tir_structure`, `structure_fin`, `boost`, `objet`,
   `competence_tour`.
 - **Bot soigneux** : joue correctement chacun des trois dieux (voir « Équilibrage des trois dieux » plus bas). Il compte le bonus et la remise de famille du dieu dans la valeur et le prix de ses achats, construit la tour divine (200 arêtes) à partir de la troisième tour pour les trois dieux, et joue chaque sort selon son effet : zones de dégâts sur les grappes, Renforts et Voile de Nuit devant la zone de feu, Pièges à Ressort deux tuiles avant, Griffes d'Ombre sur la plus grosse grappe (4 ennemis ou un boss), Ingéniosité sur le plus gros groupe de tours.
+
+## Ennemis des régions 2 à 5, élites, défis et bonus de collection (jalon 3, moteur)
+**Principe.** Aucun ennemi n'est connu du moteur par son nom : `DefEnnemi.pouvoirs` (optionnel, tout y est optionnel) décrit
+des mécaniques génériques, copiées dans `Ennemi.pouvoirs` à l'apparition. Les 16 ennemis (12 ordinaires, 4 boss) sont dans
+`src/data/ennemis.ts` (ids en `snake_case` ; les sprites suivent le même id en kebab-case, les élites `<id>-elite`), avec des
+valeurs de départ cohérentes avec `menaceEnnemi` : l'équilibrage fin est celui de la tâche 6.
+
+| Mécanique | Donnée (`pouvoirs`) | Où dans le moteur |
+| --- | --- | --- |
+| Tir à distance sur soldats et héros | `distance` (déjà là : Glaneur) | `ennemis.ts`, `attaquerADistance` |
+| Volant (ni caserne, ni artillerie, jamais bloqué) | `volant` (déjà là : Corbeau Noir) | idem |
+| Relèvement : tombe, intouchable `delai` s, repart avec une part de ses PV | `relevement { fois, pv, delai }` | `degats.ts` (`infligerDegats`) ; une exécution (`executer`) tue pour de bon |
+| Brûlure : chaque coup au contact enflamme l'unité (purs/s, non cumulée) | `brulure { duree, degats }` | `ennemis.ts` (`enflammer`), `unites.ts` (`bruler`) |
+| Noyade : l'unité qui le bloque (hors héros) ne frappe plus et meurt après `delai` s, sauf si lui meurt ou la lâche | `noyade { delai }` | `ennemis.ts` (`noyer`), `unites.ts` (`noyer`) |
+| Drain : PV retirés à l'unité touchée (purs/s) et rendus à l'ennemi | `drain { degats, soin }` | `ennemis.ts` (`drainer`) |
+| Essaim : n'arrive que par groupes de cette taille | `essaim` | `genererVague` (`equilibrage.ts`) : paquets en multiples de `essaim` ; rien ne change pour les autres |
+| Nuage à la mort : zone qui blesse les unités alliées (purs/s) | `nuage { rayon, duree, degats }` | `pouvoirs-ennemis.ts` (`laisserNuagesDesMorts`, `mettreAJourNuages`) ; `ZoneDurable.degatsAllies` ; seulement s'il est tué, pas s'il s'échappe |
+| Soin des ennemis proches (autres que lui) | `soin { rayon, quantite, cadence }` | `pouvoirs-ennemis.ts` (`soigner`) |
+| Double dégâts contre le héros | `degatsHeros` | `ennemis.ts` (`degatsContre`), au contact comme à distance |
+| Affamer les tours à portée (cadence −30 % pendant 5 s) | action `affamer { rayon, cadence, duree }` | `Tour.affamePas` / `affameCadence`, `tours.ts` (`periodeDeTir`) ; les casernes (cadence de leurs soldats) ne sont pas touchées |
+| Désactiver la tour la plus proche | action `desactiver_tour { duree }` | `Tour.desactivee` : ni tir, ni onde, ni révélation, ni construction (ses soldats restent) |
+| Plongée : intouchable, puis réapparaît plus loin sur son chemin | action `plonger { duree, saut }` | `Ennemi.invulnerable`, `Ennemi.saut`, `pouvoirs-ennemis.ts` (`emerger`) ; un saut qui dépasse la sortie l'y mène |
+| Invocation : des ennemis apparaissent à sa hauteur | action `invoquer { ennemi, nombre, ecart }` | `pouvoirs-ennemis.ts` (`appeler`), `ajouterEnnemi` |
+
+- **Paliers et cadences des boss.** `pouvoirs.paliers` (liste décroissante de `{ pv, actions }`, `pv` en fraction des PV maximaux)
+  se déclenche une fois par palier franchi, dans l'ordre ; `pouvoirs.periodiques` (`{ cadence, actions }`) se déclenche toutes
+  les `cadence` secondes, la première fois après un délai égal. Les deux sont lus par `mettreAJourPouvoirsEnnemis`, appelé au
+  début du pas (après les vagues, avant les ennemis). Un ennemi appelé commence au pas suivant.
+- **Intouchable** (`Ennemi.invulnerable` > 0, en pas) : à terre (relèvement) ou plongé. Il ne subit ni dégâts ni effets
+  (`infligerDegats`, `appliquerEffet`, `executer`), n'est visé par aucune tour, tourelle, unité ni piège, ne bloque personne, ne
+  bouge ni n'attaque, et reste compté pour la victoire. Le rendu lit ce champ pour dessiner l'état.
+- **Furtif révélé par le Voile de Nuit** : `DefZoneDurable.revele` (vrai pour le Voile) rend visibles les furtifs de la zone.
+- **Élites.** `Paquet.elite` marque un groupe de vague ; `ajouterEnnemi(..., elite)` applique `REGLES.elite` : PV ×1,8, un palier
+  d'armure et de résistance de plus (`paliersProtection`, 90 % au plus), prime ×1,5 (arrondie après la difficulté), coût en vies
+  +1. Le type de l'ennemi reste son id : le rendu choisit `<id>-elite` d'après `Ennemi.elite`. **Un boss n'est jamais élite**
+  (le drapeau est ignoré, `Ennemi.elite` reste faux).
+- **Défis.** `ConfigPartie.defi` : `'heroique'`, `'fer'` ou null/absent. Un défi se joue avec la difficulté de `DIFFICULTE_DES_DEFIS`
+  (Matou) quelle que soit celle de la config, et sans objet (`verifierConfig` refuse un défi avec des objets).
+  - **Héroïque** : 1 vie (`REGLES.heroique`), tous les groupes hors boss en élite (`creerPartie` réécrit `etat.niveau.vagues`).
+  - **Fer** : `creerPartie` fusionne toutes les vagues en une (les groupes gardent leurs délais), effectifs ×`REGLES.fer.facteurEffectifs`
+    arrondis au-dessus **sauf les boss** (qui restent à leur effectif). Le niveau doit porter `Niveau.defiFer.familles` (deux
+    familles de `IdFamille`, différentes) : sinon `creerPartie` lève. Seules ces familles se construisent (`famille_interdite`
+    sinon) ; la tour divine suit la famille de son dieu (`bonus.famille` : Plume tir, Charlie caserne, Pollen artillerie). Le bonus
+    de collection est ignoré. Hors Fer, `defiFer` n'a aucun effet.
+- **Bonus de collection.** `ConfigPartie.bonus` : `{ tours: { <famille>: { degats, cadence, portee, pvSoldats } }, heros: { pv, degats,
+  cadence, regeneration } }`, des fractions (0,05 = +5 %). `verifierConfig` refuse une forme inconnue, une valeur négative ou non
+  finie, et un total de plus de `REGLES.plafondBonus` (0,1, avec une tolérance de 1e-9 pour les flottants) par famille de tours ou
+  pour le héros. Application (`bonus.ts`) : pour une famille, à sa tour de base et à ses spécialisations, **après** le bonus du dieu
+  (les deux se multiplient) : dégâts, cadence et portée de la tour, et dégâts, cadence (et PV pour `pvSoldats`) de ses soldats ou
+  spectres ; jamais à la tour divine. Pour le héros : PV, dégâts (mêlée et tir), cadence, et régénération (`regeneration` ×
+  `REGLES.regenerationBonusHeros` PV/s). Ignoré en Fer.
+- **Config d'avant le jalon 3.** `defi` et `bonus` sont optionnels dans `ConfigPartie` (absent = null / vide). `copierConfig` ne les
+  range dans `etat.config` que s'ils servent : la config d'une partie ordinaire est inchangée, donc son état et sa sauvegarde aussi.
+- **Versions.** `VERSION_ETAT` passe à 4 (champs d'ennemi, d'unité, de tour et de zone). `VERSION_DONNEES` reste à 6 : les ajouts
+  ne changent le déroulement d'aucune partie de la région 1 (le test des vagues figées et `npm run balance` le confirment) ; la tâche
+  d'équilibrage l'incrémentera.
+- **Événements ajoutés** : `releve`, `plongee`, `emergence`, `brulure`, `noyade`, `soin_ennemi`, `famine`, `tour_desactivee`, `appel`
+  (le nuage est un `zone` ordinaire, dont la zone d'état porte `degatsAllies`). Chacun a une entrée dans `src/audio/table.ts`
+  (silence provisoire sauf `soin_ennemi`, `famine`, `appel`) ; `RaisonRefus` gagne `famille_interdite` (texte dans `fr.ts`, `refus.ts`).
+- **Tests** : `ennemis-regions.test.ts` (12 ennemis), `boss-regions.test.ts` (4 boss), `elites.test.ts`, `defis.test.ts`,
+  `bonus-collection.test.ts`, `src/data/ennemis-jalon3.test.ts` (données) et le bloc « essaims » de `src/data/equilibrage.test.ts`.

@@ -1,6 +1,6 @@
 // Dégâts infligés aux ennemis, protections et effets (ralentissement, étourdissement, dégâts sur la durée).
 import { tirer } from './aleatoire';
-import type { EffetCoup, TypeDegats } from './definitions';
+import type { EffetCoup, Relevement, TypeDegats } from './definitions';
 import { EFFET, type Ennemi, type EtatPartie } from './etat';
 import { chercherParId } from './recherche';
 import { enPas } from './temps';
@@ -31,18 +31,38 @@ function tuer(etat: EtatPartie, e: Ennemi): void {
   etat.evenements.push({ type: 'mort', ennemi: e.id, typeEnnemi: e.type, x: e.x, y: e.y, prime: e.prime });
 }
 
-/** Inflige des dégâts après protections ; verse la prime si l'ennemi meurt. Renvoie les dégâts subis. */
+/**
+ * Un ennemi qui se relève au lieu de mourir : il tombe (intouchable le temps du délai, plus d'effets, plus de bloqueur),
+ * puis repart avec une part de ses PV maximaux. Pas de prime : il n'est pas mort.
+ */
+function relever(etat: EtatPartie, e: Ennemi, relevement: Relevement): void {
+  e.releves--;
+  e.pv = e.pvMax * relevement.pv;
+  e.invulnerable = Math.max(1, enPas(relevement.delai));
+  e.effetsPas.fill(0);
+  libererEnnemi(etat, e);
+  etat.evenements.push({ type: 'releve', ennemi: e.id, x: e.x, y: e.y, delai: relevement.delai });
+}
+
+/**
+ * Inflige des dégâts après protections ; verse la prime si l'ennemi meurt (ou le relève s'il le peut). Un ennemi
+ * intouchable (à terre, plongé) ne subit rien. Renvoie les dégâts subis.
+ */
 export function infligerDegats(etat: EtatPartie, e: Ennemi, montant: number, type: TypeDegats, ignoreArmure = 0): number {
-  if (!e.vivant) return 0;
+  if (!e.vivant || e.invulnerable > 0) return 0;
   const subis = montant * partRestante(type, e.armure, e.resistance, ignoreArmure);
   e.pv -= subis;
-  if (e.pv <= 0) tuer(etat, e);
+  if (e.pv <= 0) {
+    const relevement = e.pouvoirs?.relevement;
+    if (relevement && e.releves > 0) relever(etat, e, relevement);
+    else tuer(etat, e);
+  }
   return subis;
 }
 
-/** Tue net un ennemi (exécution), quels que soient ses PV et ses protections. La prime est versée. */
+/** Tue net un ennemi (exécution), quels que soient ses PV et ses protections ; un ennemi qui se relève ne se relève pas. La prime est versée. */
 export function executer(etat: EtatPartie, e: Ennemi): void {
-  if (!e.vivant) return;
+  if (!e.vivant || e.invulnerable > 0) return;
   etat.evenements.push({ type: 'execution', ennemi: e.id, x: e.x, y: e.y });
   tuer(etat, e);
 }
@@ -52,7 +72,7 @@ export function executer(etat: EtatPartie, e: Ennemi): void {
  * (le facteur le plus fort pour un ralentissement).
  */
 export function appliquerEffet(etat: EtatPartie, e: Ennemi, effet: EffetCoup): void {
-  if (!e.vivant) return;
+  if (!e.vivant || e.invulnerable > 0) return;
   const k = EFFET[effet.type];
   if (k === EFFET.etourdissement && e.insensibleEtourdissement) return;
   if (effet.chance < 1 && tirer(etat) >= effet.chance) return;

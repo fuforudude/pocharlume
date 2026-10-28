@@ -41,8 +41,21 @@ function niveauxDeTours(): { famille: 'caserne' | 'tir' | 'magie' | 'artillerie'
 }
 
 describe('habillage : chaque sprite demandé existe dans l’atlas', () => {
+  // Ennemis des régions 2 à 5 (jalon 3) dont les sprites arrivent avec la tâche « Sprites » : vider cette liste à la fusion.
+  const SPRITES_A_VENIR = new Set([
+    'glaneur', 'corbeau_noir', 'epouvantail', 'la_faim', 'porteur_torche', 'chasseur_sorcieres', 'delateur', 'juge_flammes',
+    'noyeur', 'pelerin_voile', 'sangsue', 'dame_puits', 'rat_peste', 'pestifere', 'medecin_peste', 'mere_rats',
+  ]);
+
   it('ennemis', () => {
-    for (const type of Object.keys(ENNEMIS)) expect(existe(spriteEnnemi(type)), type).toBe(true);
+    for (const type of Object.keys(ENNEMIS)) {
+      if (SPRITES_A_VENIR.has(type)) continue;
+      expect(existe(spriteEnnemi(type)), type).toBe(true);
+    }
+  });
+
+  it('un ennemi de la liste « sprites à venir » dont le sprite existe en est retiré', () => {
+    for (const type of SPRITES_A_VENIR) expect(existe(spriteEnnemi(type)), `${type} : retirer de SPRITES_A_VENIR`).toBe(false);
   });
 
   it('héros, soldats, spectres et renforts', () => {

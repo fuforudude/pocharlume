@@ -3,6 +3,7 @@
 // le moteur ne relit plus ces tables pendant les pas.
 import { CAPACITES_NULLES, MOD_UNITE_NUL } from '../data/capacites';
 import { REGLES } from '../data/regles';
+import { bonusEffectif, modBonusHeros } from './bonus';
 import { defBranche, defHeros } from './contenu';
 import type {
   CapacitesUnite,
@@ -146,6 +147,9 @@ function resoudreDef(def: DefHeros, config: ConfigPartie): HerosResolu {
     const mod = rang > 0 ? c.rangs[Math.min(rang, c.rangs.length) - 1] : undefined;
     if (mod) mods.push(mod);
   }
+  // Bonus de collection (familier) : PV, dégâts, cadence et régénération ; rien en défi Fer.
+  const collection = modBonusHeros(bonusEffectif(config).heros);
+  if (collection) mods.push(collection);
   const mod = sommeModsUnite(mods);
   // Le gain par niveau vaut aussi pour l'attaque à distance (les tireurs n'ont pas de dégâts au corps-à-corps).
   const distance = def.capacites.distance
