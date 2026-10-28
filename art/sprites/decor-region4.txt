@@ -1,0 +1,93 @@
+# Décor des Marais de l'Ordalie (région 4) : saule pleureur, barque échouée, puits noir, roseaux, nénuphars, souche moussue,
+# feu follet. Comme le décor du village : avec contour, ancre au pied ; les grands objets font 32×32 (liste
+# GRANDS_DECORS dans src/data/niveaux/habillage.ts), les petits 16×16.
+categorie decor
+palette commune
+taille 32 32
+ancre 16 30
+
+# Saule du marais : le feuillage retombe en rideaux de mousse sur un tronc tordu.
+sprite saule-marais-1
+origine 3 3
+......hhhHhhhHhh.......
+....hhHhhEhhHhhhhh.....
+...hHhhhhHhhhhhEhHhh...
+..hhHhEhhhhHhhhhhhHh...
+.hhEhhhhdhhhHhhhEhhHh..
+.hhhHhhhdhhhhhHhhhhhh..
+hhHhhhEhdkhhEhhhhHhhhh.
+hHh.hHh.dk.hHh.hhH.hhH.
+hh..hh..bd..hh.Hh..hh..
+hH..hH..bd..hH..H..hH..
+h...h...bd...h..h..h...
+h...H...bd...h.....H...
+....h...bBd..h.........
+........bBd............
+........bBd............
+.......dbBBd...........
+......ddbBBdd..........
+.....dbbBBBbdd.........
+....ddbbbBBbbdd........
+
+sprite saule-marais-2
+derive saule-marais-1 miroir decale -1 0
+
+# Barque échouée dans la vase : coque pourrie, bordés bâillants, un aviron brisé.
+sprite barque-echouee
+origine 2 16
+dd..........................dd
+.dBdd.....................ddB.
+..dBBdddddddddddddddddddddBBd.
+...dBbBBbBBbBbBBbBBbBbBBBbBd..
+....dbBbbBbbBbbBbBbbBbbBbbd...
+.....dddddddddddddddddddd...b.
+.....mmmmmmmmmmmmmmmmmmmm..bB.
+..mmmmmmmmmmmmmmmmmmmmmmmm.b..
+
+# Puits des marais : le puits du village, vert de mousse, l'eau noire et la corde pourrie.
+sprite puits-noir
+derive puits couleurs P=G p=h q=E d=m b=M B=h
+
+sprite roseaux
+taille 16 16
+ancre 8 15
+contour non
+origine 2 3
+..h...H...
+.hH..hH.h.
+.Hh..HhhH.
+.Hh.hH.hH.
+hH.hHh.Hh.
+hH.hH..H.h
+Hh.HH..Hh.
+Hh.Hh.hH..
+EEEmEEmEEE
+
+sprite nenuphars
+taille 16 16
+ancre 8 15
+contour non
+origine 1 9
+..HHHH.....
+.HEEEEH.Hh.
+.HEEEE.HhEh
+..HEE..hEh.
+......hhh.
+
+sprite souche-moussue
+taille 16 16
+ancre 8 15
+derive souche couleurs O=E B=h b=h c=H
+
+sprite feu-follet
+taille 16 16
+ancre 8 15
+contour non
+couleur 1 b4f0d0a0
+couleur 2 7ad0a860
+origine 4 3
+..1..
+.121.
+12I21
+.121.
+..1..

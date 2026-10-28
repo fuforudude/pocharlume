@@ -1,0 +1,118 @@
+# Décor des Champs Brûlés (région 2) : arbres calcinés, meule brûlée, chariot brisé, gerbes, sillon, fourche brisée,
+# souche calcinée. Comme le décor du village : avec contour, ancre au pied ; les grands objets font 32×32 (liste
+# GRANDS_DECORS dans src/data/niveaux/habillage.ts), les petits 16×16.
+categorie decor
+palette commune
+taille 32 32
+ancre 16 30
+
+# Arbre calciné : tronc noirci, branches cassées, une braise qui couve entre les racines.
+sprite arbre-calcine-1
+origine 6 9
+......k.....k....
+.....kdk...kd....
+..k...dk..kd..k..
+..dk..dkkkd..kd..
+...dk.ddkd.kdk...
+....dkdddddkd....
+.....dddKddd.....
+......dKdd.......
+......ddKd.......
+......dKdd.......
+......ddKd.......
+.....ddKKdd......
+.....dKddKd..k...
+....ddKdddKd.kd..
+...ddKdd.ddKddd..
+..dddd.e.f.dddd..
+.ddk..eee..kddd..
+KKgKKKKKKKKKKgKKK
+
+sprite arbre-calcine-2
+derive arbre-calcine-1 miroir decale -1 0
+
+# Meule brûlée : le dôme de paille noirci, des brins intacts, des braises sur le flanc.
+sprite meule-brulee
+origine 3 13
+..........KKKKKK..........
+........KKggKKggKK........
+......KKggJKKgKKgggK......
+.....KgKKJJKggKKJKKgK.....
+....KKggKKKggJKKKgggKK....
+...KKJKKgggKKKgKKKKJgKK...
+..KgKKggKKKJKKggKKKgKKgK..
+.KKggKKJKKggKKKKJKKggKKKK.
+KgKKKKggKKKKJgKKggKKKKJgKK
+KKJKKgKKeKKKKKKKgKKfKKKgKK
+gKKKKKKefeKKKJKKKKefeKKKgg
+.KgggKKKeKKKKgKKKKKeKKggg.
+..gggggggggggggggggggggg..
+
+# Chariot brisé : caisse de bois fendue, une roue cassée, l'autre à terre, sacs de grain brûlés.
+sprite chariot-brise
+origine 2 12
+...........bb................
+.........bbB.................
+........bB...................
+.dddddddddddddddddd..dd......
+dBBBbBBBBbBBBBBBBBd.dBBd.....
+dBbbBBdBBBBbBBbdBBd.dbBd.....
+dddddddddddddddddddd.dd..KK..
+...ddd..........dd......KggK.
+..dBBBd........dBd.....KgKKgK
+.dBb.bBd......dB.Bd....KKggKK
+.dB.d.Bd......dB.Bd.....gKKg.
+.dBb.bBd.......dBd......KKKK.
+..dBBBd..................
+...ddd...................
+
+sprite gerbes-brulees
+taille 16 16
+ancre 8 15
+origine 2 8
+..K..K.
+.KgK.KgK
+.KJgKKgK
+..KgKgK.
+..KKgKK.
+.gKKKKKg
+.K.eK.K.
+
+sprite sillon
+taille 16 16
+ancre 8 15
+contour non
+origine 1 10
+gggggggggggggg
+KKKKKKKKKKKKKK
+.gG.gG.gG.gG..
+KKKKKKKKKKKKKK
+
+sprite fourche-brisee
+taille 16 16
+ancre 8 15
+origine 3 4
+.d...d
+.d...d
+.dP.Pd
+..dPd
+..db.
+..db.
+..db.
+..db.
+..db.
+..db.
+.MdbM
+MMMMMM
+
+sprite souche-calcinee
+taille 16 16
+ancre 8 15
+origine 3 8
+..KddK
+.KdKKdK
+.KdKKKd
+.dKKdKd
+.dKdKKd
+dKKKKdKd
+d.Kd.dKd

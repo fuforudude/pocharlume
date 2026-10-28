@@ -17,6 +17,23 @@ export const GRANDS_DECORS: ReadonlySet<string> = new Set([
   'maison-ruine-2',
   'potence',
   'puits',
+  // Régions 2 à 5 (art/sprites/decor-region<N>.txt)
+  'arbre-calcine-1',
+  'arbre-calcine-2',
+  'meule-brulee',
+  'chariot-brise',
+  'bucher-braises',
+  'echafaud',
+  'maison-brulee-1',
+  'maison-brulee-2',
+  'saule-marais-1',
+  'saule-marais-2',
+  'barque-echouee',
+  'puits-noir',
+  'maison-condamnee-1',
+  'maison-condamnee-2',
+  'charrette-linceuls',
+  'fosse-commune',
 ]);
 
 /** Emprise d'un décor : tout le sprite (le rectangle de pixels, ancre comprise). */

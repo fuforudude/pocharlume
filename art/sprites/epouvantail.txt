@@ -1,0 +1,112 @@
+# Épouvantail (région 2, dessiné) : sac de toile bourré de paille sur sa perche, chapeau de feutre. Il se relève une fois :
+# l'animation `releve` (mort à l'envers) est prévue pour ce moment. 32×32, ancre aux pieds. Version d'élite
+# (`epouvantail-elite`) : même recette (`modele`), tout assombri (`sombre`), yeux rouges dans les orbites du sac (calque `yeux`).
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+
+calque yeux
+.
+
+calque tete 12 8
+..kddk..
+.kddddk.
+bbbbbbbb
+.zzzzzZ.
+.zkzzkZ.
+.zzzzzZ.
+.zkkkkZ.
+..zzzZ..
+
+calque corps 8 16
+JJ.kkbbbbbkk.JJ.
+.JJbbbBBBbbbJJ..
+...kbbMbbMbk....
+....bbbbbbk.....
+....bMbbbMk.....
+....kbbbbbk.....
+.....kddk.......
+
+calque corps-frappe 8 16
+JJ.kkbbbbbbbbbbJJ
+.JJbbbBBBbbbbbJJ.
+...kbbMbbMbk.....
+....bbbbbbk......
+....bMbbbMk......
+....kbbbbbk......
+.....kddk........
+
+calque jambes 11 23
+.bb..bb.
+.bb..bb.
+.BB..BB.
+.BB..BB.
+.BB..BB.
+JJJ..JJJ
+.......
+
+calque jambes-a 11 23
+.bb...bb
+.bb...bb
+.BB..BB.
+.BB..BB.
+.BB.BB..
+JJJ.JJJ.
+.......
+
+calque jambes-b 11 23
+..bb.bb.
+..bb.bb.
+..BB.BB.
+.BB...BB
+.BB...BB
+JJJ...JJ
+.......
+
+calque tas 8 25
+....kddk........
+...bbbbbbb......
+.JJYJJJbbbJJYJ..
+JJJJYJJJJJJJJYJJ
+.JJJJJYJJJJJJJ..
+
+sprite epouvantail
+anim repos 220
+cadre jambes + corps + tete + yeux
+cadre jambes + corps decale 0 -1 + tete decale 0 -1 + yeux decale 0 -1
+
+anim marche 110
+cadre jambes-a + corps + tete + yeux
+cadre jambes + corps decale 0 -1 + tete decale 1 -1 + yeux decale 1 -1
+cadre jambes-b + corps + tete + yeux
+cadre jambes + corps decale 0 -1 + tete decale -1 -1 + yeux decale -1 -1
+
+# Le bras de paille frappe en avant.
+anim attaque 100
+cadre jambes + corps decale -1 0 + tete decale -2 0 + yeux decale -2 0 duree 170
+cadre jambes-a + corps-frappe + tete decale 2 1 + yeux decale 2 1
+cadre jambes-a + corps-frappe decale 1 0 + tete decale 3 1 + yeux decale 3 1 duree 140
+cadre jambes + corps + tete + yeux
+
+anim blesse 120
+cadre jambes + corps decale -1 0 + tete decale -2 1 + yeux decale -2 1
+cadre jambes + corps + tete decale -1 0 + yeux decale -1 0
+
+# Il s'affaisse sur ses jambes puis ne reste qu'un tas de paille et son chapeau.
+anim mort 160
+cadre jambes + corps decale -1 2 + tete decale -3 3 + yeux decale -3 3
+cadre jambes-b decale 0 3 + corps decale 0 5 + tete decale -2 7 + yeux decale -2 7
+cadre tas duree 900
+
+# Le tas se rassemble : le mort revient (le rendu la joue quand l'épouvantail se relève).
+anim releve 160 unique
+cadre tas
+cadre jambes-b decale 0 3 + corps decale 0 5 + tete decale -2 7 + yeux decale -2 7
+cadre jambes + corps decale -1 2 + tete decale -3 3 + yeux decale -3 3
+
+sprite epouvantail-elite
+modele epouvantail
+sombre
+calque yeux 14 12
+x..x

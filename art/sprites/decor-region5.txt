@@ -1,0 +1,119 @@
+# Décor de la Ville Pestiférée (région 5) : maisons condamnées à la croix rouge, charrette de linceuls, fosse commune,
+# croix rouge, linceul, lanterne, ossements. Comme le décor du village : avec contour, ancre au pied ; les grands
+# objets font 32×32 (liste GRANDS_DECORS dans src/data/niveaux/habillage.ts), les petits 16×16.
+categorie decor
+palette commune
+taille 32 32
+ancre 16 30
+
+# Maison condamnée : porte et fenêtres clouées de planches, la croix rouge peinte sur le mur.
+sprite maison-condamnee-1
+origine 3 10
+......dddddddddddddd......
+....ddbbbbbbbbbbbbbbdd....
+...dbbBBbBBbBBbBBbbBBbd...
+..dbBBbBBbBBbBBbBBbBBBbd..
+.dddddddddddddddddddddddd.
+.dppppppppppppppppppppppd.
+.dpPPppppppPPpppppppppppd.
+.dpkkppppppkkppppdddddppd.
+.dpkkppppppkkpppdBBBBBdpd.
+.dpddppppppddppdbBxBBBBdpd
+.dpbbppppppbbppdBBxxBBBdpd
+.dpppppppppppppdBxBBxBBdpd
+.dppppppppppppqdBBBBBBBdpd
+.ggggggggggggggggggggggggg
+
+sprite maison-condamnee-2
+derive maison-condamnee-1 miroir decale 1 0
+
+# Charrette aux linceuls : une charrette à bras, des formes enveloppées de toile, une roue.
+sprite charrette-linceuls
+origine 2 12
+.......zzzz.zzz......
+.....zzZZZzzZZzz.....
+....zZZzZZZZzZZZz....
+..dddddddddddddddddd.
+.dzzZzzZzzzZzzZzzzZdd
+.dZzZZzZZzzZZzZzZZzbd
+.ddddddddddddddddddd.
+...ddd..........ddd..
+..dBBBd........dBBBd.
+.dBb.bBd......dBb.bBd
+.dB.d.Bd......dB.d.Bd
+.dBb.bBd......dBb.bBd
+..dBBBd........dBBBd.
+...ddd..........ddd..
+
+# Fosse commune : la terre retournée, un trou noir, des linceuls pâles et de la chaux.
+sprite fosse-commune
+origine 2 16
+..MMNNMMNNMMNNMMNNMMNNMM..
+.MNnNNnNNnNNnNNnNNnNNnNNM.
+MNkkkkkkkkkkkkkkkkkkkkkkNM
+MkKKKkKKKkKKKkKKKkKKKkKKkM
+MkKzzKkKzzKkKwwKkKzzKkKKkM
+MkKKKKKKKKKKKKKKKKKKKKKKkM
+.MkkkkkkkkkkkkkkkkkkkkkkM.
+..MMMMMMMMMMMMMMMMMMMMMM..
+
+sprite croix-rouge
+taille 16 16
+ancre 8 15
+origine 3 1
+.dddddd.
+.dzzzzd.
+.dzxxzd.
+.dxxxxd.
+.dzxxzd.
+.dzzzzd.
+..dbbd..
+..db....
+..db....
+..db....
+..db....
+.Mdb.M..
+MMMMMMM.
+
+sprite linceul
+taille 16 16
+ancre 8 15
+origine 2 8
+...zzzz...
+..zZzzZzz.
+.zzZzzzZzz
+zZzzZzzzZz
+zzZzzzZzzZ
+.zzZzzzZzz
+..ZZzzzZ..
+
+sprite lanterne-peste
+taille 16 16
+ancre 8 15
+contour non
+couleur 1 b4f0a0b0
+couleur 2 6ea64a70
+origine 4 2
+.dd.
+dbbd
+d11d
+d1Id
+d11d
+dbbd
+.dd.
+.db.
+.db.
+.db.
+.db.
+.db.
+MMMM
+
+sprite tas-ossements
+taille 16 16
+ancre 8 15
+origine 1 8
+.q..w..q....
+wqwqwqwwq.q.
+.wqqwqqwqwq.
+qwwqkwqwwqwq
+.qwqwwqqkwq.

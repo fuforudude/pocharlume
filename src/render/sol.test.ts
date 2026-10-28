@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { VisuelCarte } from '../data/visuel';
 import { NIVEAU_TEST } from '../data/niveaux/region1';
 import type { Carte } from '../engine/definitions';
-import { bruit, construireSol, masqueChemin, type GrilleSol } from './sol';
+import { bruit, construireSol, masqueChemin, nomTuile, type GrilleSol } from './sol';
 
 const SANS_ZONE: VisuelCarte = { region: 1, zones: [], decor: [] };
 const carte = NIVEAU_TEST.carte;
@@ -135,6 +135,41 @@ describe('construireSol', () => {
     const g = construireSol(fin, SANS_ZONE, 0.5);
     expect(tuile(g, 10, 5)).toMatch(/^chemin-/);
     expect(g.tuiles.every((n) => Object.hasOwn(atlas.sprites, n))).toBe(true);
+  });
+});
+
+describe('jeux de tuiles par région', () => {
+  const BASES = [
+    'herbe-1', 'herbe-2', 'herbe-3', 'chemin-1', 'chemin-2', 'boue-1', 'boue-2', 'paves-1', 'paves-2',
+    ...['n', 'e', 's', 'o'].map((c) => `chemin-bord-${c}`),
+    ...['no', 'ne', 'se', 'so'].flatMap((c) => [`chemin-coin-ext-${c}`, `chemin-coin-int-${c}`]),
+  ];
+
+  it('nomme les tuiles de la région 1 comme avant et préfixe celles des régions suivantes', () => {
+    expect(nomTuile(1, 'herbe-1')).toBe('herbe-1');
+    expect(nomTuile(2, 'herbe-1')).toBe('r2-herbe-1');
+    expect(nomTuile(5, 'chemin-coin-int-so')).toBe('r5-chemin-coin-int-so');
+  });
+
+  it('a, pour chacune des régions 1 à 5, les 21 tuiles du jeu dans l’atlas', () => {
+    for (const region of [1, 2, 3, 4, 5]) {
+      for (const base of BASES) expect(atlas.sprites, nomTuile(region, base)).toHaveProperty([nomTuile(region, base)]);
+    }
+  });
+
+  it('peint une carte entière avec le seul jeu de sa région (chemin, herbe et zones)', () => {
+    for (const region of [2, 3, 4, 5]) {
+      const visuel: VisuelCarte = {
+        region,
+        zones: [{ sol: 'boue', x: 2, y: 8, largeur: 3, hauteur: 2 }, { sol: 'paves', x: 10, y: 2, largeur: 4, hauteur: 3 }],
+        decor: [],
+      };
+      const g = construireSol(carte, visuel);
+      const prefixe = `r${String(region)}-`;
+      expect(g.tuiles.every((n) => n.startsWith(prefixe) && Object.hasOwn(atlas.sprites, n)), `région ${String(region)}`).toBe(true);
+      // Les mêmes formes qu'en région 1 : seul le jeu change.
+      expect(g.tuiles.map((n) => n.slice(prefixe.length))).toEqual(construireSol(carte, { ...visuel, region: 1 }).tuiles);
+    }
   });
 });
 

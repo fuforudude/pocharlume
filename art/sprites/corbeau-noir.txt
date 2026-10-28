@@ -1,0 +1,80 @@
+# Corbeau Noir (région 2, dessiné) : grand corbeau charognard, plumes d'encre, bec gris. Volant : le rendu le soulève de son
+# ombre, le sprite reste donc posé sur sa ligne des pieds. 32×32, de profil vers la droite. Version d'élite
+# (`corbeau-noir-elite`) : même recette (`modele`), tout assombri (`sombre`), yeux rouges (calque `yeux`, vide dans la
+# version normale, qui suit la tête dans chaque cadre).
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+
+calque yeux
+.
+
+calque corps 8 20
+..........uuu.
+.........uuuuu
+........uuuvuuPP
+kkuuuuuuuuuuuP.
+.kkuuuuuuuuuu..
+..uuuuuuuuuuu..
+...uuuuuuuuu...
+....kk..uu.....
+
+calque aile-haut 9 15
+..k.......
+.kUk......
+.kUUk.....
+kUUUUk....
+kUkUUUk...
+kUUkUUUk..
+.kUUkUUUk.
+..kUUUUUk.
+...kkkkkk.
+
+calque aile-mid 3 19
+....kkkk......
+..kkUUUUUk....
+kkUUkUUkUUUk..
+.kkkkkkkkkk...
+
+calque aile-bas 10 22
+..kUUUUk..
+..kUkUUUk.
+..kUUkUUk.
+...kUUUk..
+...kUkUk..
+....kUk...
+.....k....
+
+sprite corbeau-noir
+anim repos 140
+cadre corps + aile-mid + yeux
+cadre corps decale 0 -1 + aile-haut + yeux decale 0 -1
+
+anim marche 90
+cadre corps decale 0 -1 + aile-haut + yeux decale 0 -1
+cadre corps + aile-mid + yeux
+cadre corps decale 0 1 + aile-bas + yeux decale 0 1
+cadre corps + aile-mid + yeux
+
+# Piqué : il plonge sur sa proie, ailes rabattues.
+anim attaque 90
+cadre corps decale 0 -1 + aile-haut + yeux decale 0 -1 duree 140
+cadre corps decale 3 2 + aile-bas decale 2 2 + yeux decale 3 2
+cadre corps decale 3 3 + aile-mid decale 2 3 + yeux decale 3 3 duree 130
+cadre corps + aile-mid + yeux
+
+anim blesse 110
+cadre corps decale -1 1 + aile-bas decale -1 1 + yeux decale -1 1
+cadre corps + aile-haut decale 0 1 + yeux
+
+# Il tombe puis reste sur le dos, les ailes ouvertes.
+anim mort 140
+cadre corps decale 0 3 + aile-bas decale 0 3 + yeux decale 0 3
+cadre corps retourne decale 0 19 + aile-bas retourne decale 0 19 duree 900
+
+sprite corbeau-noir-elite
+modele corbeau-noir
+sombre
+calque yeux 19 22
+x

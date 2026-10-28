@@ -7,6 +7,9 @@ import type { AtlasJson } from './atlas.ts';
 import { construire, DOSSIER_SORTIE, lireSources, type Construction } from './construire.ts';
 import { decoderPng } from './png.ts';
 
+/** Les cinq boss des régions 1 à 5 : cadres de 64×64. */
+const BOSS = ['boucher-vaudrelle', 'la-faim', 'juge-flammes', 'dame-puits', 'mere-rats'];
+
 let resultat: Construction;
 let commite: AtlasJson;
 
@@ -95,6 +98,109 @@ describe('atlas commité', () => {
     expect(attendus.filter((n) => !(n in commite.sprites))).toEqual([]);
   });
 
+  describe('jalon 3 (index : art/sprites/jalon3-noms.txt)', () => {
+    const ENNEMIS_J3 = ['glaneur', 'corbeau-noir', 'epouvantail', 'porteur-torche', 'chasseur-sorcieres', 'delateur', 'noyeur',
+      'pelerin-voile', 'sangsue', 'rat-peste', 'pestifere', 'medecin-peste'];
+    const FAMILIERS = ['rat', 'crapaud', 'chouette', 'chauve-souris', 'luciole', 'lezard', 'araignee', 'corneille', 'furet', 'escargot',
+      'papillon-nuit', 'salamandre'];
+    const BASES_TUILES = ['herbe-1', 'herbe-2', 'herbe-3', 'chemin-1', 'chemin-2', 'boue-1', 'boue-2', 'paves-1', 'paves-2',
+      ...['n', 'e', 's', 'o'].map((c) => `chemin-bord-${c}`),
+      ...['no', 'ne', 'se', 'so'].flatMap((c) => [`chemin-coin-ext-${c}`, `chemin-coin-int-${c}`])];
+    const DECORS_J3 = ['arbre-calcine-1', 'arbre-calcine-2', 'meule-brulee', 'chariot-brise', 'gerbes-brulees', 'sillon', 'fourche-brisee',
+      'souche-calcinee', 'bucher-braises', 'echafaud', 'maison-brulee-1', 'maison-brulee-2', 'cendres', 'fagots', 'torche-fichee',
+      'cloche-fendue', 'saule-marais-1', 'saule-marais-2', 'barque-echouee', 'puits-noir', 'roseaux', 'nenuphars', 'souche-moussue',
+      'feu-follet', 'maison-condamnee-1', 'maison-condamnee-2', 'charrette-linceuls', 'fosse-commune', 'croix-rouge', 'linceul',
+      'lanterne-peste', 'tas-ossements'];
+
+    it('contient les 12 ennemis, leurs élites, les 4 boss, les effets, les icônes, les familiers, les tuiles et le décor', () => {
+      const attendus = [
+        ...ENNEMIS_J3, ...ENNEMIS_J3.map((n) => `${n}-elite`),
+        'la-faim', 'juge-flammes', 'dame-puits', 'mere-rats',
+        'effet-nuage-toxique', 'effet-brulure', 'effet-tour-feu', 'effet-tour-affamee', 'effet-plongee',
+        'icone-caisse-skins', 'icone-caisse-familiers', 'icone-eclat', 'icone-defi-heroique', 'icone-defi-fer',
+        ...['commun', 'rare', 'epique', 'legendaire', 'mythique'].map((r) => `icone-rarete-${r}`),
+        ...FAMILIERS.map((f) => `familier-${f}`),
+        ...[2, 3, 4, 5].flatMap((r) => BASES_TUILES.map((b) => `r${String(r)}-${b}`)),
+        ...DECORS_J3,
+      ];
+      expect(attendus.filter((n) => !(n in commite.sprites))).toEqual([]);
+    });
+
+    it('donne à chaque ennemi et à chaque boss les animations du rendu, et à chaque élite celles de son ennemi, cadre pour cadre', () => {
+      for (const nom of [...ENNEMIS_J3, ...BOSS.slice(1)]) {
+        expect(Object.keys(commite.sprites[nom]?.animations ?? {}), nom).toEqual(expect.arrayContaining(['repos', 'marche', 'attaque', 'blesse', 'mort']));
+      }
+      for (const nom of ENNEMIS_J3) {
+        const base = commite.sprites[nom];
+        const elite = commite.sprites[`${nom}-elite`];
+        expect(elite?.categorie, nom).toBe('ennemi');
+        expect(Object.keys(elite?.animations ?? {}), nom).toEqual(Object.keys(base?.animations ?? {}));
+        for (const [anim, a] of Object.entries(base?.animations ?? {})) {
+          expect(elite?.animations[anim]?.cadres.length, `${nom}-elite/${anim}`).toBe(a.cadres.length);
+          expect(elite?.animations[anim]?.boucle, `${nom}-elite/${anim}`).toBe(a.boucle);
+        }
+      }
+    });
+
+    it('rend l’élite plus sombre que l’ennemi : même silhouette, pixels plus foncés, un peu de rouge pour les yeux', () => {
+      const image = decoderPng(readFileSync(join(DOSSIER_SORTIE, 'atlas.png')));
+      const luminance = (c: { x: number; y: number; largeur: number; hauteur: number }): number => {
+        let somme = 0;
+        let n = 0;
+        for (let y = c.y; y < c.y + c.hauteur; y++) {
+          for (let x = c.x; x < c.x + c.largeur; x++) {
+            const i = (y * image.largeur + x) * 4;
+            if ((image.pixels[i + 3] ?? 0) === 0) continue;
+            somme += ((image.pixels[i] ?? 0) + (image.pixels[i + 1] ?? 0) + (image.pixels[i + 2] ?? 0)) / 3;
+            n++;
+          }
+        }
+        return somme / n;
+      };
+      for (const nom of ENNEMIS_J3) {
+        const base = commite.sprites[nom]?.animations.repos?.cadres[0];
+        const elite = commite.sprites[`${nom}-elite`]?.animations.repos?.cadres[0];
+        expect(base && elite, nom).toBeTruthy();
+        if (!base || !elite) continue;
+        expect(elite.largeur, nom).toBe(base.largeur);
+        expect(elite.hauteur, nom).toBe(base.hauteur);
+        expect(luminance(elite), nom).toBeLessThan(luminance(base) * 0.85);
+      }
+    });
+
+    it('donne à chaque familier une animation d’attente en boucle de plusieurs cadres, en 16×16', () => {
+      for (const f of FAMILIERS) {
+        const s = commite.sprites[`familier-${f}`];
+        expect(`${String(s?.largeur)}×${String(s?.hauteur)}`, f).toBe('16×16');
+        expect(s?.animations.repos?.boucle, f).toBe(true);
+        expect(s?.animations.repos?.cadres.length, f).toBeGreaterThanOrEqual(2);
+      }
+    });
+
+    it('fait la plongée de la Dame du Puits en deux animations jouées une fois, et la relève de l’épouvantail une fois', () => {
+      expect(commite.sprites['dame-puits']?.animations.plonge?.boucle).toBe(false);
+      expect(commite.sprites['dame-puits']?.animations.emerge?.boucle).toBe(false);
+      expect(commite.sprites.epouvantail?.animations.releve?.boucle).toBe(false);
+    });
+
+    it('fait des effets sans contour dont `repos` boucle et `impact` est joué une fois', () => {
+      for (const nom of ['effet-nuage-toxique', 'effet-brulure', 'effet-tour-feu', 'effet-tour-affamee', 'effet-plongee']) {
+        const s = commite.sprites[nom];
+        expect(s?.categorie, nom).toBe('effet');
+        expect(s?.sansContour, nom).toBeUndefined();
+        expect(s?.animations.repos?.boucle, nom).toBe(true);
+        if (s?.animations.impact) expect(s.animations.impact.boucle, nom).toBe(false);
+      }
+      expect(commite.sprites['effet-nuage-toxique']?.animations.impact).toBeDefined();
+      expect(commite.sprites['effet-plongee']?.animations.impact).toBeDefined();
+    });
+
+    it('garde l’atlas raisonnable (planche sous 1 Mo et moins de 1 200 px de haut)', () => {
+      expect(resultat.png.length).toBeLessThan(1024 * 1024);
+      expect(resultat.image.hauteur).toBeLessThan(1200);
+    });
+  });
+
   it('donne aux 9 héros les six animations jouées en partie', () => {
     for (const nom of ['charlie', ...['plume', 'suie', 'corbeau', 'mastoc', 'brise-os', 'pollen', 'rouage', 'lanterne'].map((h) => `heros-${h}`)]) {
       expect(Object.keys(commite.sprites[nom]?.animations ?? {}), nom)
@@ -130,7 +236,7 @@ describe('atlas commité', () => {
       const taille = `${String(s.largeur)}×${String(s.hauteur)}`;
       if (nom.startsWith('icone-portrait-')) expect(taille, nom).toBe('24×24');
       else if (s.categorie === 'tuile' || s.categorie === 'icone' || s.categorie === 'projectile') expect(taille, nom).toBe('16×16');
-      else if (nom === 'boucher-vaudrelle') expect(taille).toBe('64×64');
+      else if (BOSS.includes(nom)) expect(taille, nom).toBe('64×64');
       else if (s.categorie === 'tour') expect(['32×32', '32×48'], nom).toContain(taille);
       else if (nom === 'piege') expect(taille).toBe('16×16');
       else if (s.categorie === 'unite' || s.categorie === 'ennemi') expect(taille, nom).toBe('32×32');

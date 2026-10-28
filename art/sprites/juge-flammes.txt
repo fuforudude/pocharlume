@@ -1,0 +1,29 @@
+# Le Juge des Flammes, boss de la région 3 : l'archimage du pack agrandi ×2 (cadres de 64×64), comme le Boucher.
+# Robe rouge sombre de juge, galons d'or ; la lueur du bâton devient la flamme du bûcher.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+agrandi 2
+
+sprite juge-flammes
+minifolks Without Outline/MiniArchMage.png
+# barbe et robe blanches → rouge sombre, galons d'or conservés, bleu → noir de suie, lueur → flamme
+recolore e5e9de=R aeb6a1=r 4058c0=k 6098e8=u 98d8f8=F f8c090=s f7f757=Y dfc76f=Z
+
+anim repos 200
+cadre mf 0.0-3
+
+anim marche 140
+cadre mf 1.0-5
+
+# Il lève son bâton ; la flamme monte, puis il la lance.
+anim attaque 100
+cadre mf 3.0-5
+
+anim blesse 140
+cadre mf 7.0-1
+
+anim mort 180
+cadre mf 8.0-4
+cadre mf 8.8 duree 900

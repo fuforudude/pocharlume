@@ -1,0 +1,99 @@
+# La Mère des Rats, boss de la région 5 (dessinée) : rate géante au poil terne, croûtes verdâtres, yeux rouges, grandes
+# incisives jaunes, queue nue. Dessinée en 32×32 puis agrandie ×2 (cadres de 64×64), ancre au pied, de profil vers la droite.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+agrandi 2
+
+calque corps 2 15
+....mpppppppppppppp.....
+..mppPppppPppppPpppppp..
+.mpppppppEppppppppPppppp.
+mppPpppppppppEpppppppppp.
+mpppppppPpppppppPppppppp.
+mmppppppppppEpppppppppp..
+.mmpppPpppppppppppPpppp..
+..mmpppppppppppppppppp...
+...mmmppppppppppppppm....
+
+calque tete 21 15
+.PP.......
+PPoPp.....
+.ppppppp..
+.pppppxPPP
+.ppppppPPP
+..pppppPPw
+...mPPPwww
+
+calque gueule 21 15
+.PP.......
+PPoPp.....
+.ppppppp..
+.pppppxPPP
+.ppppppPPP
+..ppppwwww
+...mPPwwYY
+....mmPYYw
+
+calque queue 0 22
+..oo....
+.o..oo..
+o....oo.
+oo....oo
+
+calque queue-b 0 21
+.oo.....
+o..oo...
+.....oo.
+oo....oo
+
+calque pattes 5 24
+.pp...pp.........pp...pp
+.pp...pp.........pp...pp
+mmm...mmm.......mmm...mmm
+PPP...PPP.......PPP...PPP
+
+calque pattes-a 5 24
+..pp.pp..........ppp.pp.
+.pp...pp........pp....pp
+mmm..mmm........mmm...mmm
+PPP..PPP........PPP...PPP
+
+calque pattes-b 5 24
+...ppp...........ppp....
+...ppp...........ppp....
+..mmmm..........mmmm....
+..PPPP..........PPPP....
+
+calque petits 8 12
+..pp...pp.
+.pppp.pppp
+.pxpp.ppxp
+
+sprite mere-rats
+anim repos 240
+cadre queue + pattes + corps + tete
+cadre queue-b + pattes + corps decale 0 1 + tete decale 0 1 + petits
+
+anim marche 130
+cadre queue + pattes-a + corps + tete
+cadre queue-b + pattes-b + corps decale 0 -1 + tete decale 0 -1
+cadre queue + pattes-a decale 1 0 + corps + tete
+cadre queue-b + pattes-b + corps decale 0 -1 + tete decale 0 -1
+
+# Elle se ramasse puis se jette la gueule ouverte.
+anim attaque 110
+cadre queue decale 0 1 + pattes-b + corps decale -1 1 + tete decale -1 2 duree 220
+cadre queue + pattes-a + corps decale 2 -1 + gueule decale 3 -1
+cadre queue + pattes-a + corps decale 3 0 + gueule decale 4 0 duree 170
+cadre queue + pattes + corps + tete
+
+anim blesse 130
+cadre queue-b + pattes + corps decale -1 0 + tete decale -1 1
+cadre queue + pattes + corps + tete
+
+# Elle bascule sur le flanc, les pattes en l'air.
+anim mort 170
+cadre queue-b + pattes-b + corps decale -1 2 + tete decale -1 4
+cadre queue-b decale 0 6 + pattes-b retourne decale 0 13 + corps retourne decale -1 13 + tete retourne decale 1 13 duree 1000

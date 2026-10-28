@@ -1,0 +1,121 @@
+# Sangsue (région 4, dessinée) : grosse sangsue noire et rouge qui se colle aux chats et les vide. Arrive en essaim.
+# 32×32, ancre aux pieds, de profil vers la droite (la ventouse est à droite). Les grilles sont posées directement
+# (origine 8 26) : la dernière ligne de chaque grille est la ligne des pieds. Version d'élite (`sangsue-elite`) :
+# même recette (`modele`), tout assombri (`sombre`), un œil rouge posé par retouche au bon endroit de chaque cadre.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+
+calque yeux
+.
+
+sprite sangsue
+origine 8 26
+
+anim repos 180
+cadre
+..............
+..rrrrrrrrrr..
+rrkrkrkrkrkrrq
+rrrrrrrrrrrrrq
+.eeeeeeeeeeee.
+cadre
+..............
+.rrrrrrrrrrrr.
+rrkrkrkrkrkrrq
+rrrrrrrrrrrrrq
+.eeeeeeeeeeee.
+
+# Elle se déplace comme une chenille : allongée, bossue, ramassée, bossue.
+anim marche 110
+cadre
+..............
+..rrrrrrrrrr..
+rrkrkrkrkrkrrq
+rrrrrrrrrrrrrq
+.eeeeeeeeeeee.
+cadre
+...rrrrrr...
+..rrkrkrrrr.
+.rrrrrrrrrrq
+.rrrrrrrrrrq
+.eeeeeeeeee.
+cadre
+..rrrrr....
+.rrkrkrrr..
+rrrrrrrrrrq.
+rrrrrrrrrrq.
+eeeeeeeeeee.
+cadre
+...rrrrrr...
+..rrkrkrrrr.
+.rrrrrrrrrrq
+.rrrrrrrrrrq
+.eeeeeeeeee.
+
+# Elle se dresse puis se jette sur sa proie.
+anim attaque 100
+cadre duree 150
+.........rrq..
+.......rrrrr..
+.rrrrrrrrrr...
+rrkrkrkrkr....
+.eeeeeeeee....
+cadre
+..............
+..........rrrq
+.rrrrrrrrrrrrq
+rrkrkrkrkrkrr.
+.eeeeeeeeeeee.
+cadre duree 130
+..............
+.......rrrrrq.
+.rrrrrrrrrrrrrq
+rrkrkrkrkrkrrr.
+.eeeeeeeeeeeee
+
+anim blesse 110
+cadre
+..............
+..............
+.rrrrrrrrrrrr.
+rrkrkrkrkrkrrq
+.eeeeeeeeeeee.
+cadre
+..............
+..rrrrrrrrrr..
+rrkrkrkrkrkrrq
+rrrrrrrrrrrrrq
+.eeeeeeeeeeee.
+
+anim mort 140
+cadre
+..............
+..............
+.rrrrrrrrrrrr.
+rrkrkrkrkrkrrq
+.eeeeeeeeeeee.
+cadre duree 900
+..............
+..............
+..............
+.eeeeeeeeeee..
+eoPoPoPoPoPooq
+
+sprite sangsue-elite
+modele sangsue
+origine 8 26
+sombre
+# (les calques sont posés à l'origine du sprite : 20 28 devient 12 2)
+calque yeux 12 2
+x
+retouche repos 0,1 + yeux
+retouche marche 0 + yeux
+retouche marche 1,3 + yeux decale -2 0
+retouche marche 2 + yeux decale -3 0
+retouche attaque 0 + yeux decale -2 -2
+retouche attaque 1 + yeux decale 0 -1
+retouche attaque 2 + yeux decale 1 0
+retouche blesse 0 + yeux decale 0 1
+retouche blesse 1 + yeux

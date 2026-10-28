@@ -1,0 +1,167 @@
+# Icônes du jalon 3, 16×16 comme celles des jalons précédents (avec contour, ancre au centre) : les deux caisses, l'éclat
+# (monnaie des doublons), les cinq raretés et les deux défis. Nommage : icone-caisse-<skins|familiers>, icone-eclat,
+# icone-rarete-<commun|rare|epique|legendaire|mythique>, icone-defi-<heroique|fer>.
+# Les raretés sont la même gemme à cinq teintes (chiffres 1 à 5 : du plus sombre au reflet), avec des ornements qui
+# s'ajoutent à chaque degré : la rareté se lit aussi sans les couleurs.
+categorie icone
+palette commune
+taille 16 16
+ancre 8 8
+couleur V 8a5ac8
+couleur X 4a2a78
+
+# La gemme des raretés (partagée : déclarée avant le premier sprite).
+calque gemme 2 3
+...111111...
+..14444431..
+.1443333321.
+144333333221
+143333332221
+.1333333221.
+..13333221..
+...133221...
+....1221....
+.....11.....
+
+# Caisse de skins : une caisse cerclée de fer, un coin de tissu coloré qui dépasse, des taches de peinture.
+sprite icone-caisse-skins
+origine 2 1
+....xxAAA...
+...xxxAAAA..
+.dddddddddd.
+dBBBBBBBBBBd
+dBPPBBBBPPBd
+dBBBxxBAAFBd
+dbbbbbbbbbbd
+dBBBBBBBBBBd
+dBPPBBBBPPBd
+dBBBBBBBBBBd
+.dddddddddd.
+
+# Caisse de familiers : une caisse à claire-voie, deux yeux jaunes dans la fente, deux petites oreilles.
+sprite icone-caisse-familiers
+origine 2 1
+.d........d.
+.dBd....dBd.
+.dddddddddd.
+dBBBBBBBBBBd
+dBkkkkkkkkBd
+dBkFkkkkFkBd
+dBkkkkkkkkBd
+dbbbbbbbbbbd
+dBPPBBBBPPBd
+dBBBBBBBBBBd
+.dddddddddd.
+
+# Éclat : un éclat de cristal pâle, monnaie des doublons.
+sprite icone-eclat
+origine 3 2
+.....I.....
+....ILi....
+...ILAAi...
+..IiAAaai..
+.ILAAAaaai.
+..iAAaaaai.
+...iAaaaa..
+....iaaa...
+.....aa....
+
+sprite icone-rarete-commun
+couleur 1 3e3b39
+couleur 2 67625a
+couleur 3 8a8478
+couleur 4 aea696
+couleur 5 e5e9de
+anim repos
+cadre gemme
+
+sprite icone-rarete-rare
+couleur 1 2a3a80
+couleur 2 4058c0
+couleur 3 6098e8
+couleur 4 a8d0f8
+couleur 5 ffffff
+anim repos
+cadre gemme
+retouche repos 0
+................
+................
+................
+................
+.....5..........
+....5...........
+
+sprite icone-rarete-epique
+couleur 1 3a1a5a
+couleur 2 5a3a90
+couleur 3 8a5ac8
+couleur 4 c0a0f0
+couleur 5 ffffff
+anim repos
+cadre gemme
+retouche repos 0
+................
+.............5..
+............555.
+.............5..
+.....5..........
+....5...........
+
+sprite icone-rarete-legendaire
+couleur 1 7a3a10
+couleur 2 c07018
+couleur 3 f0b030
+couleur 4 f8e070
+couleur 5 ffffff
+anim repos
+cadre gemme
+retouche repos 0
+........4.......
+.....4..4..4....
+.....4..4..4....
+................
+.....5..........
+....5...........
+
+sprite icone-rarete-mythique
+couleur 1 5a0a20
+couleur 2 a01040
+couleur 3 e03070
+couleur 4 ff80b0
+couleur 5 ffe8f0
+anim repos
+cadre gemme
+retouche repos 0
+........5.......
+...5.5..5..5.5..
+...5.5..5..5.5..
+................
+.....5..........
+....5...........
+
+# Défi Héroïque : un cœur fêlé (une seule vie) aux reflets de braise.
+sprite icone-defi-heroique
+origine 2 2
+.xxxx..xxxx.
+xxFFxxxxxxxx
+xxFxxxxxxxxR
+xxxxxxkxxxxR
+.xxxxxkxxxR.
+..xxxxkkxRR.
+...xxxxkxR..
+....xxxxR...
+.....xxR....
+......R.....
+
+# Défi Fer : une enclume, pour les seules familles de tours imposées et toutes les vagues d'un coup.
+sprite icone-defi-fer
+origine 2 3
+.PPPPPPPPPPP
+.PqqqqqqqPPP
+PPPPPPPPgg..
+..gGGGGGg...
+...gPPPPg...
+...gGGGGg...
+..gGPPPPGg..
+.gGGGGGGGGg.
+.gggggggggg.

@@ -1,0 +1,275 @@
+# Tuiles 16×16 de la région 5, La Ville Pestiférée : terre souillée verdâtre, chemin de boue séchée ; zones : bourbe verte, pavés sombres moussus.
+# Mêmes noms que la région 1, préfixés par r5- (le rendu choisit le jeu d'après `region` du visuel) : herbe-1..3, chemin-1..2,
+# chemin-bord-n/e/s/o, chemin-coin-ext-no/ne/se/so, chemin-coin-int-no/ne/se/so, boue-1..2, paves-1..2. Sans contour, ancre en
+# haut à gauche ; les bords et coins sont dessinés une fois (côté nord, nord-ouest) puis tournés, comme dans tuiles-village.txt.
+# Les grilles ont été produites une première fois par un script (graine fixe) puis se retouchent à la main ici.
+categorie tuile
+palette commune
+taille 16 16
+ancre 0 0
+contour non
+couleur 5 3c443a
+couleur 6 2a322a
+couleur 7 566052
+couleur 8 6e8a4a
+couleur 9 4e5a2c
+
+sprite r5-herbe-1
+5755755555556555
+5555555555555855
+6665555655857755
+5555557765575555
+5555665885555655
+5775555555555555
+5555555556555555
+5555675555555885
+5588555555555555
+5566575655555585
+7575566775588866
+5566555665555665
+5555565555588555
+5855665555565577
+5555555555555555
+5777556558655555
+
+# Avec des taches claires.
+sprite r5-herbe-2
+5576555558555575
+5555556565755556
+7555555555575855
+5557775558666555
+5567777558665555
+7565775555555555
+5555565557755575
+5555555555555775
+5555555557555575
+5555755556777755
+5556557555777566
+5558555555555555
+5555755558865555
+5555555885565565
+7755555566555575
+5555566586655865
+
+# Avec un détail propre à la région.
+sprite r5-herbe-3
+5755555555577555
+5555555575585555
+5555775555585555
+5555577575555555
+5755555558585555
+5577555555555555
+5555788555557756
+5556888855555555
+655558r858578858
+5555555555555555
+6555555555885555
+5555555555556655
+5555755555555565
+5555555555555555
+5555555585555555
+5577755556565575
+
+sprite r5-chemin-1
+NMMNNNNNNNnNnNNN
+EENMNNNMNNNMNNNN
+NNNNNnnnMnNNNNMN
+MNNNNNNNnnNNNNNN
+NNMNENNNNMMNNNnn
+NNMNNnnNnNNNNMMM
+nMnNNNNNNNNnMMNN
+MnNNnMMNNNNMMNNN
+NNNMNMNMNNNNNNNN
+NNNNnNNNNEnNNNNE
+NNNNNNNNNnNNNNNN
+NNnnNNNNNMMNNNNN
+NNNNNNNNMNNNNNNN
+nNNNNNnnNnnNNNNN
+NNNNNNENNnnNNNnN
+NNNnNNNNNNNNNNNN
+
+# Avec des ornières.
+sprite r5-chemin-2
+NNNNMMNNNNNNNNNM
+NMMMNNNMNNNENNNN
+nMMNMNNNNNnNNNMM
+NNNNNNNNNNNNNNNN
+MNMMMMnMMMMnMMMM
+NNNNNMNNNNNNNNNN
+NMNNNNNNNMNNNNMN
+NEEENNNMNNNNNNNN
+nnnNNNNNNNNNMMNN
+MNNNnnNNNMNNNnnn
+nMMMMNMMMMNMMMMN
+NNNNNNNNNNNNNNNN
+NNNNNMMNNNNNNNNN
+NNNNNMNNNNNnnMMN
+EnnNNNNNNNNnMNNN
+ENNNNMNNNNNNNNNN
+
+# Bord : sol au nord, chemin au sud ; -e, -s, -o par rotation.
+sprite r5-chemin-bord-n
+6556555655555555
+5755555555555555
+7555565556655555
+5555565755557665
+6555666566556666
+66666NN666766NN6
+N66NNNNNN66NNMnN
+MMNENNNNNNnNnnNM
+NNNNNNNNNNNNNNNN
+NNNNnNNNNNNNNNNN
+NnNMNMNNNNNNNNMN
+NNNNNNNNNNNEENNN
+NNNNNNNNNNMMNNNN
+NNNNNMMNnNNMnnNN
+NNMNNNNNNNNNNNNN
+NMMNNNNNNNNNNNnN
+
+sprite r5-chemin-bord-e
+anim repos
+cadre r5-chemin-bord-n/repos.0 tourne 90
+
+sprite r5-chemin-bord-s
+anim repos
+cadre r5-chemin-bord-n/repos.0 tourne 180
+
+sprite r5-chemin-bord-o
+anim repos
+cadre r5-chemin-bord-n/repos.0 tourne 270
+
+# Coin extérieur : sol au nord et à l’ouest (virage).
+sprite r5-chemin-coin-ext-no
+5555565655555555
+5555557555555555
+6555556657565555
+6655665658857666
+5556555555566555
+5557555675566656
+555555666666NN66
+6658566N66NMMEEN
+5555556NNNnnNNNN
+55557556NMMNNEMM
+57565666NNNNNNMN
+5555566NnnNNNNMN
+5555556NNNNNNNNN
+555556MMNNENNNnN
+556566NNNNNNNNNN
+5665566NNNNNMMNN
+
+sprite r5-chemin-coin-ext-ne
+anim repos
+cadre r5-chemin-coin-ext-no/repos.0 tourne 90
+
+sprite r5-chemin-coin-ext-se
+anim repos
+cadre r5-chemin-coin-ext-no/repos.0 tourne 180
+
+sprite r5-chemin-coin-ext-so
+anim repos
+cadre r5-chemin-coin-ext-no/repos.0 tourne 270
+
+# Coin intérieur : un peu de sol au nord-ouest seulement.
+sprite r5-chemin-coin-int-no
+555566nnNNnNNMNN
+555656NnNNNNNNNN
+55666NnnNNNNNNnN
+566MNEMNNNNNNNNN
+656NNNNMMNNNNNNN
+66NNNMNNMMNNNMNn
+NNNnnnNMMMMNNNNN
+NMMNnnNNNNNNNNMN
+NNNNNnNNNNNENNNN
+MMNNNNNnNNNNNNNN
+NNnNMMMnnNMNNNNN
+NNNNNNnNNNNNMNNN
+NNEENNNNNENNNNNN
+NNNNNNMNMnNNNNMM
+NNNNNNNNNNNNNMnM
+NNNNnMMMENMMNNNM
+
+sprite r5-chemin-coin-int-ne
+anim repos
+cadre r5-chemin-coin-int-no/repos.0 tourne 90
+
+sprite r5-chemin-coin-int-se
+anim repos
+cadre r5-chemin-coin-int-no/repos.0 tourne 180
+
+sprite r5-chemin-coin-int-so
+anim repos
+cadre r5-chemin-coin-int-no/repos.0 tourne 270
+
+sprite r5-boue-1
+999999hHH99H99h9
+99999H99H9999999
+999H999HH999999H
+9hhh999h99999999
+999h9999hh999999
+999999h99hh999h9
+H9999HHH9hhhh999
+999hh98899999999
+h999999989999999
+999hh999999H9999
+999999H9hhhHH9h9
+9999999999H99999
+h999999889999999
+999999999999h9h8
+9999hh9999999999
+999hHh9999Hhhh99
+
+# Avec une bulle qui crève.
+sprite r5-boue-2
+99999999999999h9
+9999h999999999H9
+999999H99h9hhhh9
+HhHH999H99hh99H9
+99hh9999999h9999
+999h999999999999
+H999HjH999h99999
+99hhHH99H9999999
+999999999999999H
+99hh9HH9hh999hh9
+999999999999999H
+9999999999999hhh
+99h99HHHH9999hh9
+9HHh99999h99999H
+999999889999h9h9
+89999hh999999999
+
+sprite r5-paves-1
+PPPPPPPgPPPPPPPg
+PppGpppgPpppppGg
+EppGpEpgPppEpppg
+gggggggggggggggg
+PPPgPPPPPPPgPPPP
+GppgEppppppgPppp
+pppgPpEpEppgPpGp
+gggggggggggggggg
+PPEPPPPgPPPPPPPg
+PppppEpgPppppppg
+PpEppEpgPpGppGpg
+gggggggggggggggg
+EPPgPPPPPPPgPPPP
+pEpgPppppppgPppp
+pppgPppppppgPppp
+gggggggggggggggg
+
+# Avec un manque : la terre affleure.
+sprite r5-paves-2
+PPPPPPPgPPPPPPPg
+PppppppgPppppppg
+PGpppppgEpEppEpg
+gggggggggggggggg
+PPPgPPPPPPPgPPPP
+pppgPpppp666PGpp
+pppgPpGGp666EppG
+gggggggggggggggg
+PPPPPPPgPPPPPPPg
+PpppGppgPpppppEg
+PppGpppgPppppGpg
+gggggggggggggggg
+PPPgPPPPPPPgPPPP
+pppgPppGpGpgPppp
+pEpgPppGpEpgPppp
+gggggggggggggggg

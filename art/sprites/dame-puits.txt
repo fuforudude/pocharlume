@@ -1,0 +1,135 @@
+# La Dame du Puits, boss de la région 4 (dessinée) : noyée aux cheveux noirs collés sur le visage, robe de lin détrempée,
+# debout dans une flaque noire qui ne sèche jamais. Dessinée en 32×32 puis agrandie ×2 (cadres de 64×64), ancre au pied.
+# Elle « plonge » à 66 % et 33 % de PV : animations `plonge` (s'enfonce) et `emerge` (remonte), jouées une fois ; l'effet
+# `effet-plongee` (éclaboussure) marque l'instant.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+agrandi 2
+
+calque tete 12 5
+..kkkk..
+.kkkkkk.
+kkLLLLkk
+kLILLILk
+kkLLLLkk
+kkkLLkkk
+kkkkkkkk
+.kkkkkk.
+
+calque cheveux 8 13
+kk............kk
+kuk..........kuk
+kk............kk
+kuk..........kuk
+kk............kk
+kuk..........kuk
+.kk..........kk.
+.kuk........kuk.
+.kk..........kk.
+..kk........kk..
+..kk........kk..
+...kk......kk...
+
+calque robe 8 13
+.....llLLll.....
+....lllLLlll....
+....llllllll....
+...lllLllLlll...
+...lllllllllll..
+..llllLllllLlll.
+..lllllllllllll.
+.lllLlllllllLlll
+.llllllllllllll.
+lllllllLlllllllL
+tllltllllltllltl
+
+calque bras 10 15
+LL
+Ll
+LL
+Ll
+LL
+L.
+
+calque bras-d 20 15
+LL
+lL
+LL
+lL
+LL
+.L
+
+calque bras-tendus 21 14
+LLLLLLLLL..
+.LllLLLLLLL
+..LLLLL.L.L
+
+calque flaque 4 26
+...iiAAAAAAAAAAii...
+.iiAAaaaAAAaaAAAii..
+iAAaaaaaaaaaaaaaAAAi
+.iiAAaaaAAAaaaAAAii.
+...iiiAAAAAAAAiiii..
+
+calque flaque-b 4 26
+...iiiAAAAAAAAAAii..
+..iAAAaaaAAAaaAAAAi.
+iiAAaaaaaaaaaaaaaAAi
+.iiAAaaaAAAaaaAAAAii
+....iiAAAAAAAAiii...
+
+calque eau-masque 0 27
+________________________________
+________________________________
+________________________________
+________________________________
+
+calque bulles 12 22
+.i.....
+...i.i.
+..i....
+
+sprite dame-puits
+anim repos 260
+cadre robe + cheveux + tete + bras + bras-d + flaque
+cadre robe decale 0 1 + cheveux decale 0 1 + tete decale 0 1 + bras decale 0 1 + bras-d decale 0 1 + flaque-b
+
+# Elle glisse sans marcher : le corps flotte, les cheveux traînent.
+anim marche 160
+cadre robe decale 0 -1 + cheveux decale -1 -1 + tete decale 0 -1 + bras decale 0 -1 + bras-d decale 0 -1 + flaque
+cadre robe + cheveux decale -1 0 + tete + bras + bras-d + flaque-b
+cadre robe decale 0 -1 + cheveux decale 1 -1 + tete decale 0 -1 + bras decale 0 -1 + bras-d decale 0 -1 + flaque
+cadre robe + cheveux decale 1 0 + tete + bras + bras-d + flaque-b
+
+# Les bras s'étirent vers sa proie, la tête penchée sous le rideau de cheveux.
+anim attaque 120
+cadre robe decale -1 0 + cheveux decale -2 0 + tete decale -1 1 + bras decale -1 0 + bras-d decale -1 0 + flaque duree 200
+cadre robe decale 1 0 + cheveux decale 0 0 + tete decale 2 1 + bras + bras-tendus + flaque-b
+cadre robe decale 2 0 + cheveux decale 1 0 + tete decale 3 2 + bras + bras-tendus decale 2 0 + flaque duree 160
+cadre robe + cheveux + tete + bras + bras-d + flaque-b
+
+anim blesse 130
+cadre robe decale -1 0 + cheveux decale -2 0 + tete decale -2 1 + bras decale -1 0 + bras-d decale -1 0 + flaque
+cadre robe + cheveux + tete decale -1 0 + bras + bras-d + flaque-b
+
+# Elle coule : le corps s'enfonce dans la flaque, il ne reste que les cheveux et des bulles (le dernier cadre est la flaque vide).
+anim mort 180
+cadre robe decale 0 3 + cheveux decale 0 3 + tete decale 0 3 + bras decale 0 3 + bras-d decale 0 3 + eau-masque + flaque
+cadre robe decale 0 9 + cheveux decale 0 9 + tete decale 0 8 + bras decale 0 9 + bras-d decale 0 9 + eau-masque + flaque-b
+cadre robe decale 0 15 + cheveux decale 0 15 + tete decale 0 14 + eau-masque + flaque + bulles
+cadre flaque-b + bulles duree 1000
+
+# La plongée seule (invulnérable 3 s) puis la réapparition : le corps s'enfonce, puis remonte.
+anim plonge 160 unique
+cadre robe decale 0 3 + cheveux decale 0 3 + tete decale 0 3 + bras decale 0 3 + bras-d decale 0 3 + eau-masque + flaque
+cadre robe decale 0 9 + cheveux decale 0 9 + tete decale 0 8 + bras decale 0 9 + bras-d decale 0 9 + eau-masque + flaque-b
+cadre robe decale 0 15 + cheveux decale 0 15 + tete decale 0 14 + eau-masque + flaque + bulles
+cadre flaque-b + bulles
+
+anim emerge 160 unique
+cadre flaque + bulles
+cadre robe decale 0 15 + cheveux decale 0 15 + tete decale 0 14 + eau-masque + flaque-b + bulles
+cadre robe decale 0 9 + cheveux decale 0 9 + tete decale 0 8 + bras decale 0 9 + bras-d decale 0 9 + eau-masque + flaque
+cadre robe decale 0 3 + cheveux decale 0 3 + tete decale 0 3 + bras decale 0 3 + bras-d decale 0 3 + eau-masque + flaque-b

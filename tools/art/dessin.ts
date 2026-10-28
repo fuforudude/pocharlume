@@ -1,6 +1,6 @@
 // Transforme les sources lues par format.ts en cadres RVBA : palettes, calques, cadres dérivés, planches Minifolks.
 import {
-  agrandir, contourner, coucheVide, decaler, decouper, ecrirePixel, miroir, recolorer, retourner, rogner, superposer, tourner,
+  agrandir, assombrir, contourner, coucheVide, decaler, decouper, ecrirePixel, miroir, recolorer, retourner, rogner, superposer, tourner,
   type Couche,
 } from './couche.ts';
 import { EFFACE, ErreurFormat, TRANSPARENT, type JetonCouleur, type Grille, type Operation, type SpriteSource, type Terme } from './format.ts';
@@ -111,6 +111,9 @@ function appliquerModele(s: SpriteSource, parNom: ReadonlyMap<string, SpriteSour
   const propres = new Set(s.anims.map((a) => a.nom));
   return {
     ...s,
+    minifolks: s.minifolks ?? modele.minifolks,
+    recolore: [...modele.recolore, ...s.recolore],
+    points: new Map([...modele.points, ...s.points]),
     calques: new Map([...modele.calques, ...s.calques]),
     anims: [...modele.anims.filter((a) => !propres.has(a.nom)), ...s.anims],
     retouches: [...modele.retouches, ...s.retouches],
@@ -229,13 +232,16 @@ function dessinerBrut(s: SpriteSource, sources: Sources, chercher: ChercherSprit
         break;
       }
     }
-    return appliquer(c, t.operations, ligne);
+    const finie = appliquer(c, t.operations, ligne);
+    // Version d'élite : la planche et les calques s'assombrissent, pas les yeux ni un cadre déjà composé (déjà sombre).
+    const assombri = s.sombre && (t.source.type === 'minifolks' || (t.source.type === 'calque' && t.source.nom !== 'yeux'));
+    return assombri ? assombrir(finie) : finie;
   };
 
   const composer = (base: Couche, termes: readonly Terme[], grille: Grille | null, ligne: number): Couche => {
     let c = base;
     for (const t of termes) c = superposer(c, terme(t, ligne));
-    if (grille) c = superposer(c, poserGrille(grille));
+    if (grille) c = superposer(c, s.sombre ? assombrir(poserGrille(grille)) : poserGrille(grille));
     // Un cadre terminé n'efface plus rien : seuls les calques et les grilles gardent leur masque.
     return { ...c, efface: new Uint8Array(c.largeur * c.hauteur) };
   };
