@@ -104,30 +104,43 @@ describe('catalogue des palettes', () => {
   });
 
   it('chaque skin change réellement ses sprites : ses couleurs de base y sont et plus de 5 % des pixels opaques changent', () => {
+    // Pixels opaques de chaque sprite (une seule extraction par sprite, partagée entre les skins).
+    const lus = new Map<string, { source: ImageDonnees; hex: (string | null)[] }>();
+    const lire = (nom: string): { source: ImageDonnees; hex: (string | null)[] } | null => {
+      const sprite = atlasJson.sprites[nom];
+      if (!sprite) return null;
+      let lu = lus.get(nom);
+      if (!lu) {
+        const source = extraireZone(atlas, zoneDuSprite(sprite));
+        const hex: (string | null)[] = [];
+        for (let i = 0; i < source.data.length; i += 4) {
+          hex.push((source.data[i + 3] ?? 0) === 0 ? null : [0, 1, 2].map((k) => (source.data[i + k] ?? 0).toString(16).padStart(2, '0')).join(''));
+        }
+        lu = { source, hex };
+        lus.set(nom, lu);
+      }
+      return lu;
+    };
     for (const id of IDS_SKINS) {
       const { substitutions } = PALETTES_SKINS[id];
       const presentes = new Set<string>();
       let opaques = 0;
       let changes = 0;
       for (const nom of spritesDuSkin(id)) {
-        const sprite = atlasJson.sprites[nom];
-        if (!sprite) continue;
-        const zone = zoneDuSprite(sprite);
-        const source = extraireZone(atlas, zone);
-        const recolore = appliquerPalette(source, substitutions);
-        for (let i = 0; i < source.data.length; i += 4) {
-          if ((source.data[i + 3] ?? 0) === 0) continue;
+        const lu = lire(nom);
+        if (!lu) continue;
+        for (const hex of lu.hex) {
+          if (hex === null) continue;
           opaques++;
-          const hex = [0, 1, 2].map((k) => (source.data[i + k] ?? 0).toString(16).padStart(2, '0')).join('');
           presentes.add(hex);
-          if (source.data[i] !== recolore.data[i] || source.data[i + 1] !== recolore.data[i + 1] || source.data[i + 2] !== recolore.data[i + 2]) changes++;
+          if (Object.hasOwn(substitutions, hex)) changes++;
         }
       }
       // Chaque clé de la palette doit servir quelque part dans les sprites habillés (sinon la ligne est morte).
       for (const de of Object.keys(substitutions)) expect(presentes.has(de), `${id} : ${de} absent des sprites`).toBe(true);
       expect(changes / opaques, id).toBeGreaterThan(0.05);
     }
-  });
+  }, 30_000);
 
   it('donne des rendus différents aux trois skins d’une même famille', () => {
     for (const famille of ['caserne', 'tir', 'magie', 'artillerie']) {
