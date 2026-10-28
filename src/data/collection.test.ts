@@ -37,9 +37,7 @@ describe('catalogue de la collection', () => {
 
   it('les skins de héros visent des héros qui existent vraiment dans src/data/heros.ts', () => {
     for (const heros of IDS_HEROS) {
-      const skin = DEFS_SKINS[`skin_${heros}`];
-      expect(skin, heros).toBeDefined();
-      expect(skin?.cible).toMatchObject({ type: 'heros', heros });
+      expect(DEFS_SKINS[`skin_${heros}`].cible, heros).toMatchObject({ type: 'heros', heros });
       expect(Object.hasOwn(HEROS, heros)).toBe(true);
     }
   });
