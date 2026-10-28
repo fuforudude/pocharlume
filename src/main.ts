@@ -87,6 +87,8 @@ async function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, l
     {
       parent: app,
       vitesse: session.sauvegarde.reglages.vitesse,
+      // Skins et familier équipés : le rendu habille les tours et le héros (même en défi Fer, où seul le bonus est ignoré).
+      equipes: session.sauvegarde.meta.collection.equipes,
       // « Rejouer » : même dieu, héros et objets (ceux que la partie a consommés ne sont plus emportés), nouvelle graine.
       // Comme tout lancement, il débite les objets du stock ; refusé, l'écran de fin reste en place.
       nouvelleConfig: async (precedente) => {

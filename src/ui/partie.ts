@@ -14,6 +14,7 @@ import { chargerAtlas } from '../render/atlas';
 import type { BilanPartie, RaisonFin } from '../save';
 import { ECART_MAX_MS, PasFixes } from '../render/pas-fixes';
 import { Rendu, Surbrillance } from '../render/rendu';
+import { apparenceDeLaPartie, type Equipes } from './apparence';
 import { commandeClavier, type Commande } from './clavier';
 import { afficherFin, creerAvisPaysage, creerPause } from './ecrans';
 import { Gestes } from './gestes';
@@ -87,6 +88,12 @@ export interface OptionsPartie {
    * place de « Quitter ».
    */
   surContinuer?: () => void;
+  /**
+   * Skins et familiers équipés dans la collection (`meta.collection.equipes`) : le rendu habille les tours et le héros
+   * (`apparenceDeLaPartie`, branché sur le 5e argument de `Rendu`). Absent : sprites de base. L'apparence ne dépend pas du défi
+   * (en Fer les skins restent visibles, seul le bonus est ignoré).
+   */
+  equipes?: Equipes;
 }
 
 /** Temps passé dans la partie, pour mesurer le rendu (voir `PartieEnCours.mesures`). */
@@ -152,7 +159,7 @@ export async function lancerNiveau(
 
   let rendu: Rendu;
   try {
-    rendu = new Rendu(canvas, atlas, etat.niveau.carte, niveau.visuel);
+    rendu = new Rendu(canvas, atlas, etat.niveau.carte, niveau.visuel, apparenceDeLaPartie(options.equipes, etat.config.heros));
   } catch (erreur) {
     // Pas de contexte 2D : on ne laisse pas un écran noir derrière soi, l'appelant revient à l'écran précédent.
     racine.remove();
