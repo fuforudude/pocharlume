@@ -34,3 +34,24 @@ cadre mf 4.2
 anim mort 150
 cadre mf 5.0-3
 cadre mf 5.4 duree 600
+
+# Version d'élite : même recette (`modele`), tout assombri (`sombre`), yeux rouges (calque `yeux`, posé après coup sur chaque
+# cadre par `retouche` : les décalages sont ceux du Porteur de Torche, qui vient de la même planche de lancier).
+sprite mendiant-elite
+modele mendiant
+sombre
+calque yeux 16 23
+x.x
+
+retouche repos 0,3 + yeux decale 0 0
+retouche repos 1,2 + yeux decale 0 1
+retouche marche 1,4 + yeux decale 0 0
+retouche attaque 0,6 + yeux decale 0 0
+retouche marche 0,3 + yeux decale 0 1
+retouche marche 2,5 + yeux decale 0 -1
+retouche attaque 1,2 + yeux decale -1 0
+retouche attaque 3,4,5 + yeux decale 1 0
+retouche blesse * + yeux decale -1 0
+retouche mort 0 + yeux decale -1 1
+retouche mort 1 + yeux decale 0 2
+retouche mort 2 + yeux decale -5 4
