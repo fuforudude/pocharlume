@@ -73,7 +73,7 @@ const charlie: DefDieu = {
     {
       nom: 'sort.chute_du_colosse',
       description: 'sort.chute_du_colosse.desc',
-      recharge: 40,
+      recharge: 25,
       rechargeInitiale: 10,
       rayon: 1.6,
       surChemin: false,

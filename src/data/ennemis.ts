@@ -264,14 +264,14 @@ export const ENNEMIS = {
   /** Soigne de 5 % de leurs PV maximaux les ennemis proches toutes les 4 s. */
   medecin_peste: ennemi({
     nom: 'ennemi.medecin_peste',
-    pv: 70,
+    pv: 55,
     vitesse: 0.8,
-    resistance: 0.3,
+    resistance: 0.15,
     degats: [1, 2],
     cadence: 1.3,
     coutVies: 1,
     prime: 14,
-    pouvoirs: { soin: { rayon: 2.5, quantite: 0.05, cadence: 4 } },
+    pouvoirs: { soin: { rayon: 2.5, quantite: 0.03, cadence: 4 } },
   }),
   /** Pond un groupe de 4 Rats de Peste toutes les 6 s. */
   mere_rats: ennemi({

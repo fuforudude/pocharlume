@@ -24,7 +24,7 @@ import { DIEUX } from '../data/dieux';
 import { dpsEfficace } from '../data/equilibrage';
 import { REGLES } from '../data/regles';
 import { FAMILLES, TOURS } from '../data/tours';
-import { distance, echantillonner, longueurVue, PAS_ECHANTILLON, partsSpeciales, poidsDesChemins, type Echantillon } from './geometrie';
+import { distance, echantillonner, longueurVue, PAS_ECHANTILLON, partsSpeciales, poidsDesChemins, premiereVagueFurtifs, type Echantillon } from './geometrie';
 import { jouerPartie, type Bot, type Joueur, type ResultatPartie } from './simulation';
 
 /** Une préférence de famille : le poids multiplie la valeur d'une tour de cette famille. */
@@ -138,6 +138,8 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
   let echantillons: Echantillon[] = [];
   let poids: number[] = [];
   let parts = { volants: 0, furtifs: 0 };
+  /** Numéro (1 à N) de la première vague qui compte un furtif, 0 s'il n'y en a pas. */
+  let vagueFurtifs = 0;
   const vues = new Map<string, number>();
   /** Indices des points d'échantillonnage à portée d'une case, par (case, portée). */
   const alentours = new Map<string, Int32Array>();
@@ -343,6 +345,8 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
    */
   function candidatGuetteurs(etat: EtatPartie, meilleurRatio: number): Candidat | null {
     if (parts.furtifs < PART_FURTIFS_MIN || !famillePermise(etat, 'tir')) return null;
+    // Pas avant que le premier furtif approche : les premières vagues se gagnent avec une défense ordinaire.
+    if (etat.vagues.lancees < vagueFurtifs - 2) return null;
     const requis = etat.niveau.carte.chemins.length;
     if (etat.tours.filter((t) => t.famille === 'tir' && t.voie === 'A').length >= requis) return null;
     // Une tour de tir déjà spécialisée (voie B) ne peut plus devenir Guetteurs : seules celles du niveau 1 à 3 servent.
@@ -548,6 +552,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
         echantillons = echantillonner(etat);
         poids = poidsDesChemins(etat.niveau);
         parts = partsSpeciales(etat.niveau);
+        vagueFurtifs = premiereVagueFurtifs(etat.niveau);
       }
       const actions: Action[] = [];
       const achat = acheter(etat);

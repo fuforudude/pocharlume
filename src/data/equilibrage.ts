@@ -36,7 +36,7 @@ export const EQUILIBRAGE = {
    * borné (les régions suivantes ajoutent des mécaniques d'ennemis plutôt que des armées dix fois plus grosses). Réglé avec
    * le simulateur (voir docs/architecture.md).
    */
-  croissanceNiveauSuite: 0.03,
+  croissanceNiveauSuite: 0.015,
   /**
    * Croissance du budget par vague dans un niveau. Haute à dessein : une défense complète finit par tout arrêter,
    * ce sont les dernières vagues qui empêchent le héros seul (ou une défense négligée) de gagner.

@@ -4,6 +4,7 @@
 // graine : même graine, même partie.
 import { casesLibres, centreCase, creerGenerateur, tirer, tourSurCase, validerAction } from '../engine';
 import type { Action, CaseGrille, EtatPartie, Generateur, IdFamille, Voie } from '../engine';
+import { ENNEMIS } from '../data/ennemis';
 import { FAMILLES } from '../data/tours';
 import { distance, echantillonner, type Echantillon } from './geometrie';
 import type { Bot } from './simulation';
@@ -40,8 +41,25 @@ export function creerBotNaif(options: OptionsNaif): Bot {
   /** Achat voulu mais pas encore payable : le bot économise plutôt que d'en changer. */
   let envie: Action | null = null;
 
+  /** Le niveau compte des furtifs (le débutant lit les ennemis annoncés et sait qu'il lui faut des Guetteurs des Toits). */
+  let furtifs: boolean | null = null;
+
+  /** Un débutant qui sait qu'un furtif viendra : une tour de tir par chemin, montée puis spécialisée en Guetteurs des Toits (voie A). */
+  function envieGuetteurs(etat: EtatPartie): Action | null {
+    furtifs ??= etat.niveau.vagues.some((v) => v.paquets.some((p) => ENNEMIS[p.ennemi as keyof typeof ENNEMIS].furtif));
+    if (!furtifs) return null;
+    const tirs = etat.tours.filter((t) => t.famille === 'tir');
+    if (tirs.filter((t) => t.voie === 'A').length >= etat.niveau.carte.chemins.length) return null;
+    const tour = tirs.filter((t) => t.niveau < 4).sort((a, b) => b.niveau - a.niveau)[0];
+    if (tour) return tour.niveau === 3 ? { type: 'specialiser', cx: tour.cx, cy: tour.cy, voie: 'A' } : { type: 'ameliorer', cx: tour.cx, cy: tour.cy };
+    const choisie = ordre?.find((c) => !tourSurCase(etat, c.cx, c.cy));
+    return choisie ? { type: 'construire', cx: choisie.cx, cy: choisie.cy, tour: 'tir' } : null;
+  }
+
   function nouvelleEnvie(etat: EtatPartie): Action | null {
     if (!ordre) return null;
+    const guetteurs = envieGuetteurs(etat);
+    if (guetteurs) return guetteurs;
     const libres = ordre.filter((c) => !tourSurCase(etat, c.cx, c.cy));
     const ameliorables = etat.tours.filter((t) => t.famille !== 'divine' && t.niveau < 4);
     const construire = libres.length > 0 && (ameliorables.length === 0 || tirer(g) < goutDeConstruire);
