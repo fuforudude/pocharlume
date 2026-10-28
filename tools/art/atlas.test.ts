@@ -7,6 +7,9 @@ import type { AtlasJson } from './atlas.ts';
 import { construire, DOSSIER_SORTIE, lireSources, type Construction } from './construire.ts';
 import { decoderPng } from './png.ts';
 
+/** Les cinq boss des régions 1 à 5 : cadres de 64×64. */
+const BOSS = ['boucher-vaudrelle', 'la-faim', 'juge-flammes', 'dame-puits', 'mere-rats'];
+
 let resultat: Construction;
 let commite: AtlasJson;
 
@@ -130,7 +133,7 @@ describe('atlas commité', () => {
       const taille = `${String(s.largeur)}×${String(s.hauteur)}`;
       if (nom.startsWith('icone-portrait-')) expect(taille, nom).toBe('24×24');
       else if (s.categorie === 'tuile' || s.categorie === 'icone' || s.categorie === 'projectile') expect(taille, nom).toBe('16×16');
-      else if (nom === 'boucher-vaudrelle') expect(taille).toBe('64×64');
+      else if (BOSS.includes(nom)) expect(taille, nom).toBe('64×64');
       else if (s.categorie === 'tour') expect(['32×32', '32×48'], nom).toContain(taille);
       else if (nom === 'piege') expect(taille).toBe('16×16');
       else if (s.categorie === 'unite' || s.categorie === 'ennemi') expect(taille, nom).toBe('32×32');

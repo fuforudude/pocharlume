@@ -1,0 +1,135 @@
+# La Faim, boss de la région 2 (dessinée) : géante émaciée, peau grise tendue sur les os, orbites creuses, bras trop longs qui
+# traînent. Comme le Boucher de Vaudrelle, dessinée en 32×32 puis agrandie ×2 (cadres de 64×64), ancre au pied.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+agrandi 2
+
+calque tete 12 3
+..qqqqq..
+.qqPPqqq.
+qqPqqqqqq
+qkkqqkkqq
+qkyqqkykq
+.qqqkkqq.
+.qkqkqkq.
+..qqqqq..
+
+calque torse 9 11
+..qqqqqqqqqq..
+.qPqqqqqqqqPq.
+.qqkkqkkqkkqq.
+.qqqqPqqPqqqq.
+..qkkqkkqkkq..
+..qqqPqqPqqq..
+...qkkqkkqk...
+...qqqqqqqq...
+..gggggggggg..
+.gGgggGgggGgg.
+.gggGggggggGg.
+
+calque bras-g 6 12
+.qqq
+.qPq
+.qqq
+.qPq
+.qqq
+..qq
+..qP
+..qq
+..qP
+.qqq
+.qqq
+qqqq
+q.q.
+
+calque bras-d 22 12
+qqq.
+qPq.
+qqq.
+qPq.
+qqq.
+qq..
+Pq..
+qq..
+Pq..
+qqq.
+qqq.
+qqqq
+.q.q
+
+calque bras-frappe 20 12
+qqqq......
+qPqqq.....
+.qqqqq....
+..qPqqq...
+...qqqqq..
+....qqqqq.
+.....qqqqq
+.....qqqqq
+......q.q.
+
+calque jambes 11 22
+.qq....qq.
+.qP....qP.
+.qq....qq.
+.qP....qP.
+.qq....qq.
+.qP....qP.
+.qqq..qqq.
+
+calque jambes-a 11 22
+.qq.....qq
+.qP.....qP
+.qq....qq.
+.qP....qP.
+.qq...qq..
+.qP..qPq..
+.qqq.qqq..
+
+calque jambes-b 11 22
+..qq..qq..
+..qP..qP..
+..qq...qq.
+.qqP...qP.
+.qq....qq.
+.qP....qP.
+qqq.....qqq
+
+calque tas 3 25
+.....qqqqq...........
+....qqkkqqq.....qq...
+...qqkyqqkqq...qPqq..
+..qqqqqqqqqqq.qqPqqq.
+.qPqqqPqqqPqqqqqqqqqq
+qqqqkqqkqqqkqqPqqqqqq
+gggggggggggggggggggGg
+
+sprite la-faim
+anim repos 240
+cadre jambes + torse + tete + bras-g + bras-d
+cadre jambes + torse decale 0 1 + tete decale 0 1 + bras-g decale 0 1 + bras-d decale 0 1
+
+anim marche 150
+cadre jambes-a + torse + tete + bras-g decale 0 1 + bras-d decale 0 -1
+cadre jambes + torse decale 0 -1 + tete decale 1 -1 + bras-g + bras-d decale 0 -1
+cadre jambes-b + torse + tete + bras-g decale 0 -1 + bras-d decale 0 1
+cadre jambes + torse decale 0 -1 + tete decale 0 -1 + bras-g decale 0 -1 + bras-d
+
+# Elle se penche, puis ses longues mains griffent le sol devant elle.
+anim attaque 120
+cadre jambes + torse decale -1 0 + tete decale -2 0 + bras-g decale -1 0 + bras-d decale -1 0 duree 220
+cadre jambes-a + torse decale 1 0 + tete decale 3 1 + bras-g + bras-frappe
+cadre jambes-a + torse decale 2 1 + tete decale 4 2 + bras-g + bras-frappe decale 2 1 duree 160
+cadre jambes + torse + tete + bras-g + bras-d
+
+anim blesse 130
+cadre jambes + torse decale -1 0 + tete decale -2 1 + bras-g decale -1 0 + bras-d decale -1 0
+cadre jambes + torse + tete decale -1 0 + bras-g + bras-d
+
+# Elle plie, tombe à genoux puis ne laisse qu'un tas d'os et de haillons.
+anim mort 180
+cadre jambes + torse decale -1 2 + tete decale -2 4 + bras-g decale -1 2 + bras-d decale -1 2
+cadre jambes-b decale 0 3 + torse decale 0 6 + tete decale 0 8 + bras-g decale 0 8 + bras-d decale 0 8
+cadre tas duree 1000
