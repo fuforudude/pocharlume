@@ -128,14 +128,14 @@ const charlie = heros('charlie', 'charlie', {
 const mastoc = heros('mastoc', 'charlie', {
   pv: 560,
   pvParNiveau: 50,
-  degats: [8, 12],
+  degats: [14, 22],
   degatsParNiveau: 1,
-  cadence: 1.6,
+  cadence: 1.5,
   armure: 0.6,
   vitesse: 1.2,
   portee: 1.8,
   capacite: 3,
-  zone: { rayon: 0.7, effets: [] },
+  zone: { rayon: 0.8, effets: [] },
   competences: [
     ordinaire('mur_de_chair', { pv: [0.1, 0.2, 0.3] }),
     ordinaire('cri_de_defi', { capacite: [0, 1, 2], portee: [0.2, 0.3, 0.4] }),
