@@ -289,7 +289,7 @@ describe('fin de partie avec défi et boss', () => {
   it('un défi sur un niveau sans 3 étoiles est refusé : la partie en cours est effacée, les gains non donnés', async () => {
     const p = await poste(depart({ niveaux: 1 }));
     const s = await onglet(p);
-    const r = await s.enregistrerFin({ niveau: 2, statut: 'victoire', etoiles: 3, config: { ...CONFIG, defi: 'fer' } as ConfigPartie });
+    const r = await s.enregistrerFin({ niveau: 2, statut: 'victoire', etoiles: 3, config: { ...CONFIG, defi: 'fer' } });
     expect(r).toMatchObject({ bilan: null, refus: 'niveau_invalide' });
     expect((await stockee(p)).meta.defis).toEqual({});
   });
