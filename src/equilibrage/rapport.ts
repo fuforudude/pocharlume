@@ -8,7 +8,7 @@ import { HEROS_PAR_DIEU } from '../data/meta';
 import { FAMILLES, TOURS } from '../data/tours';
 import { VERSION_DONNEES } from '../data/version';
 import { t, type CleTexte } from '../i18n';
-import { BANDES, correlationDeRang, courbeDifficulte, nomDuDieu, niveauxAvecPertes, verifierBandes } from './bandes';
+import { BANDES, correlationDeRang, courbeDifficulte, courbeMoyenne, nomDuDieu, niveauxAvecPertes, verifierBandes } from './bandes';
 import {
   DIEUX_EVALUES,
   DIFFICULTES_EVALUEES,
@@ -261,18 +261,23 @@ export function redigerRapport(evaluations: readonly Evaluation[], graines: numb
   }
 
   // --- Courbe de difficulté ---
+  const moyenneCourbe = courbeMoyenne(evaluations);
+  const plusDurMoyen = moyenneCourbe.reduce((a, c) => (c.vies < a.vies ? c : a), moyenneCourbe[0] ?? { niveau: 0, vies: 0 });
   sortie.push(
     '## Courbe de difficulté',
     '',
-    `Vies restantes moyennes du bot naïf en Matou, niveau par niveau, pour chaque dieu : la courbe doit décroître (corrélation de rang d’au plus ${un(BANDES.courbeCorrelationMax)}) et le niveau 10 figurer parmi les ${String(BANDES.courbeRangDuDernierMax)} plus durs.`,
+    `Vies restantes moyennes du bot naïf en Matou, niveau par niveau. La courbe des niveaux est jugée sur la moyenne des dieux : elle doit décroître (corrélation de rang d’au plus ${un(BANDES.courbeCorrelationMax)}) et le niveau 10 figurer parmi les ${String(BANDES.courbeRangDuDernierMax)} plus durs. La courbe de chaque dieu doit aussi décroître (corrélation d’au plus ${un(BANDES.courbeCorrelationDieuMax)}) ; le boss du niveau 10 dévore les unités au contact, ce qui pèse plus sur un héros de mêlée que sur un tireur.`,
     '',
     tableau(
       ['Dieu', ...niveaux.map(String), 'Corrélation de rang', 'Niveau le plus dur'],
-      dieux.map((dieu) => {
-        const courbe = courbeDifficulte(evaluations, 'matou', dieu);
-        const plusDur = courbe.reduce((a, c) => (c.vies < a.vies ? c : a), courbe[0] ?? { niveau: 0, vies: 0 });
-        return [nomDuDieu(dieu), ...courbe.map((c) => un(c.vies)), un(correlationDeRang(courbe)), `${String(plusDur.niveau)} (${un(plusDur.vies)} vies)`];
-      }),
+      [
+        ...dieux.map((dieu) => {
+          const courbe = courbeDifficulte(evaluations, 'matou', dieu);
+          const plusDur = courbe.reduce((a, c) => (c.vies < a.vies ? c : a), courbe[0] ?? { niveau: 0, vies: 0 });
+          return [nomDuDieu(dieu), ...courbe.map((c) => un(c.vies)), un(correlationDeRang(courbe)), `${String(plusDur.niveau)} (${un(plusDur.vies)} vies)`];
+        }),
+        ['**Moyenne des dieux**', ...moyenneCourbe.map((c) => un(c.vies)), un(correlationDeRang(moyenneCourbe)), `${String(plusDurMoyen.niveau)} (${un(plusDurMoyen.vies)} vies)`],
+      ],
     ),
     '',
     'Corrélation de rang de Spearman entre le niveau et les vies restantes (−1 = décroissance parfaite).',

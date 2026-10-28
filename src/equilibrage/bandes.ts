@@ -28,9 +28,11 @@ export const BANDES = {
     /** Écart maximal, entre deux dieux, du taux de victoire du soigneux (10 points). */
     ecartVictoiresEntreDieuxMax: 0.1,
   },
-  /** Courbe de difficulté du bot naïf en Matou : corrélation de rang au plus égale à ceci. */
+  /** Courbe de difficulté du bot naïf en Matou (moyenne des dieux) : corrélation de rang au plus égale à ceci. */
   courbeCorrelationMax: -0.6,
-  /** Le dernier niveau doit figurer parmi ce nombre de niveaux les plus durs (les moins de vies restantes au naïf). */
+  /** La courbe de chaque dieu, prise seule, doit aussi monter : corrélation de rang au plus égale à ceci. */
+  courbeCorrelationDieuMax: -0.3,
+  /** Le dernier niveau doit figurer parmi ce nombre de niveaux les plus durs (les moins de vies restantes au naïf, moyenne des dieux). */
   courbeRangDuDernierMax: 3,
 } as const;
 
@@ -177,27 +179,46 @@ export function ecartsPuissance(): string[] {
   return toursHorsTolerance().map((t) => `Puissance : ${t.nom} (palier ${String(t.palier)}) est à ${pourcent(t.ecart)} de la moyenne de son palier`);
 }
 
-/** Courbe de difficulté en Matou, pour chaque dieu : elle monte (corrélation de rang) et le dernier niveau est parmi les plus durs. */
+/**
+ * Courbe de difficulté en Matou. Les niveaux ont une seule courbe, jugée sur la moyenne des trois dieux : elle monte
+ * (corrélation de rang) et le dernier niveau est parmi les plus durs. Chaque dieu a sa courbe, qui doit monter aussi
+ * (corrélation de rang au plus égale à `courbeCorrelationDieuMax`) : le boss du niveau 10 dévore les unités au contact,
+ * ce qui pèse plus sur un héros de mêlée que sur un tireur, et le rang exact du dernier niveau varie d'un dieu à l'autre.
+ */
 export function ecartsCourbe(evaluations: readonly Evaluation[]): string[] {
-  return dieuxDe(evaluations).flatMap((dieu) => ecartsCourbeDuDieu(evaluations, dieu));
-}
-
-function ecartsCourbeDuDieu(evaluations: readonly Evaluation[], dieu: string): string[] {
-  const courbe = courbeDifficulte(evaluations, 'matou', dieu);
-  if (courbe.length < 2) return [];
   const ecarts: string[] = [];
-  const nom = `Matou (${nomDuDieu(dieu)})`;
-  const rho = correlationDeRang(courbe);
-  if (rho > BANDES.courbeCorrelationMax) {
-    ecarts.push(`${nom} : la courbe de difficulté du bot naïf a une corrélation de rang de ${un(rho)}, elle doit être d'au plus ${un(BANDES.courbeCorrelationMax)}`);
+  const moyenne = courbeMoyenne(evaluations);
+  if (moyenne.length >= 2) {
+    const rho = correlationDeRang(moyenne);
+    if (rho > BANDES.courbeCorrelationMax) {
+      ecarts.push(`Matou : la courbe de difficulté du bot naïf (moyenne des dieux) a une corrélation de rang de ${un(rho)}, elle doit être d'au plus ${un(BANDES.courbeCorrelationMax)}`);
+    }
+    const dernier = moyenne[moyenne.length - 1];
+    const tries = moyenne.map((c) => c.vies).sort((a, b) => a - b);
+    const seuil = tries[Math.min(BANDES.courbeRangDuDernierMax, tries.length) - 1] ?? 0;
+    if (dernier && dernier.vies > seuil) {
+      ecarts.push(`Matou : le niveau ${String(dernier.niveau)} (${un(dernier.vies)} vies restantes au bot naïf, moyenne des dieux) n'est pas parmi les ${String(BANDES.courbeRangDuDernierMax)} plus durs`);
+    }
   }
-  const dernier = courbe[courbe.length - 1];
-  const tries = courbe.map((c) => c.vies).sort((a, b) => a - b);
-  const seuil = tries[Math.min(BANDES.courbeRangDuDernierMax, tries.length) - 1] ?? 0;
-  if (dernier && dernier.vies > seuil) {
-    ecarts.push(`${nom} : le niveau ${String(dernier.niveau)} (${un(dernier.vies)} vies restantes au bot naïf) n'est pas parmi les ${String(BANDES.courbeRangDuDernierMax)} plus durs`);
+  for (const dieu of dieuxDe(evaluations)) {
+    const courbe = courbeDifficulte(evaluations, 'matou', dieu);
+    if (courbe.length < 2) continue;
+    const rho = correlationDeRang(courbe);
+    if (rho > BANDES.courbeCorrelationDieuMax) {
+      ecarts.push(`Matou (${nomDuDieu(dieu)}) : la courbe de difficulté du bot naïf a une corrélation de rang de ${un(rho)}, elle doit être d'au plus ${un(BANDES.courbeCorrelationDieuMax)}`);
+    }
   }
   return ecarts;
+}
+
+/** Vies restantes moyennes du bot naïf en Matou, niveau par niveau, moyennées sur les dieux évalués. */
+export function courbeMoyenne(evaluations: readonly Evaluation[], difficulte = 'matou'): { niveau: number; vies: number }[] {
+  const courbes = dieuxDe(evaluations).map((dieu) => courbeDifficulte(evaluations, difficulte, dieu));
+  const niveaux = [...new Set(courbes.flatMap((c) => c.map((x) => x.niveau)))].sort((a, b) => a - b);
+  return niveaux.map((niveau) => {
+    const vies = courbes.flatMap((c) => c.filter((x) => x.niveau === niveau).map((x) => x.vies));
+    return { niveau, vies: vies.reduce((a, b) => a + b, 0) / Math.max(1, vies.length) };
+  });
 }
 
 export function verifierBandes(evaluations: readonly Evaluation[]): string[] {

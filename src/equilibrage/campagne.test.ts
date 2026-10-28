@@ -154,7 +154,7 @@ describe('bandes par dieu et entre dieux', () => {
     expect(ecartsEntreDieux([])).toEqual([]);
   });
 
-  it('la courbe et le sans-défense sont jugés pour chaque dieu', () => {
+  it('la courbe est jugée sur la moyenne des dieux et chaque dieu doit aussi monter ; le sans-défense est jugé pour chaque dieu', () => {
     const courbe = (dieu: string, vies: number[]): Evaluation[] => vies.map((v, i) => evaluation(i + 1, 'matou', 'naif', [partie(v > 0 ? 'victoire' : 'defaite', v)], dieu));
     const bonne = [20, 19, 18, 15, 12, 10, 8, 5, 2, 1];
     expect(ecartsCourbe([...courbe('plume', bonne), ...courbe('pollen', bonne)])).toEqual([]);
