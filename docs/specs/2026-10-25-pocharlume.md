@@ -450,8 +450,8 @@ Demande de l'utilisateur pendant le jalon 3 : les socles fixes disparaissent.
   - [x] Une tour se pose sur toute case libre de la grille et jamais sur une case interdite (tests moteur, y compris
     rejeu) ; deux tours ne partagent jamais une case.
   - [x] Les 50 niveaux ont leurs cases interdites tirées du chemin et des grands décors (test).
-  - [ ] La case visée s'éclaire, la tour est centrée dans sa case, et à 812×375 une case fait au moins 44 px ou le
-    zoom le permet.
+  - [x] La case visée s'éclaire, la tour est centrée dans sa case, et à 812×375 une case fait au moins 44 px ou le
+    zoom le permet (zoom plancher tactile ; vérifié au navigateur à la souris, pas encore sur un vrai écran tactile).
   - [ ] Les sols des 5 régions sont redessinés (planche d'aperçu avant / après).
 
 ### Équilibrage du jalon 3

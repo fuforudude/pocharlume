@@ -376,9 +376,29 @@ est le centre de la case** (`tour.x = (cx + 0,5) × 2`). Deux tours ne partagent
     `elementsMenu(etat, cx, cy)` (menu en cercle) l'utilise déjà : les familles refusées y sont grisées avec leur raison, et
     `src/ui/refus.ts` donne le texte de chaque raison (`refus.case_*`, `refus.caserne_sans_chemin`).
   - `Interaction.toucher` ouvre le menu de la case touchée (`Mode.menu { cx, cy }`) ou renvoie `refus: 'case_interdite'` sur une case
-    interdite sans tour ; `Surbrillance` porte `cx`/`cy` (la case dont le menu est ouvert, -1 si aucune) et `portee`. **État provisoire** :
-    la visée de case au survol, l'éclat libre/interdit de la case visée, la taille de case de 44 px au moins au zoom du téléphone et le
-    menu en cercle sur la grille sont l'objet d'une tâche à part ; rien n'est dessiné sur les cases vides.
+    interdite sans tour ; `Surbrillance` porte `cx`/`cy` (la case dont le menu est ouvert, -1 si aucune) et `portee`.
+- **Visée à l'écran (`src/ui/interaction.ts`, `src/render/rendu.ts`)** : rien n'est dessiné tant qu'on ne vise pas. `Interaction.viser`
+  (souris qui survole, ou doigt posé) mémorise la case sous le pointeur, `cesserDeViser` l'efface (doigt levé, glissé de caméra, pincement,
+  souris sortie de la carte) ; `Surbrillance.viseeCx/viseeCy/viseeInterdite` la donnent au rendu, qui dessine un voile et quatre coins
+  (clairs si la case est libre ou porte une tour, rouge sombre si elle est interdite sans tour : chemin, grand décor). Pendant la visée
+  du héros, d'un sort, d'un objet ou d'un ralliement on désigne un point libre : aucune case n'est éclairée. Les touches 1 à 5
+  (`construireSurSelection`) construisent sur la case survolée, sinon sur celle dont le menu est ouvert ; le moteur dit pourquoi si elle
+  est interdite.
+- **Aperçu au survol du menu** : chaque `ElementMenu` « construire » porte `apercu { portee, ralliement }` (portée de la tour de niveau 1,
+  bonus compris ; pour la caserne, le point de ralliement que le moteur lui donnera). Le HUD signale le bouton survolé à la souris ou pris
+  au clavier (`survolerElement`) ; le rendu trace cette portée depuis la case du menu et, pour la caserne, le ralliement par défaut. Au
+  doigt il n'y a pas de survol : toucher un bouton construit tout de suite, la portée n'est donc pas prévisualisée.
+- **Cases de 44 px au moins au doigt** : sur un écran tactile (`(pointer: coarse)`), `Rendu.definirCibleCase(44)` donne à la caméra un
+  zoom plancher (`zoomPourCase(ratio, 44)` = plus petit zoom entier dont la case fait au moins 44 px CSS : 2 à 812×375 avec un ratio de 1
+  ou de 1,25, 4 à 2,625, 5 à 3). La caméra ne dézoome pas en dessous, la carte défile : c'est la solution la plus simple (pas de mode
+  « zoomer pour viser »). À la souris, aucun plancher : le zoom reste libre.
+- **Tours centrées dans leur case** : le moteur pose le centre de la tour au centre de la case, et l'ancre des sprites est au pied du
+  fût ; le rendu dessine donc une tour posée `DECALAGE_BASE_TOUR` = 6 pixels plus bas (`suivi.ts`), pour que l'empreinte au sol, qui
+  s'étend sous le pied, soit centrée (tireur, projectiles et fumées suivent). Horizontalement les sprites sont déjà centrés à 2 pixels
+  près (test sur l'atlas, `decalage-tour.test.ts`). Les tourelles des héros et des tours divines, posées n'importe où, ne sont pas
+  décalées. Les tours de 32 px de large (artillerie, atelier, sanctuaire, caserne de niveau 3) touchent la case voisine : l'écart visible
+  entre deux tours voisines dépend de l'art, pas du code. Ordre de dessin : clé de tri = ordonnée du centre de la case, donc une tour plus au
+  sud recouvre le haut des tours qu'elle masque (les tours hautes de 48 px s'empilent en colonne sur des cases voisines).
 - **Simulateur** : les bots jouent toutes les cases libres. Le naïf les classe par distance au chemin (avec un bruit). Le soigneux
   garde une recherche raisonnable : pour chaque famille et pour la tour divine, il classe une fois pour toutes les cases où la tour voit
   du chemin (longueur vue, pesée par la menace de chaque chemin ; la caserne seulement là où elle a un chemin à portée), n'examine à

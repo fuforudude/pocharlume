@@ -19,7 +19,7 @@ import { dessinerNombre, largeurNombre } from './police';
 import { construireSol, peindreSol } from './sol';
 import { tuileTouchee } from './zones';
 import { zoomPourCase } from './zoom-tactile';
-import { CATEGORIE, DEPLOIEMENT_NUAGE, Suivi, type OptionsCollection, type Visuel, type VisuelProjectile } from './suivi';
+import { CATEGORIE, DECALAGE_BASE_TOUR, DEPLOIEMENT_NUAGE, Suivi, type OptionsCollection, type Visuel, type VisuelProjectile } from './suivi';
 
 export type { OptionsCollection } from './suivi';
 
@@ -318,7 +318,7 @@ export class Rendu {
       const x = v.xPrec + (v.x - v.xPrec) * alpha;
       const y = v.yPrec + (v.y - v.yPrec) * alpha;
       v.px = Math.round(x * TUILE) - ox;
-      v.py = Math.round(y * TUILE) - oy;
+      v.py = Math.round(y * TUILE) - oy + (v.tour ? DECALAGE_BASE_TOUR : 0);
       v.cle = Math.round(y * TUILE) + v.categorie * 0.01 + (v.ennemi?.volant ? 10_000 : 0);
     }
   }

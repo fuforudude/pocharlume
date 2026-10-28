@@ -30,6 +30,13 @@ import {
   spriteUnite,
 } from './habillage';
 
+/**
+ * Une tour posée est dessinée ce nombre de pixels plus bas que le centre de sa case : l'ancre du sprite est au pied du fût, et c'est
+ * l'empreinte au sol (une douzaine de pixels de profondeur sous ce pied) qui doit être centrée dans la case, pas la ligne de pied.
+ * Ne vaut que pour les tours des cases (`Visuel.tour`), pas pour les tourelles qu'un héros ou une tour divine pose n'importe où.
+ */
+export const DECALAGE_BASE_TOUR = 6;
+
 export const CATEGORIE = { tour: 0, ennemi: 1, unite: 2 } as const;
 
 /**
@@ -509,7 +516,7 @@ export class Suivi {
         v.total = Math.max(0.01, distance(p.x, p.y, p.cx, p.cy));
         const tour = this.tours.get(p.tour);
         v.origineX = tour ? tour.tirX : 0;
-        v.origineY = tour ? tour.tirY : -12;
+        v.origineY = tour ? tour.tirY + (tour.tour ? DECALAGE_BASE_TOUR : 0) : -12;
         v.surEnnemi = p.cible >= 0;
         v.arc = p.stats.zone > 0 ? Math.min(40, Math.round(v.total * TUILE * 0.35)) : 0;
         v.tourne = projectileTourne(nomSprite);
@@ -588,7 +595,7 @@ export class Suivi {
         if (ev.projectile === -1 && tour && cible) {
           const e = this.effets.prendre(TYPE_EFFET.rayon, temps, DUREE_RAYON);
           e.x = Math.round(tour.x * TUILE + tour.tirX);
-          e.y = Math.round(tour.y * TUILE + tour.tirY);
+          e.y = Math.round(tour.y * TUILE + tour.tirY + DECALAGE_BASE_TOUR);
           e.x2 = Math.round(cible.x * TUILE);
           e.y2 = Math.round(cible.y * TUILE - 8);
           e.couleur = '#ff9a4a';
@@ -790,7 +797,7 @@ export class Suivi {
         return;
       case 'competence_tour': {
         const tour = this.tours.get(ev.tour);
-        if (tour) this.effetSprite('impact', tour.x, tour.y, temps, 2, -14);
+        if (tour) this.effetSprite('impact', tour.x, tour.y, temps, 2, -14 + DECALAGE_BASE_TOUR);
         return;
       }
       case 'invocation': {
@@ -801,12 +808,12 @@ export class Suivi {
       }
       case 'construction': {
         const tour = this.tours.get(ev.tour);
-        if (tour) this.effetSprite('fumee', tour.x, tour.y, temps, 2, -6);
+        if (tour) this.effetSprite('fumee', tour.x, tour.y, temps, 2, -6 + DECALAGE_BASE_TOUR);
         return;
       }
       case 'amelioration': {
         const tour = this.tours.get(ev.tour);
-        if (tour) this.effetSprite('impact', tour.x, tour.y, temps, 2, -14);
+        if (tour) this.effetSprite('impact', tour.x, tour.y, temps, 2, -14 + DECALAGE_BASE_TOUR);
         return;
       }
       case 'vente': {
