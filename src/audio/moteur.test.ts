@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { gainDuVolume, MoteurAudio, type ContexteAudio, type DependancesAudio, type GainAudio, type SourceAudio } from './moteur';
-import { IDS_SONS, SONS, type VuePartie } from './table';
+import type { Evenement } from '../engine';
+import { IDS_SONS, lectureDe, SONS, type VuePartie } from './table';
 
 /** Un faux contexte audio : enregistre ce qui est créé, branché et lancé. */
 class FauxContexte implements ContexteAudio {
@@ -234,6 +235,44 @@ describe('lecture', () => {
       { type: 'fin', statut: 'victoire', etoiles: 3 },
     ], partie);
     expect(b.contexte.lancees).toHaveLength(3);
+  });
+
+  it('un événement à lecture réglée applique ses facteurs de volume et de hauteur au son de base', async () => {
+    const b = banc();
+    await pret(b);
+    b.moteur.jouerEvenement({ type: 'plongee', ennemi: 1, x: 0, y: 0, delai: 3 });
+    const lue = lectureDe({ type: 'plongee', ennemi: 1, x: 0, y: 0, delai: 3 });
+    expect(lue).not.toBeNull();
+    const def = SONS.onde_choc;
+    expect(b.contexte.lancees).toHaveLength(1);
+    expect(b.contexte.lancees[0]?.gain).toBeCloseTo(def.volume * (lue?.volume ?? 1));
+    expect(b.contexte.lancees[0]?.vitesse).toBeCloseTo(def.hauteur * (lue?.hauteur ?? 1));
+  });
+
+  it('une lecture à clé propre ne joue qu’une fois par fenêtre sans prendre la place du son de base', async () => {
+    const b = banc();
+    await pret(b);
+    const brulure = { type: 'brulure', ennemi: 1, unite: 2 } as const;
+    // Dix soldats prennent feu au même pas : un seul souffle.
+    b.moteur.jouerEvenements(Array.from({ length: 10 }, () => brulure));
+    expect(b.contexte.lancees).toHaveLength(1);
+    // Le « sort » ordinaire joue toujours deux fois dans la fenêtre : la brûlure ne lui a pas pris sa place.
+    expect(b.moteur.jouer('sort')).toBe(true);
+    expect(b.moteur.jouer('sort')).toBe(true);
+    b.horloge.t += 80;
+    b.moteur.jouerEvenement(brulure);
+    expect(b.contexte.lancees).toHaveLength(4);
+  });
+
+  it('un essaim qui meurt d’un coup fait un son, pas une mitraille ; un ennemi ordinaire en fait jusqu’à sa limite', async () => {
+    const b = banc();
+    await pret(b);
+    const mort = (typeEnnemi: string): Evenement => ({ type: 'mort', ennemi: 1, typeEnnemi, x: 0, y: 0, prime: 0 });
+    b.moteur.jouerEvenements(Array.from({ length: 8 }, () => mort('rat_peste')));
+    expect(b.contexte.lancees).toHaveLength(1);
+    b.horloge.t += 80;
+    b.moteur.jouerEvenements(Array.from({ length: 8 }, () => mort('paysan_affame')));
+    expect(b.contexte.lancees).toHaveLength(1 + SONS.mort_ennemi.max);
   });
 
   it('suspendu (iOS en silencieux, onglet en arrière-plan) : relance le contexte sans jouer ni lever', async () => {
