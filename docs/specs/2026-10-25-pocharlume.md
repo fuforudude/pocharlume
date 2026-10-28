@@ -486,6 +486,95 @@ Demande de l'utilisateur pendant le jalon 3 : les socles fixes disparaissent.
 6. Équilibrage des régions 2 à 5 et des défis. (Après la tâche 4.)
 7. Relecture, QA, corrections.
 
+## Détail du jalon 4
+
+Décisions prises par le chef de projet sans entretien, à la demande de l'utilisateur (« enchaîne directement sur le
+jalon 4 ») : elles suivent la spec d'origine et les choix du jalon 3, et restent à relire par l'utilisateur.
+
+### Régions 6 à 10
+- Même structure qu'au jalon 3 : 10 niveaux par région, 3 cartes dessinées par région (grille de construction et
+  cases interdites comme au jalon 3), niveau 10 boss, vagues figées dans `src/data/niveaux/`, région ouverte par le
+  boss de la précédente, ennemis des régions précédentes mélangés à partir du niveau 4. Sols en grands aplats dès
+  le départ.
+- Mécaniques des ennemis :
+
+| Ennemi | Mécanique |
+| --- | --- |
+| Fossoyeur | un soldat tué à 2 tuiles de lui met deux fois plus de temps à réapparaître |
+| Creux | se relève une fois avec 50 % de ses PV, sauf s'il meurt de dégâts magiques |
+| Chauve-Souris | volante, essaim par groupes de 5, rapide et fragile |
+| Fantassin | armure 60 % |
+| Porte-Bannière | aura : +25 % de vitesse aux ennemis à 2 tuiles (non cumulable) |
+| Cavalier | très rapide, armure 30 % ; renverse le premier soldat qui le bloque (étourdi 2 s) et passe |
+| Flagellant | sous 50 % de PV, +50 % de vitesse et de dégâts |
+| Inquisiteur | fige la tour la plus proche à 2,5 tuiles pendant 3 s, toutes les 8 s |
+| Exorciste | résistance magique 30 % ; toutes les 6 s, tue une invocation à 2 tuiles ou étourdit le héros 2 s |
+| Garde Royal | armure 90 %, lent |
+| Arbalétrier d'Élite | tire sur les soldats et le héros à 3,5 tuiles |
+| Chevalier | rapide, armure 60 %, résistance magique 30 % |
+| Acolyte de Cendre | résistance magique 30 % ; invoque 2 Creux toutes les 8 s |
+| Ange de Cendre | volant, armure 30 %, résistance magique 60 % |
+
+- Boss :
+  - **Le Roi des Fosses** : toutes les 15 s, relève les 4 derniers ennemis morts à 50 % de leurs PV.
+  - **Le Prince Croisé** : charge toutes les 10 s (vitesse ×3 pendant 2 s, ignore les soldats) et porte l'aura du
+    Porte-Bannière à 3 tuiles.
+  - **Le Grand Inquisiteur** : fige les 2 tours les plus proches pendant 4 s toutes les 10 s ; insensible aux
+    ralentissements.
+  - **Le Roi Fou** : à 75, 50 et 25 % de PV, appelle 4 Gardes Royaux et devient invulnérable 3 s.
+  - **Le Soleil Blême** : trois phases. Jusqu'à 66 % de PV, aveugle les tours à 4 tuiles (portée −30 % pendant
+    4 s, toutes les 12 s) ; jusqu'à 33 %, appelle 2 Anges de Cendre toutes les 10 s ; ensuite, cadence −30 % aux
+    tours à 4 tuiles tant qu'il vit.
+- Élites, défis Héroïque et Fer : mêmes règles qu'au jalon 3, sur les 50 nouveaux niveaux.
+- Disciples offerts : victoire sur le boss des régions 6 et 8, même ordre qu'au jalon 3.
+- Victoire sur le Soleil Blême : écran de fin de campagne (texte de lore), puis retour à la carte.
+
+### Mode infini
+- Ouvert par la victoire sur le boss de la région 1. On choisit une carte dont au moins un niveau est gagné.
+- Règles de Matou, 20 vies, objets consommables et bonus de caisses autorisés, dieu et héros au choix.
+- Vagues générées par le moteur, de façon déterministe à partir de la graine de la partie (le rejeu reste exact) :
+  budget de menace de la vague n = budget de la première vague de Matou × 1,08^(n−1), tiré parmi les ennemis de la
+  région de la carte et des régions précédentes ; élites à partir de la vague 20 (10 % des ennemis, +5 points
+  toutes les 10 vagues, au plus 60 %). Le multiplicateur et les seuils sont dans `src/data/`.
+- Mini-boss toutes les 10 vagues : le boss de la région de la carte, à 30 % de ses PV, +15 points par mini-boss
+  déjà passé (60 % à la vague 30…), seul ou avec la vague.
+- Le record (dernière vague terminée) est gardé par carte. « Reprendre à la vague N » marche comme en campagne.
+- Paliers 10, 20, 30, 50, 75 et 100 : chacun payé une seule fois au total, toutes cartes confondues :
+  arêtes 50 / 100 / 150 / 250 / 400 / 600, braises 2 / 3 / 5 / 8 / 12 / 20.
+- Pas d'étoiles ni de défis en infini. Une partie arrêtée garde le record atteint.
+
+### Sauvegarde v5
+- Ajoute : records de l'infini par carte, paliers payés. Migration v4 vers v5 testée, sans perte.
+
+### Équilibrage du jalon 4
+- Les bandes de la région 1 s'appliquent aux régions 6 à 10, pour les 3 dieux ; défis entre 40 et 90 % de
+  réussite du bot soigneux par région ; le boss de chaque région parmi ses 3 niveaux les plus durs.
+- `npm run balance` couvre les 100 niveaux dans les 3 difficultés et les défis.
+- Infini, en Matou : le bot soigneux atteint en médiane entre la vague 25 et la vague 45 sur une carte de la région
+  1, et le bot naïf ne passe pas la vague 30.
+
+### Critères d'acceptation détaillés du jalon 4
+- [ ] Les régions 6 à 10 sont jouables de bout en bout, chacune débloquée par le boss de la précédente, et la
+  victoire sur le Soleil Blême affiche la fin de campagne.
+- [ ] Chaque mécanique d'ennemi et de boss des régions 6 à 10 a un test moteur qui montre son effet.
+- [ ] `npm run balance` couvre les 100 niveaux et les défis, et toutes les bandes passent.
+- [ ] Infini : même graine et mêmes actions donnent le même état (test), un mini-boss arrive aux vagues 10, 20,
+  30, le budget suit la formule (test), le record par carte survit à un rechargement.
+- [ ] Un palier de l'infini n'est payé qu'une fois, même atteint sur une autre carte (test).
+- [ ] La sauvegarde passe en v5 avec une migration testée depuis la v4.
+- [ ] Les écrans de l'infini (choix de la carte, record, paliers, fin de partie) tiennent en paysage 812×375.
+
+## Tâches du jalon 4
+1. Moteur : mécaniques des 14 ennemis et des 5 boss, élites ; génération des vagues de l'infini et mini-boss.
+2. Sprites : 14 ennemis, leurs élites, 5 boss, tuiles en aplats et décor des régions 6 à 10, illustration de fin de
+   campagne.
+3. Méta et sauvegarde v5 : déblocage des régions 6 à 10, disciples offerts, records et paliers de l'infini.
+4. Niveaux : 15 cartes et 50 niveaux figés, cases interdites, familles imposées des défis Fer. (Après la tâche 1.)
+5. Interface : carte des régions 6 à 10, écran de l'infini, affichage de la vague et du record, fin de partie
+   infinie, fin de campagne. (Après les tâches 1 et 3.)
+6. Équilibrage des régions 6 à 10, des défis et de l'infini. (Après la tâche 4.)
+7. Relecture, QA, corrections.
+
 ## Impacts
 - Données / migrations : aucune base de données. Le format de sauvegarde est versionné dès la v1.
 - API : aucune en V1. Le journal d'actions et le moteur déterministe préparent le rejeu serveur.
