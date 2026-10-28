@@ -98,6 +98,19 @@ describe('partie en cours', () => {
     expect(reprendrePartie({ ...bonne, etat: JSON.stringify(terminee) })).toBeNull();
   });
 
+  it('oublie une partie enregistrée avant la grille de construction (tours sur des socles, état en version 4, données en version 7)', () => {
+    const etat = niveau1();
+    jusquaVague(etat, 1);
+    const bonne = partieEnCours(etat, 1);
+    if (!bonne) throw new Error('pas de partie');
+    const ancien = JSON.parse(bonne.etat) as { version: number; versionDonnees: number; tours: Record<string, unknown>[] };
+    ancien.version = 4;
+    ancien.versionDonnees = VERSION_DONNEES - 1;
+    ancien.tours = ancien.tours.map((t) => ({ ...t, cx: undefined, cy: undefined, socle: 0 }));
+    const partie = { ...bonne, config: { ...bonne.config, versionDonnees: VERSION_DONNEES - 1 }, etat: JSON.stringify(ancien) };
+    expect(reprendrePartie(partie)).toBeNull();
+  });
+
   it('une victoire effacerait la partie en cours : le dépôt garde le reste de la progression', () => {
     const etat = niveau1();
     jusquaVague(etat, 1);
