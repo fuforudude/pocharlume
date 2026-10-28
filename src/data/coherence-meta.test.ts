@@ -5,6 +5,7 @@ import { BRANCHES } from './ameliorations';
 import { DIEUX } from './dieux';
 import { HEROS, SEUILS_XP } from './heros';
 import {
+  braisesDeVictoire,
   BRANCHES_ARBRE,
   COMPETENCES_PAR_HEROS,
   HEROS_PAR_DIEU,
@@ -12,6 +13,7 @@ import {
   IDS_HEROS,
   IDS_OBJETS,
   NIVEAU_ULTIME,
+  PRIX_DISCIPLE,
   RANG_MAX_ARBRE,
   RANG_MAX_COMPETENCE,
 } from './meta';
@@ -58,5 +60,13 @@ describe('ids du contenu et de la méta-progression', () => {
       expect(Object.keys(objet)).not.toContain('prix');
       expect(Object.keys(objet)).not.toContain('stockMax');
     }
+  });
+
+  it('les braises de la région 1 (5 par niveau, 10 du boss, 2 par niveau à 3 étoiles) paient deux disciples, pas trois', () => {
+    let total = 0;
+    for (let niveau = 1; niveau <= 10; niveau++) total += braisesDeVictoire(niveau, true, true);
+    expect(total).toBe(80);
+    expect(total).toBeGreaterThanOrEqual(2 * PRIX_DISCIPLE);
+    expect(total).toBeLessThan(3 * PRIX_DISCIPLE);
   });
 });

@@ -13,6 +13,7 @@ import {
   IDS_HEROS,
   IDS_OBJETS,
   OBJETS,
+  PRIX_DISCIPLE,
   RANG_MAX_ARBRE,
   xpDePartie,
 } from './meta';
@@ -52,13 +53,22 @@ describe('gains', () => {
     expect(aretesDeVictoire(10, 0)).toBe(30);
   });
 
-  it('braises : 10 à la première victoire d’un boss, 2 aux premières 3 étoiles', () => {
-    expect(braisesDeVictoire(10, true, false)).toBe(10);
-    expect(braisesDeVictoire(10, true, true)).toBe(12);
+  it('braises : 5 à la première victoire d’un niveau, 10 de plus pour un boss, 2 aux premières 3 étoiles', () => {
+    expect(braisesDeVictoire(10, true, false)).toBe(15);
+    expect(braisesDeVictoire(10, true, true)).toBe(17);
     expect(braisesDeVictoire(10, false, false)).toBe(0);
-    expect(braisesDeVictoire(5, true, false)).toBe(0);
-    expect(braisesDeVictoire(5, true, true)).toBe(2);
-    expect(braisesDeVictoire(20, true, false)).toBe(10);
+    expect(braisesDeVictoire(10, false, true)).toBe(2);
+    expect(braisesDeVictoire(5, true, false)).toBe(5);
+    expect(braisesDeVictoire(5, true, true)).toBe(7);
+    expect(braisesDeVictoire(5, false, false)).toBe(0);
+    expect(braisesDeVictoire(20, true, false)).toBe(15);
+  });
+
+  it('la région 1 rapporte 80 braises au plus (50 + 10 + 20), soit deux disciples à 30', () => {
+    let total = 0;
+    for (let n = 1; n <= 10; n++) total += braisesDeVictoire(n, true, true);
+    expect(total).toBe(80);
+    expect(Math.floor(total / PRIX_DISCIPLE)).toBe(2);
   });
 
   it('les boss sont les niveaux 10, 20, … 100', () => {

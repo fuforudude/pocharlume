@@ -109,12 +109,16 @@ export function aretesDeVictoire(niveau: number, nouvellesEtoiles: number): numb
 }
 
 /**
- * Braises gagnées par une victoire : 10 à la première victoire sur un boss, 2 la première fois qu'un niveau atteint
- * ses 3 étoiles.
+ * Braises gagnées par une victoire : 5 la première fois qu'un niveau est gagné, 10 de plus à la première victoire sur
+ * un boss, 2 la première fois qu'un niveau atteint ses 3 étoiles. Les 10 niveaux de la région 1 en rapportent au plus
+ * 50 + 10 + 20 = 80, soit deux disciples à 30 braises.
  */
 export function braisesDeVictoire(niveau: number, premiereVictoire: boolean, premieresTroisEtoiles: boolean): number {
-  return (premiereVictoire && estNiveauBoss(niveau) ? 10 : 0) + (premieresTroisEtoiles ? 2 : 0);
+  return (premiereVictoire ? BRAISES_PREMIERE_VICTOIRE : 0) + (premiereVictoire && estNiveauBoss(niveau) ? 10 : 0) + (premieresTroisEtoiles ? 2 : 0);
 }
+
+/** Braises d'un niveau gagné pour la première fois. */
+export const BRAISES_PREMIERE_VICTOIRE = 5;
 
 /** Expérience gagnée par le héros joué : 100 + 20 × N pour une victoire, la moitié pour une défaite. */
 export function xpDePartie(niveau: number, victoire: boolean): number {
