@@ -357,6 +357,26 @@ describe('retour visible des gestes refusés', () => {
     expect(messageAffiche()).toBe(t('refus.aretes_insuffisantes'));
   });
 
+  it('en défi Fer, le menu d’un socle ne propose que les familles du niveau, et une touche interdite dit pourquoi', async () => {
+    const avecFer = { ...NIVEAU as NonNullable<typeof NIVEAU>, niveau: { ...NIVEAU?.niveau as NonNullable<typeof NIVEAU>['niveau'], defiFer: { familles: ['tir', 'magie'] as [string, string] } } };
+    const partie = await lancerNiveau(avecFer, { ...CONFIG, defi: 'fer', bonus: { tours: {}, heros: {} } }, () => undefined, {
+      parent: document.body,
+      surDemarrage: (p) => { parties.push(p); },
+    });
+    partie.etat.aretes = 5000;
+    const socle = partie.etat.niveau.carte.socles[0];
+    if (!socle) throw new Error('pas de socle');
+    toucherCarte(socle.x, socle.y - 0.5);
+    images(2);
+    expect(partie.mode.type).toBe('menu');
+    const libelles = [...document.querySelectorAll('.element-menu')].map((e) => e.getAttribute('aria-label') ?? '');
+    expect(libelles).toHaveLength(2);
+    // Touche 4 : artillerie, interdite par ce défi.
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: '4', code: 'Digit4', bubbles: true }));
+    images(1);
+    expect(messageAffiche()).toBe(t('refus.famille_interdite'));
+  });
+
   it('un ordre au héros hors du chemin affiche pourquoi', async () => {
     const partie = await demarrer();
     boutonDe('.bouton.portrait').click();

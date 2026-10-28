@@ -34,7 +34,10 @@ function nomFamille(famille: FamilleTour): string {
   return t(`famille.${famille}`);
 }
 
-/** Les 4 familles et la tour divine, à construire sur un socle vide. */
+/**
+ * Les 4 familles et la tour divine, à construire sur un socle vide. En défi Fer, les familles que le niveau n'autorise pas
+ * ne sont pas proposées du tout (c'est `validerAction` qui le dit, par `famille_interdite` : aucune règle dupliquée ici).
+ */
 export function elementsSocleVide(etat: EtatPartie, socle: number): ElementMenu[] {
   return FAMILLES_MENU.map((famille) => {
     const action: Action = { type: 'construire', socle, tour: famille };
@@ -49,7 +52,7 @@ export function elementsSocleVide(etat: EtatPartie, socle: number): ElementMenu[
       rang: null,
       refus: validerAction(etat, action),
     };
-  });
+  }).filter((element) => element.refus !== 'famille_interdite');
 }
 
 function tourDuSocle(etat: EtatPartie, socle: number): Tour | undefined {
