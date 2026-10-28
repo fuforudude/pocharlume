@@ -69,8 +69,10 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
   `ecrans.ts` (accueil, pause, fin avec son butin, « Tourne ton téléphone », avis discret), `refus.ts` (raison de refus
   vers texte). **Raccourcis clavier** : `1`–`5` tours, `Q` `W` sorts du dieu, `A` `Z` `R` les trois objets emportés
   (choix sans conflit avec `Q` `W` `E` `F` `P` ni `Espace`), `E` héros, `F` vitesse, `P` pause, `Échap` annule.
-  Un objet s'utilise en deux gestes comme un sort : toucher l'objet (ou sa touche), puis la carte ; une fois utilisé il
-  est grisé (`Interaction.basculerObjet`, mode `objet`). Le menu en cercle d'une tour spécialisée montre ses deux
+  Un objet ciblé (Fiole, Griffe) s'utilise en deux gestes comme un sort : toucher l'objet (ou sa touche), puis la carte ;
+  un objet global (Sablier, Herbe de Sabbat) s'utilise d'un seul geste, sans viser (`Interaction.basculerObjet`, qui envoie
+  tout de suite l'action au centre de la carte et affiche le refus du moteur, par exemple `vies_pleines`). Une fois
+  utilisé il est grisé. Le menu en cercle d'une tour spécialisée montre ses deux
   compétences (rang `n/3` en pastille, prix de `coutCompetence`, grisé d'après `validerAction`, achat par
   `ameliorerCompetence`) avant « Vendre » et « Ralliement » ; la tour divine y prend le sprite du dieu de la partie.
 - **Écrans de méta-progression** (depuis la carte du monde) : `fiche-choix.ts` (dans la fiche d'un niveau : le dieu en
@@ -82,7 +84,8 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
   confirmation ; onglet Objets : prix en arêtes, stock sur 10), `ecran-meta.ts` (ossature commune : barre du titre, monnaies,
   message de refus, focus gardé au redessin). `meta-vues.ts` (lectures pures de la sauvegarde pour ces écrans),
   `lancement.ts` (`configDuChoix` : la `ConfigPartie` d'après la sauvegarde via `configDepuisSauvegarde` et `DEFS_META`,
-  `configDeRelance` pour « Rejouer »), `raisons-meta.ts` (texte de chaque raison de refus d'une transaction ou d'un
+  `configDeRelance` pour « Rejouer », `debiterAuLancement` et `relancerAvecDebit` qui débitent les objets du stock au
+  lancement d'une partie, y compris « Rejouer »), `raisons-meta.ts` (texte de chaque raison de refus d'une transaction ou d'un
   lancement ; un type `Record` oblige à les traduire toutes). La barre de la carte montre arêtes, braises et étoiles à
   dépenser. Un achat réussi (disciple, rang de l'arbre, objet) joue `jouerInterface('achat')`, un refus `'refus'`.
 - **Point d'entrée d'un niveau** : `lancerNiveau(niveauCampagne, config, surFin, options)`. `surFin` reçoit
@@ -93,11 +96,14 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
   « Rejouer » repart d'une partie neuve) ; `options.vitesse` donne la vitesse du réglage par défaut ;
   `options.surContinuer` remplace « Quitter » par « Continuer » après une victoire. `surFin` peut rendre une promesse
   du butin (`RetourFin` : le `BilanPartie` de `Session.enregistrerFin`, ou la raison du refus des gains) que l'écran de
-  fin affiche (arêtes, braises, expérience du héros, niveau gagné, objets consommés). `options.surQuitter(abandon)`
-  reçoit, quand la partie n'était pas finie, son résultat comme une **défaite** (objets utilisés consommés, moitié de
-  l'expérience, rien de plus) que `main.ts` enregistre ; null si la partie était déjà finie. `options.nouvelleConfig`
-  donne la config de « Rejouer » : même dieu, héros et objets (ceux que la partie a consommés ne sont plus emportés),
-  niveau et compétences du héros d'aujourd'hui.
+  fin affiche (arêtes, braises, expérience du héros, niveau gagné, objets consommés et rendus). `options.surQuitter(abandon)`
+  reçoit, quand la partie n'était pas finie, un résultat de statut **`abandon`** (ni expérience ni récompense : seuls les
+  objets non utilisés sont rendus) que `main.ts` enregistre ; null si la partie était déjà finie. Seule une défaite réelle
+  (vies à 0) donne la moitié de l'expérience. `options.surObjet` reçoit l'état juste après chaque utilisation d'objet (la
+  partie en cours est rangée aussitôt : sans cela, une reprise rendrait l'objet de nouveau disponible).
+  `options.nouvelleConfig` (éventuellement asynchrone, `null` = lancement refusé, l'écran de fin reste) donne la config
+  de « Rejouer » : même dieu, héros et objets (ceux que la partie a consommés ne sont plus emportés), niveau et
+  compétences du héros d'aujourd'hui, objets débités du stock comme à tout lancement.
 - **Carte du monde** (`src/ui/carte-monde.ts`, `src/render/carte-monde.ts`) : le fond de 512 × 288 est peint une
   fois avec `construireSol` et `peindreSol` (le tracé de `TRACE_REGION1`, seulement jusqu'au dernier niveau
   débloqué), le décor de `carte-monde-decor.ts`, un voile sombre et le pointillé de la suite du chemin. Les
@@ -106,16 +112,22 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
   molette pour tout voir). Ce que la carte montre (nœuds visibles, étoiles, tronçons, voisin d'une flèche,
   nœud touché) est calculé par des fonctions pures (`carte-monde-logique.ts`) d'après la sauvegarde. La fiche
   d'un niveau (nom, ambiance, étoiles par difficulté, difficulté, choix du dieu, du héros et des objets, Lancer)
-  est en DOM, en deux colonnes en paysage. La sauvegarde est lue à l'ouverture de l'écran : pour la voir changer
-  (victoire, achat, import), on rouvre la carte (les écrans des héros et de la boutique la ferment, puis la rouvrent).
-- **Options** (`src/ui/options.ts`) : volumes du son et de la musique (lus par le moteur de son, voir « Son »), vitesse par défaut,
+  est en DOM, en deux colonnes en paysage. La barre du haut (arêtes, braises, étoiles) suit la sauvegarde de la session
+  (`Session.surChangement` : autre onglet, écriture) et se remet à jour à la fermeture d'un dialogue, même sous une fiche
+  ou une confirmation ouverte ; les nœuds sont lus à l'ouverture : pour voir une victoire ou un import, on rouvre la
+  carte (les écrans des héros et de la boutique la ferment, puis la rouvrent).
+- **Options** (`src/ui/options.ts`) : volume du son (lu par le moteur de son, voir « Son » ; le curseur de musique est
+  masqué jusqu'au jalon 5, le réglage reste en sauvegarde), vitesse par défaut,
   export (code à copier) et import (un code refusé affiche sa raison via `import-refus.ts` et n'altère rien ;
   un code valide demande confirmation avant de remplacer la progression et abandonne la partie en cours).
 - **Enchaînement des écrans** (`src/main.ts`) : accueil, carte du monde, héros, boutique, partie, options. Il ouvre
   le stockage et une `Session` (`src/save/session.ts`, avec `DEFS_META` de `src/data/heros.ts`) qui garde la
   sauvegarde courante et l'écrit à chaque changement :
-  `enregistrerFin` (victoire : meilleur résultat conservé, niveau suivant débloqué, arêtes et braises ; toujours :
-  expérience du héros joué, objets utilisés retirés du stock, partie en cours effacée ; rend le bilan), `rangerPartie` (début de chaque vague), `effacerPartie` (abandon par « Quitter »),
+  `lancerPartie` (objets emportés débités du stock sous verrou, refusé si le stock ne couvre plus le choix),
+  `enregistrerFin` (victoire : meilleur résultat conservé, niveau suivant débloqué, arêtes et braises ; victoire ou
+  défaite : expérience du héros joué ; abandon : rien de tout cela ; toujours : objets emportés non utilisés rendus au
+  stock, partie en cours effacée, pour un abandon seulement si c'est la sienne ; rend le bilan), `rangerPartie` (début de
+  chaque vague et après chaque objet utilisé), `effacerPartie`, `surChangement` (écouteurs de la sauvegarde),
   `partieAReprendre` (état relu pour « Reprendre à la vague N »), réglages, export et import. Les raccourcis de
   test « Niveau 10 » et « Niveau de test » de l'accueil n'existent qu'en développement (`import.meta.env.DEV`)
   et ne touchent pas à la sauvegarde.
@@ -143,14 +155,17 @@ vérifie aussi que chaque compétence existe, que son rang est permis, que le ni
 que les points placés ne dépassent pas ceux du niveau (1 point par niveau de héros).
 
 **Transactions** (`transactions.ts`) : `acheterRangArbre`, `reinitialiserArbre`, `acheterDisciple`, `acheterObjet`,
-`equiperObjets`, `choisirHeros`, `repartirPoint`, `reinitialiserPoints`, `enregistrerFinDePartie`. Chacune est pure, vérifie
+`equiperObjets`, `debiterObjetsDePartie`, `choisirHeros`, `repartirPoint`, `reinitialiserPoints`, `enregistrerFinDePartie`. Chacune est pure, vérifie
 ses paramètres (chaînes quelconques venues de l'interface) et rend `{ ok: true, sauvegarde }` (une copie) ou
 `{ ok: false, raison }` sans rien avoir changé ; les raisons sont des codes stables (`etoiles_insuffisantes`, `rang_max`,
 `braises_insuffisantes`, `deja_possede`, `stock_plein`, `niveau_insuffisant`, `plus_de_points`…) que l'interface traduit.
 `enregistrerFinDePartie` étend l'enregistrement d'une victoire : étoiles et niveau suivant, arêtes (30 + 6 × N + 15 par
-étoile jamais obtenue sur ce niveau, toutes difficultés confondues ; sinon 10 + 2 × N), braises (10 à la première victoire
-d'un boss, 2 aux premières 3 étoiles d'un niveau), expérience du héros joué (100 + 20 × N, la moitié en défaite), objets
-utilisés retirés du stock ; elle rend aussi un `BilanPartie` pour l'écran de fin. `configDepuisSauvegarde` compose la config
+étoile jamais obtenue sur ce niveau, toutes difficultés confondues ; sinon 10 + 2 × N), braises (5 à la première victoire
+d'un niveau, 10 de plus pour un boss, 2 aux premières 3 étoiles d'un niveau ; 80 au plus pour la région 1), expérience du
+héros joué (100 + 20 × N, la moitié en défaite, rien pour un abandon). **Objets** : `debiterObjetsDePartie` les retire du
+stock au lancement de la partie (refus `objet_hors_stock` si le stock ne couvre plus le choix) ; en fin de partie
+enregistrée (victoire, défaite, abandon) `enregistrerFinDePartie` recrédite ceux qui n'ont pas servi, dans la limite de
+10. Elle rend aussi un `BilanPartie` pour l'écran de fin (dont `objetsConsommes` et `objetsRendus`). `configDepuisSauvegarde` compose la config
 d'une partie (dieu, héros, niveau, compétences, rangs de l'arbre, objets) et refuse un héros ou un objet qu'on n'a pas.
 
 **Règle multi-onglets** (`session.ts`) : le stockage fait foi et les opérations se rejouent dessus. Chaque changement est
@@ -170,8 +185,12 @@ l'écrasé perd son opération entière (rien n'est débité à tort) et sa vue 
 victoires passées ne rapportent pas d'arêtes ni de braises rétroactives. Fixture figée : `src/save/fixtures/sauvegarde-v2.json`.
 
 **Export et import** : le code porte `progression`, `reglages` et `meta` (pas la partie en cours). Un code d'avant la v3 est
-migré (méta de départ). L'import valide tout (taille, somme, JSON, migration, validation stricte avec les `defs` de la session)
-avant de toucher à quoi que ce soit, puis remplace progression, réglages et méta d'un bloc.
+migré (méta de départ). L'import valide tout (taille, somme, JSON, migration, validation stricte **sans** les `defs`, comme une
+lecture du stockage) avant de toucher à quoi que ce soit, puis **normalise** avec les `defs` de la session au lieu de refuser
+(`normalisation.ts`) : un héros dont les compétences ne tiennent plus (seuils d'expérience ou compétences changés) récupère
+ses points, un héros choisi non possédé devient l'avatar du dieu choisi. Il remplace ensuite progression, réglages et méta
+d'un bloc. `Session.file` ne se casse plus quand une écriture lève : le rejet va à l'appelant (les écrans le disent), pas aux
+écritures suivantes.
 
 **Config de partie étendue** : `validerConfig` (partie en cours) accepte, tous ensemble ou pas du tout, les champs que le moteur
 ajoute au jalon 2 (`heros`, `competencesHeros`, `ameliorations`, `objets`) ; une fois `ConfigPartie` étendue côté moteur, les
@@ -292,7 +311,7 @@ ce qui est demandé et affiche un résumé (sans écrire le rapport). Ce qui a �
 ## Dieux, héros, objets et arbre dans le moteur (jalon 2)
 - **`ConfigPartie`** fixe tout ce qui entre dans une partie : `graine`, `difficulte`, `dieu`, `heros` (l'avatar du
   dieu ou l'un de ses disciples), `niveauHeros`, `competencesHeros` (id vers rang 0 à 3), `ameliorations` (branche
-  vers rang 0 à 5), `objets` (0 à 3 ids distincts), `versionDonnees`. `verifierConfig` (`engine/config.ts`) la
+  vers rang 0 à 5), `objets` (0 à 3 ids ; un même objet peut occuper plusieurs emplacements, chacun ne sert qu'une fois), `versionDonnees`. `verifierConfig` (`engine/config.ts`) la
   valide sans lever d'exception (raison en français) ; `creerPartie` lève cette raison et range une copie propre
   (seuls les champs connus). Règles : héros du dieu, rang au plus égal au maximum, compétence de niveau requis atteint
   (l'ultime demande le niveau 6), somme des rangs au plus égale au niveau du héros, branches et objets connus.
@@ -317,7 +336,11 @@ ce qui est demandé et affiche un résumé (sans écrire le rapport). Ce qui a �
 - **Sorts et objets** partagent `ZoneEffets` (rayon, sur chemin ou non, global ou non, liste d'effets) et la même
   fonction `lancerEffets` : dégâts, effet, invocation, exécution, zone durable, pièges, arêtes, boost de cadence des
   tours voisines, vies (sans dépasser les vies de départ). Un objet s'utilise par `utiliserObjet {emplacement, x, y}` ;
-  l'emplacement ne sert qu'une fois (`etat.objetsUtilises`). La branche « sorts » raccourcit les recharges.
+  l'emplacement ne sert qu'une fois (`etat.objetsUtilises`). L'Herbe de Sabbat (objet qui ne fait que rendre des vies) est
+  refusée, donc non consommée, quand les vies sont pleines (`vies_pleines`). Un effet global (Sablier) touche tous les
+  ennemis visés de la carte, furtifs non révélés compris. `etat.viePerdue` (VERSION_ETAT 3) devient vrai dès qu'une vie est
+  perdue : `etoilesPour(vies, viesDepart, viePerdue)` ne donne 3 étoiles que sans perte, même si l'Herbe a rendu les vies.
+  La branche « sorts » raccourcit les recharges.
 - **Compétences de spécialisation** : `ameliorerCompetence {socle, competence}` (id de la compétence) achète le rang
   suivant en arêtes (remise de famille du dieu comprise, prix ajouté à la valeur de revente).
 - **Événements ajoutés pour le rendu et le son** : `tir_unite`, `esquive`, `soin`, `regain_vies`, `execution`, `zone`,

@@ -26,6 +26,8 @@ export interface SessionChoix {
   readonly sauvegarde: Sauvegarde;
   choisirHeros(dieu: string, heros: string): Promise<ResultatTransaction<RaisonChoix>>;
   equiperObjets(objets: readonly string[]): Promise<ResultatTransaction<RaisonEquipement>>;
+  /** Prévient quand la sauvegarde change (autre onglet, écriture) ; rend la fonction qui retire l'écouteur. */
+  surChangement?(ecouteur: () => void): () => void;
 }
 
 export interface ChoixFiche {
@@ -49,33 +51,50 @@ export function creerChoixFiche(atlas: AtlasRendu, session: SessionChoix, signal
     rendre(cleFocus);
   };
 
+  // Deux choix rapides se suivent avant que la session ait répondu au premier : seule la réponse à la dernière
+  // demande compte. Une réponse périmée (refus du premier choix, par exemple) ne doit ni annuler le second ni
+  // afficher un message qui ne le concerne plus. Une file par sorte de choix, pour que le héros et les objets ne
+  // s'annulent pas entre eux.
+  let requeteHeros = 0;
+  let requeteObjets = 0;
+
   /** Mémorise le dieu et le héros ; en cas de refus, on garde l'ancien choix et on dit pourquoi. */
   const retenirHeros = (dieu: IdDieu, heros: IdHeros, cleFocus: string): void => {
-    const avant = choix;
+    const avant = { dieu: choix.dieu, heros: choix.heros };
+    const numero = ++requeteHeros;
     choix = { ...choix, dieu, heros };
     session.choisirHeros(dieu, heros).then(
       (r) => {
-        if (!r.ok) {
-          choix = avant;
-          dire(texteRefusMeta(r.raison), cleFocus);
-        }
+        if (numero !== requeteHeros || r.ok) return;
+        choix = { ...choix, ...avant };
+        dire(texteRefusMeta(r.raison), cleFocus);
       },
-      () => undefined,
+      (erreur: unknown) => {
+        console.error(erreur);
+        if (numero !== requeteHeros) return;
+        choix = { ...choix, ...avant };
+        dire(t('erreur.sauvegarde'), cleFocus);
+      },
     );
     dire('', cleFocus);
   };
 
   const retenirObjets = (objets: IdObjet[], cleFocus: string): void => {
-    const avant = choix;
+    const avant = choix.objets;
+    const numero = ++requeteObjets;
     choix = { ...choix, objets };
     session.equiperObjets(objets).then(
       (r) => {
-        if (!r.ok) {
-          choix = avant;
-          dire(texteRefusMeta(r.raison), cleFocus);
-        }
+        if (numero !== requeteObjets || r.ok) return;
+        choix = { ...choix, objets: avant };
+        dire(texteRefusMeta(r.raison), cleFocus);
       },
-      () => undefined,
+      (erreur: unknown) => {
+        console.error(erreur);
+        if (numero !== requeteObjets) return;
+        choix = { ...choix, objets: avant };
+        dire(t('erreur.sauvegarde'), cleFocus);
+      },
     );
     dire('', cleFocus);
   };
@@ -180,7 +199,7 @@ export function creerChoixFiche(atlas: AtlasRendu, session: SessionChoix, signal
       }, signal);
       b.dataset.cle = `objet:${vue.id}`;
       b.classList.toggle('grise', vue.libre <= 0 || choix.objets.length >= EMPLACEMENTS_OBJETS);
-      b.append(icone(atlas, iconeObjet(vue.id), 2), el('span', 'detail-heros', `×${String(vue.libre)}`));
+      b.append(icone(atlas, iconeObjet(vue.id), 2), el('span', 'detail-heros', t('fiche.objet_reste', { n: vue.libre })));
       rangee.append(b);
     }
     section.append(rangee);

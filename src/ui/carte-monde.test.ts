@@ -191,3 +191,69 @@ describe('carte du monde : lancer un niveau', () => {
     expect(surRetour).not.toHaveBeenCalled();
   });
 });
+
+describe('carte du monde : l’en-tête suit la sauvegarde', () => {
+  const lire = (): (string | null)[] => [...document.querySelectorAll('.carte-monnaies .puce')].map((p) => p.textContent);
+
+  /** Une session truquée dont la sauvegarde change « dans un autre onglet » quand le test le décide. */
+  function sessionVivante() {
+    const ecouteurs = new Set<() => void>();
+    const session = {
+      sauvegarde: sauvegardeVide(),
+      choisirHeros: vi.fn(),
+      equiperObjets: vi.fn(),
+      surChangement: (ecouteur: () => void): (() => void) => {
+        ecouteurs.add(ecouteur);
+        return () => { ecouteurs.delete(ecouteur); };
+      },
+    };
+    const autreOnglet = (changement: (s: typeof session.sauvegarde) => typeof session.sauvegarde, prevenir = true): void => {
+      session.sauvegarde = changement(session.sauvegarde);
+      if (prevenir) for (const e of [...ecouteurs]) e();
+    };
+    return { session, autreOnglet, ecouteurs };
+  }
+
+  it('arêtes, braises et étoiles changent quand un autre onglet écrit, même sous une fiche ouverte', () => {
+    const { session, autreOnglet } = sessionVivante();
+    monter({ session });
+    expect(lire()).toEqual(['0', '0', '0']);
+    appuyer('Enter');
+    expect(fiche()).not.toBeNull();
+    autreOnglet((s) => ({
+      ...s,
+      progression: { niveauMax: 2, etoiles: { '1': { matou: 3 } } },
+      meta: { ...s.meta, monnaies: { aretes: 81, braises: 7 } },
+    }));
+    expect(lire()).toEqual(['81', '7', '3']);
+    expect(document.querySelector('.carte-monnaies .puce:nth-child(2)')?.getAttribute('aria-label')).toBe(t('monnaie.braises', { n: 7 }));
+  });
+
+  it('une boîte de confirmation ouverte ne fige pas l’en-tête, et sa fermeture le remet à jour', () => {
+    const { session, autreOnglet } = sessionVivante();
+    monter({ session, partieEnCours: { niveau: 3, vague: 4 } });
+    appuyer('Enter');
+    bouton(t('fiche.lancer')).click();
+    expect(confirmation()).not.toBeNull();
+    autreOnglet((s) => ({ ...s, meta: { ...s.meta, monnaies: { aretes: 10, braises: 0 } } }));
+    expect(lire()[0]).toBe('10');
+    // Un changement dont personne n'a prévenu apparaît dès que le dialogue se ferme.
+    autreOnglet((s) => ({ ...s, meta: { ...s.meta, monnaies: { aretes: 20, braises: 0 } } }), false);
+    expect(lire()[0]).toBe('10');
+    bouton(t('lancer.annuler')).click();
+    expect(lire()[0]).toBe('20');
+    autreOnglet((s) => ({ ...s, meta: { ...s.meta, monnaies: { aretes: 30, braises: 0 } } }), false);
+    appuyer('Escape');
+    expect(fiche()).toBeNull();
+    expect(lire()[0]).toBe('30');
+  });
+
+  it('une carte arrêtée ne reçoit plus les changements', () => {
+    const { session, autreOnglet, ecouteurs } = sessionVivante();
+    const { ecran } = monter({ session });
+    expect(ecouteurs.size).toBe(1);
+    ecran.arreter();
+    expect(ecouteurs.size).toBe(0);
+    expect(() => { autreOnglet((s) => s); }).not.toThrow();
+  });
+});

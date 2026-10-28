@@ -290,10 +290,22 @@
   font-size: 12px;
 }
 
+/* Le nom passe à la ligne plutôt que d'être coupé (« Pollen, Trois-Pattes »), la ligne reste haute d'au moins 44 px. */
 .ligne-heros .nom {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.heros-actions .manque-braises {
+  margin: 0;
+  font-size: 12px;
+  color: var(--sang);
+  text-align: right;
+}
+
+.bouton:disabled {
+  cursor: not-allowed;
 }
 
 .ligne-heros .sous {

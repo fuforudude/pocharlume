@@ -3,11 +3,13 @@ import { describe, expect, it } from 'vitest';
 import { BRANCHES_ARBRE, IDS_HEROS } from '../data/meta';
 import { DEFS_TEST, FIXTURE_V2, sauvegardeRemplie, SUPPRIME, variante } from './aides.test-utils';
 import { crc32, exporterCode, importerCode, PREFIXE_CODE, remplacerProgression, TAILLE_MAX_CODE, versBase64Url } from './code';
+import type { DefsMeta } from './definitions';
 import { Depot } from './depot';
 import { metaParDefaut, sauvegardeVide, type Sauvegarde } from './format';
 import { enregistrerVictoire } from './progression';
 import { Session } from './session';
 import { StockageMemoire } from './stockage';
+import { validerSauvegarde } from './validation';
 
 /** Fabrique un code valide (somme comprise) autour de données quelconques. */
 function fabriquerCode(json: string): string {
@@ -117,18 +119,67 @@ describe('export et import de la méta-progression', () => {
       expect(Reflect.get({}, 'polluee')).toBeUndefined();
     });
 
-    it('avec les définitions : plus de points que de niveaux, ultime trop tôt, compétence inconnue', async () => {
-      const cas: Record<string, unknown>[] = [
-        { 'meta.heros.pollen.competences': { pollen_a: 1, pollen_b: 1 } }, // niveau 1 : un seul point
-        { 'meta.heros.charlie.competences': { charlie_ultime: 1 } }, // niveau 4 : pas d'ultime
-        { 'meta.heros.plume.competences': { vol: 1 } },
+  });
+
+  describe('normalise au lieu de refuser ce que les définitions d’aujourd’hui ne permettent plus', () => {
+    it('plus de points que de niveaux, ultime trop tôt, compétence inconnue : le héros récupère ses points, garde son expérience', async () => {
+      const cas: [string, string, Record<string, number>][] = [
+        ['pollen', 'meta.heros.pollen.competences', { pollen_a: 1, pollen_b: 1 }], // niveau 1 : un seul point
+        ['charlie', 'meta.heros.charlie.competences', { charlie_ultime: 1 }], // niveau 4 : pas d'ultime
+        ['plume', 'meta.heros.plume.competences', { vol: 1 }],
+        ['charlie', 'meta.heros.charlie.competences', { charlie_a: 3, charlie_b: 3 }], // 6 points au niveau 4
+        ['charlie', 'meta.heros.charlie.competences', { charlie_a: 3 }], // valable : intact
       ];
-      for (const changements of cas) {
-        const code = fabriquerCode(donneesExportees(changements));
-        expect((await importerCode(code, DEFS_TEST)).ok, JSON.stringify(changements)).toBe(false);
+      for (const [heros, chemin, competences] of cas) {
+        const code = fabriquerCode(donneesExportees({ [chemin]: competences }));
+        const r = await importerCode(code, DEFS_TEST);
+        if (!r.ok) throw new Error(`${heros} ${JSON.stringify(competences)} : ${r.detail}`);
+        const lu = r.sauvegarde.meta.heros[heros as keyof Sauvegarde['meta']['heros']];
+        const xp = sauvegardeRemplie().meta.heros[heros as keyof Sauvegarde['meta']['heros']]?.xp;
+        const valable = competences.charlie_a === 3 && Object.keys(competences).length === 1;
+        expect(lu, JSON.stringify(competences)).toEqual({ xp, competences: valable ? competences : {} });
+        expect(validerSauvegarde(JSON.parse(JSON.stringify(r.sauvegarde)), DEFS_TEST).ok).toBe(true);
       }
-      // La première est acceptée sans définitions (le niveau n'est pas connu) : c'est bien `defs` qui la refuse.
-      expect((await importerCode(fabriquerCode(donneesExportees(cas[0] ?? {})))).ok).toBe(true);
+      // Sans définitions, les compétences ne se jugent pas : le code passe tel quel.
+      const sans = await importerCode(fabriquerCode(donneesExportees({ 'meta.heros.pollen.competences': { pollen_a: 1, pollen_b: 1 } })));
+      expect(sans.ok && sans.sauvegarde.meta.heros.pollen?.competences).toEqual({ pollen_a: 1, pollen_b: 1 });
+    });
+
+    it('un code écrit avant un changement de SEUILS_XP est corrigé : les héros devenus trop bas rendent leurs points', async () => {
+      const source = sauvegardeRemplie();
+      const code = await exporterCode(source);
+      // Mêmes compétences qu'avant, mais les niveaux sont devenus beaucoup plus chers à atteindre.
+      const durcies: DefsMeta = { ...DEFS_TEST, seuilsXp: DEFS_TEST.seuilsXp.map((seuil) => seuil * 10) };
+      const r = await importerCode(code, durcies);
+      if (!r.ok) throw new Error(r.detail);
+      expect(r.sauvegarde.meta.heros.charlie).toEqual({ xp: 500, competences: {} }); // niveau 1 au lieu de 4 : 3 points placés
+      expect(r.sauvegarde.meta.heros.suie).toEqual({ xp: 2000, competences: {} }); // niveau 2 au lieu de 6, plus d'ultime
+      expect(r.sauvegarde.meta.heros.plume).toEqual(source.meta.heros.plume); // rien à corriger
+      expect(r.sauvegarde.meta.monnaies).toEqual(source.meta.monnaies);
+      expect(r.sauvegarde.meta.arbre).toEqual(source.meta.arbre);
+      expect(r.sauvegarde.progression).toEqual(source.progression);
+      expect(validerSauvegarde(JSON.parse(JSON.stringify(r.sauvegarde)), durcies).ok).toBe(true);
+      // Avec les définitions d'origine, le même code reste intact.
+      const intact = await importerCode(code, DEFS_TEST);
+      expect(intact.ok && intact.sauvegarde.meta).toEqual(source.meta);
+    });
+
+    it('un héros choisi qui n’est pas possédé est remplacé par l’avatar de son dieu', async () => {
+      const code = fabriquerCode(donneesExportees({ 'meta.heros.suie': SUPPRIME, 'meta.choix.dieu': 'plume', 'meta.choix.heros': 'suie' }));
+      for (const defs of [DEFS_TEST, undefined]) {
+        const r = await importerCode(code, defs);
+        if (!r.ok) throw new Error(r.detail);
+        expect(r.sauvegarde.meta.choix).toMatchObject({ dieu: 'plume', heros: 'plume' });
+        expect(r.sauvegarde.meta.heros.suie).toBeUndefined();
+      }
+      // Un héros choisi qui est possédé ne bouge pas.
+      const possede = await importerCode(await exporterCode(sauvegardeRemplie()), DEFS_TEST);
+      expect(possede.ok && possede.sauvegarde.meta.choix).toMatchObject({ dieu: 'plume', heros: 'suie' });
+    });
+
+    it('la structure impossible reste refusée avec les définitions', async () => {
+      const code = fabriquerCode(donneesExportees({ 'meta.arbre.tir': 6 }));
+      expect(await importerCode(code, DEFS_TEST)).toMatchObject({ ok: false, raison: 'donnees' });
     });
   });
 
@@ -147,9 +198,15 @@ describe('export et import de la méta-progression', () => {
     expect(relue.sauvegarde.partie).toBeNull();
   });
 
-  it('la session refuse à l’import ce que ses définitions refusent', async () => {
-    const session = await Session.ouvrir(new Depot(new StockageMemoire()), null, { verrou: null, defs: DEFS_TEST });
+  it('la session normalise à l’import ce que ses définitions ne permettent plus, puis l’écrit corrigé', async () => {
+    const stockage = new StockageMemoire();
+    const session = await Session.ouvrir(new Depot(stockage), null, { verrou: null, defs: DEFS_TEST });
     const code = fabriquerCode(donneesExportees({ 'meta.heros.pollen.competences': { pollen_a: 1, pollen_b: 1 } }));
-    expect(await session.importer(code)).toMatchObject({ ok: false, raison: 'donnees' });
+    const lu = await session.importer(code);
+    if (!lu.ok) throw new Error(lu.detail);
+    expect(lu.sauvegarde.meta.heros.pollen).toEqual({ xp: 0, competences: {} });
+    expect(await session.appliquerImport(lu.sauvegarde)).toBe(true);
+    const relue = await Session.ouvrir(new Depot(stockage), null, { verrou: null, defs: DEFS_TEST });
+    expect(relue.sauvegarde.meta.heros.pollen).toEqual({ xp: 0, competences: {} });
   });
 });

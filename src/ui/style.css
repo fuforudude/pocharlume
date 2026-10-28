@@ -654,11 +654,19 @@ button:focus-visible {
   border-radius: 6px;
   font-size: 14px;
   font-weight: bold;
+  line-height: 1.2;
   text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  /* Le nom du niveau passe à la ligne plutôt que d'être coupé (812×375 : « Le Gué des Corbe… »). */
+  white-space: normal;
+  overflow-wrap: anywhere;
   pointer-events: none;
+}
+
+@media (max-height: 460px) {
+  .carte-titre {
+    padding: 3px 8px;
+    font-size: 13px;
+  }
 }
 
 .carte-titre:empty {

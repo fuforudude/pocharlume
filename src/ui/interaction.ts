@@ -156,6 +156,13 @@ export class Interaction {
     if (this.mode.type === 'objet' && this.mode.emplacement === emplacement) return this.annuler();
     if (etat.config.objets[emplacement] === undefined) return { action: null, refus: 'objet_inconnu' };
     if (etat.objetsUtilises[emplacement]) return { action: null, refus: 'objet_utilise' };
+    // Un objet qui agit partout (Sablier, Herbe de Sabbat) s'utilise tout de suite : il n'y a rien à viser. Le point
+    // envoyé est le centre de la carte, là où le rendu pose son effet.
+    const id = etat.config.objets[emplacement];
+    if (Object.hasOwn(OBJETS, id) && OBJETS[id as keyof typeof OBJETS].global) {
+      const { largeur, hauteur } = etat.niveau.carte;
+      return this.ordonner(etat, { type: 'utiliserObjet', emplacement, x: largeur / 2, y: hauteur / 2 });
+    }
     this.mode = { type: 'objet', emplacement };
     return RIEN;
   }

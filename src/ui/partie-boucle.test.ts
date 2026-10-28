@@ -401,12 +401,11 @@ describe('objets emportés', () => {
     expect(document.querySelectorAll('.bouton.objet')).toHaveLength(0);
   });
 
-  it('toucher l’objet puis la carte l’utilise ; il est ensuite grisé et ne sert plus', async () => {
+  it('un objet global (Herbe de Sabbat) s’utilise d’un toucher sur son bouton, sans toucher la carte ; il est ensuite grisé', async () => {
     const partie = await demarrer({}, AVEC_OBJETS);
     partie.etat.vies = partie.etat.viesDepart - 3;
     boutonDe('.bouton.objet').click();
-    expect(partie.mode).toEqual({ type: 'objet', emplacement: 0 });
-    toucherCarte(10, 5);
+    expect(partie.mode.type).toBe('libre');
     images(3);
     expect(journalDe(partie, 'utiliserObjet')).toBe(1);
     expect(partie.etat.objetsUtilises).toEqual([true, false]);
@@ -419,17 +418,58 @@ describe('objets emportés', () => {
     expect(journalDe(partie, 'utiliserObjet')).toBe(1);
   });
 
-  it('les touches A et Z passent en visée de l’objet 1 et 2 ; Échap annule', async () => {
+  it('l’Herbe de Sabbat avec les vies pleines est refusée, dite, et n’est pas consommée', async () => {
+    const partie = await demarrer({}, AVEC_OBJETS);
+    boutonDe('.bouton.objet').click();
+    images(2);
+    expect(messageAffiche()).toBe(t('refus.vies_pleines'));
+    expect(journalDe(partie, 'utiliserObjet')).toBe(0);
+    expect(partie.etat.objetsUtilises).toEqual([false, false]);
+  });
+
+  it('un objet ciblé (Fiole de Soufre) : toucher l’objet puis un point de la carte l’utilise', async () => {
+    const partie = await demarrer({}, AVEC_OBJETS);
+    const boutons = document.querySelectorAll<HTMLButtonElement>('.bouton.objet');
+    boutons[1]?.click();
+    expect(partie.mode).toEqual({ type: 'objet', emplacement: 1 });
+    toucherCarte(10, 5);
+    images(3);
+    expect(journalDe(partie, 'utiliserObjet')).toBe(1);
+    expect(partie.etat.objetsUtilises).toEqual([false, true]);
+  });
+
+  it('les touches A (objet global, direct) et Z (objet ciblé, en visée) ; Échap annule la visée', async () => {
     const partie = await demarrer({}, AVEC_OBJETS);
     appuyer('a');
-    expect(partie.mode).toEqual({ type: 'objet', emplacement: 0 });
-    appuyer('Escape');
+    expect(partie.mode.type).toBe('libre');
+    expect(messageAffiche()).toBe(t('refus.vies_pleines'));
     appuyer('z');
     expect(partie.mode).toEqual({ type: 'objet', emplacement: 1 });
     images(1);
     expect(document.querySelector('.invite')?.textContent).toBe(t('invite.objet', { nom: 'Fiole de Soufre' }));
+    appuyer('Escape');
+    expect(partie.mode.type).toBe('libre');
     appuyer('r');
     expect(messageAffiche()).toBe(t('refus.objet_inconnu'));
+  });
+
+  it('surObjet est appelé juste après chaque utilisation, avec l’objet déjà marqué utilisé (pour sauvegarder la partie)', async () => {
+    const vus: boolean[][] = [];
+    const surObjet = vi.fn((etat: EtatPartie) => { vus.push([...etat.objetsUtilises]); });
+    const partie = await demarrer({ surObjet }, { ...CONFIG, objets: ['sablier', 'fiole_soufre'] });
+    images(2);
+    expect(surObjet).not.toHaveBeenCalled();
+    partie.envoyer({ type: 'utiliserObjet', emplacement: 0, x: 5, y: 5 });
+    images(2);
+    expect(surObjet).toHaveBeenCalledTimes(1);
+    expect(vus).toEqual([[true, false]]);
+    // Un objet refusé n'est pas un objet utilisé.
+    partie.envoyer({ type: 'utiliserObjet', emplacement: 0, x: 5, y: 5 });
+    images(2);
+    expect(surObjet).toHaveBeenCalledTimes(1);
+    partie.envoyer({ type: 'utiliserObjet', emplacement: 1, x: 5, y: 5 });
+    images(2);
+    expect(vus).toEqual([[true, false], [true, true]]);
   });
 });
 
@@ -442,6 +482,7 @@ describe('butin et abandon', () => {
     heros: 'charlie' as const,
     niveauHeros: { avant: 1, apres: 2 },
     objetsConsommes: ['sablier' as const],
+    objetsRendus: [],
   };
 
   it('l’écran de fin montre le butin que surFin promet : arêtes, braises, expérience, niveau gagné, objets consommés', async () => {
@@ -479,17 +520,40 @@ describe('butin et abandon', () => {
     expect(fins[0]?.objetsUtilises).toEqual(['sablier']);
   });
 
-  it('« Quitter » depuis la pause pendant la partie rend une défaite à enregistrer, avec les objets utilisés', async () => {
+  it('« Quitter » depuis la pause pendant la partie rend un abandon (pas une défaite) à enregistrer, avec les objets utilisés', async () => {
     const surQuitter = vi.fn();
-    const partie = await demarrer({ surQuitter }, { ...CONFIG, objets: ['sablier'] });
+    const partie = await demarrer({ surQuitter }, { ...CONFIG, objets: ['sablier', 'fiole_soufre'] });
     partie.envoyer({ type: 'utiliserObjet', emplacement: 0, x: 5, y: 5 });
     images(2);
     appuyer('p');
     boutonTexte(t('fin.quitter')).click();
     expect(surQuitter).toHaveBeenCalledTimes(1);
     const abandon = surQuitter.mock.calls[0]?.[0] as ResultatPartie | null;
-    expect(abandon).toMatchObject({ statut: 'defaite', etoiles: 0, objetsUtilises: ['sablier'], niveau: NIVEAU.numero });
+    expect(abandon).toMatchObject({ statut: 'abandon', etoiles: 0, objetsUtilises: ['sablier'], niveau: NIVEAU.numero });
+    expect(abandon?.config.objets).toEqual(['sablier', 'fiole_soufre']);
     expect(fins).toHaveLength(0);
+  });
+
+  it('« Rejouer » asynchrone : l’écran de fin attend la config, et reste en place si le lancement est refusé', async () => {
+    let repondre: (config: ConfigPartie | null) => void = () => undefined;
+    const nouvelleConfig = vi.fn(() => new Promise<ConfigPartie | null>((resolve) => { repondre = resolve; }));
+    const partie = await demarrer({ nouvelleConfig }, CONFIG);
+    partie.etat.vies = 0;
+    imagesJusqua(() => document.querySelector('.ecran.fin') !== null);
+    boutonTexte(t('fin.rejouer')).click();
+    boutonTexte(t('fin.rejouer')).click(); // un second toucher ne relance pas une seconde fois
+    expect(nouvelleConfig).toHaveBeenCalledTimes(1);
+    expect(parties).toHaveLength(1);
+    repondre(null);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(parties).toHaveLength(1);
+    expect(document.querySelector('.ecran.fin')).not.toBeNull();
+    // Une fois la réponse rendue, on peut réessayer, et une config acceptée relance.
+    boutonTexte(t('fin.rejouer')).click();
+    expect(nouvelleConfig).toHaveBeenCalledTimes(2);
+    repondre({ ...CONFIG, graine: 123 });
+    await vi.waitFor(() => { expect(parties).toHaveLength(2); });
+    expect(parties[1]?.etat.config.graine).toBe(123);
   });
 
   it('« Quitter » après la fin ne rend rien à enregistrer : surFin l’a déjà fait', async () => {

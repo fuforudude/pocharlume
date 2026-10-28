@@ -12,6 +12,7 @@
 import type { DefsMeta } from './definitions';
 import { VERSION_SAUVEGARDE, type Sauvegarde } from './format';
 import { migrer } from './migrations';
+import { normaliserImport } from './normalisation';
 
 export const PREFIXE_CODE = 'PCH1';
 /** Taille maximale d'un code accepté, en caractères. Une progression complète en fait moins de 1000. */
@@ -148,8 +149,9 @@ function refus(raison: RaisonImport, detail: string): ResultatImport {
  * Lit un code d'export. Ne modifie rien : c'est à l'appelant, si le résultat est bon, de remplacer la
  * progression (avec `remplacerProgression`). Un code de la version courante ou d'une version plus ancienne
  * est accepté (migré : un code d'avant la version 3 donne une méta-progression de départ), un code plus récent que
- * le jeu est refusé. `defs` (facultatif) active la validation complète des héros : compétences connues, rangs et
- * niveaux requis cohérents avec l'expérience (voir validation.ts).
+ * le jeu est refusé. `defs` (facultatif) sert à remettre le code en cohérence avec les données d'aujourd'hui, sans
+ * jamais le refuser pour cela : un héros dont les compétences ne tiennent plus (seuils d'expérience changés…) récupère
+ * ses points, un héros choisi non possédé devient l'avatar du dieu (voir normalisation.ts).
  */
 export async function importerCode(code: string, defs?: DefsMeta): Promise<ResultatImport> {
   // Les codes collés contiennent souvent des retours à la ligne ou des espaces en bout de ligne.
@@ -185,9 +187,11 @@ export async function importerCode(code: string, defs?: DefsMeta): Promise<Resul
   if (typeof analyse !== 'object' || analyse === null || Array.isArray(analyse) || Object.hasOwn(analyse, 'partie')) {
     return refus('donnees', 'structure inattendue');
   }
-  const migration = migrer({ ...analyse, partie: null }, defs);
+  // Validation comme une lecture du stockage (sans les définitions de héros) : seule une structure impossible est
+  // refusée. Ce qui est devenu incohérent avec les données d'aujourd'hui est corrigé, pas refusé.
+  const migration = migrer({ ...analyse, partie: null });
   if (!migration.ok) return refus(migration.cause === 'trop_recente' ? 'trop_recent' : 'donnees', migration.raison);
-  return { ok: true, sauvegarde: migration.sauvegarde, depuis: migration.depuis };
+  return { ok: true, sauvegarde: normaliserImport(migration.sauvegarde, defs), depuis: migration.depuis };
 }
 
 /**

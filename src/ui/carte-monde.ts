@@ -5,8 +5,9 @@
 // mène aux écrans des héros et de la boutique.
 //
 // Cet écran ne lance rien lui-même : il s'arrête puis appelle `surLancer` ou `surRetour`, et c'est l'appelant
-// (main.ts) qui enchaîne sur la partie ou l'accueil. La sauvegarde est lue une fois à l'ouverture : pour la voir
-// changer (victoire, import), on rouvre la carte.
+// (main.ts) qui enchaîne sur la partie ou l'accueil. La barre du haut suit la sauvegarde de la session (autre onglet,
+// fermeture d'un dialogue) ; les nœuds de la carte sont lus une fois à l'ouverture : pour voir une victoire ou un
+// import, on rouvre la carte.
 import { NOEUDS_REGION1, TRACE_REGION1 } from '../data/niveaux/carte-du-monde';
 import { REGION1, TEXTES_REGION1 } from '../data/niveaux/region1';
 import type { NiveauCampagne } from '../data/visuel';
@@ -109,21 +110,35 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   retour.textContent = t('carte.retour');
   const titre = el('div', 'carte-titre');
   const monnaies = el('div', 'carte-monnaies');
-  const puceMonnaie = (sprite: string, libelle: string, valeur: number): HTMLElement => {
+  const puceMonnaie = (sprite: string): { puce: HTMLElement; valeur: HTMLElement } => {
     const puce = el('div', 'puce monnaie');
-    puce.title = libelle;
-    puce.setAttribute('aria-label', libelle);
-    puce.append(image(atlas.iconeUrl(sprite, 2), 'icone'), el('span', '', String(valeur)));
-    return puce;
+    const valeur = el('span');
+    puce.append(image(atlas.iconeUrl(sprite, 2), 'icone'), valeur);
+    return { puce, valeur };
   };
-  const libelleTotal = t('carte.total_etoiles_libelle', { n: totalEtoiles(sauvegarde), m: NOMBRE_NIVEAUX * 3 });
-  const disponibles = etoilesDisponibles(sauvegarde);
-  const puceEtoiles = puceMonnaie('icone-etoile', `${t('monnaie.etoiles', { n: disponibles })} (${libelleTotal})`, disponibles);
-  monnaies.append(
-    puceMonnaie('icone-arete', t('monnaie.aretes', { n: sauvegarde.meta.monnaies.aretes }), sauvegarde.meta.monnaies.aretes),
-    puceMonnaie('icone-braise', t('monnaie.braises', { n: sauvegarde.meta.monnaies.braises }), sauvegarde.meta.monnaies.braises),
-    puceEtoiles,
-  );
+  const puceAretes = puceMonnaie('icone-arete');
+  const puceBraises = puceMonnaie('icone-braise');
+  const puceEtoiles = puceMonnaie('icone-etoile');
+  const remplirPuce = (p: { puce: HTMLElement; valeur: HTMLElement }, libelle: string, valeur: number): void => {
+    p.puce.title = libelle;
+    p.puce.setAttribute('aria-label', libelle);
+    p.valeur.textContent = String(valeur);
+  };
+  /**
+   * Remet la barre du haut (arêtes, braises, étoiles à dépenser et gagnées) d'après la sauvegarde d'aujourd'hui : elle
+   * change quand un autre onglet écrit, ou quand un dialogue ouvert par-dessus se ferme.
+   */
+  const majEntete = (): void => {
+    const courante = session.sauvegarde;
+    const libelleTotal = t('carte.total_etoiles_libelle', { n: totalEtoiles(courante), m: NOMBRE_NIVEAUX * 3 });
+    const disponibles = etoilesDisponibles(courante);
+    remplirPuce(puceAretes, t('monnaie.aretes', { n: courante.meta.monnaies.aretes }), courante.meta.monnaies.aretes);
+    remplirPuce(puceBraises, t('monnaie.braises', { n: courante.meta.monnaies.braises }), courante.meta.monnaies.braises);
+    remplirPuce(puceEtoiles, `${t('monnaie.etoiles', { n: disponibles })} (${libelleTotal})`, disponibles);
+  };
+  majEntete();
+  monnaies.append(puceAretes.puce, puceBraises.puce, puceEtoiles.puce);
+  const retirerEcouteur = session.surChangement?.(majEntete);
   const heros = bouton('bouton', t('carte.heros'), options.surHeros, signal);
   heros.textContent = t('carte.heros');
   const boutique = bouton('bouton', t('carte.boutique'), options.surBoutique, signal);
@@ -166,6 +181,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     fiche?.remove();
     fiche = null;
     boutonsDifficulte = [];
+    majEntete();
   };
 
   const choisirDifficulte = (d: DifficulteSauvegarde): void => {
@@ -212,7 +228,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     groupe.setAttribute('role', 'radiogroup');
     groupe.setAttribute('aria-label', t('fiche.difficulte'));
     const boutons: HTMLButtonElement[] = [];
-    for (const { difficulte: id, etoiles } of etoilesParDifficulte(sauvegarde, vue.numero)) {
+    for (const { difficulte: id, etoiles } of etoilesParDifficulte(session.sauvegarde, vue.numero)) {
       const b = bouton('bouton difficulte', t('fiche.etoiles', { n: etoiles, difficulte: nomDeDifficulte(id) }), () => { choisirDifficulte(id); }, signal);
       b.setAttribute('role', 'radio');
       const rangee = el('span', 'etoiles petites');
@@ -255,6 +271,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
         },
         surAnnuler: () => {
           avertissement = null;
+          majEntete();
           lancer.focus({ preventScroll: true });
         },
       });
@@ -368,6 +385,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     arretee = true;
     cancelAnimationFrame(identifiantImage);
     controleur.abort();
+    retirerEcouteur?.();
     racine.remove();
   }
 

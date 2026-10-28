@@ -15,7 +15,7 @@ import { afficherBoutique } from './ui/boutique';
 import { afficherCarteMonde, type EcranCarteMonde } from './ui/carte-monde';
 import { afficherEcranHeros } from './ui/ecran-heros';
 import { afficherAccueil, afficherAvis, type ChoixNiveau } from './ui/ecrans';
-import { configDeRelance, configDuChoix, nouvelleGraine } from './ui/lancement';
+import { configDeRelance, configDuChoix, debiterAuLancement, nouvelleGraine, relancerAvecDebit } from './ui/lancement';
 import { choixJouable } from './ui/meta-vues';
 import { NIVEAU_CAMPAGNE_TEST } from './ui/niveau-test';
 import { afficherOptions } from './ui/options';
@@ -40,7 +40,7 @@ interface OptionsLancement {
   readonly horsSauvegarde?: boolean;
 }
 
-function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, lancement: OptionsLancement = {}): void {
+async function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, lancement: OptionsLancement = {}): Promise<void> {
   carteOuverte?.arreter();
   carteOuverte = null;
   app.replaceChildren();
@@ -55,6 +55,15 @@ function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, lanceme
       return;
     }
     config = composee.config;
+    // Les objets emportés sont débités du stock tout de suite, sous verrou : si le stock ne les couvre plus, la partie ne démarre pas.
+    if (!horsSauvegarde) {
+      const debit = await debiterAuLancement(session, config);
+      if (!debit.ok) {
+        afficherAvis(document.body, debit.refus);
+        carte();
+        return;
+      }
+    }
   }
   // La partie reprise est déjà dans la sauvegarde ; une nouvelle partie n'y est qu'à partir de sa première vague.
   let enSauvegarde = reprise !== undefined;
@@ -73,13 +82,21 @@ function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, lanceme
       parent: app,
       vitesse: session.sauvegarde.reglages.vitesse,
       // « Rejouer » : même dieu, héros et objets (ceux que la partie a consommés ne sont plus emportés), nouvelle graine.
-      nouvelleConfig: (precedente) => configDeRelance(session.sauvegarde, precedente, graineSuivante(precedente.graine)),
+      // Comme tout lancement, il débite les objets du stock ; refusé, l'écran de fin reste en place.
+      nouvelleConfig: async (precedente) => {
+        const graine = graineSuivante(precedente.graine);
+        if (horsSauvegarde) return configDeRelance(session.sauvegarde, precedente, graine);
+        const r = await relancerAvecDebit(session, precedente, graine);
+        if (r.ok) return r.config;
+        afficherAvis(document.body, r.refus);
+        return null;
+      },
       surQuitter: (abandon) => {
-        // Abandon d'une partie en cours : une défaite (objets utilisés consommés, expérience de défaite, sans gain de
-        // victoire) qui efface aussi la partie sauvegardée. Une partie déjà finie a déjà été enregistrée.
+        // Abandon d'une partie en cours : ni expérience ni récompense, les objets non utilisés sont rendus, et la
+        // partie sauvegardée qui était la sienne est effacée. Une partie déjà finie a déjà été enregistrée.
         if (!horsSauvegarde) {
-          if (abandon) void session.enregistrerFin(abandon);
-          else if (enSauvegarde) void session.effacerPartie();
+          if (abandon) session.enregistrerFin(abandon).catch(console.error);
+          else if (enSauvegarde) session.effacerPartie().catch(console.error);
         }
         carte();
       },
@@ -89,7 +106,11 @@ function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, lanceme
         : {
             surVague: (etat: EtatPartie) => {
               enSauvegarde = true;
-              void session.rangerPartie(etat, niveau.numero);
+              session.rangerPartie(etat, niveau.numero).catch(console.error);
+            },
+            // Un objet utilisé est rangé aussitôt : une reprise ne doit pas le rendre de nouveau disponible.
+            surObjet: (etat: EtatPartie) => {
+              session.rangerPartie(etat, niveau.numero).then((rangee) => { if (rangee) enSauvegarde = true; }).catch(console.error);
             },
           }),
       ...(reprise ? { reprise } : {}),
@@ -120,7 +141,7 @@ function carte(): void {
         partieEnCours: partieEnCours(),
         surLancer: (niveau, difficulte, choix) => {
           derniereDifficulte = difficulte;
-          jouer(niveau, difficulte, { choix });
+          jouer(niveau, difficulte, { choix }).catch(console.error);
         },
         // Les écrans des héros et de la boutique couvrent la carte, qui dort dessous puis est rouverte (elle relit la sauvegarde).
         surHeros: () => {
@@ -158,8 +179,8 @@ function raccourcisDeveloppement(): readonly ChoixNiveau[] {
   const dernier = REGION1[REGION1.length - 1];
   if (!dernier) return [];
   return [
-    { libelle: t('accueil.niveau', { n: dernier.numero }), surChoisir: () => { jouer(dernier, 'matou', { horsSauvegarde: true }); } },
-    { libelle: t('accueil.niveau_test'), surChoisir: () => { jouer(NIVEAU_CAMPAGNE_TEST, 'matou', { horsSauvegarde: true }); } },
+    { libelle: t('accueil.niveau', { n: dernier.numero }), surChoisir: () => { jouer(dernier, 'matou', { horsSauvegarde: true }).catch(console.error); } },
+    { libelle: t('accueil.niveau_test'), surChoisir: () => { jouer(NIVEAU_CAMPAGNE_TEST, 'matou', { horsSauvegarde: true }).catch(console.error); } },
   ];
 }
 
@@ -181,7 +202,7 @@ function accueil(): void {
           reprise: {
             vague: reprise.vague,
             surReprendre: () => {
-              jouer(niveauRepris, difficulteDe(reprise.etat.config) ?? derniereDifficulte, { reprise: reprise.etat });
+              jouer(niveauRepris, difficulteDe(reprise.etat.config) ?? derniereDifficulte, { reprise: reprise.etat }).catch(console.error);
             },
           },
         }

@@ -61,6 +61,12 @@ export function afficherEcranHeros(parent: HTMLElement, options: OptionsEcranHer
       if (!r.ok) jouerInterface('refus');
       else if (achat) jouerInterface('achat');
       ecran.dire(r.ok ? (succes ?? '') : texteRefusMeta(r.raison), !r.ok);
+    } catch (erreur) {
+      // La session lève si l'écriture échoue (verrou, stockage) : on le dit au lieu de laisser un rejet orphelin.
+      console.error(erreur);
+      dessiner();
+      jouerInterface('refus');
+      ecran.dire(t('erreur.sauvegarde'), true);
     } finally {
       occupe = false;
     }
@@ -68,6 +74,7 @@ export function afficherEcranHeros(parent: HTMLElement, options: OptionsEcranHer
 
   const recruter = (id: IdHeros): void => {
     const braises = session.sauvegarde.meta.monnaies.braises;
+    if (braises < PRIX_DISCIPLE) return;
     afficherConfirmation(ecran.racine, {
       titre: t('heros.confirmer_titre', { nom: nomDe(id) }),
       detail: t('heros.confirmer_detail', { n: PRIX_DISCIPLE, m: Math.max(0, braises - PRIX_DISCIPLE) }),
@@ -172,8 +179,12 @@ export function afficherEcranHeros(parent: HTMLElement, options: OptionsEcranHer
       const acheter = bouton('bouton grand', t('heros.acheter', { n: PRIX_DISCIPLE }), () => { recruter(heros); });
       acheter.dataset.cle = 'recruter';
       acheter.append(image(atlas.iconeUrl('icone-braise', 2), 'icone'), el('span', '', t('heros.acheter', { n: PRIX_DISCIPLE })));
-      acheter.classList.toggle('grise', session.sauvegarde.meta.monnaies.braises < PRIX_DISCIPLE);
+      // Sans assez de braises, le bouton est désactivé et dit ce qui manque : pas de confirmation trompeuse.
+      const manque = PRIX_DISCIPLE - session.sauvegarde.meta.monnaies.braises;
+      acheter.disabled = manque > 0;
+      acheter.classList.toggle('grise', manque > 0);
       actions.append(acheter);
+      if (manque > 0) actions.append(el('p', 'manque-braises', t('heros.manque_braises', { n: manque })));
     }
     tete.append(actions);
     panneau.append(tete);
@@ -201,7 +212,7 @@ export function afficherEcranHeros(parent: HTMLElement, options: OptionsEcranHer
           void agir(() => session.repartirPoint(heros, c.id));
         });
         plus.dataset.cle = `placer:${c.id}`;
-        plus.textContent = '+';
+        plus.textContent = t('heros.plus');
         plus.classList.toggle('grise', !comp.peutPlacer);
         entete.append(plus);
       }

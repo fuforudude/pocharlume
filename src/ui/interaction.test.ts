@@ -359,11 +359,37 @@ describe('objets emportés', () => {
     expect(interaction.mode).toEqual({ type: 'objet', emplacement: 0 });
   });
 
-  it('un objet qui agit partout s’utilise en touchant n’importe où sur la carte', () => {
+  it('un objet global (Sablier) s’utilise directement, sans toucher la carte ni passer en visée', () => {
     const etat = avecObjets('sablier');
     const interaction = new Interaction();
-    interaction.basculerObjet(etat, 0);
-    expect(interaction.toucher(etat, 3, 1, RAYON).action).toEqual({ type: 'utiliserObjet', emplacement: 0, x: 3, y: 1 });
+    const { carte } = etat.niveau;
+    const issue = interaction.basculerObjet(etat, 0);
+    expect(issue).toEqual({ action: { type: 'utiliserObjet', emplacement: 0, x: carte.largeur / 2, y: carte.hauteur / 2 }, refus: null });
+    expect(interaction.mode.type).toBe('libre');
+    envoyer(etat, issue.action);
+    expect(etat.objetsUtilises).toEqual([true]);
+  });
+
+  it('l’Herbe de Sabbat avec les vies pleines est refusée sans passer en visée ni être consommée', () => {
+    const etat = avecObjets('herbe_sabbat');
+    const interaction = new Interaction();
+    expect(interaction.basculerObjet(etat, 0)).toEqual({ action: null, refus: 'vies_pleines' });
+    expect(interaction.mode.type).toBe('libre');
+    expect(etat.objetsUtilises).toEqual([false]);
+  });
+
+  it('l’Herbe de Sabbat s’utilise directement dès qu’une vie manque', () => {
+    const etat = avecObjets('herbe_sabbat');
+    etat.vies = etat.viesDepart - 3;
+    const issue = new Interaction().basculerObjet(etat, 0);
+    expect(issue.refus).toBeNull();
+    expect(issue.action?.type).toBe('utiliserObjet');
+  });
+
+  it('un objet global déjà utilisé reste refusé', () => {
+    const etat = avecObjets('sablier');
+    etat.objetsUtilises[0] = true;
+    expect(new Interaction().basculerObjet(etat, 0)).toEqual({ action: null, refus: 'objet_utilise' });
   });
 
   it('la visée tombe si l’objet est utilisé, et la surbrillance montre son rayon', () => {

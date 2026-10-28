@@ -27,6 +27,7 @@ export const CLES_REFUS: Readonly<Record<RaisonRefus, CleTexte>> = {
   competence_au_maximum: 'refus.competence_au_maximum',
   objet_inconnu: 'refus.objet_inconnu',
   objet_utilise: 'refus.objet_utilise',
+  vies_pleines: 'refus.vies_pleines',
   plus_de_vague: 'refus.plus_de_vague',
 };
 

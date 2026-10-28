@@ -4,8 +4,10 @@ import { DEFS_META } from '../data/heros';
 import { VERSION_DONNEES } from '../data/version';
 import type { ConfigPartie } from '../engine';
 import { estIdDieu, estIdHeros, estIdObjet, type IdObjet } from '../data/meta';
-import { configDepuisSauvegarde, type ChoixPartie, type RaisonConfig, type Sauvegarde } from '../save';
+import { t } from '../i18n';
+import { configDepuisSauvegarde, type ChoixPartie, type RaisonConfig, type RaisonEquipement, type ResultatTransaction, type Sauvegarde } from '../save';
 import { choixJouable } from './meta-vues';
+import { texteRefusMeta } from './raisons-meta';
 
 export type ResultatLancement =
   | { readonly ok: true; readonly config: ConfigPartie }
@@ -65,4 +67,41 @@ export function choixDeLaConfig(s: Sauvegarde, config: ConfigPartie): ChoixParti
 export function configDeRelance(s: Sauvegarde, precedente: ConfigPartie, graine: number): ConfigPartie {
   const r = configDuChoix(s, choixDeLaConfig(s, precedente), precedente.difficulte, graine);
   return r.ok ? r.config : { ...precedente, graine };
+}
+
+/** Ce que le lancement demande à la session : le stock pour composer la config, le débit des objets pour la lancer. */
+export interface SessionLancement {
+  readonly sauvegarde: Sauvegarde;
+  lancerPartie(objets: readonly string[]): Promise<ResultatTransaction<RaisonEquipement>>;
+}
+
+export type ResultatDebit = { readonly ok: true } | { readonly ok: false; readonly refus: string };
+
+/**
+ * Débite les objets de la config du stock, sous verrou, au moment de lancer une nouvelle partie. Refuse (avec la phrase
+ * à dire au joueur) si le stock ne couvre plus le choix, ou si l'écriture échoue : la partie ne doit alors pas démarrer.
+ */
+export async function debiterAuLancement(session: SessionLancement, config: ConfigPartie): Promise<ResultatDebit> {
+  try {
+    const r = await session.lancerPartie(config.objets);
+    return r.ok ? { ok: true } : { ok: false, refus: t('fiche.lancement_refuse', { raison: texteRefusMeta(r.raison) }) };
+  } catch (erreur) {
+    console.error(erreur);
+    return { ok: false, refus: t('erreur.sauvegarde') };
+  }
+}
+
+/**
+ * La config de « Rejouer » prête à démarrer : composée d'après la sauvegarde d'aujourd'hui (`configDeRelance`), puis
+ * débitée du stock comme n'importe quel lancement. Le repli de `configDeRelance` (config précédente gardée telle quelle)
+ * n'échappe pas au contrôle : si le stock ne couvre plus ses objets, le lancement est refusé.
+ */
+export async function relancerAvecDebit(
+  session: SessionLancement,
+  precedente: ConfigPartie,
+  graine: number,
+): Promise<{ readonly ok: true; readonly config: ConfigPartie } | { readonly ok: false; readonly refus: string }> {
+  const config = configDeRelance(session.sauvegarde, precedente, graine);
+  const debit = await debiterAuLancement(session, config);
+  return debit.ok ? { ok: true, config } : debit;
 }

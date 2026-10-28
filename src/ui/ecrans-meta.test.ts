@@ -120,16 +120,64 @@ describe('écran des héros', () => {
     expect(document.querySelector('.meta-monnaies')?.textContent).toBe('15');
   });
 
-  it('avec moins de 30 braises, l’achat est refusé et rien n’est débité', async () => {
+  it('avec moins de 30 braises, « Recruter » est désactivé et dit ce qui manque : pas de confirmation, rien n’est débité', async () => {
     const session = await ouvrir(avec((s) => ({ ...s, meta: { ...s.meta, monnaies: { aretes: 0, braises: 29 } } })));
+    afficherEcranHeros(document.body, { atlas: ATLAS, session, surFermer: vi.fn() });
+    parTitre('Mastoc').click();
+    const recruter = parTitre(t('heros.acheter', { n: 30 }));
+    expect(recruter.disabled).toBe(true);
+    expect(document.querySelector('.heros-actions .manque-braises')?.textContent).toBe(t('heros.manque_braises', { n: 1 }));
+    recruter.click();
+    await attendre();
+    expect(document.querySelector('.ecran.confirmation')).toBeNull();
+    expect(session.sauvegarde.meta.monnaies.braises).toBe(29);
+    expect(session.sauvegarde.meta.heros.mastoc).toBeUndefined();
+  });
+
+  it('avec 30 braises, « Recruter » est actif et ne parle d’aucun manque', async () => {
+    const session = await ouvrir(avec((s) => ({ ...s, meta: { ...s.meta, monnaies: { aretes: 0, braises: 30 } } })));
+    afficherEcranHeros(document.body, { atlas: ATLAS, session, surFermer: vi.fn() });
+    parTitre('Mastoc').click();
+    expect(parTitre(t('heros.acheter', { n: 30 })).disabled).toBe(false);
+    expect(document.querySelector('.manque-braises')).toBeNull();
+  });
+
+  it('un geste dont l’écriture lève dit l’erreur au lieu de laisser un rejet orphelin, et l’écran reste utilisable', async () => {
+    const session = await ouvrir(avec((s) => ({ ...s, meta: { ...s.meta, monnaies: { aretes: 90, braises: 60 } } })));
+    const erreurs = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const casse = vi.spyOn(session, 'acheterDisciple').mockRejectedValueOnce(new Error('écriture impossible'));
     afficherEcranHeros(document.body, { atlas: ATLAS, session, surFermer: vi.fn() });
     parTitre('Mastoc').click();
     parTitre(t('heros.acheter', { n: 30 })).click();
     parTexte(t('heros.confirmer')).click();
     await attendre();
-    expect(message()).toBe(t('meta.refus.braises_insuffisantes'));
-    expect(session.sauvegarde.meta.monnaies.braises).toBe(29);
-    expect(session.sauvegarde.meta.heros.mastoc).toBeUndefined();
+    expect(message()).toBe(t('erreur.sauvegarde'));
+    expect(son.jouerInterface).toHaveBeenCalledWith('refus');
+    // Le geste suivant passe.
+    parTitre(t('heros.acheter', { n: 30 })).click();
+    parTexte(t('heros.confirmer')).click();
+    await attendre();
+    expect(message()).toBe(t('heros.recrute', { nom: 'Mastoc' }));
+    casse.mockRestore();
+    erreurs.mockRestore();
+  });
+
+  it('la boutique aussi dit l’erreur d’une écriture qui lève', async () => {
+    const session = await ouvrir(avec((s) => ({ ...s, meta: { ...s.meta, monnaies: { aretes: 200, braises: 0 } } })));
+    const erreurs = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    vi.spyOn(session, 'acheterObjet').mockRejectedValueOnce(new Error('écriture impossible'));
+    afficherBoutique(document.body, { atlas: ATLAS, session, onglet: 'objets', surFermer: vi.fn() });
+    document.querySelector<HTMLButtonElement>('[data-cle="objet:sablier"]')?.click();
+    await attendre();
+    expect(message()).toBe(t('erreur.sauvegarde'));
+    erreurs.mockRestore();
+  });
+
+  it('le bouton de placement affiche le texte « + » venu de la table des textes', async () => {
+    const session = await ouvrir(sauvegardeVide());
+    afficherEcranHeros(document.body, { atlas: ATLAS, session, surFermer: vi.fn() });
+    const plus = document.querySelector('[data-cle^="placer:"]');
+    expect(plus?.textContent).toBe(t('heros.plus'));
   });
 
   it('annuler la confirmation ne débite rien', async () => {

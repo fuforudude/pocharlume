@@ -3,7 +3,7 @@
 // Règle testée : le stockage fait foi. Chaque opération est rejouée sur le contenu frais du stockage, sous verrou, puis
 // écrite. Un achat fait depuis une vue périmée est donc revalidé : il ne duplique rien (les arêtes et les braises ne se
 // dépensent qu'une fois) et n'en efface aucun autre (les achats de l'autre onglet sont gardés).
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { VERSION_DONNEES } from '../data/version';
 import type { ConfigPartie } from '../engine/etat';
 import { DEFS_TEST, StockageTruque } from './aides.test-utils';
@@ -112,22 +112,77 @@ describe('transactions de la session', () => {
     const p = await poste(depart());
     const s = await onglet(p);
     const fin = await s.enregistrerFin({ niveau: 1, statut: 'victoire', etoiles: 3, config: CONFIG, heros: 'charlie' });
-    expect(fin).toMatchObject({ ecrite: true, refus: null, bilan: { aretes: 81, braises: 2, xp: 120, nouvellesEtoiles: 3, heros: 'charlie' } });
+    expect(fin).toMatchObject({ ecrite: true, refus: null, bilan: { aretes: 81, braises: 7, xp: 120, nouvellesEtoiles: 3, heros: 'charlie' } });
     const relue = await stockee(p);
-    expect(relue.meta.monnaies).toEqual({ aretes: 81, braises: 2 });
+    expect(relue.meta.monnaies).toEqual({ aretes: 81, braises: 7 });
     expect(relue.meta.heros.charlie?.xp).toBe(120);
     expect(relue.progression.niveauMax).toBe(2);
   });
 
   it('le héros et les objets de la fin de partie peuvent venir de la config du moteur', async () => {
-    const stock = { fiole_soufre: 2, herbe_sabbat: 0, griffe_renfort: 0, sablier: 0 };
+    // Stock d'après le lancement : les deux fioles emportées sont déjà débitées.
+    const stock = { fiole_soufre: 0, herbe_sabbat: 0, griffe_renfort: 0, sablier: 0 };
     const p = await poste(depart({ meta: { objets: stock } }));
     const s = await onglet(p);
     const config = { ...CONFIG, heros: 'plume', objets: ['fiole_soufre', 'fiole_soufre'] };
     await s.enregistrerFin({ niveau: 1, statut: 'defaite', etoiles: 0, config, objetsUtilises: ['fiole_soufre'] });
     const relue = await stockee(p);
     expect(relue.meta.heros.plume?.xp).toBe(60);
-    expect(relue.meta.objets.fiole_soufre).toBe(1);
+    expect(relue.meta.objets.fiole_soufre).toBe(1); // la fiole utilisée est perdue, l'autre est rendue
+  });
+
+  it('lancerPartie débite les objets emportés sous verrou ; le second onglet, à stock épuisé, est refusé', async () => {
+    const stock = { fiole_soufre: 2, herbe_sabbat: 0, griffe_renfort: 0, sablier: 0 };
+    const p = await poste(depart({ meta: { objets: stock } }));
+    const a = await onglet(p);
+    const b = await onglet(p);
+    expect(await a.lancerPartie(['fiole_soufre', 'fiole_soufre'])).toMatchObject({ ok: true });
+    expect(await b.lancerPartie(['fiole_soufre'])).toEqual({ ok: false, raison: 'objet_hors_stock' });
+    expect((await stockee(p)).meta.objets.fiole_soufre).toBe(0);
+  });
+
+  it('un abandon rend les objets non utilisés mais n’efface pas une partie sauvegardée plus ancienne', async () => {
+    const stock = { fiole_soufre: 0, herbe_sabbat: 0, griffe_renfort: 0, sablier: 0 };
+    const ancienne = { niveau: 3, config: { ...CONFIG, graine: 999 }, etat: '{"version":1}', vague: 2 };
+    const p = await poste({ ...depart({ niveaux: 3, meta: { objets: stock } }), partie: ancienne });
+    const s = await onglet(p);
+    await s.enregistrerFin({ niveau: 3, statut: 'abandon', etoiles: 0, config: { ...CONFIG, graine: 5, objets: ['sablier'] } });
+    const relue = await stockee(p);
+    expect(relue.meta.objets.sablier).toBe(1);
+    expect(relue.partie).toEqual(ancienne);
+    // Abandonner la partie qui est justement celle de la sauvegarde l'efface.
+    await s.enregistrerFin({ niveau: 3, statut: 'abandon', etoiles: 0, config: { ...CONFIG, graine: 999 } });
+    expect((await stockee(p)).partie).toBeNull();
+  });
+
+  it('une écriture qui lève ne casse pas la file : l’opération suivante passe', async () => {
+    const p = await poste(depart({ braises: 100 }));
+    let echecs = 1;
+    const verrou: VerrouSauvegarde = {
+      executer: (travail) => (echecs-- > 0 ? Promise.reject(new Error('verrou indisponible')) : (p.verrou ?? creerVerrouMemoire()).executer(travail)),
+    };
+    const s = await Session.ouvrir(new Depot(p.stockage), null, { verrou, defs: DEFS_TEST });
+    await expect(s.acheterDisciple('suie')).rejects.toThrow('verrou indisponible');
+    const suivant = await s.acheterDisciple('corbeau');
+    expect(suivant).toMatchObject({ ok: true });
+    const relue = await stockee(p);
+    expect(relue.meta.heros.corbeau).toBeDefined();
+    // L'achat dont l'écriture avait levé reste en attente et part avec l'écriture qui a réussi.
+    expect(relue.meta.heros.suie).toBeDefined();
+    expect(relue.meta.monnaies.braises).toBe(40);
+  });
+
+  it('surChangement prévient à chaque changement de la sauvegarde, jusqu’à ce qu’on retire l’écouteur', async () => {
+    const p = await poste(depart({ braises: 100 }));
+    const s = await onglet(p);
+    const appels = vi.fn();
+    const retirer = s.surChangement(appels);
+    await s.acheterDisciple('suie');
+    expect(appels).toHaveBeenCalled();
+    const n = appels.mock.calls.length;
+    retirer();
+    await s.acheterDisciple('corbeau');
+    expect(appels).toHaveBeenCalledTimes(n);
   });
 
   it('une fin de partie refusée (héros non possédé) efface quand même la partie et ne donne rien', async () => {
@@ -276,10 +331,10 @@ describe('deux onglets : les achats ne se dupliquent pas et ne se perdent pas', 
     const b = await onglet(p);
     const fa = await a.enregistrerFin({ niveau: 1, statut: 'victoire', etoiles: 3, config: CONFIG });
     const fb = await b.enregistrerFin({ niveau: 1, statut: 'victoire', etoiles: 3, config: CONFIG });
-    expect(fa.bilan).toMatchObject({ aretes: 81, braises: 2, nouvellesEtoiles: 3 });
+    expect(fa.bilan).toMatchObject({ aretes: 81, braises: 7, nouvellesEtoiles: 3 });
     expect(fb.bilan).toMatchObject({ aretes: 12, braises: 0, nouvellesEtoiles: 0 });
     const relue = await stockee(p);
-    expect(relue.meta.monnaies).toEqual({ aretes: 93, braises: 2 });
+    expect(relue.meta.monnaies).toEqual({ aretes: 93, braises: 7 });
     expect(relue.progression.etoiles['1']).toEqual({ matou: 3 });
   });
 

@@ -38,6 +38,7 @@ import {
   acheterObjet,
   acheterRangArbre,
   choisirHeros,
+  debiterObjetsDePartie,
   enregistrerFinDePartie,
   equiperObjets,
   reinitialiserArbre,
@@ -59,14 +60,15 @@ import { ouvrirVerrouNavigateur, type VerrouSauvegarde } from './verrou';
 /** Ce que la session a besoin de savoir d'une partie terminée (un sous-ensemble du `ResultatPartie` de l'interface). */
 export interface FinDePartie {
   readonly niveau: number;
-  readonly statut: 'victoire' | 'defaite';
+  /** `abandon` : le joueur a quitté avant la fin (ni expérience ni récompense ; les objets non utilisés sont rendus). */
+  readonly statut: 'victoire' | 'defaite' | 'abandon';
   readonly etoiles: number;
   readonly config: ConfigPartie;
   /** Héros joué, qui reçoit l'expérience. Par défaut, celui de la config du moteur (`config.heros`) s'il y en a un. */
   readonly heros?: string | null;
   /** Objets emportés. Par défaut, ceux de la config du moteur (`config.objets`). */
   readonly objetsEquipes?: readonly string[];
-  /** Objets utilisés pendant la partie (un par emplacement utilisé) : retirés du stock. */
+  /** Objets utilisés pendant la partie (un par emplacement utilisé) : consommés ; les autres objets emportés sont rendus. */
   readonly objetsUtilises?: readonly string[];
 }
 
@@ -162,6 +164,8 @@ export class Session {
   readonly origine: OrigineChargement;
   /** La sauvegarde en mémoire : le dernier contenu connu du stockage (`base`) avec par-dessus les opérations en attente. */
   private courante: Sauvegarde;
+  /** Écouteurs de `surChangement`. */
+  private readonly ecouteurs = new Set<() => void>();
   /** Le dernier contenu connu du stockage (lu ou écrit par cette session). */
   private base: Sauvegarde;
   /** Opérations appliquées en mémoire dont l'écriture n'a pas (encore) réussi, dans l'ordre. */
@@ -188,7 +192,7 @@ export class Session {
     this.contenuConnu = chargement.origine !== 'indisponible';
     this.verrou = options.verrou === undefined ? ouvrirVerrouNavigateur() : options.verrou;
     this.defs = options.defs;
-    canal?.ecouter(() => { void this.rafraichir(); });
+    canal?.ecouter(() => { this.rafraichir().catch(() => undefined); });
   }
 
   /** `canal` : la diffusion entre onglets (voir canal.ts), absente si le navigateur ne la propose pas. */
@@ -198,6 +202,28 @@ export class Session {
 
   get sauvegarde(): Sauvegarde {
     return this.courante;
+  }
+
+  /**
+   * Appelle `ecouteur` chaque fois que la sauvegarde en mémoire change (opération de cette session, écriture ou
+   * message d'un autre onglet). Rend la fonction qui retire l'écouteur. Un écouteur qui lève n'arrête personne.
+   */
+  surChangement(ecouteur: () => void): () => void {
+    this.ecouteurs.add(ecouteur);
+    return () => {
+      this.ecouteurs.delete(ecouteur);
+    };
+  }
+
+  private definirCourante(sauvegarde: Sauvegarde): void {
+    this.courante = sauvegarde;
+    for (const ecouteur of [...this.ecouteurs]) {
+      try {
+        ecouteur();
+      } catch (erreur) {
+        console.error(erreur);
+      }
+    }
   }
 
   /** Ferme le canal de diffusion ; la session reste utilisable. */
@@ -232,9 +258,10 @@ export class Session {
     if (optimiste.sauvegarde === this.courante) return Promise.resolve({ ok: true, sauvegarde: this.courante, detail: optimiste.detail, ecrite: true });
     const entree: EnAttente = { op, detail: optimiste.detail };
     this.enAttente.push(entree);
-    this.courante = optimiste.sauvegarde;
+    this.definirCourante(optimiste.sauvegarde);
     const ecriture = this.file.then(() => this.sousVerrou(() => this.persister<D, R>(entree, fusion)));
-    this.file = ecriture;
+    // La file continue même si une écriture lève (verrou, stockage) : le rejet va à l'appelant, jamais aux suivantes.
+    this.file = ecriture.catch(() => undefined);
     return ecriture;
   }
 
@@ -293,7 +320,7 @@ export class Session {
       this.base = base;
       this.enAttente = [...retenues, ...suite];
     }
-    this.courante = this.rejouer(this.base);
+    this.definirCourante(this.rejouer(this.base));
 
     if (!propre || !propre.ok) return { ok: false, raison: (propre?.ok === false ? propre.raison : 'modifie_ailleurs') as R };
     return { ok: true, sauvegarde: this.courante, detail: propre.detail as D, ecrite: enregistree };
@@ -306,9 +333,9 @@ export class Session {
       if (lecture.etat !== 'ok') return;
       this.contenuConnu = true;
       this.base = lecture.sauvegarde;
-      this.courante = this.rejouer(this.base);
+      this.definirCourante(this.rejouer(this.base));
     });
-    this.file = travail;
+    this.file = travail.catch(() => undefined);
     return travail;
   }
 
@@ -344,9 +371,13 @@ export class Session {
         },
         this.defs,
       );
+      const apres = r.ok ? r.sauvegarde : s;
+      // Un abandon n'efface que la partie sauvegardée qui est la sienne : quitter une partie neuve, jamais rangée,
+      // garde la partie plus ancienne que le joueur pourrait encore reprendre.
+      const sienne = apres.partie !== null && apres.partie.niveau === fin.niveau && apres.partie.config.graine === fin.config.graine;
       return {
         ok: true,
-        sauvegarde: avecPartieEnCours(r.ok ? r.sauvegarde : s, null),
+        sauvegarde: fin.statut === 'abandon' && !sienne ? apres : avecPartieEnCours(apres, null),
         detail: r.ok ? { bilan: r.bilan, refus: null } : { bilan: null, refus: r.raison },
       };
     };
@@ -354,7 +385,21 @@ export class Session {
     return issue.ok ? { ecrite: issue.ecrite, ...issue.detail } : { ecrite: false, bilan: null, refus: null };
   }
 
-  /** Range l'instantané de la partie, à appeler au début d'une vague. Rien n'est écrit si la partie n'a pas d'instantané valide. */
+  /**
+   * Lance une partie : les objets emportés sont débités du stock tout de suite (voir `debiterObjetsDePartie`). Comme un
+   * achat, l'opération est rejouée sous verrou sur le contenu frais du stockage : si le stock ne couvre plus le choix
+   * (autre onglet, autre partie), elle est refusée et la partie ne doit pas démarrer. À appeler pour chaque nouvelle
+   * partie, « Rejouer » compris, jamais pour la reprise d'une partie sauvegardée (ses objets sont déjà débités).
+   */
+  async lancerPartie(objets: readonly string[]): Promise<ResultatTransaction<RaisonEquipement>> {
+    return sansDetail(await this.lancer((s) => depuisTransaction(debiterObjetsDePartie(s, objets))));
+  }
+
+  /**
+   * Range l'instantané de la partie, à appeler au début d'une vague et juste après chaque utilisation d'objet (sans
+   * quoi une reprise rendrait l'objet utilisable une seconde fois). Rien n'est écrit si la partie n'a pas d'instantané
+   * valide (aucune vague lancée encore).
+   */
   async rangerPartie(etat: EtatPartie, numeroNiveau: number): Promise<boolean> {
     const partie = partieEnCours(etat, numeroNiveau);
     if (!partie) return false;

@@ -124,8 +124,8 @@ d'élite par ennemi.
 - 10 régions de 10 niveaux. Chaque région a 3 à 4 cartes dessinées à la main, réutilisées avec d'autres entrées,
   vagues et règles. Le niveau 10 de chaque région est un boss.
 - Carte du monde par région, chemin qui relie les niveaux, niveau suivant débloqué à la victoire.
-- Difficultés **Chaton**, **Matou** et **Vieux Sage**, choisies au lancement. Étoiles : 3 si aucune vie perdue,
-  2 si au moins la moitié des vies, 1 sinon. On garde le meilleur résultat par niveau (300 étoiles en tout).
+- Difficultés **Chaton**, **Matou** et **Vieux Sage**, choisies au lancement. Étoiles : 3 si aucune vie perdue
+  (même si l'Herbe de Sabbat les a rendues), 2 si au moins la moitié des vies, 1 sinon. On garde le meilleur résultat par niveau (300 étoiles en tout).
 - Après 3 étoiles sur un niveau, deux défis s'ouvrent : **Héroïque** (1 vie, vagues d'élite) et **Fer** (une
   énorme vague, 2 tours imposées, bonus de caisses désactivés). Chacun rapporte des braises une fois.
 
@@ -288,7 +288,8 @@ tours, unités non ciblables, structures construites par une tour.
 | Pollen | Rouage | construit une tourelle | à distance |
 | Pollen | Lanterne | soigne les soldats et les héros autour | magique à distance |
 
-- Expérience : gagnée à chaque niveau joué (victoire 100 + 20 × N, défaite moitié), gardée par héros. Seuils
+- Expérience : gagnée à chaque niveau joué (victoire 100 + 20 × N, défaite moitié ; un abandon ne donne rien),
+  gardée par héros. Seuils
   des niveaux 2 à 10 dans `src/data/heros.ts`. 1 point de compétence par niveau, 4 compétences de 3 rangs par
   héros (la 4e, l'ultime, demande le niveau 6). Points redistribuables gratuitement hors partie.
 
@@ -302,11 +303,25 @@ Carreau perforant ; Mortier de Soufre, Nappe de soufre et Charge lourde.
   le rang n coûte n étoiles. Chaque rang donne un petit bonus défini dans `src/data/ameliorations.ts`.
   Réinitialisation gratuite : toutes les étoiles dépensées reviennent.
 - **Arêtes** (hors partie) : victoire = 30 + 6 × N + 15 par étoile la première fois, 10 + 2 × N ensuite.
-- **Braises** : première victoire d'un boss 10, premières 3 étoiles d'un niveau 2.
-- **Objets consommables** (arêtes, stock de 10 au maximum chacun, 3 emplacements équipés avant un niveau,
-  chaque emplacement utilisable une fois par partie) : Fiole de Soufre (60 : zone, 150 dégâts purs), Herbe de
-  Sabbat (80 : +5 vies), Griffe de Renfort (60 : un chat soldat fort pendant 30 s), Sablier (100 : gèle tous
-  les non-boss 5 s, ralentit les boss).
+- **Braises** : chaque niveau gagné pour la première fois 5, première victoire d'un boss 10 de plus, premières
+  3 étoiles d'un niveau 2. La région 1 en rapporte donc au plus 50 + 10 + 20 = 80, de quoi recruter deux disciples
+  (30 braises chacun).
+- **Objets consommables** (arêtes, stock de 10 au maximum chacun, 3 emplacements équipés avant un niveau, un même
+  objet pouvant occuper plusieurs emplacements, chaque emplacement utilisable une fois par partie) : Fiole de Soufre
+  (60 : zone, 150 dégâts purs), Herbe de Sabbat (80 : +5 vies), Griffe de Renfort (60 : un chat soldat fort pendant
+  30 s), Sablier (100 : gèle tous les non-boss 5 s, ralentit les boss).
+  - Un objet qui agit partout (Sablier, Herbe de Sabbat) s'utilise d'un toucher sur son bouton, sans viser la carte.
+    Le Sablier gèle tous les non-boss de la carte, furtifs non révélés compris.
+  - L'Herbe de Sabbat est refusée quand les vies sont pleines (elle n'est pas consommée). Les 3 étoiles ne sont
+    données que si aucune vie n'a jamais été perdue : l'Herbe, qui rend des vies, ne les rend pas.
+  - **Règle des consommables** : les objets emportés sont débités du stock **au lancement** de la partie (opération
+    rejouée sous verrou comme un achat : refusée si le stock ne couvre plus le choix, « Rejouer » compris). À la fin
+    d'une partie enregistrée (victoire, défaite ou abandon), les objets emportés non utilisés sont recrédités (dans la
+    limite de 10) ; les objets utilisés restent consommés. Une partie en cours remplacée par une autre sans être
+    finie ne rend rien. La partie en cours est aussi rangée juste après chaque utilisation d'objet, pour qu'une
+    reprise ne rende pas un objet déjà utilisé.
+  - **Abandon** (« Quitter » avant la fin) : aucune expérience ni récompense ; seule une défaite réelle (vies à 0)
+    donne la moitié de l'expérience.
 - Tout ce qui entre dans une partie est fixé au lancement dans `ConfigPartie` (dieu, héros, son niveau et ses
   compétences, rangs de l'arbre, objets emportés) pour que la partie reste rejouable à l'identique.
 
@@ -319,7 +334,10 @@ Carreau perforant ; Mortier de Soufre, Nappe de soufre et Charge lourde.
 - [ ] Acheter un rang de l'arbre retire les étoiles. Réinitialiser les rend toutes. On ne peut pas dépenser plus
   d'étoiles qu'on n'en a gagné.
 - [ ] Acheter un disciple retire 30 braises. Avec moins de 30, l'achat est refusé.
-- [ ] Un objet consommable acheté s'équipe, s'utilise une fois dans la partie, puis disparaît du stock.
+- [ ] Un objet consommable acheté s'équipe, quitte le stock au lancement, s'utilise une fois dans la partie ; s'il
+  n'a pas servi à la fin de la partie, il revient au stock (règle des consommables ci-dessus).
+- [ ] Un code d'export devenu incohérent avec les données d'aujourd'hui (seuils d'expérience, compétences) est
+  corrigé à l'import (le héros récupère ses points, un héros choisi non possédé devient l'avatar du dieu), pas refusé.
 - [ ] La sauvegarde passe en v3 avec une migration testée depuis la v2 : aucune progression perdue.
 - [x] Les bandes du simulateur passent pour chacun des 3 dieux avec son avatar, sans amélioration ni objet.
   Aucun dieu ne dépasse de plus de 10 points le taux de victoire des autres en Vieux Sage. (Écart assumé : la courbe

@@ -1,7 +1,7 @@
 // Transactions de la méta-progression : chacune rend { ok, sauvegarde } ou { ok:false, raison }, sans jamais modifier la
 // sauvegarde reçue.
 import { describe, expect, it } from 'vitest';
-import { EMPLACEMENTS_OBJETS, IDS_OBJETS, PLAFOND_MONNAIE, STOCK_MAX_OBJET } from '../data/meta';
+import { EMPLACEMENTS_OBJETS, IDS_OBJETS, PLAFOND_MONNAIE, PRIX_DISCIPLE, STOCK_MAX_OBJET } from '../data/meta';
 import { DEFS_TEST } from './aides.test-utils';
 import { sauvegardeVide, type Meta, type Sauvegarde } from './format';
 import { enregistrerVictoire, totalEtoiles } from './progression';
@@ -10,6 +10,7 @@ import {
   acheterObjet,
   acheterRangArbre,
   choisirHeros,
+  debiterObjetsDePartie,
   enregistrerFinDePartie,
   equiperObjets,
   etoilesDisponibles,
@@ -219,6 +220,43 @@ describe('objets consommables', () => {
   });
 });
 
+describe('lancement d’une partie : objets débités du stock', () => {
+  const stock = { fiole_soufre: 2, herbe_sabbat: 1, griffe_renfort: 0, sablier: 3 };
+
+  it('retire un exemplaire par emplacement, un même objet pouvant en occuper plusieurs', () => {
+    const s = joueur({ meta: { objets: stock } });
+    const t = reussie(debiterObjetsDePartie(s, ['sablier', 'sablier', 'herbe_sabbat']));
+    expect(t.meta.objets).toEqual({ fiole_soufre: 2, herbe_sabbat: 0, griffe_renfort: 0, sablier: 1 });
+    expect(reussie(debiterObjetsDePartie(s, [])).meta.objets).toEqual(stock);
+  });
+
+  it('exactement le stock suffit, un exemplaire de plus est refusé sans rien débiter', () => {
+    const s = joueur({ meta: { objets: stock } });
+    expect(reussie(debiterObjetsDePartie(s, ['sablier', 'sablier', 'sablier'])).meta.objets.sablier).toBe(0);
+    sansEffet(s, (x) => {
+      expect(raison(debiterObjetsDePartie(x, ['herbe_sabbat', 'herbe_sabbat']))).toBe('objet_hors_stock');
+      expect(raison(debiterObjetsDePartie(x, ['griffe_renfort']))).toBe('objet_hors_stock');
+      expect(raison(debiterObjetsDePartie(x, ['sablier', 'griffe_renfort']))).toBe('objet_hors_stock');
+    });
+  });
+
+  it('refuse un objet inconnu, une valeur qui n’est pas une liste, ou plus de trois objets', () => {
+    const s = joueur({ meta: { objets: stock } });
+    expect(raison(debiterObjetsDePartie(s, ['potion']))).toBe('objet_inconnu');
+    expect(raison(debiterObjetsDePartie(s, ['constructor']))).toBe('objet_inconnu');
+    expect(raison(debiterObjetsDePartie(s, 'sablier' as unknown as string[]))).toBe('objet_inconnu');
+    expect(raison(debiterObjetsDePartie(s, ['sablier', 'sablier', 'sablier', 'fiole_soufre']))).toBe('trop_d_objets');
+  });
+
+  it('débiter au lancement puis rendre à la fin ne change pas le stock quand rien n’a servi', () => {
+    const s = joueur({ meta: { objets: stock } });
+    const emporte = ['sablier', 'fiole_soufre', 'sablier'];
+    const lancee = reussie(debiterObjetsDePartie(s, emporte));
+    const finie = enregistrerFinDePartie(lancee, { niveau: 1, statut: 'abandon', difficulte: 'matou', etoiles: 0, objetsEquipes: emporte, objetsUtilises: [] }, DEFS_TEST);
+    expect(finie.ok && finie.sauvegarde.meta.objets).toEqual(stock);
+  });
+});
+
 describe('choix du dieu et du héros', () => {
   it('retient le dieu et un de ses héros possédés', () => {
     const s = joueur({ braises: 30 });
@@ -332,10 +370,10 @@ describe('fin de partie', () => {
     return t;
   }
 
-  it('première victoire à 3 étoiles : 30 + 6 × N + 15 par étoile en arêtes, 2 braises, de l’expérience', () => {
+  it('première victoire à 3 étoiles : 30 + 6 × N + 15 par étoile en arêtes, 5 + 2 braises, de l’expérience', () => {
     const t = reussiAvecBilan(enFin(sauvegardeVide(), { heros: 'charlie' }));
-    expect(t.bilan).toMatchObject({ aretes: 30 + 6 + 45, braises: 2, xp: 120, nouvellesEtoiles: 3, heros: 'charlie' });
-    expect(t.sauvegarde.meta.monnaies).toEqual({ aretes: 81, braises: 2 });
+    expect(t.bilan).toMatchObject({ aretes: 30 + 6 + 45, braises: 7, xp: 120, nouvellesEtoiles: 3, heros: 'charlie' });
+    expect(t.sauvegarde.meta.monnaies).toEqual({ aretes: 81, braises: 7 });
     expect(t.sauvegarde.meta.heros.charlie?.xp).toBe(120);
     expect(t.sauvegarde.progression.niveauMax).toBe(2);
   });
@@ -345,12 +383,12 @@ describe('fin de partie', () => {
     const t = reussiAvecBilan(enFin(s));
     expect(t.bilan).toMatchObject({ aretes: 12, braises: 0, nouvellesEtoiles: 0 });
     s = t.sauvegarde;
-    expect(s.meta.monnaies).toEqual({ aretes: 81 + 12, braises: 2 });
+    expect(s.meta.monnaies).toEqual({ aretes: 81 + 12, braises: 7 });
   });
 
   it('seules les étoiles nouvelles comptent : de 1 à 3 étoiles, 2 nouvelles', () => {
     const s = reussiAvecBilan(enFin(sauvegardeVide(), { etoiles: 1 })).sauvegarde;
-    expect(s.meta.monnaies).toEqual({ aretes: 30 + 6 + 15, braises: 0 });
+    expect(s.meta.monnaies).toEqual({ aretes: 30 + 6 + 15, braises: 5 });
     const t = reussiAvecBilan(enFin(s, { etoiles: 3 }));
     expect(t.bilan).toMatchObject({ aretes: 30 + 6 + 30, braises: 2, nouvellesEtoiles: 2 });
   });
@@ -369,18 +407,32 @@ describe('fin de partie', () => {
     expect(t.sauvegarde.progression.etoiles['1']).toEqual({ matou: 3 });
   });
 
-  it('le boss (niveau 10) donne 10 braises la première fois seulement, 12 avec les 3 étoiles', () => {
+  it('le boss (niveau 10) donne 5 + 10 braises la première fois seulement, 17 avec les 3 étoiles', () => {
     let s = sauvegardeVide();
     for (let n = 1; n <= 9; n++) s = enregistrerVictoire(s, n, 'matou', 1);
     const premiere = reussiAvecBilan(enFin(s, { niveau: 10, etoiles: 1 }));
-    expect(premiere.bilan).toMatchObject({ braises: 10, aretes: 30 + 60 + 15 });
+    expect(premiere.bilan).toMatchObject({ braises: 15, aretes: 30 + 60 + 15 });
     const seconde = reussiAvecBilan(enFin(premiere.sauvegarde, { niveau: 10, etoiles: 1 }));
     expect(seconde.bilan).toMatchObject({ braises: 0, aretes: 30 });
     const troisEtoiles = reussiAvecBilan(enFin(seconde.sauvegarde, { niveau: 10, etoiles: 3 }));
     expect(troisEtoiles.bilan.braises).toBe(2);
-    expect(reussiAvecBilan(enFin(s, { niveau: 10, etoiles: 3 })).bilan.braises).toBe(12);
-    // Un niveau ordinaire ne donne rien à sa première victoire (hors 3 étoiles).
-    expect(reussiAvecBilan(enFin(sauvegardeVide(), { etoiles: 2 })).bilan.braises).toBe(0);
+    expect(reussiAvecBilan(enFin(s, { niveau: 10, etoiles: 3 })).bilan.braises).toBe(17);
+    // Un niveau ordinaire donne 5 braises à sa première victoire (2 de plus avec les 3 étoiles), puis plus rien.
+    const ordinaire = reussiAvecBilan(enFin(sauvegardeVide(), { etoiles: 2 }));
+    expect(ordinaire.bilan.braises).toBe(5);
+    expect(reussiAvecBilan(enFin(ordinaire.sauvegarde, { etoiles: 2 })).bilan.braises).toBe(0);
+  });
+
+  it('une région de 10 niveaux gagnés en 3 étoiles rapporte 80 braises au plus : deux disciples', () => {
+    let s = sauvegardeVide();
+    let total = 0;
+    for (let n = 1; n <= 10; n++) {
+      const t = reussiAvecBilan(enFin(s, { niveau: n, etoiles: 3 }));
+      total += t.bilan.braises;
+      s = t.sauvegarde;
+    }
+    expect(total).toBe(80);
+    expect(Math.floor(total / PRIX_DISCIPLE)).toBe(2);
   });
 
   it('une défaite ne rapporte ni arêtes, ni braises, ni étoiles, mais la moitié de l’expérience', () => {
@@ -427,22 +479,72 @@ describe('fin de partie', () => {
     expect(t.sauvegarde.meta.monnaies).toEqual({ aretes: PLAFOND_MONNAIE, braises: PLAFOND_MONNAIE });
   });
 
-  it('les objets équipés et utilisés sont retirés du stock, les autres restent', () => {
-    const s = joueur({ meta: { objets: { fiole_soufre: 3, herbe_sabbat: 2, griffe_renfort: 1, sablier: 4 } } });
+  // Les objets emportés sont débités au lancement (`debiterObjetsDePartie`) : le stock de ces tests est celui d'après le lancement.
+  it('les objets utilisés restent consommés, ceux qui ont été emportés sans servir sont rendus', () => {
+    const s = joueur({ meta: { objets: { fiole_soufre: 2, herbe_sabbat: 2, griffe_renfort: 1, sablier: 2 } } });
     const t = reussiAvecBilan(
       enFin(s, { objetsEquipes: ['sablier', 'sablier', 'fiole_soufre'], objetsUtilises: ['sablier', 'fiole_soufre'] }),
     );
     expect(t.sauvegarde.meta.objets).toEqual({ fiole_soufre: 2, herbe_sabbat: 2, griffe_renfort: 1, sablier: 3 });
     expect(t.bilan.objetsConsommes).toEqual(['sablier', 'fiole_soufre']);
-    // Équipés mais non utilisés : rien n'est retiré.
-    const intact = reussiAvecBilan(enFin(s, { objetsEquipes: ['sablier'], objetsUtilises: [] }));
-    expect(intact.sauvegarde.meta.objets).toEqual(s.meta.objets);
+    expect(t.bilan.objetsRendus).toEqual(['sablier']);
+    // Rien d'utilisé : tout est rendu.
+    const rendu = reussiAvecBilan(enFin(s, { objetsEquipes: ['sablier', 'herbe_sabbat'], objetsUtilises: [] }));
+    expect(rendu.sauvegarde.meta.objets).toEqual({ fiole_soufre: 2, herbe_sabbat: 3, griffe_renfort: 1, sablier: 3 });
+    // Tout utilisé : rien n'est rendu.
+    const consomme = reussiAvecBilan(enFin(s, { objetsEquipes: ['sablier'], objetsUtilises: ['sablier'] }));
+    expect(consomme.sauvegarde.meta.objets).toEqual(s.meta.objets);
+    expect(consomme.bilan.objetsRendus).toEqual([]);
   });
 
-  it('les objets sont consommés aussi en cas de défaite', () => {
-    const s = joueur({ meta: { objets: { fiole_soufre: 1, herbe_sabbat: 0, griffe_renfort: 0, sablier: 0 } } });
-    const t = reussiAvecBilan(enFin(s, { statut: 'defaite', etoiles: 0, objetsEquipes: ['fiole_soufre'], objetsUtilises: ['fiole_soufre'] }));
-    expect(t.sauvegarde.meta.objets.fiole_soufre).toBe(0);
+  it('les objets non utilisés sont rendus aussi après une défaite', () => {
+    const s = joueur({ meta: { objets: { fiole_soufre: 0, herbe_sabbat: 0, griffe_renfort: 0, sablier: 0 } } });
+    const t = reussiAvecBilan(enFin(s, { statut: 'defaite', etoiles: 0, objetsEquipes: ['fiole_soufre', 'sablier'], objetsUtilises: ['fiole_soufre'] }));
+    expect(t.sauvegarde.meta.objets).toEqual({ fiole_soufre: 0, herbe_sabbat: 0, griffe_renfort: 0, sablier: 1 });
+  });
+
+  it('le stock rendu ne dépasse jamais 10 (un achat a pu le remplir entre-temps)', () => {
+    const s = joueur({ meta: { objets: { fiole_soufre: 10, herbe_sabbat: 9, griffe_renfort: 0, sablier: 0 } } });
+    const t = reussiAvecBilan(enFin(s, { objetsEquipes: ['fiole_soufre', 'herbe_sabbat', 'herbe_sabbat'], objetsUtilises: [] }));
+    expect(t.sauvegarde.meta.objets).toMatchObject({ fiole_soufre: 10, herbe_sabbat: 10 });
+    expect(t.bilan.objetsRendus).toEqual(['herbe_sabbat']);
+  });
+
+  describe('abandon', () => {
+    const abandon = (s: Sauvegarde, o: Partial<Parameters<typeof enregistrerFinDePartie>[1]> = {}) =>
+      enFin(s, { statut: 'abandon', etoiles: 0, heros: 'charlie', ...o });
+
+    it('ne rapporte aucune expérience, aucune arête, aucune braise, aucune étoile, et ne débloque rien', () => {
+      const avant = joueur({ niveaux: 2, aretes: 40, braises: 7 });
+      const t = reussiAvecBilan(abandon(avant, { niveau: 3 }));
+      expect(t.bilan).toMatchObject({ aretes: 0, braises: 0, xp: 0, nouvellesEtoiles: 0, heros: null, niveauHeros: null });
+      expect(t.sauvegarde.meta.monnaies).toEqual(avant.meta.monnaies);
+      expect(t.sauvegarde.meta.heros).toEqual(avant.meta.heros);
+      expect(t.sauvegarde.progression).toEqual(avant.progression);
+    });
+
+    it('seule une défaite réelle donne la moitié de l’expérience : l’abandon du même niveau ne donne rien', () => {
+      const s = sauvegardeVide();
+      const defaite = reussiAvecBilan(enFin(s, { statut: 'defaite', etoiles: 0, heros: 'charlie' }));
+      expect(defaite.bilan.xp).toBe(60); // niveau 1 : (100 + 20) / 2
+      const quitte = reussiAvecBilan(abandon(s));
+      expect(quitte.bilan.xp).toBe(0);
+      expect(quitte.sauvegarde.meta.heros.charlie?.xp).toBe(0);
+    });
+
+    it('rend les objets non utilisés, garde consommés ceux qui ont servi', () => {
+      const s = joueur({ meta: { objets: { fiole_soufre: 1, herbe_sabbat: 0, griffe_renfort: 0, sablier: 0 } } });
+      const t = reussiAvecBilan(abandon(s, { objetsEquipes: ['fiole_soufre', 'sablier', 'sablier'], objetsUtilises: ['sablier'] }));
+      expect(t.sauvegarde.meta.objets).toEqual({ fiole_soufre: 2, herbe_sabbat: 0, griffe_renfort: 0, sablier: 1 });
+      expect(t.bilan.objetsConsommes).toEqual(['sablier']);
+    });
+
+    it('n’est pas bloqué par un héros inconnu ni un niveau non ouvert : seuls les objets comptent', () => {
+      const s = joueur({ meta: { objets: { fiole_soufre: 0, herbe_sabbat: 0, griffe_renfort: 0, sablier: 0 } } });
+      const t = reussiAvecBilan(abandon(s, { niveau: 50, heros: 'zeus', objetsEquipes: ['sablier'], objetsUtilises: [] }));
+      expect(t.sauvegarde.meta.objets.sablier).toBe(1);
+      expect(raison(abandon(s, { objetsEquipes: ['sablier'], objetsUtilises: ['sablier', 'sablier'] }))).toBe('objets_invalides');
+    });
   });
 
   it('refuse d’utiliser plus d’objets qu’on n’en a emporté, ou un objet inconnu', () => {
@@ -451,12 +553,6 @@ describe('fin de partie', () => {
     expect(raison(enFin(s, { objetsEquipes: ['sablier'], objetsUtilises: ['fiole_soufre'] }))).toBe('objets_invalides');
     expect(raison(enFin(s, { objetsEquipes: ['potion'], objetsUtilises: ['potion'] }))).toBe('objets_invalides');
     expect(raison(enFin(s, { objetsEquipes: ['sablier', 'sablier', 'sablier', 'sablier'], objetsUtilises: [] }))).toBe('objets_invalides');
-  });
-
-  it('le stock ne descend jamais sous zéro (un autre onglet l’a peut-être déjà entamé)', () => {
-    const s = joueur({ meta: { objets: { fiole_soufre: 0, herbe_sabbat: 0, griffe_renfort: 0, sablier: 0 } } });
-    const t = reussiAvecBilan(enFin(s, { objetsEquipes: ['sablier'], objetsUtilises: ['sablier'] }));
-    expect(t.sauvegarde.meta.objets.sablier).toBe(0);
   });
 
   it('les étoiles gagnées s’ajoutent aux étoiles disponibles pour l’arbre', () => {
@@ -492,6 +588,7 @@ describe('suite de transactions au hasard', () => {
         () => acheterDisciple(s, h),
         () => acheterObjet(s, choisir(objets), 1 + alea(3)),
         () => equiperObjets(s, [choisir(objets), choisir(objets), choisir(objets)].slice(0, alea(4))),
+        () => debiterObjetsDePartie(s, [choisir(objets), choisir(objets)].slice(0, alea(3))),
         () => choisirHeros(s, choisir(dieuxDuHeros), h),
         () => repartirPoint(s, h, `${h}_${choisir(['a', 'b', 'c', 'ultime', 'x'])}`, DEFS_TEST),
         () => reinitialiserPoints(s, h),
@@ -500,7 +597,7 @@ describe('suite de transactions au hasard', () => {
             s,
             {
               niveau: 1 + alea(Math.min(12, s.progression.niveauMax + 1)),
-              statut: alea(3) === 0 ? 'defaite' : 'victoire',
+              statut: choisir(['defaite', 'victoire', 'abandon'] as const),
               difficulte: choisir(['chaton', 'matou', 'vieux_sage']),
               etoiles: 1 + alea(3),
               heros: alea(2) === 0 ? h : null,
@@ -509,7 +606,7 @@ describe('suite de transactions au hasard', () => {
             },
             DEFS_TEST,
           ),
-      ][alea(9)]?.();
+      ][alea(10)]?.();
       if (t?.ok) {
         reussies++;
         s = t.sauvegarde;

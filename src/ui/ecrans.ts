@@ -135,6 +135,9 @@ export function lignesBilan(bilan: BilanPartie): string[] {
   if (bilan.objetsConsommes.length > 0) {
     lignes.push(t('fin.bilan_objets', { noms: bilan.objetsConsommes.map((o) => tCle(OBJETS[o].nom)).join(', ') }));
   }
+  if (bilan.objetsRendus.length > 0) {
+    lignes.push(t('fin.bilan_rendus', { noms: bilan.objetsRendus.map((o) => tCle(OBJETS[o].nom)).join(', ') }));
+  }
   return lignes;
 }
 

@@ -47,6 +47,7 @@ export const fr = {
 
   // Chargement raté
   'erreur.chargement': 'Le chargement a échoué. Réessaie dans un instant.',
+  'erreur.sauvegarde': 'La sauvegarde a échoué. Réessaie dans un instant.',
 
   // Sauvegarde : avis discrets au démarrage
   'sauvegarde.corrompue': 'Ta sauvegarde était illisible : une copie est gardée de côté, tu repars de zéro.',
@@ -160,6 +161,7 @@ export const fr = {
   'refus.competence_au_maximum': 'Cette compétence est au sommet.',
   'refus.objet_inconnu': 'Il n’y a pas d’objet ici.',
   'refus.objet_utilise': 'Cet objet est déjà utilisé.',
+  'refus.vies_pleines': 'Tes vies sont pleines : l’Herbe est gardée pour plus tard.',
   'refus.plus_de_vague': 'Il ne reste plus de vague.',
 
   // Partie : pause, orientation et fin

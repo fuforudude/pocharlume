@@ -19,7 +19,8 @@ export const frMeta = {
   'fiche.objet_libre': 'Libre',
   'fiche.objet_retirer': 'Retirer : {nom}',
   'fiche.objet_ajouter': 'Emporter : {nom} (en stock : {n})',
-  'fiche.objet_stock_vide': 'Il ne te reste plus de {nom}.',
+  'fiche.objet_reste': '×{n}',
+  'fiche.objet_stock_vide':'Il ne te reste plus de {nom}.',
   'fiche.objets_pleins': 'Les trois emplacements sont pris : retire un objet d’abord.',
   'fiche.sans_objet': 'Aucun objet en stock : la boutique en vend.',
   'fiche.lancement_refuse': 'Impossible de lancer ce niveau : {raison}',
@@ -39,7 +40,8 @@ export const frMeta = {
   'heros.ultime': 'Ultime',
   'heros.niveau_requis': 'Niveau {n} requis',
   'heros.placer': 'Placer un point : {nom}',
-  'heros.confirmer_titre': 'Recruter {nom} ?',
+  'heros.plus': '+',
+  'heros.manque_braises': 'Il te manque {n} braises.',  'heros.confirmer_titre': 'Recruter {nom} ?',
   'heros.confirmer_detail': 'Cela coûte {n} braises. Il t’en restera {m}.',
   'heros.confirmer': 'Recruter',
   'heros.annuler': 'Annuler',
@@ -68,7 +70,6 @@ export const frMeta = {
   'boutique.stock_plein': 'Stock plein',
   'boutique.achete': '{nom} acheté.',
   'boutique.arbre_reinitialise': 'Étoiles rendues : {n}.',
-
   // Partie : objets emportés et compétences d'une tour spécialisée
   'hud.objet': 'Objet : {nom}',
   'hud.objet_utilise': 'Objet utilisé : {nom}',
@@ -87,6 +88,7 @@ export const frMeta = {
   'fin.bilan_xp': '+{n} XP pour {nom}',
   'fin.bilan_niveau': '{nom} passe au niveau {n} !',
   'fin.bilan_objets': 'Objets consommés : {noms}',
+  'fin.bilan_rendus': 'Objets rendus : {noms}',
   'fin.bilan_refuse': 'Les gains de cette partie n’ont pas pu être enregistrés.',
 
   // Raisons de refus d'une transaction de la méta-progression

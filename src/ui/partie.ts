@@ -28,8 +28,9 @@ import { el } from './dom';
 export interface ResultatPartie {
   /** Numéro du niveau de campagne (1 à 100). */
   readonly niveau: number;
-  readonly statut: 'victoire' | 'defaite';
-  /** 0 en cas de défaite, 1 à 3 en cas de victoire. */
+  /** `abandon` : le joueur a quitté avant la fin (rendu seulement à `surQuitter`, jamais à `surFin`). */
+  readonly statut: 'victoire' | 'defaite' | 'abandon';
+  /** 0 en cas de défaite ou d'abandon, 1 à 3 en cas de victoire. */
   readonly etoiles: number;
   readonly vies: number;
   readonly viesDepart: number;
@@ -52,12 +53,21 @@ export interface OptionsPartie {
   parent?: HTMLElement;
   /**
    * Appelée par les boutons « Quitter » (pause et fin). Absente : ces boutons n'apparaissent pas. `abandon` est le
-   * résultat d'une défaite quand la partie n'était pas finie (abandon : à enregistrer), null quand elle l'était (déjà
-   * enregistrée par `surFin`).
+   * résultat (statut `abandon`) quand la partie n'était pas finie (à enregistrer : ni expérience ni récompense, objets non
+   * utilisés rendus), null quand elle l'était (déjà enregistrée par `surFin`).
    */
   surQuitter?: (abandon: ResultatPartie | null) => void;
-  /** Config d'une nouvelle tentative (« Rejouer »), d'après celle de la partie. Par défaut : la même, avec une autre graine. */
-  nouvelleConfig?: (precedente: ConfigPartie) => ConfigPartie;
+  /**
+   * Config d'une nouvelle tentative (« Rejouer »), d'après celle de la partie. Par défaut : la même, avec une autre graine.
+   * Peut être asynchrone (le lancement débite les objets sous verrou) ; `null` : le lancement est refusé, l'appelant a
+   * dit pourquoi et l'écran de fin reste en place.
+   */
+  nouvelleConfig?: (precedente: ConfigPartie) => ConfigPartie | null | Promise<ConfigPartie | null>;
+  /**
+   * Appelée juste après chaque utilisation d'un objet, avec l'état courant : c'est le moment de sauvegarder la partie
+   * en cours, pour qu'une reprise ne rende pas l'objet de nouveau disponible. L'appelant ne doit pas modifier l'état.
+   */
+  surObjet?: (etat: EtatPartie) => void;
   /** Appelée dès que la partie tourne, y compris après « Rejouer » (qui lance une nouvelle partie). */
   surDemarrage?: (partie: PartieEnCours) => void;
   /**
@@ -160,6 +170,7 @@ export async function lancerNiveau(
   let finie = false;
   let finVue = 0;
   let ecranFinAffiche = false;
+  let relanceEnCours = false;
   /** Le butin de la partie, quand `surFin` en promet un. */
   let retourFin: Promise<RetourFin | null> | null = null;
   let identifiantImage = 0;
@@ -197,7 +208,7 @@ export async function lancerNiveau(
   };
   /** Les objets emportés que la partie a utilisés, un par emplacement utilisé. */
   const objetsUtilises = (): string[] => etat.config.objets.filter((_, i) => etat.objetsUtilises[i] === true);
-  const resultatDe = (statut: 'victoire' | 'defaite'): ResultatPartie => ({
+  const resultatDe = (statut: 'victoire' | 'defaite' | 'abandon'): ResultatPartie => ({
     niveau: niveau.numero,
     statut,
     etoiles: statut === 'victoire' ? etat.etoiles : 0,
@@ -210,8 +221,9 @@ export async function lancerNiveau(
   });
   const quitter = options.surQuitter
     ? (): void => {
-        // Partir avant la fin, c'est perdre : l'appelant enregistre cette défaite (objets utilisés consommés).
-        const abandon = finie ? null : resultatDe('defaite');
+        // Partir avant la fin n'est pas perdre : l'appelant enregistre un abandon (ni expérience ni récompense, objets
+        // utilisés consommés, les autres rendus). Seules les vies à 0 font une défaite.
+        const abandon = finie ? null : resultatDe('abandon');
         arreter();
         options.surQuitter?.(abandon);
       }
@@ -361,12 +373,22 @@ export async function lancerNiveau(
     const continuer = options.surContinuer;
     afficherFin(racine, atlas, { statut: etat.statut, etoiles: etat.etoiles, vies: etat.vies, viesDepart: etat.viesDepart }, {
       surRejouer: () => {
-        arreter();
-        // Une nouvelle tentative repart d'une partie neuve, jamais de la partie reprise.
-        const relance: OptionsPartie = { ...options };
-        delete relance.reprise;
-        const suivante = options.nouvelleConfig ? options.nouvelleConfig(config) : { ...config, graine: graineSuivante(config.graine) };
-        lancerNiveau(niveau, suivante, surFin, relance).catch(console.error);
+        if (relanceEnCours) return;
+        relanceEnCours = true;
+        // Le lancement peut être refusé (stock d'objets entamé) : l'écran de fin reste alors en place.
+        Promise.resolve(options.nouvelleConfig ? options.nouvelleConfig(config) : { ...config, graine: graineSuivante(config.graine) })
+          .then((suivante) => {
+            if (suivante === null || arretee) return;
+            arreter();
+            // Une nouvelle tentative repart d'une partie neuve, jamais de la partie reprise.
+            const relance: OptionsPartie = { ...options };
+            delete relance.reprise;
+            lancerNiveau(niveau, suivante, surFin, relance).catch(console.error);
+          })
+          .catch(console.error)
+          .finally(() => {
+            relanceEnCours = false;
+          });
       },
       ...(etat.statut === 'victoire' && continuer
         ? {
@@ -406,13 +428,15 @@ export async function lancerNiveau(
         actions.length = 0;
         rendu.apresPas(etat, temps);
         mesures.pasSimules++;
-        if (options.surVague && etat.statut === 'en_cours') {
+        if (etat.statut === 'en_cours' && (options.surVague || options.surObjet)) {
+          let vague = false;
+          let objet = false;
           for (const evenement of etat.evenements) {
-            if (evenement.type === 'vague') {
-              options.surVague(etat);
-              break;
-            }
+            if (evenement.type === 'vague') vague = true;
+            else if (evenement.type === 'objet') objet = true;
           }
+          if (vague) options.surVague?.(etat);
+          if (objet) options.surObjet?.(etat);
         }
         if (etat.statut !== 'en_cours') {
           finVue = maintenant;

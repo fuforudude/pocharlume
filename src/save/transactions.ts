@@ -155,6 +155,23 @@ export function equiperObjets(s: Sauvegarde, objets: readonly string[]): Transac
   return avecMeta(s, { choix: { ...s.meta.choix, objets: liste } });
 }
 
+/**
+ * Lancement d'une partie : les objets emportés sont débités du stock tout de suite (un exemplaire par emplacement).
+ * Refusé si le stock ne couvre plus le choix (un autre onglet l'a entamé, par exemple) : la partie ne se lance pas.
+ * En fin de partie enregistrée, les objets non utilisés sont recrédités (`enregistrerFinDePartie`) ; une partie
+ * remplacée sans être finie ne rend rien.
+ */
+export function debiterObjetsDePartie(s: Sauvegarde, objets: readonly string[]): Transaction<RaisonEquipement> {
+  if (Array.isArray(objets) && objets.length > EMPLACEMENTS_OBJETS) return refus('trop_d_objets');
+  const liste = listeObjets(objets);
+  if (!liste) return refus('objet_inconnu');
+  for (const objet of liste) if (compte(liste, objet) > s.meta.objets[objet]) return refus('objet_hors_stock');
+  if (liste.length === 0) return { ok: true, sauvegarde: s };
+  const stock = { ...s.meta.objets };
+  for (const objet of liste) stock[objet] -= 1;
+  return avecMeta(s, { objets: stock });
+}
+
 // --- Compétences des héros ------------------------------------------------------------------------------------
 
 /** Place un point de compétence : +1 rang dans une compétence du héros, dans la limite de ses points et de son niveau. */
@@ -190,16 +207,20 @@ export function reinitialiserPoints(s: Sauvegarde, heros: string): Transaction<R
 /** Ce que l'interface sait d'une partie terminée. */
 export interface FinDePartieMeta {
   readonly niveau: number;
-  readonly statut: 'victoire' | 'defaite';
+  /**
+   * `abandon` : le joueur a quitté avant la fin. Il ne rapporte ni expérience, ni étoiles, ni arêtes, ni braises ;
+   * seuls les objets non utilisés sont rendus. Seule une défaite réelle (vies à 0) donne la moitié de l'expérience.
+   */
+  readonly statut: 'victoire' | 'defaite' | 'abandon';
   /** Difficulté jouée (clé de `DIFFICULTES_SAUVEGARDE`) ; seule une victoire en a besoin. */
   readonly difficulte: string;
-  /** Étoiles de la victoire (1 à 3) ; ignorées pour une défaite. */
+  /** Étoiles de la victoire (1 à 3) ; ignorées pour une défaite ou un abandon. */
   readonly etoiles: number;
-  /** Héros joué : il reçoit l'expérience. Absent ou null : pas d'expérience. */
+  /** Héros joué : il reçoit l'expérience. Absent ou null : pas d'expérience. Ignoré pour un abandon. */
   readonly heros?: string | null;
-  /** Objets emportés dans la partie (les emplacements, 3 au plus). */
+  /** Objets emportés dans la partie (les emplacements, 3 au plus), déjà débités du stock au lancement. */
   readonly objetsEquipes?: readonly string[];
-  /** Objets que le joueur a utilisés pendant la partie, un par emplacement utilisé : retirés du stock. */
+  /** Objets que le joueur a utilisés pendant la partie, un par emplacement utilisé : consommés pour de bon. */
   readonly objetsUtilises?: readonly string[];
 }
 
@@ -214,6 +235,8 @@ export interface BilanPartie {
   /** Niveau du héros avant et après la partie (null sans héros ou sans `defs`). */
   readonly niveauHeros: { readonly avant: number; readonly apres: number } | null;
   readonly objetsConsommes: readonly IdObjet[];
+  /** Objets emportés mais pas utilisés, recrédités au stock (dans la limite du stock maximal). */
+  readonly objetsRendus: readonly IdObjet[];
 }
 
 export type ResultatFin =
@@ -231,18 +254,31 @@ function inclus(utilises: readonly IdObjet[], equipes: readonly IdObjet[]): bool
   return true;
 }
 
+/** `equipes` privé de `utilises` (avec les répétitions) : les objets emportés qui n'ont pas servi. */
+function nonUtilises(equipes: readonly IdObjet[], utilises: readonly IdObjet[]): IdObjet[] {
+  const reste = [...equipes];
+  for (const objet of utilises) {
+    const i = reste.indexOf(objet);
+    if (i >= 0) reste.splice(i, 1);
+  }
+  return reste;
+}
+
 /**
  * Enregistre une partie terminée : victoire (étoiles, niveau suivant débloqué, arêtes, braises), expérience du héros
- * joué, objets utilisés retirés du stock. Une défaite ne rapporte que la moitié de l'expérience. Une partie invalide
- * est refusée en entier : rien ne bouge. `defs` (facultatif) sert seulement au niveau du héros dans le bilan.
+ * joué. Une défaite (vies à 0) ne rapporte que la moitié de l'expérience ; un abandon ne rapporte rien. Les objets
+ * emportés ont été débités au lancement : ceux qui n'ont pas servi sont recrédités (le stock reste borné à 10), ceux qui
+ * ont servi restent consommés. Une partie invalide est refusée en entier : rien ne bouge. `defs` (facultatif) sert
+ * seulement au niveau du héros dans le bilan.
  */
 export function enregistrerFinDePartie(s: Sauvegarde, fin: FinDePartieMeta, defs?: DefsMeta): ResultatFin {
   const victoire = fin.statut === 'victoire';
-  if (!niveauDebloque(s, fin.niveau)) return refus('niveau_invalide');
+  const abandon = fin.statut === 'abandon';
+  if (!abandon && !niveauDebloque(s, fin.niveau)) return refus('niveau_invalide');
   const difficulte = DIFFICULTES_SAUVEGARDE.find((d) => d === fin.difficulte);
   if (victoire && difficulte === undefined) return refus('difficulte_inconnue');
   if (victoire && !estEntierEntre(fin.etoiles, 1, 3)) return refus('etoiles_invalides');
-  const heros = fin.heros ?? null;
+  const heros = abandon ? null : (fin.heros ?? null);
   if (heros !== null && (!estIdHeros(heros) || !possede(s, heros))) return refus('heros_non_possede');
   const equipes = listeObjets(fin.objetsEquipes ?? []);
   const utilises = listeObjets(fin.objetsUtilises ?? []);
@@ -271,8 +307,14 @@ export function enregistrerFinDePartie(s: Sauvegarde, fin: FinDePartieMeta, defs
     if (defs) niveauHeros = { avant: niveauHerosDepuisXp(xpAvant, defs.seuilsXp), apres: niveauHerosDepuisXp(xpApres, defs.seuilsXp) };
   }
 
+  // Les objets emportés ont été débités au lancement : on rend ceux qui n'ont pas servi, sans dépasser le stock maximal.
   const objets = { ...s.meta.objets };
-  for (const objet of utilises) objets[objet] = Math.max(0, objets[objet] - 1);
+  const rendus: IdObjet[] = [];
+  for (const objet of nonUtilises(equipes, utilises)) {
+    if (objets[objet] >= STOCK_MAX_OBJET) continue;
+    objets[objet] += 1;
+    rendus.push(objet);
+  }
 
   return {
     ok: true,
@@ -285,6 +327,7 @@ export function enregistrerFinDePartie(s: Sauvegarde, fin: FinDePartieMeta, defs
       heros,
       niveauHeros,
       objetsConsommes: utilises,
+      objetsRendus: rendus,
     },
   };
 }

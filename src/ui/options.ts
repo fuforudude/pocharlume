@@ -1,4 +1,4 @@
-// Écran des options : volumes (rangés pour plus tard, il n'y a pas encore de son), vitesse par défaut, export de
+// Écran des options : volume des bruitages (la musique arrive au jalon 5), vitesse par défaut, export de
 // la progression en code à copier, import d'un code. Un import ne remplace rien sans confirmation, et un code
 // refusé n'altère rien : la raison s'affiche (import-refus.ts).
 import { t } from '../i18n';
@@ -13,6 +13,9 @@ export interface EcranOptions {
 }
 
 const VITESSES: readonly VitesseJeu[] = [1, 2];
+
+/** La musique d'ambiance arrive au jalon 5 : d'ici là son curseur est masqué (le réglage `musique` reste dans la sauvegarde). */
+const MUSIQUE_DISPONIBLE = false as boolean;
 
 /** Copie dans le presse-papiers ; false si le navigateur refuse (la sélection reste alors à copier à la main). */
 async function copierTexte(texte: string): Promise<boolean> {
@@ -122,7 +125,8 @@ export function afficherOptions(parent: HTMLElement, session: Session, surFermer
     ligneVitesse.append(choixVitesse);
     reglages.replaceChildren(
       curseurVolume(t('options.son'), lire().son, (son) => { void session.changerReglages({ son }); }),
-      curseurVolume(t('options.musique'), lire().musique, (musique) => { void session.changerReglages({ musique }); }),
+      // Pas de musique avant le jalon 5 : le curseur est masqué, le réglage reste en sauvegarde.
+      ...(MUSIQUE_DISPONIBLE ? [curseurVolume(t('options.musique'), lire().musique, (musique) => { void session.changerReglages({ musique }); })] : []),
       ligneVitesse,
     );
   };

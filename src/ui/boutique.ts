@@ -57,6 +57,12 @@ export function afficherBoutique(parent: HTMLElement, options: OptionsBoutique):
       if (!r.ok) jouerInterface('refus');
       else if (achat) jouerInterface('achat');
       ecran.dire(r.ok ? succes : texteRefusMeta(r.raison), !r.ok);
+    } catch (erreur) {
+      // La session lève si l'écriture échoue (verrou, stockage) : on le dit au lieu de laisser un rejet orphelin.
+      console.error(erreur);
+      dessiner();
+      jouerInterface('refus');
+      ecran.dire(t('erreur.sauvegarde'), true);
     } finally {
       occupe = false;
     }
