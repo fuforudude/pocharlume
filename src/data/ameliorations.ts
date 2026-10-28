@@ -21,17 +21,17 @@ function branche(id: string, cible: DefBranche['cible'], effets: readonly ModArb
 
 export const BRANCHES = {
   /** Soldats des casernes : plus de PV. */
-  caserne: branche('caserne', 'caserne', cinq({ pvSoldats: [0.04, 0.08, 0.12, 0.16, 0.2] })),
+  caserne: branche('caserne', 'caserne', cinq({ pvSoldats: [0.016, 0.032, 0.048, 0.064, 0.08] })),
   /** Tours de tir : plus de portée. */
-  tir: branche('tir', 'tir', cinq({ portee: [0.03, 0.06, 0.09, 0.12, 0.15] })),
+  tir: branche('tir', 'tir', cinq({ portee: [0.012, 0.024, 0.036, 0.048, 0.06] })),
   /** Tours de magie : plus de dégâts. */
-  magie: branche('magie', 'magie', cinq({ degats: [0.03, 0.06, 0.09, 0.12, 0.15] })),
+  magie: branche('magie', 'magie', cinq({ degats: [0.012, 0.024, 0.036, 0.048, 0.06] })),
   /** Artillerie : zones plus larges. */
-  artillerie: branche('artillerie', 'artillerie', cinq({ zone: [0.04, 0.08, 0.12, 0.16, 0.2] })),
+  artillerie: branche('artillerie', 'artillerie', cinq({ zone: [0.016, 0.032, 0.048, 0.064, 0.08] })),
   /** Sorts : recharge plus courte. */
-  sorts: branche('sorts', 'sorts', cinq({ recharge: [0.04, 0.08, 0.12, 0.16, 0.2] })),
+  sorts: branche('sorts', 'sorts', cinq({ recharge: [0.016, 0.032, 0.048, 0.064, 0.08] })),
   /** Héros : plus de PV et de dégâts. */
-  heros: branche('heros', 'heros', cinq({ pvHeros: [0.04, 0.08, 0.12, 0.16, 0.2], degatsHeros: [0.03, 0.06, 0.09, 0.12, 0.15] })),
+  heros: branche('heros', 'heros', cinq({ pvHeros: [0.016, 0.032, 0.048, 0.064, 0.08], degatsHeros: [0.012, 0.024, 0.036, 0.048, 0.06] })),
 } as const satisfies Record<string, DefBranche>;
 
 export type IdBranche = keyof typeof BRANCHES;
