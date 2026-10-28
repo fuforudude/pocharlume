@@ -16,6 +16,11 @@ export const EQUILIBRAGE = {
    * 3,5 tuiles pour qu'une caserne à une case du chemin l'atteigne quel que soit l'axe. La puissance ne la compte pas.
    */
   elargissementRalliement: 1,
+  /**
+   * Dans un niveau qui compte des volants ou des furtifs, nombre de fois où chaque ennemi ordinaire figure dans la liste du tirage :
+   * à 2, un volant ou un furtif est tiré deux fois moins souvent qu'un ennemi ordinaire.
+   */
+  repetitionOrdinaires: 2,
   /** Valeur d'un point de vie (effectif) de bloqueur, en DPS équivalent. */
   valeurBlocageParPv: 0.013,
   /** Vitesse (tuiles/s) dont le facteur de menace vaut 1. */

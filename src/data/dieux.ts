@@ -130,6 +130,8 @@ const charlie: DefDieu = {
     degats: [20, 30],
     effets: [{ type: 'etourdissement', chance: 1, duree: 1, valeur: 0 }],
     onde: true,
+    revele: true,
+    volants: true,
   }),
 };
 
