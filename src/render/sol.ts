@@ -32,6 +32,14 @@ export function bruit(x: number, y: number): number {
   return (h >>> 0) / 4294967296;
 }
 
+/**
+ * Poids cumulés des variantes de sol : la 1re est un aplat uni, les autres (taches, flaques, ornières) sont rares pour
+ * que les répétitions ne fassent pas de bruit. Herbe : 78 % / 12 % / 10 %.
+ */
+export const SEUILS_HERBE: readonly number[] = [0.78, 0.9];
+/** Terre unie du chemin, boue, pavés : 80 % de la 1re variante, 20 % de la 2e. */
+export const SEUILS_DEUX_VARIANTES: readonly number[] = [0.8];
+
 /** Choisit une variante d'après des poids cumulés (ex. [0.6, 0.85] : 60 % de la 1re, 25 % de la 2e, 15 % de la 3e). */
 function variante(x: number, y: number, seuils: readonly number[]): number {
   const b = bruit(x, y);
@@ -94,7 +102,7 @@ function tuileChemin(masque: Uint8Array, largeur: number, hauteur: number, x: nu
     if (!chemin(x - 1, y + 1)) diagonales.push('so');
     if (!chemin(x + 1, y + 1)) diagonales.push('se');
     const seule = diagonales.length === 1 ? diagonales[0] : undefined;
-    return seule ? `chemin-coin-int-${seule}` : `chemin-${String(variante(x, y, [0.7]))}`;
+    return seule ? `chemin-coin-int-${seule}` : `chemin-${String(variante(x, y, SEUILS_DEUX_VARIANTES))}`;
   }
   if (cotes === 2 && (n || s) && (o || e)) return `chemin-coin-ext-${n ? 'n' : 's'}${o ? 'o' : 'e'}`;
   // Un côté, ou un couloir d'une case de large (deux côtés opposés) : un bord, du nord au sud en priorité.
@@ -116,7 +124,7 @@ export function construireSol(carte: Carte, visuel: VisuelCarte, demiLargeur: nu
         continue;
       }
       const zone = visuel.zones.find((z) => x >= z.x && x < z.x + z.largeur && y >= z.y && y < z.y + z.hauteur);
-      const base = zone ? `${zone.sol}-${String(variante(x, y, [0.7]))}` : `herbe-${String(variante(x, y, [0.62, 0.86]))}`;
+      const base = zone ? `${zone.sol}-${String(variante(x, y, SEUILS_DEUX_VARIANTES))}` : `herbe-${String(variante(x, y, SEUILS_HERBE))}`;
       tuiles.push(nomTuile(visuel.region, base));
     }
   }

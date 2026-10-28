@@ -2,7 +2,6 @@
 # Mêmes noms que la région 1, préfixés par r4- (le rendu choisit le jeu d'après `region` du visuel) : herbe-1..3, chemin-1..2,
 # chemin-bord-n/e/s/o, chemin-coin-ext-no/ne/se/so, chemin-coin-int-no/ne/se/so, boue-1..2, paves-1..2. Sans contour, ancre en
 # haut à gauche ; les bords et coins sont dessinés une fois (côté nord, nord-ouest) puis tournés, comme dans tuiles-village.txt.
-# Les grilles ont été produites une première fois par un script (graine fixe) puis se retouchent à la main ici.
 categorie tuile
 palette commune
 taille 16 16
@@ -12,118 +11,121 @@ couleur 1 1e3a3a
 couleur 2 2c5250
 couleur 3 4a7a72
 couleur 4 9ac4b8
+# Redessinées au jalon 3 (sols moins granuleux) : grands aplats, taches douces et rares, herbe-1, chemin-1 et boue-1 unies (le rendu les tire le plus souvent),
+# lisière du chemin adoucie (une seule ligne d’herbe sombre). Générées une première fois par un script jetable, puis à retoucher à la main ici.
 
+# Aplat uni : la plus fréquente.
 sprite r4-herbe-1
-hhhhhhkkHhhhhhhh
-hhhEHhhhhHhhEhhh
-khhhhhhhhhhhhkkh
-hhhhhhhhhhhkHHhh
-hHHhhHhhhhEhhHhh
-hhhEEhhkhhhhhkhh
-hEhkHHhhEEhhkkhE
-hhhhhhHHhhhhEEhh
-hhhhhhhhhhhhkkkh
-hhhhhhhhhhhkhhhE
-hhHkkhhhkkhHhhhh
-hhhkEhhhhhhkhhhh
-HHhkhkhhhHhhhkkE
-hkkhHhhkhhkhkkkh
-HhhhhhhkhEhhEhhh
-hhhhhHEEkkhkhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
 
-# Avec des taches claires.
+# Deux taches douces, une sombre et une claire.
 sprite r4-herbe-2
-HHhHHkkEhhhhhhhh
-hhhhkhhhhhhhhkhh
-hhhkkEhhhhhhhhhh
-hkkHHHhhHhhkkhhh
-hhhHHHHhhkhhhhhH
-hhhhHHhkkkhhkhHE
-hhhhhHhhkhhhhhHh
-hhhHhHhhhHhhkhhh
-hhhhhhhhhhkHhhhh
-hhHhhhhhhhHHhkEE
-khhhhhhhhhHHHhhk
-hhhhhhhEEhhhhhhh
-hhHhhhhhhhhhhhhh
-hhHHhhEEhhhhhkhh
-hhkkhhhhEhhhhhkh
-HhHhhhkhhhhhhkhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhHHHHHhh
+hhhhhhhhHHHHHHHh
+hhhhhhhhHHHHHHHh
+hhhhhhhhhHHHHHhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhkkkkkkhhhhhhhh
+hkkkkkkkkhhhhhhh
+hkkkkkkkkhhhhhhh
+hhkkkkkkhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
 
-# Avec un détail propre à la région.
+# Une tache claire large et une petite touffe.
 sprite r4-herbe-3
-hhHhhhhhkhhhhhhh
 hhhhhhhhhhhhhhhh
-hkhhhhhhhhhhhhhh
-hhhhkhhhhhhhhhhh
-khkhhhhkkhhhhhhh
 hhhhhhhhhhhhhhhh
-hhHHh2222hhhhhHh
-hhhh234222hhhHHH
-EHhh222222hkhkhh
-hhhhh2222khEhhhh
-hhhhhhhhhhhHhhhk
-hhhhhhhhHEhhhhhE
-hkkHhhhHHhhhhhhh
-khhhhhhhhhhEhkkh
-kkkhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhHHHHHHHhh
+hhhhhhhHHHHHHHhh
+hhhhhhhHHHHHHHhh
+hhhhhhhHHHHHHHhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhh2222hhhhhhhhh
+hhh2222hhhhhhhhh
+hhh2222hhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
 hhhhhhhhhhhhhhhh
 
 sprite r4-chemin-1
-mMMmmmmmdmddmmmm
-mdmmmmmmmmmMMmmm
 mmmmmmmmmmmmmmmm
 mmmmmmmmmmmmmmmm
-mmmddMNNmmmmmmmm
-mmmmmmmmmmMmMmmm
-MmmmMMmmmmmmddmm
-mmmmMmmddmmmmmmN
-mmmmmmmmmmmMmmmm
-mmmmmmmmmmmmmmmd
-mdNNmmmmmmmmmmmm
-mmddmmmmmmmmmmmm
-mmmmmmdMMddddmmm
-mmmmmmmmmmmNNNmm
-mmMmmmmMmmdmmmmm
-mmmmmmmdMmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
 
 # Avec des ornières.
 sprite r4-chemin-2
-mdmddmmmmmNNNMmm
-mdmddmmmMmmmdmmm
-MmmmmmmMmmddmMdm
-mmmmmdNNmmNmdMMm
-dMddddmddddddddd
-mmmmmmmmmmdmmmmm
-Mmmmmdmmmmmmdmmd
-mmmdmMMmmmMmmmmm
-mmmdmmmmmmmmddmm
-mmddmmmmmmddddmm
-mdddddddddmddddm
 mmmmmmmmmmmmmmmm
-MmmmmmmmmmmNmmmm
-mmmMMmmmmmmmmmmm
-dddmmddmmmmmmmMM
-mmmmmmNNmmmmmMMm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmddddddddddmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmdddddddddmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
 
 # Bord : sol au nord, chemin au sud ; -e, -s, -o par rotation.
 sprite r4-chemin-bord-n
-HhhhhhEhhhhhhhEE
 hhhhhhhhhhhhhhhh
-hhhhhhhhhhkhHhHH
-hhhhhkhkkhhhhkhh
-kEEhkddhkkhhkddh
-dkhddddddkHddddd
-mddmmmmmmddmmmmm
-mmmmmdddmmmmmmmm
-mMMmmdmmmmmMmmmm
-mmmmMmmmmmmmmmmm
-mmmmdmmmmmmmdmmm
-mmmmmmMMmdmddmmm
-ddmmmmmdddmMmNmM
-mmmmmmmmmmdmMMMd
-mmmMMmmmmmmmmmmm
-mmmdmmmmmmmmmmmm
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhkkkkkhhhhhhh
+kkkkmmmmmkkkhhhk
+mmmmmmmmmmmmkkkm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
 
 sprite r4-chemin-bord-e
 anim repos
@@ -139,22 +141,22 @@ cadre r4-chemin-bord-n/repos.0 tourne 270
 
 # Coin extérieur : sol au nord et à l’ouest (virage).
 sprite r4-chemin-coin-ext-no
-hHHhhhhkhhhhhkkh
-hhhhhEhhkhhhhkhh
-hhhkhkhhhhhhhhhh
-hhhhhHHkkhHkkEhE
-hhhhhhkhhhhhkhhh
-hhHhHkkkhhkkddkk
-hhhhhhkdkHddmmdd
-hhhhhkdMddmmmmmm
-hHHhhkdmmmmmmmmm
-hhhhHhhdmmmdmmMM
-hhhhkhkdmmmmmMmm
-hhhhhkdddMdmmmmm
-kkhhhhdmmmmMmmmd
-hhhhhdmmmNmmmmmm
-hhhHkddmdddmmmmM
-hhhkhkddmmmmmmmm
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhkkkkkkkkk
+hhhhhhkmmmmmmmmm
+hhhhhkmmmmmmmmmm
+hhhhkmmmmmmmmmmm
+hhhhkmmmmmmmmmmm
+hhhhkmmmmmmmmmmm
+hhhhkmmmmmmmmmmm
+hhhhkmmmmmmmmmmm
+hhhhkmmmmmmmmmmm
+hhhhkmmmmmmmmmmm
+hhhhkmmmmmmmmmmm
+hhhhkmmmmmmmmmmm
 
 sprite r4-chemin-coin-ext-ne
 anim repos
@@ -170,22 +172,22 @@ cadre r4-chemin-coin-ext-no/repos.0 tourne 270
 
 # Coin intérieur : un peu de sol au nord-ouest seulement.
 sprite r4-chemin-coin-int-no
-hhhhkdmmmmmmNmMM
-hhhdhdmmmmMmmMmm
-kkkddmmddmmmmmmm
-hddmmmdmmmmmmmdd
-khdmmmmMMmmmmddd
-ddmmmmmddmmmmmmm
-mmmmmmdmmmmmmmmm
-mmmmMMmmmNNNmmmm
-mMMddmmmmmmmMMdm
-dmdmmmmmmmMMmmmm
-dddddmmMMmmmmmmm
+hhhhkmmmmmmmmmmm
+hhhkmmmmmmmmmmmm
+hhkmmmmmmmmmmmmm
+hkmmmmmmmmmmmmmm
+kmmmmmmmmmmmmmmm
 mmmmmmmmmmmmmmmm
-mmdmmMmmmmdmmmmm
-mmmmmdmMmmmmmmmm
-mddmmmmdmmNNmMmm
-mmmmddmmmmmmmmmd
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
 
 sprite r4-chemin-coin-int-ne
 anim repos
@@ -200,75 +202,75 @@ anim repos
 cadre r4-chemin-coin-int-no/repos.0 tourne 270
 
 sprite r4-boue-1
-22122E222222E233
-2122212222E22E22
-1212222112222222
-2232221222222211
-3222222332222111
-2222222112222222
-2222221222222222
-222233222EEE2222
-2EE1122222223312
-1212222222332222
-1111122332222222
 2222222222222222
-22122E2222122222
-2222212322222222
-2112222122221322
-2222112222222221
+2222222222222222
+2222222222222222
+2222222222222222
+2222222222222222
+2222222222222222
+2222222222222222
+2222222222222222
+2222222222222222
+2222222222222222
+2222222222222222
+2222222222222222
+2222222222222222
+2222222222222222
+2222222222222222
+2222222222222222
 
-# Avec un reflet pâle dans l’eau.
+# Avec une flaque.
 sprite r4-boue-2
-2223222222222EE2
-2222233221222122
-3222222222212222
-2222E31222222222
-1332222112322222
-232333332EE22222
-3333344332211222
-2222333322222222
-2221222222222222
-2221222221122222
-21222222E2212222
-2222132112311222
-2211222222222222
-3222112332222222
-2222322221211122
-2222112233233222
+2222222222222222
+2222222222222222
+2222222222222222
+2222222222222222
+2222222222222222
+2222223333222222
+2222333333332222
+2223333333333222
+2233333333333322
+2223333333333222
+2222333333332222
+2222223333222222
+2222222222222222
+2222222222222222
+2222222222222222
+2222222222222222
 
 sprite r4-paves-1
-dNNNNNNNNNNdNENN
+dNNNNNNNNNNdNNNN
 dBBEBBBBBBBdBBBB
-dBBEBEBBBBBdBEBB
-ddddddddddddddEd
+dBBEBBBBBBBdBBBB
+dddddddddddddddd
 NNNNNNdNNNNNNNNN
 BBBBBBdBBBBBBBBB
 BBBBBBdBBBBBBBBB
-dEdddddEdddddddd
-NdNNNNENNNNNdNNN
+dddddddddddddddd
+ddNNNNENNNNNdNNN
 BdEEBBEBBBBBdBBB
-BdBEBBBBBBBEdBBB
+BdEEBBBBBBBddBBB
 ddddEdddddddddEE
-NNNNENEdNNNNENNN
+NNNNEEddNNNNNNNN
 BBBBBBBdBBBBBBBB
-BEBBBBBdBBBBEEBB
+BBBBBBBdBBBBEEBB
 dddddddddddddddd
 
 # Avec un manque : la terre affleure.
 sprite r4-paves-2
 dNNNNNNNNNNdNNNN
 dBBBBBBBBBBdBBBB
-dEBBBBBBBBBdBBBB
-dddddEdEdddddddd
-ENNNNNdNNNENNNNN
+dBBBBBBBBBBdBBBB
+dddddddddddddddd
+NNNNNNdNNNNNNNNN
 BBBBB11BBBBBEEBB
 BBBBB1dBBBBBBBBB
 dddddddddddddddd
-NdNENNNNNNNNdNEE
-EdBBBBBBBBBBdBBB
-BdBEBBBBBBBBdEBB
-EddEdddddddddddd
-NENNNNNdNNNNNNNN
-EBBBBBBdBBBEBBBB
-BBBBBBEdBEBBBBBB
-Eddddddddddddddd
+dddNNNNNNNNNddEE
+ddBBBBBBBBBBdBBB
+ddBEBBBBBBBBdBBB
+dddEdddddddddddd
+NNNNNNNdNNNNNNNN
+BBBBBBBdBBBBBBBB
+BBBBBBddBBBBBBBB
+dddddddddddddddd

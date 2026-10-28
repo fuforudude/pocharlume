@@ -6,117 +6,121 @@ palette commune
 taille 16 16
 ancre 0 0
 contour non
+# Redessinées au jalon 3 (sols moins granuleux) : grands aplats, taches douces et rares, herbe-1, chemin-1 et boue-1 unies (le rendu les tire le plus souvent),
+# lisière du chemin adoucie (une seule ligne d’herbe sombre). Générées une première fois par un script jetable, puis à retoucher à la main ici.
 
+# Aplat uni : la plus fréquente.
 sprite herbe-1
-HHHHHHHHhHHHHjHj
-hHHHHhHHHHhHHjHH
-HHHHjHHHHHHHHHHH
-HHHHHHHHHHHhHHHH
-HhHHJHHHHHHHHHHH
-HjHHHHHHHHHHHjHH
-HHHHHHHHjHhHHHHH
 HHHHHHHHHHHHHHHH
-HHHHHHHjHHHHHHHH
-HHHHHJHHHHJHHHHH
-HHHHhHHHHHHjHHHH
-HHHHhHhHHHjHHHHH
-HHHHHJHhHHHhHHHj
-hjJHhHHHHHHHHHHH
-HHHHhHHjJHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
 HHHHHHHHHHHHHHHH
 
-# Avec une touffe sèche.
+# Deux taches douces, une sombre et une claire.
 sprite herbe-2
-HHHjHhHjHjHHjHhH
-jHHHHHHHHHHJHHhH
-jHHHHHHHHHHHHhHH
-HHjHHHHHHjHHHHHH
-HjHHhHHHHJHJHHHH
-HHHHHHHHHHHHhHHH
-HHHHHHHHHHJHjjHH
-HJHHHHHHHjHJhHHH
-HHHHHHHHhJjJHHHj
-HHHHHhHHhhjhhhjj
-HJHjHHHJHHhHHHHH
 HHHHHHHHHHHHHHHH
-HHHHHHHHHHHHHJHH
-HHHHHHHHjHHHHHHj
-HjHhHHHHHHHHHHHH
-HHHHjjjHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHjjjjjHH
+HHHHHHHHjjjjjjjH
+HHHHHHHHjjjjjjjH
+HHHHHHHHHjjjjjHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHhhhhhhHHHHHHHH
+HhhhhhhhhHHHHHHH
+HhhhhhhhhHHHHHHH
+HHhhhhhhHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
 
-# Avec un caillou et de la terre nue.
+# Une tache claire large et une petite touffe.
 sprite herbe-3
-HHHHHHHHHHjHHjHH
-HHhHHJHHHHHHHHhH
-HHHHjHHHjHHHHHHH
-HHHHHHHHJHHHHjHH
-HHHHHHHHHHHHHHjH
-jHHHHHHHHHHHjHHH
-HHJjHHHHhHJHHHHH
-HHHHHHHHHHHjHhhH
-HHHHHMMHHjHHHHHH
-HjHHMNMMHHHjjHHH
-HHHHMMPqHHHHHHHH
-HHHHHMgpHHHHHjhH
-HHHHHHhhHJHHHHHH
-HHHHHHHHHHHHHhHH
-hHHHHHhhHHHHHHHH
-HjjHjHHHHHHHHhHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHjjjjjjjHH
+HHHHHHHjjjjjjjHH
+HHHHHHHjjjjjjjHH
+HHHHHHHjjjjjjjHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHJJJJHHHHHHHHH
+HHHJJJJHHHHHHHHH
+HHHJJJJHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
 
 sprite chemin-1
-MMMMMMMMMMMMNMMM
-MMMMMMmMMMMnMMMM
-MMMMMMNMMmMNMMNM
-MMMMMMMMMMMMmMmM
-MMMMMMMMMMMMMMNM
-MMnMMMMMMMMMMMMM
 MMMMMMMMMMMMMMMM
-MMMMMMMMMMMMmMMM
-MMMMMMNMMMMMMMMM
-mMnMMMMMMMmMMMMM
-MMMMnnMMMMNNNMMM
-MNMNnMMMMMMMMMMM
 MMMMMMMMMMMMMMMM
-mMmMMMMMMMMMMMMM
-MMMMMMNMMMMNMMNM
-MMMMMMMMnNMMMNMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
 
 # Avec des ornières.
 sprite chemin-2
-MMMMmMMMmMNMMMMN
-MMMMNMMMMMMNMMMM
-MMMMMMMMMMMmMMNM
-MMNMMMMMMMMMNMMM
-mmmmMmmmmmMmmmmm
-NmmmmmmMmmmmmmMm
-MMMmNmMMMMNMMMMM
-mMMMMMMMMMMMMMMM
-NMMMMMnMMMMMMMMM
-MmMMmMNMMMMMMMMN
-mmMmmmmmMmmmmmmm
-mmmmmMmmmmmmMmmm
-MMNMMMMMMMMMMMMM
-MMMMMMNMMMMMMMMM
-MMMMMMNMNMMMMMMM
-nMMMMNMMMMMMMMMM
-
-sprite chemin-bord-n
-HHjHHjHHHjHHHHHH
-hHHHHHHHHHHjHHHH
-HHHHHHHHHHHHHHHH
-HhHHHHHjhHHHHHHH
-HhHhhhhhhHHHhhHh
-hMhMnMMMMhhhMmhM
-MmMNMMMMNMMMMMMM
-MMMMMMNMMMMMMMMm
-MMMMMMMMMMMNmMMn
-MMMMMMMMmmMMMMMM
 MMMMMMMMMMMMMMMM
-MMMMMMNMMMMMMMMM
-MmMMMMMMMMMMMMMM
-MMMMmMMNMMMMMMMM
-MMNNMNMMMMMmMMMM
-MMMmMMMMMnNmmMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMmmmmmmmmmmMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMmmmmmmmmmMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+
+# Bord : sol au nord, chemin au sud ; -e, -s, -o par rotation.
+sprite chemin-bord-n
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHhhhhhHHHHHHH
+hhhhMMMMMhhhHHHh
+MMMMMMMMMMMMhhhM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
 
 sprite chemin-bord-e
 anim repos
@@ -130,24 +134,24 @@ sprite chemin-bord-o
 anim repos
 cadre chemin-bord-n/repos.0 tourne 270
 
-# Coin extérieur : herbe au nord et à l'ouest (virage du chemin).
+# Coin extérieur : sol au nord et à l’ouest (virage).
 sprite chemin-coin-ext-no
 HHHHHHHHHHHHHHHH
-HHHHHHHHHhHHHHHH
-HHHHHjjHHHHHHHHH
-HHHHHHHHHHjHHHhJ
-HHHHhhhhhjHHhhhh
-HjHHhMmMMhhhMNhm
-HHHHhMmMMmMMMMMM
-HHHHhMNMMMMMMMMM
-HHHHhMMmMMmMMMMM
-HHHHHhMMMMMMMMNM
-HHHHHhMMMMMMMMMM
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHHHHHHHHHH
+HHHHHHHhhhhhhhhh
+HHHHHHhMMMMMMMMM
 HHHHHhMMMMMMMMMM
 HHHHhMMMMMMMMMMM
-HjHHhMMMmMMMMNMM
-HHHHHhMMMNMMMMNm
-HHHjhMNMMMMMMMmM
+HHHHhMMMMMMMMMMM
+HHHHhMMMMMMMMMMM
+HHHHhMMMMMMMMMMM
+HHHHhMMMMMMMMMMM
+HHHHhMMMMMMMMMMM
+HHHHhMMMMMMMMMMM
+HHHHhMMMMMMMMMMM
+HHHHhMMMMMMMMMMM
 
 sprite chemin-coin-ext-ne
 anim repos
@@ -161,24 +165,24 @@ sprite chemin-coin-ext-so
 anim repos
 cadre chemin-coin-ext-no/repos.0 tourne 270
 
-# Coin intérieur : un peu d'herbe au nord-ouest seulement.
+# Coin intérieur : un peu de sol au nord-ouest seulement.
 sprite chemin-coin-int-no
-HHHJjhmMMMMMMMMM
-JjHHhMMMnMMMMMMM
-HHHHHhMmMMMMMMMM
 HHHHhMMMMMMMMMMM
-HhHhhMMMMMmMMMMM
-hMhNMMMMMmMNMMNM
-MmMMMMMMmMMMMMMM
-MMMMMMmMMMMMMMMM
-NMNMMMMMMMMMMMMM
-MNMMMMMMMmMMMMMM
-MNMMMMMmMMMMmMMM
-mMMMMMmMMMMMMMNM
-NnNMMMmMMMMMMMMM
+HHHhMMMMMMMMMMMM
+HHhMMMMMMMMMMMMM
+HhMMMMMMMMMMMMMM
+hMMMMMMMMMMMMMMM
 MMMMMMMMMMMMMMMM
-MmMMMMMMMNMMMMMM
-MMmmMMMMmMMMNMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMM
 
 sprite chemin-coin-int-ne
 anim repos
@@ -193,75 +197,75 @@ anim repos
 cadre chemin-coin-int-no/repos.0 tourne 270
 
 sprite boue-1
-mmmgmmmmmmmmmmmM
-gmmmmmmmmmmmmmmm
 mmmmmmmmmmmmmmmm
-mmmmmmmmMmmgmmmm
-mmmmmmmmmmmmmmmM
-mmMmmmmmmmmmMmmm
-MmgmmMmmmmgmmmmm
-mmmmmggmmmmmmmmM
-mmmmmmmmmmmmmmgm
 mmmmmmmmmmmmmmmm
-mmmmmmmmmmmgmmgm
-mmmmmmmmgmmmmmmm
-mmmmmmmmmmmmgmmm
-mmMmMMmmmmmmmmmm
 mmmmmmmmmmmmmmmm
-mmmmMmMmmmmmMmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
 
-# Avec une flaque où se reflète un ciel gris.
+# Avec une flaque.
 sprite boue-2
-mmmmmmmmmMmmMmmm
 mmmmmmmmmmmmmmmm
 mmmmmmmmmmmmmmmm
-mmmmmmmmmgMmmmmm
-MmmmmmMmmmmmmmmm
-mmmmmMmmmgggmmmm
-mmmmmmmgggGgggmM
-mmggmmgggGGGggmm
-mmmmmmggGGgggmMm
-mmmmmmmgggggmmmm
-mmmmmmmmmmmmmmmM
-mmgmmmmmMmmmmmmm
-mmMmmmmmmmmmmMmm
-mmmmmmmmmmmmMMMm
-mmmmmmmmmgmmmmmm
-mmmMmmMmmMmmmggm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmggggmmmmmm
+mmmmggggggggmmmm
+mmmgggGGGGgggmmm
+mmggggGGGGggggmm
+mmmggggggggggmmm
+mmmmggggggggmmmm
+mmmmmmggggmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
 
 sprite paves-1
-PPPqgPPPPqgPPPPq
+PPPPgPPPPPgPPPPP
 pppPgppppPgppppP
-GppPgGpppPgGpppP
+pppPgppppPgppppP
 gggggggggggggggg
-PqgPPPPqgPPPPPqg
-pPgppppPgpppppPg
-GPgGpppPgGppppPg
+gggPPPPggPPPPPgg
+PPgppppPgpppppPg
+PPgppppPgpppppPg
 gggggggggggggggg
-PPPPqgPPPqgPPPPq
+PPPPggPPPggPPPPP
 ppppPgpppPgppppP
-GpppPgGppPgGpppP
+ppppPgpppPgppppP
 gggggggggggggggg
-PPqgPPPPPqgPPPqg
+PPggPPPPPggPPPgg
 ppPgpppppPgpppPg
-GpPgGppppPgGppPg
+ppPgpppppPgpppPg
 gggggggggggggggg
 
-# Pavés disjoints : une pierre manque, la terre affleure.
+# Avec un manque : la terre affleure.
 sprite paves-2
-PPPqgPPPPqgPPPPq
+PPPPgPPPPPgPPPPP
 pppPgppppPgppppP
-GppPgGpppPgGpppP
+pppPgppppPgppppP
 gggggggggggggggg
-PqgPPPPqgmMMMmqg
-pPgppppPgMNMMmPg
-GPgGpppPgmMmMmPg
+gggPPPPggMMMMmgg
+PPgppppPgMMMMmPg
+PPgppppPgmmmMmPg
 gggggggggggmgggg
-PPPPqgPPPqgPPPPq
+PPPPggPPPggPPPPP
 ppppPgpppPgppppP
-GpppPgGppPgGpppP
+ppppPgpppPgppppP
 gggggggggggggggg
-PPqgPPPHhqgPPPqg
-ppPgpppjHPgpppPg
-GpPgGppppPgGppPg
+PPggPPPHgggPPPgg
+ppPgppppPPgpppPg
+ppPgpppppPgpppPg
 gggggggggggggggg
