@@ -1,7 +1,7 @@
 // Plan des 10 niveaux de la région 4, des Marais de l’Ordalie (niveaux 31 à 40 de la campagne).
 // Comme la région 1 (plan-region1.ts) : les vagues sont générées par `npm run niveaux` depuis ce plan et figées dans
 // vagues-region4.ts. Trois cartes (cartes-region4.ts) : la première n'a qu'un chemin, les deux autres en ont deux
-// ; un niveau en emprunte un seul ou les deux, et ne garde que les socles à portée des chemins empruntés. Les ennemis
+// ; un niveau en emprunte un seul ou les deux, et ne garde que ces chemins. Les ennemis
 // viennent de `ennemisDuNiveau` (plan-niveau.ts) : ceux de la région, puis dès le niveau 4 ceux des régions précédentes. Le
 // niveau 10 est le combat contre la Dame du Puits. `defiFer` : deux familles de tours qui savent toucher les volants et
 // révéler les furtifs quand le niveau en compte, et qui varient d'un niveau à l'autre.
@@ -14,7 +14,6 @@ export const PLANS_REGION4: readonly PlanNiveau[] = [
     numero: 31,
     carte: 'ponton',
     chemins: [0],
-    socles: [0, 1, 2, 3, 4, 5, 6, 7, 8],
     aretesDepart: 970,
     defiFer: { familles: ['caserne', 'artillerie'] },
     nom: 'niveau.r4.01.nom',
@@ -29,7 +28,6 @@ export const PLANS_REGION4: readonly PlanNiveau[] = [
     numero: 32,
     carte: 'etang',
     chemins: [0],
-    socles: [0, 1, 2, 3, 6, 7],
     aretesDepart: 390,
     defiFer: { familles: ['magie', 'artillerie'] },
     nom: 'niveau.r4.02.nom',
@@ -44,7 +42,6 @@ export const PLANS_REGION4: readonly PlanNiveau[] = [
     numero: 33,
     carte: 'saules',
     chemins: [0],
-    socles: [0, 1, 2, 3, 4, 5],
     aretesDepart: 400,
     defiFer: { familles: ['caserne', 'magie'] },
     nom: 'niveau.r4.03.nom',
@@ -59,7 +56,6 @@ export const PLANS_REGION4: readonly PlanNiveau[] = [
     numero: 34,
     carte: 'etang',
     chemins: [1],
-    socles: [4, 5, 6, 7, 8, 9],
     aretesDepart: 800,
     defiFer: { familles: ['tir', 'artillerie'] },
     nom: 'niveau.r4.04.nom',
@@ -74,7 +70,6 @@ export const PLANS_REGION4: readonly PlanNiveau[] = [
     numero: 35,
     carte: 'saules',
     chemins: [1],
-    socles: [5, 6, 7, 8, 9, 10],
     aretesDepart: 1770,
     defiFer: { familles: ['caserne', 'tir'] },
     nom: 'niveau.r4.05.nom',
@@ -89,7 +84,6 @@ export const PLANS_REGION4: readonly PlanNiveau[] = [
     numero: 36,
     carte: 'ponton',
     chemins: [0],
-    socles: [0, 1, 2, 3, 4, 5, 6, 7, 8],
     aretesDepart: 1790,
     defiFer: { familles: ['tir', 'magie'] },
     nom: 'niveau.r4.06.nom',
@@ -104,7 +98,6 @@ export const PLANS_REGION4: readonly PlanNiveau[] = [
     numero: 37,
     carte: 'etang',
     chemins: [0, 1],
-    socles: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
     aretesDepart: 1230,
     defiFer: { familles: ['tir', 'artillerie'] },
     nom: 'niveau.r4.07.nom',
@@ -119,7 +112,6 @@ export const PLANS_REGION4: readonly PlanNiveau[] = [
     numero: 38,
     carte: 'saules',
     chemins: [0, 1],
-    socles: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     aretesDepart: 1490,
     defiFer: { familles: ['caserne', 'tir'] },
     nom: 'niveau.r4.08.nom',
@@ -134,7 +126,6 @@ export const PLANS_REGION4: readonly PlanNiveau[] = [
     numero: 39,
     carte: 'etang',
     chemins: [0, 1],
-    socles: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
     aretesDepart: 1260,
     defiFer: { familles: ['tir', 'magie'] },
     nom: 'niveau.r4.09.nom',
@@ -149,7 +140,6 @@ export const PLANS_REGION4: readonly PlanNiveau[] = [
     numero: 40,
     carte: 'saules',
     chemins: [0, 1],
-    socles: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     aretesDepart: 1860,
     defiFer: { familles: ['tir', 'artillerie'] },
     nom: 'niveau.r4.10.nom',

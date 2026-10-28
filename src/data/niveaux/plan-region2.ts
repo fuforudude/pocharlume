@@ -1,7 +1,7 @@
 // Plan des 10 niveaux de la région 2, des Champs Brûlés (niveaux 11 à 20 de la campagne).
 // Comme la région 1 (plan-region1.ts) : les vagues sont générées par `npm run niveaux` depuis ce plan et figées dans
 // vagues-region2.ts. Trois cartes (cartes-region2.ts) : la première n'a qu'un chemin, les deux autres en ont deux
-// ; un niveau en emprunte un seul ou les deux, et ne garde que les socles à portée des chemins empruntés. Les ennemis
+// ; un niveau en emprunte un seul ou les deux, et ne garde que ces chemins. Les ennemis
 // viennent de `ennemisDuNiveau` (plan-niveau.ts) : ceux de la région, puis dès le niveau 4 ceux des régions précédentes. Le
 // niveau 10 est le combat contre la Faim. `defiFer` : deux familles de tours qui savent toucher les volants et
 // révéler les furtifs quand le niveau en compte, et qui varient d'un niveau à l'autre.
@@ -14,7 +14,6 @@ export const PLANS_REGION2: readonly PlanNiveau[] = [
     numero: 11,
     carte: 'sillons',
     chemins: [0],
-    socles: [0, 1, 2, 3, 4, 5, 6, 7, 8],
     aretesDepart: 310,
     defiFer: { familles: ['tir', 'artillerie'] },
     nom: 'niveau.r2.01.nom',
@@ -29,7 +28,6 @@ export const PLANS_REGION2: readonly PlanNiveau[] = [
     numero: 12,
     carte: 'meules',
     chemins: [0],
-    socles: [1, 3, 4, 5, 6, 7, 8],
     aretesDepart: 1380,
     defiFer: { familles: ['magie', 'artillerie'] },
     nom: 'niveau.r2.02.nom',
@@ -44,7 +42,6 @@ export const PLANS_REGION2: readonly PlanNiveau[] = [
     numero: 13,
     carte: 'aire',
     chemins: [0],
-    socles: [0, 1, 2, 3, 4, 5, 6, 7],
     aretesDepart: 1400,
     defiFer: { familles: ['caserne', 'tir'] },
     nom: 'niveau.r2.03.nom',
@@ -59,7 +56,6 @@ export const PLANS_REGION2: readonly PlanNiveau[] = [
     numero: 14,
     carte: 'meules',
     chemins: [1],
-    socles: [0, 2, 5, 6, 7, 8],
     aretesDepart: 640,
     defiFer: { familles: ['caserne', 'magie'] },
     nom: 'niveau.r2.04.nom',
@@ -74,7 +70,6 @@ export const PLANS_REGION2: readonly PlanNiveau[] = [
     numero: 15,
     carte: 'aire',
     chemins: [1],
-    socles: [0, 1, 2, 3, 5, 8],
     aretesDepart: 1430,
     defiFer: { familles: ['tir', 'magie'] },
     nom: 'niveau.r2.05.nom',
@@ -89,7 +84,6 @@ export const PLANS_REGION2: readonly PlanNiveau[] = [
     numero: 16,
     carte: 'sillons',
     chemins: [0],
-    socles: [0, 1, 2, 3, 4, 5, 6, 7, 8],
     aretesDepart: 430,
     defiFer: { familles: ['tir', 'artillerie'] },
     nom: 'niveau.r2.06.nom',
@@ -104,7 +98,6 @@ export const PLANS_REGION2: readonly PlanNiveau[] = [
     numero: 17,
     carte: 'meules',
     chemins: [0, 1],
-    socles: [0, 1, 2, 3, 4, 5, 6, 7, 8],
     aretesDepart: 1200,
     defiFer: { familles: ['magie', 'artillerie'] },
     nom: 'niveau.r2.07.nom',
@@ -119,7 +112,6 @@ export const PLANS_REGION2: readonly PlanNiveau[] = [
     numero: 18,
     carte: 'aire',
     chemins: [0, 1],
-    socles: [0, 1, 2, 3, 4, 5, 6, 7, 8],
     aretesDepart: 1480,
     defiFer: { familles: ['caserne', 'tir'] },
     nom: 'niveau.r2.08.nom',
@@ -134,7 +126,6 @@ export const PLANS_REGION2: readonly PlanNiveau[] = [
     numero: 19,
     carte: 'meules',
     chemins: [0, 1],
-    socles: [0, 1, 2, 3, 4, 5, 6, 7, 8],
     aretesDepart: 1500,
     defiFer: { familles: ['caserne', 'magie'] },
     nom: 'niveau.r2.09.nom',
@@ -149,7 +140,6 @@ export const PLANS_REGION2: readonly PlanNiveau[] = [
     numero: 20,
     carte: 'aire',
     chemins: [0, 1],
-    socles: [0, 1, 2, 3, 4, 5, 6, 7, 8],
     aretesDepart: 1240,
     defiFer: { familles: ['tir', 'magie'] },
     nom: 'niveau.r2.10.nom',

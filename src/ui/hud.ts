@@ -1,5 +1,5 @@
 // Interface de partie en DOM léger par-dessus le canvas : barre du haut (vies, arêtes, vague, vitesse, pause),
-// portrait du héros et sorts en bas à gauche, appel de vague en bas à droite, menu en cercle des socles.
+// portrait du héros et sorts en bas à gauche, appel de vague en bas à droite, menu en cercle des cases.
 //
 // Pourquoi du DOM plutôt que du canvas : vrais boutons (cibles tactiles de 44 px, focus clavier, lecteurs
 // d'écran), texte net à toute taille, aucune mise en page à recalculer à la main. Le coût reste faible : le

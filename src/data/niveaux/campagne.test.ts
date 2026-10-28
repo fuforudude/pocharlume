@@ -36,21 +36,21 @@ describe('les 50 niveaux', () => {
     expect(niveauDeCampagne(51)).toBeUndefined();
   });
 
-  it('suivent leur plan : numéro, entrées, socles, arêtes de départ', () => {
+  it('suivent leur plan : numéro, entrées, arêtes de départ', () => {
     PLANS_REGIONS.flat().forEach((plan, i) => {
       const n = CAMPAGNE[i];
       expect(n?.numero).toBe(plan.numero);
       expect(n?.niveau.carte.chemins.length).toBe(plan.chemins.length);
-      expect(n?.niveau.carte.socles.length).toBe(plan.socles.length);
       expect(n?.niveau.aretesDepart).toBe(plan.aretesDepart);
       expect(n?.niveau.defiFer).toEqual(plan.defiFer);
     });
   });
 
-  it('ont tous de 6 à 12 socles, une ou deux entrées (trois au plus pour la région 1)', () => {
+  it('laissent de 40 à 110 cases libres sur 144, une ou deux entrées (trois au plus pour la région 1)', () => {
     for (const n of CAMPAGNE) {
-      expect(n.niveau.carte.socles.length, `niveau ${String(n.numero)}`).toBeGreaterThanOrEqual(6);
-      expect(n.niveau.carte.socles.length, `niveau ${String(n.numero)}`).toBeLessThanOrEqual(12);
+      const libres = 144 - n.niveau.casesInterdites.length;
+      expect(libres, `niveau ${String(n.numero)}`).toBeGreaterThanOrEqual(40);
+      expect(libres, `niveau ${String(n.numero)}`).toBeLessThanOrEqual(110);
       if (n.numero > 10) expect(n.niveau.carte.chemins.length, `niveau ${String(n.numero)}`).toBeLessThanOrEqual(2);
     }
   });
@@ -80,13 +80,8 @@ describe('les 12 nouvelles cartes', () => {
     expect(Object.values(CARTES).filter((c) => c.region === 1)).toHaveLength(4);
   });
 
-  it('ont 9 socles pour un chemin, de 9 à 12 pour deux, et 40 décors au moins', () => {
+  it('ont au moins 40 décors et 3 zones de sol', () => {
     for (const c of nouvelles) {
-      if (c.chemins.length === 1) expect(c.socles.length, c.id).toBe(9);
-      else {
-        expect(c.socles.length, c.id).toBeGreaterThanOrEqual(9);
-        expect(c.socles.length, c.id).toBeLessThanOrEqual(12);
-      }
       expect(c.decor.length, c.id).toBeGreaterThanOrEqual(40);
       expect(c.zones.length, c.id).toBeGreaterThanOrEqual(3);
     }
@@ -97,13 +92,6 @@ describe('les 12 nouvelles cartes', () => {
     for (const c of nouvelles) expect(PLANS_REGIONS.flat().filter((p) => p.carte === c.id).length, c.id).toBeGreaterThanOrEqual(2);
   });
 
-  it('un niveau qui emprunte tous les chemins de sa carte garde tous ses socles', () => {
-    for (const plan of PLANS_REGIONS.flat().filter((p) => p.numero > 10)) {
-      const modele = CARTES[plan.carte];
-      if (plan.chemins.length === modele.chemins.length) expect(plan.socles, `niveau ${String(plan.numero)}`).toEqual(modele.socles.map((_, i) => i));
-      else expect(plan.socles.length, `niveau ${String(plan.numero)}`).toBeLessThanOrEqual(modele.socles.length);
-    }
-  });
 });
 
 describe('ennemis des régions', () => {

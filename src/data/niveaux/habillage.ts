@@ -1,5 +1,5 @@
 // Règles d'habillage d'une carte : largeur supposée du chemin dessiné et emprises des sprites au sol.
-// Le moteur ne lit pas ce fichier ; il sert à écarter le décor du chemin et des socles, et aux tests.
+// Le moteur ne lit pas ce fichier ; il sert à écarter le décor du chemin, à calculer les cases interdites (grille-niveau.ts) et aux tests.
 import type { Decor } from '../visuel';
 import { rectAutour, type Rect } from './geometrie';
 
@@ -43,12 +43,8 @@ export function empriseDecor(d: Pick<Decor, 'sprite' | 'x' | 'y'>): Rect {
     : rectAutour(d.x, d.y, 0.5, 0.9375, 0.5, 0.0625);
 }
 
-/** Emprise du sprite d'un socle (32×32, ancre à 26 px du haut). */
-export function empriseSprite(x: number, y: number): Rect {
-  return rectAutour(x, y, 1, 1.625, 1, 0.375);
-}
-
-/** Emprise de la pierre du socle, la partie qui ne doit pas mordre sur le chemin. */
-export function empriseSocle(x: number, y: number): Rect {
-  return rectAutour(x, y, 0.75, 0.75, 0.75, 0.25);
-}
+/**
+ * Un grand décor bloque une tuile quand son emprise la recouvre de plus de cette longueur (en tuiles) dans les deux sens :
+ * les marges de quelques pixels d'un sprite de 32×32 ne condamnent pas la tuile voisine.
+ */
+export const RECOUVREMENT_MIN_DECOR = 0.25;

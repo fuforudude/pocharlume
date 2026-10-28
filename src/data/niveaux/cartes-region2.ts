@@ -1,8 +1,8 @@
 // Cartes dessinées à la main de la région 2, les Champs Brûlés (32 × 18 tuiles). Même structure que les cartes du
-// Village Affamé (cartes.ts) : une ou deux entrées, des socles fixes à 2 tuiles de l'axe des chemins (leur ralliement de
-// caserne est le point de l'axe le plus proche). Un niveau qui n'emprunte pas tous les chemins ne garde que les socles à portée
-// des chemins utilisés (plan-region2.ts) ; le décor posé dans le couloir d'un chemin inutilisé reste affiché.
-import { chemin, decor, socle, zone, type CarteModele } from './modele-carte';
+// Village Affamé (cartes.ts) : une ou deux entrées, sans socles (les tours se posent sur la grille de construction,
+// cases interdites tirées du chemin et des grands décors par grille-niveau.ts). Un niveau qui n'emprunte pas tous les
+// chemins ne garde que ceux utilisés (plan-region2.ts) ; le décor posé dans le couloir d'un chemin inutilisé reste affiché.
+import { chemin, decor, zone, type CarteModele } from './modele-carte';
 
 /**
  * Les Sillons : un seul chemin qui remonte les rangs de labour en serpentant, des fermes calcinées au nord, un champ de gerbes brûlées au sud.
@@ -14,17 +14,6 @@ export const SILLONS: CarteModele = {
   hauteur: 18,
   chemins: [
     chemin([-1, 5], [18, 5], [18, 10], [6, 10], [6, 15], [33, 15]),
-  ],
-  socles: [
-    socle(1, 7, 1, 5), // 0
-    socle(4, 3, 4, 5), // 1
-    socle(8, 12, 8, 10), // 2
-    socle(11, 7, 11, 5), // 3
-    socle(14, 13, 14, 15), // 4
-    socle(16, 7, 16, 5), // 5
-    socle(18, 13, 18, 15), // 6
-    socle(24, 13, 24, 15), // 7
-    socle(30, 13, 30, 15), // 8
   ],
   departHeros: { x: 24, y: 15 },
   zones: [zone('boue', 1, 12, 4, 3), zone('boue', 22, 0, 8, 2), zone('paves', 20, 7, 6, 3), zone('paves', 9, 12, 4, 2)],
@@ -100,17 +89,6 @@ export const MEULES: CarteModele = {
   chemins: [
     chemin([-1, 5], [10, 5], [10, 12], [22, 12], [22, 7], [33, 7]),
     chemin([-1, 15], [5, 15], [5, 12], [10, 12], [22, 12], [22, 7], [33, 7]),
-  ],
-  socles: [
-    socle(1, 13, 1, 15), // 0
-    socle(2, 3, 2, 5), // 1
-    socle(7, 14, 5, 14), // 2
-    socle(8, 7, 8, 5), // 3
-    socle(12, 10, 10, 10), // 4
-    socle(16, 14, 16, 12), // 5
-    socle(20, 10, 20, 12), // 6
-    socle(24, 9, 22, 9), // 7
-    socle(30, 9, 30, 7), // 8
   ],
   departHeros: { x: 16, y: 12 },
   zones: [zone('boue', 12, 2, 6, 3), zone('boue', 26, 12, 5, 4), zone('paves', 14, 7, 5, 2), zone('paves', 1, 7, 4, 2)],
@@ -189,17 +167,6 @@ export const AIRE: CarteModele = {
   chemins: [
     chemin([16, -1], [16, 6], [26, 6], [26, 12], [8, 12], [8, 19]),
     chemin([33, 15], [26, 15], [26, 12], [8, 12], [8, 19]),
-  ],
-  socles: [
-    socle(6, 16, 8, 16), // 0
-    socle(10, 14, 10, 12), // 1
-    socle(14, 10, 14, 12), // 2
-    socle(17, 14, 17, 12), // 3
-    socle(18, 4, 16, 4), // 4
-    socle(20, 10, 20, 12), // 5
-    socle(24, 4, 24, 6), // 6
-    socle(24, 10, 26, 10), // 7
-    socle(28, 13, 28, 15), // 8
   ],
   departHeros: { x: 14, y: 12 },
   zones: [zone('paves', 10, 1, 5, 4), zone('paves', 18, 8, 6, 2), zone('boue', 0, 2, 5, 5), zone('boue', 12, 14, 8, 3)],

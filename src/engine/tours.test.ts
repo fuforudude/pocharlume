@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DIEUX } from '../data/dieux';
 import { REGLES } from '../data/regles';
 import { TOURS } from '../data/tours';
-import { CONFIG, avancerPas, avancerSecondes, distance, ennemiEssai, niveauEssai } from './aides.test-utils';
+import { ce, CONFIG, avancerPas, avancerSecondes, distance, ennemiEssai, niveauEssai } from './aides.test-utils';
 import type { DefEnnemi } from './definitions';
 import { ajouterEnnemi } from './ennemis';
 import { EFFET, type EtatPartie } from './etat';
@@ -16,12 +16,13 @@ function partie(aretes = 5000): EtatPartie {
   return creerPartie(niveauEssai(undefined, aretes), CONFIG);
 }
 
-function construire(etat: EtatPartie, socle: number, tour: 'caserne' | 'tir' | 'magie' | 'artillerie' | 'divine', voie?: 'A' | 'B'): void {
-  expect(appliquerAction(etat, { type: 'construire', socle, tour })).toEqual({ ok: true });
+function construire(etat: EtatPartie, i: number, tour: 'caserne' | 'tir' | 'magie' | 'artillerie' | 'divine', voie?: 'A' | 'B'): void {
+  const { cx, cy } = ce(i);
+  expect(appliquerAction(etat, { type: 'construire', cx, cy, tour })).toEqual({ ok: true });
   if (voie) {
-    appliquerAction(etat, { type: 'ameliorer', socle });
-    appliquerAction(etat, { type: 'ameliorer', socle });
-    expect(appliquerAction(etat, { type: 'specialiser', socle, voie })).toEqual({ ok: true });
+    appliquerAction(etat, { type: 'ameliorer', cx, cy });
+    appliquerAction(etat, { type: 'ameliorer', cx, cy });
+    expect(appliquerAction(etat, { type: 'specialiser', cx, cy, voie })).toEqual({ ok: true });
   }
 }
 
@@ -40,48 +41,48 @@ function evenementsPendant(etat: EtatPartie, secondes: number): Evenement[] {
 }
 
 describe('construction, amélioration, revente', () => {
-  it('construit sur un socle libre et paie le prix', () => {
+  it('construit sur une case libre, au centre de la case, et paie le prix', () => {
     const etat = partie();
     construire(etat, 0, 'tir');
     expect(etat.aretes).toBe(5000 - TOURS.tir.niveaux[0].cout);
     expect(etat.tours).toHaveLength(1);
-    expect(etat.tours[0]).toMatchObject({ socle: 0, famille: 'tir', niveau: 1, voie: null, x: 5, y: 7 });
-    expect(etat.evenements).toContainEqual({ type: 'construction', tour: etat.tours[0]?.id, socle: 0, famille: 'tir' });
+    expect(etat.tours[0]).toMatchObject({ ...ce(0), famille: 'tir', niveau: 1, voie: null, x: 5, y: 7 });
+    expect(etat.evenements).toContainEqual({ type: 'construction', tour: etat.tours[0]?.id, ...ce(0), famille: 'tir' });
   });
 
-  it('refuse un socle occupé, inconnu, ou sans assez d’arêtes', () => {
+  it('refuse une case occupée, hors de la grille, ou sans assez d’arêtes', () => {
     const etat = partie(100);
     construire(etat, 0, 'tir');
-    expect(appliquerAction(etat, { type: 'construire', socle: 0, tour: 'tir' })).toEqual({ ok: false, raison: 'socle_occupe' });
-    expect(appliquerAction(etat, { type: 'construire', socle: 9, tour: 'tir' })).toEqual({ ok: false, raison: 'socle_inconnu' });
-    expect(appliquerAction(etat, { type: 'construire', socle: 1, tour: 'tir' })).toEqual({ ok: false, raison: 'aretes_insuffisantes' });
+    expect(appliquerAction(etat, { type: 'construire', ...ce(0), tour: 'tir' })).toEqual({ ok: false, raison: 'case_occupee' });
+    expect(appliquerAction(etat, { type: 'construire', cx: 99, cy: 0, tour: 'tir' })).toEqual({ ok: false, raison: 'case_hors_carte' });
+    expect(appliquerAction(etat, { type: 'construire', ...ce(1), tour: 'tir' })).toEqual({ ok: false, raison: 'aretes_insuffisantes' });
     expect(etat.aretes).toBe(30);
   });
 
   it('améliore jusqu’au niveau 3, puis exige une spécialisation, puis s’arrête', () => {
     const etat = partie();
     construire(etat, 0, 'tir');
-    expect(appliquerAction(etat, { type: 'specialiser', socle: 0, voie: 'A' })).toEqual({ ok: false, raison: 'specialisation_impossible' });
-    expect(appliquerAction(etat, { type: 'ameliorer', socle: 0 })).toEqual({ ok: true });
-    expect(appliquerAction(etat, { type: 'ameliorer', socle: 0 })).toEqual({ ok: true });
+    expect(appliquerAction(etat, { type: 'specialiser', ...ce(0), voie: 'A' })).toEqual({ ok: false, raison: 'specialisation_impossible' });
+    expect(appliquerAction(etat, { type: 'ameliorer', ...ce(0) })).toEqual({ ok: true });
+    expect(appliquerAction(etat, { type: 'ameliorer', ...ce(0) })).toEqual({ ok: true });
     expect(etat.tours[0]?.niveau).toBe(3);
-    expect(appliquerAction(etat, { type: 'ameliorer', socle: 0 })).toEqual({ ok: false, raison: 'specialisation_requise' });
-    expect(appliquerAction(etat, { type: 'specialiser', socle: 0, voie: 'B' })).toEqual({ ok: true });
+    expect(appliquerAction(etat, { type: 'ameliorer', ...ce(0) })).toEqual({ ok: false, raison: 'specialisation_requise' });
+    expect(appliquerAction(etat, { type: 'specialiser', ...ce(0), voie: 'B' })).toEqual({ ok: true });
     expect(etat.tours[0]).toMatchObject({ niveau: 4, voie: 'B' });
     expect(etat.tours[0]?.stats.nom).toBe(TOURS.tir.specialisations.B.nom);
-    expect(appliquerAction(etat, { type: 'ameliorer', socle: 0 })).toEqual({ ok: false, raison: 'niveau_max' });
-    expect(appliquerAction(etat, { type: 'specialiser', socle: 0, voie: 'A' })).toEqual({ ok: false, raison: 'specialisation_impossible' });
-    expect(appliquerAction(etat, { type: 'ameliorer', socle: 1 })).toEqual({ ok: false, raison: 'socle_vide' });
+    expect(appliquerAction(etat, { type: 'ameliorer', ...ce(0) })).toEqual({ ok: false, raison: 'niveau_max' });
+    expect(appliquerAction(etat, { type: 'specialiser', ...ce(0), voie: 'A' })).toEqual({ ok: false, raison: 'specialisation_impossible' });
+    expect(appliquerAction(etat, { type: 'ameliorer', ...ce(1) })).toEqual({ ok: false, raison: 'case_vide' });
   });
 
-  it('revend à 70 % du coût cumulé et libère le socle', () => {
+  it('revend à 70 % du coût cumulé et libère la case', () => {
     const etat = partie();
     construire(etat, 0, 'tir', 'A');
     const t = TOURS.tir;
     const cumul = t.niveaux[0].cout + t.niveaux[1].cout + t.niveaux[2].cout + t.specialisations.A.cout;
     expect(etat.tours[0]?.coutCumule).toBe(cumul);
     const avant = etat.aretes;
-    expect(appliquerAction(etat, { type: 'vendre', socle: 0 })).toEqual({ ok: true });
+    expect(appliquerAction(etat, { type: 'vendre', ...ce(0) })).toEqual({ ok: true });
     expect(etat.aretes).toBe(avant + Math.floor((cumul * REGLES.tauxRevente) / 100));
     expect(etat.tours).toHaveLength(0);
     construire(etat, 0, 'magie');
@@ -90,14 +91,14 @@ describe('construction, amélioration, revente', () => {
   it('revend sans erreur d’arrondi : 180 donne 126, 340 donne 238', () => {
     const etat = partie();
     construire(etat, 0, 'caserne');
-    appliquerAction(etat, { type: 'ameliorer', socle: 0 });
+    appliquerAction(etat, { type: 'ameliorer', ...ce(0) });
     expect(etat.tours[0]?.coutCumule).toBe(180);
-    expect(valeurRevente(etat, 0)).toBe(126);
-    appliquerAction(etat, { type: 'ameliorer', socle: 0 });
+    expect(valeurRevente(etat, ce(0).cx, ce(0).cy)).toBe(126);
+    appliquerAction(etat, { type: 'ameliorer', ...ce(0) });
     expect(etat.tours[0]?.coutCumule).toBe(340);
-    expect(valeurRevente(etat, 0)).toBe(238);
+    expect(valeurRevente(etat, ce(0).cx, ce(0).cy)).toBe(238);
     const avant = etat.aretes;
-    appliquerAction(etat, { type: 'vendre', socle: 0 });
+    appliquerAction(etat, { type: 'vendre', ...ce(0) });
     expect(etat.aretes).toBe(avant + 238);
   });
 
@@ -117,7 +118,7 @@ describe('construction, amélioration, revente', () => {
     const e = ajouterEnnemi(etat, ennemiEssai({ pv: 100000, degats: [0, 0] }), 'paysan_affame', 0, 8);
     avancerSecondes(etat, 3);
     expect(e.bloqueur).not.toBe(-1);
-    appliquerAction(etat, { type: 'vendre', socle: 1 });
+    appliquerAction(etat, { type: 'vendre', ...ce(1) });
     expect(etat.unites.filter((u) => u.genre === 'soldat')).toHaveLength(0);
     expect(e.bloqueur).toBe(-1);
   });
@@ -179,9 +180,9 @@ describe('tirs et projectiles', () => {
     const furtif = cible(etat, 6, { furtif: true });
     avancerSecondes(etat, 2);
     expect(furtif.pv).toBe(furtif.pvMax);
-    appliquerAction(etat, { type: 'ameliorer', socle: 0 });
-    appliquerAction(etat, { type: 'ameliorer', socle: 0 });
-    appliquerAction(etat, { type: 'specialiser', socle: 0, voie: 'A' });
+    appliquerAction(etat, { type: 'ameliorer', ...ce(0) });
+    appliquerAction(etat, { type: 'ameliorer', ...ce(0) });
+    appliquerAction(etat, { type: 'specialiser', ...ce(0), voie: 'A' });
     avancerSecondes(etat, 1);
     expect(furtif.pv).toBeLessThan(furtif.pvMax);
     expect(furtif.effetsPas[EFFET.poison]).toBeGreaterThan(0);
@@ -318,7 +319,7 @@ describe('caserne', () => {
     const soldats = etat.unites.filter((u) => u.genre === 'soldat');
     expect(soldats).toHaveLength(3);
     avancerSecondes(etat, 3);
-    for (const s of soldats) expect(distance(s.x, s.y, 10, 5)).toBeLessThan(1);
+    for (const s of soldats) expect(distance(s.x, s.y, 11, 5)).toBeLessThan(1);
   });
 
   it('chaque soldat bloque un ennemi, le quatrième passe', () => {
@@ -356,13 +357,13 @@ describe('caserne', () => {
     const etat = partie();
     construire(etat, 1, 'caserne');
     construire(etat, 0, 'tir');
-    expect(appliquerAction(etat, { type: 'deplacerRalliement', socle: 1, x: 11.5, y: 5 })).toEqual({ ok: true });
+    expect(appliquerAction(etat, { type: 'deplacerRalliement', ...ce(1), x: 11.5, y: 5 })).toEqual({ ok: true });
     avancerSecondes(etat, 3);
     for (const s of etat.unites.filter((u) => u.genre === 'soldat')) expect(distance(s.x, s.y, 11.5, 5)).toBeLessThan(1);
-    expect(appliquerAction(etat, { type: 'deplacerRalliement', socle: 1, x: 13, y: 5 })).toEqual({ ok: false, raison: 'hors_portee' });
-    expect(appliquerAction(etat, { type: 'deplacerRalliement', socle: 1, x: 10, y: 8.5 })).toEqual({ ok: false, raison: 'hors_chemin' });
-    expect(appliquerAction(etat, { type: 'deplacerRalliement', socle: 0, x: 5, y: 5 })).toEqual({ ok: false, raison: 'pas_une_caserne' });
-    expect(appliquerAction(etat, { type: 'deplacerRalliement', socle: 2, x: 15, y: 5 })).toEqual({ ok: false, raison: 'socle_vide' });
+    expect(appliquerAction(etat, { type: 'deplacerRalliement', ...ce(1), x: 13, y: 5 })).toEqual({ ok: false, raison: 'hors_portee' });
+    expect(appliquerAction(etat, { type: 'deplacerRalliement', ...ce(1), x: 10, y: 8.5 })).toEqual({ ok: false, raison: 'hors_chemin' });
+    expect(appliquerAction(etat, { type: 'deplacerRalliement', ...ce(0), x: 5, y: 5 })).toEqual({ ok: false, raison: 'pas_une_caserne' });
+    expect(appliquerAction(etat, { type: 'deplacerRalliement', ...ce(2), x: 15, y: 5 })).toEqual({ ok: false, raison: 'case_vide' });
   });
 
   it('applique le bonus de Charlie : +25 % PV et coups étourdissants', () => {
@@ -377,7 +378,7 @@ describe('caserne', () => {
   it('remet les soldats à neuf avec les stats du nouveau niveau', () => {
     const etat = partie();
     construire(etat, 1, 'caserne');
-    appliquerAction(etat, { type: 'ameliorer', socle: 1 });
+    appliquerAction(etat, { type: 'ameliorer', ...ce(1) });
     const soldats = etat.unites.filter((u) => u.genre === 'soldat');
     const pv = (TOURS.caserne.niveaux[1].soldats?.pv ?? 0) * (1 + DIEUX.charlie.bonus.pvSoldats);
     for (const s of soldats) expect(s.pv).toBe(pv);
@@ -390,9 +391,9 @@ describe('tour divine de Charlie : Totem du Colosse', () => {
     construire(etat, 0, 'divine');
     expect(etat.aretes).toBe(5000 - DIEUX.charlie.tourDivine.cout);
     expect(etat.tours[0]?.famille).toBe('divine');
-    expect(appliquerAction(etat, { type: 'construire', socle: 1, tour: 'divine' })).toEqual({ ok: false, raison: 'tour_divine_unique' });
-    expect(appliquerAction(etat, { type: 'ameliorer', socle: 0 })).toEqual({ ok: false, raison: 'niveau_max' });
-    expect(appliquerAction(etat, { type: 'specialiser', socle: 0, voie: 'A' })).toEqual({ ok: false, raison: 'specialisation_impossible' });
+    expect(appliquerAction(etat, { type: 'construire', ...ce(1), tour: 'divine' })).toEqual({ ok: false, raison: 'tour_divine_unique' });
+    expect(appliquerAction(etat, { type: 'ameliorer', ...ce(0) })).toEqual({ ok: false, raison: 'niveau_max' });
+    expect(appliquerAction(etat, { type: 'specialiser', ...ce(0), voie: 'A' })).toEqual({ ok: false, raison: 'specialisation_impossible' });
   });
 
   it('lance une onde de choc qui étourdit les ennemis au sol autour de lui', () => {

@@ -1,12 +1,12 @@
-// Cartes dessinées à la main du Village Affamé (32 × 18 tuiles). Chaque carte propose plusieurs chemins et
-// plus de socles qu'un niveau n'en utilise : un niveau choisit ses entrées et ses socles (plan-region1.ts), et
-// le décor posé sur un chemin ou un socle inutilisé reste affiché (assemblage.ts écarte le reste).
+// Cartes dessinées à la main du Village Affamé (32 × 18 tuiles). Chaque carte propose plusieurs chemins : un niveau
+// choisit ses entrées (plan-region1.ts), et le décor posé sur un chemin inutilisé reste affiché (assemblage.ts écarte
+// le reste). Pas de socles : les tours se posent sur la grille de construction (cases de 2×2 tuiles), dont les cases
+// interdites viennent du chemin et des grands décors (grille-niveau.ts).
 // Les chemins vont d'une entrée hors de la carte à une sortie hors de la carte ; les chemins d'une même carte
-// peuvent partager leur fin. Un socle est toujours à 2 tuiles de l'axe du chemin qu'il garde, et son
-// ralliement de caserne est le point de cet axe le plus proche.
+// peuvent partager leur fin.
 // Les cartes des régions 2 à 5 sont dans cartes-region2.ts à cartes-region5.ts, même structure (modele-carte.ts) ;
 // `CARTES` (cartes-toutes.ts) les rassemble.
-import { chemin, decor, socle, zone, type CarteModele } from './modele-carte';
+import { chemin, decor, zone, type CarteModele } from './modele-carte';
 
 /**
  * Les Chaumes : un grand serpent. Le chemin 0 descend du nord-ouest, le chemin 1 arrive du sud-ouest et le
@@ -20,25 +20,6 @@ export const CHAUMES: CarteModele = {
   chemins: [
     chemin([-1, 4], [12, 4], [12, 13], [24, 13], [24, 7], [33, 7]),
     chemin([-1, 16], [6, 16], [6, 10], [12, 10], [12, 13], [24, 13], [24, 7], [33, 7]),
-  ],
-  socles: [
-    socle(4, 6, 4, 4), // 0
-    socle(8, 2, 8, 4), // 1
-    socle(4, 2, 4, 4), // 2
-    socle(10, 6, 10, 4), // 3
-    socle(14, 7, 12, 7), // 4
-    socle(14, 11, 12, 11), // 5
-    socle(17, 11, 17, 13), // 6
-    socle(17, 15, 17, 13), // 7
-    socle(21, 11, 21, 13), // 8
-    socle(21, 15, 21, 13), // 9
-    socle(22, 9, 24, 9), // 10
-    socle(26, 10, 24, 10), // 11
-    socle(28, 5, 28, 7), // 12
-    socle(28, 9, 28, 7), // 13
-    socle(9, 12, 9, 10), // 14
-    socle(4, 13, 6, 13), // 15
-    socle(8, 14, 6, 14), // 16
   ],
   departHeros: { x: 16, y: 13 },
   zones: [zone('boue', 13, 15, 6, 2), zone('boue', 0, 8, 3, 3), zone('paves', 17, 8, 4, 2), zone('paves', 16, 5, 6, 1)],
@@ -101,27 +82,6 @@ export const GUE: CarteModele = {
     chemin([6, -1], [6, 5], [18, 5], [18, 12], [8, 12], [8, 19]),
     chemin([33, 9], [18, 9], [18, 12], [8, 12], [8, 19]),
     chemin([33, 15], [14, 15], [14, 12], [8, 12], [8, 19]),
-  ],
-  socles: [
-    socle(4, 3, 6, 3), // 0
-    socle(8, 2, 6, 2), // 1
-    socle(8, 7, 8, 5), // 2
-    socle(12, 7, 12, 5), // 3
-    socle(16, 7, 16, 5), // 4
-    socle(12, 3, 12, 5), // 5
-    socle(16, 3, 16, 5), // 6
-    socle(20, 7, 18, 7), // 7
-    socle(22, 7, 22, 9), // 8
-    socle(22, 11, 22, 9), // 9
-    socle(26, 7, 26, 9), // 10
-    socle(26, 11, 26, 9), // 11
-    socle(12, 10, 12, 12), // 12
-    socle(16, 10, 18, 10), // 13
-    socle(12, 14, 12, 12), // 14
-    socle(6, 14, 8, 14), // 15
-    socle(10, 16, 8, 16), // 16
-    socle(22, 13, 22, 15), // 17
-    socle(26, 13, 26, 15), // 18
   ],
   departHeros: { x: 12, y: 12 },
   zones: [zone('boue', 9, 6, 8, 5), zone('boue', 19, 16, 8, 2), zone('paves', 13, 8, 3, 2)],
@@ -186,31 +146,6 @@ export const PENDUS: CarteModele = {
     chemin([4, -1], [4, 9], [10, 9], [10, 4], [22, 4], [22, 14], [33, 14]),
     chemin([28, -1], [28, 9], [22, 9], [22, 14], [33, 14]),
   ],
-  socles: [
-    socle(4, 12, 4, 14), // 0
-    socle(7, 12, 7, 14), // 1
-    socle(4, 16, 4, 14), // 2
-    socle(7, 16, 7, 14), // 3
-    socle(8, 7, 10, 7), // 4
-    socle(10, 2, 10, 4), // 5
-    socle(14, 2, 14, 4), // 6
-    socle(18, 2, 18, 4), // 7
-    socle(14, 6, 14, 4), // 8
-    socle(18, 6, 18, 4), // 9
-    socle(22, 2, 22, 4), // 10
-    socle(12, 7, 10, 7), // 11
-    socle(12, 11, 10, 11), // 12
-    socle(20, 7, 22, 7), // 13
-    socle(20, 11, 22, 11), // 14
-    socle(24, 7, 22, 7), // 15
-    socle(24, 11, 22, 11), // 16
-    socle(26, 6, 28, 6), // 17
-    socle(30, 6, 28, 6), // 18
-    socle(28, 12, 28, 14), // 19
-    socle(26, 16, 26, 14), // 20
-    socle(30, 16, 30, 14), // 21
-    socle(30, 12, 30, 14), // 22
-  ],
   departHeros: { x: 16, y: 4 },
   zones: [zone('paves', 14, 8, 5, 2), zone('boue', 0, 17, 10, 1), zone('boue', 23, 9, 8, 2)],
   decor: [
@@ -270,29 +205,6 @@ export const CARREFOUR: CarteModele = {
     chemin([-1, 5], [8, 5], [8, 9], [20, 9], [20, 13], [33, 13]),
     chemin([-1, 15], [8, 15], [8, 9], [20, 9], [20, 13], [33, 13]),
     chemin([16, -1], [16, 9], [20, 9], [20, 13], [33, 13]),
-  ],
-  socles: [
-    socle(4, 3, 4, 5), // 0
-    socle(4, 7, 4, 5), // 1
-    socle(6, 7, 6, 5), // 2
-    socle(10, 7, 8, 7), // 3
-    socle(12, 7, 12, 9), // 4
-    socle(14, 7, 14, 9), // 5
-    socle(18, 7, 18, 9), // 6
-    socle(10, 12, 8, 12), // 7
-    socle(12, 11, 12, 9), // 8
-    socle(16, 11, 16, 9), // 9
-    socle(18, 11, 18, 9), // 10
-    socle(22, 9, 20, 9), // 11
-    socle(22, 11, 20, 11), // 12
-    socle(24, 11, 24, 13), // 13
-    socle(28, 11, 28, 13), // 14
-    socle(24, 15, 24, 13), // 15
-    socle(28, 15, 28, 13), // 16
-    socle(4, 13, 4, 15), // 17
-    socle(6, 12, 8, 12), // 18
-    socle(14, 3, 16, 3), // 19
-    socle(18, 3, 16, 3), // 20
   ],
   departHeros: { x: 18, y: 9 },
   zones: [zone('paves', 10, 1, 5, 4), zone('boue', 11, 13, 7, 4), zone('boue', 25, 0, 6, 3)],

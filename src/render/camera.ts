@@ -27,7 +27,7 @@ export class Camera {
   ecranH = 1;
   /**
    * Bandes de l'écran recouvertes par l'interface (barres du HUD, encoche), en pixels physiques. La vue peut
-   * dépasser la carte de cette largeur de chaque côté, pour qu'un socle collé au bord puisse être amené dans la
+   * dépasser la carte de cette largeur de chaque côté, pour qu'une case collée au bord puisse être amenée dans la
    * zone libre au lieu de rester sous un bouton.
    */
   private margeHaut = 0;

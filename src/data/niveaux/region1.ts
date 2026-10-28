@@ -1,40 +1,37 @@
 // Région 1, le Village Affamé : les 10 niveaux de la campagne (REGION1) et un niveau de test complet (un
-// chemin, 6 socles, 5 vagues) utilisé par les tests du moteur et des données. Cartes dans cartes.ts, plan des
+// chemin, 5 vagues) utilisé par les tests du moteur et des données. Cartes dans cartes.ts, plan des
 // niveaux dans plan-region1.ts, vagues figées dans vagues-region1.ts (générées par `npm run niveaux`).
-import type { Niveau } from '../../engine/definitions';
+import type { Carte, Niveau } from '../../engine/definitions';
 import type { NiveauCampagne } from '../visuel';
 import { assemblerNiveau } from './assemblage';
+import { casesInterditesDuNiveau } from './grille-niveau';
 import { PLANS_REGION1 } from './plan-region1';
 import { VAGUES_REGION1 } from './vagues-region1';
+
+/** Carte du niveau de test : un seul chemin en serpent, sans décor (seul le chemin interdit des cases). */
+const CARTE_TEST: Carte = {
+  largeur: 32,
+  hauteur: 18,
+  chemins: [
+    {
+      points: [
+        { x: -1, y: 4 },
+        { x: 12, y: 4 },
+        { x: 12, y: 13 },
+        { x: 24, y: 13 },
+        { x: 24, y: 7 },
+        { x: 33, y: 7 },
+      ],
+    },
+  ],
+  departHeros: { x: 16, y: 13 },
+};
 
 export const NIVEAU_TEST: Niveau = {
   id: 'r1-test',
   aretesDepart: 260,
-  carte: {
-    largeur: 32,
-    hauteur: 18,
-    chemins: [
-      {
-        points: [
-          { x: -1, y: 4 },
-          { x: 12, y: 4 },
-          { x: 12, y: 13 },
-          { x: 24, y: 13 },
-          { x: 24, y: 7 },
-          { x: 33, y: 7 },
-        ],
-      },
-    ],
-    socles: [
-      { x: 8, y: 6, ralliement: { x: 8, y: 4 } },
-      { x: 10, y: 9, ralliement: { x: 12, y: 9 } },
-      { x: 15, y: 11, ralliement: { x: 15, y: 13 } },
-      { x: 19, y: 15, ralliement: { x: 19, y: 13 } },
-      { x: 22, y: 9, ralliement: { x: 24, y: 9 } },
-      { x: 28, y: 5, ralliement: { x: 28, y: 7 } },
-    ],
-    departHeros: { x: 16, y: 13 },
-  },
+  carte: CARTE_TEST,
+  casesInterdites: casesInterditesDuNiveau(CARTE_TEST, []),
   vagues: [
     { paquets: [{ ennemi: 'paysan_affame', nombre: 6, intervalle: 1.5, chemin: 0, delai: 0 }] },
     {

@@ -1,6 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import type { VisuelCarte } from '../data/visuel';
+import { CAMPAGNE } from '../data/niveaux/campagne';
+import { tuilesDeChemin } from '../data/niveaux/grille-niveau';
 import { NIVEAU_TEST } from '../data/niveaux/region1';
 import type { Carte } from '../engine/definitions';
 import { bruit, construireSol, masqueChemin, nomTuile, SEUILS_DEUX_VARIANTES, SEUILS_HERBE, type GrilleSol } from './sol';
@@ -15,6 +17,12 @@ function tuile(grille: GrilleSol, x: number, y: number): string {
 const atlas = JSON.parse(readFileSync('public/sprites/atlas.json', 'utf-8')) as { sprites: Record<string, unknown> };
 
 describe('masque du chemin', () => {
+  it('est exactement ce qui rend les cases du chemin interdites à la construction (data/niveaux/grille-niveau.ts)', () => {
+    for (const n of [...CAMPAGNE.map((c) => c.niveau), NIVEAU_TEST]) {
+      expect(tuilesDeChemin(n.carte), n.id).toEqual(masqueChemin(n.carte));
+    }
+  });
+
   it('couvre 2 tuiles de large autour de l’axe du chemin', () => {
     const m = masqueChemin(carte);
     const estChemin = (x: number, y: number): boolean => m[y * carte.largeur + x] === 1;

@@ -3,7 +3,7 @@ import { DIFFICULTES } from '../data/difficultes';
 import { NIVEAU_TEST } from '../data/niveaux/region1';
 import { REGLES } from '../data/regles';
 import { VERSION_DONNEES } from '../data/version';
-import { CONFIG, avancerPas, avancerSecondes, ennemiEssai, niveauEssai } from './aides.test-utils';
+import { ce, CONFIG, avancerPas, avancerSecondes, ennemiEssai, niveauEssai } from './aides.test-utils';
 import { ajouterEnnemi } from './ennemis';
 import { appliquerAction, avancer, creerPartie, etoilesPour, step, validerAction } from './partie';
 import { PAS_PAR_SECONDE } from './temps';
@@ -114,7 +114,7 @@ describe('vagues', () => {
 describe('événements', () => {
   it('garde les événements d’une action appliquée avant le pas, avec ceux du pas', () => {
     const etat = creerPartie(niveauEssai(), CONFIG);
-    appliquerAction(etat, { type: 'construire', socle: 0, tour: 'tir' });
+    appliquerAction(etat, { type: 'construire', ...ce(0), tour: 'tir' });
     ajouterEnnemi(etat, ennemiEssai({ vitesse: 0, pv: 1000 }), 'paysan_affame', 0, 6);
     step(etat);
     const types = etat.evenements.map((e) => e.type);
@@ -125,16 +125,16 @@ describe('événements', () => {
 
   it('avancer garde les événements de ses propres actions', () => {
     const etat = creerPartie(niveauEssai(), CONFIG);
-    avancer(etat, [{ type: 'construire', socle: 0, tour: 'tir' }]);
+    avancer(etat, [{ type: 'construire', ...ce(0), tour: 'tir' }]);
     expect(etat.evenements.map((e) => e.type)).toContain('construction');
   });
 
   it('vide au pas suivant les événements du pas précédent', () => {
     const etat = creerPartie(niveauEssai(), CONFIG);
-    avancer(etat, [{ type: 'construire', socle: 0, tour: 'tir' }]);
+    avancer(etat, [{ type: 'construire', ...ce(0), tour: 'tir' }]);
     step(etat);
     expect(etat.evenements).toEqual([]);
-    appliquerAction(etat, { type: 'construire', socle: 1, tour: 'tir' });
+    appliquerAction(etat, { type: 'construire', ...ce(1), tour: 'tir' });
     expect(etat.evenements).toHaveLength(1);
   });
 });
@@ -171,9 +171,9 @@ describe('fin de partie', () => {
   it('gagne quand toutes les vagues sont passées et qu’il ne reste aucun ennemi', () => {
     const niveau = niveauEssai([{ paquets: [{ ennemi: 'mendiant', nombre: 2, intervalle: 1, chemin: 0, delai: 0 }] }]);
     const etat = creerPartie(niveau, CONFIG);
-    appliquerAction(etat, { type: 'construire', socle: 0, tour: 'tir' });
-    appliquerAction(etat, { type: 'construire', socle: 1, tour: 'tir' });
-    appliquerAction(etat, { type: 'construire', socle: 2, tour: 'magie' });
+    appliquerAction(etat, { type: 'construire', ...ce(0), tour: 'tir' });
+    appliquerAction(etat, { type: 'construire', ...ce(1), tour: 'tir' });
+    appliquerAction(etat, { type: 'construire', ...ce(2), tour: 'magie' });
     appliquerAction(etat, { type: 'appelerVague' });
     let fin = false;
     for (let i = 0; i < 60 * PAS_PAR_SECONDE && !fin; i++) {

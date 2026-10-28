@@ -10,7 +10,7 @@ import type { Evenement } from './evenements';
 import { appliquerAction, step } from './partie';
 import { enPas } from './temps';
 
-/** Une caserne sur le socle 0 dont les soldats ont pris leur place. */
+/** Une caserne sur la case d'essai 0 dont les soldats ont pris leur place. */
 function partieAvecCaserne(): EtatPartie {
   const etat = partieEssai();
   construireTour(etat, 0, 'caserne');

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { DIFFICULTES } from '../data/difficultes';
 import { ENNEMIS } from '../data/ennemis';
 import { REGLES } from '../data/regles';
-import { CONFIG, avancerPas, avancerSecondes, ennemiEssai, niveauEssai } from './aides.test-utils';
+import { ce, CONFIG, avancerPas, avancerSecondes, ennemiEssai, niveauEssai } from './aides.test-utils';
 import { appliquerEffet, infligerDegats } from './degats';
 import { ajouterEnnemi } from './ennemis';
 import type { Evenement } from './evenements';
@@ -116,7 +116,7 @@ describe('effets', () => {
 describe('attaques des ennemis', () => {
   it('attaque à distance une unité alliée à portée', () => {
     const etat = partieVide();
-    appliquerAction(etat, { type: 'construire', socle: 0, tour: 'caserne' });
+    appliquerAction(etat, { type: 'construire', ...ce(0), tour: 'caserne' });
     avancerSecondes(etat, 2);
     const tireur = ennemiEssai({ vitesse: 0, distance: { portee: 4, degats: [5, 5], cadence: 1, typeDegats: 'physique' } });
     const e = ajouterEnnemi(etat, tireur, 'paysan_affame', 0, 1.5);
@@ -129,7 +129,7 @@ describe('attaques des ennemis', () => {
 
   it('frappe au corps-à-corps le soldat qui le bloque', () => {
     const etat = partieVide();
-    appliquerAction(etat, { type: 'construire', socle: 0, tour: 'caserne' });
+    appliquerAction(etat, { type: 'construire', ...ce(0), tour: 'caserne' });
     avancerSecondes(etat, 2);
     ajouterEnnemi(etat, ennemiEssai({ pv: 10000, degats: [3, 3] }), 'paysan_affame', 0, 4);
     avancerSecondes(etat, 3);
@@ -138,7 +138,7 @@ describe('attaques des ennemis', () => {
 
   it('le Boucher dévore de temps en temps le soldat qui le bloque', () => {
     const etat = partieVide();
-    appliquerAction(etat, { type: 'construire', socle: 0, tour: 'caserne' });
+    appliquerAction(etat, { type: 'construire', ...ce(0), tour: 'caserne' });
     avancerSecondes(etat, 2);
     const boucher = ajouterEnnemi(etat, ENNEMIS.boucher_vaudrelle, 'boucher_vaudrelle', 0, 4.5);
     const vus: Evenement[] = [];

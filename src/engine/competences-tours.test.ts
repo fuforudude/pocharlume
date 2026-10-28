@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { COMPETENCES_TOURS } from '../data/competences-tours';
 import { DIEUX } from '../data/dieux';
 import { TOURS } from '../data/tours';
-import { CONFIG, avancerSecondes, compter, configDe, construireTour, ennemiFixe, evenementsPendant, partieEssai } from './aides.test-utils';
+import { ce, CONFIG, avancerSecondes, compter, configDe, construireTour, ennemiFixe, evenementsPendant, partieEssai } from './aides.test-utils';
 import type { DefNiveauTour, IdFamille, Voie } from './definitions';
 import type { EtatPartie } from './etat';
 import { appliquerAction, coutCompetence, validerAction } from './partie';
@@ -74,22 +74,22 @@ describe('compétences des spécialisations (16)', () => {
       const aretes = etat.aretes;
       const cumul = tour.coutCumule;
       const cout = competence.cout[rang - 1] ?? Number.NaN;
-      expect(coutCompetence(etat, 0, id)).toBe(cout);
-      expect(appliquerAction(etat, { type: 'ameliorerCompetence', socle: 0, competence: id })).toEqual({ ok: true });
+      expect(coutCompetence(etat, ce(0).cx, ce(0).cy, id)).toBe(cout);
+      expect(appliquerAction(etat, { type: 'ameliorerCompetence', ...ce(0), competence: id })).toEqual({ ok: true });
       expect(etat.aretes).toBe(aretes - cout);
       expect(tour.coutCumule).toBe(cumul + cout);
       expect(tour.rangs[indice]).toBe(rang);
-      expect(etat.evenements).toContainEqual({ type: 'competence_tour', tour: tour.id, socle: 0, competence: id, rang });
+      expect(etat.evenements).toContainEqual({ type: 'competence_tour', tour: tour.id, ...ce(0), competence: id, rang });
       verifier(avant, tour.stats, rang);
     }
     expect(tour.rangs[1 - indice]).toBe(0);
-    expect(appliquerAction(etat, { type: 'ameliorerCompetence', socle: 0, competence: id })).toEqual({ ok: false, raison: 'competence_au_maximum' });
-    expect(coutCompetence(etat, 0, id)).toBeUndefined();
+    expect(appliquerAction(etat, { type: 'ameliorerCompetence', ...ce(0), competence: id })).toEqual({ ok: false, raison: 'competence_au_maximum' });
+    expect(coutCompetence(etat, ce(0).cx, ce(0).cy, id)).toBeUndefined();
   });
 
   it('les deux compétences d’une tour s’ajoutent', () => {
     const etat = tourSpecialisee('artillerie', 'A');
-    for (const id of ['charge_lourde', 'nappe_de_soufre']) appliquerAction(etat, { type: 'ameliorerCompetence', socle: 0, competence: id });
+    for (const id of ['charge_lourde', 'nappe_de_soufre']) appliquerAction(etat, { type: 'ameliorerCompetence', ...ce(0), competence: id });
     const stats = etat.tours[0]?.stats;
     expect(stats?.nappe?.rayon).toBe(1);
     expect(stats?.degats[1]).toBeCloseTo(TOURS.artillerie.specialisations.A.degats[1] * 1.15, 5);
@@ -99,40 +99,40 @@ describe('compétences des spécialisations (16)', () => {
 describe('achat d’une compétence : refus', () => {
   it('exige une tour, une spécialisation, une compétence connue et assez d’arêtes', () => {
     const etat = partieEssai(CONFIG, 20000);
-    const acheter = { type: 'ameliorerCompetence', socle: 0, competence: 'mur' } as const;
-    expect(appliquerAction(etat, acheter)).toEqual({ ok: false, raison: 'socle_vide' });
+    const acheter = { type: 'ameliorerCompetence', ...ce(0), competence: 'mur' } as const;
+    expect(appliquerAction(etat, acheter)).toEqual({ ok: false, raison: 'case_vide' });
     construireTour(etat, 0, 'caserne');
     expect(appliquerAction(etat, acheter)).toEqual({ ok: false, raison: 'specialisation_requise' });
-    appliquerAction(etat, { type: 'ameliorer', socle: 0 });
-    appliquerAction(etat, { type: 'ameliorer', socle: 0 });
-    appliquerAction(etat, { type: 'specialiser', socle: 0, voie: 'A' });
-    expect(appliquerAction(etat, { type: 'ameliorerCompetence', socle: 0, competence: 'frenesie' })).toEqual({ ok: false, raison: 'competence_inconnue' });
+    appliquerAction(etat, { type: 'ameliorer', ...ce(0) });
+    appliquerAction(etat, { type: 'ameliorer', ...ce(0) });
+    appliquerAction(etat, { type: 'specialiser', ...ce(0), voie: 'A' });
+    expect(appliquerAction(etat, { type: 'ameliorerCompetence', ...ce(0), competence: 'frenesie' })).toEqual({ ok: false, raison: 'competence_inconnue' });
     for (const nom of ['', 'constructor', '__proto__', 'toString']) {
-      expect(appliquerAction(etat, { type: 'ameliorerCompetence', socle: 0, competence: nom }), nom).toEqual({ ok: false, raison: 'competence_inconnue' });
+      expect(appliquerAction(etat, { type: 'ameliorerCompetence', ...ce(0), competence: nom }), nom).toEqual({ ok: false, raison: 'competence_inconnue' });
     }
     etat.aretes = 10;
     expect(appliquerAction(etat, acheter)).toEqual({ ok: false, raison: 'aretes_insuffisantes' });
     expect(etat.tours[0]?.rangs).toEqual([0, 0]);
-    expect(validerAction(etat, { type: 'ameliorerCompetence', socle: 0, competence: 3 } as never)).toBe('action_invalide');
-    expect(validerAction(etat, { type: 'ameliorerCompetence', socle: 0.5, competence: 'mur' } as never)).toBe('action_invalide');
+    expect(validerAction(etat, { type: 'ameliorerCompetence', ...ce(0), competence: 3 } as never)).toBe('action_invalide');
+    expect(validerAction(etat, { type: 'ameliorerCompetence', cx: 0.5, cy: 0, competence: 'mur' } as never)).toBe('action_invalide');
   });
 
   it('un niveau inférieur à la spécialisation n’a pas de compétence à acheter', () => {
     const etat = partieEssai(CONFIG, 20000);
     construireTour(etat, 0, 'tir');
-    expect(appliquerAction(etat, { type: 'ameliorerCompetence', socle: 0, competence: 'tir_a_la_tete' })).toEqual({ ok: false, raison: 'specialisation_requise' });
+    expect(appliquerAction(etat, { type: 'ameliorerCompetence', ...ce(0), competence: 'tir_a_la_tete' })).toEqual({ ok: false, raison: 'specialisation_requise' });
   });
 
   it('la remise de Pollen sur l’artillerie vaut aussi pour les compétences', () => {
     const etat = tourSpecialisee('artillerie', 'A', configDe('pollen'));
     const prix = TOURS.artillerie.specialisations.A.competences[1]?.cout[0] ?? 0;
-    expect(coutCompetence(etat, 0, 'charge_lourde')).toBe(Math.round(prix * (1 + DIEUX.pollen.bonus.prix)));
+    expect(coutCompetence(etat, ce(0).cx, ce(0).cy, 'charge_lourde')).toBe(Math.round(prix * (1 + DIEUX.pollen.bonus.prix)));
   });
 
   it('le prix des compétences entre dans la valeur de revente', () => {
     const etat = tourSpecialisee('caserne', 'A');
     const avant = etat.tours[0]?.coutCumule ?? 0;
-    appliquerAction(etat, { type: 'ameliorerCompetence', socle: 0, competence: 'mur' });
+    appliquerAction(etat, { type: 'ameliorerCompetence', ...ce(0), competence: 'mur' });
     expect(etat.tours[0]?.coutCumule).toBe(avant + COMPETENCES_TOURS.caserneA[1].cout[0]);
   });
 });
@@ -140,7 +140,7 @@ describe('achat d’une compétence : refus', () => {
 describe('compétences en jeu', () => {
   it('Nappe de soufre : l’impact laisse une zone qui brûle les ennemis qui y restent', () => {
     const avec = tourSpecialisee('artillerie', 'A');
-    appliquerAction(avec, { type: 'ameliorerCompetence', socle: 0, competence: 'nappe_de_soufre' });
+    appliquerAction(avec, { type: 'ameliorerCompetence', ...ce(0), competence: 'nappe_de_soufre' });
     const e = ennemiFixe(avec, 7);
     const vus = evenementsPendant(avec, 10);
     expect(compter(vus.filter((v) => v.type === 'zone'), 'zone')).toBeGreaterThan(0);
@@ -154,7 +154,7 @@ describe('compétences en jeu', () => {
 
   it('Bénédiction : les soldats blessés se régénèrent', () => {
     const etat = tourSpecialisee('caserne', 'A');
-    appliquerAction(etat, { type: 'ameliorerCompetence', socle: 0, competence: 'benediction' });
+    appliquerAction(etat, { type: 'ameliorerCompetence', ...ce(0), competence: 'benediction' });
     const soldat = etat.unites.find((u) => u.genre === 'soldat');
     if (!soldat) throw new Error('pas de soldat');
     blesserUnite(etat, soldat, 40, 'pur');
@@ -165,7 +165,7 @@ describe('compétences en jeu', () => {
 
   it('Légion : le nécromancien peut relever plus de spectres à la fois', () => {
     const etat = tourSpecialisee('magie', 'B');
-    for (let i = 0; i < 3; i++) appliquerAction(etat, { type: 'ameliorerCompetence', socle: 0, competence: 'legion' });
+    for (let i = 0; i < 3; i++) appliquerAction(etat, { type: 'ameliorerCompetence', ...ce(0), competence: 'legion' });
     expect(etat.tours[0]?.stats.spectres?.max).toBe(6);
   });
 });

@@ -8,7 +8,7 @@ import { HEROS_PAR_DIEU } from '../data/meta';
 import { FAMILLES, TOURS } from '../data/tours';
 import { VERSION_DONNEES } from '../data/version';
 import { t, type CleTexte } from '../i18n';
-import { BANDES, correlationDeRang, courbeDifficulte, courbeMoyenne, nomDuDieu, niveauxAvecPertes, verifierBandes } from './bandes';
+import { BANDES, BANDES_IMPOSEES, correlationDeRang, courbeDifficulte, courbeMoyenne, nomDuDieu, niveauxAvecPertes, verifierBandes } from './bandes';
 import {
   DIEUX_EVALUES,
   DIFFICULTES_EVALUEES,
@@ -128,18 +128,18 @@ export function redigerRapport(evaluations: readonly Evaluation[], graines: numb
     'Généré par `npm run balance` (tools/balance/) : ne pas modifier à la main. Chaque niveau de la région 1 est rejoué sans',
     `affichage dans les trois difficultés, avec chacun des trois dieux jouant son avatar (sans amélioration ni objet), par deux bots, sur ${String(graines)} graines chacun (version des données ${String(VERSION_DONNEES)}).`,
     '',
-    '- **Soigneux** : achète à chaque fois ce qui apporte le plus de puissance par arête dépensée (socle, famille, niveau,',
+    '- **Soigneux** : achète à chaque fois ce qui apporte le plus de puissance par arête dépensée (case de la grille, famille, niveau,',
     '  spécialisation, bonus et remise de famille du dieu compris), après une petite recherche entre dix variantes (5 préférences × 2 diversités) jouées sur des graines d’entraînement ;',
     '  place le héros dans la zone de feu de ses tours ; joue les sorts de son dieu selon leur effet (Chute du Colosse sur les grappes, Renforts et Voile de Nuit devant la zone de feu,',
     '  Griffes d’Ombre sur la plus grosse grappe, Pièges à Ressort un peu avant la zone de feu, Ingéniosité au cœur de ses tours) ; construit la tour divine de son dieu dès la troisième tour ;',
     '  appelle les vagues en avance quand le terrain est vide et qu’il n’a plus rien à acheter. Il lit la composition des vagues futures, ce qu’un joueur ne voit pas : il est un peu optimiste.',
-    '- **Naïf** : construit sur les socles proches du chemin, famille au hasard, améliore et spécialise au hasard dès qu’il peut, sans',
+    '- **Naïf** : construit sur les cases de la grille proches du chemin, famille au hasard, améliore et spécialise au hasard dès qu’il peut, sans',
     '  sorts ni ordres au héros, sans tour divine, sans appel de vague en avance.',
     '- **Sans défense** : aucune action, seul le héros à son poste.',
     '',
     '## Bandes cibles',
     '',
-    ecarts.length === 0 ? 'Toutes les bandes sont respectées.' : `**${String(ecarts.length)} écart(s)** :\n\n${ecarts.map((e) => `- ${e}`).join('\n')}`,
+    ecarts.length === 0 ? 'Toutes les bandes sont respectées.' : `**${String(ecarts.length)} écart(s)**${BANDES_IMPOSEES ? '' : ' (bandes suspendues le temps de l’équilibrage qui suit la pose libre des tours : à titre d’information)'} :\n\n${ecarts.map((e) => `- ${e}`).join('\n')}`,
     '',
     `Bandes, pour chaque dieu : Chaton, le naïf gagne tout ; Matou, le soigneux gagne tout en perdant au moins ${String(BANDES.matou.pertesParNiveauMin)} vie sur ${pct(BANDES.matou.partNiveauxAvecPertesMin)} des niveaux et en laissant moins de ${String(BANDES.matou.aretesInutiliseesMax)} arêtes inutilisées par niveau, le naïf gagne ${pct(BANDES.matou.naifMin)} à ${pct(BANDES.matou.naifMax)} ;`,
     `Vieux Sage, le soigneux gagne ${pct(BANDES.vieux_sage.soigneuxMin)} à ${pct(BANDES.vieux_sage.soigneuxMax)} ; sans défense on perd. Entre dieux : en Vieux Sage, au plus ${un(BANDES.vieux_sage.ecartVictoiresEntreDieuxMax * 100)} points d’écart de taux de victoire du soigneux ; en Matou, au plus ${String(BANDES.matou.ecartViesEntreDieuxMax)} vies d’écart de vies moyennes du soigneux.`,

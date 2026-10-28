@@ -8,7 +8,7 @@
 // - tout ce que la partie installe (événements, DOM, boucle) est retiré par `arreter()`.
 import { audio, jouerInterface } from '../audio';
 import type { NiveauCampagne } from '../data/visuel';
-import { avancer, creerPartie, validerAction } from '../engine';
+import { avancer, caseExiste, centreCase, creerPartie, validerAction } from '../engine';
 import type { Action, ConfigPartie, EntreeJournal, EtatPartie, ResultatAction } from '../engine';
 import { chargerAtlas } from '../render/atlas';
 import type { BilanPartie, RaisonFin } from '../save';
@@ -119,7 +119,7 @@ export interface PartieEnCours {
   arreter(): void;
 }
 
-/** Zone de toucher autour d'un socle ou du héros : 44 px CSS de large au moins, soit un rayon de 22 px. */
+/** Zone de toucher autour du héros : 44 px CSS de large au moins, soit un rayon de 22 px. */
 const RAYON_TOUCHE_CSS = 24;
 const RAYON_TOUCHE_MIN_TUILES = 0.9;
 /** Délai avant l'écran de fin, pour laisser voir la dernière mort. */
@@ -183,7 +183,7 @@ export async function lancerNiveau(
   let identifiantImage = 0;
   let pasMenu = -1;
   let elementsDuMenu: ElementMenu[] | null = null;
-  let socleMenu = -1;
+  let caseMenu = '';
   /** Change chaque fois que le contenu du menu est recalculé : le HUD ne compare ses boutons qu'à ce moment. */
   let versionMenu = 0;
 
@@ -248,7 +248,7 @@ export async function lancerNiveau(
     choisirElement: (element) => { traiter(interaction.choisirElement(element)); },
   }, signal);
 
-  // La carte peut dépasser de l'écran de la largeur des barres du HUD : un socle collé au bord reste atteignable.
+  // La carte peut dépasser de l'écran de la largeur des barres du HUD : une case collée au bord reste atteignable.
   const mesurerInterface = (): void => {
     rendu.definirMarges(mesurerMarges(hud.racine, canvas.clientWidth, canvas.clientHeight));
   };
@@ -465,28 +465,29 @@ export async function lancerNiveau(
     mesures.images++;
   };
 
-  /** Menu en cercle du socle sélectionné, recalculé à chaque pas de simulation (prix, grisé) et replacé à chaque image. */
+  /** Menu en cercle de la case sélectionnée, recalculé à chaque pas de simulation (prix, grisé) et replacé à chaque image. */
   const mettreAJourMenu = (): void => {
     const mode = interaction.mode;
-    const socle = etat.niveau.carte.socles[mode.type === 'menu' ? mode.socle : -1];
-    if (mode.type !== 'menu' || !socle || finie) {
+    const centre = mode.type === 'menu' && caseExiste(etat.niveau.carte, mode.cx, mode.cy) ? centreCase(mode.cx, mode.cy) : null;
+    if (mode.type !== 'menu' || !centre || finie) {
       if (elementsDuMenu) {
         elementsDuMenu = null;
-        socleMenu = -1;
+        caseMenu = '';
         hud.placerMenu(null, versionMenu, 0, 0, 0, 0, 0);
       }
       return;
     }
-    if (!elementsDuMenu || etat.pas !== pasMenu || mode.socle !== socleMenu) {
-      elementsDuMenu = elementsMenu(etat, mode.socle);
+    const cle = `${String(mode.cx)},${String(mode.cy)}`;
+    if (!elementsDuMenu || etat.pas !== pasMenu || cle !== caseMenu) {
+      elementsDuMenu = elementsMenu(etat, mode.cx, mode.cy);
       pasMenu = etat.pas;
-      socleMenu = mode.socle;
+      caseMenu = cle;
       versionMenu++;
     }
     const largeur = window.innerWidth;
     const hauteur = window.innerHeight;
     const rayon = Math.min(78, Math.max(56, hauteur * 0.19));
-    hud.placerMenu(elementsDuMenu, versionMenu, rendu.enCssX(socle.x), rendu.enCssY(socle.y - 0.6), largeur, hauteur, rayon);
+    hud.placerMenu(elementsDuMenu, versionMenu, rendu.enCssX(centre.x), rendu.enCssY(centre.y - 0.6), largeur, hauteur, rayon);
   };
 
   function arreter(): void {

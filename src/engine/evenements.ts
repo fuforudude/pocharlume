@@ -13,9 +13,9 @@ export type Evenement =
   | { type: 'apparition'; ennemi: number; typeEnnemi: string }
   | { type: 'fuite'; ennemi: number; vies: number }
   | { type: 'mort'; ennemi: number; typeEnnemi: string; x: number; y: number; prime: number }
-  | { type: 'construction'; tour: number; socle: number; famille: FamilleTour }
-  | { type: 'amelioration'; tour: number; socle: number; niveau: number; voie: Voie | null }
-  | { type: 'vente'; tour: number; socle: number; aretes: number }
+  | { type: 'construction'; tour: number; cx: number; cy: number; famille: FamilleTour }
+  | { type: 'amelioration'; tour: number; cx: number; cy: number; niveau: number; voie: Voie | null }
+  | { type: 'vente'; tour: number; cx: number; cy: number; aretes: number }
   /** Tir d'une tour ; projectile -1 pour un coup instantané (rayon). */
   | { type: 'tir'; tour: number; cible: number; projectile: number; x: number; y: number; critique: boolean }
   | { type: 'impact'; projectile: number; tour: number; x: number; y: number; zone: number }
@@ -29,7 +29,7 @@ export type Evenement =
   | { type: 'sort'; emplacement: number; x: number; y: number }
   /** Objet utilisé : emplacement, id, point visé. */
   | { type: 'objet'; emplacement: number; objet: string; x: number; y: number }
-  | { type: 'competence_tour'; tour: number; socle: number; competence: string; rang: number }
+  | { type: 'competence_tour'; tour: number; cx: number; cy: number; competence: string; rang: number }
   /** Tir d'un héros à distance. */
   | { type: 'tir_unite'; unite: number; ennemi: number; critique: boolean }
   | { type: 'esquive'; unite: number; ennemi: number }

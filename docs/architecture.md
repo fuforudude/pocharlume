@@ -60,7 +60,7 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
   la boucle donne au prochain pas : l'interface n'écrit jamais dans l'état.
 - **Tests de la boucle** : `src/ui/partie-boucle.test.ts` et `carte-monde.test.ts` tournent sous happy-dom (devDependency, pour le DOM) avec un faux `requestAnimationFrame` ; le rendu Canvas et l'atlas y sont remplacés par des doublures.
 - **Rendu** (`src/render/`) : `Rendu` dessine dans un tampon de pixels logiques (une tuile = 16 px) agrandi
-  d'un facteur entier sans lissage ; `camera.ts` (zoom entier, glisser, pincement, molette, bornes ; la vue peut dépasser la carte de la largeur des barres du HUD, mesurées dans le DOM par `src/ui/marges.ts`, pour que tout socle puisse sortir de dessous un bouton), `sol.ts`
+  d'un facteur entier sans lissage ; `camera.ts` (zoom entier, glisser, pincement, molette, bornes ; la vue peut dépasser la carte de la largeur des barres du HUD, mesurées dans le DOM par `src/ui/marges.ts`, pour que toute case de la grille puisse sortir de dessous un bouton), `sol.ts`
   (sol précalculé depuis les chemins : herbe, chemin avec bords et coins, boue, pavés), `suivi.ts` (une
   représentation par entité du moteur, créée et retirée d'après les événements), `effets.ts` (effets en pool),
   `animations.ts` et `atlas.ts` (sprites). Rien ne s'alloue dans la boucle chaude. **Nouveautés du jalon 2** :
@@ -92,7 +92,7 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
   `familier-<bête>` trottine derrière le héros (suit d'une part de l'écart par pas, bondit s'il est loin, caché si le héros est
   à terre). Les skins passent par `AtlasRendu.habiller` : pixels de la planche lus une fois (à la première demande), zone du sprite
   recolorée par `imageDuSkin` (cache) puis copiée dans deux petits canvas (normal et retourné). Sans option, rien ne change.
-- **Interface** (`src/ui/`) : `interaction.ts` (machine à états pure : menu d'un socle, héros, sort,
+- **Interface** (`src/ui/`) : `interaction.ts` (machine à états pure : menu d'une case de la grille, héros, sort,
   ralliement ; renvoie l'action à envoyer ou la raison d'un refus), `menu-cercle.ts` (éléments du menu
   d'après `validerAction`), `gestes.ts` (toucher, glisser, pincer), `clavier.ts` (touches), `hud.ts`,
   `ecrans.ts` (accueil, pause, fin avec son butin, « Tourne ton téléphone », avis discret), `refus.ts` (raison de refus
@@ -318,7 +318,7 @@ Elles sont maintenant dans `RaisonMeta` (`raisons-meta.ts`), les sept phrases `c
   (Matou imposé, aucun objet, familles imposées en Fer, prime de 4 braises la première fois seulement) et retire la section des
   objets (`ChoixFiche.definirDefi`). `surLancer(niveau, difficulte, choix, defi)` donne le défi ; `main.ts` le passe à `configDuChoix`
   et le numéro du niveau à « Rejouer » (`relancerAvecDebit(…, niveau)`), qui garde le défi et prend les bonus d'aujourd'hui.
-- **Partie en Fer** : `elementsSocleVide` (menu en cercle) ne propose pas une famille que `validerAction` refuse par
+- **Partie en Fer** : `elementsCaseVide` (menu en cercle) ne propose pas une famille que `validerAction` refuse par
   `famille_interdite` ; une touche d'une famille interdite affiche `refus.famille_interdite`.
 - **Apparence** (`apparence.ts`) : `lancerNiveau` reçoit `options.equipes` (`meta.collection.equipes`) et donne au rendu
   (`new Rendu(…, apparenceDeLaPartie(equipes, héros joué))`) tous les skins équipés et le familier du héros joué. L'apparence ne
@@ -341,33 +341,77 @@ Elles sont maintenant dans `RaisonMeta` (`raisons-meta.ts`), les sept phrases `c
 - **Bilan de fin** (`lignesBilan`, `ecrans.ts`) : en plus du butin, « Défi Héroïque réussi : +4 braises », « <disciple> rejoint tes
   héros ! » et « Région ouverte : <nom> » quand le `BilanPartie` les porte.
 
+## Grille de construction (pose libre des tours, `src/engine/grille.ts`)
+Les socles fixes ont disparu (spec « Pose libre des tours », changement du 2026-10-28). La carte (32 × 18 tuiles) est découpée en
+**cases de `REGLES.tailleCase` = 2 tuiles de côté, 16 × 9 cases** ; une tour se pose sur n'importe quelle case libre et **son centre
+est le centre de la case** (`tour.x = (cx + 0,5) × 2`). Deux tours ne partagent jamais une case ; il n'y a pas d'autre règle d'écartement.
+- **Données du niveau** : `Niveau.casesInterdites: CaseGrille[]` (`{ cx, cy }`, colonne et ligne depuis le coin nord-ouest). Le moteur
+  ne lit pas l'habillage : `src/data/niveaux/grille-niveau.ts` les calcule à l'assemblage (`casesInterditesDuNiveau(carte, decor)`)
+  depuis les chemins du niveau (tuile dont le centre est à 1 tuile ou moins de l'axe, la règle du sol dessiné de `render/sol.ts`, un test
+  les garde identiques) et les **grands décors** visibles (`GRANDS_DECORS` de `habillage.ts` : tuile recouverte de plus de
+  `RECOUVREMENT_MIN_DECOR` = 0,25 tuile par l'emprise du sprite). Une case est interdite si l'une de ses 4 tuiles est bloquée ; l'herbe,
+  les fleurs, les petits cailloux et tout décor de 16×16 ne bloquent pas. `NIVEAU_TEST` (region1.ts) n'a pas de décor : seul le
+  chemin interdit des cases. Les cartes dessinées (`CarteModele`) n'ont plus de socles ; les plans (`PlanNiveau`) n'ont plus de `socles`.
+- **Actions** : `construire { cx, cy, tour }` ; `ameliorer`, `specialiser`, `ameliorerCompetence`, `vendre` et `deplacerRalliement`
+  visent la tour posée sur la case `{ cx, cy }`. `Tour` porte `cx` et `cy` (et plus `socle`), les événements `construction`,
+  `amelioration`, `vente` et `competence_tour` aussi. `VERSION_ETAT` 5 et `VERSION_DONNEES` 8 : une partie enregistrée avec des socles
+  se relit en échec et est oubliée à la reprise (règle existante de `Session.reprendre`), un journal de l'ancien format est refusé.
+- **Refus** (`RaisonRefus`), dans l'ordre où `validerAction` les rend pour `construire` : `action_invalide` (cases non entières ou
+  absentes), `case_hors_carte` (hors de la grille), `case_interdite` (chemin, grand décor), `case_occupee`, puis les refus de famille et de
+  prix existants (`tour_divine_unique`, `famille_interdite` du défi Fer, `aretes_insuffisantes`), avec **`caserne_sans_chemin`** inséré
+  avant le prix : une tour à soldats (la caserne, la tour divine de Plume) n'est constructible que là où le point du chemin le plus
+  proche du centre de la case est à portée (`ralliementParDefaut(chemins, cx, cy, portee)`, portée 2,5 pour la caserne de niveau 1, 3 pour
+  le Sanctuaire) ; ce point devient son ralliement par défaut. Les autres familles restent permises sur cette case. Pour les autres actions
+  sur une case sans tour : `case_vide`. Conséquence de la géométrie : le centre d'une case est à 2 tuiles d'un axe de chemin impair
+  (une ligne de cases interdite), à 3 tuiles d'un axe pair (deux lignes interdites) ; la caserne (portée 2,5) ne se pose donc qu'à côté
+  des tronçons d'axe impair, aux coins ou en diagonale.
+- **API pour l'interface** (exportée par `src/engine/index.ts`) :
+  - `caseSousPoint(carte, x, y): CaseGrille | null` : la case qui contient un point en tuiles (le point du toucher converti par
+    `rendu.enTuilesX/Y`), null hors de la carte ; `centreCase(cx, cy): Point` : où dessiner l'éclat, le menu, la portée ;
+    `caseExiste(carte, cx, cy)`.
+  - `estCaseInterdite(niveau, cx, cy)` et `tourSurCase(etat, cx, cy)` : de quoi dire « case interdite », « libre » ou « occupée » sans
+    passer par une action ; `casesLibres(etat): CaseGrille[]` (ni interdites ni occupées, sans tenir compte du prix, de la famille ni de la
+    caserne) ; `toutesLesCases(carte)`, `colonnes(carte)`, `lignes(carte)`.
+  - **Le refus précis se demande à `validerAction(etat, { type: 'construire', cx, cy, tour })`** : `null` si permis, sinon la raison.
+    `elementsMenu(etat, cx, cy)` (menu en cercle) l'utilise déjà : les familles refusées y sont grisées avec leur raison, et
+    `src/ui/refus.ts` donne le texte de chaque raison (`refus.case_*`, `refus.caserne_sans_chemin`).
+  - `Interaction.toucher` ouvre le menu de la case touchée (`Mode.menu { cx, cy }`) ou renvoie `refus: 'case_interdite'` sur une case
+    interdite sans tour ; `Surbrillance` porte `cx`/`cy` (la case dont le menu est ouvert, -1 si aucune) et `portee`. **État provisoire** :
+    la visée de case au survol, l'éclat libre/interdit de la case visée, la taille de case de 44 px au moins au zoom du téléphone et le
+    menu en cercle sur la grille sont l'objet d'une tâche à part ; rien n'est dessiné sur les cases vides.
+- **Simulateur** : les bots jouent toutes les cases libres. Le naïf les classe par distance au chemin (avec un bruit). Le soigneux
+  garde une recherche raisonnable : pour chaque famille et pour la tour divine, il classe une fois pour toutes les cases où la tour voit
+  du chemin (longueur vue, pesée par la menace de chaque chemin ; la caserne seulement là où elle a un chemin à portée), n'examine à
+  chaque achat que les `CASES_PAR_FAMILLE` = 30 meilleures qui sont libres, et compte la puissance qui couvre chaque point du chemin avec
+  un **rendement décroissant** (`utilite(D) = D / (1 + D / SATURATION_DPS)`, 30 dégâts par seconde) : sans cela, le bot empile tout sur le
+  meilleur virage, un joueur répartit sa défense.
+
 ## Niveaux de la campagne (`src/data/niveaux/`)
 50 niveaux (régions 1 à 5), numérotés de 1 à 50 ; le numéro de campagne est le niveau L du budget b(L, w).
-- `modele-carte.ts` : la structure d'une carte et ses constructeurs. Les cartes dessinées à la main (chemins, socles et
-  ralliements, départ du héros, zones de sol, décor) sont dans `cartes.ts` (région 1, 4 cartes) et `cartes-region2.ts` à
+- `modele-carte.ts` : la structure d'une carte et ses constructeurs. Les cartes dessinées à la main (chemins, départ du héros,
+  zones de sol, décor ; plus de socles depuis la pose libre des tours) sont dans `cartes.ts` (région 1, 4 cartes) et `cartes-region2.ts` à
   `cartes-region5.ts` (3 cartes par région : une à un chemin, deux à deux chemins) ; `cartes-toutes.ts` les rassemble (`CARTES`).
-  Les cartes des régions 2 à 5 ont été produites par un script jetable (socles à 2 tuiles de l'axe, décor réparti, tuiles
-  `r<N>-…` choisies par `region`), puis se retouchent à la main. Un niveau n'emprunte qu'un chemin ou les deux, et ne garde
-  que les socles à portée (et au ralliement) des chemins empruntés ; chaque chemin seul garde au moins 6 socles.
+  Les cartes des régions 2 à 5 ont été produites par un script jetable (décor réparti, tuiles `r<N>-…` choisies par `region`),
+  puis se retouchent à la main. Un niveau n'emprunte qu'un chemin ou les deux.
 - `plan-niveau.ts` : le type `PlanNiveau`, les ennemis de chaque région (`ENNEMIS_REGIONS`), les boss (`BOSS_REGIONS`) et
   `ennemisDuNiveau` : ceux de la région, un de plus à chaque niveau (tous au niveau 3), puis dès le niveau 4 ceux des
-  régions précédentes. `plan-region<N>.ts` : pour chacun des 10 niveaux, la carte, les chemins et les socles choisis, les
+  régions précédentes. `plan-region<N>.ts` : pour chacun des 10 niveaux, la carte, les chemins choisis, les
   ennemis, le nombre de vagues, la graine, les arêtes de départ et **`defiFer`** (les deux familles du défi Fer : elles
   savent toucher les volants et révéler les furtifs quand le niveau en compte, et varient d'un niveau à l'autre ; un test
-  le vérifie). `assemblage.ts` en tire un `NiveauCampagne` (identifiant `r<région>-<nn>`) et n'en garde que le décor qui ne
-  recouvre ni un chemin ni un socle utilisés. `campagne.ts` assemble les 50 niveaux (`CAMPAGNE`, `REGIONS`, `niveauDeCampagne`).
+  le vérifie). `assemblage.ts` en tire un `NiveauCampagne` (identifiant `r<région>-<nn>`), n'en garde que le décor qui ne
+  recouvre pas un chemin utilisé, et calcule `Niveau.casesInterdites` (voir « Grille de construction » ci-dessous). `campagne.ts` assemble les 50 niveaux (`CAMPAGNE`, `REGIONS`, `niveauDeCampagne`).
 - `vagues-region<N>.ts` : vagues **figées**, générées par `npm run niveaux` (`npm run niveaux -- 3` : une seule région) avec
   le générateur d'équilibrage (budget b(L, w)). Jamais de génération à l'exécution. Un niveau marqué `retouchees: true` dans
   le plan garde ses vagues retouchées à la main ; un test vérifie que les autres correspondent au générateur. Les essaims
   arrivent par groupes entiers. Le niveau 10 de chaque région ajoute son boss à la dernière vague. Les fichiers des
   régions 2 à 5 pèsent de 230 à 550 Ko de source : à charger à la demande si le poids du jeu devient un souci.
 - Budget : la croissance par niveau est pleine jusqu'au niveau 10 (`croissanceNiveau` 0,15) puis plus lente
-  (`croissanceNiveauSuite` 0,03), car les tours n'ont que quatre niveaux et un nombre de socles borné : sans cela les
+  (`croissanceNiveauSuite` 0,03), car les tours n'ont que quatre niveaux et un nombre de cases utiles borné : sans cela les
   régions 2 à 5 deviennent impossibles à tenir sans amélioration (voir `balance-report.md`).
 - `carte-du-monde.ts` : positions des 10 nœuds et tracé de la route de chacune des 5 régions sur le fond de 512 × 288
   (`NOEUDS_REGIONS`, `TRACES_REGIONS`, `noeudsDeRegion`, `traceDeRegion`) ; `src/ui/regions-monde.ts` les branche.
-- Le chemin est supposé dessiné sur 2 tuiles de large (`DEMI_LARGEUR_CHEMIN` dans `habillage.ts`) : les socles
-  sont à 2 tuiles de l'axe, le décor à au moins 1,25 tuile.
+- Le chemin est supposé dessiné sur 2 tuiles de large (`DEMI_LARGEUR_CHEMIN` dans `habillage.ts`) : le décor reste à au moins
+  1,25 tuile de l'axe, et les cases du chemin sont interdites à la construction.
 - Aperçus : `npm run niveaux:apercu -- carte <id>` (texte), `-- planche` (PNG des 12 cartes des régions 2 à 5, avec les vrais
   sprites : `docs/cartes/regions-2-a-5.png`) ou `-- planche <région>` (`art/apercu/`, non suivi).
 - **Élites en Vieux Sage** : `Difficulte.vaguesElites` (0 en Chaton et Matou, 2 en Vieux Sage) : le moteur joue les groupes (hors
@@ -380,7 +424,7 @@ Le simulateur de `src/equilibrage/` rejoue les 10 niveaux dans les 3 difficulté
 `src/data/`). Les bandes cibles sont vérifiées par `src/equilibrage/bandes-*.test.ts` (un fichier par difficulté ; les trois
 dieux se calculent chacun dans un fil à part, `bandes.travailleur.ts`, donc le temps d'un fichier est celui d'un dieu) et par
 `npm run balance` (mêmes 10 graines et 2 graines d'entraînement : mêmes résultats, code de sortie 1 si une bande n'est pas
-respectée). `npm run balance` joue en plus les vérifications supplémentaires du rapport : disciples comparés à leur avatar,
+respectée, **tant que les bandes sont imposées : voir ci-dessous**). `npm run balance` joue en plus les vérifications supplémentaires du rapport : disciples comparés à leur avatar,
 arbre au maximum et héros de niveau 10 en Vieux Sage, soigneux sans tour divine (profils de `profils.ts`). Pour la mise au point,
 `npm run balance -- --dieux=plume --difficultes=matou --graines=5 --detail [--profils=disciples,progression,divine]` ne joue que
 ce qui est demandé et affiche un résumé (sans écrire le rapport). Ce qui a été réglé, et pourquoi :
@@ -406,6 +450,11 @@ ce qui est demandé et affiche un résumé (sans écrire le rapport). Ce qui a �
   (`--graines=30`). Régler à la main plusieurs dieux et niveaux à la fois n'y arrive pas : les derniers réglages viennent
   d'une descente par coordonnées (un paramètre à la fois, jugé sur les bandes de tous les dieux).
 - Quand les données changent : `npm run niveaux` (vagues figées), `VERSION_DONNEES` + 1, `npm run balance`, puis `npm run verifier`.
+- **Bandes suspendues (pose libre des tours)** : le passage des socles à la grille a déplacé la difficulté des 50 niveaux, rééquilibrée
+  après coup. `BANDES_IMPOSEES` (`bandes.ts`, faux sauf `BANDES_IMPOSEES=1`) rend les écarts non bloquants : les tests
+  `bandes-*.test.ts` les affichent (`console.warn`) sans échouer, `npm run balance` les affiche et les écrit au rapport sans code de
+  sortie 1. À rendre permanent (`true`) à la fin du rééquilibrage ; `BANDES_IMPOSEES=1 npm test` les impose dès maintenant. Les
+  contrôles qui ne sont pas des bandes (sans défense on perd) restent bloquants.
 
 ### Équilibrage des trois dieux (jalon 2, tâche 6)
 - **Constat.** Le héros porte la difficulté. Les ennemis arrivent en colonnes serrées (0,3 s d'écart) et un héros ne bloque
@@ -461,7 +510,7 @@ ce qui est demandé et affiche un résumé (sans écrire le rapport). Ce qui a �
 
 ## Règles du moteur
 - **Entrées non fiables** : les actions (interface, journal relu) sont validées par `validerAction` : forme
-  (type connu, socles et emplacements entiers, coordonnées finies, voie `A` ou `B`), puis règles de jeu. Une
+  (type connu, cases `cx`/`cy` et emplacements entiers, coordonnées finies, voie `A` ou `B`), puis règles de jeu. Une
   action refusée ne lève jamais d'exception et ne change rien à l'état. Les tables de données ne sont lues que
   par propriétés propres (`Object.hasOwn`).
 - **Événements** : `etat.evenements` contient les événements d'un seul pas (actions appliquées à ce pas, puis
@@ -506,7 +555,7 @@ ce qui est demandé et affiche un résumé (sans écrire le rapport). Ce qui a �
   ennemis visés de la carte, furtifs non révélés compris. `etat.viePerdue` (VERSION_ETAT 3) devient vrai dès qu'une vie est
   perdue : `etoilesPour(vies, viesDepart, viePerdue)` ne donne 3 étoiles que sans perte, même si l'Herbe a rendu les vies.
   La branche « sorts » raccourcit les recharges.
-- **Compétences de spécialisation** : `ameliorerCompetence {socle, competence}` (id de la compétence) achète le rang
+- **Compétences de spécialisation** : `ameliorerCompetence {cx, cy, competence}` (id de la compétence) achète le rang
   suivant en arêtes (remise de famille du dieu comprise, prix ajouté à la valeur de revente).
 - **Événements ajoutés pour le rendu et le son** : `tir_unite`, `esquive`, `soin`, `regain_vies`, `execution`, `zone`,
   `zone_fin`, `piege_pose`, `piege_declenche`, `structure`, `tir_structure`, `structure_fin`, `boost`, `objet`,

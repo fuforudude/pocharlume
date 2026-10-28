@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { REGION1 } from '../data/niveaux/region1';
 import type { EtatPartie } from '../engine/etat';
+import { premiereCaseLibre } from '../engine/aides.test-utils';
 import { appliquerAction, creerPartie, serialiser, step } from '../engine/partie';
 import { Depot } from './depot';
 import { enregistrerVictoire } from './progression';
@@ -20,7 +21,7 @@ function niveau1(): EtatPartie {
 
 /** Avance jusqu'à ce que `n` vagues soient lancées. */
 function jusquaVague(etat: EtatPartie, n: number): void {
-  appliquerAction(etat, { type: 'construire', socle: 0, tour: 'tir' });
+  appliquerAction(etat, { type: 'construire', ...premiereCaseLibre(etat), tour: 'tir' });
   while (etat.vagues.lancees < n && etat.statut === 'en_cours') step(etat);
 }
 
@@ -95,6 +96,19 @@ describe('partie en cours', () => {
     const terminee = JSON.parse(bonne.etat) as { statut: string };
     terminee.statut = 'victoire';
     expect(reprendrePartie({ ...bonne, etat: JSON.stringify(terminee) })).toBeNull();
+  });
+
+  it('oublie une partie enregistrée avant la grille de construction (tours sur des socles, état en version 4, données en version 7)', () => {
+    const etat = niveau1();
+    jusquaVague(etat, 1);
+    const bonne = partieEnCours(etat, 1);
+    if (!bonne) throw new Error('pas de partie');
+    const ancien = JSON.parse(bonne.etat) as { version: number; versionDonnees: number; tours: Record<string, unknown>[] };
+    ancien.version = 4;
+    ancien.versionDonnees = VERSION_DONNEES - 1;
+    ancien.tours = ancien.tours.map((t) => ({ ...t, cx: undefined, cy: undefined, socle: 0 }));
+    const partie = { ...bonne, config: { ...bonne.config, versionDonnees: VERSION_DONNEES - 1 }, etat: JSON.stringify(ancien) };
+    expect(reprendrePartie(partie)).toBeNull();
   });
 
   it('une victoire effacerait la partie en cours : le dépôt garde le reste de la progression', () => {

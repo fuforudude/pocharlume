@@ -1,5 +1,5 @@
 // Marges de l'interface de partie : les bandes de l'écran que les barres du HUD (haut et bas) et l'encoche du
-// téléphone recouvrent. La caméra s'en sert pour laisser la carte dépasser de ces bandes, afin qu'un socle collé
+// téléphone recouvrent. La caméra s'en sert pour laisser la carte dépasser de ces bandes, afin qu'une case collée
 // au bord puisse être amené dans la zone libre. Le calcul est pur ; la lecture du DOM est à part.
 
 /** Un rectangle d'écran en pixels CSS (la forme d'un `DOMRect`). */

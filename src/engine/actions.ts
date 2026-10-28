@@ -2,13 +2,15 @@
 import type { IdFamille, Voie } from './definitions';
 
 export type Action =
-  | { type: 'construire'; socle: number; tour: IdFamille | 'divine' }
-  | { type: 'ameliorer'; socle: number }
-  | { type: 'specialiser'; socle: number; voie: Voie }
+  /** Pose une tour sur la case (`cx`, `cy`) de la grille de construction, centrée dans la case. */
+  | { type: 'construire'; cx: number; cy: number; tour: IdFamille | 'divine' }
+  /** Les actions suivantes visent la tour posée sur la case (`cx`, `cy`). */
+  | { type: 'ameliorer'; cx: number; cy: number }
+  | { type: 'specialiser'; cx: number; cy: number; voie: Voie }
   /** Achète le rang suivant d'une compétence de la spécialisation d'une tour (`competence` : son id). */
-  | { type: 'ameliorerCompetence'; socle: number; competence: string }
-  | { type: 'vendre'; socle: number }
-  | { type: 'deplacerRalliement'; socle: number; x: number; y: number }
+  | { type: 'ameliorerCompetence'; cx: number; cy: number; competence: string }
+  | { type: 'vendre'; cx: number; cy: number }
+  | { type: 'deplacerRalliement'; cx: number; cy: number; x: number; y: number }
   | { type: 'deplacerHeros'; x: number; y: number }
   | { type: 'lancerSort'; emplacement: number; x: number; y: number }
   /** Utilise l'objet de l'emplacement (0 à 2) en un point ; un emplacement ne sert qu'une fois par partie. */
@@ -18,9 +20,16 @@ export type Action =
 export type RaisonRefus =
   | 'partie_terminee'
   | 'action_invalide'
-  | 'socle_inconnu'
-  | 'socle_occupe'
-  | 'socle_vide'
+  /** La case visée n'existe pas dans la grille de la carte. */
+  | 'case_hors_carte'
+  /** Chemin ou grand décor : on ne construit pas sur cette case. */
+  | 'case_interdite'
+  /** Une tour se dresse déjà sur cette case. */
+  | 'case_occupee'
+  /** Aucune tour sur la case visée (amélioration, vente, ralliement…). */
+  | 'case_vide'
+  /** Une caserne (ou une tour divine à soldats) ne se pose que là où un chemin est à portée de son ralliement. */
+  | 'caserne_sans_chemin'
   | 'tour_inconnue'
   | 'aretes_insuffisantes'
   | 'niveau_max'

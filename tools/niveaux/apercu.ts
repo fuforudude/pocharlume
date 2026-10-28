@@ -1,16 +1,19 @@
 // `npm run niveaux:apercu -- <n>` : dessine en texte le niveau de campagne n (1 à 10), une lettre par tuile.
-// `npm run niveaux:apercu -- carte <id>` : dessine une carte avec tous ses chemins, socles et décors.
+// `npm run niveaux:apercu -- carte <id>` : dessine une carte avec tous ses chemins et décors.
 // `npm run niveaux:apercu -- planche [région]` : planche PNG des cartes des régions 2 à 5 (docs/cartes/regions-2-a-5.png), ou
 // des cartes d'une seule région (art/apercu/cartes-region<N>.png, non suivi par git), avec le vrai sol et les vrais sprites.
-// # chemin (couloir de 2 tuiles) · S pierre d'un socle · R ralliement · H départ du héros
+// # chemin (couloir de 2 tuiles) · : tuile d'une case interdite à la construction (chemin ou grand décor) · H départ du héros
 // m maison · a arbre · p puits · b bûcher · t potence/échafaud · c clôture · T tonneau · x croix · k crâne/ossements · s souche
-// o cailloux · ' touffe · M meule · C chariot/charrette/barque · F fosse · ~ boue · + pavés · ! décor qui mord sur un chemin ou un socle
+// o cailloux · ' touffe · M meule · C chariot/charrette/barque · F fosse · ~ boue · + pavés · ! décor qui mord sur un chemin
 // (les petits décors des régions 2 à 5 ont chacun une lettre, voir LETTRES ; ? = sprite sans lettre)
 import { CARTES, type IdCarte } from '../../src/data/niveaux/cartes-toutes.ts';
-import { empriseDecor, empriseSocle, empriseSprite, DEMI_LARGEUR_CHEMIN, MARGE_DECOR } from '../../src/data/niveaux/habillage.ts';
-import { distanceRectChemin, distancePointChemin, rectsSeChevauchent } from '../../src/data/niveaux/geometrie.ts';
+import { empriseDecor, DEMI_LARGEUR_CHEMIN, MARGE_DECOR } from '../../src/data/niveaux/habillage.ts';
+import { casesInterditesDuNiveau } from '../../src/data/niveaux/grille-niveau.ts';
+import { REGLES } from '../../src/data/regles.ts';
+import { distanceRectChemin, distancePointChemin } from '../../src/data/niveaux/geometrie.ts';
 import { REGION1 } from '../../src/data/niveaux/region1.ts';
 import type { Carte } from '../../src/engine/definitions.ts';
+import { colonnes, lignes } from '../../src/engine/grille.ts';
 import type { VisuelCarte } from '../../src/data/visuel.ts';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
@@ -93,22 +96,22 @@ function dessiner(carte: Carte, visuel: VisuelCarte): string {
   }
   for (const d of visuel.decor) {
     const r = empriseDecor(d);
-    const mord =
-      carte.chemins.some((c) => distanceRectChemin(r, c.points) < DEMI_LARGEUR_CHEMIN + MARGE_DECOR) ||
-      carte.socles.some((s) => rectsSeChevauchent(r, empriseSprite(s.x, s.y)));
+    const mord = carte.chemins.some((c) => distanceRectChemin(r, c.points) < DEMI_LARGEUR_CHEMIN + MARGE_DECOR);
     for (let j = 0; j < carte.hauteur; j++) {
       for (let i = 0; i < carte.largeur; i++) {
         if (i + 0.5 > r.x0 && i + 0.5 < r.x1 && j + 0.5 > r.y0 && j + 0.5 < r.y1) poser(i, j, mord ? '!' : (LETTRES[d.sprite] ?? '?'));
       }
     }
   }
-  for (const s of carte.socles) {
-    const r = empriseSocle(s.x, s.y);
-    for (let j = 0; j < carte.hauteur; j++) {
-      for (let i = 0; i < carte.largeur; i++) if (i + 0.5 > r.x0 && i + 0.5 < r.x1 && j + 0.5 > r.y0 && j + 0.5 < r.y1) poser(i, j, 'S');
+  // Les tuiles encore vides des cases interdites (la tuile d'une case entière est condamnée par l'une des siennes).
+  for (const c of casesInterditesDuNiveau(carte, visuel.decor)) {
+    for (let j = 0; j < REGLES.tailleCase; j++) {
+      for (let i = 0; i < REGLES.tailleCase; i++) {
+        const ligne = grille[c.cy * REGLES.tailleCase + j];
+        if (ligne?.[c.cx * REGLES.tailleCase + i] === '.') poser(c.cx * REGLES.tailleCase + i, c.cy * REGLES.tailleCase + j, ':');
+      }
     }
   }
-  for (const s of carte.socles) poser(Math.floor(s.ralliement.x), Math.floor(s.ralliement.y), 'R');
   poser(Math.floor(carte.departHeros.x), Math.floor(carte.departHeros.y), 'H');
   const entete = '   ' + Array.from({ length: carte.largeur }, (_, i) => String(i % 10)).join('');
   return [entete, ...grille.map((l, j) => `${String(j).padStart(2)} ${l.join('')}`)].join('\n');
@@ -128,7 +131,7 @@ if (mode === 'planche') {
   console.log(`${String(modeles.length)} cartes dessinées dans ${sortie}`);
 } else if (mode === 'carte' && arg && arg in CARTES) {
   const m = CARTES[arg as IdCarte];
-  console.log(dessiner({ largeur: m.largeur, hauteur: m.hauteur, chemins: m.chemins, socles: m.socles, departHeros: m.departHeros }, { region: m.region, zones: m.zones, decor: m.decor }));
+  console.log(dessiner({ largeur: m.largeur, hauteur: m.hauteur, chemins: m.chemins, departHeros: m.departHeros }, { region: m.region, zones: m.zones, decor: m.decor }));
 } else {
   const n = Number(mode);
   const niveau = REGION1.find((c) => c.numero === n);
@@ -136,6 +139,6 @@ if (mode === 'planche') {
     console.error('Usage : apercu.ts <1 à 10> | carte <chaumes|gue|pendus|carrefour>');
     process.exit(1);
   }
-  console.log(`Niveau ${String(n)} (${niveau.niveau.id}) : ${String(niveau.niveau.carte.chemins.length)} chemin(s), ${String(niveau.niveau.carte.socles.length)} socles, ${String(niveau.niveau.vagues.length)} vagues`);
+  console.log(`Niveau ${String(n)} (${niveau.niveau.id}) : ${String(niveau.niveau.carte.chemins.length)} chemin(s), ${String(niveau.niveau.casesInterdites.length)} cases interdites sur ${String(colonnes(niveau.niveau.carte) * lignes(niveau.niveau.carte))}, ${String(niveau.niveau.vagues.length)} vagues`);
   console.log(dessiner(niveau.niveau.carte, niveau.visuel));
 }

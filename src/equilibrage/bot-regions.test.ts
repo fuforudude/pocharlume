@@ -67,7 +67,7 @@ describe('bot soigneux face aux furtifs', () => {
     expect(guetteurs).toBeGreaterThan(tir);
     const construit = actions[tir];
     const specialise = actions[guetteurs];
-    expect(construit?.type === 'construire' && specialise?.type === 'specialiser' && construit.socle === specialise.socle).toBe(true);
+    expect(construit?.type === 'construire' && specialise?.type === 'specialiser' && construit.cx === specialise.cx && construit.cy === specialise.cy).toBe(true);
   });
 
   it('sans furtifs, il ne se préoccupe pas des Guetteurs', () => {

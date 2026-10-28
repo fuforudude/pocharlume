@@ -2,6 +2,7 @@
 import type { Regles } from '../engine/definitions';
 
 export const REGLES: Regles = {
+  tailleCase: 2,
   tauxRevente: 70,
   multiplicateurCritique: 2,
   paliersProtection: [0, 0.3, 0.6, 0.9],

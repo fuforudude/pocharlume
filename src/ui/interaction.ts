@@ -1,10 +1,10 @@
-// Ce que fait chaque geste du joueur : toucher un socle ouvre son menu, toucher le héros puis un point lui
+// Ce que fait chaque geste du joueur : toucher une case libre ou une tour ouvre son menu, toucher le héros puis un point lui
 // donne un ordre, toucher un sort puis la carte le lance. Machine à états pure (sans DOM) : elle ne modifie
 // jamais l'état de la partie, elle renvoie l'action à envoyer au moteur (qui la valide et la met au journal).
 import { DIEUX } from '../data/dieux';
 import { OBJETS } from '../data/objets';
 import type { Action, EtatPartie, RaisonRefus } from '../engine';
-import { validerAction } from '../engine';
+import { caseSousPoint, estCaseInterdite, tourSurCase, validerAction } from '../engine';
 import type { FamilleTour } from '../engine/etat';
 import { chercherParId } from '../engine/recherche';
 import { tCle } from '../i18n';
@@ -13,15 +13,15 @@ import type { ElementMenu } from './menu-cercle';
 
 export type Mode =
   | { readonly type: 'libre' }
-  /** Le menu en cercle d'un socle est ouvert. */
-  | { readonly type: 'menu'; readonly socle: number }
+  /** Le menu en cercle d'une case (libre, ou portant une tour) est ouvert. */
+  | { readonly type: 'menu'; readonly cx: number; readonly cy: number }
   /** Le héros est sélectionné : le prochain point touché est son ordre. */
   | { readonly type: 'heros' }
   | { readonly type: 'sort'; readonly emplacement: number }
   /** Un objet emporté est sélectionné : le prochain point touché est l'endroit où l'utiliser. */
   | { readonly type: 'objet'; readonly emplacement: number }
   /** Une caserne attend son point de ralliement. */
-  | { readonly type: 'ralliement'; readonly socle: number };
+  | { readonly type: 'ralliement'; readonly cx: number; readonly cy: number };
 
 /** Ce que le geste demande à la partie : une action pour le moteur, ou la raison d'un refus à afficher. */
 export interface Issue {
@@ -32,38 +32,24 @@ export interface Issue {
 const RIEN: Issue = { action: null, refus: null };
 const LIBRE: Mode = { type: 'libre' };
 
-export type CibleTouchee = { readonly type: 'heros' } | { readonly type: 'socle'; readonly socle: number };
+export type CibleTouchee = { readonly type: 'heros' } | { readonly type: 'case'; readonly cx: number; readonly cy: number };
 
 /** Décalage entre le pied d'une tour ou d'un personnage et le centre de son sprite, en tuiles : on touche le corps. */
 const CENTRE_SPRITE = 0.5;
 
 /**
- * Ce qui est touché en (x, y) (tuiles) : le héros ou un socle, le plus proche dans `rayon` tuiles. Le rayon
- * vient de la taille de la cible tactile (44 px CSS) convertie en tuiles au zoom courant.
+ * Ce qui est touché en (x, y) (tuiles) : le héros s'il est dans `rayon` tuiles (la taille de la cible tactile, 44 px CSS,
+ * convertie en tuiles au zoom courant), sinon la case de la grille qui contient le point.
  */
 export function cibleTouchee(etat: EtatPartie, x: number, y: number, rayon: number): CibleTouchee | null {
-  let meilleure: CibleTouchee | null = null;
-  let distanceMin = rayon * rayon;
   const heros = chercherParId(etat.unites, etat.heros);
   if (heros && !heros.mort) {
     const dx = heros.x - x;
     const dy = heros.y - CENTRE_SPRITE - y;
-    const d = dx * dx + dy * dy;
-    if (d <= distanceMin) {
-      distanceMin = d;
-      meilleure = { type: 'heros' };
-    }
+    if (dx * dx + dy * dy <= rayon * rayon) return { type: 'heros' };
   }
-  etat.niveau.carte.socles.forEach((s, i) => {
-    const dx = s.x - x;
-    const dy = s.y - CENTRE_SPRITE - y;
-    const d = dx * dx + dy * dy;
-    if (d <= distanceMin) {
-      distanceMin = d;
-      meilleure = { type: 'socle', socle: i };
-    }
-  });
-  return meilleure;
+  const touchee = caseSousPoint(etat.niveau.carte, x, y);
+  return touchee ? { type: 'case', cx: touchee.cx, cy: touchee.cy } : null;
 }
 
 /** Rayon (tuiles) de l'objet d'un emplacement, 0 s'il est inconnu (ou s'il agit partout). */
@@ -97,13 +83,15 @@ export class Interaction {
       case 'objet':
         return this.ordonner(etat, { type: 'utiliserObjet', emplacement: mode.emplacement, x, y });
       case 'ralliement':
-        return this.ordonner(etat, { type: 'deplacerRalliement', socle: mode.socle, x, y });
+        return this.ordonner(etat, { type: 'deplacerRalliement', cx: mode.cx, cy: mode.cy, x, y });
       default:
         break;
     }
     if (!cible) return this.annuler();
     if (cible.type === 'heros') return this.selectionnerHeros(etat);
-    this.mode = mode.type === 'menu' && mode.socle === cible.socle ? LIBRE : { type: 'menu', socle: cible.socle };
+    // Une case interdite (chemin, décor) sans tour ne s'ouvre pas : le joueur sait pourquoi.
+    if (estCaseInterdite(etat.niveau, cible.cx, cible.cy) && !tourSurCase(etat, cible.cx, cible.cy)) return { action: null, refus: 'case_interdite' };
+    this.mode = mode.type === 'menu' && mode.cx === cible.cx && mode.cy === cible.cy ? LIBRE : { type: 'menu', cx: cible.cx, cy: cible.cy };
     return RIEN;
   }
 
@@ -121,7 +109,7 @@ export class Interaction {
     if (mode.type !== 'menu') return RIEN;
     if (element.refus !== null) return { action: null, refus: element.refus };
     if (element.id === 'ralliement') {
-      this.mode = { type: 'ralliement', socle: mode.socle };
+      this.mode = { type: 'ralliement', cx: mode.cx, cy: mode.cy };
       return RIEN;
     }
     this.mode = LIBRE;
@@ -167,11 +155,11 @@ export class Interaction {
     return RIEN;
   }
 
-  /** Touches 1 à 5 : construit sur le socle dont le menu est ouvert (s'il est vide). */
+  /** Touches 1 à 5 : construit sur la case dont le menu est ouvert (si elle est vide). */
   construireSurSelection(etat: EtatPartie, famille: FamilleTour): Issue {
     const mode = this.mode;
-    if (mode.type !== 'menu' || etat.tours.some((tour) => tour.socle === mode.socle)) return RIEN;
-    return this.ordonner(etat, { type: 'construire', socle: mode.socle, tour: famille });
+    if (mode.type !== 'menu' || tourSurCase(etat, mode.cx, mode.cy)) return RIEN;
+    return this.ordonner(etat, { type: 'construire', cx: mode.cx, cy: mode.cy, tour: famille });
   }
 
   /** Échap, ou un toucher dans le vide : ferme les menus et abandonne la visée. */
@@ -195,21 +183,22 @@ export class Interaction {
     } else if (mode.type === 'objet') {
       if (etat.objetsUtilises[mode.emplacement] === true) this.mode = LIBRE;
     } else if (mode.type === 'ralliement') {
-      if (!etat.tours.some((tour) => tour.socle === mode.socle && tour.stats.soldats)) this.mode = LIBRE;
+      if (!tourSurCase(etat, mode.cx, mode.cy)?.stats.soldats) this.mode = LIBRE;
     }
   }
 
   /** Recopie le mode dans ce que le rendu met en valeur sur la carte. */
   surbrillance(etat: EtatPartie, surb: Surbrillance): void {
     const mode = this.mode;
-    surb.socle = -1;
+    surb.cx = -1;
+    surb.cy = -1;
     surb.portee = 0;
     surb.heros = mode.type === 'heros';
     surb.sortRayon = mode.type === 'sort' ? rayonSort(etat, mode.emplacement) : mode.type === 'objet' ? rayonObjet(etat, mode.emplacement) : 0;
     if (mode.type === 'menu' || mode.type === 'ralliement') {
-      surb.socle = mode.socle;
-      const tour = etat.tours.find((autre) => autre.socle === mode.socle);
-      surb.portee = tour?.stats.portee ?? 0;
+      surb.cx = mode.cx;
+      surb.cy = mode.cy;
+      surb.portee = tourSurCase(etat, mode.cx, mode.cy)?.stats.portee ?? 0;
     }
   }
 
