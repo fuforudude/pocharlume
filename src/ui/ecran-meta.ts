@@ -95,8 +95,8 @@ export function creerEcranMeta(parent: HTMLElement, options: OptionsEcranMeta): 
 
   window.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape' || e.ctrlKey || e.altKey || e.metaKey) return;
-    // Une confirmation ouverte par-dessus garde Échap pour elle.
-    if (document.querySelector('.ecran.confirmation')) return;
+    // Une confirmation (ou la révélation d'une caisse) ouverte par-dessus garde Échap pour elle.
+    if (document.querySelector('.ecran.confirmation, .revelation')) return;
     e.preventDefault();
     arreter();
     options.surFermer();
