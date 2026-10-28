@@ -82,8 +82,30 @@ function v2versV3(v2: Brut): Brut {
   };
 }
 
+/**
+ * v3 vers v4 : progression, réglages, partie en cours et tout le reste de `meta` sont gardés tels quels. `meta` reçoit
+ * la région ouverte (déduite du niveau le plus haut débloqué : la région r + 1 s'ouvre quand le niveau 10 r est battu),
+ * aucun défi réussi, et une collection vide (rien en poche, rien d'équipé, compteurs de garantie à zéro), écrits en dur
+ * ici comme pour la v3. Les victoires passées ne rapportent ni éclats ni défis rétroactifs. Rien n'est perdu.
+ */
+function v3versV4(v3: Brut): Brut {
+  const progression = objet(v3.progression);
+  const niveauMax = progression.niveauMax;
+  const regionMax = typeof niveauMax === 'number' && Number.isInteger(niveauMax) && niveauMax >= 1 ? Math.min(10, Math.floor((niveauMax - 1) / 10) + 1) : 1;
+  return {
+    ...v3,
+    version: 4,
+    meta: {
+      ...objet(v3.meta),
+      regionMax,
+      defis: {},
+      collection: { possedes: {}, eclats: 0, garanties: { skins: 0, familiers: 0 }, equipes: { skins: {}, familiers: {} } },
+    },
+  };
+}
+
 /** `MIGRATIONS[n]` fait passer une sauvegarde de la version n à la version n + 1. */
-export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: v1versV2, 2: v2versV3 };
+export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: v1versV2, 2: v2versV3, 3: v3versV4 };
 
 /**
  * Migre une sauvegarde brute (n'importe quelle version connue) vers la version courante et la valide. `defs`

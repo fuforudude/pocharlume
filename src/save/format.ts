@@ -7,10 +7,13 @@
 // - v2 : étoiles par niveau et par difficulté, volumes en pourcentages entiers, vitesse par défaut.
 // - v3 : méta-progression (`meta`) : arêtes et braises, héros possédés avec leur expérience et leurs compétences,
 //        rangs de l'arbre d'améliorations, stock d'objets, dernier choix de dieu, de héros et d'objets.
-import { AVATARS, BRANCHES_ARBRE, coutCumuleArbre, IDS_OBJETS, type IdBranche, type IdDieu, type IdHeros, type IdObjet } from '../data/meta';
+// - v4 : (dans `meta`) région la plus haute ouverte, défis réussis par niveau, collection (objets possédés et rangs, éclats,
+//        compteurs de garantie par caisse, skins et familiers équipés).
+import { AVATARS, BRANCHES_ARBRE, coutCumuleArbre, IDS_OBJETS, type IdBranche, type IdDefi, type IdDieu, type IdHeros, type IdObjet } from '../data/meta';
 import type { ConfigPartie } from '../engine/etat';
+import { collectionVide, type Collection } from '../meta/collection';
 
-export const VERSION_SAUVEGARDE = 3;
+export const VERSION_SAUVEGARDE = 4;
 
 /** Nombre de niveaux de la campagne (10 régions de 10 niveaux). */
 export const NOMBRE_NIVEAUX = 100;
@@ -78,6 +81,9 @@ export interface ChoixPartie {
   objets: IdObjet[];
 }
 
+/** Défis réussis sur un niveau (chacun a rapporté ses braises, une seule fois). */
+export type DefisNiveau = Partial<Record<IdDefi, true>>;
+
 /**
  * Méta-progression. Les étoiles dépensées dans l'arbre ne sont pas stockées : on retient les rangs, et les étoiles
  * disponibles se déduisent (étoiles gagnées moins coût des rangs), si bien qu'une réinitialisation les rend toutes.
@@ -91,6 +97,14 @@ export interface Meta {
   /** Stock de chaque objet consommable (0 à 10). */
   objets: Record<IdObjet, number>;
   choix: ChoixPartie;
+  /**
+   * Plus haute région ouverte (1 à 10) : la région r + 1 s'ouvre quand le boss de la région r est battu. Toujours égale
+   * à `regionOuverte(progression.niveauMax)` (la validation le vérifie) ; rangée pour que l'interface la lise sans calcul.
+   */
+  regionMax: number;
+  /** Défis réussis, par numéro de niveau en chiffres. Seul un niveau à 3 étoiles peut en avoir. */
+  defis: Record<string, DefisNiveau>;
+  collection: Collection;
 }
 
 export interface Sauvegarde {
@@ -113,6 +127,9 @@ export function metaParDefaut(): Meta {
     arbre: Object.fromEntries(BRANCHES_ARBRE.map((b) => [b, 0])) as Record<IdBranche, number>,
     objets: Object.fromEntries(IDS_OBJETS.map((o) => [o, 0])) as Record<IdObjet, number>,
     choix: { dieu: 'charlie', heros: 'charlie', objets: [] },
+    regionMax: 1,
+    defis: {},
+    collection: collectionVide(),
   };
 }
 

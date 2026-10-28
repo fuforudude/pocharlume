@@ -31,7 +31,8 @@ describe('validation d’une sauvegarde', () => {
     for (const x of [null, undefined, 3, 'texte', [], true]) refusee(x);
     refusee(variante({ version: 1 }));
     refusee(variante({ version: VERSION_SAUVEGARDE + 1 }));
-    refusee(variante({ version: '3' }));
+    refusee(variante({ version: '4' }));
+    refusee(variante({ version: 3 })); // une v3 se migre (migrations.ts) avant d'être validée
     refusee(variante({ version: 2 }));
   });
 
@@ -47,22 +48,34 @@ describe('validation d’une sauvegarde', () => {
   it('refuse les clés héritées __proto__, constructor et prototype, sans polluer Object.prototype', () => {
     const meta = JSON.stringify(metaParDefaut());
     const reglages = `"reglages":{"son":1,"musique":1,"vitesse":1},"meta":${meta},"partie":null`;
-    const sain = `{"version":3,"progression":{"niveauMax":3,"etoiles":{"1":{"matou":3}}},${reglages}}`;
+    const v = String(VERSION_SAUVEGARDE);
+    const sain = `{"version":${v},"progression":{"niveauMax":3,"etoiles":{"1":{"matou":3}}},${reglages}}`;
     acceptee(JSON.parse(sain));
     const empoisonnees = [
-      `{"version":3,"__proto__":{"polluee":true},"progression":{"niveauMax":1,"etoiles":{}},${reglages}}`,
-      `{"version":3,"progression":{"niveauMax":3,"etoiles":{"__proto__":{"matou":3}}},${reglages}}`,
-      `{"version":3,"progression":{"niveauMax":3,"etoiles":{"1":{"__proto__":3,"matou":3}}},${reglages}}`,
-      `{"version":3,"progression":{"niveauMax":3,"etoiles":{"constructor":{"matou":3}}},${reglages}}`,
-      `{"version":3,"progression":{"niveauMax":3,"etoiles":{"1":{"constructor":3}}},${reglages}}`,
-      `{"version":3,"progression":{"niveauMax":3,"etoiles":{}},"reglages":{"son":1,"musique":1,"vitesse":1,"constructor":{"prototype":{"x":1}}},"meta":${meta},"partie":null}`,
-      `{"version":3,"progression":{"niveauMax":3,"etoiles":{}},"reglages":{"son":1,"musique":1,"vitesse":1,"prototype":1},"meta":${meta},"partie":null}`,
+      `{"version":${v},"__proto__":{"polluee":true},"progression":{"niveauMax":1,"etoiles":{}},${reglages}}`,
+      `{"version":${v},"progression":{"niveauMax":3,"etoiles":{"__proto__":{"matou":3}}},${reglages}}`,
+      `{"version":${v},"progression":{"niveauMax":3,"etoiles":{"1":{"__proto__":3,"matou":3}}},${reglages}}`,
+      `{"version":${v},"progression":{"niveauMax":3,"etoiles":{"constructor":{"matou":3}}},${reglages}}`,
+      `{"version":${v},"progression":{"niveauMax":3,"etoiles":{"1":{"constructor":3}}},${reglages}}`,
+      `{"version":${v},"progression":{"niveauMax":3,"etoiles":{}},"reglages":{"son":1,"musique":1,"vitesse":1,"constructor":{"prototype":{"x":1}}},"meta":${meta},"partie":null}`,
+      `{"version":${v},"progression":{"niveauMax":3,"etoiles":{}},"reglages":{"son":1,"musique":1,"vitesse":1,"prototype":1},"meta":${meta},"partie":null}`,
       sain.replace('"monnaies":{', '"monnaies":{"__proto__":{"polluee":true},'),
       sain.replace('"choix":{', '"choix":{"__proto__":{"polluee":true},'),
       sain.replace('"heros":{"plume"', '"heros":{"__proto__":{"xp":1,"competences":{}},"plume"'),
       sain.replace('"heros":{"plume":{"xp":0,"competences":{}}', '"heros":{"plume":{"xp":0,"competences":{"__proto__":2}}'),
       sain.replace('"heros":{"plume":{"xp":0,"competences":{}}', '"heros":{"plume":{"xp":0,"competences":{"constructor":2}}'),
+      // Ce que la v4 ajoute : défis, collection, équipement, garanties.
+      sain.replace('"defis":{}', '"defis":{"__proto__":{"fer":true}}'),
+      sain.replace('"defis":{}', '"defis":{"constructor":{"fer":true}}'),
+      sain.replace('"possedes":{}', '"possedes":{"__proto__":1}'),
+      sain.replace('"possedes":{}', '"possedes":{"constructor":1}'),
+      sain.replace('"equipes":{"skins":{}', '"equipes":{"skins":{"__proto__":"skin_tir_1"}'),
+      sain.replace('"familiers":{}}', '"familiers":{"__proto__":"familier_rat"}}'),
+      sain.replace('"garanties":{', '"garanties":{"__proto__":1,'),
+      sain.replace('"collection":{', '"collection":{"__proto__":{"polluee":true},'),
     ];
+    // Chaque remplacement a bien touché le texte (sinon le cas ne prouverait rien).
+    for (const json of empoisonnees.slice(7)) expect(json).not.toBe(sain);
     for (const json of empoisonnees) refusee(JSON.parse(json));
     expect(Reflect.get({}, 'polluee')).toBeUndefined();
     expect(Reflect.get({}, 'matou')).toBeUndefined();
@@ -79,16 +92,24 @@ describe('validation d’une sauvegarde', () => {
 
   describe('progression', () => {
     // Sans étoile gagnée, l'arbre ne peut rien avoir coûté : on le remet à zéro avec elles.
-    const sansPartie = { partie: null, 'progression.etoiles': {}, 'meta.arbre': { caserne: 0, tir: 0, magie: 0, artillerie: 0, sorts: 0, heros: 0 } };
+    // Sans niveau réussi, aucun défi non plus ; la région ouverte est la première tant que le niveau 10 n'est pas gagné.
+    const sansPartie = {
+      partie: null,
+      'progression.etoiles': {},
+      'meta.arbre': { caserne: 0, tir: 0, magie: 0, artillerie: 0, sorts: 0, heros: 0 },
+      'meta.defis': {},
+      'meta.regionMax': 1,
+    };
 
     it('niveau max : entier de 1 à 100', () => {
       for (const v of [0, -1, 101, 2.5, '3', null, Number.POSITIVE_INFINITY]) refusee(variante({ ...sansPartie, 'progression.niveauMax': v }));
-      for (const v of [1, 50, 100]) acceptee(variante({ ...sansPartie, 'progression.niveauMax': v }));
+      // La région ouverte suit : 1 jusqu'au niveau 10, 5 au niveau 50, 10 au niveau 100.
+      for (const [niveauMax, region] of [[1, 1], [50, 5], [100, 10]] as const) acceptee(variante({ ...sansPartie, 'meta.regionMax': region, 'progression.niveauMax': niveauMax }));
     });
 
     it('clés de niveau : 1 à 100 en chiffres, sans zéro de tête ni signe ni décimale', () => {
       for (const cle of ['0', '101', '01', '-1', '1.5', 'a', '', ' 1', '1e1']) {
-        refusee(variante({ partie: null, 'progression.niveauMax': 100, 'progression.etoiles': { [cle]: { matou: 1 } } }));
+        refusee(variante({ ...sansPartie, 'meta.regionMax': 10, 'progression.niveauMax': 100, 'progression.etoiles': { [cle]: { matou: 1 } } }));
       }
     });
 
@@ -102,7 +123,7 @@ describe('validation d’une sauvegarde', () => {
     it('un niveau réussi doit avoir son suivant débloqué (sauf le dernier)', () => {
       refusee(variante({ ...sansPartie, 'progression.niveauMax': 3, 'progression.etoiles': { '3': { matou: 1 } } }));
       acceptee(variante({ ...sansPartie, 'progression.niveauMax': 4, 'progression.etoiles': { '3': { matou: 1 } } }));
-      acceptee(variante({ ...sansPartie, 'progression.niveauMax': 100, 'progression.etoiles': { '100': { matou: 3 } } }));
+      acceptee(variante({ ...sansPartie, 'meta.regionMax': 10, 'progression.niveauMax': 100, 'progression.etoiles': { '100': { matou: 3 } } }));
     });
   });
 

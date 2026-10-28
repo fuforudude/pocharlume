@@ -67,10 +67,10 @@ describe('export et import d’un code', () => {
     expect(r.ok && r.sauvegarde.partie).toBeNull();
   });
 
-  it('est compact : une campagne complète tient en moins de 1000 caractères, une sauvegarde vide en moins de 400', async () => {
+  it('est compact : une campagne complète tient en moins de 1000 caractères, une sauvegarde vide en moins de 450', async () => {
     const complete = await exporterCode(campagneComplete());
     expect(complete.length).toBeLessThan(1000);
-    expect((await exporterCode(sauvegardeVide())).length).toBeLessThan(400);
+    expect((await exporterCode(sauvegardeVide())).length).toBeLessThan(450);
     expect(complete).toMatch(/^PCH1\.z\.[A-Za-z0-9_-]+\.[0-9a-f]{8}$/);
   });
 

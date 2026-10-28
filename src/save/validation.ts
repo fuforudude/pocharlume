@@ -31,6 +31,8 @@ import {
 import { REGLES } from '../data/regles';
 import type { ConfigPartie } from '../engine/etat';
 import { definitionDuHeros, niveauHerosDepuisXp, pointsDeCompetence, type DefsMeta } from './definitions';
+import { validerCollection, validerDefis, validerExtensionConfigV4, validerRegionMax, type ExtensionConfigV4 } from './validation-collection';
+import { avecCles, CLE_NIVEAU, echec, estEnregistrement, estEntierEntre, ok, parmi, poser, validerEntiersParCle, valeur, type Resultat } from './validation-base';
 import {
   DIFFICULTES_SAUVEGARDE,
   etoilesDepensees,
@@ -48,53 +50,12 @@ import {
   type Sauvegarde,
 } from './format';
 
-export type Resultat<T> = { readonly ok: true; readonly valeur: T } | { readonly ok: false; readonly raison: string };
+export { estEntierEntre, poser, type Resultat };
 
 /** Taille maximale de l'état sérialisé d'une partie en cours, en caractères. */
 export const TAILLE_MAX_ETAT = 4 * 1024 * 1024;
 const VAGUE_MAX = 1000;
 const GRAINE_MAX = 0xffffffff;
-
-function ok<T>(valeur: T): Resultat<T> {
-  return { ok: true, valeur };
-}
-
-function echec<T>(raison: string): Resultat<T> {
-  return { ok: false, raison };
-}
-
-function estEnregistrement(x: unknown): x is Record<string, unknown> {
-  if (typeof x !== 'object' || x === null || Array.isArray(x)) return false;
-  const proto = Object.getPrototypeOf(x) as unknown;
-  return proto === Object.prototype || proto === null;
-}
-
-/** Un objet qui a exactement ces clés propres (ni plus ni moins). */
-function avecCles(x: unknown, cles: readonly string[], chemin: string): Resultat<Record<string, unknown>> {
-  if (!estEnregistrement(x)) return echec(`${chemin} : objet attendu`);
-  const presentes = Object.keys(x);
-  for (const cle of presentes) if (!cles.includes(cle)) return echec(`${chemin} : clé inattendue « ${cle} »`);
-  for (const cle of cles) if (!Object.hasOwn(x, cle)) return echec(`${chemin} : clé « ${cle} » manquante`);
-  return ok(x);
-}
-
-export function estEntierEntre(x: unknown, min: number, max: number): x is number {
-  return typeof x === 'number' && Number.isInteger(x) && x >= min && x <= max;
-}
-
-function valeur(objet: Record<string, unknown>, cle: string): unknown {
-  return Object.hasOwn(objet, cle) ? objet[cle] : undefined;
-}
-
-/** Pose une valeur sous une clé quelconque comme propriété propre (jamais comme prototype, même pour `__proto__`). */
-export function poser<T>(cible: Record<string, T>, cle: string, valeur: T): void {
-  Object.defineProperty(cible, cle, { value: valeur, enumerable: true, writable: true, configurable: true });
-}
-
-/** `x` est l'un des éléments de `liste` (une liste d'identifiants connus). */
-function parmi<T extends string>(liste: readonly T[], x: unknown): x is T {
-  return typeof x === 'string' && (liste as readonly string[]).includes(x);
-}
 
 function validerEtoilesNiveau(x: unknown, chemin: string): Resultat<EtoilesNiveau> {
   if (!estEnregistrement(x)) return echec(`${chemin} : objet attendu`);
@@ -110,8 +71,6 @@ function validerEtoilesNiveau(x: unknown, chemin: string): Resultat<EtoilesNivea
   }
   return ok(copie);
 }
-
-const CLE_NIVEAU = /^(?:[1-9]\d?|100)$/;
 
 function validerProgression(x: unknown): Resultat<Progression> {
   const base = avecCles(x, ['niveauMax', 'etoiles'], 'progression');
@@ -161,19 +120,6 @@ function validerCompetences(x: unknown, chemin: string): Resultat<Record<string,
     const rang = valeur(x, cle);
     if (!estEntierEntre(rang, 1, RANG_MAX_COMPETENCE)) return echec(`${chemin}.${cle} : rang de 1 à ${String(RANG_MAX_COMPETENCE)} attendu`);
     poser(copie, cle, rang);
-  }
-  return ok(copie);
-}
-
-/** Un objet dont les clés sont exactement `cles` et les valeurs des entiers de 0 à `max`. */
-function validerEntiersParCle<K extends string>(x: unknown, cles: readonly K[], max: number, chemin: string): Resultat<Record<K, number>> {
-  const base = avecCles(x, cles, chemin);
-  if (!base.ok) return base;
-  const copie = {} as Record<K, number>;
-  for (const cle of cles) {
-    const v = valeur(base.valeur, cle);
-    if (!estEntierEntre(v, 0, max)) return echec(`${chemin}.${cle} : entier de 0 à ${String(max)} attendu`);
-    copie[cle] = v;
   }
   return ok(copie);
 }
@@ -243,7 +189,7 @@ function validerChoix(x: unknown): Resultat<ChoixPartie> {
 }
 
 function validerMeta(x: unknown, progression: Progression, defs: DefsMeta | undefined): Resultat<Meta> {
-  const base = avecCles(x, ['monnaies', 'heros', 'arbre', 'objets', 'choix'], 'meta');
+  const base = avecCles(x, ['monnaies', 'heros', 'arbre', 'objets', 'choix', 'regionMax', 'defis', 'collection'], 'meta');
   if (!base.ok) return base;
   const monnaies = validerEntiersParCle(valeur(base.valeur, 'monnaies'), ['aretes', 'braises'] as const, PLAFOND_MONNAIE, 'meta.monnaies');
   if (!monnaies.ok) return monnaies;
@@ -256,7 +202,22 @@ function validerMeta(x: unknown, progression: Progression, defs: DefsMeta | unde
   if (!objets.ok) return objets;
   const choix = validerChoix(valeur(base.valeur, 'choix'));
   if (!choix.ok) return choix;
-  return ok({ monnaies: monnaies.valeur, heros: heros.valeur, arbre: arbre.valeur, objets: objets.valeur, choix: choix.valeur });
+  const regionMax = validerRegionMax(valeur(base.valeur, 'regionMax'), progression.niveauMax);
+  if (!regionMax.ok) return regionMax;
+  const defis = validerDefis(valeur(base.valeur, 'defis'), progression);
+  if (!defis.ok) return defis;
+  const collection = validerCollection(valeur(base.valeur, 'collection'));
+  if (!collection.ok) return collection;
+  return ok({
+    monnaies: monnaies.valeur,
+    heros: heros.valeur,
+    arbre: arbre.valeur,
+    objets: objets.valeur,
+    choix: choix.valeur,
+    regionMax: regionMax.valeur,
+    defis: defis.valeur,
+    collection: collection.valeur,
+  });
 }
 
 // --- Partie en cours ------------------------------------------------------------------------------------------
@@ -264,6 +225,8 @@ function validerMeta(x: unknown, progression: Progression, defs: DefsMeta | unde
 const CLES_CONFIG = ['graine', 'difficulte', 'dieu', 'niveauHeros', 'versionDonnees'] as const;
 /** Champs que le moteur ajoute à la config au jalon 2 : tous obligatoires (une config sans eux vient d'une version trop ancienne). */
 const CLES_EXTENSION_CONFIG = ['heros', 'competencesHeros', 'ameliorations', 'objets'] as const;
+/** Champs du jalon 3 : le défi joué et les bonus de collection. */
+const CLES_DEFI_BONUS = ['defi', 'bonus'] as const;
 
 function validerExtensionConfig(brute: Record<string, unknown>, dieu: string): Resultat<Pick<ConfigPartie, (typeof CLES_EXTENSION_CONFIG)[number]>> {
   const heros = valeur(brute, 'heros');
@@ -287,7 +250,9 @@ function validerExtensionConfig(brute: Record<string, unknown>, dieu: string): R
 
 function validerConfig(x: unknown): Resultat<ConfigPartie> {
   if (!estEnregistrement(x)) return echec('partie.config : objet attendu');
-  const base = avecCles(x, [...CLES_CONFIG, ...CLES_EXTENSION_CONFIG], 'partie.config');
+  // `defi` et `bonus` (jalon 3) vont ensemble, et sont facultatifs tant que `ConfigPartie` du moteur ne les porte pas.
+  const avecDefiEtBonus = Object.hasOwn(x, 'defi') || Object.hasOwn(x, 'bonus');
+  const base = avecCles(x, [...CLES_CONFIG, ...CLES_EXTENSION_CONFIG, ...(avecDefiEtBonus ? CLES_DEFI_BONUS : [])], 'partie.config');
   if (!base.ok) return base;
   const graine = valeur(base.valeur, 'graine');
   const difficulte = valeur(base.valeur, 'difficulte');
@@ -302,7 +267,12 @@ function validerConfig(x: unknown): Resultat<ConfigPartie> {
   const config = { graine, difficulte, dieu, niveauHeros, versionDonnees };
   const extension = validerExtensionConfig(base.valeur, dieu);
   if (!extension.ok) return extension;
-  return ok({ ...config, ...extension.valeur });
+  if (!avecDefiEtBonus) return ok({ ...config, ...extension.valeur });
+  const defiEtBonus = validerExtensionConfigV4(base.valeur);
+  if (!defiEtBonus.ok) return defiEtBonus;
+  // Le moteur ne porte pas encore `defi` et `bonus` dans `ConfigPartie` : on les garde dans la copie (voir docs/architecture.md).
+  const complete: ConfigPartie & ExtensionConfigV4 = { ...config, ...extension.valeur, ...defiEtBonus.valeur };
+  return ok(complete);
 }
 
 function validerPartie(x: unknown, niveauMax: number): Resultat<PartieEnCours | null> {

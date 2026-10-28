@@ -1,11 +1,12 @@
 // Export et import de la méta-progression : tout voyage dans le code, et un code piégé est refusé avant d'avoir touché à rien.
 import { describe, expect, it } from 'vitest';
+import { IDS_COLLECTION } from '../data/collection';
 import { BRANCHES_ARBRE, IDS_HEROS } from '../data/meta';
-import { DEFS_TEST, FIXTURE_V2, sauvegardeRemplie, SUPPRIME, variante } from './aides.test-utils';
+import { DEFS_TEST, FIXTURE_V2, FIXTURE_V3, sauvegardeRemplie, SUPPRIME, variante } from './aides.test-utils';
 import { crc32, exporterCode, importerCode, PREFIXE_CODE, remplacerProgression, TAILLE_MAX_CODE, versBase64Url } from './code';
 import type { DefsMeta } from './definitions';
 import { Depot } from './depot';
-import { metaParDefaut, sauvegardeVide, type Sauvegarde } from './format';
+import { metaParDefaut, sauvegardeVide, VERSION_SAUVEGARDE, type Sauvegarde } from './format';
 import { enregistrerVictoire } from './progression';
 import { Session } from './session';
 import { StockageMemoire } from './stockage';
@@ -37,6 +38,18 @@ function joueurComplet(): Sauvegarde {
       arbre: Object.fromEntries(BRANCHES_ARBRE.map((b) => [b, 5])) as Sauvegarde['meta']['arbre'],
       objets: { fiole_soufre: 10, herbe_sabbat: 10, griffe_renfort: 10, sablier: 10 },
       choix: { dieu: 'pollen', heros: 'lanterne', objets: ['sablier', 'herbe_sabbat', 'griffe_renfort'] },
+      regionMax: 10,
+      // Les deux défis réussis sur les 100 niveaux (tous à 3 étoiles).
+      defis: Object.fromEntries(Array.from({ length: 100 }, (_, i) => [String(i + 1), { heroique: true as const, fer: true as const }])),
+      collection: {
+        possedes: Object.fromEntries(IDS_COLLECTION.map((id) => [id, 5])),
+        eclats: 99_999_999,
+        garanties: { skins: 9, familiers: 9 },
+        equipes: {
+          skins: { caserne: 'skin_caserne_3', tir: 'skin_tir_3', magie: 'skin_magie_3', artillerie: 'skin_artillerie_3', lanterne: 'skin_lanterne' },
+          familiers: Object.fromEntries(IDS_HEROS.map((h) => [h, 'familier_salamandre'])),
+        },
+      },
     },
   };
 }
@@ -46,7 +59,7 @@ describe('export et import de la méta-progression', () => {
     const source = sauvegardeRemplie();
     const r = await importerCode(await exporterCode(source), DEFS_TEST);
     if (!r.ok) throw new Error(r.detail);
-    expect(r.depuis).toBe(3);
+    expect(r.depuis).toBe(VERSION_SAUVEGARDE);
     expect(r.sauvegarde.meta).toEqual(source.meta);
     expect(remplacerProgression(r.sauvegarde).meta).toEqual(source.meta);
     expect(remplacerProgression(r.sauvegarde).partie).toBeNull();
@@ -69,6 +82,16 @@ describe('export et import de la méta-progression', () => {
     expect(r.depuis).toBe(2);
     expect(r.sauvegarde.meta).toEqual(metaParDefaut());
     expect(r.sauvegarde.progression).toEqual(v2.progression);
+  });
+
+  it('un code d’une sauvegarde v3 est migré : la méta est gardée, la collection part vide', async () => {
+    const v3 = JSON.parse(FIXTURE_V3) as { progression: unknown; meta: object; partie: unknown };
+    Reflect.deleteProperty(v3, 'partie');
+    const r = await importerCode(fabriquerCode(JSON.stringify(v3)), DEFS_TEST);
+    if (!r.ok) throw new Error(r.detail);
+    expect(r.depuis).toBe(3);
+    expect(r.sauvegarde.progression).toEqual(v3.progression);
+    expect(r.sauvegarde.meta).toEqual({ ...v3.meta, regionMax: 2, defis: {}, collection: metaParDefaut().collection });
   });
 
   it('un code v3 sans méta est refusé', async () => {

@@ -318,7 +318,7 @@ export function enregistrerFinDePartie(s: Sauvegarde, fin: FinDePartieMeta, defs
 
   return {
     ok: true,
-    sauvegarde: { ...suivante, meta: { ...s.meta, monnaies: { aretes, braises }, heros: herosMeta, objets } },
+    sauvegarde: { ...suivante, meta: { ...suivante.meta, monnaies: { aretes, braises }, heros: herosMeta, objets } },
     bilan: {
       aretes: aretes - s.meta.monnaies.aretes,
       braises: braises - s.meta.monnaies.braises,

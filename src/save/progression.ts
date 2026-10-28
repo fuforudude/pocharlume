@@ -1,8 +1,10 @@
 // Règles de progression de la campagne, en fonctions pures : elles prennent une sauvegarde et en rendent une
 // nouvelle (jamais modifiée sur place), sans toucher au stockage.
+import { IDS_DEFIS, regionOuverte } from '../data/meta';
 import {
   DIFFICULTES_SAUVEGARDE,
   NOMBRE_NIVEAUX,
+  type DefisNiveau,
   type DifficulteSauvegarde,
   type Etoiles,
   type EtoilesNiveau,
@@ -56,9 +58,12 @@ export function enregistrerVictoire(s: Sauvegarde, numero: number, difficulte: D
   anciennes[difficulte] = Math.max(anciennes[difficulte] ?? 0, etoiles) as Etoiles;
   const nouvelles = { ...s.progression.etoiles };
   Object.defineProperty(nouvelles, cle(numero), { value: anciennes, enumerable: true, writable: true, configurable: true });
+  const niveauMax = Math.max(s.progression.niveauMax, Math.min(numero + 1, NOMBRE_NIVEAUX));
   return {
     ...s,
-    progression: { niveauMax: Math.max(s.progression.niveauMax, Math.min(numero + 1, NOMBRE_NIVEAUX)), etoiles: nouvelles },
+    progression: { niveauMax, etoiles: nouvelles },
+    // Battre le boss d'une région (niveau 10 r) ouvre la suivante : `niveauMax` passe alors au-delà de 10 r.
+    meta: { ...s.meta, regionMax: regionOuverte(niveauMax) },
   };
 }
 
@@ -95,6 +100,22 @@ export function fusionnerProgressions(a: Sauvegarde, b: Sauvegarde): Sauvegarde 
     }
     Object.defineProperty(etoiles, numero, { value: reunies, enumerable: true, writable: true, configurable: true });
   }
+  // Les défis réussis de `b` s'ajoutent à ceux de `a` : un défi réussi ne se perd pas.
+  const defis = { ...a.meta.defis };
+  for (const numero of Object.keys(b.meta.defis)) {
+    const miens = Object.hasOwn(defis, numero) ? defis[numero] : undefined;
+    const autres = b.meta.defis[numero];
+    if (!autres) continue;
+    const reunis: DefisNiveau = { ...miens };
+    for (const defi of IDS_DEFIS) {
+      if (autres[defi] === true && miens?.[defi] !== true) {
+        reunis[defi] = true;
+        change = true;
+      }
+    }
+    Object.defineProperty(defis, numero, { value: reunis, enumerable: true, writable: true, configurable: true });
+  }
   if (!change) return a;
-  return { ...a, progression: { niveauMax: Math.max(a.progression.niveauMax, b.progression.niveauMax), etoiles } };
+  const niveauMax = Math.max(a.progression.niveauMax, b.progression.niveauMax);
+  return { ...a, progression: { niveauMax, etoiles }, meta: { ...a.meta, regionMax: regionOuverte(niveauMax), defis } };
 }

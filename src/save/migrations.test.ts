@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FIXTURE_V1, FIXTURE_V2, sauvegardeRemplie, variante } from './aides.test-utils';
+import { FIXTURE_V1, FIXTURE_V2, FIXTURE_V3, sauvegardeRemplie, variante } from './aides.test-utils';
 import { etoilesDepensees, etoilesGagnees, metaParDefaut, VERSION_SAUVEGARDE } from './format';
 import { MIGRATIONS, migrer } from './migrations';
 
@@ -32,12 +32,12 @@ describe('migrations de format', () => {
     expect((JSON.parse(FIXTURE_V2) as { version: number }).version).toBe(2);
   });
 
-  it('migre la sauvegarde v2 figée en v3 sans rien perdre : progression et réglages sont identiques, la partie reçoit les champs du jalon 2', () => {
+  it('migre la sauvegarde v2 figée jusqu’à la version courante sans rien perdre : progression et réglages sont identiques, la partie reçoit les champs du jalon 2', () => {
     const v2 = JSON.parse(FIXTURE_V2) as { progression: unknown; reglages: unknown; partie: unknown };
     const r = migrer(v2);
     if (!r.ok) throw new Error(r.raison);
     expect(r.depuis).toBe(2);
-    expect(r.sauvegarde.version).toBe(3);
+    expect(r.sauvegarde.version).toBe(VERSION_SAUVEGARDE);
     expect(r.sauvegarde.progression).toEqual(v2.progression);
     expect(r.sauvegarde.reglages).toEqual(v2.reglages);
     // La partie est gardée telle quelle, sa config recevant les champs du jalon 2 (valeurs neutres).
@@ -49,7 +49,58 @@ describe('migrations de format', () => {
       arbre: { caserne: 0, tir: 0, magie: 0, artillerie: 0, sorts: 0, heros: 0 },
       objets: { fiole_soufre: 0, herbe_sabbat: 0, griffe_renfort: 0, sablier: 0 },
       choix: { dieu: 'charlie', heros: 'charlie', objets: [] },
+      // Ajouts de la v4 : la région 1 seulement (niveau 7 débloqué), aucun défi, collection vide.
+      regionMax: 1,
+      defis: {},
+      collection: { possedes: {}, eclats: 0, garanties: { skins: 0, familiers: 0 }, equipes: { skins: {}, familiers: {} } },
     });
+  });
+
+  it('la fixture v3 figée est bien une sauvegarde en version 3', () => {
+    expect((JSON.parse(FIXTURE_V3) as { version: number }).version).toBe(3);
+  });
+
+  it('migre la sauvegarde v3 figée en v4 sans rien perdre : tout est identique, la méta reçoit région, défis et collection', () => {
+    const v3 = JSON.parse(FIXTURE_V3) as { progression: unknown; reglages: unknown; meta: Record<string, unknown>; partie: unknown };
+    const r = migrer(v3);
+    if (!r.ok) throw new Error(r.raison);
+    expect(r.depuis).toBe(3);
+    expect(r.sauvegarde.version).toBe(4);
+    expect(r.sauvegarde.progression).toEqual(v3.progression);
+    expect(r.sauvegarde.reglages).toEqual(v3.reglages);
+    expect(r.sauvegarde.partie).toEqual(v3.partie);
+    // Le niveau 10 est gagné (niveauMax 11) : la région 2 est ouverte. Les monnaies, héros, arbre, stock et choix sont gardés.
+    expect(r.sauvegarde.meta).toEqual({
+      ...v3.meta,
+      regionMax: 2,
+      defis: {},
+      collection: { possedes: {}, eclats: 0, garanties: { skins: 0, familiers: 0 }, equipes: { skins: {}, familiers: {} } },
+    });
+  });
+
+  it('migrer la v3 ne donne ni éclats, ni objets, ni défis rétroactifs, et garde l’arbre acheté', () => {
+    const r = migrer(JSON.parse(FIXTURE_V3));
+    if (!r.ok) throw new Error(r.raison);
+    expect(r.sauvegarde.meta.collection.eclats).toBe(0);
+    expect(r.sauvegarde.meta.defis).toEqual({});
+    expect(etoilesDepensees(r.sauvegarde.meta.arbre)).toBe(10);
+    expect(r.sauvegarde.meta.monnaies).toEqual({ aretes: 345, braises: 42 });
+  });
+
+  it('la région ouverte de la v4 se déduit du plus haut niveau débloqué de la v3', () => {
+    const v3 = JSON.parse(FIXTURE_V3) as { progression: { niveauMax: number; etoiles: Record<string, unknown> } };
+    const regionPour = (niveauMax: number): number | undefined => {
+      const r = migrer({ ...v3, progression: { niveauMax, etoiles: {} }, meta: { ...(v3 as unknown as { meta: object }).meta, arbre: { caserne: 0, tir: 0, magie: 0, artillerie: 0, sorts: 0, heros: 0 } }, partie: null });
+      return r.ok ? r.sauvegarde.meta.regionMax : undefined;
+    };
+    expect([1, 9, 10, 11, 20, 21, 51, 100].map(regionPour)).toEqual([1, 1, 1, 2, 2, 3, 6, 10]);
+  });
+
+  it('une v3 abîmée est refusée après migration (la v4 est validée strictement)', () => {
+    const v3 = JSON.parse(FIXTURE_V3) as Record<string, unknown>;
+    expect(migrer({ ...v3, extra: 1 })).toMatchObject({ ok: false, cause: 'invalide' });
+    expect(migrer({ ...v3, meta: { ...(v3.meta as object), monnaies: { aretes: -1, braises: 0 } } })).toMatchObject({ ok: false, cause: 'invalide' });
+    expect(migrer({ ...v3, progression: { niveauMax: 'x', etoiles: {} } })).toMatchObject({ ok: false, cause: 'invalide' });
   });
 
   it('les étoiles déjà gagnées en v2 sont toutes disponibles pour l’arbre après la migration', () => {
