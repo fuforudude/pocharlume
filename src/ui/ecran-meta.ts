@@ -25,8 +25,8 @@ export interface OptionsEcranMeta {
   readonly fermer: string;
   readonly atlas: AtlasRendu;
   readonly sauvegarde: Sauvegarde;
-  /** Quelles monnaies la barre montre : les braises (héros) ou les arêtes et les étoiles (boutique). */
-  readonly monnaies: readonly ('aretes' | 'braises' | 'etoiles')[];
+  /** Quelles monnaies la barre montre : les braises (héros, caisses), les arêtes et les étoiles (boutique), les éclats (collection). */
+  readonly monnaies: readonly ('aretes' | 'braises' | 'etoiles' | 'eclats')[];
   readonly surFermer: () => void;
 }
 
@@ -54,7 +54,7 @@ export function creerEcranMeta(parent: HTMLElement, options: OptionsEcranMeta): 
   entete.append(el('h2', 'titre', options.titre));
   const monnaies = el('div', 'meta-monnaies');
   const puces = new Map<string, HTMLElement>();
-  const icones = { aretes: 'icone-arete', braises: 'icone-braise', etoiles: 'icone-etoile' } as const;
+  const icones = { aretes: 'icone-arete', braises: 'icone-braise', etoiles: 'icone-etoile', eclats: 'icone-eclat' } as const;
   for (const monnaie of options.monnaies) {
     const puce = el('div', 'puce monnaie');
     puce.append(image(atlas.iconeUrl(icones[monnaie], 2), 'icone'), el('span'));
@@ -76,11 +76,12 @@ export function creerEcranMeta(parent: HTMLElement, options: OptionsEcranMeta): 
   parent.append(racine);
 
   const majMonnaies = (s: Sauvegarde): void => {
-    const valeurs = { aretes: s.meta.monnaies.aretes, braises: s.meta.monnaies.braises, etoiles: etoilesDisponibles(s) };
+    const valeurs = { aretes: s.meta.monnaies.aretes, braises: s.meta.monnaies.braises, etoiles: etoilesDisponibles(s), eclats: s.meta.collection.eclats };
     const libelles = {
       aretes: t('monnaie.aretes', { n: valeurs.aretes }),
       braises: t('monnaie.braises', { n: valeurs.braises }),
       etoiles: t('monnaie.etoiles', { n: valeurs.etoiles }),
+      eclats: t('monnaie.eclats', { n: valeurs.eclats }),
     };
     for (const [nom, puce] of puces) {
       const cle = nom as keyof typeof valeurs;
