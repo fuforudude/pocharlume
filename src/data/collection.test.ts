@@ -93,4 +93,9 @@ describe('catalogue de la collection', () => {
     for (const rarete of RARETES) expect(Object.hasOwn(fr, `rarete.${rarete}`), rarete).toBe(true);
     for (const stat of ['pv', 'degats', 'cadence', 'regeneration', 'portee', 'pvSoldats']) expect(Object.hasOwn(fr, `stat.${stat}`), stat).toBe(true);
   });
+
+  it('chaque raison de refus propre à la collection et aux défis a sa phrase', () => {
+    const raisons = ['type_inconnu', 'eclats_insuffisants', 'non_possede', 'emplacement_invalide', 'aleatoire_indisponible', 'defi_inconnu', 'defi_verrouille'];
+    for (const raison of raisons) expect(Object.hasOwn(fr, `collection.refus.${raison}`), raison).toBe(true);
+  });
 });

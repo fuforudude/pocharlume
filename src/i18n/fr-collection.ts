@@ -14,6 +14,16 @@ export const frCollection = {
   'stat.portee': 'Portée',
   'stat.pvSoldats': 'PV des soldats',
 
+  // Raisons de refus propres à la collection et aux défis (les autres — braises, rang maximal, objet déjà possédé… — ont leur
+  // phrase `meta.refus.*`). Préfixe à part : l'interface les ajoute à `raisons-meta.ts` quand elle branche les écrans.
+  'collection.refus.type_inconnu': 'Cette caisse n’existe pas.',
+  'collection.refus.eclats_insuffisants': 'Pas assez d’éclats.',
+  'collection.refus.non_possede': 'Tu n’as pas encore cet objet.',
+  'collection.refus.emplacement_invalide': 'Cet objet ne se porte pas ici.',
+  'collection.refus.aleatoire_indisponible': 'Les caisses ne peuvent pas s’ouvrir sur cet appareil.',
+  'collection.refus.defi_inconnu': 'Ce défi n’existe pas.',
+  'collection.refus.defi_verrouille': 'Il faut d’abord les trois étoiles sur ce niveau.',
+
   // Skins des tours de base
   'collection.skin_caserne_1': 'Grenier de Paille',
   'collection.skin_caserne_1.desc': 'Le foin garde la chaleur des bêtes parties.',

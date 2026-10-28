@@ -9,12 +9,13 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
 | Dossier | Rôle | Peut dépendre de |
 | --- | --- | --- |
 | `src/engine/` | Simulation déterministe : boucle à pas fixe (1/30 s), générateur pseudo-aléatoire à graine, chemins, ennemis, tours, projectiles, soldats, vagues, vies et or, journal d'actions rejouable. Aucune dépendance au DOM : tourne dans Node (simulateur, futur serveur). | `src/data/` |
-| `src/data/` | Tables d'équilibrage : tours, ennemis, dieux, difficultés, règles, formules et générateur de vagues (`equilibrage.ts`), version des données (`version.ts`, à incrémenter à chaque changement d'équilibrage), méta-progression (`meta.ts` : ids des dieux, héros, branches de l'arbre et objets, prix, plafonds, formules de gain hors partie). Aucune valeur de jeu en dur ailleurs. Les niveaux figés vont dans `src/data/niveaux/` (un fichier par région). | `src/engine/` : types, et le générateur à graine (`aleatoire.ts`) pour le générateur de vagues |
+| `src/data/` | Tables d'équilibrage : tours, ennemis, dieux, difficultés, règles, formules et générateur de vagues (`equilibrage.ts`), version des données (`version.ts`, à incrémenter à chaque changement d'équilibrage), méta-progression (`meta.ts` : ids des dieux, héros, branches de l'arbre et objets, prix, plafonds, formules de gain hors partie, et depuis le jalon 3 les règles des caisses, des défis, des régions et des disciples offerts), catalogue de la collection (`collection.ts` : 21 skins et 12 familiers avec rareté et stat). Aucune valeur de jeu en dur ailleurs. Les niveaux figés vont dans `src/data/niveaux/` (un fichier par région). | `src/engine/` : types, et le générateur à graine (`aleatoire.ts`) pour le générateur de vagues |
 | `src/render/` | Rendu Canvas 2D : caméra, zoom à pixels entiers sans lissage, sprites, animations, barres de vie, effets. Lit l'état du moteur, ne le modifie jamais. | `src/engine/`, `src/data/` |
 | `src/ui/` | Écrans, HUD, menus, toucher, souris, clavier. Traduit les gestes en actions du moteur. | tout `src/` |
 | `src/audio/` | Son : moteur Web Audio (`moteur.ts`), limiteur (`limiteur.ts`), données des sons et table événement vers son (`table.ts`), écouteurs du navigateur (`geste.ts`). Ne dépend que du type des événements du moteur et de `src/data/ennemis.ts`. | `src/engine/` (types), `src/data/` |
 | `src/i18n/` | Textes affichés. `fr.ts` contient la table, `t('clé')` la lit avec une clé typée. | rien |
-| `src/save/` | Sauvegarde. Fonctions pures : format versionné v3 (`format.ts`), validation stricte, migrations en chaîne vN vers vN+1, progression (étoiles, déblocage), méta-progression (`transactions.ts`, `config-partie.ts`, `definitions.ts`), partie en cours, export et import par code (`code.ts`). `Session` (`session.ts`) tient la sauvegarde courante en mémoire et l'écrit à chaque changement ; sa règle multi-onglets est décrite plus bas (« Méta-progression et sauvegarde v3 »). `verrou.ts` exclut les écritures entre onglets (Web Locks) ; `canal.ts` prévient les autres onglets par `BroadcastChannel`, qui se rafraîchissent. Accès au stockage : interface `Stockage` (IndexedDB, repli localStorage, mémoire ; Capacitor Preferences plus tard) et `Depot`, qui ne lève jamais et garde une copie de secours d'une sauvegarde illisible. | `src/engine/`, `src/data/` |
+| `src/meta/` | Logique pure de la collection (jalon 3), sans stockage ni DOM : types de la collection d'un joueur (`collection.ts`), sources aléatoires injectées (`aleatoire.ts` : `crypto.getRandomValues`, réserve rejouable), tirage d'une caisse avec sa garantie (`tirage.ts`), bonus de la collection équipée vers le contrat de `ConfigPartie` (`bonus.ts`). Lit les règles de `src/data/meta.ts` et le catalogue de `src/data/collection.ts`. | `src/data/` |
+| `src/save/` | Sauvegarde. Fonctions pures : format versionné v4 (`format.ts`), validation stricte (`validation.ts`, `validation-collection.ts`, briques communes `validation-base.ts`), migrations en chaîne vN vers vN+1, progression (étoiles, déblocage), méta-progression (`transactions.ts`, `transactions-collection.ts`, `config-partie.ts`, `definitions.ts`), partie en cours, export et import par code (`code.ts`). `Session` (`session.ts`) tient la sauvegarde courante en mémoire et l'écrit à chaque changement ; sa règle multi-onglets est décrite plus bas (« Méta-progression et sauvegarde v3 »). `verrou.ts` exclut les écritures entre onglets (Web Locks) ; `canal.ts` prévient les autres onglets par `BroadcastChannel`, qui se rafraîchissent. Accès au stockage : interface `Stockage` (IndexedDB, repli localStorage, mémoire ; Capacitor Preferences plus tard) et `Depot`, qui ne lève jamais et garde une copie de secours d'une sauvegarde illisible. | `src/engine/`, `src/data/`, `src/meta/` |
 | `src/equilibrage/` | Simulateur d'équilibrage sans affichage : partie jouée par un bot (`simulation.ts`), bot naïf (`bot-naif.ts`) et bot soigneux avec sa petite recherche de variante (`bot-soigneux.ts`), géométrie des cartes, évaluation d'une région (`campagne.ts`), bandes cibles (`bandes.ts`), puissance des tours et des tours divines (`puissance.ts`), profils des vérifications supplémentaires (`profils.ts` : disciples, arbre au maximum, héros de niveau 10, sans tour divine), rédaction de `balance-report.md` (`rapport.ts`). Les bots ne passent que par l'API publique du moteur (`avancer` avec des actions). Réutilisé par `tools/balance/` et par les tests des bandes. | `src/engine/`, `src/data/`, `src/i18n/` |
 | `tools/` | Scripts Node : `art` (grilles de pixels vers planches PNG et atlas JSON), `niveaux` (génère les vagues figées de la région 1, aperçu texte des cartes, bilan du joueur automatique ; `enregistrer.ts` permet à Node d'importer `src/` sans extension), `balance` (`npm run balance` : lance le simulateur de `src/equilibrage/` et écrit `balance-report.md` à la racine). | `src/engine/`, `src/data/` |
 | `art/` | Sources graphiques : pack Minifolks d'origine (`art/minifolks/`), grilles de pixels en texte (`art/sprites/<nom>.txt`, format décrit en tête de `tools/art/format.ts`), palettes partagées (`art/palettes/`). `npm run art` écrit aussi des aperçus agrandis dans `art/apercu/` (ignoré par git). | — |
@@ -195,6 +196,80 @@ d'un bloc. `Session.file` ne se casse plus quand une écriture lève : le rejet 
 **Config de partie étendue** : `validerConfig` (partie en cours) accepte, tous ensemble ou pas du tout, les champs que le moteur
 ajoute au jalon 2 (`heros`, `competencesHeros`, `ameliorations`, `objets`) ; une fois `ConfigPartie` étendue côté moteur, les
 rendre obligatoires dans `validation.ts`.
+
+## Collection, caisses, défis et sauvegarde v4 (jalon 3 : `src/data/collection.ts`, `src/meta/`, `src/save/`)
+**Catalogue** (`src/data/collection.ts`) : 21 skins (`skin_caserne_1..3`, `skin_tir_1..3`, `skin_magie_1..3`, `skin_artillerie_1..3`,
+puis un par héros `skin_<id du héros>`) et 12 familiers (`familier_rat`…). Chacun a une rareté, une stat (tour : `degats`, `cadence`,
+`portee`, `pvSoldats` ; héros : `pv`, `degats`, `cadence`, `regeneration`) et deux textes (`collection.<id>` et `.desc`, dans
+`src/i18n/fr-collection.ts`). Chaque rareté existe dans chaque caisse (un test le vérifie : le tirage n'a jamais de rareté vide).
+Les prix, chances, éclats, rangs et bonus sont dans `meta.ts`, qui fait foi : caisse 20 braises, chances 60 / 25 / 10 / 4 / 1,
+éclats d'un doublon 5 / 10 / 25 / 60 / 150, rang r vers r + 1 = 20 × r éclats (5 rangs), achat précis 50 / 120 / 300 / 700 / 1 500.
+
+**Tirage** (`src/meta/tirage.ts`) : pur, le hasard est injecté (`SourceAleatoire`, un nombre dans [0, 1)). Un tirage consomme
+toujours deux jets : la rareté (jet comparé à des pourcentages entiers, donc sans arrondi flottant), puis l'objet de cette rareté
+dans la caisse (équiprobable). Garantie : le compteur gardé **par type de caisse** (`meta.collection.garanties`, de 0 à 9) compte les
+caisses sans Épique ou mieux ; à 9, la caisse suivante tire dans Épique, Légendaire, Mythique avec leurs proportions (10 / 4 / 1).
+Un test joue 100 000 tirages sans garantie pour chaque graine essayée : chaque rareté sort à moins de 0,5 point de sa chance.
+
+**Hasard et verrou.** Les transactions de session se rejouent sur le contenu frais du stockage (voir « Règle multi-onglets »).
+Pour que la caisse ne change pas de résultat à chaque passage, `Session.ouvrirCaisse` tire **une seule fois** deux nombres dans
+`crypto.getRandomValues` (`sourceCrypto`), les range dans une réserve (`sourceRejouable`) et rejoue ces mêmes nombres à chaque
+passage : le résultat ne dépend que de l'état du joueur écrit (compteur, doublons, braises), et le tirage rendu à l'écran est celui
+qui a été écrit. Sans `crypto` (plateforme sans), la caisse est refusée (`aleatoire_indisponible`), jamais tirée avec `Math.random`.
+
+**Bonus** (`src/meta/bonus.ts`, `bonusDeCollection(collection, héros joué, défi)`) : pour chaque tour de base, le skin équipé ;
+pour le héros joué, son skin et son familier. Bonus d'un objet = base de rareté (skin 1 / 2 / 3 / 4 / 5 %, familier 1 / 1,5 / 2 / 3 /
+4 %) × (1 + 0,25 × (rang − 1)), calculé en entiers de 1/100 000. **Le total d'une tour ou du héros (toutes stats confondues) est
+plafonné à +10 %** ; au-delà, chaque stat est réduite dans la même proportion. Le résultat a la forme exacte du champ `bonus` de la
+config du moteur : `{ tours: { caserne|tir|magie|artillerie: { degats|cadence|portee|pvSoldats } }, heros: { pv|degats|cadence|
+regeneration } }`, en fractions. Vide en défi Fer. Un objet équipé mais non possédé ou mal placé ne donne rien.
+
+**Config de partie** (`config-partie.ts`) : `ConfigMeta` porte maintenant `defi: 'heroique' | 'fer' | null` et `bonus`.
+`configDepuisSauvegarde(s, options)` accepte en plus `niveau` et `defi` (surcharge qui rend `ResultatConfigDefi`, avec les raisons
+`defi_inconnu` et `defi_verrouille`, à part de `RaisonConfig` pour ne pas changer le code existant de l'interface). Un défi est
+refusé tant que le niveau n'a pas ses 3 étoiles (meilleur résultat, toutes difficultés) ; il se joue en Matou et **sans objet
+emporté** (la difficulté et les objets demandés sont ignorés, le stock n'est pas regardé). **Note d'alignement avec le moteur** :
+`defi` et `bonus` sont déclarés dans `ConfigMeta` (src/save) en attendant `ConfigPartie` (src/engine/etat.ts) étendue par la tâche
+moteur du jalon 3 ; à la fusion, remplacer par les types du moteur, rendre `defi` et `bonus` obligatoires dans `validerConfig`
+(aujourd'hui facultatifs, tous deux ou aucun, pour qu'une partie en cours enregistrée avec le moteur actuel reste lisible), et
+transmettre `defi` et `bonus` dans `configDuChoix` (`src/ui/lancement.ts` copie la config champ par champ).
+
+**Format v4** (`format.ts`) : `meta` reçoit trois champs. `regionMax` (1 à 10) : plus haute région ouverte, toujours égale à
+`regionOuverte(progression.niveauMax)` (la région r + 1 s'ouvre quand le boss, niveau 10 r, est battu) ; `defis` : par niveau en
+chiffres, `{ heroique?: true, fer?: true }`, seulement sur un niveau à 3 étoiles ; `collection` : `possedes` (id vers rang 1 à 5),
+`eclats`, `garanties: { skins, familiers }`, `equipes: { skins: { <tour de base ou héros> : skin }, familiers: { <héros> : familier } }`.
+La validation est stricte (ids du catalogue en propriétés propres, rangs, garanties de 0 à 9, skin à son emplacement et possédé,
+config de partie : `bonus` jamais au-dessus de +10 %, aucun bonus en Fer). Elle n'exige pas que le héros portant un skin ou un
+familier soit recruté ; les transactions d'équipement le refusent (`heros_non_possede`) et l'import le corrige
+(`normalisation.ts` déséquipe ce qui est porté par un héros absent, sans rien retirer de la collection).
+
+**Migration v3 vers v4** (`migrations.ts`, fixture figée `fixtures/sauvegarde-v3.json`) : tout est gardé tel quel ; `regionMax` est
+déduite de `niveauMax`, `defis` part vide, la collection part vide (écrite en dur). Les victoires passées ne rapportent ni éclats
+ni défis rétroactifs.
+
+**Transactions** (`transactions-collection.ts`, mêmes règles que `transactions.ts` : pures, copie ou refus sans rien changer) :
+`ouvrirCaisse` (débit des braises, tirage, ajout au rang 1 ou éclats du doublon tronqués au plafond, compteur), `monterRang`,
+`acheterObjetPrecis`, `equiperSkin` et `equiperFamilier` (`null` pour déséquiper ; un familier par héros, un même familier peut
+être porté par deux héros). Refus : `braises_insuffisantes`, `eclats_insuffisants`, `rang_max`, `deja_possede`, `non_possede`,
+`emplacement_invalide`, `heros_non_possede`, `type_inconnu`, `objet_inconnu`. `Session` expose `ouvrirCaisse(type)` (rend le
+`OuvertureCaisse` : objet, rareté, nouveau ou doublon, éclats, garantie), `monterRang` (qui vise le rang vu : `modifie_ailleurs` si
+un autre onglet l'a déjà monté), `acheterObjetPrecis`, `equiperSkin`, `equiperFamilier`.
+
+**Fin de partie** (`enregistrerFinDePartie`, option `defi` de `FinDePartieMeta`, lue par défaut dans `config.defi`) :
+- une **victoire en défi** exige un niveau à 3 étoiles (sinon `niveau_invalide`), marque `meta.defis[niveau][défi]` et rapporte
+  `BRAISES_DEFI` = 4 braises **la première fois seulement** ; elle ne touche ni aux étoiles, ni au niveau suivant, ni aux arêtes, ni
+  aux braises de première victoire, ni aux disciples ; le héros reçoit l'expérience d'une victoire. Défaite et abandon en défi : comme
+  ailleurs, sans récompense (le défi n'est pas examiné) ;
+- la **première victoire** sur le boss de la région 2 ou 4 (niveaux 20 et 40, `NIVEAUX_DISCIPLE_OFFERT`) offre le premier disciple
+  non possédé dans l'ordre Suie, Mastoc, Rouage, Corbeau, Brise-Os, Lanterne (0 d'expérience) — rejouer le boss n'en offre pas de
+  plus ;
+- la région suivante s'ouvre (`meta.regionMax`) ; le `BilanPartie` porte `defiReussi`, `discipleOffert` et `regionDebloquee`,
+  **facultatifs** (absents quand il n'y a rien à signaler), pour ne pas casser le code existant de l'interface.
+
+**Pour l'interface (tâche 5)** : les raisons propres au jalon 3 ne sont pas dans `RaisonConfig`, `RaisonFin` ni `RaisonMeta` (les
+types existants de l'interface restent compilables) : `RaisonDefi`, `RaisonCaisse`, `RaisonRang`, `RaisonAchatPrecis`,
+`RaisonEquipementCollection`, plus `aleatoire_indisponible` et `modifie_ailleurs` ; leurs phrases sont dans `src/i18n/fr-collection.ts`
+sous `collection.refus.*` (le préfixe `meta.refus.*` est réservé à `raisons-meta.ts`, dont un test exige que chaque phrase serve).
 
 ## Niveaux de la campagne (`src/data/niveaux/`)
 - `cartes.ts` : cartes dessinées à la main (chemins, socles et ralliements, départ du héros, zones de sol, décor).

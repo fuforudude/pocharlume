@@ -2,7 +2,16 @@
 // réglages, partie en cours, export et import), accès au stockage de l'autre (Depot, Session).
 export { ouvrirCanalNavigateur, type CanalSauvegarde } from './canal';
 export { exporterCode, importerCode, remplacerProgression, type RaisonImport, type ResultatImport } from './code';
-export { configDepuisSauvegarde, type ConfigMeta, type OptionsConfig, type RaisonConfig, type ResultatConfig } from './config-partie';
+export {
+  configDepuisSauvegarde,
+  type ConfigMeta,
+  type OptionsConfig,
+  type OptionsConfigDefi,
+  type RaisonConfig,
+  type RaisonDefi,
+  type ResultatConfig,
+  type ResultatConfigDefi,
+} from './config-partie';
 export { definitionDuHeros, pointsDeCompetence, type DefCompetence, type DefHeros, type DefsMeta } from './definitions';
 export {
   CLE_AVANT_MIGRATION,
@@ -23,6 +32,7 @@ export {
   sauvegardeVide,
   VERSION_SAUVEGARDE,
   type ChoixPartie,
+  type DefisNiveau,
   type DifficulteSauvegarde,
   type Etoiles,
   type EtoilesNiveau,
@@ -48,6 +58,7 @@ export {
   type Reprise,
   type ResultatFin,
   type ResultatTransaction,
+  type ResultatTransactionAvecDetail,
 } from './session';
 export {
   ouvrirStockage,
@@ -87,5 +98,18 @@ export {
   type ResultatFin as ResultatFinPure,
   type Transaction,
 } from './transactions';
+export {
+  acheterObjetPrecis,
+  equiperFamilier,
+  equiperSkin,
+  monterRang,
+  ouvrirCaisse,
+  type OuvertureCaisse,
+  type RaisonAchatPrecis,
+  type RaisonCaisse,
+  type RaisonEquipementCollection,
+  type RaisonRang,
+  type ResultatCaisse,
+} from './transactions-collection';
 export { validerSauvegarde, type Resultat } from './validation';
 export { creerVerrouMemoire, ouvrirVerrouNavigateur, type VerrouSauvegarde } from './verrou';
