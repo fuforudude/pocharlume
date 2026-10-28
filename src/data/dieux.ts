@@ -160,7 +160,7 @@ const pollen: DefDieu = {
       surChemin: false,
       global: false,
       effets: [
-        { type: 'aretes', montant: 130 },
+        { type: 'aretes', montant: 80 },
         { type: 'boost', cadence: 0.8, duree: 10 },
       ],
     },

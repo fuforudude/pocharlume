@@ -75,7 +75,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     carte: 'carrefour',
     chemins: [0],
     socles: [1, 3, 5, 8, 10, 12, 14, 16],
-    aretesDepart: 240,
+    aretesDepart: 260,
     nom: 'niveau.r1.04.nom',
     ambiance: 'niveau.r1.04.ambiance',
     vagues: { nombre: 8, ennemis: PAYSAN_MENDIANT, graine: 1104 },
@@ -135,7 +135,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     carte: 'gue',
     chemins: [0, 1, 2],
     socles: [0, 3, 4, 7, 9, 11, 12, 14, 17, 18],
-    aretesDepart: 420,
+    aretesDepart: 385,
     nom: 'niveau.r1.10.nom',
     ambiance: 'niveau.r1.10.ambiance',
     vagues: {

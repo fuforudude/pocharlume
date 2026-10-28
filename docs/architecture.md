@@ -275,7 +275,4 @@ Le simulateur de `src/equilibrage/` rejoue les 10 niveaux dans les 3 difficulté
 - **Événements ajoutés pour le rendu et le son** : `tir_unite`, `esquive`, `soin`, `regain_vies`, `execution`, `zone`,
   `zone_fin`, `piege_pose`, `piege_declenche`, `structure`, `tir_structure`, `structure_fin`, `boost`, `objet`,
   `competence_tour`.
-- **Bot soigneux** : joue les trois dieux simplement (tour divine à partir de la troisième tour, Pièges à Ressort deux
-  tuiles avant la zone de feu, Ingéniosité au cœur du plus gros groupe de tours, sorts de zone sur les grappes). Pour
-  Charlie il ne construit pas le Totem (option `tourDivine`) : les bandes de la région 1 ont été réglées sans lui.
-  Les bandes des trois dieux relèvent de la tâche d'équilibrage.
+- **Bot soigneux** : joue correctement chacun des trois dieux (voir « Équilibrage des trois dieux » plus bas). Il compte le bonus et la remise de famille du dieu dans la valeur et le prix de ses achats, construit la tour divine (200 arêtes) à partir de la troisième tour pour les trois dieux, et joue chaque sort selon son effet : zones de dégâts sur les grappes, Renforts et Voile de Nuit devant la zone de feu, Pièges à Ressort deux tuiles avant, Griffes d'Ombre sur la plus grosse grappe (4 ennemis ou un boss), Ingéniosité sur le plus gros groupe de tours.
