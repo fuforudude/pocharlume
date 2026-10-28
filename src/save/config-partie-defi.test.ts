@@ -1,8 +1,10 @@
 // Config d'une partie : le défi joué (Héroïque, Fer) et les bonus de la collection équipée.
-import { describe, expect, it } from 'vitest';
+import { describe, expect, expectTypeOf, it } from 'vitest';
+import { DEFS_META } from '../data/heros';
 import { VERSION_DONNEES } from '../data/version';
+import { verifierConfig, type BonusCollection, type ConfigPartie, type DefiPartie } from '../engine';
 import { DEFS_TEST, sauvegardeRemplie } from './aides.test-utils';
-import { configDepuisSauvegarde, type OptionsConfig, type OptionsConfigDefi, type ResultatConfig, type ResultatConfigDefi } from './config-partie';
+import { configDepuisSauvegarde, type ConfigMeta, type OptionsConfig, type OptionsConfigDefi, type ResultatConfig, type ResultatConfigDefi } from './config-partie';
 import { sauvegardeVide, type Sauvegarde } from './format';
 
 const BASE: OptionsConfig = {
@@ -110,5 +112,23 @@ describe('configDepuisSauvegarde : défis', () => {
     const avant = structuredClone(s);
     defi({ defi: 'fer' }, s);
     expect(s).toEqual(avant);
+  });
+});
+
+describe('alignement avec la config du moteur', () => {
+  it('`defi` et `bonus` de la config de la sauvegarde sont les types du moteur', () => {
+    expectTypeOf<ConfigMeta['defi']>().toEqualTypeOf<DefiPartie | null>();
+    expectTypeOf<ConfigMeta['bonus']>().toEqualTypeOf<BonusCollection>();
+    expectTypeOf<ConfigMeta['defi']>().toExtend<ConfigPartie['defi']>();
+  });
+
+  it('une config composée, avec ou sans défi, est acceptée telle quelle par le moteur', () => {
+    // Définitions réelles des héros (celles que le moteur vérifie), sauvegarde sans compétence placée.
+    const s = { ...sauvegardeVide(), progression: { niveauMax: 2, etoiles: { '1': { matou: 3 as const } } } };
+    const options = { ...BASE, dieu: 'charlie', heros: 'charlie', objetsEquipes: [], defsHeros: DEFS_META };
+    for (const unDefi of ['heroique', 'fer', null] as const) {
+      expect(verifierConfig(config(configDepuisSauvegarde(s, { ...options, niveau: 1, defi: unDefi }))), String(unDefi)).toBeNull();
+    }
+    expect(verifierConfig(config(configDepuisSauvegarde(s, options)))).toBeNull();
   });
 });

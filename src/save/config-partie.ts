@@ -3,7 +3,8 @@
 // lancement pour que la partie reste rejouable à l'identique. Fonction pure : rend la config ou la raison pour laquelle
 // le lancement est refusé.
 import { EMPLACEMENTS_OBJETS, estIdDefi, estIdDieu, estIdHeros, estIdObjet, HEROS_PAR_DIEU, type IdBranche, type IdDefi, type IdDieu, type IdHeros, type IdObjet } from '../data/meta';
-import { bonusDeCollection, type BonusCollection } from '../meta/bonus';
+import type { BonusCollection, DefiPartie } from '../engine';
+import { bonusDeCollection } from '../meta/bonus';
 import { definitionDuHeros, niveauHerosDepuisXp, pointsDeCompetence, type DefsMeta } from './definitions';
 import { DIFFICULTES_SAUVEGARDE, NOMBRE_NIVEAUX, type Sauvegarde } from './format';
 import { meilleuresEtoiles } from './progression';
@@ -11,11 +12,9 @@ import { estEntierEntre } from './validation';
 
 /**
  * Config d'une partie telle que la méta-progression la compose. Ce sont les champs de `ConfigPartie` côté moteur
- * (graine, difficulté, dieu, niveau du héros, version des données) plus ceux du jalon 2, puis `defi` et `bonus` du jalon 3.
- *
- * NOTE D'ALIGNEMENT : `defi` et `bonus` sont déclarés ici en attendant que `ConfigPartie` (src/engine/etat.ts, tâche
- * moteur du jalon 3) les porte. Les types sont écrits pour être identiques à ceux du moteur (`defi: 'heroique' | 'fer' |
- * null`, `bonus` au contrat `BonusCollection`) ; à la fusion, remplacer ces déclarations par celles du moteur.
+ * (graine, difficulté, dieu, niveau du héros, version des données) plus ceux du jalon 2, puis `defi` et `bonus` du jalon 3,
+ * dont les types sont ceux du moteur (`DefiPartie`, `BonusCollection` de src/engine) : la config ici composée se copie
+ * champ par champ dans une `ConfigPartie` (voir `configDuChoix`, src/ui/lancement.ts).
  */
 export interface ConfigMeta {
   readonly graine: number;
@@ -31,7 +30,7 @@ export interface ConfigMeta {
   readonly objets: readonly IdObjet[];
   readonly versionDonnees: number;
   /** Le défi joué, ou null pour une partie ordinaire. */
-  readonly defi: IdDefi | null;
+  readonly defi: DefiPartie | null;
   /** Bonus de la collection équipée, en fractions ; vide en défi Fer. */
   readonly bonus: BonusCollection;
 }

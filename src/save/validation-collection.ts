@@ -13,8 +13,8 @@ import {
   RANG_MAX_COLLECTION,
   regionOuverte,
   TYPES_CAISSE,
-  type IdDefi,
 } from '../data/meta';
+import type { ConfigPartie } from '../engine';
 import { emplacementAcceptable, type CibleSkin, type Collection } from '../meta/collection';
 import type { BonusCollection } from '../meta/bonus';
 import { DIFFICULTES_SAUVEGARDE, type DefisNiveau, type Progression } from './format';
@@ -116,10 +116,7 @@ export function validerCollection(x: unknown): Resultat<Collection> {
 // --- Défi et bonus de la config d'une partie -------------------------------------------------------------------
 
 /** Les champs que la config d'une partie reçoit au jalon 3 : le défi joué (ou null) et les bonus de la collection. */
-export interface ExtensionConfigV4 {
-  defi: IdDefi | null;
-  bonus: BonusCollection;
-}
+export type ExtensionConfigV4 = Required<Pick<ConfigPartie, 'defi' | 'bonus'>>;
 
 /** Un groupe de bonus (une tour, ou le héros) : stats connues, fractions finies de 0 à +10 %, total d'au plus +10 %. */
 function validerGroupeBonus<S extends string>(x: unknown, stats: readonly S[], chemin: string): Resultat<Partial<Record<S, number>>> {

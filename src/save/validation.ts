@@ -31,7 +31,7 @@ import {
 import { REGLES } from '../data/regles';
 import type { ConfigPartie } from '../engine/etat';
 import { definitionDuHeros, niveauHerosDepuisXp, pointsDeCompetence, type DefsMeta } from './definitions';
-import { validerCollection, validerDefis, validerExtensionConfigV4, validerRegionMax, type ExtensionConfigV4 } from './validation-collection';
+import { validerCollection, validerDefis, validerExtensionConfigV4, validerRegionMax } from './validation-collection';
 import { avecCles, CLE_NIVEAU, echec, estEnregistrement, estEntierEntre, ok, parmi, poser, validerEntiersParCle, valeur, type Resultat } from './validation-base';
 import {
   DIFFICULTES_SAUVEGARDE,
@@ -250,7 +250,7 @@ function validerExtensionConfig(brute: Record<string, unknown>, dieu: string): R
 
 function validerConfig(x: unknown): Resultat<ConfigPartie> {
   if (!estEnregistrement(x)) return echec('partie.config : objet attendu');
-  // `defi` et `bonus` (jalon 3) vont ensemble, et sont facultatifs tant que `ConfigPartie` du moteur ne les porte pas.
+  // `defi` et `bonus` (jalon 3) vont ensemble, et sont facultatifs (une partie enregistrée avant le jalon 3 n'en a pas).
   const avecDefiEtBonus = Object.hasOwn(x, 'defi') || Object.hasOwn(x, 'bonus');
   const base = avecCles(x, [...CLES_CONFIG, ...CLES_EXTENSION_CONFIG, ...(avecDefiEtBonus ? CLES_DEFI_BONUS : [])], 'partie.config');
   if (!base.ok) return base;
@@ -270,8 +270,7 @@ function validerConfig(x: unknown): Resultat<ConfigPartie> {
   if (!avecDefiEtBonus) return ok({ ...config, ...extension.valeur });
   const defiEtBonus = validerExtensionConfigV4(base.valeur);
   if (!defiEtBonus.ok) return defiEtBonus;
-  // Le moteur ne porte pas encore `defi` et `bonus` dans `ConfigPartie` : on les garde dans la copie (voir docs/architecture.md).
-  const complete: ConfigPartie & ExtensionConfigV4 = { ...config, ...extension.valeur, ...defiEtBonus.valeur };
+  const complete: ConfigPartie = { ...config, ...extension.valeur, ...defiEtBonus.valeur };
   return ok(complete);
 }
 

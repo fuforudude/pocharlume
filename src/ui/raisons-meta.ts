@@ -3,14 +3,19 @@
 import { t, type CleTexte } from '../i18n';
 import type {
   RaisonAchatObjet,
+  RaisonAchatPrecis,
   RaisonArbre,
+  RaisonCaisse,
   RaisonChoix,
   RaisonConfig,
+  RaisonDefi,
   RaisonDisciple,
   RaisonEquipement,
+  RaisonEquipementCollection,
   RaisonFin,
   RaisonPoint,
   RaisonPoints,
+  RaisonRang,
   RaisonReinitialisation,
 } from '../save';
 
@@ -26,6 +31,12 @@ export type RaisonMeta =
   | RaisonPoints
   | RaisonConfig
   | RaisonFin
+  | RaisonDefi
+  | RaisonCaisse
+  | RaisonRang
+  | RaisonAchatPrecis
+  | RaisonEquipementCollection
+  | 'aleatoire_indisponible'
   | 'modifie_ailleurs'
   | 'definitions_absentes';
 
@@ -56,6 +67,14 @@ export const CLES_REFUS_META: Readonly<Record<RaisonMeta, CleTexte>> = {
   niveau_invalide: 'meta.refus.niveau_invalide',
   etoiles_invalides: 'meta.refus.etoiles_invalides',
   objets_invalides: 'meta.refus.objets_invalides',
+  // Jalon 3 : caisses, collection et défis (les raisons déjà connues plus haut gardent leur phrase meta.refus.*).
+  type_inconnu: 'collection.refus.type_inconnu',
+  eclats_insuffisants: 'collection.refus.eclats_insuffisants',
+  non_possede: 'collection.refus.non_possede',
+  emplacement_invalide: 'collection.refus.emplacement_invalide',
+  aleatoire_indisponible: 'collection.refus.aleatoire_indisponible',
+  defi_inconnu: 'collection.refus.defi_inconnu',
+  defi_verrouille: 'collection.refus.defi_verrouille',
 };
 
 export function texteRefusMeta(raison: RaisonMeta): string {
