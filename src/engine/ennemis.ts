@@ -100,6 +100,7 @@ function fuir(etat: EtatPartie, e: Ennemi): void {
   e.vivant = false;
   libererEnnemi(etat, e);
   etat.vies = Math.max(0, etat.vies - e.coutVies);
+  if (e.coutVies > 0) etat.viePerdue = true;
   etat.evenements.push({ type: 'fuite', ennemi: e.id, vies: e.coutVies });
 }
 

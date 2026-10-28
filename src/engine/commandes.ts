@@ -141,6 +141,8 @@ export function validerAction(etat: EtatPartie, action: Action): RaisonRefus | n
       const objet = defObjet(id);
       if (!objet) return 'objet_inconnu';
       if (etat.objetsUtilises[action.emplacement]) return 'objet_utilise';
+      // Un objet qui ne fait que rendre des vies (Herbe de Sabbat) est refusé, donc pas consommé, quand elles sont pleines.
+      if (objet.effets.length > 0 && objet.effets.every((effet) => effet.type === 'vies') && etat.vies >= etat.viesDepart) return 'vies_pleines';
       if (objet.global) return null;
       if (horsCarte(etat, action.x, action.y)) return 'hors_carte';
       return objet.surChemin && loinDuChemin(etat, action.x, action.y) ? 'hors_chemin' : null;

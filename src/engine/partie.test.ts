@@ -195,11 +195,16 @@ describe('fin de partie', () => {
   });
 
   it('compte les étoiles selon les vies restantes', () => {
-    expect(etoilesPour(20, 20)).toBe(3);
-    expect(etoilesPour(19, 20)).toBe(2);
-    expect(etoilesPour(10, 20)).toBe(2);
-    expect(etoilesPour(9, 20)).toBe(1);
-    expect(etoilesPour(1, 20)).toBe(1);
-    expect(etoilesPour(0, 20)).toBe(0);
+    expect(etoilesPour(20, 20, false)).toBe(3);
+    expect(etoilesPour(19, 20, true)).toBe(2);
+    expect(etoilesPour(10, 20, true)).toBe(2);
+    expect(etoilesPour(9, 20, true)).toBe(1);
+    expect(etoilesPour(1, 20, true)).toBe(1);
+    expect(etoilesPour(0, 20, true)).toBe(0);
+  });
+
+  it('ne donne 3 étoiles que si aucune vie n’a jamais été perdue, même quand les vies sont de nouveau pleines', () => {
+    expect(etoilesPour(20, 20, true)).toBe(2);
+    expect(etoilesPour(20, 20, false)).toBe(3);
   });
 });

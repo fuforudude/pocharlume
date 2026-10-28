@@ -24,8 +24,9 @@ function visee(e: Ennemi, cibles: CiblesEffet | undefined): boolean {
 function surEnnemis(etat: EtatPartie, zone: ZoneEffets, x: number, y: number, volants: boolean, appliquer: (e: Ennemi) => void, cibles?: CiblesEffet): void {
   const rayon2 = zone.rayon * zone.rayon;
   for (const e of etat.ennemis) {
-    // Comme les zones des tours, un sort ne touche pas un furtif non révélé.
-    if (!e.vivant || (e.volant && !volants) || !estVisible(e, false) || !visee(e, cibles)) continue;
+    // Comme les zones des tours, un sort de zone ne touche pas un furtif non révélé ; un effet global (Sablier) touche
+    // tous les ennemis de la carte, furtifs non révélés compris.
+    if (!e.vivant || (e.volant && !volants) || !(zone.global || estVisible(e, false)) || !visee(e, cibles)) continue;
     if (!zone.global && distance2(e.x, e.y, x, y) > rayon2) continue;
     appliquer(e);
   }

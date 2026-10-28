@@ -1,8 +1,9 @@
 // Objets consommables : effet principal de chacun, un emplacement ne sert qu'une fois, refus.
 import { describe, expect, it } from 'vitest';
-import { CONFIG, avancerSecondes, compter, ennemiFixe, partieEssai } from './aides.test-utils';
+import { CONFIG, avancerSecondes, compter, ennemiEssai, ennemiFixe, niveauEssai, partieEssai } from './aides.test-utils';
+import { ajouterEnnemi } from './ennemis';
 import { EFFET, type EtatPartie } from './etat';
-import { appliquerAction, validerAction } from './partie';
+import { appliquerAction, creerPartie, step, validerAction } from './partie';
 import { PAS_PAR_SECONDE } from './temps';
 
 function partie(...objets: string[]): EtatPartie {
@@ -56,6 +57,52 @@ describe('Herbe de Sabbat', () => {
   });
 });
 
+describe('Herbe de Sabbat : vies pleines et étoiles', () => {
+  it('est refusée quand les vies sont pleines, et n’est pas consommée', () => {
+    const etat = partie('herbe_sabbat');
+    expect(validerAction(etat, { type: 'utiliserObjet', emplacement: 0, x: 0, y: 0 })).toBe('vies_pleines');
+    expect(appliquerAction(etat, { type: 'utiliserObjet', emplacement: 0, x: 0, y: 0 })).toEqual({ ok: false, raison: 'vies_pleines' });
+    expect(etat.objetsUtilises).toEqual([false]);
+    expect(etat.journal).toHaveLength(0);
+    expect(compter(etat.evenements, 'objet')).toBe(0);
+  });
+
+  it('est acceptée dès qu’une vie manque, puis refusée de nouveau une fois les vies rendues', () => {
+    const etat = creerPartie(niveauEssai(), { ...CONFIG, objets: ['herbe_sabbat', 'herbe_sabbat'] });
+    ajouterEnnemi(etat, ennemiEssai({ coutVies: 1 }), 'paysan_affame', 0, 29.99);
+    step(etat);
+    expect(etat.vies).toBe(etat.viesDepart - 1);
+    expect(appliquerAction(etat, { type: 'utiliserObjet', emplacement: 0, x: 0, y: 0 })).toEqual({ ok: true });
+    expect(etat.vies).toBe(etat.viesDepart);
+    expect(appliquerAction(etat, { type: 'utiliserObjet', emplacement: 1, x: 0, y: 0 })).toEqual({ ok: false, raison: 'vies_pleines' });
+    expect(etat.objetsUtilises).toEqual([true, false]);
+  });
+
+  it('une vie perdue puis rendue par l’Herbe garde l’indicateur : pas de 3 étoiles', () => {
+    const etat = creerPartie(niveauEssai([{ paquets: [] }]), { ...CONFIG, objets: ['herbe_sabbat'] });
+    expect(etat.viePerdue).toBe(false);
+    ajouterEnnemi(etat, ennemiEssai({ coutVies: 2 }), 'paysan_affame', 0, 29.99);
+    step(etat);
+    expect(etat.viePerdue).toBe(true);
+    expect(appliquerAction(etat, { type: 'utiliserObjet', emplacement: 0, x: 0, y: 0 })).toEqual({ ok: true });
+    expect(etat.vies).toBe(etat.viesDepart);
+    appliquerAction(etat, { type: 'appelerVague' });
+    for (let i = 0; i < 300 && etat.statut === 'en_cours'; i++) step(etat);
+    expect(etat.statut).toBe('victoire');
+    expect(etat.vies).toBe(etat.viesDepart);
+    expect(etat.etoiles).toBe(2);
+  });
+
+  it('sans aucune vie perdue, la victoire garde ses 3 étoiles', () => {
+    const etat = creerPartie(niveauEssai([{ paquets: [] }]), CONFIG);
+    appliquerAction(etat, { type: 'appelerVague' });
+    for (let i = 0; i < 300 && etat.statut === 'en_cours'; i++) step(etat);
+    expect(etat.statut).toBe('victoire');
+    expect(etat.viePerdue).toBe(false);
+    expect(etat.etoiles).toBe(3);
+  });
+});
+
 describe('Griffe de Renfort', () => {
   it('fait venir un chat soldat fort sur le chemin, qui bloque puis repart au bout de 30 s', () => {
     const etat = partie('griffe_renfort');
@@ -92,6 +139,25 @@ describe('Sablier', () => {
     expect(boss.effetsValeur[EFFET.ralentissement]).toBeCloseTo(0.4, 5);
   });
 
+  it('gèle aussi les furtifs non révélés, hors de portée de tout révélateur', () => {
+    const etat = partie('sablier');
+    const furtif = ennemiFixe(etat, 8, { furtif: true });
+    const furtifLointain = ennemiFixe(etat, 25, { furtif: true }, 1);
+    expect(appliquerAction(etat, { type: 'utiliserObjet', emplacement: 0, x: 0, y: 0 })).toEqual({ ok: true });
+    for (const e of [furtif, furtifLointain]) {
+      expect(e.revele).toBe(0);
+      expect(e.effetsPas[EFFET.etourdissement]).toBe(5 * PAS_PAR_SECONDE);
+    }
+  });
+
+  it('un furtif boss est seulement ralenti, comme les autres boss', () => {
+    const etat = partie('sablier');
+    const boss = ennemiFixe(etat, 8, { furtif: true, boss: true });
+    appliquerAction(etat, { type: 'utiliserObjet', emplacement: 0, x: 0, y: 0 });
+    expect(boss.effetsPas[EFFET.etourdissement]).toBe(0);
+    expect(boss.effetsPas[EFFET.ralentissement]).toBe(5 * PAS_PAR_SECONDE);
+  });
+
   it('un ennemi gelé n’avance plus pendant 5 s', () => {
     const etat = partie('sablier');
     const e = ennemiFixe(etat, 3, { vitesse: 1 });
@@ -108,6 +174,7 @@ describe('emplacements', () => {
   it('trois objets, un par emplacement, chacun utilisable à son tour', () => {
     const etat = partie('fiole_soufre', 'herbe_sabbat', 'sablier');
     expect(etat.objetsUtilises).toEqual([false, false, false]);
+    etat.vies = etat.viesDepart - 1;
     expect(appliquerAction(etat, { type: 'utiliserObjet', emplacement: 2, x: 0, y: 0 })).toEqual({ ok: true });
     expect(appliquerAction(etat, { type: 'utiliserObjet', emplacement: 1, x: 0, y: 0 })).toEqual({ ok: true });
     expect(etat.objetsUtilises).toEqual([false, true, true]);

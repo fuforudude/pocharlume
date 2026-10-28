@@ -16,7 +16,7 @@ import type {
 } from './definitions';
 import type { Evenement } from './evenements';
 
-export const VERSION_ETAT = 2;
+export const VERSION_ETAT = 3;
 
 export type Statut = 'en_cours' | 'victoire' | 'defaite';
 export type FamilleTour = IdFamille | 'divine';
@@ -40,7 +40,7 @@ export interface ConfigPartie {
   competencesHeros: Record<string, number>;
   /** Arbre d'améliorations : id de branche (src/data/ameliorations.ts) vers rang (0 à 5). */
   ameliorations: Record<string, number>;
-  /** Objets emportés (0 à 3 ids de src/data/objets.ts, distincts), un par emplacement. */
+  /** Objets emportés (0 à 3 ids de src/data/objets.ts, un même objet pouvant occuper plusieurs emplacements), un par emplacement. */
   objets: string[];
   /** VERSION_DONNEES de src/data/version.ts : une partie ne se rejoue qu'avec les données de sa version. */
   versionDonnees: number;
@@ -241,6 +241,8 @@ export interface EtatPartie {
   etoiles: number;
   vies: number;
   viesDepart: number;
+  /** Vrai dès qu'une vie a été perdue, même rendue ensuite (Herbe de Sabbat) : les 3 étoiles n'iront qu'à une partie sans perte. */
+  viePerdue: boolean;
   aretes: number;
   vagues: EtatVagues;
   ennemis: Ennemi[];

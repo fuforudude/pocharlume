@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { NIVEAU_TEST } from '../data/niveaux/region1';
 import { CONFIG } from './aides.test-utils';
 import type { Action } from './actions';
-import type { ConfigPartie, EntreeJournal, EtatPartie } from './etat';
+import { VERSION_ETAT, type ConfigPartie, type EntreeJournal, type EtatPartie } from './etat';
 import { avancer, creerPartie, deserialiser, rejouer, serialiser, step } from './partie';
 import { PAS_PAR_SECONDE } from './temps';
 
@@ -84,7 +84,12 @@ describe('déterminisme et rejeu', () => {
   });
 
   it('refuse un état d’une autre version', () => {
-    const texte = serialiser(creerPartie(NIVEAU_TEST, CONFIG)).replace('"version":2', '"version":99');
+    const texte = serialiser(creerPartie(NIVEAU_TEST, CONFIG)).replace(`"version":${String(VERSION_ETAT)},`, '"version":99,');
+    expect(() => deserialiser(texte)).toThrow('version');
+  });
+
+  it('refuse un état de l’ancien format (version 2, sans indicateur de vie perdue)', () => {
+    const texte = serialiser(creerPartie(NIVEAU_TEST, CONFIG)).replace(`"version":${String(VERSION_ETAT)},`, '"version":2,');
     expect(() => deserialiser(texte)).toThrow('version');
   });
 

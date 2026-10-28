@@ -24,10 +24,13 @@ export { appliquerAction, coutCompetence, coutConstruction, validerAction, valeu
 /** Rejeu sans pas final : au-delà de 3 heures de jeu, on s'arrête (partie sans fin). */
 const PAS_MAX_REJEU = 3 * 3600 * PAS_PAR_SECONDE;
 
-/** Étoiles d'une victoire : 3 sans vie perdue, 2 avec au moins la moitié des vies, 1 sinon. */
-export function etoilesPour(vies: number, viesDepart: number): number {
+/**
+ * Étoiles d'une victoire : 3 si aucune vie n'a jamais été perdue (même si l'Herbe de Sabbat les a rendues), 2 avec au
+ * moins la moitié des vies, 1 sinon.
+ */
+export function etoilesPour(vies: number, viesDepart: number, viePerdue: boolean): number {
   if (vies <= 0) return 0;
-  if (vies >= viesDepart) return 3;
+  if (!viePerdue && vies >= viesDepart) return 3;
   return vies >= viesDepart * REGLES.seuilDeuxEtoiles ? 2 : 1;
 }
 
@@ -66,6 +69,7 @@ export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
     etoiles: 0,
     vies: difficulte.vies,
     viesDepart: difficulte.vies,
+    viePerdue: false,
     aretes: ajusterMontant(niveau.aretesDepart, difficulte.aretesDepart),
     vagues: { lancees: 0, prochaine: copie.vagues.length > 0 ? enPas(REGLES.delaiPremiereVague) : -1, paquets: [] },
     ennemis: [],
@@ -118,7 +122,7 @@ function verifierFin(etat: EtatPartie): void {
     etat.etoiles = 0;
   } else if (etat.vagues.lancees >= etat.niveau.vagues.length && etat.vagues.paquets.length === 0 && etat.ennemis.length === 0) {
     etat.statut = 'victoire';
-    etat.etoiles = etoilesPour(etat.vies, etat.viesDepart);
+    etat.etoiles = etoilesPour(etat.vies, etat.viesDepart, etat.viePerdue);
   } else {
     return;
   }

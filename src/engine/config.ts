@@ -58,11 +58,9 @@ function verifierCompetences(config: Dictionnaire, niveauHeros: number): string 
 function verifierObjets(objets: unknown): string | null {
   if (!Array.isArray(objets)) return 'Objets : une liste est attendue';
   if (objets.length > EMPLACEMENTS_OBJETS) return `Objets : ${String(EMPLACEMENTS_OBJETS)} au plus`;
-  const vus = new Set<string>();
+  // Un même objet peut occuper plusieurs emplacements (chacun ne sert qu'une fois) : pas de contrôle d'unicité.
   for (const objet of objets as unknown[]) {
     if (typeof objet !== 'string' || !defObjet(objet)) return `Objets : ${String(objet)} inconnu`;
-    if (vus.has(objet)) return `Objets : ${objet} emporté deux fois`;
-    vus.add(objet);
   }
   return null;
 }
@@ -71,7 +69,7 @@ function verifierObjets(objets: unknown): string | null {
  * Dit si la config permet de créer une partie. Renvoie la raison du refus, en français, ou null si elle est bonne.
  * Règles : version des données, difficulté, dieu et héros connus (le héros appartient au dieu), niveau du héros de 1 à 10,
  * compétences du héros connues (rang de 0 à 3, ultime à partir du niveau 6, pas plus de points que de niveaux), branches
- * de l'arbre connues (rang de 0 à 5), objets connus, distincts, trois au plus.
+ * de l'arbre connues (rang de 0 à 5), objets connus (un même objet peut occuper plusieurs emplacements), trois au plus.
  */
 export function verifierConfig(config: unknown): string | null {
   if (!estDictionnaire(config)) return 'Config de partie : un objet est attendu';

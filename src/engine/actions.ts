@@ -38,6 +38,7 @@ export type RaisonRefus =
   | 'competence_au_maximum'
   | 'objet_inconnu'
   | 'objet_utilise'
+  | 'vies_pleines'
   | 'vague_en_cours'
   | 'plus_de_vague';
 

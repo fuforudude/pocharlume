@@ -119,15 +119,20 @@ describe('verifierConfig : cas piégés', () => {
     expect(refus({ ameliorations: { tir: 5, magie: 0 } })).toBeNull();
   });
 
-  it('refuse des objets inconnus, en double, trop nombreux, ou qui ne sont pas des ids', () => {
+  it('refuse des objets inconnus, trop nombreux, ou qui ne sont pas des ids', () => {
     expect(refus({ objets: ['potion'] })).toContain('potion');
-    expect(refus({ objets: ['sablier', 'sablier'] })).toContain('sablier');
     expect(refus({ objets: ['fiole_soufre', 'herbe_sabbat', 'griffe_renfort', 'sablier'] })).not.toBeNull();
     for (const objets of ['sablier', null, { 0: 'sablier' }, [3], [null], ['constructor'], ['__proto__']]) {
       expect(refus({ objets }), JSON.stringify(objets)).not.toBeNull();
     }
     expect(refus({ objets: Object.keys(OBJETS).slice(0, 3) })).toBeNull();
     expect(refus({ objets: [] })).toBeNull();
+  });
+
+  it('accepte le même objet sur plusieurs emplacements', () => {
+    expect(refus({ objets: ['sablier', 'sablier'] })).toBeNull();
+    expect(refus({ objets: ['herbe_sabbat', 'herbe_sabbat', 'herbe_sabbat'] })).toBeNull();
+    expect(refus({ objets: ['fiole_soufre', 'sablier', 'fiole_soufre'] })).toBeNull();
   });
 
   it('refuse une autre version des données', () => {
@@ -139,7 +144,7 @@ describe('creerPartie et ConfigPartie', () => {
   it('lève l’erreur de verifierConfig, et ne crée rien', () => {
     const niveau = niveauEssai();
     expect(() => creerPartie(niveau, { ...CONFIG, heros: 'plume' })).toThrow('plume');
-    expect(() => creerPartie(niveau, { ...CONFIG, objets: ['sablier', 'sablier'] })).toThrow('sablier');
+    expect(() => creerPartie(niveau, { ...CONFIG, objets: ['potion'] as never })).toThrow('potion');
     expect(() => creerPartie(niveau, { ...CONFIG, ameliorations: { feu: 1 } })).toThrow('feu');
   });
 
