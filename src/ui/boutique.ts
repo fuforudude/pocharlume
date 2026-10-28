@@ -30,6 +30,10 @@ export interface OptionsBoutique {
   readonly session: SessionBoutique;
   readonly onglet?: OngletBoutique;
   readonly surFermer: () => void;
+  /** « Caisses » : l'appelant affiche l'écran des caisses (skins et familiers, payés en braises). */
+  readonly surCaisses?: () => void;
+  /** « Collection » : l'appelant affiche l'écran de la collection (équiper, monter, acheter). */
+  readonly surCollection?: () => void;
 }
 
 export function afficherBoutique(parent: HTMLElement, options: OptionsBoutique): EcranMeta {
@@ -83,6 +87,13 @@ export function afficherBoutique(parent: HTMLElement, options: OptionsBoutique):
       b.setAttribute('role', 'tab');
       b.setAttribute('aria-selected', String(id === onglet));
       b.classList.toggle('actif', id === onglet);
+      rangee.append(b);
+    }
+    for (const [cle, titre, ouvrir] of [['caisses', t('caisses.titre'), options.surCaisses], ['collection', t('collection.titre'), options.surCollection]] as const) {
+      if (!ouvrir) continue;
+      const b = bouton('bouton', titre, ouvrir);
+      b.dataset.cle = `vers:${cle}`;
+      b.textContent = titre;
       rangee.append(b);
     }
     if (onglet === 'arbre') {

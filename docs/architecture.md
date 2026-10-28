@@ -38,6 +38,12 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
   bus) et `SON_DES_EVENEMENTS`, une entrée par type d'événement du moteur (`null` = silence voulu). Un test lit
   `src/engine/evenements.ts` : un nouvel événement sans entrée fait échouer la CI. Les entrées-fonctions choisissent selon
   la famille de la tour ou le genre de l'unité (la partie est passée au moteur de son) et selon `boss` des ennemis.
+  **Lectures réglées (jalon 3)** : une entrée peut rendre une `LectureSon` (`{ id, volume, hauteur, cle, max }`, facteurs
+  appliqués au son de base, clé et `max` du limiteur) au lieu d'un simple id : le même fichier sert plusieurs événements avec
+  des nuances, sans nouveau fichier. Les 9 événements des ennemis des régions 2 à 5 ont ainsi leur son ; ceux qui viennent en
+  grappe (`brulure`, `soin_ennemi`, `appel`) et la mort d'un ennemi d'essaim (sangsue, rat de peste : `pouvoirs.essaim`) ont
+  une clé propre limitée à une instance par fenêtre, donc pas de mitraille. `lectureDe` donne la lecture d'un événement,
+  `sonDe` son id.
 - **Limitation** (`limiteur.ts`) : fenêtre de 80 ms, au plus `max` instances d'un même son, et un plafond total par
   priorité (basse 4, normale 7, haute 12) : une rafale de tirs ne couvre jamais une cloche de vague, la mort d'un boss ou
   la victoire. Le hasard de hauteur et de volume est `Math.random` du rendu, jamais celui du moteur.
@@ -68,7 +74,24 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
   (`nomTuile` dans `sol.ts` : la région 1 garde `herbe-1`, les régions 2 à 5 ont `r2-herbe-1`…, 21 tuiles chacune), les
   boss en 64×64 (`la-faim`, `juge-flammes`, `dame-puits`, `mere-rats`), les élites (`<ennemi>-elite`) et les familiers
   (`familier-<bête>`) sont des sprites de l'atlas, et `palettes-skins.ts` donne les 21 palettes de skins (fonction pure
-  `appliquerPalette`, copie recolorée d'un sprite ou de l'atlas avec cache par `imageDuSkin`) qu'il restera à brancher.
+  `appliquerPalette`, copie recolorée d'un sprite ou de l'atlas avec cache par `imageDuSkin`).
+  **Branchement du rendu (jalon 3)** : un ennemi d'élite (`Ennemi.elite`) prend `<id>-elite` (retombe sur le sprite de base s'il
+  manque ; les ennemis de la région 1 ont les leurs, `paysan-affame-elite`, `mendiant-elite`, `chien-errant-elite`) et sa barre de
+  vie est dorée et toujours visible. L'Épouvantail dont `Ennemi.invulnerable` > 0 joue `mort` puis reste à terre, puis `releve` ;
+  la Dame du Puits joue `plonge`, reste sous l'eau (ripple), puis `emerge` d'un bond, avec une gerbe (`effet-plongee`) à la
+  plongée et à l'émergence ; la barre d'un ennemi intouchable est bleu pâle. `Unite.brulure` pose `effet-brulure`, `Unite.noyade`
+  enfonce l'unité sous une surface qui monte (clip + ondulation) ; `Tour.desactivee` et `Tour.affamePas` posent `effet-tour-feu`
+  et `effet-tour-affamee` ; une `ZoneDurable.degatsAllies` > 0 dessine `effet-nuage-toxique` (déploiement `impact` joué à
+  l'événement `zone`, puis le nuage qui tourne) ; `soin_ennemi` pose `effet-soin` sur l'ennemi soigné ; `appel` fait sortir les
+  appelés de la fumée ; `famine` trace un anneau gris du rayon de la zone.
+  **Collection équipée** : `new Rendu(canvas, atlas, carte, visuel, { skins, familier })` ou `rendu.definirCollection({ skins, familier })`
+  (type `OptionsCollection`, `src/render/suivi.ts`). `skins` est la table de `Collection.equipes.skins` : clé = famille de tours de
+  base (`caserne`, `tir`, `magie`, `artillerie`) ou id d'un héros, valeur = id de skin ; le skin d'une famille habille sa tour de base
+  et ses spécialisations (jamais la tour divine), seul le héros de la partie porte son skin. `familier` est l'id du familier du
+  héros de la partie (`Collection.equipes.familiers[héros]`, par exemple `familier_rat`), `null` pour aucun : le sprite
+  `familier-<bête>` trottine derrière le héros (suit d'une part de l'écart par pas, bondit s'il est loin, caché si le héros est
+  à terre). Les skins passent par `AtlasRendu.habiller` : pixels de la planche lus une fois (à la première demande), zone du sprite
+  recolorée par `imageDuSkin` (cache) puis copiée dans deux petits canvas (normal et retourné). Sans option, rien ne change.
 - **Interface** (`src/ui/`) : `interaction.ts` (machine à états pure : menu d'un socle, héros, sort,
   ralliement ; renvoie l'action à envoyer ou la raison d'un refus), `menu-cercle.ts` (éléments du menu
   d'après `validerAction`), `gestes.ts` (toucher, glisser, pincer), `clavier.ts` (touches), `hud.ts`,
@@ -233,11 +256,11 @@ regeneration } }`, en fractions. Vide en défi Fer. Un objet équipé mais non p
 `configDepuisSauvegarde(s, options)` accepte en plus `niveau` et `defi` (surcharge qui rend `ResultatConfigDefi`, avec les raisons
 `defi_inconnu` et `defi_verrouille`, à part de `RaisonConfig` pour ne pas changer le code existant de l'interface). Un défi est
 refusé tant que le niveau n'a pas ses 3 étoiles (meilleur résultat, toutes difficultés) ; il se joue en Matou et **sans objet
-emporté** (la difficulté et les objets demandés sont ignorés, le stock n'est pas regardé). **Note d'alignement avec le moteur** :
-`defi` et `bonus` sont déclarés dans `ConfigMeta` (src/save) en attendant `ConfigPartie` (src/engine/etat.ts) étendue par la tâche
-moteur du jalon 3 ; à la fusion, remplacer par les types du moteur, rendre `defi` et `bonus` obligatoires dans `validerConfig`
-(aujourd'hui facultatifs, tous deux ou aucun, pour qu'une partie en cours enregistrée avec le moteur actuel reste lisible), et
-transmettre `defi` et `bonus` dans `configDuChoix` (`src/ui/lancement.ts` copie la config champ par champ).
+emporté** (la difficulté et les objets demandés sont ignorés, le stock n'est pas regardé). **Alignement avec le moteur** (fait
+avec l'interface du jalon 3) : `ConfigMeta.defi` et `.bonus`, et l'extension de la config d'une partie en cours
+(`ExtensionConfigV4`), utilisent `DefiPartie` et `BonusCollection` de `src/engine` ; `defi` et `bonus` restent **facultatifs, tous
+deux ou aucun**, dans `validerConfig` (une partie enregistrée avant le jalon 3 reste lisible) ; `configDuChoix`
+(`src/ui/lancement.ts`) les transmet.
 
 **Format v4** (`format.ts`) : `meta` reçoit trois champs. `regionMax` (1 à 10) : plus haute région ouverte, toujours égale à
 `regionOuverte(progression.niveauMax)` (la région r + 1 s'ouvre quand le boss, niveau 10 r, est battu) ; `defis` : par niveau en
@@ -275,6 +298,48 @@ un autre onglet l'a déjà monté), `acheterObjetPrecis`, `equiperSkin`, `equipe
 types existants de l'interface restent compilables) : `RaisonDefi`, `RaisonCaisse`, `RaisonRang`, `RaisonAchatPrecis`,
 `RaisonEquipementCollection`, plus `aleatoire_indisponible` et `modifie_ailleurs` ; leurs phrases sont dans `src/i18n/fr-collection.ts`
 sous `collection.refus.*` (le préfixe `meta.refus.*` est réservé à `raisons-meta.ts`, dont un test exige que chaque phrase serve).
+Elles sont maintenant dans `RaisonMeta` (`raisons-meta.ts`), les sept phrases `collection.refus.*` comprises.
+
+**Écrans du jalon 3** (`src/ui/`, textes dans `src/i18n/fr-ecrans3.ts`) :
+- **Régions** (`regions-monde.ts`) : `REGIONS_MONDE`, les cinq régions montrées, chacune avec son nom, son premier niveau de campagne
+  et un `contenu` (10 niveaux, nœuds, tracé, décor et textes) qui vaut `null` tant que ses niveaux ne sont pas livrés. **Seule la
+  région 1 est branchée** : pour les régions 2 à 5, remplacer `contenu: null` par les données de `src/data/niveaux/` (numéros de
+  campagne dans `niveaux` et `textes`, numéros 1 à 10 dans `noeuds`) ; rien d'autre n'est à toucher. `niveauDeCampagne(numero)` et
+  `textesDuNiveau(numero)` retrouvent un niveau dans les régions livrées (reprise d'une partie, bilan).
+- **Carte du monde** (`carte-monde.ts`, `carte-monde-logique.ts`, `carte-monde-defis.ts`) : une rangée de flèches et de
+  pastilles (un cadenas et le grisé pour une région pas ouverte, qui dit comment l'ouvrir ; PageHaut et PageBas au clavier) passe
+  d'une région ouverte (`meta.regionMax`) à l'autre ; chaque changement refait le rendu de la carte pour la région
+  (`RenduCarteMonde` est recréé) et se signale par `surRegion` (main.ts garde la dernière région vue). Une région ouverte sans
+  contenu annonce que ses niveaux ne sont pas encore dans le jeu. Les numéros affichés et lus dans la sauvegarde sont ceux de la
+  campagne (`vueNoeuds(s, noeuds, decalage)`). Les défis réussis sont marqués par `icone-defi-heroique` et `icone-defi-fer`
+  posées par l'interface sur le canvas juste après le rendu de la carte (le rendu de la carte n'a pas à les connaître).
+- **Fiche d'un niveau** : trois modes (`vueModes` de `meta-vues.ts`). Héroïque et Fer demandent les trois étoiles ; Fer demande en
+  plus que le niveau porte `defiFer.familles` (sinon « Ce niveau n'a pas de défi Fer »). Un défi remplace la difficulté par ses règles
+  (Matou imposé, aucun objet, familles imposées en Fer, prime de 4 braises la première fois seulement) et retire la section des
+  objets (`ChoixFiche.definirDefi`). `surLancer(niveau, difficulte, choix, defi)` donne le défi ; `main.ts` le passe à `configDuChoix`
+  et le numéro du niveau à « Rejouer » (`relancerAvecDebit(…, niveau)`), qui garde le défi et prend les bonus d'aujourd'hui.
+- **Partie en Fer** : `elementsSocleVide` (menu en cercle) ne propose pas une famille que `validerAction` refuse par
+  `famille_interdite` ; une touche d'une famille interdite affiche `refus.famille_interdite`.
+- **Apparence** (`apparence.ts`) : `lancerNiveau` reçoit `options.equipes` (`meta.collection.equipes`) et donne au rendu
+  (`new Rendu(…, apparenceDeLaPartie(equipes, héros joué))`) tous les skins équipés et le familier du héros joué. L'apparence ne
+  dépend pas du défi : en Fer les skins restent visibles, seul le bonus est ignoré (`config.bonus` vide).
+- **Caisses** (`caisses.ts`) : depuis la boutique (boutons « Caisses » et « Collection » ; « Fermer » des deux écrans revient à la
+  boutique, `main.ts` les enchaîne). Les deux caisses, le prix (20 braises), les cinq chances lues dans `CHANCES_RARETE`, la
+  garantie restante (`CAISSES_AVANT_GARANTIE` moins le compteur : « Épique garanti dans N caisses », « à la prochaine caisse » à 9) et
+  l'ouverture par `Session.ouvrirCaisse` : une révélation en CSS (la caisse tremble 0,7 s, puis l'objet, sa rareté, « Nouveau » ou
+  « Doublon » avec les éclats, « La garantie a joué »), « Continuer » ou Échap la ferme. Tant que la révélation est affichée ou
+  qu'une ouverture est en cours, aucun second geste ne part (pas de double débit) ; un refus (braises, hasard indisponible,
+  écriture impossible) est dit et rien n'est révélé.
+- **Collection** (`collection.ts`, lectures pures dans `collection-vues.ts`) : trois onglets. *Skins* et *Familiers* : tout le
+  catalogue, les objets possédés en couleur et les autres en silhouette, rareté, rang (pastilles), bonus actuel (ou au rang 1), monter
+  d'un rang (20 × rang éclats), acheter un objet précis en éclats, équiper un skin sur sa tour de base ou son héros (un skin d'un
+  même emplacement remplace l'autre), choisir le héros recruté qui porte un familier (un par héros, le même familier peut aller sur
+  plusieurs). *Équipement* : les quatre tours et les héros recrutés, ce qu'ils portent, « Retirer », et le total de leur bonus
+  lu dans `bonusDeCollection` (donc plafonné à +10 %, avec l'indication « plafond atteint » quand le brut le dépasse). Les skins
+  s'affichent avec l'icône de la tour ou du héros qu'ils habillent (la silhouette sert aux objets pas possédés) : montrer le skin
+  recoloré demanderait que `AtlasRendu` expose ses pixels.
+- **Bilan de fin** (`lignesBilan`, `ecrans.ts`) : en plus du butin, « Défi Héroïque réussi : +4 braises », « <disciple> rejoint tes
+  héros ! » et « Région ouverte : <nom> » quand le `BilanPartie` les porte.
 
 ## Niveaux de la campagne (`src/data/niveaux/`)
 - `cartes.ts` : cartes dessinées à la main (chemins, socles et ralliements, départ du héros, zones de sol, décor).
@@ -485,6 +550,6 @@ valeurs de départ cohérentes avec `menaceEnnemi` : l'équilibrage fin est celu
   d'équilibrage l'incrémentera.
 - **Événements ajoutés** : `releve`, `plongee`, `emergence`, `brulure`, `noyade`, `soin_ennemi`, `famine`, `tour_desactivee`, `appel`
   (le nuage est un `zone` ordinaire, dont la zone d'état porte `degatsAllies`). Chacun a une entrée dans `src/audio/table.ts`
-  (silence provisoire sauf `soin_ennemi`, `famine`, `appel`) ; `RaisonRefus` gagne `famille_interdite` (texte dans `fr.ts`, `refus.ts`).
+  (son réglé par la tâche du rendu : voir « Son ») ; `RaisonRefus` gagne `famille_interdite` (texte dans `fr.ts`, `refus.ts`).
 - **Tests** : `ennemis-regions.test.ts` (12 ennemis), `boss-regions.test.ts` (4 boss), `elites.test.ts`, `defis.test.ts`,
   `bonus-collection.test.ts`, `src/data/ennemis-jalon3.test.ts` (données) et le bloc « essaims » de `src/data/equilibrage.test.ts`.

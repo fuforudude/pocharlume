@@ -8,6 +8,21 @@ export function spriteEnnemi(type: string): string {
   return type.replaceAll('_', '-');
 }
 
+/** Sprite de la version d'élite d'un ennemi (`paysan-affame-elite`). Le rendu retombe sur `spriteEnnemi` s'il manque. */
+export function spriteEnnemiElite(type: string): string {
+  return `${spriteEnnemi(type)}-elite`;
+}
+
+/** Sprite d'un familier d'après son id du catalogue (`familier_chauve_souris` devient `familier-chauve-souris`). */
+export function spriteFamilier(id: string): string {
+  return id.replaceAll('_', '-');
+}
+
+/** Id du héros d'après le nom (clé de texte) de ses stats (`heros.brise_os` donne `brise_os`), null pour une autre unité. */
+export function idHerosDe(nomStats: string): string | null {
+  return nomStats.startsWith('heros.') ? nomStats.slice('heros.'.length) : null;
+}
+
 /** Sprite des unités alliées d'après le nom (clé de texte) de leurs stats. */
 const SPRITES_UNITES: Readonly<Record<string, string>> = {
   'unite.chat_de_grange': 'soldat-grange',

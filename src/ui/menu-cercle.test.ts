@@ -33,6 +33,36 @@ describe('menu d’un socle vide', () => {
     expect(elements.every((e) => e.refus === null)).toBe(true);
   });
 
+  describe('défi Fer', () => {
+    /** Charlie (divine = caserne) dans un niveau qui impose deux familles. */
+    function partieFer(familles: [string, string] = ['tir', 'magie']): EtatPartie {
+      const etat = creerPartie({ ...NIVEAU_TEST, defiFer: { familles } }, { ...CONFIG, defi: 'fer', bonus: { tours: {}, heros: {} } });
+      etat.aretes = 5000;
+      return etat;
+    }
+
+    it('ne propose que les familles autorisées (la tour divine suit la famille du dieu)', () => {
+      expect(elementsSocleVide(partieFer(), 0).map((e) => e.id)).toEqual(['construire:tir', 'construire:magie']);
+      expect(elementsSocleVide(partieFer(['tir', 'caserne']), 0).map((e) => e.id)).toEqual(['construire:caserne', 'construire:tir', 'construire:divine']);
+    });
+
+    it('ce qui est proposé n’est jamais refusé pour sa famille', () => {
+      for (const e of elementsSocleVide(partieFer(), 0)) expect(e.refus).not.toBe('famille_interdite');
+    });
+
+    it('le moteur refuse une famille interdite demandée au clavier, avec la raison à dire', () => {
+      const etat = partieFer();
+      const [r] = avancer(etat, [{ type: 'construire', socle: 0, tour: 'artillerie' }]);
+      expect(r).toEqual({ ok: false, raison: 'famille_interdite' });
+    });
+
+    it('en Héroïque, toutes les familles restent proposées', () => {
+      const heroique = creerPartie(NIVEAU_TEST, { ...CONFIG, defi: 'heroique', bonus: { tours: {}, heros: {} } });
+      heroique.aretes = 5000;
+      expect(elementsSocleVide(heroique, 0)).toHaveLength(5);
+    });
+  });
+
   it('grise ce qu’on ne peut pas payer, d’après le moteur', () => {
     const elements = elementsSocleVide(partie(90), 0);
     const refus = Object.fromEntries(elements.map((e) => [e.id, e.refus]));

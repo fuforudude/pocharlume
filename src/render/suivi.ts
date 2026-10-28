@@ -10,15 +10,18 @@ import type { Ennemi, EtatPartie, Evenement, Projectile, Tour, Unite } from '../
 import type { Voie } from '../engine/definitions';
 import type { FamilleTour } from '../engine/etat';
 import { dureeAnimation } from './animations';
-import type { AtlasRendu, SpriteAtlas } from './atlas';
+import type { AtlasRendu, SpriteAtlas, SpriteHabille } from './atlas';
 import { TUILE } from './camera';
 import { TYPE_EFFET, type Effet, type PoolEffets } from './effets';
 import {
   effetObjet,
   habillageSort,
+  idHerosDe,
   nomPointDeTir,
   projectileTourne,
   spriteEnnemi,
+  spriteEnnemiElite,
+  spriteFamilier,
   spriteImpact,
   spriteProjectile,
   spriteStructure,
@@ -29,12 +32,35 @@ import {
 
 export const CATEGORIE = { tour: 0, ennemi: 1, unite: 2 } as const;
 
+/**
+ * Ce que le joueur a équipé dans sa collection, à donner au rendu (`Rendu.definirCollection`) : de quoi habiller les tours
+ * et le héros de la partie. Rien n'est obligatoire : sans option, tout est dessiné avec les sprites de base.
+ */
+export interface OptionsCollection {
+  /**
+   * Skin équipé par cible : une famille de tours de base (`caserne`, `tir`, `magie`, `artillerie`) ou l'id d'un héros
+   * (`charlie`, `brise_os`…) vers un id de skin (`skin_tir_2`). C'est la forme de `Collection.equipes.skins` de la sauvegarde.
+   * Un skin qui n'habille pas sa cible est ignoré ; seul le héros de la partie est habillé.
+   */
+  readonly skins?: Readonly<Record<string, string | undefined>>;
+  /** Id du familier du héros de la partie (`familier_rat`…), null ou absent pour aucun : `Collection.equipes.familiers[héros]`. */
+  readonly familier?: string | null;
+}
+
+/** Familiers : distance (tuiles) derrière le héros, part de l'écart rattrapée à chaque pas, et écart au-delà duquel il le rejoint d'un bond. */
+const FAMILIER_DERRIERE = 0.85;
+const FAMILIER_SUIVI = 0.2;
+const FAMILIER_BOND2 = 36;
+/** Durée (ms) du déploiement du nuage toxique (animation `impact`) : le nuage qui tourne ne se pose qu'ensuite. */
+export const DEPLOIEMENT_NUAGE = 360;
+
 /** Durées en millisecondes de temps de jeu. */
 const DUREE_BLESSE = 180;
 const MAINTIEN_MARCHE = 160;
 const DUREE_TEXTE = 900;
 const DUREE_ORDRE = 500;
 const DUREE_RAYON = 130;
+const DUREE_FAMINE = 700;
 const MAINTIEN_CADAVRE = 700;
 /** Au-delà de cette distance (tuiles) entre deux pas, c'est une téléportation (réapparition) : pas d'interpolation. */
 const SAUT_TUILES = 3;
@@ -84,6 +110,18 @@ export class Visuel {
   /** Point d'où part le tir, en pixels depuis l'ancre du sprite de la tour. */
   tirX = 0;
   tirY = -12;
+  /** Nom du sprite choisi, et sa version recolorée par un skin (null : sprite de base). */
+  nomSprite = '';
+  habille: SpriteHabille | null = null;
+  /** Version des options de collection avec laquelle `habille` a été choisi. */
+  versionCollection = -1;
+  /** Ennemi intouchable (à terre, plongé) à la dernière image, et instant où il l'est devenu. */
+  intouchable = false;
+  intouchableDebut = 0;
+  /** Plus grand nombre de pas de noyade vu sur cette unité : de quoi savoir à quel point elle a coulé. */
+  noyadeMax = 0;
+  /** Non dessiné (familier dont le héros est tombé). */
+  masque = false;
 }
 
 export class VisuelProjectile {
@@ -124,8 +162,18 @@ export class Suivi {
   readonly listeProjectiles: VisuelProjectile[] = [];
   /** Par socle : une tour s'y dresse. */
   socleOccupe: boolean[] = [];
+  /** Le familier du héros, dessiné comme une unité (null tant qu'aucun n'est équipé). */
+  familier: Visuel | null = null;
+  /** Instant de début de chaque nuage toxique en cours (les autres zones n'y sont pas). */
+  readonly debutNuage = new Map<number, number>();
 
   private marque = 0;
+  private version = 0;
+  private skins: Readonly<Record<string, string | undefined>> = {};
+  private familierId: string | null = null;
+  /** Ennemis appelés par `appel` dont l'apparition reste à marquer (les `apparition` suivent l'événement). */
+  private appelsRestants = 0;
+  private appelType = '';
   private readonly libres: Visuel[] = [];
   private readonly libresProjectiles: VisuelProjectile[] = [];
 
@@ -133,6 +181,16 @@ export class Suivi {
     private readonly atlas: AtlasRendu,
     private readonly effets: PoolEffets,
   ) {}
+
+  /**
+   * Fixe les skins et le familier équipés. Les tours et le héros déjà suivis sont rhabillés au prochain pas : on peut donc
+   * l'appeler avant la partie ou pendant.
+   */
+  definirCollection(options: OptionsCollection): void {
+    this.skins = options.skins ?? {};
+    this.familierId = options.familier ?? null;
+    this.version++;
+  }
 
   /**
    * À appeler après chaque pas du moteur (`avancer` ou `step`), avec le temps de jeu en millisecondes.
@@ -145,8 +203,10 @@ export class Suivi {
     this.suivreTours(etat, marque);
     this.suivreEnnemis(etat, temps, marque);
     this.suivreUnites(etat, temps, marque);
+    this.suivreFamilier(etat, temps);
     this.suivreProjectiles(etat, marque);
     this.suivreStructures(etat, temps, marque);
+    this.appelsRestants = 0;
     if (avecEvenements) for (const evenement of etat.evenements) this.evenement(etat, evenement, temps);
     if (this.tours.size !== etat.tours.length) this.retirer(this.tours, marque);
     if (this.structures.size !== etat.structures.length) this.retirer(this.structures, marque);
@@ -191,6 +251,13 @@ export class Suivi {
     v.tireurMiroir = false;
     v.tirX = 0;
     v.tirY = -12;
+    v.nomSprite = '';
+    v.habille = null;
+    v.versionCollection = -1;
+    v.intouchable = false;
+    v.intouchableDebut = 0;
+    v.noyadeMax = 0;
+    v.masque = false;
     this.dessinables.push(v);
     return v;
   }
@@ -205,6 +272,7 @@ export class Suivi {
       v.ennemi = null;
       v.unite = null;
       v.tour = null;
+      v.habille = null;
       this.libres.push(v);
     }
   }
@@ -253,7 +321,7 @@ export class Suivi {
         v = this.creer(CATEGORIE.tour, t.id, t.x, t.y);
         this.tours.set(t.id, v);
       }
-      if (v.niveau !== t.niveau || v.voie !== t.voie || v.sprite === null) this.habillerTour(v, t, etat.config.dieu);
+      if (v.niveau !== t.niveau || v.voie !== t.voie || v.sprite === null || v.versionCollection !== this.version) this.habillerTour(v, t, etat.config.dieu);
       v.tour = t;
       v.vu = marque;
     }
@@ -263,7 +331,10 @@ export class Suivi {
     v.famille = t.famille;
     v.niveau = t.niveau;
     v.voie = t.voie;
-    v.sprite = this.atlas.sprite(spriteTour(t.famille, t.niveau, t.voie, dieu)) ?? null;
+    v.nomSprite = spriteTour(t.famille, t.niveau, t.voie, dieu);
+    v.sprite = this.atlas.sprite(v.nomSprite) ?? null;
+    v.habille = this.habiller(v.nomSprite, t.famille);
+    v.versionCollection = this.version;
     const nomTireur = spriteTireur(t.famille, t.niveau, t.voie);
     v.tireur = nomTireur ? (this.atlas.sprite(nomTireur) ?? null) : null;
     const nomPoint = nomPointDeTir(t.famille);
@@ -275,6 +346,13 @@ export class Suivi {
       v.tirX = 0;
       v.tirY = -12;
     }
+  }
+
+  /** Le sprite recoloré du skin équipé pour cette cible (famille de tours ou id de héros), null s'il n'y en a pas ou s'il ne l'habille pas. */
+  private habiller(nomSprite: string, cible: string): SpriteHabille | null {
+    if (!Object.hasOwn(this.skins, cible)) return null;
+    const skin = this.skins[cible];
+    return skin ? this.atlas.habiller(nomSprite, skin) : null;
   }
 
   /** Une tourelle qui apparaît joue son « apparition » ; celle qui disparaît est jouée par l'événement `structure_fin`. */
@@ -296,13 +374,37 @@ export class Suivi {
     }
   }
 
+  /** Sprite d'un ennemi : sa version d'élite si c'en est une et qu'elle est dessinée, sinon celui de l'ennemi ordinaire. */
+  private spriteDeEnnemi(type: string, elite: boolean): SpriteAtlas | null {
+    const sprite = elite ? this.atlas.sprite(spriteEnnemiElite(type)) : undefined;
+    return sprite ?? this.atlas.sprite(spriteEnnemi(type)) ?? null;
+  }
+
+  /**
+   * Un ennemi intouchable (à terre après sa chute, plongé) joue sa chute ou sa plongée, puis reste sur le dernier cadre ; quand il
+   * cesse de l'être, il se relève (`releve`) ou émerge (`emerge`) et, pour une plongée, apparaît d'un bond à son nouvel endroit.
+   */
+  private suivreIntouchable(v: Visuel, e: Ennemi, temps: number): void {
+    const intouchable = e.invulnerable > 0;
+    if (intouchable === v.intouchable) return;
+    v.intouchable = intouchable;
+    if (intouchable) {
+      v.intouchableDebut = temps;
+      return;
+    }
+    // La plongée mène plus loin sur le chemin : pas d'interpolation sur ce trajet.
+    v.xPrec = v.x;
+    v.yPrec = v.y;
+    this.lancerAction(v, e.pouvoirs?.relevement ? 'releve' : 'emerge', temps);
+  }
+
   private suivreEnnemis(etat: EtatPartie, temps: number, marque: number): void {
     for (const e of etat.ennemis) {
       let v = this.ennemis.get(e.id);
       if (!v) {
         v = this.creer(CATEGORIE.ennemi, e.id, e.x, e.y);
         v.cleSprite = e.type;
-        v.sprite = this.atlas.sprite(spriteEnnemi(e.type)) ?? null;
+        v.sprite = this.spriteDeEnnemi(e.type, e.elite);
         v.pvPrec = e.pv;
         this.ennemis.set(e.id, v);
       } else {
@@ -310,6 +412,7 @@ export class Suivi {
         if (e.pv < v.pvPrec - 1e-6 && temps >= v.actionFin) v.blesseFin = temps + DUREE_BLESSE;
         v.pvPrec = e.pv;
       }
+      this.suivreIntouchable(v, e, temps);
       v.ennemi = e;
       v.vu = marque;
     }
@@ -324,8 +427,17 @@ export class Suivi {
       }
       if (v.cleSprite !== u.stats.nom) {
         v.cleSprite = u.stats.nom;
-        v.sprite = this.atlas.sprite(spriteUnite(u.genre, u.stats.nom)) ?? null;
+        v.nomSprite = spriteUnite(u.genre, u.stats.nom);
+        v.sprite = this.atlas.sprite(v.nomSprite) ?? null;
+        v.versionCollection = -1;
       }
+      if (v.versionCollection !== this.version) {
+        v.versionCollection = this.version;
+        // Seul le héros de la partie porte le skin de sa collection.
+        const idHeros = u.id === etat.heros ? idHerosDe(u.stats.nom) : null;
+        v.habille = idHeros === null ? null : this.habiller(v.nomSprite, idHeros);
+      }
+      v.noyadeMax = u.noyade > 0 ? Math.max(v.noyadeMax, u.noyade) : 0;
       if (u.mort) {
         if (v.mortDebut < 0) v.mortDebut = temps;
       } else {
@@ -344,6 +456,48 @@ export class Suivi {
       v.unite = u;
       v.vu = marque;
     }
+  }
+
+  /**
+   * Le familier du héros : un petit sprite d'attente (`familier-<bête>`, animation `repos` en boucle) qui trottine derrière lui,
+   * se rapproche d'une part de l'écart à chaque pas et le rejoint d'un bond si le héros s'éloigne (réapparition). Il regarde du
+   * côté où il marche, puis du côté du héros quand il s'arrête. Masqué tant que le héros est à terre.
+   */
+  private suivreFamilier(etat: EtatPartie, temps: number): void {
+    const nom = this.familierId === null ? '' : spriteFamilier(this.familierId);
+    const sprite = nom === '' ? null : (this.atlas.sprite(nom) ?? null);
+    const heros = this.unites.get(etat.heros);
+    if (!sprite || !heros) {
+      if (this.familier) this.familier.masque = true;
+      return;
+    }
+    const cibleX = heros.x + (heros.miroir ? FAMILIER_DERRIERE : -FAMILIER_DERRIERE);
+    const cibleY = heros.y + 0.1;
+    let f = this.familier;
+    if (!f) {
+      f = this.creer(CATEGORIE.unite, -1, cibleX, cibleY);
+      this.familier = f;
+    }
+    if (f.cleSprite !== nom) {
+      f.cleSprite = nom;
+      f.nomSprite = nom;
+      f.sprite = sprite;
+    }
+    f.masque = heros.mortDebut >= 0;
+    const dx = cibleX - f.x;
+    const dy = cibleY - f.y;
+    if (dx * dx + dy * dy > FAMILIER_BOND2) {
+      f.xPrec = cibleX;
+      f.yPrec = cibleY;
+      f.x = cibleX;
+      f.y = cibleY;
+      return;
+    }
+    const x = f.x + dx * FAMILIER_SUIVI;
+    const y = f.y + dy * FAMILIER_SUIVI;
+    const bouge = (x - f.x) * (x - f.x) + (y - f.y) * (y - f.y) > MOUVEMENT_MIN2;
+    this.deplacer(f, x, y, temps);
+    if (!bouge) f.miroir = heros.miroir;
   }
 
   private suivreProjectiles(etat: EtatPartie, marque: number): void {
@@ -486,7 +640,8 @@ export class Suivi {
       }
       case 'mort': {
         const v = this.ennemis.get(ev.ennemi);
-        const sprite = this.atlas.sprite(spriteEnnemi(ev.typeEnnemi));
+        // Le cadavre garde le sprite de l'ennemi qui meurt : sa version d'élite, le cas échéant.
+        const sprite = v?.sprite ?? this.atlas.sprite(spriteEnnemi(ev.typeEnnemi));
         if (sprite) {
           const anim = this.atlas.animation(sprite, 'mort');
           const f = this.effets.prendre(TYPE_EFFET.fantome, temps, (anim ? dureeAnimation(anim) : 0) + MAINTIEN_CADAVRE);
@@ -516,16 +671,79 @@ export class Suivi {
         if (v?.unite?.stats.capacites?.ciblable === false) this.effetSprite('effet-ombre', v.x, v.y, temps, 1, -2);
         return;
       }
-      case 'apparition':
+      case 'apparition': {
+        // Un ennemi appelé sort de la fumée : l'événement `appel` précède les `apparition` des appelés.
+        if (this.appelsRestants > 0 && ev.typeEnnemi === this.appelType) {
+          this.appelsRestants--;
+          const v = this.ennemis.get(ev.ennemi);
+          if (v) this.effetSprite('fumee', v.x, v.y, temps, 1, -4);
+        }
+        return;
+      }
       case 'fuite':
       case 'vague':
       case 'fin':
       case 'regain_vies':
-      case 'zone':
-      case 'zone_fin':
       case 'structure':
       case 'boost':
-        // La zone, les structures et les tours boostées se dessinent d'après l'état, tant qu'elles durent.
+      case 'releve':
+      case 'brulure':
+      case 'tour_desactivee':
+        // La zone, les structures, les tours boostées ou en feu, les unités qui brûlent et l'ennemi à terre se dessinent d'après
+        // l'état, tant qu'ils durent.
+        return;
+      case 'zone': {
+        // Un nuage toxique se déploie (animation `impact`) avant de tourner ; les autres zones se dessinent d'après l'état.
+        const zone = etat.zones.find((z) => z.id === ev.zone);
+        if (zone && zone.degatsAllies > 0) {
+          this.debutNuage.set(ev.zone, temps);
+          this.effetSprite('effet-nuage-toxique', ev.x, ev.y, temps, 1, 0, 'impact');
+        }
+        return;
+      }
+      case 'zone_fin':
+        this.debutNuage.delete(ev.zone);
+        return;
+      case 'plongee':
+        // Un boss plonge : éclaboussure (deux fois la taille du sprite d'effet, qui est fait pour un ennemi ordinaire).
+        this.effetSprite('effet-plongee', ev.x, ev.y, temps, this.ennemis.get(ev.ennemi)?.ennemi?.boss ? 2 : 1, 0, 'impact');
+        return;
+      case 'emergence': {
+        // Il refait surface plus loin (une plongée) : éclaboussure. L'ennemi qui se relève n'en fait pas.
+        const v = this.ennemis.get(ev.ennemi);
+        if (v?.ennemi && !v.ennemi.pouvoirs?.relevement) this.effetSprite('effet-plongee', ev.x, ev.y, temps, v.ennemi.boss ? 2 : 1, 0, 'impact');
+        return;
+      }
+      case 'noyade': {
+        // Le noyeur attaque et entraîne le soldat sous l'eau : éclaboussure sur lui, le reste se lit sur l'unité (`noyade`).
+        this.lancerAction(this.ennemis.get(ev.ennemi), 'attaque', temps);
+        const unite = this.unites.get(ev.unite);
+        if (unite) this.effetSprite('effet-plongee', unite.x, unite.y, temps, 1, 0, 'impact');
+        return;
+      }
+      case 'soin_ennemi': {
+        // Le halo de soin des alliés, posé sur l'ennemi soigné (pas un nouveau à chaque pulsation).
+        const v = this.ennemis.get(ev.ennemi);
+        if (v && temps >= v.soinFin) {
+          const e = this.effetSprite('effet-soin', v.x, v.y, temps, 1, -2, 'repos');
+          if (e) v.soinFin = temps + e.duree;
+        }
+        return;
+      }
+      case 'famine': {
+        // Le boss hurle ; un anneau gris se resserre sur la zone où les tours maigrissent (leur état se lit ensuite sur chaque tour).
+        this.lancerAction(this.ennemis.get(ev.ennemi), 'attaque', temps);
+        const anneau = this.effets.prendre(TYPE_EFFET.ordre, temps, DUREE_FAMINE);
+        anneau.x = Math.round(ev.x * TUILE);
+        anneau.y = Math.round(ev.y * TUILE);
+        anneau.valeur = Math.max(2, Math.round(ev.rayon * TUILE));
+        anneau.couleur = '#b0a89a';
+        return;
+      }
+      case 'appel':
+        this.lancerAction(this.ennemis.get(ev.ennemi), 'attaque', temps);
+        this.appelsRestants = ev.nombre;
+        this.appelType = ev.typeEnnemi;
         return;
       case 'piege_pose':
         this.effetSprite('fumee', ev.x, ev.y, temps, 1, -2);

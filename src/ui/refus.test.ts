@@ -10,6 +10,10 @@ describe('textes de refus', () => {
     expect(texteRefus('aretes_insuffisantes')).toBe('Pas assez d’arêtes.');
   });
 
+  it('le défi Fer dit pourquoi un type de tour est refusé', () => {
+    expect(texteRefus('famille_interdite')).toBe('Ce défi n’autorise pas ce type de tour.');
+  });
+
   it('chaque clé de refus de la table de textes est utilisée par une raison', () => {
     const utilisees = new Set<string>(Object.values(CLES_REFUS));
     for (const cle of Object.keys(fr).filter((k) => k.startsWith('refus.'))) expect(utilisees.has(cle), cle).toBe(true);

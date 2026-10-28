@@ -6,7 +6,7 @@
 // Le hasard d'ici (variation de hauteur) est celui du rendu, jamais celui du moteur de jeu.
 import type { Evenement } from '../engine';
 import { Limiteur } from './limiteur';
-import { IDS_SONS, PARTIE_VIDE, SONS, sonDe, type IdSon, type VuePartie } from './table';
+import { IDS_SONS, lectureDe, PARTIE_VIDE, SONS, type IdSon, type LectureSon, type VuePartie } from './table';
 
 // Le strict nécessaire de la Web Audio API : un faux objet suffit dans les tests, et `AudioContext` y correspond.
 export interface ParametreAudio {
@@ -120,8 +120,8 @@ export class MoteurAudio {
 
   /** Joue l'effet d'un événement du moteur. `partie` sert à choisir entre deux sons (famille de la tour, genre de l'unité). */
   jouerEvenement(evenement: Evenement, partie: VuePartie = PARTIE_VIDE): void {
-    const id = sonDe(evenement, partie);
-    if (id !== null) this.jouer(id);
+    const lecture = lectureDe(evenement, partie);
+    if (lecture !== null) this.jouer(lecture);
   }
 
   /** Joue les événements d'un pas, dans l'ordre. */
@@ -129,16 +129,20 @@ export class MoteurAudio {
     for (const evenement of evenements) this.jouerEvenement(evenement, partie);
   }
 
-  /** Joue un son. Rend vrai s'il est parti ; faux s'il est coupé, limité, pas encore chargé ou si l'audio manque. */
-  jouer(id: IdSon): boolean {
+  /**
+   * Joue un son, ou une lecture réglée (`LectureSon` : facteurs de volume et de hauteur, limite propre). Rend vrai s'il est
+   * parti ; faux s'il est coupé, limité, pas encore chargé ou si l'audio manque.
+   */
+  jouer(son: IdSon | LectureSon): boolean {
     try {
-      return this.lancer(id);
+      return this.lancer(typeof son === 'string' ? { id: son } : son);
     } catch {
       return false;
     }
   }
 
-  private lancer(id: IdSon): boolean {
+  private lancer(lecture: LectureSon): boolean {
+    const id = lecture.id;
     if (this.indisponible || this.volumeSon() <= 0) return false;
     const contexte = this.contexte;
     if (!contexte) return false;
@@ -152,15 +156,15 @@ export class MoteurAudio {
       return false;
     }
     const def = SONS[id];
-    if (!this.limiteur.autoriser(id, def.priorite, def.max, this.dependances.maintenant())) return false;
+    if (!this.limiteur.autoriser(lecture.cle ?? id, def.priorite, lecture.max ?? def.max, this.dependances.maintenant())) return false;
     const bus = def.bus === 'interface' ? this.busInterface : this.busEffets;
     if (!bus) return false;
     this.appliquerVolumes();
     const gain = contexte.createGain();
-    gain.gain.value = def.volume * (1 + (this.dependances.alea() * 2 - 1) * VARIATION_VOLUME);
+    gain.gain.value = def.volume * (lecture.volume ?? 1) * (1 + (this.dependances.alea() * 2 - 1) * VARIATION_VOLUME);
     const source = contexte.createBufferSource();
     source.buffer = tampon;
-    source.playbackRate.value = def.hauteur * (1 + (this.dependances.alea() * 2 - 1) * def.variation);
+    source.playbackRate.value = def.hauteur * (lecture.hauteur ?? 1) * (1 + (this.dependances.alea() * 2 - 1) * def.variation);
     source.connect(gain);
     gain.connect(bus);
     source.start(0);

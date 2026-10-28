@@ -11,6 +11,8 @@ import { t } from '../i18n';
 import { graineSuivante, lancerNiveau, type OptionsPartie, type PartieEnCours, type ResultatPartie } from './partie';
 
 const rendu = vi.hoisted(() => ({
+  /** Le cinquième argument (skins et familier équipés) de chaque `new Rendu(…)`. */
+  collections: [] as unknown[],
   apresPas: vi.fn(),
   synchroniser: vi.fn(),
   dessiner: vi.fn(),
@@ -56,6 +58,9 @@ vi.mock('../render/rendu', () => ({
     synchroniser = rendu.synchroniser;
     dessiner = rendu.dessiner;
     definirMarges = rendu.definirMarges;
+    constructor(_canvas: unknown, _atlas: unknown, _carte: unknown, _visuel: unknown, collection?: unknown) {
+      rendu.collections.push(collection);
+    }
     redimensionner = vi.fn();
     enTuilesX = (x: number): number => x / 16;
     enTuilesY = (y: number): number => y / 16;
@@ -161,7 +166,8 @@ beforeEach(() => {
   parties = [];
   fins = [];
   vagues = [];
-  for (const spy of [...Object.values(rendu), ...Object.values(son)]) spy.mockClear();
+  rendu.collections.length = 0;
+  for (const spy of [rendu.apresPas, rendu.synchroniser, rendu.dessiner, rendu.definirMarges, ...Object.values(son)]) spy.mockClear();
   vi.stubGlobal('requestAnimationFrame', (rappel: FrameRequestCallback): number => {
     prochainId++;
     file.set(prochainId, rappel);
@@ -349,6 +355,26 @@ describe('retour visible des gestes refusés', () => {
     expect(choix).not.toBeNull();
     choix?.click();
     expect(messageAffiche()).toBe(t('refus.aretes_insuffisantes'));
+  });
+
+  it('en défi Fer, le menu d’un socle ne propose que les familles du niveau, et une touche interdite dit pourquoi', async () => {
+    const avecFer = { ...NIVEAU, niveau: { ...NIVEAU.niveau, defiFer: { familles: ['tir', 'magie'] as [string, string] } } };
+    const partie = await lancerNiveau(avecFer, { ...CONFIG, defi: 'fer', bonus: { tours: {}, heros: {} } }, () => undefined, {
+      parent: document.body,
+      surDemarrage: (p) => { parties.push(p); },
+    });
+    partie.etat.aretes = 5000;
+    const socle = partie.etat.niveau.carte.socles[0];
+    if (!socle) throw new Error('pas de socle');
+    toucherCarte(socle.x, socle.y - 0.5);
+    images(2);
+    expect(partie.mode.type).toBe('menu');
+    const libelles = [...document.querySelectorAll('.element-menu')].map((e) => e.getAttribute('aria-label') ?? '');
+    expect(libelles).toHaveLength(2);
+    // Touche 4 : artillerie, interdite par ce défi.
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: '4', code: 'Digit4', bubbles: true }));
+    images(1);
+    expect(messageAffiche()).toBe(t('refus.famille_interdite'));
   });
 
   it('un ordre au héros hors du chemin affiche pourquoi', async () => {
@@ -575,5 +601,43 @@ describe('butin et abandon', () => {
     await vi.waitFor(() => { expect(parties).toHaveLength(2); });
     expect(nouvelleConfig).toHaveBeenCalledTimes(1);
     expect(parties[1]?.etat.config).toMatchObject({ graine: 999, objets: [] });
+  });
+});
+
+describe('apparence : skins équipés et familier du héros', () => {
+  const EQUIPES = {
+    skins: { tir: 'skin_tir_2', charlie: 'skin_charlie' },
+    familiers: { charlie: 'familier_rat', suie: 'familier_chouette' },
+  } as const;
+
+  it('le rendu reçoit les skins équipés et le familier du héros joué', async () => {
+    await demarrer({ equipes: EQUIPES });
+    expect(rendu.collections).toEqual([{ skins: { tir: 'skin_tir_2', charlie: 'skin_charlie' }, familier: 'familier_rat' }]);
+  });
+
+  it('sans équipement donné, rien n’est habillé', async () => {
+    await demarrer();
+    expect(rendu.collections).toEqual([{ skins: {}, familier: null }]);
+  });
+
+  it('en défi Fer, l’apparence reste : seul le bonus est ignoré', async () => {
+    const avecFer = { ...NIVEAU, niveau: { ...NIVEAU.niveau, defiFer: { familles: ['tir', 'caserne'] as [string, string] } } };
+    const partie = await lancerNiveau(avecFer, { ...CONFIG, defi: 'fer', bonus: { tours: {}, heros: {} } }, () => undefined, {
+      parent: document.body,
+      surDemarrage: (p) => { parties.push(p); },
+      equipes: EQUIPES,
+    });
+    expect(partie.etat.config.defi).toBe('fer');
+    expect(rendu.collections[0]).toMatchObject({ familier: 'familier_rat', skins: { tir: 'skin_tir_2' } });
+  });
+
+  it('« Rejouer » garde l’apparence', async () => {
+    const partie = await demarrer({ equipes: EQUIPES });
+    partie.etat.vies = 0;
+    imagesJusqua(() => document.querySelector('.ecran.fin') !== null);
+    boutonTexte(t('fin.rejouer')).click();
+    await vi.waitFor(() => { expect(parties).toHaveLength(2); });
+    expect(rendu.collections).toHaveLength(2);
+    expect(rendu.collections[1]).toEqual(rendu.collections[0]);
   });
 });

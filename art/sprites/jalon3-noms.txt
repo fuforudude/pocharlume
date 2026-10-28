@@ -9,6 +9,8 @@
 #   région 5   rat-peste (rat-peste.txt), pestifere, medecin-peste (ennemis-humains.txt)
 #   élites     glaneur-elite corbeau-noir-elite epouvantail-elite porteur-torche-elite chasseur-sorcieres-elite delateur-elite
 #              noyeur-elite pelerin-voile-elite sangsue-elite rat-peste-elite pestifere-elite medecin-peste-elite
+#   région 1   élites ajoutées à l'étape du rendu (leurs sprites de base sont paysan-affame.txt, mendiant.txt, chien-errant.txt) :
+#              paysan-affame-elite mendiant-elite chien-errant-elite (même recette, `sombre`, yeux rouges posés par `retouche`)
 #
 # BOSS (cadres de 64×64, ancre 32 61 : dessinés en 32×32 puis agrandis ×2 comme boucher-vaudrelle ; mêmes animations)
 #   la-faim (la-faim.txt)   juge-flammes (juge-flammes.txt : archimage du pack)

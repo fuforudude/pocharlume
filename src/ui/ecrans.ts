@@ -1,11 +1,13 @@
 // Écrans plein cadre en DOM : accueil, pause, fin de partie, « Tourne ton téléphone ».
 import { HEROS } from '../data/heros';
+import { BRAISES_DEFI } from '../data/meta';
 import { OBJETS } from '../data/objets';
 import { t, tCle } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
 import type { BilanPartie, RaisonFin } from '../save';
 import { bouton, el, image } from './dom';
 import { texteRefusMeta } from './raisons-meta';
+import { REGIONS_MONDE } from './regions-monde';
 
 /** Un niveau proposé en plus de « Jouer » (raccourcis de développement seulement). */
 export interface ChoixNiveau {
@@ -137,6 +139,16 @@ export function lignesBilan(bilan: BilanPartie): string[] {
   }
   if (bilan.objetsRendus.length > 0) {
     lignes.push(t('fin.bilan_rendus', { noms: bilan.objetsRendus.map((o) => tCle(OBJETS[o].nom)).join(', ') }));
+  }
+  // Jalon 3 : un défi réussi pour la première fois (ses braises sont déjà dans le total ci-dessus), un disciple offert par un
+  // boss, la région que cette victoire ouvre.
+  if (bilan.defiReussi !== undefined) lignes.push(t('fin.bilan_defi', { defi: t(`fiche.mode_${bilan.defiReussi}`), n: BRAISES_DEFI }));
+  if (bilan.discipleOffert !== undefined && Object.hasOwn(HEROS, bilan.discipleOffert)) {
+    lignes.push(t('fin.bilan_disciple', { nom: tCle(HEROS[bilan.discipleOffert].nom) }));
+  }
+  if (bilan.regionDebloquee !== undefined) {
+    const region = REGIONS_MONDE.find((r) => r.numero === bilan.regionDebloquee);
+    lignes.push(region ? t('fin.bilan_region', { nom: tCle(region.nom) }) : t('fin.bilan_region_numero', { n: bilan.regionDebloquee }));
   }
   return lignes;
 }

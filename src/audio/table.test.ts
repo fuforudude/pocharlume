@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { CATALOGUE } from '../../tools/sons/catalogue';
 import { ENNEMIS } from '../data/ennemis';
 import type { Evenement } from '../engine';
-import { IDS_SONS, SON_DES_EVENEMENTS, SONS, sonDe, type VuePartie } from './table';
+import { IDS_SONS, lectureDe, SON_DES_EVENEMENTS, SONS, sonDe, type VuePartie } from './table';
 
 const RACINE = join(import.meta.dirname, '..', '..');
 const DOSSIER_SONS = join(RACINE, 'public', 'sons');
@@ -103,6 +103,70 @@ describe('table événement vers son', () => {
   it('les silences voulus restent silencieux', () => {
     expect(sonDe({ type: 'apparition', ennemi: 1, typeEnnemi: 'paysan_affame' })).toBeNull();
     expect(sonDe({ type: 'esquive', unite: 1, ennemi: 1 })).toBeNull();
+  });
+
+  describe('mécaniques des ennemis des régions 2 à 5 (jalon 3)', () => {
+    const NEUF: readonly Evenement[] = [
+      { type: 'releve', ennemi: 1, x: 0, y: 0, delai: 1.5 },
+      { type: 'plongee', ennemi: 1, x: 0, y: 0, delai: 3 },
+      { type: 'emergence', ennemi: 1, x: 0, y: 0 },
+      { type: 'brulure', ennemi: 1, unite: 11 },
+      { type: 'noyade', ennemi: 1, unite: 11, delai: 3 },
+      { type: 'soin_ennemi', source: 1, ennemi: 2, pv: 4 },
+      { type: 'famine', ennemi: 1, x: 0, y: 0, rayon: 5, duree: 5 },
+      { type: 'tour_desactivee', ennemi: 1, tour: 4, duree: 4 },
+      { type: 'appel', ennemi: 1, typeEnnemi: 'rat_peste', nombre: 4 },
+    ];
+
+    it('chacun des 9 événements a un son, plus de silence provisoire', () => {
+      for (const e of NEUF) expect(lectureDe(e, PARTIE), e.type).not.toBeNull();
+    });
+
+    it('chaque lecture réglée reste audible et dans les bornes du moteur : volume final dans ]0, 1], hauteur finale entre 0,4 et 2', () => {
+      const evenements: Evenement[] = [...NEUF, mort('sangsue'), mort('rat_peste')];
+      for (const e of evenements) {
+        const l = lectureDe(e, PARTIE);
+        if (!l) continue;
+        const def = SONS[l.id];
+        const volume = def.volume * (l.volume ?? 1);
+        const hauteur = def.hauteur * (l.hauteur ?? 1);
+        expect(volume, e.type).toBeGreaterThan(0);
+        expect(volume, e.type).toBeLessThanOrEqual(1);
+        expect(hauteur * (1 - def.variation), e.type).toBeGreaterThan(0.4);
+        expect(hauteur * (1 + def.variation), e.type).toBeLessThan(2);
+        expect(l.max ?? def.max, e.type).toBeGreaterThanOrEqual(1);
+      }
+    });
+
+    it('les événements de masse (brûlures en grappe, soins du médecin, appels) ont leur propre limite, d’une seule instance', () => {
+      for (const type of ['brulure', 'soin_ennemi', 'appel'] as const) {
+        const e = NEUF.find((n) => n.type === type);
+        const l = e ? lectureDe(e, PARTIE) : null;
+        expect(l?.cle, type).toBeDefined();
+        expect(l?.cle, type).not.toBe(l?.id);
+        expect(l?.max, type).toBe(1);
+      }
+    });
+
+    it('la chute de l’Épouvantail et la plongée du boss sont plus graves que le son de base', () => {
+      expect(lectureDe(NEUF[0] as Evenement, PARTIE)?.hauteur).toBeLessThan(1);
+      expect(lectureDe(NEUF[1] as Evenement, PARTIE)?.hauteur).toBeLessThan(1);
+    });
+
+    it('la mort d’un ennemi d’essaim (sangsue, rat de peste) est plus douce et limitée à un son : pas de mitraille', () => {
+      for (const type of ['sangsue', 'rat_peste']) {
+        const l = lectureDe(mort(type), PARTIE);
+        expect(l, type).toMatchObject({ id: 'mort_ennemi', cle: 'mort_essaim', max: 1 });
+        expect(l?.volume, type).toBeLessThan(1);
+      }
+      expect(lectureDe(mort('paysan_affame'), PARTIE)).toEqual({ id: 'mort_ennemi' });
+      expect(lectureDe(mort('dame_puits'), PARTIE)).toEqual({ id: 'mort_boss' });
+    });
+
+    it('sonDe rend l’id du son de la lecture', () => {
+      expect(sonDe(NEUF[1] as Evenement, PARTIE)).toBe(lectureDe(NEUF[1] as Evenement, PARTIE)?.id);
+      expect(sonDe(mort('sangsue'), PARTIE)).toBe('mort_ennemi');
+    });
   });
 
   it('les paramètres de chaque son sont dans des bornes sensées', () => {

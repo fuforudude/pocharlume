@@ -100,7 +100,9 @@ describe('atlas commité', () => {
 
   describe('jalon 3 (index : art/sprites/jalon3-noms.txt)', () => {
     const ENNEMIS_J3 = ['glaneur', 'corbeau-noir', 'epouvantail', 'porteur-torche', 'chasseur-sorcieres', 'delateur', 'noyeur',
-      'pelerin-voile', 'sangsue', 'rat-peste', 'pestifere', 'medecin-peste'];
+      'pelerin-voile', 'sangsue', 'rat-peste', 'pestifere', 'medecin-peste',
+      // Les trois ennemis de la région 1 n'avaient pas d'élite dessinée : le jalon 3 leur en donne une (directive `sombre`).
+      'paysan-affame', 'mendiant', 'chien-errant'];
     const FAMILIERS = ['rat', 'crapaud', 'chouette', 'chauve-souris', 'luciole', 'lezard', 'araignee', 'corneille', 'furet', 'escargot',
       'papillon-nuit', 'salamandre'];
     const BASES_TUILES = ['herbe-1', 'herbe-2', 'herbe-3', 'chemin-1', 'chemin-2', 'boue-1', 'boue-2', 'paves-1', 'paves-2',

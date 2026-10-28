@@ -1,6 +1,7 @@
 // Tous les textes affichés du jeu, en français. Une clé par texte, groupées par écran.
 import { frCollection } from './fr-collection';
 import { frDieux } from './fr-dieux';
+import { frEcrans3 } from './fr-ecrans3';
 import { frEnnemis } from './fr-ennemis';
 import { frMeta } from './fr-meta';
 import { frNiveaux } from './fr-niveaux';
@@ -193,6 +194,9 @@ export const fr = {
 
   // Collection : raretés, stats, skins et familiers (fr-collection.ts)
   ...frCollection,
+
+  // Écrans du jalon 3 : régions, modes d'un niveau, caisses, collection, bilan des défis (fr-ecrans3.ts)
+  ...frEcrans3,
 
   // Niveaux de la campagne (fr-niveaux.ts)
   ...frNiveaux,

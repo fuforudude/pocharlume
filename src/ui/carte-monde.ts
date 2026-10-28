@@ -1,21 +1,25 @@
-// Écran de la carte du monde : le fond et les nœuds dans un canvas (render/carte-monde.ts), la barre du haut et
-// la fiche d'un niveau en DOM. Toucher ou Entrée sur un nœud ouvre la fiche (nom, ambiance, meilleures étoiles par
-// difficulté, choix de la difficulté, du dieu, du héros et des objets emportés, « Lancer »). Échap ou Retour arrière
-// ferme la fiche, puis quitte la carte. La barre du haut montre les monnaies (arêtes, braises, étoiles à dépenser) et
-// mène aux écrans des héros et de la boutique.
+// Écran de la carte du monde : le fond et les nœuds dans un canvas (render/carte-monde.ts), la barre du haut, le choix de
+// la région et la fiche d'un niveau en DOM. Toucher ou Entrée sur un nœud ouvre la fiche (nom, ambiance, mode Normal,
+// Héroïque ou Fer, meilleures étoiles par difficulté, choix de la difficulté, du dieu, du héros et des objets emportés,
+// « Lancer »). Échap ou Retour arrière ferme la fiche, puis quitte la carte. La barre du haut montre les monnaies (arêtes,
+// braises, étoiles à dépenser) et mène aux écrans des héros et de la boutique.
+//
+// Les régions (jalon 3) : une rangée de pastilles, de flèches et le clavier (Page haut, Page bas) passent d'une région
+// ouverte à l'autre ; les régions pas encore ouvertes se voient grisées avec un cadenas et disent comment les ouvrir. Les
+// défis réussis d'un niveau sont marqués par une icône à côté de son nœud.
 //
 // Cet écran ne lance rien lui-même : il s'arrête puis appelle `surLancer` ou `surRetour`, et c'est l'appelant
 // (main.ts) qui enchaîne sur la partie ou l'accueil. La barre du haut suit la sauvegarde de la session (autre onglet,
-// fermeture d'un dialogue) ; les nœuds de la carte sont lus une fois à l'ouverture : pour voir une victoire ou un
+// fermeture d'un dialogue) ; les nœuds de la carte sont lus à l'ouverture d'une région : pour voir une victoire ou un
 // import, on rouvre la carte.
-import { NOEUDS_REGION1, TRACE_REGION1 } from '../data/niveaux/carte-du-monde';
-import { REGION1, TEXTES_REGION1 } from '../data/niveaux/region1';
+import { BRAISES_DEFI } from '../data/meta';
 import type { NiveauCampagne } from '../data/visuel';
+import type { DefiPartie } from '../engine';
 import { t, tCle } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
 import { RenduCarteMonde } from '../render/carte-monde';
-import { DECOR_MONDE_REGION1 } from '../render/carte-monde-decor';
-import { DIFFICULTES_SAUVEGARDE, etoilesDisponibles, NOMBRE_NIVEAUX, totalEtoiles, type ChoixPartie, type DifficulteSauvegarde, type Sauvegarde } from '../save';
+import { DIFFICULTES_SAUVEGARDE, etoilesDisponibles, NOMBRE_NIVEAUX, totalEtoiles, type ChoixPartie, type DifficulteSauvegarde } from '../save';
+import { dessinerIconesDefis } from './carte-monde-defis';
 import {
   directionDeTouche,
   etoilesParDifficulte,
@@ -23,7 +27,12 @@ import {
   noeudInitial,
   noeudToucheA,
   noeudVoisin,
+  regionInitiale,
+  regionVisee,
+  regionVoisine,
   vueNoeuds,
+  vueRegions,
+  type DeplacementRegion,
   type VueNoeud,
 } from './carte-monde-logique';
 import { bouton, el, image } from './dom';
@@ -31,8 +40,9 @@ import { afficherConfirmation } from './ecrans';
 import { creerChoixFiche, type SessionChoix } from './fiche-choix';
 import { Gestes } from './gestes';
 import { configDuChoix } from './lancement';
-import { choixJouable } from './meta-vues';
+import { choixJouable, famillesDuFer, vueModes, type ModeNiveau } from './meta-vues';
 import { texteRefusMeta } from './raisons-meta';
+import { decalageDeRegion, REGIONS_MONDE, type RegionMonde } from './regions-monde';
 
 export interface OptionsCarteMonde {
   readonly atlas: AtlasRendu;
@@ -40,8 +50,11 @@ export interface OptionsCarteMonde {
   readonly session: SessionChoix;
   /** Difficulté cochée à l'ouverture d'une fiche. */
   readonly difficulte: DifficulteSauvegarde;
-  /** « Lancer » dans la fiche : l'écran est déjà arrêté. */
-  surLancer: (niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, choix: ChoixPartie) => void;
+  /**
+   * « Lancer » dans la fiche : l'écran est déjà arrêté. `defi` est le défi choisi (Héroïque, Fer), null pour une partie
+   * ordinaire ; en défi, `difficulte` est celle de Matou, imposée.
+   */
+  surLancer: (niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, choix: ChoixPartie, defi: DefiPartie | null) => void;
   /** « Options » : l'écran reste ouvert, l'appelant affiche les options par-dessus. */
   surOptions: () => void;
   /** « Héros » : l'écran reste ouvert, l'appelant affiche l'écran des héros par-dessus. */
@@ -55,6 +68,12 @@ export interface OptionsCarteMonde {
    * confirmation.
    */
   readonly partieEnCours?: { readonly niveau: number; readonly vague: number } | null;
+  /** Les régions montrées ; par défaut celles du jeu (`REGIONS_MONDE`). */
+  readonly regions?: readonly RegionMonde[];
+  /** Numéro de la région montrée à l'ouverture si elle est ouverte ; par défaut la plus haute région ouverte. */
+  readonly region?: number;
+  /** Appelée à chaque changement de région (numéro de la région), pour la retrouver à la réouverture de la carte. */
+  readonly surRegion?: (numero: number) => void;
 }
 
 export interface EcranCarteMonde {
@@ -74,33 +93,43 @@ function nomDeDifficulte(d: DifficulteSauvegarde): string {
   return t(`difficulte.${d}`);
 }
 
+function nomDeMode(mode: ModeNiveau): string {
+  return t(`fiche.mode_${mode}`);
+}
+
 export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMonde): EcranCarteMonde {
   const { atlas, session } = options;
-  const sauvegarde: Sauvegarde = session.sauvegarde;
-  const vues: readonly VueNoeud[] = vueNoeuds(sauvegarde, NOEUDS_REGION1);
+  const regions = options.regions ?? REGIONS_MONDE;
   const controleur = new AbortController();
   const { signal } = controleur;
   let arretee = false;
   let suspendue = false;
   let avertissement: HTMLElement | null = null;
   let identifiantImage = 0;
-  let selection = noeudInitial(vues);
   let difficulte = options.difficulte;
+  let mode: ModeNiveau = 'normal';
   let fiche: HTMLElement | null = null;
   let boutonsDifficulte: readonly HTMLButtonElement[] = [];
   let controleurFiche: AbortController | null = null;
+
+  // La région montrée, ses nœuds d'après la sauvegarde, et son rendu (null tant que ses niveaux ne sont pas livrés).
+  let indiceRegion = 0;
+  let vues: readonly VueNoeud[] = [];
+  let selection = -1;
+  let rendu: RenduCarteMonde | null = null;
 
   const racine = el('div', 'carte-monde');
   const canvas = el('canvas', 'jeu');
   racine.append(canvas);
   parent.append(racine);
-  const rendu = new RenduCarteMonde(canvas, atlas, TRACE_REGION1, DECOR_MONDE_REGION1, nombreTroncons(vues));
-  // La vue montre les niveaux débloqués et le premier qui ne l'est pas encore (on devine où mène la route).
-  const premierCache = vues.findIndex((v) => !v.visible);
-  const aVoir = premierCache === -1 ? vues : vues.slice(0, premierCache + 1);
-  rendu.cadrer(aVoir, vues[selection] ?? aVoir[0] ?? { x: 0, y: 0 });
+  const contexte = canvas.getContext('2d');
+  const regionVide = el('p', 'carte-region-vide', t('carte.region_bientot'));
+  regionVide.hidden = true;
+  racine.append(regionVide);
 
-  // --- Barre du haut : retour, niveau sélectionné, total d'étoiles, options ---
+  const regionCourante = (): RegionMonde | undefined => regions[indiceRegion];
+
+  // --- Barre du haut : retour, niveau sélectionné, monnaies, accès aux écrans ---
 
   const barre = el('div', 'carte-barre');
   const retour = bouton('bouton', t('carte.retour'), () => {
@@ -149,7 +178,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   racine.append(barre);
 
   const textesDe = (numero: number): { nom: string; ambiance: string } | null => {
-    const textes = TEXTES_REGION1.find((x) => x.numero === numero);
+    const textes = regionCourante()?.contenu?.textes.find((x) => x.numero === numero);
     return textes ? { nom: tCle(textes.nom), ambiance: tCle(textes.ambiance) } : null;
   };
 
@@ -159,10 +188,103 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     titre.textContent = vue && textes ? t('carte.niveau', { n: vue.numero, nom: textes.nom }) : '';
   };
 
+  // --- Choix de la région : flèches, pastilles (les régions fermées sont grisées), nom ---
+
+  const rangeeRegions = el('div', 'carte-regions');
+  rangeeRegions.setAttribute('role', 'group');
+  rangeeRegions.setAttribute('aria-label', t('carte.regions'));
+  const flechePrecedente = bouton('bouton region-fleche', t('carte.region_precedente'), () => { aller(regionVoisine(session.sauvegarde, regions, indiceRegion, -1)); }, signal);
+  flechePrecedente.textContent = '‹';
+  const flecheSuivante = bouton('bouton region-fleche', t('carte.region_suivante'), () => { aller(regionVoisine(session.sauvegarde, regions, indiceRegion, 1)); }, signal);
+  flecheSuivante.textContent = '›';
+  const puces: HTMLButtonElement[] = regions.map((region, i) => {
+    const nom = tCle(region.nom);
+    const b = bouton('bouton region-puce', t('carte.region_aller', { n: region.numero, nom }), () => { aller(regionVisee(session.sauvegarde, regions, i)); }, signal);
+    b.dataset.cle = `region:${String(region.numero)}`;
+    b.append(el('span', 'numero', String(region.numero)));
+    return b;
+  });
+  const nomRegion = el('div', 'region-nom');
+  nomRegion.setAttribute('role', 'status');
+  rangeeRegions.append(flechePrecedente, ...puces, flecheSuivante, nomRegion);
+  racine.append(rangeeRegions);
+
+  /** Texte à côté des pastilles : le nom de la région montrée, ou pourquoi une région touchée reste fermée. */
+  const direRegion = (texte: string, refus: boolean): void => {
+    nomRegion.textContent = texte;
+    nomRegion.classList.toggle('refus', refus);
+  };
+
+  const majRegionsUI = (): void => {
+    const vuesRegions = vueRegions(session.sauvegarde, regions);
+    vuesRegions.forEach((vr, i) => {
+      const b = puces[i];
+      if (!b) return;
+      const courante = i === indiceRegion;
+      b.classList.toggle('actif', courante);
+      b.classList.toggle('verrouillee', !vr.ouverte);
+      b.classList.toggle('grise', !vr.ouverte);
+      b.setAttribute('aria-current', String(courante));
+      b.setAttribute('aria-disabled', String(!vr.ouverte));
+      b.querySelector('img.cadenas')?.remove();
+      if (!vr.ouverte) b.append(image(atlas.iconeUrl('icone-cadenas', 1), 'cadenas'));
+    });
+    const precedenteOuverte = indiceRegion > 0;
+    const suivanteOuverte = vuesRegions[indiceRegion + 1]?.ouverte ?? false;
+    flechePrecedente.classList.toggle('grise', !precedenteOuverte);
+    flechePrecedente.setAttribute('aria-disabled', String(!precedenteOuverte));
+    flecheSuivante.classList.toggle('grise', !suivanteOuverte);
+    flecheSuivante.setAttribute('aria-disabled', String(!suivanteOuverte));
+    const region = regionCourante();
+    direRegion(region ? t('carte.region_nom', { n: region.numero, nom: tCle(region.nom) }) : '', false);
+  };
+
+  /** Montre la région d'indice `i` : ses nœuds d'après la sauvegarde, son fond, la sélection. */
+  const chargerRegion = (i: number): void => {
+    const region = regions[i];
+    if (!region) return;
+    indiceRegion = i;
+    const contenu = region.contenu;
+    vues = contenu ? vueNoeuds(session.sauvegarde, contenu.noeuds, decalageDeRegion(region)) : [];
+    selection = noeudInitial(vues);
+    rendu = contenu ? new RenduCarteMonde(canvas, atlas, contenu.trace, contenu.decor, nombreTroncons(vues)) : null;
+    regionVide.hidden = contenu !== null;
+    if (rendu) {
+      // La vue montre les niveaux débloqués et le premier qui ne l'est pas encore (on devine où mène la route).
+      const premierCache = vues.findIndex((v) => !v.visible);
+      const aVoir = premierCache === -1 ? vues : vues.slice(0, premierCache + 1);
+      rendu.cadrer(aVoir, vues[selection] ?? aVoir[0] ?? { x: 0, y: 0 });
+    } else {
+      contexte?.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    majTitre();
+    majRegionsUI();
+  };
+
+  /** Va là où la demande mène ; une région fermée reste fermée et dit comment l'ouvrir. */
+  const aller = (deplacement: DeplacementRegion): void => {
+    if (fiche || avertissement) return;
+    if (deplacement.bloquee) {
+      direRegion(t('carte.region_fermee', { n: deplacement.visee, m: deplacement.visee - 1 }), true);
+      return;
+    }
+    if (deplacement.index < 0 || deplacement.index === indiceRegion) return;
+    chargerRegion(deplacement.index);
+    const region = regionCourante();
+    if (region) options.surRegion?.(region.numero);
+    const actif = puces[deplacement.index];
+    if (actif && document.activeElement instanceof HTMLButtonElement && rangeeRegions.contains(document.activeElement)) actif.focus({ preventScroll: true });
+  };
+
+  // La région d'ouverture : celle qu'on demande si elle est ouverte, sinon la plus haute région ouverte.
+  const demandee = options.region === undefined ? -1 : regions.findIndex((r) => r.numero === options.region);
+  const depart = demandee >= 0 && !regionVisee(session.sauvegarde, regions, demandee).bloquee ? demandee : regionInitiale(session.sauvegarde, regions);
+  chargerRegion(depart);
+
   /** Change le nœud sélectionné ; la vue le suit s'il sort de l'écran. */
   const selectionner = (i: number): void => {
     const vue = vues[i];
-    if (!vue?.visible) return;
+    if (!vue?.visible || !rendu) return;
     selection = i;
     majTitre();
     const cam = rendu.camera;
@@ -171,7 +293,6 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
       rendu.centrerSur(vue.x, vue.y);
     }
   };
-  majTitre();
 
   // --- Fiche d'un niveau ---
 
@@ -196,11 +317,12 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
 
   const ouvrirFiche = (i: number): void => {
     const vue = vues[i];
-    const niveau = vue ? REGION1.find((n) => n.numero === vue.numero) : undefined;
+    const niveau = vue ? regionCourante()?.contenu?.niveaux.find((n) => n.numero === vue.numero) : undefined;
     const textes = vue ? textesDe(vue.numero) : null;
     if (!vue?.visible || !niveau || !textes) return;
     fermerFiche();
     selectionner(i);
+    mode = 'normal';
 
     const ecran = el('div', 'ecran fiche');
     ecran.setAttribute('role', 'dialog');
@@ -211,7 +333,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     }, { signal });
 
     const carte = el('div', 'carte');
-    // Deux colonnes en paysage : le niveau et sa difficulté à gauche, le dieu, le héros et les objets à droite.
+    // Deux colonnes en paysage : le niveau, son mode et sa difficulté à gauche, le dieu, le héros et les objets à droite.
     const colonnes = el('div', 'fiche-colonnes');
     const gauche = el('div', 'fiche-colonne');
     const droite = el('div', 'fiche-colonne');
@@ -224,9 +346,68 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     const choisir = creerChoixFiche(atlas, session, signalFiche);
     droite.append(choisir.racine);
 
+    const message = el('p', 'fiche-message');
+    message.setAttribute('role', 'status');
+
+    // Mode : Normal, Héroïque ou Fer. Un défi s'ouvre avec les trois étoiles ; fermé, il dit ce qui manque.
+    const vuesModes = vueModes(session.sauvegarde, niveau);
+    const groupeModes = el('div', 'modes');
+    groupeModes.setAttribute('role', 'radiogroup');
+    groupeModes.setAttribute('aria-label', t('fiche.mode'));
+    const boutonsModes = new Map<ModeNiveau, HTMLButtonElement>();
+    // La difficulté (Normal) et les règles du défi (Héroïque, Fer) se partagent la même place.
     const groupe = el('div', 'difficultes');
     groupe.setAttribute('role', 'radiogroup');
     groupe.setAttribute('aria-label', t('fiche.difficulte'));
+    const regles = el('div', 'defi-regles');
+    regles.hidden = true;
+
+    const remplirRegles = (defi: DefiPartie): void => {
+      const vm = vuesModes.find((v) => v.mode === defi);
+      const lignes = [t(defi === 'fer' ? 'fiche.defi_fer' : 'fiche.defi_heroique'), t('fiche.defi_regles')];
+      const familles = famillesDuFer(niveau);
+      if (defi === 'fer' && familles) lignes.push(t('fiche.defi_familles', { noms: familles.map((f) => tCle(`famille.${f}`)).join(', ') }));
+      lignes.push(vm?.reussi === true ? t('fiche.defi_deja') : t('fiche.defi_prime', { n: BRAISES_DEFI }));
+      regles.replaceChildren(...lignes.map((ligne, k) => el('p', k === lignes.length - 1 ? 'defi-prime' : '', ligne)));
+    };
+
+    const choisirMode = (m: ModeNiveau): void => {
+      mode = m;
+      for (const [id, b] of boutonsModes) {
+        b.classList.toggle('actif', id === m);
+        b.setAttribute('aria-checked', String(id === m));
+      }
+      const enDefi = m !== 'normal';
+      groupe.hidden = enDefi;
+      regles.hidden = !enDefi;
+      if (m !== 'normal') remplirRegles(m);
+      choisir.definirDefi(enDefi);
+      message.textContent = '';
+    };
+
+    for (const vm of vuesModes) {
+      const nom = nomDeMode(vm.mode);
+      const libelle = vm.reussi ? t('fiche.mode_reussi', { mode: nom }) : nom;
+      const b = bouton('bouton mode', libelle, () => {
+        if (!vm.ouvert) {
+          message.textContent = t(vm.manque === 'pas_de_fer' ? 'fiche.mode_pas_de_fer' : 'fiche.mode_trois_etoiles');
+          return;
+        }
+        choisirMode(vm.mode);
+      }, signalFiche);
+      b.setAttribute('role', 'radio');
+      b.dataset.cle = `mode:${vm.mode}`;
+      b.classList.toggle('grise', !vm.ouvert);
+      b.classList.toggle('reussi', vm.reussi);
+      b.setAttribute('aria-disabled', String(!vm.ouvert));
+      if (vm.mode !== 'normal') b.append(image(atlas.iconeUrl(vm.ouvert ? `icone-defi-${vm.mode}` : 'icone-cadenas', 1), 'icone-mode'));
+      b.append(el('span', 'nom-mode', nom));
+      if (vm.reussi) b.append(el('span', 'coche', '✓'));
+      boutonsModes.set(vm.mode, b);
+      groupeModes.append(b);
+    }
+    gauche.append(groupeModes);
+
     const boutons: HTMLButtonElement[] = [];
     for (const { difficulte: id, etoiles } of etoilesParDifficulte(session.sauvegarde, vue.numero)) {
       const b = bouton('bouton difficulte', t('fiche.etoiles', { n: etoiles, difficulte: nomDeDifficulte(id) }), () => { choisirDifficulte(id); }, signal);
@@ -238,21 +419,23 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
       groupe.append(b);
     }
     boutonsDifficulte = boutons;
-    gauche.append(groupe);
+    gauche.append(groupe, regles);
 
     const actions = el('div', 'rangee');
     const lancer = bouton('bouton grand', t('fiche.lancer'), () => {
-      const choisie = difficulte;
+      const defi: DefiPartie | null = mode === 'normal' ? null : mode;
+      // Un défi se joue en Matou (la difficulté choisie est ignorée) ; sinon celle qui est cochée.
+      const choisie: DifficulteSauvegarde = defi === null ? difficulte : 'matou';
       // Un choix qui ne tient plus (objet épuisé dans un autre onglet…) est refusé ici, avant de quitter la carte.
       const choix = choixJouable(session.sauvegarde, choisir.choix());
-      const compose = configDuChoix(session.sauvegarde, choix, choisie, 0);
+      const compose = configDuChoix(session.sauvegarde, choix, choisie, 0, defi === null ? undefined : { niveau: niveau.numero, defi });
       if (!compose.ok) {
         message.textContent = t('fiche.lancement_refuse', { raison: texteRefusMeta(compose.raison) });
         return;
       }
       const lancerVraiment = (): void => {
         arreter();
-        options.surLancer(niveau, choisie, choix);
+        options.surLancer(niveau, choisie, choix, defi);
       };
       const enCours = options.partieEnCours;
       if (!enCours) {
@@ -280,8 +463,6 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     const fermer = bouton('bouton grand secondaire', t('fiche.fermer'), fermerFiche, signal);
     fermer.textContent = t('fiche.fermer');
     actions.append(lancer, fermer);
-    const message = el('p', 'fiche-message');
-    message.setAttribute('role', 'status');
     gauche.append(actions, message);
     colonnes.append(gauche, droite);
     carte.append(colonnes);
@@ -289,6 +470,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     racine.append(ecran);
     fiche = ecran;
     choisirDifficulte(difficulte);
+    choisirMode('normal');
     lancer.focus({ preventScroll: true });
   };
 
@@ -296,13 +478,13 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
 
   const gestes = new Gestes({
     toucher: (x, y) => {
-      if (fiche) return;
+      if (fiche || !rendu) return;
       const touche = noeudToucheA(vues, rendu.enMondeX(x), rendu.enMondeY(y), rendu.rayonToucher);
       if (touche !== -1) ouvrirFiche(touche);
     },
-    glisser: (dx, dy) => { rendu.camera.deplacer(dx * rendu.ratio, dy * rendu.ratio); },
-    debutPincement: () => { rendu.camera.debutPincement(); },
-    pincer: (facteur, x, y) => { rendu.camera.pincement(facteur, x * rendu.ratio, y * rendu.ratio); },
+    glisser: (dx, dy) => { rendu?.camera.deplacer(dx * rendu.ratio, dy * rendu.ratio); },
+    debutPincement: () => { rendu?.camera.debutPincement(); },
+    pincer: (facteur, x, y) => { rendu?.camera.pincement(facteur, x * rendu.ratio, y * rendu.ratio); },
     survol: () => undefined,
   });
   canvas.addEventListener('pointerdown', (e) => {
@@ -315,6 +497,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   canvas.addEventListener('pointercancel', (e) => { gestes.annuler(e.pointerId); }, { signal });
   canvas.addEventListener('wheel', (e) => {
     e.preventDefault();
+    if (!rendu) return;
     const facteur = e.deltaMode === 1 ? LIGNE_PIXELS : e.deltaMode === 2 ? PAGE_PIXELS : 1;
     rendu.camera.molette(e.deltaY * facteur, e.clientX * rendu.ratio, e.clientY * rendu.ratio);
   }, { signal, passive: false });
@@ -344,12 +527,17 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     }
     if (fiche) {
       const direction = directionDeTouche(e.key);
-      if (direction === 'gauche' || direction === 'droite') {
+      if ((direction === 'gauche' || direction === 'droite') && mode === 'normal') {
         e.preventDefault();
         const k = DIFFICULTES_SAUVEGARDE.indexOf(difficulte) + (direction === 'droite' ? 1 : -1);
         const suivante = DIFFICULTES_SAUVEGARDE[k];
         if (suivante) choisirDifficulte(suivante);
       }
+      return;
+    }
+    if (e.key === 'PageUp' || e.key === 'PageDown') {
+      e.preventDefault();
+      aller(regionVoisine(session.sauvegarde, regions, indiceRegion, e.key === 'PageUp' ? -1 : 1));
       return;
     }
     const direction = directionDeTouche(e.key);
@@ -361,15 +549,18 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
       ouvrirFiche(selection);
     }
   }, { signal });
-  window.addEventListener('resize', () => { rendu.redimensionner(); }, { signal });
-  window.addEventListener('orientationchange', () => { rendu.redimensionner(); }, { signal });
+  window.addEventListener('resize', () => { rendu?.redimensionner(); }, { signal });
+  window.addEventListener('orientationchange', () => { rendu?.redimensionner(); }, { signal });
 
   // --- Boucle : le clignotement du prochain niveau et le chevron de sélection bougent à chaque image ---
 
   const boucle = (maintenant: number): void => {
     if (arretee || suspendue) return;
     identifiantImage = requestAnimationFrame(boucle);
+    if (!rendu) return;
     rendu.dessiner(vues, selection, maintenant);
+    // Les défis réussis, marqués par-dessus les nœuds.
+    if (contexte) dessinerIconesDefis(contexte, atlas, rendu.camera, vues);
   };
   identifiantImage = requestAnimationFrame(boucle);
 

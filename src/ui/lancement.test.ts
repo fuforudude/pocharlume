@@ -3,10 +3,10 @@
 // Tests d'intégration entre la couche sauvegarde (qui compose, débite) et le moteur (qui valide).
 import { describe, expect, it, vi } from 'vitest';
 import { DEFS_META } from '../data/heros';
-import { creerPartie } from '../engine';
+import { creerPartie, verifierConfig } from '../engine';
 import { niveauEssai } from '../engine/aides.test-utils';
 import { t } from '../i18n';
-import { Depot, sauvegardeVide, Session, StockageMemoire, type Sauvegarde } from '../save';
+import { Depot, sauvegardeVide, Session, StockageMemoire, type ChoixPartie, type Sauvegarde } from '../save';
 import { creerVerrouMemoire } from '../save/verrou';
 import { configDeRelance, configDuChoix, debiterAuLancement, relancerAvecDebit } from './lancement';
 
@@ -20,6 +20,109 @@ async function ouvrir(sauvegarde: Sauvegarde, stockage = new StockageMemoire()):
   await session.appliquerImport(sauvegarde);
   return session;
 }
+
+/** Niveau 1 réussi en 3 étoiles (les défis y sont ouverts), un skin de tour, un skin et un familier de Charlie équipés. */
+function avecDefisOuverts(): Sauvegarde {
+  const s = sauvegardeVide();
+  return {
+    ...s,
+    progression: { niveauMax: 2, etoiles: { '1': { matou: 3 } } },
+    meta: {
+      ...s.meta,
+      objets: { ...s.meta.objets, sablier: 3 },
+      collection: {
+        ...s.meta.collection,
+        possedes: { skin_tir_1: 2, skin_charlie: 1, familier_rat: 1 },
+        equipes: { skins: { tir: 'skin_tir_1', charlie: 'skin_charlie' }, familiers: { charlie: 'familier_rat' } },
+      },
+    },
+  };
+}
+
+const CHOIX_CHARLIE: ChoixPartie = { dieu: 'charlie', heros: 'charlie', objets: [] };
+
+describe('configDuChoix : défi et bonus de la collection', () => {
+  it('une partie ordinaire porte `defi: null` et les bonus de la collection équipée', () => {
+    const r = configDuChoix(avecDefisOuverts(), { ...CHOIX_CHARLIE, objets: [] }, 'matou', 3);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.config.defi).toBeNull();
+    expect(r.config.bonus?.tours.tir).toEqual({ cadence: 0.0125 });
+    expect(Object.keys(r.config.bonus?.heros ?? {})).toEqual(expect.arrayContaining(['pv']));
+    expect(verifierConfig(r.config)).toBeNull();
+  });
+
+  it('Héroïque : defi transmis, Matou, aucun objet même demandé, bonus gardés', () => {
+    const s = avecDefisOuverts();
+    const r = configDuChoix(s, { ...CHOIX_CHARLIE, objets: ['sablier'] }, 'vieux_sage', 3, { niveau: 1, defi: 'heroique' });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.config).toMatchObject({ defi: 'heroique', difficulte: 'matou', objets: [] });
+    expect(r.config.bonus?.tours.tir).toEqual({ cadence: 0.0125 });
+    expect(verifierConfig(r.config)).toBeNull();
+  });
+
+  it('Fer : defi transmis et bonus vides', () => {
+    const r = configDuChoix(avecDefisOuverts(), CHOIX_CHARLIE, 'matou', 3, { niveau: 1, defi: 'fer' });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.config.defi).toBe('fer');
+    expect(r.config.bonus).toEqual({ tours: {}, heros: {} });
+    expect(verifierConfig(r.config)).toBeNull();
+  });
+
+  it('un défi sur un niveau sans les trois étoiles est refusé avec sa raison', () => {
+    const r = configDuChoix(avecDefisOuverts(), CHOIX_CHARLIE, 'matou', 3, { niveau: 2, defi: 'heroique' });
+    expect(r).toEqual({ ok: false, raison: 'defi_verrouille' });
+  });
+});
+
+describe('configDeRelance : « Rejouer » garde le défi et les bonus', () => {
+  it('Héroïque : même défi, nouvelle graine, mêmes bonus', () => {
+    const s = avecDefisOuverts();
+    const precedente = configDuChoix(s, CHOIX_CHARLIE, 'matou', 1, { niveau: 1, defi: 'heroique' });
+    if (!precedente.ok) throw new Error(precedente.raison);
+    const relance = configDeRelance(s, precedente.config, 99, 1);
+    expect(relance).toMatchObject({ graine: 99, defi: 'heroique', difficulte: 'matou', objets: [] });
+    expect(relance.bonus).toEqual(precedente.config.bonus);
+  });
+
+  it('Fer : le défi reste, sans bonus', () => {
+    const s = avecDefisOuverts();
+    const precedente = configDuChoix(s, CHOIX_CHARLIE, 'matou', 1, { niveau: 1, defi: 'fer' });
+    if (!precedente.ok) throw new Error(precedente.raison);
+    const relance = configDeRelance(s, precedente.config, 5, 1);
+    expect(relance).toMatchObject({ graine: 5, defi: 'fer', bonus: { tours: {}, heros: {} } });
+  });
+
+  it('une partie ordinaire garde `defi: null` et prend les bonus de la collection d’aujourd’hui', () => {
+    const s = avecDefisOuverts();
+    const precedente = configDuChoix(s, CHOIX_CHARLIE, 'matou', 1);
+    if (!precedente.ok) throw new Error(precedente.raison);
+    // Entre deux parties, le joueur retire ses skins : la relance en tient compte.
+    const apres: Sauvegarde = { ...s, meta: { ...s.meta, collection: { ...s.meta.collection, equipes: { skins: {}, familiers: {} } } } };
+    const relance = configDeRelance(apres, precedente.config, 8);
+    expect(relance.defi).toBeNull();
+    expect(relance.bonus).toEqual({ tours: {}, heros: {} });
+  });
+
+  it('un défi dont le niveau n’est pas donné se relance tel quel, avec la nouvelle graine', () => {
+    const s = avecDefisOuverts();
+    const precedente = configDuChoix(s, CHOIX_CHARLIE, 'matou', 1, { niveau: 1, defi: 'heroique' });
+    if (!precedente.ok) throw new Error(precedente.raison);
+    expect(configDeRelance(s, precedente.config, 4)).toEqual({ ...precedente.config, graine: 4 });
+  });
+
+  it('« Rejouer » un défi passe par le débit sans objet : le stock ne bouge pas', async () => {
+    const session = await ouvrir(avecDefisOuverts());
+    const precedente = configDuChoix(session.sauvegarde, CHOIX_CHARLIE, 'matou', 1, { niveau: 1, defi: 'heroique' });
+    if (!precedente.ok) throw new Error(precedente.raison);
+    const r = await relancerAvecDebit(session, precedente.config, 12, 1);
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.config.defi).toBe('heroique');
+    expect(session.sauvegarde.meta.objets.sablier).toBe(3);
+  });
+});
 
 describe('configDuChoix et le moteur', () => {
   it('un même objet sur plusieurs emplacements donne une config que creerPartie accepte', () => {

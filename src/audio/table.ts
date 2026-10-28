@@ -84,8 +84,37 @@ function estBoss(typeEnnemi: string): boolean {
   return (ENNEMIS as Readonly<Record<string, { readonly boss: boolean }>>)[typeEnnemi]?.boss === true;
 }
 
-/** Le son d'un événement : un id, `null` pour le silence (explicite), ou un choix d'après l'événement et la partie. */
-export type ReglageSon<E> = IdSon | null | ((evenement: E, partie: VuePartie) => IdSon | null);
+function estEssaim(typeEnnemi: string): boolean {
+  if (!Object.hasOwn(ENNEMIS, typeEnnemi)) return false;
+  return (ENNEMIS as Readonly<Record<string, { readonly pouvoirs?: { readonly essaim?: number } }>>)[typeEnnemi]?.pouvoirs?.essaim !== undefined;
+}
+
+/**
+ * Un son de `SONS` réglé pour un événement : le même fichier peut servir plusieurs événements, chacun avec son volume, sa
+ * hauteur et sa limite de répétition (pas de nouveau fichier pour une nuance).
+ */
+export interface LectureSon {
+  readonly id: IdSon;
+  /** Facteur appliqué au volume propre du son (1 par défaut) ; le produit reste dans ]0, 1]. */
+  readonly volume?: number;
+  /** Facteur appliqué à la hauteur propre du son (1 par défaut) : moins de 1 = plus grave. */
+  readonly hauteur?: number;
+  /** Clé du limiteur (l'id du son par défaut) : une clé à part donne à cet événement sa propre limite, sans manger celle du son. */
+  readonly cle?: string;
+  /** Instances permises dans la fenêtre du limiteur pour cette clé (`max` du son par défaut). */
+  readonly max?: number;
+}
+
+/** Une lecture réglée : un son à volume et hauteur adaptés, avec sa limite propre (raccourci de `LectureSon`). */
+function lecture(id: IdSon, volume: number, hauteur: number, cle?: string, max?: number): LectureSon {
+  return { id, volume, hauteur, ...(cle === undefined ? {} : { cle }), ...(max === undefined ? {} : { max }) };
+}
+
+/**
+ * Le son d'un événement : un id, une lecture réglée (`LectureSon`), `null` pour le silence (explicite), ou un choix d'après
+ * l'événement et la partie.
+ */
+export type ReglageSon<E> = IdSon | LectureSon | null | ((evenement: E, partie: VuePartie) => IdSon | LectureSon | null);
 
 export type TableEvenements = { readonly [T in Evenement['type']]: ReglageSon<Extract<Evenement, { type: T }>> };
 
@@ -97,7 +126,8 @@ export const SON_DES_EVENEMENTS: TableEvenements = {
   vague: 'vague',
   apparition: null,
   fuite: 'vie_perdue',
-  mort: (e) => (estBoss(e.typeEnnemi) ? 'mort_boss' : 'mort_ennemi'),
+  // Un essaim (sangsues, rats de peste) qui tombe d'un coup ne fait qu'un son, plus doux : pas de mitraille.
+  mort: (e) => (estBoss(e.typeEnnemi) ? 'mort_boss' : estEssaim(e.typeEnnemi) ? lecture('mort_ennemi', 0.7, 1.15, 'mort_essaim', 1) : 'mort_ennemi'),
   construction: 'construction',
   amelioration: 'amelioration',
   vente: 'vente',
@@ -138,22 +168,39 @@ export const SON_DES_EVENEMENTS: TableEvenements = {
   boost: 'amelioration',
   ralliement: 'clic',
   ordre_heros: 'clic',
-  // Mécaniques des ennemis : le choix des sons est à faire avec les bruitages des régions 2 à 5 (silence provisoire).
-  releve: null,
-  plongee: null,
-  emergence: null,
-  brulure: null,
-  noyade: null,
-  soin_ennemi: 'soin',
-  famine: 'sort',
-  tour_desactivee: null,
-  appel: 'sort',
+  // Mécaniques des ennemis (régions 2 à 5) : pas de fichier de plus, les sons existants réglés par événement (volume, hauteur).
+  // Les événements qui peuvent venir en grappe (brûlures, soins du médecin, appels) ont leur propre limite d'une instance.
+  /** Le corps tombe : la chute d'une unité, plus grave et plus lourde. */
+  releve: lecture('mort_unite', 1, 0.8),
+  /** Le boss plonge : la plaque de métal lourde de l'onde de choc, très grave, comme une grosse gerbe. */
+  plongee: lecture('onde_choc', 0.9, 0.7),
+  /** Il refait surface ou se relève : l'éclat de verre, plus aigu. */
+  emergence: lecture('impact_magique', 0.8, 1.2),
+  /** Un soldat prend feu : le souffle du sort, aigu et discret. */
+  brulure: lecture('sort', 0.55, 1.5, 'brulure', 1),
+  /** Un soldat est entraîné sous l'eau : un choc sourd et grave, comme un glouglou. */
+  noyade: lecture('impact_physique', 1.3, 0.6),
+  /** Le médecin soigne : le son du soin, plus grave et plus bas que les soins des alliés. */
+  soin_ennemi: lecture('soin', 0.6, 0.85, 'soin_ennemi', 1),
+  /** La Faim hurle : le souffle du sort, très grave. */
+  famine: lecture('sort', 0.8, 0.6),
+  /** Une tour prend feu : un éclat de braise, plus léger que l'explosion de la catapulte. */
+  tour_desactivee: lecture('explosion', 0.6, 1.3),
+  /** La Mère des Rats ou le Juge appelle du renfort : le souffle du sort, grave, une fois à la fois. */
+  appel: lecture('sort', 0.7, 0.75, 'appel', 1),
   fin: (e) => (e.statut === 'victoire' ? 'victoire' : e.statut === 'defaite' ? 'defaite' : null),
 };
 
-/** Le son à jouer pour un événement, ou null. */
-export function sonDe(evenement: Evenement, partie: VuePartie = PARTIE_VIDE): IdSon | null {
+/** La lecture à lancer pour un événement (son, facteurs, limite), ou null pour le silence. */
+export function lectureDe(evenement: Evenement, partie: VuePartie = PARTIE_VIDE): LectureSon | null {
   const regle = (SON_DES_EVENEMENTS as Readonly<Record<string, ReglageSon<Evenement>>>)[evenement.type];
   if (regle === undefined || regle === null) return null;
-  return typeof regle === 'string' ? regle : regle(evenement, partie);
+  const resultat = typeof regle === 'function' ? regle(evenement, partie) : regle;
+  if (resultat === null) return null;
+  return typeof resultat === 'string' ? { id: resultat } : resultat;
+}
+
+/** Le son à jouer pour un événement, ou null. */
+export function sonDe(evenement: Evenement, partie: VuePartie = PARTIE_VIDE): IdSon | null {
+  return lectureDe(evenement, partie)?.id ?? null;
 }
