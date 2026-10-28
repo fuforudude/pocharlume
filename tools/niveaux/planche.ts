@@ -1,6 +1,5 @@
 // Planche d'aperçu des cartes : le vrai sol (tuiles de la région, chemin, zones), le décor visible quand un niveau emprunte
-// tous les chemins, et les socles, à l'échelle 1 (16 px par tuile). Les croix rouges marquent les départs du héros, les
-// points blancs les ralliements de caserne. Sert à juger les cartes sans lancer le jeu (`npm run niveaux:apercu -- planche`).
+// tous les chemins, à l'échelle 1 (16 px par tuile). Les croix rouges marquent les départs du héros. Sert à juger les cartes sans lancer le jeu (`npm run niveaux:apercu -- planche`).
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { decorVisible } from '../../src/data/niveaux/assemblage.ts';
@@ -54,9 +53,9 @@ function point(image: Image, x: number, y: number, [r, v, b]: readonly [number, 
   image.pixels[i + 3] = 255;
 }
 
-/** Une carte entière (tous chemins, tous socles) sur une image de 512 × 288. */
+/** Une carte entière (tous chemins) sur une image de 512 × 288. */
 export function dessinerCarte(modele: CarteModele): Image {
-  const carte = { largeur: modele.largeur, hauteur: modele.hauteur, chemins: modele.chemins, socles: modele.socles, departHeros: modele.departHeros };
+  const carte = { largeur: modele.largeur, hauteur: modele.hauteur, chemins: modele.chemins, departHeros: modele.departHeros };
   const decor = decorVisible(modele, carte);
   const visuel = { region: modele.region, zones: modele.zones, decor };
   const image = nouvelleImage(modele.largeur * TUILE, modele.hauteur * TUILE);
@@ -65,17 +64,8 @@ export function dessinerCarte(modele: CarteModele): Image {
     poserSprite(image, nom, (i % grille.largeur) * TUILE, Math.floor(i / grille.largeur) * TUILE);
   });
   // Ancre des tuiles : en haut à gauche, comme pour le sol du jeu.
-  const objets = [
-    ...decor.map((d) => ({ sprite: d.sprite, x: d.x, y: d.y, miroir: d.miroir === true })),
-    ...modele.socles.map((s) => ({ sprite: 'socle', x: s.x, y: s.y, miroir: false })),
-  ].sort((a, b) => a.y - b.y);
+  const objets = decor.map((d) => ({ sprite: d.sprite, x: d.x, y: d.y, miroir: d.miroir === true })).sort((a, b) => a.y - b.y);
   for (const o of objets) poserSprite(image, o.sprite, Math.round(o.x * TUILE), Math.round(o.y * TUILE), o.miroir);
-  for (const s of modele.socles) {
-    const x = Math.round(s.ralliement.x * TUILE);
-    const y = Math.round(s.ralliement.y * TUILE);
-    point(image, x, y, [255, 255, 255]);
-    point(image, x + 1, y, [255, 255, 255]);
-  }
   const hx = Math.round(modele.departHeros.x * TUILE);
   const hy = Math.round(modele.departHeros.y * TUILE);
   for (let d = -3; d <= 3; d++) {

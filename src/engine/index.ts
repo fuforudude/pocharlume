@@ -32,6 +32,18 @@ export { distanceAuxChemins, pointSurChemin } from './chemins';
 export { ajusterMontant, partEntiere } from './argent';
 export { ajouterEnnemi } from './ennemis';
 export {
+  caseExiste,
+  caseSousPoint,
+  casesLibres,
+  centreCase,
+  colonnes,
+  estCaseInterdite,
+  lignes,
+  ralliementParDefaut,
+  toutesLesCases,
+  tourSurCase,
+} from './grille';
+export {
   appliquerAction,
   avancer,
   coutCompetence,

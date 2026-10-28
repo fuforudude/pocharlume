@@ -1,8 +1,8 @@
 // Cartes dessinées à la main de la région 3, le Bourg des Bûchers (32 × 18 tuiles). Même structure que les cartes du
-// Village Affamé (cartes.ts) : une ou deux entrées, des socles fixes à 2 tuiles de l'axe des chemins (leur ralliement de
-// caserne est le point de l'axe le plus proche). Un niveau qui n'emprunte pas tous les chemins ne garde que les socles à portée
-// des chemins utilisés (plan-region3.ts) ; le décor posé dans le couloir d'un chemin inutilisé reste affiché.
-import { chemin, decor, socle, zone, type CarteModele } from './modele-carte';
+// Village Affamé (cartes.ts) : une ou deux entrées, sans socles (les tours se posent sur la grille de construction,
+// cases interdites tirées du chemin et des grands décors par grille-niveau.ts). Un niveau qui n'emprunte pas tous les
+// chemins ne garde que ceux utilisés (plan-region3.ts) ; le décor posé dans le couloir d'un chemin inutilisé reste affiché.
+import { chemin, decor, zone, type CarteModele } from './modele-carte';
 
 /**
  * Les Ruelles : un seul chemin qui se faufile entre les maisons brûlées, par coudes serrés, de la porte nord-ouest au faubourg du sud-est.
@@ -14,17 +14,6 @@ export const RUELLES: CarteModele = {
   hauteur: 18,
   chemins: [
     chemin([4, -1], [4, 8], [12, 8], [12, 3], [20, 3], [20, 12], [28, 12], [28, 19]),
-  ],
-  socles: [
-    socle(2, 2, 4, 2), // 0
-    socle(6, 6, 4, 6), // 1
-    socle(9, 10, 9, 8), // 2
-    socle(10, 6, 10, 8), // 3
-    socle(14, 5, 12, 5), // 4
-    socle(18, 5, 18, 3), // 5
-    socle(22, 10, 20, 10), // 6
-    socle(26, 14, 26, 12), // 7
-    socle(30, 16, 28, 16), // 8
   ],
   departHeros: { x: 24, y: 12 },
   zones: [zone('paves', 14, 5, 5, 4), zone('paves', 22, 5, 5, 4), zone('boue', 6, 11, 5, 4), zone('boue', 0, 11, 2, 6)],
@@ -96,20 +85,6 @@ export const PLACE: CarteModele = {
   chemins: [
     chemin([-1, 6], [8, 6], [8, 14], [24, 14], [24, 9], [33, 9]),
     chemin([16, -1], [16, 9], [24, 9], [33, 9]),
-  ],
-  socles: [
-    socle(1, 4, 1, 6), // 0
-    socle(6, 8, 6, 6), // 1
-    socle(10, 12, 8, 12), // 2
-    socle(14, 2, 16, 2), // 3
-    socle(14, 6, 16, 6), // 4
-    socle(16, 16, 16, 14), // 5
-    socle(18, 7, 16, 7), // 6
-    socle(22, 7, 22, 9), // 7
-    socle(22, 12, 22, 14), // 8
-    socle(26, 11, 24, 11), // 9
-    socle(30, 11, 30, 9), // 10
-    socle(31, 7, 31, 9), // 11
   ],
   departHeros: { x: 28, y: 9 },
   zones: [zone('paves', 10, 7, 5, 5), zone('paves', 17, 10, 6, 3), zone('boue', 0, 10, 5, 6), zone('boue', 25, 1, 6, 5)],
@@ -196,20 +171,6 @@ export const BEFFROI: CarteModele = {
   chemins: [
     chemin([33, 4], [22, 4], [22, 10], [10, 10], [10, 19]),
     chemin([-1, 6], [10, 6], [10, 10], [10, 19]),
-  ],
-  socles: [
-    socle(1, 8, 1, 6), // 0
-    socle(3, 4, 3, 6), // 1
-    socle(7, 4, 7, 6), // 2
-    socle(8, 8, 8, 6), // 3
-    socle(8, 12, 10, 12), // 4
-    socle(8, 16, 10, 16), // 5
-    socle(12, 12, 12, 10), // 6
-    socle(16, 8, 16, 10), // 7
-    socle(20, 8, 22, 8), // 8
-    socle(24, 6, 24, 4), // 9
-    socle(28, 2, 28, 4), // 10
-    socle(31, 6, 31, 4), // 11
   ],
   departHeros: { x: 10, y: 14 },
   zones: [zone('paves', 12, 6, 8, 3), zone('paves', 24, 11, 6, 4), zone('boue', 0, 12, 6, 4), zone('boue', 14, 13, 6, 4)],

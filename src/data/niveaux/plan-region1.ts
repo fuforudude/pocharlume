@@ -3,10 +3,10 @@
 // vagues, graine, nombre de chemins) demande de relancer `npm run niveaux`, un test le rappelle.
 //
 // `aretesDepart` est réglé niveau par niveau avec le simulateur (`npm run balance`, voir docs/architecture.md) : il
-// donne la difficulté de chaque carte (nombre de chemins et de socles) sans toucher aux budgets de vagues. Il n'est
+// donne la difficulté de chaque carte (nombre de chemins) sans toucher aux budgets de vagues. Il n'est
 // donc pas croissant : la carte du Gué (niveau 2) demande plus d'arêtes de départ que celle des Pendus (niveau 3).
 //
-// Progression : le niveau 1 a un chemin simple et 6 socles ; le mendiant arrive au 3, le chien errant au 5 ;
+// Progression : le niveau 1 a un chemin simple ; le mendiant arrive au 3, le chien errant au 5 ;
 // plusieurs entrées du 5 au 9 ; le niveau 10 est le combat contre le Boucher de Vaudrelle.
 import type { IdEnnemi } from '../ennemis';
 import type { PlanNiveau } from './plan-niveau';
@@ -20,7 +20,6 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     numero: 1,
     carte: 'chaumes',
     chemins: [0],
-    socles: [0, 3, 5, 6, 9, 12],
     aretesDepart: 210,
     defiFer: { familles: ['caserne', 'tir'] },
     nom: 'niveau.r1.01.nom',
@@ -31,7 +30,6 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     numero: 2,
     carte: 'gue',
     chemins: [0],
-    socles: [0, 3, 4, 6, 7, 12, 16],
     aretesDepart: 315,
     defiFer: { familles: ['caserne', 'magie'] },
     nom: 'niveau.r1.02.nom',
@@ -42,7 +40,6 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     numero: 3,
     carte: 'pendus',
     chemins: [0],
-    socles: [1, 4, 6, 8, 9, 14, 20],
     aretesDepart: 200,
     defiFer: { familles: ['caserne', 'artillerie'] },
     nom: 'niveau.r1.03.nom',
@@ -53,7 +50,6 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     numero: 4,
     carte: 'carrefour',
     chemins: [0],
-    socles: [1, 3, 5, 8, 10, 12, 14, 16],
     aretesDepart: 240,
     defiFer: { familles: ['tir', 'magie'] },
     nom: 'niveau.r1.04.nom',
@@ -64,7 +60,6 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     numero: 5,
     carte: 'chaumes',
     chemins: [0, 1],
-    socles: [0, 3, 5, 7, 10, 13, 14, 16],
     aretesDepart: 530,
     defiFer: { familles: ['tir', 'artillerie'] },
     nom: 'niveau.r1.05.nom',
@@ -75,7 +70,6 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     numero: 6,
     carte: 'gue',
     chemins: [0, 1],
-    socles: [0, 3, 6, 8, 9, 11, 12, 16],
     aretesDepart: 515,
     defiFer: { familles: ['magie', 'artillerie'] },
     nom: 'niveau.r1.06.nom',
@@ -86,7 +80,6 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     numero: 7,
     carte: 'pendus',
     chemins: [0, 1],
-    socles: [0, 4, 5, 8, 9, 12, 14, 16, 20],
     aretesDepart: 340,
     defiFer: { familles: ['caserne', 'tir'] },
     nom: 'niveau.r1.07.nom',
@@ -97,7 +90,6 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     numero: 8,
     carte: 'carrefour',
     chemins: [0, 1],
-    socles: [0, 2, 3, 5, 8, 10, 12, 15, 17],
     aretesDepart: 330,
     defiFer: { familles: ['caserne', 'magie'] },
     nom: 'niveau.r1.08.nom',
@@ -108,7 +100,6 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     numero: 9,
     carte: 'pendus',
     chemins: [0, 1, 2],
-    socles: [0, 4, 6, 9, 12, 13, 16, 17, 19, 21],
     aretesDepart: 700,
     defiFer: { familles: ['caserne', 'artillerie'] },
     nom: 'niveau.r1.09.nom',
@@ -119,7 +110,6 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     numero: 10,
     carte: 'gue',
     chemins: [0, 1, 2],
-    socles: [0, 3, 4, 7, 9, 11, 12, 14, 17, 18],
     aretesDepart: 610,
     defiFer: { familles: ['tir', 'magie'] },
     nom: 'niveau.r1.10.nom',

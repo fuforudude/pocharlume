@@ -62,13 +62,12 @@ const ECART_ETOILES = 2;
 
 const VISUEL_VIDE: VisuelCarte = { region: 1, zones: [], decor: [] };
 
-/** La carte de tuiles de la route : les `troncons` premiers tronçons du tracé, en tuiles. Pas de socle ni de départ. */
+/** La carte de tuiles de la route : les `troncons` premiers tronçons du tracé, en tuiles. Pas de départ. */
 export function carteDuSol(trace: readonly (readonly Point[])[], troncons: number): Carte {
   return {
     largeur: LARGEUR_CARTE_MONDE / TUILE,
     hauteur: HAUTEUR_CARTE_MONDE / TUILE,
     chemins: trace.slice(0, Math.max(0, troncons)).map((points) => ({ points: points.map((p) => ({ x: p.x / TUILE, y: p.y / TUILE })) })),
-    socles: [],
     departHeros: { x: 0, y: 0 },
   };
 }

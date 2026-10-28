@@ -1,8 +1,8 @@
 // Cartes dessinées à la main de la région 5, la Ville Pestiférée (32 × 18 tuiles). Même structure que les cartes du
-// Village Affamé (cartes.ts) : une ou deux entrées, des socles fixes à 2 tuiles de l'axe des chemins (leur ralliement de
-// caserne est le point de l'axe le plus proche). Un niveau qui n'emprunte pas tous les chemins ne garde que les socles à portée
-// des chemins utilisés (plan-region5.ts) ; le décor posé dans le couloir d'un chemin inutilisé reste affiché.
-import { chemin, decor, socle, zone, type CarteModele } from './modele-carte';
+// Village Affamé (cartes.ts) : une ou deux entrées, sans socles (les tours se posent sur la grille de construction,
+// cases interdites tirées du chemin et des grands décors par grille-niveau.ts). Un niveau qui n'emprunte pas tous les
+// chemins ne garde que ceux utilisés (plan-region5.ts) ; le décor posé dans le couloir d'un chemin inutilisé reste affiché.
+import { chemin, decor, zone, type CarteModele } from './modele-carte';
 
 /**
  * La Quarantaine : un seul chemin en spirale carrée, entre les maisons marquées d’une croix rouge, jusqu’à la porte de l’est.
@@ -14,17 +14,6 @@ export const QUARANTAINE: CarteModele = {
   hauteur: 18,
   chemins: [
     chemin([-1, 3], [10, 3], [10, 9], [4, 9], [4, 15], [22, 15], [22, 8], [33, 8]),
-  ],
-  socles: [
-    socle(1, 5, 1, 3), // 0
-    socle(2, 15, 4, 15), // 1
-    socle(6, 11, 6, 9), // 2
-    socle(8, 5, 8, 3), // 3
-    socle(9, 13, 9, 15), // 4
-    socle(15, 13, 15, 15), // 5
-    socle(20, 13, 20, 15), // 6
-    socle(24, 10, 22, 10), // 7
-    socle(30, 10, 30, 8), // 8
   ],
   departHeros: { x: 27, y: 8 },
   zones: [zone('paves', 12, 5, 6, 8), zone('boue', 24, 11, 6, 4), zone('boue', 0, 11, 2, 3), zone('paves', 14, 1, 8, 2)],
@@ -95,19 +84,6 @@ export const FAUBOURG: CarteModele = {
   chemins: [
     chemin([-1, 8], [12, 8], [12, 3], [24, 3], [24, 12], [33, 12]),
     chemin([-1, 15], [18, 15], [18, 12], [24, 12], [33, 12]),
-  ],
-  socles: [
-    socle(2, 10, 2, 8), // 0
-    socle(4, 13, 4, 15), // 1
-    socle(8, 13, 8, 15), // 2
-    socle(10, 6, 10, 8), // 3
-    socle(12, 13, 12, 15), // 4
-    socle(14, 5, 12, 5), // 5
-    socle(16, 13, 16, 15), // 6
-    socle(21, 14, 21, 12), // 7
-    socle(22, 5, 22, 3), // 8
-    socle(26, 10, 24, 10), // 9
-    socle(31, 14, 31, 12), // 10
   ],
   departHeros: { x: 29, y: 12 },
   zones: [zone('paves', 14, 5, 8, 5), zone('boue', 1, 10, 6, 3), zone('boue', 26, 4, 5, 5), zone('paves', 5, 16, 6, 2)],
@@ -188,17 +164,6 @@ export const MARCHE: CarteModele = {
   chemins: [
     chemin([8, -1], [8, 6], [20, 6], [20, 12], [8, 12], [8, 19]),
     chemin([33, 3], [26, 3], [26, 9], [20, 9], [20, 12], [8, 12], [8, 19]),
-  ],
-  socles: [
-    socle(6, 16, 8, 16), // 0
-    socle(10, 4, 8, 4), // 1
-    socle(10, 14, 10, 12), // 2
-    socle(14, 14, 14, 12), // 3
-    socle(15, 4, 15, 6), // 4
-    socle(18, 10, 20, 10), // 5
-    socle(19, 4, 19, 6), // 6
-    socle(24, 7, 26, 7), // 7
-    socle(28, 5, 28, 3), // 8
   ],
   departHeros: { x: 14, y: 12 },
   zones: [zone('paves', 10, 7, 8, 4), zone('boue', 22, 13, 8, 4), zone('boue', 0, 8, 4, 4), zone('paves', 12, 0, 6, 3)],

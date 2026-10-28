@@ -1,8 +1,8 @@
-// Menu en cercle autour d'un socle : contenu (quelles actions, quel prix, lesquelles sont grisées) et
+// Menu en cercle autour d'une case de la grille : contenu (quelles actions, quel prix, lesquelles sont grisées) et
 // placement des boutons. Logique pure : le DOM est dans hud.ts. Les actions sont celles du moteur, et c'est
 // `validerAction` qui décide de ce qui est grisé : l'interface ne duplique aucune règle de jeu.
 import type { Action, RaisonRefus } from '../engine';
-import { coutCompetence, coutConstruction, validerAction, valeurRevente } from '../engine';
+import { coutCompetence, coutConstruction, tourSurCase, validerAction, valeurRevente } from '../engine';
 import type { EtatPartie, FamilleTour, Tour } from '../engine/etat';
 import { defNiveau, prix } from '../engine/tours';
 import { RANG_MAX_COMPETENCE } from '../data/meta';
@@ -35,12 +35,12 @@ function nomFamille(famille: FamilleTour): string {
 }
 
 /**
- * Les 4 familles et la tour divine, à construire sur un socle vide. En défi Fer, les familles que le niveau n'autorise pas
+ * Les 4 familles et la tour divine, à construire sur une case libre. En défi Fer, les familles que le niveau n'autorise pas
  * ne sont pas proposées du tout (c'est `validerAction` qui le dit, par `famille_interdite` : aucune règle dupliquée ici).
  */
-export function elementsSocleVide(etat: EtatPartie, socle: number): ElementMenu[] {
+export function elementsCaseVide(etat: EtatPartie, cx: number, cy: number): ElementMenu[] {
   return FAMILLES_MENU.map((famille) => {
-    const action: Action = { type: 'construire', socle, tour: famille };
+    const action: Action = { type: 'construire', cx, cy, tour: famille };
     const def = defNiveau(etat, famille, 1, null);
     return {
       id: `construire:${famille}`,
@@ -55,19 +55,19 @@ export function elementsSocleVide(etat: EtatPartie, socle: number): ElementMenu[
   }).filter((element) => element.refus !== 'famille_interdite');
 }
 
-function tourDuSocle(etat: EtatPartie, socle: number): Tour | undefined {
-  return etat.tours.find((tour) => tour.socle === socle);
+function tourDeLaCase(etat: EtatPartie, cx: number, cy: number): Tour | undefined {
+  return tourSurCase(etat, cx, cy);
 }
 
 /** Améliorer (ou les deux spécialisations au niveau 3), vendre, et ralliement pour une caserne. */
-export function elementsTour(etat: EtatPartie, socle: number): ElementMenu[] {
-  const tour = tourDuSocle(etat, socle);
+export function elementsTour(etat: EtatPartie, cx: number, cy: number): ElementMenu[] {
+  const tour = tourDeLaCase(etat, cx, cy);
   if (!tour) return [];
   const elements: ElementMenu[] = [];
   const famille = tour.famille;
   if (famille !== 'divine') {
     if (tour.niveau < 3) {
-      const action: Action = { type: 'ameliorer', socle };
+      const action: Action = { type: 'ameliorer', cx, cy };
       const def = defNiveau(etat, famille, tour.niveau + 1, null);
       elements.push({
         id: 'ameliorer',
@@ -81,7 +81,7 @@ export function elementsTour(etat: EtatPartie, socle: number): ElementMenu[] {
       });
     } else if (tour.niveau === 3) {
       for (const voie of ['A', 'B'] as const) {
-        const action: Action = { type: 'specialiser', socle, voie };
+        const action: Action = { type: 'specialiser', cx, cy, voie };
         const def = defNiveau(etat, famille, 4, voie);
         elements.push({
           id: `specialiser:${voie}`,
@@ -97,7 +97,7 @@ export function elementsTour(etat: EtatPartie, socle: number): ElementMenu[] {
     } else {
       // Tour spécialisée : ses deux compétences, achetées avec des arêtes (le moteur dit le prix et ce qui est permis).
       tour.stats.competences.forEach((competence, i) => {
-        const action: Action = { type: 'ameliorerCompetence', socle, competence: competence.id };
+        const action: Action = { type: 'ameliorerCompetence', cx, cy, competence: competence.id };
         const rang = tour.rangs[i] ?? 0;
         const nom = tCle(competence.nom);
         elements.push({
@@ -105,7 +105,7 @@ export function elementsTour(etat: EtatPartie, socle: number): ElementMenu[] {
           action,
           icone: 'icone-competence',
           libelle: rang >= RANG_MAX_COMPETENCE ? t('menu.competence_max', { nom }) : t('menu.competence', { nom, n: rang, m: RANG_MAX_COMPETENCE }),
-          prix: coutCompetence(etat, socle, competence.id) ?? null,
+          prix: coutCompetence(etat, cx, cy, competence.id) ?? null,
           gain: null,
           rang: t('menu.competence_rang', { n: rang, m: RANG_MAX_COMPETENCE }),
           refus: validerAction(etat, action),
@@ -113,14 +113,14 @@ export function elementsTour(etat: EtatPartie, socle: number): ElementMenu[] {
       });
     }
   }
-  const vente: Action = { type: 'vendre', socle };
+  const vente: Action = { type: 'vendre', cx, cy };
   elements.push({
     id: 'vendre',
     action: vente,
     icone: 'icone-vendre',
     libelle: t('menu.vendre'),
     prix: null,
-    gain: valeurRevente(etat, socle),
+    gain: valeurRevente(etat, cx, cy),
     rang: null,
     refus: validerAction(etat, vente),
   });
@@ -130,9 +130,9 @@ export function elementsTour(etat: EtatPartie, socle: number): ElementMenu[] {
   return elements;
 }
 
-/** Éléments du menu d'un socle, vide ou occupé. */
-export function elementsMenu(etat: EtatPartie, socle: number): ElementMenu[] {
-  return tourDuSocle(etat, socle) ? elementsTour(etat, socle) : elementsSocleVide(etat, socle);
+/** Éléments du menu d'une case, libre ou occupée. */
+export function elementsMenu(etat: EtatPartie, cx: number, cy: number): ElementMenu[] {
+  return tourDeLaCase(etat, cx, cy) ? elementsTour(etat, cx, cy) : elementsCaseVide(etat, cx, cy);
 }
 
 export interface PositionMenu {

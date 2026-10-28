@@ -1,8 +1,8 @@
 // Cartes dessinées à la main de la région 4, les Marais de l’Ordalie (32 × 18 tuiles). Même structure que les cartes du
-// Village Affamé (cartes.ts) : une ou deux entrées, des socles fixes à 2 tuiles de l'axe des chemins (leur ralliement de
-// caserne est le point de l'axe le plus proche). Un niveau qui n'emprunte pas tous les chemins ne garde que les socles à portée
-// des chemins utilisés (plan-region4.ts) ; le décor posé dans le couloir d'un chemin inutilisé reste affiché.
-import { chemin, decor, socle, zone, type CarteModele } from './modele-carte';
+// Village Affamé (cartes.ts) : une ou deux entrées, sans socles (les tours se posent sur la grille de construction,
+// cases interdites tirées du chemin et des grands décors par grille-niveau.ts). Un niveau qui n'emprunte pas tous les
+// chemins ne garde que ceux utilisés (plan-region4.ts) ; le décor posé dans le couloir d'un chemin inutilisé reste affiché.
+import { chemin, decor, zone, type CarteModele } from './modele-carte';
 
 /**
  * Le Ponton : un seul chemin de planches pourries, qui traverse le marais en longs lacets, du ponton de l’ouest à la berge de l’est.
@@ -14,17 +14,6 @@ export const PONTON: CarteModele = {
   hauteur: 18,
   chemins: [
     chemin([-1, 9], [6, 9], [6, 3], [14, 3], [14, 14], [26, 14], [26, 6], [33, 6]),
-  ],
-  socles: [
-    socle(1, 11, 1, 9), // 0
-    socle(4, 7, 4, 9), // 1
-    socle(8, 5, 6, 5), // 2
-    socle(12, 5, 12, 3), // 3
-    socle(16, 8, 14, 8), // 4
-    socle(16, 12, 14, 12), // 5
-    socle(20, 16, 20, 14), // 6
-    socle(24, 12, 24, 14), // 7
-    socle(28, 8, 26, 8), // 8
   ],
   departHeros: { x: 20, y: 14 },
   zones: [zone('boue', 8, 5, 5, 8), zone('boue', 16, 5, 8, 6), zone('boue', 0, 13, 5, 4), zone('paves', 27, 9, 4, 3)],
@@ -101,18 +90,6 @@ export const ETANG: CarteModele = {
   chemins: [
     chemin([-1, 5], [8, 5], [8, 14], [28, 14], [28, 19]),
     chemin([33, 8], [20, 8], [20, 14], [28, 14], [28, 19]),
-  ],
-  socles: [
-    socle(1, 3, 1, 5), // 0
-    socle(6, 7, 6, 5), // 1
-    socle(10, 12, 8, 12), // 2
-    socle(16, 12, 16, 14), // 3
-    socle(18, 8, 20, 8), // 4
-    socle(22, 6, 22, 8), // 5
-    socle(22, 12, 22, 14), // 6
-    socle(26, 16, 26, 14), // 7
-    socle(27, 10, 27, 8), // 8
-    socle(31, 10, 31, 8), // 9
   ],
   departHeros: { x: 24, y: 14 },
   zones: [zone('boue', 10, 6, 8, 6), zone('boue', 22, 1, 8, 5), zone('paves', 1, 8, 4, 4), zone('paves', 12, 15, 6, 2)],
@@ -195,19 +172,6 @@ export const SAULES: CarteModele = {
   chemins: [
     chemin([16, -1], [16, 5], [6, 5], [6, 11], [18, 11], [18, 19]),
     chemin([33, 8], [24, 8], [24, 14], [18, 14], [18, 19]),
-  ],
-  socles: [
-    socle(8, 3, 8, 5), // 0
-    socle(8, 9, 6, 9), // 1
-    socle(12, 9, 12, 11), // 2
-    socle(14, 3, 16, 3), // 3
-    socle(16, 13, 16, 11), // 4
-    socle(20, 16, 18, 16), // 5
-    socle(22, 12, 24, 12), // 6
-    socle(26, 10, 26, 8), // 7
-    socle(27, 6, 27, 8), // 8
-    socle(30, 10, 30, 8), // 9
-    socle(31, 6, 31, 8), // 10
   ],
   departHeros: { x: 18, y: 16 },
   zones: [zone('boue', 8, 7, 8, 3), zone('boue', 22, 8, 8, 4), zone('paves', 1, 13, 5, 4), zone('paves', 19, 1, 8, 4)],

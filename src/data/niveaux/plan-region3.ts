@@ -1,7 +1,7 @@
 // Plan des 10 niveaux de la région 3, du Bourg des Bûchers (niveaux 21 à 30 de la campagne).
 // Comme la région 1 (plan-region1.ts) : les vagues sont générées par `npm run niveaux` depuis ce plan et figées dans
 // vagues-region3.ts. Trois cartes (cartes-region3.ts) : la première n'a qu'un chemin, les deux autres en ont deux
-// ; un niveau en emprunte un seul ou les deux, et ne garde que les socles à portée des chemins empruntés. Les ennemis
+// ; un niveau en emprunte un seul ou les deux, et ne garde que ces chemins. Les ennemis
 // viennent de `ennemisDuNiveau` (plan-niveau.ts) : ceux de la région, puis dès le niveau 4 ceux des régions précédentes. Le
 // niveau 10 est le combat contre le Juge des Flammes. `defiFer` : deux familles de tours qui savent toucher les volants et
 // révéler les furtifs quand le niveau en compte, et qui varient d'un niveau à l'autre.
@@ -14,7 +14,6 @@ export const PLANS_REGION3: readonly PlanNiveau[] = [
     numero: 21,
     carte: 'ruelles',
     chemins: [0],
-    socles: [0, 1, 2, 3, 4, 5, 6, 7, 8],
     aretesDepart: 350,
     defiFer: { familles: ['caserne', 'artillerie'] },
     nom: 'niveau.r3.01.nom',
@@ -29,7 +28,6 @@ export const PLANS_REGION3: readonly PlanNiveau[] = [
     numero: 22,
     carte: 'place',
     chemins: [0],
-    socles: [0, 1, 2, 5, 8, 9, 10, 11],
     aretesDepart: 350,
     defiFer: { familles: ['tir', 'artillerie'] },
     nom: 'niveau.r3.02.nom',
@@ -44,7 +42,6 @@ export const PLANS_REGION3: readonly PlanNiveau[] = [
     numero: 23,
     carte: 'beffroi',
     chemins: [0],
-    socles: [4, 5, 6, 7, 8, 9, 10, 11],
     aretesDepart: 890,
     defiFer: { familles: ['caserne', 'tir'] },
     nom: 'niveau.r3.03.nom',
@@ -59,7 +56,6 @@ export const PLANS_REGION3: readonly PlanNiveau[] = [
     numero: 24,
     carte: 'place',
     chemins: [1],
-    socles: [3, 4, 6, 7, 10, 11],
     aretesDepart: 900,
     defiFer: { familles: ['tir', 'magie'] },
     nom: 'niveau.r3.04.nom',
@@ -74,7 +70,6 @@ export const PLANS_REGION3: readonly PlanNiveau[] = [
     numero: 25,
     carte: 'beffroi',
     chemins: [1],
-    socles: [0, 1, 2, 3, 4, 5],
     aretesDepart: 1600,
     defiFer: { familles: ['tir', 'artillerie'] },
     nom: 'niveau.r3.05.nom',
@@ -89,7 +84,6 @@ export const PLANS_REGION3: readonly PlanNiveau[] = [
     numero: 26,
     carte: 'ruelles',
     chemins: [0],
-    socles: [0, 1, 2, 3, 4, 5, 6, 7, 8],
     aretesDepart: 1620,
     defiFer: { familles: ['caserne', 'tir'] },
     nom: 'niveau.r3.06.nom',
@@ -104,7 +98,6 @@ export const PLANS_REGION3: readonly PlanNiveau[] = [
     numero: 27,
     carte: 'place',
     chemins: [0, 1],
-    socles: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
     aretesDepart: 930,
     defiFer: { familles: ['tir', 'magie'] },
     nom: 'niveau.r3.07.nom',
@@ -119,7 +112,6 @@ export const PLANS_REGION3: readonly PlanNiveau[] = [
     numero: 28,
     carte: 'beffroi',
     chemins: [0, 1],
-    socles: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
     aretesDepart: 600,
     defiFer: { familles: ['tir', 'artillerie'] },
     nom: 'niveau.r3.08.nom',
@@ -134,7 +126,6 @@ export const PLANS_REGION3: readonly PlanNiveau[] = [
     numero: 29,
     carte: 'place',
     chemins: [0, 1],
-    socles: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
     aretesDepart: 1140,
     defiFer: { familles: ['caserne', 'tir'] },
     nom: 'niveau.r3.09.nom',
@@ -149,7 +140,6 @@ export const PLANS_REGION3: readonly PlanNiveau[] = [
     numero: 30,
     carte: 'beffroi',
     chemins: [0, 1],
-    socles: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
     aretesDepart: 1690,
     defiFer: { familles: ['tir', 'magie'] },
     nom: 'niveau.r3.10.nom',
