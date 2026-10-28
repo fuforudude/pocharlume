@@ -1,0 +1,97 @@
+# Rat de Peste (région 5, dessiné) : rongeur décharné au poil terne, croûtes verdâtres, queue nue. Rapide, par essaims.
+# 32×32, ancre aux pieds, de profil vers la droite. Version d'élite (`rat-peste-elite`) : même recette (`modele`), tout assombri
+# (`sombre`), yeux rouges (le calque `yeux` est vide dans la version normale ; il suit la tête dans chaque cadre).
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+couleur S d4b088
+couleur Q 8e9a6a
+
+calque yeux
+.
+
+# --- Rat de Peste : rongeur décharné au poil terne, croûtes verdâtres, queue nue. Rapide, par essaims. -------------------------
+
+calque corps 7 22
+.MMMMMMMMM.
+MMmMMMmMMMM
+MmMMMMMENNM
+.MMMNMMNNM.
+..mMMMMMm..
+
+calque tete 17 22
+.Mn...
+MMMMNn
+MMMyNPP
+.MMMNP.
+
+calque gueule 17 22
+.Mn...
+MMMMNn
+MMMyNPw
+.MMMwwP
+..mPww.
+
+calque mort-dos 7 25
+..M.M.....M.M
+.NMMMMMMMMMMN
+mMMmMMMmMMMMM
+.MMMMMEMMMMN.
+.MMMMMM.Mnn..
+
+calque queue 1 25
+..PPPP
+PPP...
+
+calque queue-b 1 24
+PP.PPP
+..PP..
+
+calque pattes 7 27
+..M.M.....M.M
+..M.M.....M.M
+..N.N.....N.N
+
+calque pattes-a 7 27
+..M..M...M..M
+.M....M.M....M
+.N....N.N....N
+
+calque pattes-b 7 27
+...MM.....MM.
+...MM.....MM.
+...NN.....NN.
+
+sprite rat-peste
+anim repos 200
+cadre queue + pattes + corps + tete + yeux
+cadre queue-b + pattes + corps decale 0 -1 + tete decale 0 -1 + yeux decale 0 -1
+
+anim marche 60
+cadre queue + pattes-a + corps + tete + yeux
+cadre queue-b + pattes-b + corps decale 0 -1 + tete decale 0 -1 + yeux decale 0 -1
+cadre queue + pattes-a decale 1 0 + corps + tete + yeux
+cadre queue-b + pattes-b + corps decale 0 -1 + tete decale 0 -1 + yeux decale 0 -1
+
+# Il se ramasse puis bondit la gueule ouverte.
+anim attaque 80
+cadre queue decale 0 1 + pattes-b + corps decale -1 1 + tete decale -1 2 + yeux decale -1 2 duree 150
+cadre queue + pattes-a + corps decale 2 -1 + gueule decale 3 -1 + yeux decale 3 -1
+cadre queue + pattes-a + corps decale 2 0 + gueule decale 3 0 + yeux decale 3 0 duree 130
+cadre queue + pattes + corps + tete + yeux
+
+anim blesse 110
+cadre queue-b + pattes + corps decale -1 0 + tete decale -1 1 + yeux decale -1 1
+cadre queue + pattes + corps + tete + yeux
+
+# Sur le dos, les pattes en l'air.
+anim mort 140
+cadre queue-b + pattes-b + corps decale -1 2 + tete decale -1 3 + yeux decale -1 3
+cadre queue-b + mort-dos duree 900
+
+sprite rat-peste-elite
+modele rat-peste
+sombre
+calque yeux 20 23
+x

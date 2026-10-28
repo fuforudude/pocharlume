@@ -1,0 +1,372 @@
+# Ennemis humains des régions 2 à 5 (jalon 3) : les humains du pack Minifolks recolorés, avec quelques retouches.
+# Chaque ennemi a sa version d'élite (`<nom>-elite`) : même recette (`modele`), tout assombri (`sombre`), yeux rouges
+# (le calque `yeux` est vide dans la version normale et posé sur la tête dans chaque cadre : il suit donc le balancement).
+# Sprites 32×32, ancre aux pieds. Lignes de la planche : 0 repos, 1 marche, 3 attaque, 4 ou 5 blessé, 5 ou 6 mort
+# (selon la planche). Fichier généré une première fois par un script puis retouché à la main : on le modifie ici.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+couleur S d4b088
+couleur Q 8e9a6a
+couleur V 6c4a78
+
+calque yeux
+.
+
+
+sprite glaneur
+minifolks Without Outline/MiniArcherMan.png
+recolore 4058c0=H 6098e8=j b5d6de=J ffffff=q f8c090=S b07040=M c88850=n
+# Glaneur : l'archer du pack, chapeau de paille et haillons ; il tire de loin sur les soldats.
+
+anim repos 180
+cadre mf 0.0 + yeux decale 0 0
+cadre mf 0.1 + yeux decale 0 1
+cadre mf 0.2 + yeux decale 0 1
+cadre mf 0.3 + yeux decale 0 0
+
+anim marche 100
+cadre mf 1.0 + yeux decale 0 1
+cadre mf 1.1 + yeux decale 0 0
+cadre mf 1.2 + yeux decale 0 -1
+cadre mf 1.3 + yeux decale 0 1
+cadre mf 1.4 + yeux decale 0 0
+cadre mf 1.5 + yeux decale 0 -1
+
+anim attaque 90
+cadre mf 3.0 + yeux decale 0 0
+cadre mf 3.1 + yeux decale 0 0
+cadre mf 3.2 + yeux decale 0 0
+cadre mf 3.3 + yeux decale 0 0
+cadre mf 3.4 + yeux decale 0 0
+cadre mf 3.5 + yeux decale -1 0
+
+anim blesse 120
+cadre mf 5.1 + yeux decale -3 0
+cadre mf 5.2 + yeux decale -1 0
+
+anim mort 150
+cadre mf 6.0 + yeux decale -1 1
+cadre mf 6.1 + yeux decale -4 2
+cadre mf 6.2 + yeux decale -6 3
+cadre mf 6.3 duree 600
+
+sprite glaneur-elite
+modele glaneur
+sombre
+calque yeux 16 23
+x.x
+
+sprite porteur-torche
+minifolks Without Outline/MiniSpearMan.png
+recolore 8cadc6=b b5d6de=B 5a7b94=d 4058c0=r 6098e8=e ffffff=y f8c090=S b07040=M c88850=n
+# Porteur de Torche : le lancier du pack, cagoule sombre, robe rouge sang ; la pointe de la lance est la flamme.
+
+anim repos 160
+cadre mf 0.0 + yeux decale 0 0
+cadre mf 0.1 + yeux decale 0 1
+cadre mf 0.2 + yeux decale 0 1
+cadre mf 0.3 + yeux decale 0 0
+
+anim marche 90
+cadre mf 1.0 + yeux decale 0 1
+cadre mf 1.1 + yeux decale 0 0
+cadre mf 1.2 + yeux decale 0 -1
+cadre mf 1.3 + yeux decale 0 1
+cadre mf 1.4 + yeux decale 0 0
+cadre mf 1.5 + yeux decale 0 -1
+
+anim attaque 80
+cadre mf 3.0 + yeux decale 0 0
+cadre mf 3.1 + yeux decale -1 0
+cadre mf 3.2 + yeux decale -1 0
+cadre mf 3.3 + yeux decale 1 0
+cadre mf 3.4 + yeux decale 1 0
+cadre mf 3.5 + yeux decale 1 0
+cadre mf 3.6 + yeux decale 0 0
+
+anim blesse 120
+cadre mf 4.1 + yeux decale -1 0
+cadre mf 4.2 + yeux decale -1 0
+
+anim mort 150
+cadre mf 5.0 + yeux decale -1 1
+cadre mf 5.1 + yeux decale 0 2
+cadre mf 5.2 + yeux decale -5 4
+cadre mf 5.3
+cadre mf 5.4 duree 600
+
+sprite porteur-torche-elite
+modele porteur-torche
+sombre
+calque yeux 15 22
+x.x
+
+sprite chasseur-sorcieres
+minifolks Without Outline/MiniCrossBowMan.png
+recolore 8cadc6=G b5d6de=p 5a7b94=g ffffff=P 4058c0=k 6098e8=u f8c090=S b07040=d c88850=M
+# Chasseur de Sorcières : l'arbalétrier du pack, casque d'acier noirci et manteau sombre (armure moyenne).
+
+anim repos 180
+cadre mf 0.0 + yeux decale 0 0
+cadre mf 0.1 + yeux decale 0 2
+cadre mf 0.2 + yeux decale 0 1
+cadre mf 0.3 + yeux decale 0 0
+
+anim marche 100
+cadre mf 1.0 + yeux decale 0 2
+cadre mf 1.1 + yeux decale 0 0
+cadre mf 1.2 + yeux decale 0 -1
+cadre mf 1.3 + yeux decale 0 2
+cadre mf 1.4 + yeux decale 0 0
+cadre mf 1.5 + yeux decale 0 -1
+
+anim attaque 90
+cadre mf 3.0 + yeux decale 0 0
+cadre mf 3.1 + yeux decale 1 0
+cadre mf 3.2 + yeux decale 1 1
+cadre mf 3.3 + yeux decale 1 0
+cadre mf 3.4 + yeux decale 0 0
+cadre mf 3.5 + yeux decale -4 0
+
+anim blesse 120
+cadre mf 5.1 + yeux decale -3 0
+cadre mf 5.2 + yeux decale -1 0
+
+anim mort 150
+cadre mf 6.0 + yeux decale -1 1
+cadre mf 6.1 + yeux decale -4 1
+cadre mf 6.2 + yeux decale -6 2
+cadre mf 6.3 duree 600
+
+sprite chasseur-sorcieres-elite
+modele chasseur-sorcieres
+sombre
+calque yeux 16 22
+x.x
+
+sprite delateur
+minifolks Without Outline/MiniArcherMan.png
+recolore 4058c0=u 6098e8=U b5d6de=v ffffff=v f8c090=S b07040=p c88850=U
+# Délateur : l'archer du pack, encapuchonné de gris-violet ; furtif, il se fond dans le décor.
+
+anim repos 180
+cadre mf 0.0 + yeux decale 0 0
+cadre mf 0.1 + yeux decale 0 1
+cadre mf 0.2 + yeux decale 0 1
+cadre mf 0.3 + yeux decale 0 0
+
+anim marche 100
+cadre mf 1.0 + yeux decale 0 1
+cadre mf 1.1 + yeux decale 0 0
+cadre mf 1.2 + yeux decale 0 -1
+cadre mf 1.3 + yeux decale 0 1
+cadre mf 1.4 + yeux decale 0 0
+cadre mf 1.5 + yeux decale 0 -1
+
+anim attaque 90
+cadre mf 3.0 + yeux decale 0 0
+cadre mf 3.1 + yeux decale 0 0
+cadre mf 3.2 + yeux decale 0 0
+cadre mf 3.3 + yeux decale 0 0
+cadre mf 3.4 + yeux decale 0 0
+cadre mf 3.5 + yeux decale -1 0
+
+anim blesse 120
+cadre mf 5.1 + yeux decale -3 0
+cadre mf 5.2 + yeux decale -1 0
+
+anim mort 150
+cadre mf 6.0 + yeux decale -1 1
+cadre mf 6.1 + yeux decale -4 2
+cadre mf 6.2 + yeux decale -6 3
+cadre mf 6.3 duree 600
+
+sprite delateur-elite
+modele delateur
+sombre
+calque yeux 16 23
+x.x
+
+sprite noyeur
+minifolks Without Outline/MiniHalberdMan.png
+recolore 6098e8=E 4058c0=h 8cadc6=H 5a7b94=h b5d6de=j ffffff=L f8c090=Q b07040=m c88850=M
+# Noyeur : le hallebardier du pack, vert de vase et d'algues, la hallebarde rouillée.
+
+anim repos 180
+cadre mf 0.0 + yeux decale 0 0
+cadre mf 0.1 + yeux decale 0 1
+cadre mf 0.2 + yeux decale 0 1
+cadre mf 0.3 + yeux decale 0 0
+
+anim marche 110
+cadre mf 1.0 + yeux decale 0 1
+cadre mf 1.1 + yeux decale 0 0
+cadre mf 1.2 + yeux decale 0 -1
+cadre mf 1.3 + yeux decale 0 1
+cadre mf 1.4 + yeux decale 0 0
+cadre mf 1.5 + yeux decale 0 -1
+
+anim attaque 100
+cadre mf 3.0 + yeux decale -1 0
+cadre mf 3.1 + yeux decale -1 0
+cadre mf 3.2 + yeux decale 1 0
+cadre mf 3.3 + yeux decale 1 0
+cadre mf 3.4 + yeux decale 1 0
+cadre mf 3.5 + yeux decale 0 0
+
+anim blesse 120
+cadre mf 4.1 + yeux decale -3 0
+cadre mf 4.2 + yeux decale -1 0
+
+anim mort 150
+cadre mf 5.0 + yeux decale -1 1
+cadre mf 5.1 + yeux decale -2 2
+cadre mf 5.2
+cadre mf 5.3
+cadre mf 5.4 duree 600
+
+sprite noyeur-elite
+modele noyeur
+sombre
+calque yeux 16 23
+xx
+
+sprite pelerin-voile
+minifolks Without Outline/MiniMage.png
+recolore 4058c0=Z 6098e8=z 98d8f8=L f8c090=z c88850=Z b07040=q
+# Pèlerin Voilé : le mage du pack, voile et robe de lin pâle (résistance magique).
+
+anim repos 180
+cadre mf 0.0 + yeux decale 0 0
+cadre mf 0.1 + yeux decale 0 1
+cadre mf 0.2 + yeux decale 0 1
+cadre mf 0.3 + yeux decale 0 0
+
+anim marche 100
+cadre mf 1.0 + yeux decale 0 -1
+cadre mf 1.1 + yeux decale 0 1
+cadre mf 1.2 + yeux decale 0 0
+cadre mf 1.3 + yeux decale 0 -1
+cadre mf 1.4 + yeux decale 0 1
+cadre mf 1.5 + yeux decale 0 0
+
+anim attaque 90
+cadre mf 3.0 + yeux decale 0 0
+cadre mf 3.1 + yeux decale 0 0
+cadre mf 3.2 + yeux decale 0 0
+cadre mf 3.3 + yeux decale 0 0
+cadre mf 3.4 + yeux decale 0 0
+cadre mf 3.5 + yeux decale 1 0
+
+anim blesse 120
+cadre mf 6.0 + yeux decale -3 0
+cadre mf 6.1 + yeux decale -1 0
+
+anim mort 150
+cadre mf 7.0 + yeux decale -1 0
+cadre mf 7.1 + yeux decale -2 3
+cadre mf 7.2 + yeux decale -2 2
+cadre mf 7.3 + yeux decale -2 2
+cadre mf 7.4 + yeux decale -2 2
+cadre mf 7.8 duree 600
+
+sprite pelerin-voile-elite
+modele pelerin-voile
+sombre
+calque yeux 16 24
+x.x
+
+sprite pestifere
+minifolks Without Outline/MiniSwordMan.png
+recolore 8cadc6=B b5d6de=O 5a7b94=b ffffff=q 4058c0=M 6098e8=N f8c090=Q b07040=E c88850=E
+# Pestiféré : l'épéiste du pack en haillons, peau verdâtre ; l'épée est un bâton noueux.
+
+anim repos 180
+cadre mf 0.0 + yeux decale 0 0
+cadre mf 0.1 + yeux decale 0 1
+cadre mf 0.2 + yeux decale 0 1
+cadre mf 0.3 + yeux decale 0 0
+
+anim marche 100
+cadre mf 1.0 + yeux decale 0 -1
+cadre mf 1.1 + yeux decale 0 1
+cadre mf 1.2 + yeux decale 0 0
+cadre mf 1.3 + yeux decale 0 -1
+cadre mf 1.4 + yeux decale 0 1
+cadre mf 1.5 + yeux decale 0 0
+
+anim attaque 90
+cadre mf 3.0 + yeux decale -1 0
+cadre mf 3.1 + yeux decale -5 0
+cadre mf 3.2 + yeux decale 1 0
+cadre mf 3.3 + yeux decale 1 0
+cadre mf 3.4 + yeux decale 1 0
+cadre mf 3.5 + yeux decale 0 0
+
+anim blesse 120
+cadre mf 4.1 + yeux decale -3 0
+cadre mf 4.2 + yeux decale -1 0
+
+anim mort 150
+cadre mf 5.0 + yeux decale -1 1
+cadre mf 5.1 + yeux decale 1 2
+cadre mf 5.2 + yeux decale -5 5
+cadre mf 5.3 + yeux decale -5 6 duree 600
+
+sprite pestifere-elite
+modele pestifere
+sombre
+calque yeux 16 24
+x.x
+
+sprite medecin-peste
+minifolks Without Outline/MiniMage.png
+recolore 4058c0=k 6098e8=u 98d8f8=E f8c090=q c88850=P b07040=d
+# Médecin de Peste : le mage du pack, grande robe noire, masque d'os à long bec (calque bec posé sur la tête).
+
+anim repos 180
+cadre mf 0.0 + bec decale 0 0 + yeux decale 0 0
+cadre mf 0.1 + bec decale 0 1 + yeux decale 0 1
+cadre mf 0.2 + bec decale 0 1 + yeux decale 0 1
+cadre mf 0.3 + bec decale 0 0 + yeux decale 0 0
+
+anim marche 100
+cadre mf 1.0 + bec decale 0 -1 + yeux decale 0 -1
+cadre mf 1.1 + bec decale 0 1 + yeux decale 0 1
+cadre mf 1.2 + bec decale 0 0 + yeux decale 0 0
+cadre mf 1.3 + bec decale 0 -1 + yeux decale 0 -1
+cadre mf 1.4 + bec decale 0 1 + yeux decale 0 1
+cadre mf 1.5 + bec decale 0 0 + yeux decale 0 0
+
+anim attaque 90
+cadre mf 3.0 + bec decale 0 0 + yeux decale 0 0
+cadre mf 3.1 + bec decale 0 0 + yeux decale 0 0
+cadre mf 3.2 + bec decale 0 0 + yeux decale 0 0
+cadre mf 3.3 + bec decale 0 0 + yeux decale 0 0
+cadre mf 3.4 + bec decale 0 0 + yeux decale 0 0
+cadre mf 3.5 + bec decale 1 0 + yeux decale 1 0
+
+anim blesse 120
+cadre mf 6.0 + bec decale -3 0 + yeux decale -3 0
+cadre mf 6.1 + bec decale -1 0 + yeux decale -1 0
+
+anim mort 150
+cadre mf 7.0 + bec decale -1 0 + yeux decale -1 0
+cadre mf 7.1 + bec decale -2 3 + yeux decale -2 3
+cadre mf 7.2 + bec decale -2 2 + yeux decale -2 2
+cadre mf 7.3 + bec decale -2 2 + yeux decale -2 2
+cadre mf 7.4 + bec decale -2 2 + yeux decale -2 2
+cadre mf 7.8 duree 600
+
+calque bec 18 24
+qqq.
+.PPq
+..PP
+
+sprite medecin-peste-elite
+modele medecin-peste
+sombre
+calque yeux 16 24
+x.x
