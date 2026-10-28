@@ -289,7 +289,7 @@ describe('niveau, compétences et stats des héros', () => {
 
   it('applique les compétences en partie : esquive de Plume, capacité de Mastoc, tourelles de Rouage', () => {
     const plume = partieDe('plume', { niveauHeros: 4, competencesHeros: { pas_de_velours: 3 } });
-    expect(heros(plume).stats.capacites?.esquive).toBeCloseTo((HEROS.plume.capacites.esquive ?? 0) + (HEROS.plume.competences[0]?.rangs[2]?.esquive ?? 0), 5);
+    expect(heros(plume).stats.capacites?.esquive).toBeCloseTo(HEROS.plume.capacites.esquive + (HEROS.plume.competences[0]?.rangs[2]?.esquive ?? 0), 5);
 
     const mastoc = partieDe('mastoc', { niveauHeros: 4, competencesHeros: { cri_de_defi: 3 } });
     expect(heros(mastoc).stats.capacite).toBe(5);
