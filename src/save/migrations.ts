@@ -104,8 +104,16 @@ function v3versV4(v3: Brut): Brut {
   };
 }
 
+/**
+ * v4 vers v5 : tout est gardé tel quel ; `meta` reçoit le mode infini sans record ni palier payé (écrit en dur ici comme
+ * pour les versions précédentes). Rien n'est perdu : le mode infini n'existait pas, il n'y a aucun record à reprendre.
+ */
+function v4versV5(v4: Brut): Brut {
+  return { ...v4, version: 5, meta: { ...objet(v4.meta), infini: { records: {}, paliers: [] } } };
+}
+
 /** `MIGRATIONS[n]` fait passer une sauvegarde de la version n à la version n + 1. */
-export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: v1versV2, 2: v2versV3, 3: v3versV4 };
+export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: v1versV2, 2: v2versV3, 3: v3versV4, 4: v4versV5 };
 
 /**
  * Migre une sauvegarde brute (n'importe quelle version connue) vers la version courante et la valide. `defs`

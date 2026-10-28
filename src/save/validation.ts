@@ -31,6 +31,7 @@ import {
 import { REGLES } from '../data/regles';
 import type { ConfigPartie } from '../engine/etat';
 import { definitionDuHeros, niveauHerosDepuisXp, pointsDeCompetence, type DefsMeta } from './definitions';
+import { validerInfini } from './validation-infini';
 import { validerCollection, validerDefis, validerExtensionConfigV4, validerRegionMax } from './validation-collection';
 import { avecCles, CLE_NIVEAU, echec, estEnregistrement, estEntierEntre, ok, parmi, poser, validerEntiersParCle, valeur, type Resultat } from './validation-base';
 import {
@@ -189,7 +190,7 @@ function validerChoix(x: unknown): Resultat<ChoixPartie> {
 }
 
 function validerMeta(x: unknown, progression: Progression, defs: DefsMeta | undefined): Resultat<Meta> {
-  const base = avecCles(x, ['monnaies', 'heros', 'arbre', 'objets', 'choix', 'regionMax', 'defis', 'collection'], 'meta');
+  const base = avecCles(x, ['monnaies', 'heros', 'arbre', 'objets', 'choix', 'regionMax', 'defis', 'collection', 'infini'], 'meta');
   if (!base.ok) return base;
   const monnaies = validerEntiersParCle(valeur(base.valeur, 'monnaies'), ['aretes', 'braises'] as const, PLAFOND_MONNAIE, 'meta.monnaies');
   if (!monnaies.ok) return monnaies;
@@ -208,6 +209,8 @@ function validerMeta(x: unknown, progression: Progression, defs: DefsMeta | unde
   if (!defis.ok) return defis;
   const collection = validerCollection(valeur(base.valeur, 'collection'));
   if (!collection.ok) return collection;
+  const infini = validerInfini(valeur(base.valeur, 'infini'));
+  if (!infini.ok) return infini;
   return ok({
     monnaies: monnaies.valeur,
     heros: heros.valeur,
@@ -217,6 +220,7 @@ function validerMeta(x: unknown, progression: Progression, defs: DefsMeta | unde
     regionMax: regionMax.valeur,
     defis: defis.valeur,
     collection: collection.valeur,
+    infini: infini.valeur,
   });
 }
 

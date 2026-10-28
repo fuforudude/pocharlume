@@ -9,11 +9,12 @@
 //        rangs de l'arbre d'améliorations, stock d'objets, dernier choix de dieu, de héros et d'objets.
 // - v4 : (dans `meta`) région la plus haute ouverte, défis réussis par niveau, collection (objets possédés et rangs, éclats,
 //        compteurs de garantie par caisse, skins et familiers équipés).
-import { AVATARS, BRANCHES_ARBRE, coutCumuleArbre, IDS_OBJETS, type IdBranche, type IdDefi, type IdDieu, type IdHeros, type IdObjet } from '../data/meta';
+// - v5 : (dans `meta`) mode infini : record par carte (dernière vague terminée) et paliers déjà payés.
+import { AVATARS, BRANCHES_ARBRE, coutCumuleArbre, IDS_OBJETS, type IdBranche, type IdDefi, type IdDieu, type IdHeros, type IdObjet, type PalierInfini } from '../data/meta';
 import type { ConfigPartie } from '../engine/etat';
 import { collectionVide, type Collection } from '../meta/collection';
 
-export const VERSION_SAUVEGARDE = 4;
+export const VERSION_SAUVEGARDE = 5;
 
 /** Nombre de niveaux de la campagne (10 régions de 10 niveaux). */
 export const NOMBRE_NIVEAUX = 100;
@@ -85,6 +86,16 @@ export interface ChoixPartie {
 export type DefisNiveau = Partial<Record<IdDefi, true>>;
 
 /**
+ * Mode infini. Le record est la dernière vague terminée sur une carte (clé : identifiant de la carte) ; seules les cartes
+ * jouées y figurent. Les paliers payés sont globaux, toutes cartes confondues, rangés dans l'ordre croissant : chacun
+ * n'a rapporté ses arêtes et ses braises qu'une fois.
+ */
+export interface Infini {
+  records: Record<string, number>;
+  paliers: PalierInfini[];
+}
+
+/**
  * Méta-progression. Les étoiles dépensées dans l'arbre ne sont pas stockées : on retient les rangs, et les étoiles
  * disponibles se déduisent (étoiles gagnées moins coût des rangs), si bien qu'une réinitialisation les rend toutes.
  */
@@ -105,6 +116,7 @@ export interface Meta {
   /** Défis réussis, par numéro de niveau en chiffres. Seul un niveau à 3 étoiles peut en avoir. */
   defis: Record<string, DefisNiveau>;
   collection: Collection;
+  infini: Infini;
 }
 
 export interface Sauvegarde {
@@ -130,6 +142,7 @@ export function metaParDefaut(): Meta {
     regionMax: 1,
     defis: {},
     collection: collectionVide(),
+    infini: { records: {}, paliers: [] },
   };
 }
 

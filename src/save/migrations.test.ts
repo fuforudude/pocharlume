@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FIXTURE_V1, FIXTURE_V2, FIXTURE_V3, sauvegardeRemplie, variante } from './aides.test-utils';
+import { FIXTURE_V1, FIXTURE_V2, FIXTURE_V3, FIXTURE_V4, sauvegardeRemplie, variante } from './aides.test-utils';
 import { etoilesDepensees, etoilesGagnees, metaParDefaut, VERSION_SAUVEGARDE } from './format';
 import { MIGRATIONS, migrer } from './migrations';
 
@@ -53,6 +53,8 @@ describe('migrations de format', () => {
       regionMax: 1,
       defis: {},
       collection: { possedes: {}, eclats: 0, garanties: { skins: 0, familiers: 0 }, equipes: { skins: {}, familiers: {} } },
+      // Ajout de la v5 : le mode infini sans record ni palier.
+      infini: { records: {}, paliers: [] },
     });
   });
 
@@ -65,7 +67,7 @@ describe('migrations de format', () => {
     const r = migrer(v3);
     if (!r.ok) throw new Error(r.raison);
     expect(r.depuis).toBe(3);
-    expect(r.sauvegarde.version).toBe(4);
+    expect(r.sauvegarde.version).toBe(VERSION_SAUVEGARDE);
     expect(r.sauvegarde.progression).toEqual(v3.progression);
     expect(r.sauvegarde.reglages).toEqual(v3.reglages);
     expect(r.sauvegarde.partie).toEqual(v3.partie);
@@ -75,7 +77,41 @@ describe('migrations de format', () => {
       regionMax: 2,
       defis: {},
       collection: { possedes: {}, eclats: 0, garanties: { skins: 0, familiers: 0 }, equipes: { skins: {}, familiers: {} } },
+      infini: { records: {}, paliers: [] },
     });
+  });
+
+  it('la fixture v4 figée est bien une sauvegarde en version 4', () => {
+    expect((JSON.parse(FIXTURE_V4) as { version: number }).version).toBe(4);
+  });
+
+  it('migre la sauvegarde v4 figée en v5 sans rien perdre : tout est identique, la méta reçoit le mode infini vide', () => {
+    const v4 = JSON.parse(FIXTURE_V4) as { progression: unknown; reglages: unknown; meta: Record<string, unknown>; partie: unknown };
+    const r = migrer(v4);
+    if (!r.ok) throw new Error(r.raison);
+    expect(r.depuis).toBe(4);
+    expect(r.sauvegarde.version).toBe(5);
+    expect(r.sauvegarde.progression).toEqual(v4.progression);
+    expect(r.sauvegarde.reglages).toEqual(v4.reglages);
+    expect(r.sauvegarde.partie).toEqual(v4.partie);
+    // Monnaies, héros, arbre, stock, choix, région, défis et collection sont gardés tels quels.
+    expect(r.sauvegarde.meta).toEqual({ ...v4.meta, infini: { records: {}, paliers: [] } });
+    expect(r.sauvegarde.meta.defis).toEqual({ '2': { heroique: true }, '4': { heroique: true, fer: true } });
+    expect(r.sauvegarde.meta.collection.eclats).toBe(77);
+  });
+
+  it('la chaîne complète v1, v2, v3, v4 aboutit à la version 5 valide', () => {
+    for (const fixture of [FIXTURE_V1, FIXTURE_V2, FIXTURE_V3, FIXTURE_V4]) {
+      const r = migrer(JSON.parse(fixture));
+      expect(r.ok && r.sauvegarde.version).toBe(5);
+      expect(r.ok && r.sauvegarde.meta.infini).toEqual({ records: {}, paliers: [] });
+    }
+  });
+
+  it('une v4 abîmée est refusée après migration', () => {
+    const v4 = JSON.parse(FIXTURE_V4) as Record<string, unknown>;
+    expect(migrer({ ...v4, extra: 1 })).toMatchObject({ ok: false, cause: 'invalide' });
+    expect(migrer({ ...v4, meta: { ...(v4.meta as object), monnaies: { aretes: -1, braises: 0 } } })).toMatchObject({ ok: false, cause: 'invalide' });
   });
 
   it('migrer la v3 ne donne ni éclats, ni objets, ni défis rétroactifs, et garde l’arbre acheté', () => {

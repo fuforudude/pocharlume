@@ -1,5 +1,4 @@
-// Outils réservés aux tests de la sauvegarde (jamais importés par le jeu) : sauvegardes d'exemple, fixtures v1, v2 et
-// v3, définitions de héros d'essai, stockages truqués.
+// Outils réservés aux tests de la sauvegarde (jamais importés par le jeu) : sauvegardes d'exemple, fixtures v1 à v4, définitions de héros d'essai, stockages truqués.
 import { readFileSync } from 'node:fs';
 import { IDS_HEROS } from '../data/meta';
 import { VERSION_DONNEES } from '../data/version';
@@ -11,6 +10,7 @@ import type { Stockage } from './stockage';
 export const FIXTURE_V1 = readFileSync(new URL('./fixtures/sauvegarde-v1.json', import.meta.url), 'utf8');
 export const FIXTURE_V2 = readFileSync(new URL('./fixtures/sauvegarde-v2.json', import.meta.url), 'utf8');
 export const FIXTURE_V3 = readFileSync(new URL('./fixtures/sauvegarde-v3.json', import.meta.url), 'utf8');
+export const FIXTURE_V4 = readFileSync(new URL('./fixtures/sauvegarde-v4.json', import.meta.url), 'utf8');
 
 /**
  * Définitions de héros d'essai (les vraies viennent de src/data/heros.ts) : 4 compétences par héros, les trois
@@ -69,6 +69,8 @@ export function sauvegardeRemplie(): Sauvegarde {
         garanties: { skins: 4, familiers: 0 },
         equipes: { skins: { tir: 'skin_tir_1', suie: 'skin_suie' }, familiers: { suie: 'familier_chouette' } },
       },
+      // Mode infini ouvert (niveau 10 gagné) : deux cartes jouées, les paliers 10 et 20 payés.
+      infini: { records: { chaumes: 23, gue: 12 }, paliers: [10, 20] },
     },
     partie: PARTIE,
   };

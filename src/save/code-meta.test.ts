@@ -50,6 +50,8 @@ function joueurComplet(): Sauvegarde {
           familiers: Object.fromEntries(IDS_HEROS.map((h) => [h, 'familier_salamandre'])),
         },
       },
+      // Tous les paliers de l'infini payés, des records sur plusieurs cartes.
+      infini: { records: { chaumes: 130, gue: 75, pendus: 9999, carrefour: 1 }, paliers: [10, 20, 30, 50, 75, 100] },
     },
   };
 }
@@ -91,7 +93,7 @@ describe('export et import de la méta-progression', () => {
     if (!r.ok) throw new Error(r.detail);
     expect(r.depuis).toBe(3);
     expect(r.sauvegarde.progression).toEqual(v3.progression);
-    expect(r.sauvegarde.meta).toEqual({ ...v3.meta, regionMax: 2, defis: {}, collection: metaParDefaut().collection });
+    expect(r.sauvegarde.meta).toEqual({ ...v3.meta, regionMax: 2, defis: {}, collection: metaParDefaut().collection, infini: { records: {}, paliers: [] } });
   });
 
   it('un code v3 sans méta est refusé', async () => {

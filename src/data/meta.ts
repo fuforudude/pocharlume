@@ -154,8 +154,35 @@ export function estIdDefi(x: unknown): x is IdDefi {
 /** Braises que rapporte la première réussite d'un défi sur un niveau. */
 export const BRAISES_DEFI = 4;
 
-/** Niveaux (boss) dont la première victoire offre un disciple : fin des régions 2 et 4 (6 et 8 au jalon 4). */
-export const NIVEAUX_DISCIPLE_OFFERT: readonly number[] = [20, 40];
+/** Niveaux (boss) dont la première victoire offre un disciple : fin des régions 2, 4, 6 et 8. */
+export const NIVEAUX_DISCIPLE_OFFERT: readonly number[] = [20, 40, 60, 80];
+
+/** Niveau (boss de la région 1) dont la victoire ouvre le mode infini. */
+export const NIVEAU_OUVERTURE_INFINI = 10;
+/** Niveau (boss de la région 10, le Soleil Blême) dont la victoire termine la campagne. */
+export const NIVEAU_FIN_CAMPAGNE = NOMBRE_REGIONS * NIVEAUX_PAR_REGION;
+
+// --- Mode infini : record par carte et paliers --------------------------------------------------------------------
+
+/** Paliers de l'infini (dernière vague terminée) : chacun est payé une seule fois au total, toutes cartes confondues. */
+export const PALIERS_INFINI = [10, 20, 30, 50, 75, 100] as const;
+export type PalierInfini = (typeof PALIERS_INFINI)[number];
+export function estPalierInfini(x: unknown): x is PalierInfini {
+  return typeof x === 'number' && (PALIERS_INFINI as readonly number[]).includes(x);
+}
+/** Ce que rapporte un palier de l'infini, la première (et seule) fois. */
+export const RECOMPENSES_PALIERS_INFINI: Readonly<Record<PalierInfini, { readonly aretes: number; readonly braises: number }>> = {
+  10: { aretes: 50, braises: 2 },
+  20: { aretes: 100, braises: 3 },
+  30: { aretes: 150, braises: 5 },
+  50: { aretes: 250, braises: 8 },
+  75: { aretes: 400, braises: 12 },
+  100: { aretes: 600, braises: 20 },
+};
+/** Plus haute vague acceptée comme record (garde-fou contre une valeur démesurée). */
+export const VAGUE_MAX_INFINI = 9999;
+/** Nombre maximal de cartes ayant un record (15 + 15 cartes dessinées prévues, avec de la marge). */
+export const CARTES_INFINI_MAX = 64;
 /** Ordre dans lequel les disciples sont offerts : le premier que le joueur n'a pas encore. */
 export const DISCIPLES_OFFERTS: readonly IdHeros[] = ['suie', 'mastoc', 'rouage', 'corbeau', 'brise_os', 'lanterne'];
 
