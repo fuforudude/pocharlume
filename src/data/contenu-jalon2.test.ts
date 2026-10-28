@@ -65,13 +65,14 @@ describe('dieux', () => {
   });
 
   it('les bonus de famille suivent la spec', () => {
-    expect(DIEUX.plume.bonus).toMatchObject({ famille: 'tir', cadence: 0.15, chanceCritique: 0.1 });
-    expect(DIEUX.pollen.bonus).toMatchObject({ famille: 'artillerie', prix: -0.15 });
+    // Valeurs réglées avec le simulateur (jalon 2, tâche 6) ; la spec donne seulement les valeurs de départ.
+    expect(DIEUX.plume.bonus).toMatchObject({ famille: 'tir', cadence: 0.6, chanceCritique: 0.15 });
+    expect(DIEUX.pollen.bonus).toMatchObject({ famille: 'artillerie', prix: -0.1, cadence: 0.15 });
     expect(DIEUX.pollen.bonus.piegeAuSol?.chance).toBe(0.2);
   });
 
   it('les sorts ont les recharges de la spec', () => {
-    expect(DIEUX.plume.sorts.map((s) => s.recharge)).toEqual([35, 60]);
+    expect(DIEUX.plume.sorts.map((s) => s.recharge)).toEqual([30, 40]);
     expect(DIEUX.pollen.sorts.map((s) => s.recharge)).toEqual([30, 50]);
   });
 });

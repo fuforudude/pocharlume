@@ -264,7 +264,8 @@ describe('niveau, compétences et stats des héros', () => {
       const haut = configDe(def.dieu, { heros: id, niveauHeros: 10 });
       const bas = resoudreHeros(config).stats;
       const plus = resoudreHeros(haut).stats;
-      expect(plus.pv, id).toBe(bas.pv + 9 * def.pvParNiveau);
+      // Les PV sont arrondis à l'entier : au plus un point d'écart avec la somme exacte.
+      expect(Math.abs(plus.pv - (bas.pv + 9 * def.pvParNiveau)), id).toBeLessThanOrEqual(1);
       const attaque = (s: typeof bas): number => s.capacites?.distance?.degats[1] ?? s.degats[1];
       expect(attaque(plus), id).toBeCloseTo(attaque(bas) + 9 * def.degatsParNiveau, 5);
     }
@@ -288,7 +289,7 @@ describe('niveau, compétences et stats des héros', () => {
 
   it('applique les compétences en partie : esquive de Plume, capacité de Mastoc, tourelles de Rouage', () => {
     const plume = partieDe('plume', { niveauHeros: 4, competencesHeros: { pas_de_velours: 3 } });
-    expect(heros(plume).stats.capacites?.esquive).toBeCloseTo(0.45, 5);
+    expect(heros(plume).stats.capacites?.esquive).toBeCloseTo((HEROS.plume.capacites.esquive ?? 0) + (HEROS.plume.competences[0]?.rangs[2]?.esquive ?? 0), 5);
 
     const mastoc = partieDe('mastoc', { niveauHeros: 4, competencesHeros: { cri_de_defi: 3 } });
     expect(heros(mastoc).stats.capacite).toBe(5);

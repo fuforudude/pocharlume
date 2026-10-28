@@ -9,13 +9,14 @@ import { PAS_PAR_SECONDE } from './temps';
 describe('Sanctuaire de l’Ombre (Plume)', () => {
   const sanctuaire = DIEUX.plume.tourDivine;
 
-  it('se construit une seule fois pour 200 arêtes et fait sortir deux assassins', () => {
+  it('se construit une seule fois pour 200 arêtes et fait sortir ses assassins', () => {
     const etat = partieEssai(configDe('plume'));
     construireTour(etat, 0, 'divine');
     expect(etat.aretes).toBe(5000 - 200);
     expect(appliquerAction(etat, { type: 'construire', socle: 1, tour: 'divine' })).toEqual({ ok: false, raison: 'tour_divine_unique' });
     const assassins = etat.unites.filter((u) => u.genre === 'soldat');
-    expect(assassins).toHaveLength(2);
+    expect(assassins).toHaveLength(sanctuaire.soldats?.nombre ?? 0);
+    expect(assassins.length).toBeGreaterThan(0);
     expect(assassins.every((u) => u.stats.capacites?.ciblable === false)).toBe(true);
   });
 

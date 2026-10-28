@@ -1,6 +1,7 @@
 // Compétences des spécialisations : 16 compétences de 3 rangs achetées en partie avec des arêtes.
 import { describe, expect, it } from 'vitest';
 import { COMPETENCES_TOURS } from '../data/competences-tours';
+import { DIEUX } from '../data/dieux';
 import { TOURS } from '../data/tours';
 import { CONFIG, avancerSecondes, compter, configDe, construireTour, ennemiFixe, evenementsPendant, partieEssai } from './aides.test-utils';
 import type { DefNiveauTour, IdFamille, Voie } from './definitions';
@@ -125,7 +126,7 @@ describe('achat d’une compétence : refus', () => {
   it('la remise de Pollen sur l’artillerie vaut aussi pour les compétences', () => {
     const etat = tourSpecialisee('artillerie', 'A', configDe('pollen'));
     const prix = TOURS.artillerie.specialisations.A.competences[1]?.cout[0] ?? 0;
-    expect(coutCompetence(etat, 0, 'charge_lourde')).toBe(Math.round(prix * 0.85));
+    expect(coutCompetence(etat, 0, 'charge_lourde')).toBe(Math.round(prix * (1 + DIEUX.pollen.bonus.prix)));
   });
 
   it('le prix des compétences entre dans la valeur de revente', () => {

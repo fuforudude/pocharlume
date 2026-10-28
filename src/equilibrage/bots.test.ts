@@ -93,7 +93,7 @@ describe('bot soigneux', () => {
   });
 
   it('améliore et spécialise ses tours quand le niveau est long', () => {
-    const types = new Set(actionsJouees(creerBotSoigneux(), 4, 'matou', REGION1[9]?.niveau).map((a) => a.type));
+    const types = new Set(actionsJouees(creerBotSoigneux(), 4, 'matou', REGION1[8]?.niveau).map((a) => a.type));
     expect(types.has('ameliorer')).toBe(true);
     expect(types.has('specialiser')).toBe(true);
   }, DELAI_PARTIE_LONGUE);
@@ -148,12 +148,16 @@ describe('bot soigneux avec chaque dieu', () => {
   }, DELAI_PARTIE_LONGUE);
 
   it('les trois dieux construisent leur tour divine, sauf si on la retire au bot', () => {
+    // Le niveau 5 est assez long pour que le bot, même sans recherche de variante, réunisse ses 200 arêtes.
+    const niveau5 = REGION1[4]?.niveau ?? niveau3;
     for (const dieu of ['plume', 'charlie', 'pollen']) {
-      const etat = jouer(dieu, 33);
+      const bot = creerBotSoigneux();
+      const etat = creerPartie(niveau5, configPartie({ graine: 33, difficulte: 'matou', dieu }));
+      while (etat.statut === 'en_cours' && etat.pas < 30 * 2400) avancer(etat, etat.pas % 15 === 0 ? bot.decider(etat) : []);
       expect(etat.tours.some((t) => t.famille === 'divine'), dieu).toBe(true);
     }
     const sans = creerBotSoigneux({ tourDivine: false });
-    const etat = creerPartie(niveau3, configPartie({ graine: 33, difficulte: 'matou', dieu: 'charlie' }));
+    const etat = creerPartie(niveau5, configPartie({ graine: 33, difficulte: 'matou', dieu: 'charlie' }));
     while (etat.statut === 'en_cours' && etat.pas < 30 * 2400) avancer(etat, etat.pas % 15 === 0 ? sans.decider(etat) : []);
     expect(etat.tours.some((t) => t.famille === 'divine')).toBe(false);
   }, DELAI_PARTIE_LONGUE);

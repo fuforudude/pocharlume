@@ -5,6 +5,7 @@
 import { describe, expect, it } from 'vitest';
 import { rejouer, serialiser } from '../../engine/partie';
 import { creerBotSoigneux, optimiserBot } from '../../equilibrage/bot-soigneux';
+import { GRAINES_ENTRAINEMENT } from '../../equilibrage/campagne';
 import { jouerPartie } from '../../equilibrage/simulation';
 import { CONFIG_MATOU, jouer, planDeConstruction } from './bot.test-utils';
 import { REGION1 } from './region1';
@@ -15,7 +16,7 @@ describe('les niveaux de la région 1 se jouent', () => {
   for (const campagne of REGION1) {
     it(`niveau ${String(campagne.numero)} : le bot soigneux gagne en Matou, quelle que soit la graine`, () => {
       // Matou est assez dur pour que le bot sans recherche perde parfois : on joue la variante retenue à l'entraînement, comme le simulateur.
-      const { variante } = optimiserBot(campagne.niveau, 'matou', [9001]);
+      const { variante } = optimiserBot(campagne.niveau, 'matou', GRAINES_ENTRAINEMENT);
       for (const graine of [7, 8, 9]) {
         const bilan = jouerPartie(campagne.niveau, creerBotSoigneux({ variante }), { graine, difficulte: 'matou' });
         expect(bilan.statut, `graine ${String(graine)}`).toBe('victoire');
