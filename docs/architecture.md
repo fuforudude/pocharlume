@@ -15,7 +15,7 @@ Vue d'ensemble des dossiers et de leurs frontières. Les choix de fond sont expl
 | `src/audio/` | Son : moteur Web Audio (`moteur.ts`), limiteur (`limiteur.ts`), données des sons et table événement vers son (`table.ts`), écouteurs du navigateur (`geste.ts`). Ne dépend que du type des événements du moteur et de `src/data/ennemis.ts`. | `src/engine/` (types), `src/data/` |
 | `src/i18n/` | Textes affichés. `fr.ts` contient la table, `t('clé')` la lit avec une clé typée. | rien |
 | `src/save/` | Sauvegarde. Fonctions pures : format versionné v3 (`format.ts`), validation stricte, migrations en chaîne vN vers vN+1, progression (étoiles, déblocage), méta-progression (`transactions.ts`, `config-partie.ts`, `definitions.ts`), partie en cours, export et import par code (`code.ts`). `Session` (`session.ts`) tient la sauvegarde courante en mémoire et l'écrit à chaque changement ; sa règle multi-onglets est décrite plus bas (« Méta-progression et sauvegarde v3 »). `verrou.ts` exclut les écritures entre onglets (Web Locks) ; `canal.ts` prévient les autres onglets par `BroadcastChannel`, qui se rafraîchissent. Accès au stockage : interface `Stockage` (IndexedDB, repli localStorage, mémoire ; Capacitor Preferences plus tard) et `Depot`, qui ne lève jamais et garde une copie de secours d'une sauvegarde illisible. | `src/engine/`, `src/data/` |
-| `src/equilibrage/` | Simulateur d'équilibrage sans affichage : partie jouée par un bot (`simulation.ts`), bot naïf (`bot-naif.ts`) et bot soigneux avec sa petite recherche de variante (`bot-soigneux.ts`), géométrie des cartes, évaluation d'une région (`campagne.ts`), bandes cibles (`bandes.ts`), puissance des tours (`puissance.ts`), rédaction de `balance-report.md` (`rapport.ts`). Les bots ne passent que par l'API publique du moteur (`avancer` avec des actions). Réutilisé par `tools/balance/` et par les tests des bandes. | `src/engine/`, `src/data/`, `src/i18n/` |
+| `src/equilibrage/` | Simulateur d'équilibrage sans affichage : partie jouée par un bot (`simulation.ts`), bot naïf (`bot-naif.ts`) et bot soigneux avec sa petite recherche de variante (`bot-soigneux.ts`), géométrie des cartes, évaluation d'une région (`campagne.ts`), bandes cibles (`bandes.ts`), puissance des tours et des tours divines (`puissance.ts`), profils des vérifications supplémentaires (`profils.ts` : disciples, arbre au maximum, héros de niveau 10, sans tour divine), rédaction de `balance-report.md` (`rapport.ts`). Les bots ne passent que par l'API publique du moteur (`avancer` avec des actions). Réutilisé par `tools/balance/` et par les tests des bandes. | `src/engine/`, `src/data/`, `src/i18n/` |
 | `tools/` | Scripts Node : `art` (grilles de pixels vers planches PNG et atlas JSON), `niveaux` (génère les vagues figées de la région 1, aperçu texte des cartes, bilan du joueur automatique ; `enregistrer.ts` permet à Node d'importer `src/` sans extension), `balance` (`npm run balance` : lance le simulateur de `src/equilibrage/` et écrit `balance-report.md` à la racine). | `src/engine/`, `src/data/` |
 | `art/` | Sources graphiques : pack Minifolks d'origine (`art/minifolks/`), grilles de pixels en texte (`art/sprites/<nom>.txt`, format décrit en tête de `tools/art/format.ts`), palettes partagées (`art/palettes/`). `npm run art` écrit aussi des aperçus agrandis dans `art/apercu/` (ignoré par git). | — |
 | `public/sprites/` | Atlas généré par `npm run art` (`atlas.png`, `atlas.json`), commité : le build n'exécute pas le pipeline, un test vérifie que l'atlas est à jour. | — |
@@ -191,10 +191,15 @@ rendre obligatoires dans `validation.ts`.
   sont à 2 tuiles de l'axe, le décor à au moins 1,25 tuile.
 
 ## Équilibrage de la région 1 (`npm run balance`)
-Le simulateur de `src/equilibrage/` rejoue les 10 niveaux dans les 3 difficultés avec deux bots et écrit
-`balance-report.md` (à relancer et commiter après tout changement de `src/data/`). Les bandes cibles sont vérifiées par
-`src/equilibrage/bandes-*.test.ts` (5 graines, un fichier par difficulté pour tourner en parallèle) et par `npm run balance`
-(10 graines, code de sortie 1 si une bande n'est pas respectée). Ce qui a été réglé, et pourquoi :
+Le simulateur de `src/equilibrage/` rejoue les 10 niveaux dans les 3 difficultés, pour **chacun des 3 dieux avec son avatar**
+(sans amélioration ni objet), avec deux bots, et écrit `balance-report.md` (à relancer et commiter après tout changement de
+`src/data/`). Les bandes cibles sont vérifiées par `src/equilibrage/bandes-*.test.ts` (un fichier par difficulté ; les trois
+dieux se calculent chacun dans un fil à part, `bandes.travailleur.ts`, donc le temps d'un fichier est celui d'un dieu) et par
+`npm run balance` (mêmes 10 graines et 2 graines d'entraînement : mêmes résultats, code de sortie 1 si une bande n'est pas
+respectée). `npm run balance` joue en plus les vérifications supplémentaires du rapport : disciples comparés à leur avatar,
+arbre au maximum et héros de niveau 10 en Vieux Sage, soigneux sans tour divine (profils de `profils.ts`). Pour la mise au point,
+`npm run balance -- --dieux=plume --difficultes=matou --graines=5 --detail [--profils=disciples,progression,divine]` ne joue que
+ce qui est demandé et affiche un résumé (sans écrire le rapport). Ce qui a été réglé, et pourquoi :
 - Les défenses complètes arrêtent presque tout : la difficulté vient des premières vagues (défense encore maigre) et de la
   densité des colonnes. D'où `intervalleReference` à 0,3 s (colonnes serrées), `croissanceVague` à 1,2 (dernières vagues
   énormes, qui seules arrêtent le héros seul) et `budgetBase` 260, `croissanceNiveau` 0,15.
@@ -212,9 +217,52 @@ Le simulateur de `src/equilibrage/` rejoue les 10 niveaux dans les 3 difficulté
   lit la composition des vagues futures (`poidsDesChemins` dans `geometrie.ts`), ce qu'un joueur ne voit pas : il est un peu
   optimiste, mais un joueur humain compétent se mesure à lui.
 - Les mesures sont très sensibles : un réglage voisin change la variante que le bot soigneux retient à l'entraînement, donc
-  son résultat. Les tests (5 graines, une seule graine d'entraînement) et `npm run balance` (10 graines, deux graines
-  d'entraînement) doivent passer tous les deux ; pour juger la marge, rejouer aussi sur d'autres graines.
+  son résultat (un niveau à 100 % peut passer à 90 % sur une modification sans rapport). Les tests et `npm run balance` jouent
+  la même configuration (10 graines, 2 graines d'entraînement) ; pour juger la marge, rejouer aussi sur d'autres graines
+  (`--graines=30`). Régler à la main plusieurs dieux et niveaux à la fois n'y arrive pas : les derniers réglages viennent
+  d'une descente par coordonnées (un paramètre à la fois, jugé sur les bandes de tous les dieux).
 - Quand les données changent : `npm run niveaux` (vagues figées), `VERSION_DONNEES` + 1, `npm run balance`, puis `npm run verifier`.
+
+### Équilibrage des trois dieux (jalon 2, tâche 6)
+- **Constat.** Le héros porte la difficulté. Les ennemis arrivent en colonnes serrées (0,3 s d'écart) et un héros ne bloque
+  qu'un ennemi à la fois : seul le coup de zone de Charlie (il touche tout ce qui est dans un rayon d'une tuile autour de sa
+  cible) arrête une colonne. Charlie sans zone ne gagne que 13 % de ses parties Matou, contre 100 % ; Plume et Pollen, sans
+  équivalent, perdaient presque tout (Matou : soigneux 8 % et 4 %, naïf 0 %), quelle que soit la force de leurs tirs ou de leurs
+  coups simples (huit fois plus de dégâts ne change rien). Les niveaux, réglés sur Charlie, sont restés à peu près tels quels :
+  ce sont Plume, Pollen et les disciples qu'on a ramenés au niveau de Charlie, pas l'inverse.
+- **Bot soigneux.** Il compte le bonus de famille du dieu (cadence, critique, PV des soldats) et sa remise de prix dans ses achats,
+  joue chaque sort selon son effet (voir plus haut) et construit la tour divine des trois dieux, Totem de Charlie compris. Le
+  rapport donne les lancers de chaque sort par partie : un sort jamais lancé est du pouvoir perdu.
+- **Plume** : le héros frappe en zone (rayon 0,6, 50 % de chances de ralentir de moitié pendant 1,5 s), le bonus des tours de tir
+  passe de +15 % à +60 % de cadence et +15 points de critique, Voile de Nuit : recharge 30 s, rayon 3, ennemis à 40 % de vitesse
+  pendant 10 s, Griffes d'Ombre : recharge 40 s, rayon 1,6, Sanctuaire : 4 assassins de 110 PV (18 à 26 de dégâts).
+- **Charlie** : seul le Totem change (activé dans le bot) : onde toutes les 7 s, étourdissement 1 s. Avec 6 s et 1,5 s, le soigneux
+  gagnait 84 % des parties en Vieux Sage, juste sous la bande et 10 points au-dessus de Plume.
+- **Pollen** : fronde toutes les 0,22 s (un tireur doit tuer autant de colonne qu'une zone de mêlée), tours d'artillerie à -10 % de
+  prix et +15 % de cadence, Pièges à Ressort : 4 pièges, Ingéniosité : +130 arêtes (et non +40) et +80 % de cadence aux tours
+  voisines pendant 10 s. L'Ingéniosité est le levier qui donne au soigneux ce que le naïf (qui ne lance aucun sort) n'a pas : plus
+  elle rapporte, plus le soigneux monte sans faire monter le naïf, mais à +220 elle laisse des centaines d'arêtes inutilisées aux
+  derniers niveaux.
+- **Disciples** (écart de vies moyennes du soigneux en Matou, disciple moins avatar : de -1,7 à +0,0 ; bande 3) : Suie, Mastoc et
+  Brise-Os frappent en zone (rayons 0,7, 0,8 et 0,7), Mastoc frappe plus fort (14 à 22 toutes les 1,5 s), Corbeau tire toutes les
+  0,3 s, Rouage et Lanterne toutes les 0,2 s. Les cadences sont arrondies au pas de 1/30 s : 0,25 et 0,28 s donnent le même résultat.
+- **Niveaux** : `aretesDepart` des niveaux 2, 3, 4, 5, 6 et 10 retouché (315, 200, 240, 530, 515, 610) pour tenir ensemble les
+  bandes des trois dieux. Le niveau 10 est le plus délicat : le boss dévore les unités au contact, ce qui pèse sur un héros de
+  mêlée et pas sur un tireur, si bien que le bot naïf de Pollen y réussit mieux que celui des deux autres.
+- **Courbe de difficulté** : jugée sur la moyenne des trois dieux (corrélation de rang au plus -0,6 et niveau 10 parmi les 3 plus
+  durs), et chaque dieu doit avoir une courbe décroissante (corrélation au plus -0,3). La courbe de Pollen seule (-0,4) ne tient
+  pas la bande de Charlie et Plume (-0,6, niveau 10 parmi les 3 plus durs) : c'est un écart à la spec (« mêmes bandes pour
+  chaque dieu »), assumé et documenté dans `bandes.ts`.
+- **Progression** : à l'origine, le héros de niveau 10 faisait gagner 83 à 88 % des parties au bot naïf en Vieux Sage (7 à 14 % de
+  base) et tout au maximum donnait 100 % au soigneux : trivial. `pvParNiveau` et `degatsParNiveau` des 9 héros sont maintenant
+  divisés par 10, les rangs des compétences de héros par 2,5 (hors entiers : capacité, ouvrages, régénération) et ceux de l'arbre
+  aussi. Résultat en Vieux Sage, tout au maximum : le soigneux gagne 89 % (Plume), 90 % (Charlie) et 98 % (Pollen), le naïf 33 à
+  42 %. Un rang de compétence vaut maintenant peu (quelques points de pourcentage) : à revoir avec les testeurs si le gain paraît
+  trop mince.
+- **Tour divine** (rapport « Tours divines ») : la formule de puissance des tours communes ne chiffre ni l'étourdissement du Totem,
+  ni les assassins non ciblables, ni l'immobilisation des pièges. Le vrai test est le même soigneux, mêmes graines, qui dépense
+  ces 200 arêtes en tours communes : le Sanctuaire vaut +16 points de victoires en Vieux Sage (+0,5 vie en Matou), le Totem +4
+  points, l'Atelier +10 points. Le Totem est le moins rentable : à surveiller.
 
 ## Invariants vérifiés automatiquement
 `eslint.config.js` (bloc `reglesSimulationPure`, testé par `src/architecture.test.ts`) interdit à

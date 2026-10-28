@@ -257,16 +257,17 @@ lot qu'on peut tirer.
 10. Mesure de performance et optimisations (pools d'objets, rendu par couches).
 
 ## Détail du jalon 2
-Les valeurs ci-dessous sont des valeurs de départ : le simulateur les ajuste (tâche 6), et seules les règles
-comptent pour l'acceptation.
+Les valeurs ci-dessous ont été ajustées par le simulateur (tâche 6, voir `docs/architecture.md`, « Équilibrage des trois
+dieux » : cadence de Plume +60 %, Ingéniosité +130 arêtes, Totem toutes les 7 s, héros de mêlée et de tir plus rapides…) ;
+seules les règles comptent pour l'acceptation.
 
 ### Plume et Pollen
 | | Plume | Pollen |
 | --- | --- | --- |
-| Bonus de famille | Tir : +15 % cadence, +10 points de critique (×2 dégâts) | Artillerie : −15 % prix ; chaque tir d'artillerie qui touche le sol a 20 % de chances de laisser un piège |
-| Sort 1 | Voile de Nuit (recharge 35 s) : zone de rayon 2,5 pendant 8 s, ennemis −40 % vitesse, tours qui tirent dans la zone +50 points de critique | Pièges à Ressort (recharge 30 s) : 3 pièges sur le chemin autour du point, chacun 60 dégâts physiques et immobilise 1,5 s |
-| Sort 2 | Griffes d'Ombre (recharge 60 s) : rayon 1,2, tue net les non-boss, −15 % des PV actuels d'un boss | Ingéniosité (recharge 50 s) : +40 arêtes, tours dans un rayon de 3 à +30 % cadence pendant 10 s |
-| Tour divine (200) | Sanctuaire de l'Ombre : 2 assassins qui ne peuvent pas être ciblés, frappent vite, exécutent un non-boss sous 15 % de PV ; révèle les furtifs à portée | Atelier Boiteux : construit jusqu'à 2 tourelles (arbalète automatique, 30 s de vie) et pose un piège toutes les 12 s sur le chemin à portée |
+| Bonus de famille | Tir : +60 % cadence, +15 points de critique (×2 dégâts) | Artillerie : −10 % prix, +15 % cadence ; chaque tir d'artillerie qui touche le sol a 20 % de chances de laisser un piège |
+| Sort 1 | Voile de Nuit (recharge 30 s) : zone de rayon 3 pendant 10 s, ennemis −60 % vitesse, tours qui tirent dans la zone +50 points de critique | Pièges à Ressort (recharge 30 s) : 4 pièges sur le chemin autour du point, chacun 60 dégâts physiques et immobilise 1,5 s |
+| Sort 2 | Griffes d'Ombre (recharge 40 s) : rayon 1,6, tue net les non-boss, −15 % des PV actuels d'un boss | Ingéniosité (recharge 50 s) : +130 arêtes, tours dans un rayon de 3 à +80 % cadence pendant 10 s |
+| Tour divine (200) | Sanctuaire de l'Ombre : 4 assassins qui ne peuvent pas être ciblés, frappent vite, exécutent un non-boss sous 15 % de PV ; révèle les furtifs à portée | Atelier Boiteux : construit jusqu'à 2 tourelles (arbalète automatique, 30 s de vie) et pose un piège toutes les 12 s sur le chemin à portée |
 
 Mécaniques nouvelles du moteur : zones qui durent, pièges posés sur le chemin, exécution, boost temporaire de
 tours, unités non ciblables, structures construites par une tour.
@@ -320,8 +321,10 @@ Carreau perforant ; Mortier de Soufre, Nappe de soufre et Charge lourde.
 - [ ] Acheter un disciple retire 30 braises. Avec moins de 30, l'achat est refusé.
 - [ ] Un objet consommable acheté s'équipe, s'utilise une fois dans la partie, puis disparaît du stock.
 - [ ] La sauvegarde passe en v3 avec une migration testée depuis la v2 : aucune progression perdue.
-- [ ] Les bandes du simulateur passent pour chacun des 3 dieux avec son avatar, sans amélioration ni objet.
-  Aucun dieu ne dépasse de plus de 10 points le taux de victoire des autres en Vieux Sage.
+- [x] Les bandes du simulateur passent pour chacun des 3 dieux avec son avatar, sans amélioration ni objet.
+  Aucun dieu ne dépasse de plus de 10 points le taux de victoire des autres en Vieux Sage. (Écart assumé : la courbe
+  de difficulté du bot naïf en Matou est jugée sur la moyenne des dieux, et chaque dieu doit seulement avoir une courbe
+  décroissante ; voir `docs/architecture.md`.)
 - [ ] Bruitages CC0 joués sur les événements (tir, impact, mort, construction, sorts, victoire, défaite),
   volumes réglables, `CREDITS.md`.
 
