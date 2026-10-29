@@ -22,7 +22,7 @@ export const PLANS_REGION7: readonly PlanNiveau[] = [
       nombre: 10,
       ennemis: ennemisDuNiveau(7, 1),
       graine: 2061,
-      facteurBudget: 0.34,
+      facteurBudget: 0.297,
     },
   },
   {
@@ -37,7 +37,7 @@ export const PLANS_REGION7: readonly PlanNiveau[] = [
       nombre: 10,
       ennemis: ennemisDuNiveau(7, 2),
       graine: 3062,
-      facteurBudget: 0.352,
+      facteurBudget: 0.308,
     },
   },
   {
@@ -52,7 +52,7 @@ export const PLANS_REGION7: readonly PlanNiveau[] = [
       nombre: 11,
       ennemis: ennemisDuNiveau(7, 3),
       graine: 4063,
-      facteurBudget: 0.364,
+      facteurBudget: 0.318,
     },
   },
   {
@@ -67,7 +67,7 @@ export const PLANS_REGION7: readonly PlanNiveau[] = [
       nombre: 11,
       ennemis: ennemisDuNiveau(7, 4),
       graine: 1064,
-      facteurBudget: 0.376,
+      facteurBudget: 0.329,
     },
   },
   {
@@ -82,7 +82,7 @@ export const PLANS_REGION7: readonly PlanNiveau[] = [
       nombre: 12,
       ennemis: ennemisDuNiveau(7, 5),
       graine: 2065,
-      facteurBudget: 0.388,
+      facteurBudget: 0.339,
     },
   },
   {
@@ -97,7 +97,7 @@ export const PLANS_REGION7: readonly PlanNiveau[] = [
       nombre: 12,
       ennemis: ennemisDuNiveau(7, 6),
       graine: 3066,
-      facteurBudget: 0.4,
+      facteurBudget: 0.35,
     },
   },
   {
@@ -112,7 +112,7 @@ export const PLANS_REGION7: readonly PlanNiveau[] = [
       nombre: 13,
       ennemis: ennemisDuNiveau(7, 7),
       graine: 4067,
-      facteurBudget: 0.412,
+      facteurBudget: 0.36,
     },
   },
   {
@@ -127,7 +127,7 @@ export const PLANS_REGION7: readonly PlanNiveau[] = [
       nombre: 13,
       ennemis: ennemisDuNiveau(7, 8),
       graine: 1068,
-      facteurBudget: 0.424,
+      facteurBudget: 0.371,
     },
   },
   {
@@ -142,7 +142,7 @@ export const PLANS_REGION7: readonly PlanNiveau[] = [
       nombre: 14,
       ennemis: ennemisDuNiveau(7, 9),
       graine: 2069,
-      facteurBudget: 0.436,
+      facteurBudget: 0.381,
     },
   },
   {
@@ -157,7 +157,7 @@ export const PLANS_REGION7: readonly PlanNiveau[] = [
       nombre: 15,
       ennemis: ennemisDuNiveau(7, 10),
       graine: 3070,
-      facteurBudget: 0.448,
+      facteurBudget: 0.392,
       boss: { vague: 15, ennemi: 'prince_croise', chemin: 0, delai: 12 },
     },
   },
