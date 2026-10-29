@@ -2,6 +2,7 @@
 import { frCollection } from './fr-collection';
 import { frDieux } from './fr-dieux';
 import { frEcrans3 } from './fr-ecrans3';
+import { frEcrans4 } from './fr-ecrans4';
 import { frEnnemis } from './fr-ennemis';
 import { frEnnemisRegions6a10 } from './fr-ennemis-regions-6-10';
 import { frMeta } from './fr-meta';
@@ -203,6 +204,9 @@ export const fr = {
 
   // Écrans du jalon 3 : régions, modes d'un niveau, caisses, collection, bilan des défis (fr-ecrans3.ts)
   ...frEcrans3,
+
+  // Écrans du jalon 4 : régions 6 à 10, mode infini, fin de campagne (fr-ecrans4.ts)
+  ...frEcrans4,
 
   // Niveaux de la campagne (fr-niveaux.ts)
   ...frNiveaux,

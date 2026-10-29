@@ -36,8 +36,9 @@ describe('bilan de fin : défi, disciple offert, région ouverte', () => {
     expect(lignesBilan({ ...BILAN, regionDebloquee: 4 })).toEqual([t('fin.bilan_region', { nom: 'Les Marais de l’Ordalie' })]);
   });
 
-  it('une région que l’écran ne montre pas encore est annoncée par son numéro', () => {
-    expect(lignesBilan({ ...BILAN, regionDebloquee: 7 })).toEqual([t('fin.bilan_region_numero', { n: 7 })]);
+  it('une région que l’écran ne connaît pas est annoncée par son numéro', () => {
+    expect(lignesBilan({ ...BILAN, regionDebloquee: 11 })).toEqual([t('fin.bilan_region_numero', { n: 11 })]);
+    expect(lignesBilan({ ...BILAN, regionDebloquee: 7 })).toEqual([t('fin.bilan_region', { nom: 'Les Routes de la Croisade' })]);
   });
 
   it('tout ensemble, après le butin habituel et dans l’ordre : défi, disciple, région', () => {

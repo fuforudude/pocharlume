@@ -3,17 +3,17 @@ import { NIVEAUX_PAR_REGION } from '../data/meta';
 import { NOEUDS_REGION1 } from '../data/niveaux/carte-du-monde';
 import { REGION1 } from '../data/niveaux/region1';
 import { fr } from '../i18n/fr';
-import { decalageDeRegion, niveauDeCampagne, REGIONS_MONDE, textesDuNiveau } from './regions-monde';
+import { contenuDeRegion, decalageDeRegion, niveauDeCampagne, REGIONS_MONDE, textesDuNiveau } from './regions-monde';
 
 describe('régions du monde', () => {
-  it('montre les cinq régions du jalon 3, numérotées de 1 à 5, chacune avec son nom traduit', () => {
-    expect(REGIONS_MONDE.map((r) => r.numero)).toEqual([1, 2, 3, 4, 5]);
+  it('montre les dix régions, numérotées de 1 à 10, chacune avec son nom traduit', () => {
+    expect(REGIONS_MONDE.map((r) => r.numero)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     for (const r of REGIONS_MONDE) expect(Object.hasOwn(fr, r.nom), r.nom).toBe(true);
   });
 
   it('chaque région commence au niveau de campagne qui suit celles d’avant', () => {
-    expect(REGIONS_MONDE.map((r) => r.premierNiveau)).toEqual([1, 11, 21, 31, 41]);
-    expect(REGIONS_MONDE.map((r) => decalageDeRegion(r))).toEqual([0, 10, 20, 30, 40].map((d) => (d / 10) * NIVEAUX_PAR_REGION));
+    expect(REGIONS_MONDE.map((r) => r.premierNiveau)).toEqual([1, 11, 21, 31, 41, 51, 61, 71, 81, 91]);
+    expect(REGIONS_MONDE.map((r) => decalageDeRegion(r))).toEqual([0, 10, 20, 30, 40, 50, 60, 70, 80, 90].map((d) => (d / 10) * NIVEAUX_PAR_REGION));
   });
 
   it('la région 1 est livrée : dix niveaux, dix nœuds, neuf tronçons, un texte par niveau', () => {
@@ -45,5 +45,22 @@ describe('régions du monde', () => {
   it('retrouve le nom et l’ambiance d’un niveau', () => {
     expect(textesDuNiveau(1)).toEqual({ nom: 'La Porte Ouverte', ambiance: expect.stringContaining('porte ouverte') as string });
     expect(textesDuNiveau(101)).toBeNull();
+  });
+
+  it('une région sans données (niveaux pas encore livrés) n’a pas de contenu, sans planter', () => {
+    const vide = { niveaux: [], noeuds: [], traces: [], textes: [] };
+    expect(contenuDeRegion(7, vide)).toBeNull();
+    expect(contenuDeRegion(1, vide)).toBeNull();
+    expect(contenuDeRegion(11)).toBeNull();
+    // Des données partielles (moins de dix niveaux) ne suffisent pas non plus.
+    expect(contenuDeRegion(1, { niveaux: [REGION1.slice(0, 4)], noeuds: [NOEUDS_REGION1], traces: [[]], textes: [[]] })).toBeNull();
+  });
+
+  it('une région livrée a un contenu, les régions sans niveaux n’en ont pas', () => {
+    for (const r of REGIONS_MONDE) {
+      const livree = contenuDeRegion(r.numero) !== null;
+      expect(r.contenu !== null, `région ${String(r.numero)}`).toBe(livree);
+    }
+    expect(REGIONS_MONDE[0]?.contenu).not.toBeNull();
   });
 });
