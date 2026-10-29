@@ -194,6 +194,14 @@ if (miseAuPoint) {
       }
     }
   }
+  // Défis : part de réussites du soigneux par région et par défi (bande 40 à 90 %), trois dieux ensemble.
+  for (const defi of difficultesJouees.filter(estDefi)) {
+    const parRegion = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].flatMap((r) => {
+      const deLaRegion = evaluationsDeRegion(evaluations, r).filter((e) => e.difficulte === defi && e.bot === 'soigneux');
+      return deLaRegion.length === 0 ? [] : [`R${String(r)} ${pct(synthetiser(deLaRegion.flatMap((e) => [...e.parties])).tauxVictoire)} %`];
+    });
+    if (parRegion.length > 0) console.log(`défi ${defi} par région : ${parRegion.join(' | ')}`);
+  }
   // Écarts aux bandes : tous si l'on a joué tous les dieux et toutes les difficultés, sinon seulement ceux des dieux joués.
   if (!options.has('difficultes')) {
     const complets = dieuxVoulus.length === DIEUX_EVALUES.length;
