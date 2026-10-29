@@ -1,7 +1,11 @@
 // Lecture de docs/lore.md : chaque ligne `- \`clé\` : texte` donne la valeur d'une clé de src/i18n/.
 // La section « Univers » (note pour l'équipe) et les paragraphes libres ne sont pas des textes du jeu.
 
-const LIGNE_TEXTE = /^- `([^`]+)` : ?(.*)$/;
+// Espace avant ou après le deux-points : espace, espace insécable ou fine insécable (typographie française).
+const ESPACE = String.raw`[\s\u00a0\u202f]`;
+const LIGNE_TEXTE = new RegExp(String.raw`^- \`([^\`]+)\`${ESPACE}*:${ESPACE}*(.*)$`);
+const DEBUT_ENTREE = /^- `/;
+const SUITE = /^[ \t]+\S/;
 const TITRE_UNIVERS = /^## Univers\b/;
 const TITRE = /^## /;
 
@@ -12,25 +16,38 @@ export interface TexteLore {
   readonly ligne: number;
 }
 
-/** Les textes du document, dans l'ordre. Lève une erreur sur une clé répétée ou un texte vide. */
+/**
+ * Les textes du document, dans l'ordre. Hors de la section « Univers » : toute ligne qui commence par « - ` » et n'a pas
+ * la forme `- \`clé\` : texte` est une erreur (une faute de frappe ne doit pas faire disparaître un texte) ; une ligne
+ * indentée juste après une entrée la prolonge (les éditeurs coupent les lignes) et est recollée avec une espace. Une clé
+ * répétée ou un texte vide est une erreur.
+ */
 export function lireLore(source: string): TexteLore[] {
-  const textes: TexteLore[] = [];
+  const entrees: { cle: string; ligne: number; texte: string }[] = [];
   const vues = new Map<string, number>();
   let dansUnivers = false;
+  let courante: { cle: string; ligne: number; texte: string } | null = null;
   source.split(/\r?\n/).forEach((ligne, i) => {
+    const numero = i + 1;
     if (TITRE.test(ligne)) dansUnivers = TITRE_UNIVERS.test(ligne);
     if (dansUnivers) return;
+    if (courante && SUITE.test(ligne)) {
+      courante.texte = `${courante.texte} ${ligne.trim()}`;
+      return;
+    }
+    courante = null;
+    if (!DEBUT_ENTREE.test(ligne)) return;
     const m = LIGNE_TEXTE.exec(ligne);
-    if (m === null) return;
+    if (m === null) throw new Error(`lore.md ligne ${String(numero)} : entrée illisible (attendu : - \`clé\` : texte) : ${ligne}`);
     const cle = m[1] ?? '';
-    const texte = (m[2] ?? '').trim();
-    if (texte === '') throw new Error(`lore.md ligne ${String(i + 1)} : texte vide pour ${cle}`);
     const avant = vues.get(cle);
-    if (avant !== undefined) throw new Error(`lore.md ligne ${String(i + 1)} : clé ${cle} déjà vue ligne ${String(avant)}`);
-    vues.set(cle, i + 1);
-    textes.push({ cle, texte, ligne: i + 1 });
+    if (avant !== undefined) throw new Error(`lore.md ligne ${String(numero)} : clé ${cle} déjà vue ligne ${String(avant)}`);
+    vues.set(cle, numero);
+    courante = { cle, ligne: numero, texte: (m[2] ?? '').trim() };
+    entrees.push(courante);
   });
-  return textes;
+  for (const e of entrees) if (e.texte === '') throw new Error(`lore.md ligne ${String(e.ligne)} : texte vide pour ${e.cle}`);
+  return entrees;
 }
 
 /** Écrit un texte en littéral TypeScript entre apostrophes droites. */

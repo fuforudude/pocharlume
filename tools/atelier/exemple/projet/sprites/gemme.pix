@@ -1,0 +1,23 @@
+# Une gemme qui brille.
+taille 8 8
+duree 400
+fond 202830
+couleur B 3070e0
+couleur b 80b0ff
+couleur W ffffff
+
+cadre
+...BB...
+..BbbB..
+.BbWbbB.
+.BbbbbB.
+..BbbB..
+...BB...
+
+cadre
+...BB...
+..BbbB..
+.BbbbbB.
+.BbbWbB.
+..BbbB..
+...BB...

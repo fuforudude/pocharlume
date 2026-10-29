@@ -9,6 +9,7 @@ import { HEROS } from '../data/heros';
 import { OBJETS } from '../data/objets';
 import type { EtatPartie } from '../engine';
 import { validerAction } from '../engine';
+import { decompteParole } from './parole-boss';
 import { chercherParId } from '../engine/recherche';
 import { PAS_PAR_SECONDE, enPas } from '../engine/temps';
 import { bonusAppel } from '../engine/vagues';
@@ -80,7 +81,9 @@ export class Hud {
   private readonly menu: HTMLElement;
   private minuteurMessage = 0;
   private readonly noeudParole: HTMLElement;
-  private minuteurParole = 0;
+  /** Temps de jeu restant (ms) avant que le bandeau de parole s'efface ; 0 = caché. */
+  private paroleRestante = 0;
+  private derniereImage = 0;
   private viesPrecedentes = -1;
   private fractionPv = -1;
   private signatureMenu = '';
@@ -195,6 +198,7 @@ export class Hud {
 
   /** Reflète l'état de la partie. Appelée à chaque image : n'écrit dans le DOM que ce qui a changé. */
   mettreAJour(etat: EtatPartie, vue: VueHud, invite: string | null): void {
+    this.avancerParole(vue);
     // Vies : clignote en rouge quand on en perd.
     this.vies.mettreSelon(etat.vies, () => String(etat.vies));
     if (this.viesPrecedentes !== -1 && etat.vies < this.viesPrecedentes) {
@@ -299,14 +303,21 @@ export class Hud {
     }, DUREE_MESSAGE);
   }
 
-  /** Affiche un bandeau de quelques secondes (parole d'un boss) : rien n'est bloqué, il ne reçoit aucun toucher. */
+  /** Affiche un bandeau de quelques secondes de jeu (parole d'un boss) : rien n'est bloqué, il ne reçoit aucun toucher. */
   afficherParole(texte: string): void {
     this.noeudParole.textContent = texte;
+    this.paroleRestante = DUREE_PAROLE;
     basculerClasse(this.noeudParole, 'visible', true);
-    window.clearTimeout(this.minuteurParole);
-    this.minuteurParole = window.setTimeout(() => {
-      basculerClasse(this.noeudParole, 'visible', false);
-    }, DUREE_PAROLE);
+  }
+
+  /** Le bandeau compte en temps de jeu : il s'arrête en pause et passe plus vite à la vitesse ×2. */
+  private avancerParole(vue: VueHud): void {
+    const maintenant = performance.now();
+    const ecart = this.derniereImage === 0 ? 0 : maintenant - this.derniereImage;
+    this.derniereImage = maintenant;
+    if (this.paroleRestante <= 0) return;
+    this.paroleRestante = decompteParole(this.paroleRestante, ecart, vue.pause, vue.vitesse);
+    if (this.paroleRestante <= 0) basculerClasse(this.noeudParole, 'visible', false);
   }
 
   /**
@@ -390,7 +401,6 @@ export class Hud {
 
   detruire(): void {
     window.clearTimeout(this.minuteurMessage);
-    window.clearTimeout(this.minuteurParole);
     this.racine.remove();
   }
 }

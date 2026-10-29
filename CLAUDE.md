@@ -10,6 +10,7 @@ Capacitor plus tard.
 - Tester : `npm test` (Vitest)
 - Linter : `npm run lint` (ESLint, typescript-eslint strict avec typage)
 - Reporter le lore : `npm run lore` (reporte `docs/lore.md` dans `src/i18n/` ; `-- --verifier` compare sans écrire). `fr-lore.ts` est généré : corriger `lore.md`, jamais ce fichier.
+- Retoucher les designs : `npm run editeur` (atelier local sur http://127.0.0.1:5199, `-- --port N` pour un autre port ; sprites, palette, décors des cartes ; écrit dans `art/` et les fichiers de cartes, jamais commite). Usage dans `tools/atelier/README.md`, adaptateur Pocharlume dans `tools/atelier-pocharlume/README.md`.
 - Tout vérifier : `npm run verifier` (lint, types, tests, build). Doit être vert avant tout commit.
 
 ## Architecture

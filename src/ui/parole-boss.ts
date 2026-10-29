@@ -12,3 +12,12 @@ export function cleParoleBoss(vagues: readonly Vague[], index: number, region: n
   const aUnBoss = vague.paquets.some((p) => Object.hasOwn(ENNEMIS, p.ennemi) && ENNEMIS[p.ennemi as keyof typeof ENNEMIS].boss);
   return aUnBoss ? (`boss.r${String(region)}.parole` as CleTexte) : null;
 }
+
+/** Écart maximal pris en compte entre deux images (ms) : un onglet qui dort ne vide pas le bandeau d'un coup. */
+const ECART_MAX_MS = 100;
+
+/** Temps restant du bandeau après `ecartMs` de temps réel : rien en pause, ×vitesse en jeu. */
+export function decompteParole(restantMs: number, ecartMs: number, pause: boolean, vitesse: number): number {
+  if (pause) return restantMs;
+  return Math.max(0, restantMs - Math.min(ecartMs, ECART_MAX_MS) * vitesse);
+}

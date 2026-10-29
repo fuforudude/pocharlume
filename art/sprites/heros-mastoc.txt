@@ -12,7 +12,7 @@ couleur 2 9c8660
 couleur 3 6e5c3e
 
 sprite heros-mastoc
-modele charlie
+modele charlie-ancien
 
 calque tete 8 0
 2..gPPg..2
@@ -115,4 +115,4 @@ cadre queue + jambes + corps + bouclier + tete
 anim mort 160
 cadre queue + jambes + corps decale -1 0 + tete decale -1 1 + bouclier decale -1 0 + yeux-clos decale -1 1
 cadre queue decale 0 3 + corps decale 0 3 + bouclier decale 1 3 + tete decale 0 4 + yeux-clos decale 0 4
-cadre charlie/mort.2 couleurs u=3 U=2 v=1 duree 1000
+cadre charlie-ancien/mort.2 couleurs u=3 U=2 v=1 duree 1000

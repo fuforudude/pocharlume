@@ -166,7 +166,7 @@ export function creerChoixFiche(atlas: AtlasRendu, session: SessionChoix, signal
     }
     section.append(rangee);
     const actuel = HEROS[choix.heros];
-    section.append(el('p', 'choix-legende', `${tCle(actuel.nom)} : ${tCle(actuel.role)}`));
+    section.append(el('p', 'choix-legende', t('legende.nom_texte', { nom: tCle(actuel.nom), texte: tCle(actuel.role) })));
     return section;
   }
 

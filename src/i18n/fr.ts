@@ -75,6 +75,8 @@ export const fr = {
   'carte.total_etoiles': '{n} / {m}',
   'carte.total_etoiles_libelle': 'Étoiles gagnées : {n} sur {m}',
   'carte.niveau': 'Niveau {n} : {nom}',
+  // Légende « nom : texte » (épithète d'un dieu et sa phrase, héros et son rôle)
+  'legende.nom_texte': '{nom} : {texte}',
   'fiche.boss': 'Boss',
   'fiche.difficulte': 'Difficulté',
   'fiche.etoiles': '{n} étoile(s) en {difficulte}',

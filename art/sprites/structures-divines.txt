@@ -926,4 +926,4 @@ cadre ferme-2 duree 800
 # Plume (mêmes animations) en couleurs d'encre violette à demi transparentes.
 sprite assassin-ombre
 categorie unite
-derive heros-plume couleurs k=#0c0912b8 u=#1c1630b8 U=#30284cc0 v=#6a6094d0 W=#e4f0f4 1=#e4f0f4
+derive plume-ancien couleurs k=#0c0912b8 u=#1c1630b8 U=#30284cc0 v=#6a6094d0 W=#e4f0f4 1=#e4f0f4
