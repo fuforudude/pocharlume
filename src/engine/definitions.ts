@@ -731,6 +731,8 @@ export interface Niveau {
   readonly defiFer?: DefiFer;
   /** Vrai : la difficulté Vieux Sage n'y joue pas ses dernières vagues en élite (le défi Héroïque, lui, les joue toutes en élite). */
   readonly sansElites?: boolean;
+  /** Niveau de horde (jalon 5) : nombreux ennemis faibles et serrés. Les bots de l'équilibrage s'en servent pour estimer ce que vaut la zone. */
+  readonly horde?: boolean;
 }
 
 /** Une région du mode infini : ses ennemis propres, et le boss dont les mini-boss sont tirés. */

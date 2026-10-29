@@ -28,6 +28,8 @@ export interface PlanVagues {
   /** Nombre de chemins du niveau. */
   readonly chemins: number;
   readonly boss?: BossDeVague;
+  /** Niveau de horde (jalon 5) : la densité d'avant, ennemis non renforcés et serrés (voir `genererVague`). */
+  readonly horde?: boolean;
 }
 
 /** Les vagues d'un niveau, telles que son plan les demande. */
@@ -52,6 +54,7 @@ export function genererVaguesNiveau(plan: PlanVagues): Vague[] {
         graine: plan.graine,
         chemins: plan.chemins,
         ...(plan.facteurBudget === undefined ? {} : { budget: budgetVague(plan.niveau, w) * plan.facteurBudget }),
+        ...(plan.horde === true ? { horde: true } : {}),
       }).paquets];
     const boss = plan.boss;
     if (boss && boss.vague === w) {

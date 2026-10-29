@@ -13,9 +13,9 @@ export const PONTON: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([-1, 9], [6, 9], [6, 3], [14, 3], [14, 14], [26, 14], [26, 6], [33, 6]),
+    chemin([-1, 9], [7, 9], [7, 3], [15, 3], [15, 15], [27, 15], [27, 7], [33, 7]),
   ],
-  departHeros: { x: 20, y: 14 },
+  departHeros: { x: 21, y: 15 },
   zones: [zone('boue', 8, 5, 5, 8), zone('boue', 16, 5, 8, 6), zone('boue', 0, 13, 5, 4), zone('paves', 27, 9, 4, 3)],
   decor: [
     decor('crane', 11, 1.5, true),
@@ -88,10 +88,10 @@ export const ETANG: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([-1, 5], [8, 5], [8, 14], [28, 14], [28, 19]),
-    chemin([33, 8], [20, 8], [20, 14], [28, 14], [28, 19]),
+    chemin([-1, 5], [9, 5], [9, 15], [29, 15], [29, 19]),
+    chemin([33, 9], [21, 9], [21, 15], [29, 15], [29, 19]),
   ],
-  departHeros: { x: 24, y: 14 },
+  departHeros: { x: 25, y: 15 },
   zones: [zone('boue', 10, 6, 8, 6), zone('boue', 22, 1, 8, 5), zone('paves', 1, 8, 4, 4), zone('paves', 12, 15, 6, 2)],
   decor: [
     decor('cailloux', 7, 1.5),
@@ -170,10 +170,10 @@ export const SAULES: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([16, -1], [16, 5], [6, 5], [6, 11], [18, 11], [18, 19]),
-    chemin([33, 8], [24, 8], [24, 14], [18, 14], [18, 19]),
+    chemin([17, -1], [17, 5], [7, 5], [7, 11], [19, 11], [19, 19]),
+    chemin([33, 9], [25, 9], [25, 15], [19, 15], [19, 19]),
   ],
-  departHeros: { x: 18, y: 16 },
+  departHeros: { x: 19, y: 17 },
   zones: [zone('boue', 8, 7, 8, 3), zone('boue', 22, 8, 8, 4), zone('paves', 1, 13, 5, 4), zone('paves', 19, 1, 8, 4)],
   decor: [
     decor('feu-follet', 10, 1.5),

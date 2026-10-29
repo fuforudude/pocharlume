@@ -32,4 +32,6 @@ export interface NiveauCampagne {
   readonly niveau: Niveau;
   readonly visuel: VisuelCarte;
   readonly boss: boolean;
+  /** Niveau de horde (jalon 5) : beaucoup d'ennemis faibles et serrés, là où la zone brille. */
+  readonly horde: boolean;
 }

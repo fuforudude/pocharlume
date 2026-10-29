@@ -38,6 +38,7 @@ export {
   casesLibres,
   centreCase,
   colonnes,
+  estCaseDeChemin,
   estCaseInterdite,
   lignes,
   ralliementParDefaut,

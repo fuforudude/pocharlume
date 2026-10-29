@@ -13,9 +13,9 @@ export const SILLONS: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([-1, 5], [18, 5], [18, 10], [6, 10], [6, 15], [33, 15]),
+    chemin([-1, 5], [19, 5], [19, 11], [7, 11], [7, 15], [33, 15]),
   ],
-  departHeros: { x: 24, y: 15 },
+  departHeros: { x: 25, y: 15 },
   zones: [zone('boue', 1, 12, 4, 3), zone('boue', 22, 0, 8, 2), zone('paves', 20, 7, 6, 3), zone('paves', 9, 12, 4, 2)],
   decor: [
     decor('cloture-cassee', 1.5, 1.5, true),
@@ -87,10 +87,10 @@ export const MEULES: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([-1, 5], [10, 5], [10, 12], [22, 12], [22, 7], [33, 7]),
-    chemin([-1, 15], [5, 15], [5, 12], [10, 12], [22, 12], [22, 7], [33, 7]),
+    chemin([-1, 5], [11, 5], [11, 13], [23, 13], [23, 7], [33, 7]),
+    chemin([-1, 15], [5, 15], [5, 13], [11, 13], [23, 13], [23, 7], [33, 7]),
   ],
-  departHeros: { x: 16, y: 12 },
+  departHeros: { x: 17, y: 13 },
   zones: [zone('boue', 12, 2, 6, 3), zone('boue', 26, 12, 5, 4), zone('paves', 14, 7, 5, 2), zone('paves', 1, 7, 4, 2)],
   decor: [
     decor('gerbes-brulees', 28, 1.5),
@@ -165,10 +165,10 @@ export const AIRE: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([16, -1], [16, 6], [26, 6], [26, 12], [8, 12], [8, 19]),
-    chemin([33, 15], [26, 15], [26, 12], [8, 12], [8, 19]),
+    chemin([17, -1], [17, 7], [27, 7], [27, 13], [9, 13], [9, 19]),
+    chemin([33, 15], [27, 15], [27, 13], [9, 13], [9, 19]),
   ],
-  departHeros: { x: 14, y: 12 },
+  departHeros: { x: 15, y: 13 },
   zones: [zone('paves', 10, 1, 5, 4), zone('paves', 18, 8, 6, 2), zone('boue', 0, 2, 5, 5), zone('boue', 12, 14, 8, 3)],
   decor: [
     decor('tonneau', 18.5, 1.5),

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { CAMPAGNE } from '../data/niveaux/campagne';
 import { NIVEAU_TEST } from '../data/niveaux/region1';
 import { avancer, centreCase, creerPartie, type Action, type EtatPartie } from '../engine';
 import { ct, avancerPas, CONFIG } from '../engine/aides.test-utils';
@@ -546,5 +547,24 @@ describe('aperçu de la tour au survol du menu', () => {
     ui.annuler();
     ui.surbrillance(etat, surb);
     expect(surb.apercuPortee).toBe(0);
+  });
+});
+
+describe('le chemin n’offre aucune pose (jalon 5)', () => {
+  it('toucher une case du chemin n’ouvre pas le menu et ne dit rien ; la case n’est pas éclairée', () => {
+    const niveau = CAMPAGNE[0]?.niveau;
+    if (!niveau) throw new Error('niveau 1 absent');
+    const etat = creerPartie(niveau, CONFIG);
+    // Le chemin du niveau 1 part du bord ouest par le centre d'une case : sa première case est une case de chemin.
+    const premier = niveau.carte.chemins[0]?.points[1];
+    if (!premier) throw new Error('chemin absent');
+    const interaction = new Interaction();
+    expect(interaction.toucher(etat, premier.x - 0.5, premier.y - 0.5, RAYON)).toEqual({ action: null, refus: null });
+    expect(interaction.mode.type).toBe('libre');
+    interaction.viser(etat, premier.x - 0.5, premier.y - 0.5);
+    expect(interaction.visee).toBeNull();
+    // Une case libre voisine, elle, s'ouvre et s'éclaire.
+    interaction.toucher(etat, premier.x + 0.5, premier.y + 2.5, RAYON);
+    expect(interaction.mode.type).toBe('menu');
   });
 });

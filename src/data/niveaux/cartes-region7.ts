@@ -13,9 +13,9 @@ export const BIVOUAC: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([-1, 9], [8, 9], [8, 3], [18, 3], [18, 14], [27, 14], [27, 8], [33, 8]),
+    chemin([-1, 9], [9, 9], [9, 3], [19, 3], [19, 15], [27, 15], [27, 7], [33, 7]),
   ],
-  departHeros: { x: 30, y: 8 },
+  departHeros: { x: 31, y: 7 },
   zones: [zone('paves', 4, 14, 4, 2), zone('boue', 9, 11, 4, 4), zone('boue', 20, 4, 8, 2), zone('paves', 0, 2, 4, 4)],
   decor: [
     decor('cloture-h', 12, 1),
@@ -77,10 +77,10 @@ export const PALISSADE: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([-1, 4], [9, 4], [9, 12], [19, 12], [19, 6], [33, 6]),
-    chemin([-1, 16], [24, 16], [24, 6], [33, 6]),
+    chemin([-1, 5], [9, 5], [9, 13], [19, 13], [19, 7], [33, 7]),
+    chemin([-1, 17], [25, 17], [25, 7], [33, 7]),
   ],
-  departHeros: { x: 29, y: 6 },
+  departHeros: { x: 29, y: 7 },
   zones: [zone('paves', 12, 0, 5, 2), zone('boue', 13, 3, 5, 2), zone('boue', 12, 8, 4, 2), zone('paves', 19, 2, 8, 2)],
   decor: [
     decor('banniere-dechiree', 6, 1, true),
@@ -152,8 +152,8 @@ export const BALISTE: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([5, -1], [5, 6], [15, 6], [15, 12], [27, 12], [27, 19]),
-    chemin([33, 3], [21, 3], [21, 12], [27, 12], [27, 19]),
+    chemin([5, -1], [5, 7], [15, 7], [15, 13], [27, 13], [27, 19]),
+    chemin([33, 3], [21, 3], [21, 13], [27, 13], [27, 19]),
   ],
   departHeros: { x: 27, y: 15 },
   zones: [zone('paves', 15, 14, 8, 2), zone('boue', 9, 1, 5, 2), zone('boue', 0, 8, 7, 3), zone('paves', 23, 5, 7, 2)],

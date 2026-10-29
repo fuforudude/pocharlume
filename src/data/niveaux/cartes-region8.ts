@@ -13,9 +13,9 @@ export const CLOITRE: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([-1, 15], [4, 15], [4, 3], [12, 3], [12, 12], [20, 12], [20, 3], [28, 3], [28, 19]),
+    chemin([-1, 15], [5, 15], [5, 3], [13, 3], [13, 13], [21, 13], [21, 3], [29, 3], [29, 19]),
   ],
-  departHeros: { x: 28, y: 15 },
+  departHeros: { x: 29, y: 15 },
   zones: [zone('paves', 13, 14, 8, 3), zone('boue', 14, 0, 4, 2), zone('boue', 22, 10, 4, 4), zone('paves', 14, 7, 4, 2)],
   decor: [
     decor('crucifix', 6, 1),
@@ -77,10 +77,10 @@ export const REFECTOIRE: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([-1, 4], [11, 4], [11, 9], [21, 9], [21, 14], [33, 14]),
-    chemin([33, 2], [27, 2], [27, 11], [21, 11], [21, 14], [33, 14]),
+    chemin([-1, 5], [11, 5], [11, 9], [21, 9], [21, 15], [33, 15]),
+    chemin([33, 3], [27, 3], [27, 11], [21, 11], [21, 15], [33, 15]),
   ],
-  departHeros: { x: 30, y: 14 },
+  departHeros: { x: 31, y: 15 },
   zones: [zone('paves', 15, 2, 8, 4), zone('boue', 2, 10, 5, 4), zone('boue', 8, 14, 7, 2), zone('paves', 3, 6, 5, 3)],
   decor: [
     decor('cierge-noir', 7, 1, true),
@@ -152,10 +152,10 @@ export const SCRIPTORIUM: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([8, -1], [8, 8], [24, 8], [24, 14], [10, 14], [10, 19]),
-    chemin([33, 3], [16, 3], [16, 8], [24, 8], [24, 14], [10, 14], [10, 19]),
+    chemin([9, -1], [9, 9], [25, 9], [25, 15], [11, 15], [11, 19]),
+    chemin([33, 3], [17, 3], [17, 9], [25, 9], [25, 15], [11, 15], [11, 19]),
   ],
-  departHeros: { x: 10, y: 17 },
+  departHeros: { x: 11, y: 17 },
   zones: [zone('paves', 0, 8, 4, 4), zone('boue', 2, 13, 4, 2), zone('boue', 26, 13, 4, 2), zone('paves', 11, 10, 8, 2)],
   decor: [
     decor('cierge-noir', 14, 1, true),

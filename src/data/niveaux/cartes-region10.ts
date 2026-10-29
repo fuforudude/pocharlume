@@ -13,9 +13,9 @@ export const NEF: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([-1, 9], [10, 9], [10, 3], [16, 3], [16, 15], [22, 15], [22, 9], [33, 9]),
+    chemin([-1, 9], [11, 9], [11, 3], [17, 3], [17, 15], [23, 15], [23, 9], [33, 9]),
   ],
-  departHeros: { x: 28, y: 9 },
+  departHeros: { x: 29, y: 9 },
   zones: [zone('paves', 22, 2, 4, 2), zone('boue', 6, 11, 5, 3), zone('boue', 24, 13, 4, 2), zone('paves', 0, 5, 4, 2)],
   decor: [
     decor('calice-brise', 15, 1),
@@ -77,10 +77,10 @@ export const TRANSEPT: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([-1, 4], [8, 4], [8, 9], [24, 9], [24, 14], [33, 14]),
-    chemin([33, 3], [18, 3], [18, 9], [24, 9], [24, 14], [33, 14]),
+    chemin([-1, 5], [9, 5], [9, 9], [25, 9], [25, 15], [33, 15]),
+    chemin([33, 3], [19, 3], [19, 9], [25, 9], [25, 15], [33, 15]),
   ],
-  departHeros: { x: 29, y: 14 },
+  departHeros: { x: 29, y: 15 },
   zones: [zone('paves', 10, 2, 6, 3), zone('boue', 3, 13, 7, 4), zone('boue', 12, 12, 6, 3), zone('paves', 1, 10, 6, 2)],
   decor: [
     decor('dalle-solaire', 5, 1, true),
@@ -152,10 +152,10 @@ export const CHOEUR: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([-1, 15], [6, 15], [6, 6], [14, 6], [14, 12], [26, 12], [26, -1]),
-    chemin([33, 16], [20, 16], [20, 12], [26, 12], [26, -1]),
+    chemin([-1, 15], [7, 15], [7, 7], [15, 7], [15, 13], [27, 13], [27, -1]),
+    chemin([33, 17], [21, 17], [21, 13], [27, 13], [27, -1]),
   ],
-  departHeros: { x: 26, y: 4 },
+  departHeros: { x: 27, y: 5 },
   zones: [zone('paves', 16, 6, 7, 3), zone('boue', 13, 14, 4, 2), zone('boue', 19, 1, 4, 2), zone('paves', 9, 0, 4, 4)],
   decor: [
     decor('cierge-bleme', 7.5, 1.5),

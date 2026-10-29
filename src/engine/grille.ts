@@ -52,6 +52,22 @@ export function estCaseInterdite(niveau: Pick<Niveau, 'carte' | 'casesInterdites
   return ensembleInterdit(niveau).has(cy * colonnes(niveau.carte) + cx);
 }
 
+/**
+ * Vrai si l'axe d'un chemin de la carte traverse la case (jalon 5 : les chemins suivent la grille, donc une case est entièrement
+ * du chemin ou pas du tout). Les segments sont horizontaux ou verticaux ; un segment en diagonale est testé par sa boîte englobante.
+ */
+export function estCaseDeChemin(carte: Pick<Carte, 'chemins'>, cx: number, cy: number): boolean {
+  const t = REGLES.tailleCase;
+  const x0 = cx * t;
+  const y0 = cy * t;
+  return carte.chemins.some((chemin) =>
+    chemin.points.some((b, i) => {
+      const a = chemin.points[i - 1];
+      return a !== undefined && Math.max(a.x, b.x) > x0 && Math.min(a.x, b.x) < x0 + t && Math.max(a.y, b.y) > y0 && Math.min(a.y, b.y) < y0 + t;
+    }),
+  );
+}
+
 /** La tour posée sur la case, si elle existe. */
 export function tourSurCase(etat: Pick<EtatPartie, 'tours'>, cx: number, cy: number): Tour | undefined {
   for (const t of etat.tours) if (t.cx === cx && t.cy === cy) return t;

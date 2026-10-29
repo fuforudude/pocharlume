@@ -52,6 +52,7 @@ export function assemblerNiveau(plan: PlanNiveau, vagues: readonly Vague[]): Niv
     aretesDepart: plan.aretesDepart,
     defiFer: plan.defiFer,
     ...(REGIONS_SANS_ELITES.includes(region) ? { sansElites: true } : {}),
+    ...(plan.vagues.horde === true ? { horde: true } : {}),
     carte,
     casesInterdites: casesInterditesDuNiveau(carte, decor),
     vagues,
@@ -61,5 +62,6 @@ export function assemblerNiveau(plan: PlanNiveau, vagues: readonly Vague[]): Niv
     niveau,
     visuel: { region, zones: modele.zones, decor },
     boss: plan.vagues.boss !== undefined,
+    horde: plan.vagues.horde === true,
   };
 }

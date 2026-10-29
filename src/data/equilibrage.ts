@@ -5,8 +5,19 @@ import type { DefEnnemi, DefFamille, DefNiveauTour, EffetCoup, Paquet, StatsComb
 import { REGLES } from './regles';
 
 export const EQUILIBRAGE = {
-  /** Cibles moyennes touchées par un coup de zone : 1 + ce facteur × rayon. */
-  ciblesParRayonDeZone: 1.5,
+  /**
+   * Cibles moyennes touchées par un coup de zone sur une colonne espacée (niveau ordinaire, ennemis libres de leurs mouvements) :
+   * 1 + ce facteur × rayon. Les ennemis sont à au moins `ecartMinimalTuiles` les uns des autres et une vague compte `robustesseOrdinaires`
+   * fois moins d'ennemis : peu de cibles par coup.
+   */
+  ciblesParRayonDeZone: 1.2,
+  /**
+   * Cibles par rayon de zone quand les ennemis sont arrêtés par des soldats (bloqueurs de caserne) : ils s'entassent au contact,
+   * à moins d'une demi-tuile les uns des autres. C'est la stratégie « bloquer puis écraser en zone ».
+   */
+  ciblesParRayonDeZoneBloquees: 3.5,
+  /** Cibles par rayon de zone dans un niveau de horde (ennemis serrés à 0,3 s : 1 + 4,5 × rayon, estimé au simulateur). */
+  ciblesParRayonDeZoneHorde: 4.5,
   /** Part des maillons d'une chaîne qui trouvent en moyenne un ennemi. */
   presenceChaine: 0.6,
   /** Part du temps où un nécromancien a ses spectres sur le terrain. */
@@ -21,6 +32,14 @@ export const EQUILIBRAGE = {
    * à 2, un volant ou un furtif est tiré deux fois moins souvent qu'un ennemi ordinaire.
    */
   repetitionOrdinaires: 5,
+  /**
+   * Jalon 5 : robustesse des ennemis ordinaires hors niveaux de horde. À budget de menace égal, une vague compte ce nombre de fois moins
+   * d'ennemis, chacun ayant ce nombre de fois plus de PV et de prime (`Paquet.facteurPv`) : la menace totale (nombre × PV) est inchangée,
+   * mais un coup de zone n'a plus de grappe à écraser sans que des soldats ne l'arrêtent.
+   */
+  robustesseOrdinaires: 2,
+  /** Écart minimal, en tuiles, entre deux ennemis d'un même paquet à leur entrée (hors essaims et niveaux de horde). */
+  ecartMinimalTuiles: 0.8,
   /** Valeur d'un point de vie (effectif) de bloqueur, en DPS équivalent. */
   valeurBlocageParPv: 0.013,
   /** Vitesse (tuiles/s) dont le facteur de menace vaut 1. */
@@ -54,6 +73,9 @@ export const EQUILIBRAGE = {
    */
   intervalleReference: 0.3,
 } as const;
+
+/** Profil de densité d'un niveau : ordinaire (jalon 5 : peu d'ennemis, solides, espacés) ou horde (la densité d'avant, essaims compris). */
+export type ProfilDensite = 'ordinaire' | 'horde';
 
 function moyenne(f: readonly [number, number]): number {
   return (f[0] + f[1]) / 2;
@@ -184,6 +206,17 @@ export interface OptionsGeneration {
   boss?: boolean;
   /** Budget de menace imposé, à la place de `budgetVague(niveau, vague)` (mode infini). */
   budget?: number;
+  /** Niveau de horde : la densité d'avant le jalon 5 (ennemis ordinaires non renforcés, serrés à `intervalleReference`). */
+  horde?: boolean;
+}
+
+/**
+ * Secondes entre deux ennemis d'un paquet. Un essaim ou un niveau de horde garde des colonnes serrées (`intervalleReference`, à la
+ * vitesse de référence) ; sinon l'écart à l'entrée est d'au moins `ecartMinimalTuiles` (arrondi à la hausse au dixième de seconde).
+ */
+export function intervallePaquet(def: DefEnnemi, essaim: boolean, horde: boolean): number {
+  if (essaim || horde) return arrondiDixieme(EQUILIBRAGE.intervalleReference / facteurVitesse(def.vitesse));
+  return Math.ceil((EQUILIBRAGE.ecartMinimalTuiles / def.vitesse) * 10 - 1e-9) / 10;
 }
 
 /**
@@ -197,31 +230,36 @@ export function genererVague(o: OptionsGeneration): Vague {
     // `groupe` : un essaim n'arrive que par groupes de cette taille (1 = un ennemi ordinaire).
     .map(([id, def]) => ({ id, def, menace: menaceEnnemi(def), groupe: def.pouvoirs?.essaim ?? 1 }));
   let restant = o.budget ?? budgetVague(o.niveau, o.vague);
+  const robustesseVoulue = o.horde === true ? 1 : EQUILIBRAGE.robustesseOrdinaires;
   let delai = 0;
   const paquets: Paquet[] = [];
   for (;;) {
     const abordables = candidats.filter((c) => c.menace * c.groupe <= restant);
     const choix = abordables[Math.floor(tirer(g) * abordables.length)];
     if (!choix) break;
-    const max = Math.min(Math.floor(restant / choix.menace), EQUILIBRAGE.tailleMaxPaquet);
+    // Un ennemi renforcé qui ne tient plus dans le budget restant l'est moins (jamais en dessous de sa force normale) : sinon les vagues
+    // au petit budget (régions 7 à 10, facteurBudget bas) n'auraient aucun ennemi cher à tirer.
+    const robustesse = Math.max(1, Math.min(robustesseVoulue, Math.floor((restant / (choix.menace * choix.groupe)) * 100) / 100));
+    const max = Math.min(Math.floor(restant / (choix.menace * robustesse)), EQUILIBRAGE.tailleMaxPaquet);
     const nombre =
       choix.groupe === 1
         ? 1 + Math.floor(tirer(g) * max)
         : choix.groupe * (1 + Math.floor(tirer(g) * Math.max(1, Math.floor(max / choix.groupe))));
-    const intervalle = arrondiDixieme(EQUILIBRAGE.intervalleReference / facteurVitesse(choix.def.vitesse));
-    paquets.push({ ennemi: choix.id, nombre, intervalle, chemin: Math.floor(tirer(g) * o.chemins), delai });
-    restant -= nombre * choix.menace;
+    const intervalle = intervallePaquet(choix.def, choix.groupe > 1, o.horde === true);
+    const paquet = { ennemi: choix.id, nombre, intervalle, chemin: Math.floor(tirer(g) * o.chemins), delai };
+    paquets.push(robustesse > 1 && !choix.def.boss ? { ...paquet, facteurPv: robustesse } : paquet);
+    restant -= nombre * choix.menace * robustesse;
     delai = arrondiDixieme(delai + (nombre * intervalle) / 2);
   }
   return { paquets };
 }
 
-/** Menace totale d'une vague. */
+/** Menace totale d'une vague (un paquet renforcé par `facteurPv` pèse d'autant). */
 export function menaceVague(vague: Vague, ennemis: Readonly<Record<string, DefEnnemi | undefined>>): number {
   let total = 0;
   for (const p of vague.paquets) {
     const def = ennemis[p.ennemi];
-    if (def) total += p.nombre * menaceEnnemi(def);
+    if (def) total += p.nombre * menaceEnnemi(def) * (p.facteurPv ?? 1);
   }
   return total;
 }

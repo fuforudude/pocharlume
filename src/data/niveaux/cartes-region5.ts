@@ -13,9 +13,9 @@ export const QUARANTAINE: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([-1, 3], [10, 3], [10, 9], [4, 9], [4, 15], [22, 15], [22, 8], [33, 8]),
+    chemin([-1, 3], [11, 3], [11, 9], [5, 9], [5, 15], [23, 15], [23, 7], [33, 7]),
   ],
-  departHeros: { x: 27, y: 8 },
+  departHeros: { x: 27, y: 7 },
   zones: [zone('paves', 12, 5, 6, 8), zone('boue', 24, 11, 6, 4), zone('boue', 0, 11, 2, 3), zone('paves', 14, 1, 8, 2)],
   decor: [
     decor('linceul', 6.5, 1.5, true),
@@ -82,10 +82,10 @@ export const FAUBOURG: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([-1, 8], [12, 8], [12, 3], [24, 3], [24, 12], [33, 12]),
-    chemin([-1, 15], [18, 15], [18, 12], [24, 12], [33, 12]),
+    chemin([-1, 9], [13, 9], [13, 3], [25, 3], [25, 13], [33, 13]),
+    chemin([-1, 15], [19, 15], [19, 13], [25, 13], [33, 13]),
   ],
-  departHeros: { x: 29, y: 12 },
+  departHeros: { x: 29, y: 13 },
   zones: [zone('paves', 14, 5, 8, 5), zone('boue', 1, 10, 6, 3), zone('boue', 26, 4, 5, 5), zone('paves', 5, 16, 6, 2)],
   decor: [
     decor('cailloux', 17.5, 1.5),
@@ -162,10 +162,10 @@ export const MARCHE: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([8, -1], [8, 6], [20, 6], [20, 12], [8, 12], [8, 19]),
-    chemin([33, 3], [26, 3], [26, 9], [20, 9], [20, 12], [8, 12], [8, 19]),
+    chemin([9, -1], [9, 7], [21, 7], [21, 13], [9, 13], [9, 19]),
+    chemin([33, 3], [27, 3], [27, 9], [21, 9], [21, 13], [9, 13], [9, 19]),
   ],
-  departHeros: { x: 14, y: 12 },
+  departHeros: { x: 15, y: 13 },
   zones: [zone('paves', 10, 7, 8, 4), zone('boue', 22, 13, 8, 4), zone('boue', 0, 8, 4, 4), zone('paves', 12, 0, 6, 3)],
   decor: [
     decor('lanterne-peste', 17, 1, true),

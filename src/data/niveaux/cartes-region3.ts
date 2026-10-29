@@ -13,9 +13,9 @@ export const RUELLES: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([4, -1], [4, 8], [12, 8], [12, 3], [20, 3], [20, 12], [28, 12], [28, 19]),
+    chemin([5, -1], [5, 9], [13, 9], [13, 3], [21, 3], [21, 13], [29, 13], [29, 19]),
   ],
-  departHeros: { x: 24, y: 12 },
+  departHeros: { x: 25, y: 13 },
   zones: [zone('paves', 14, 5, 5, 4), zone('paves', 22, 5, 5, 4), zone('boue', 6, 11, 5, 4), zone('boue', 0, 11, 2, 6)],
   decor: [
     decor('fagots', 29, 1.5),
@@ -83,10 +83,10 @@ export const PLACE: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([-1, 6], [8, 6], [8, 14], [24, 14], [24, 9], [33, 9]),
-    chemin([16, -1], [16, 9], [24, 9], [33, 9]),
+    chemin([-1, 7], [9, 7], [9, 15], [25, 15], [25, 9], [33, 9]),
+    chemin([17, -1], [17, 9], [25, 9], [33, 9]),
   ],
-  departHeros: { x: 28, y: 9 },
+  departHeros: { x: 29, y: 9 },
   zones: [zone('paves', 10, 7, 5, 5), zone('paves', 17, 10, 6, 3), zone('boue', 0, 10, 5, 6), zone('boue', 25, 1, 6, 5)],
   decor: [
     decor('crane', 19, 1.5, true),
@@ -169,10 +169,10 @@ export const BEFFROI: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([33, 4], [22, 4], [22, 10], [10, 10], [10, 19]),
-    chemin([-1, 6], [10, 6], [10, 10], [10, 19]),
+    chemin([33, 5], [23, 5], [23, 11], [11, 11], [11, 19]),
+    chemin([-1, 7], [11, 7], [11, 11], [11, 19]),
   ],
-  departHeros: { x: 10, y: 14 },
+  departHeros: { x: 11, y: 15 },
   zones: [zone('paves', 12, 6, 8, 3), zone('paves', 24, 11, 6, 4), zone('boue', 0, 12, 6, 4), zone('boue', 14, 13, 6, 4)],
   decor: [
     decor('maison-brulee-2', 2.5, 2),

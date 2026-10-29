@@ -18,10 +18,10 @@ export const CHAUMES: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([-1, 4], [12, 4], [12, 13], [24, 13], [24, 7], [33, 7]),
-    chemin([-1, 16], [6, 16], [6, 10], [12, 10], [12, 13], [24, 13], [24, 7], [33, 7]),
+    chemin([-1, 5], [13, 5], [13, 13], [25, 13], [25, 7], [33, 7]),
+    chemin([-1, 17], [7, 17], [7, 11], [13, 11], [13, 13], [25, 13], [25, 7], [33, 7]),
   ],
-  departHeros: { x: 16, y: 13 },
+  departHeros: { x: 17, y: 13 },
   zones: [zone('boue', 13, 15, 6, 2), zone('boue', 0, 8, 3, 3), zone('paves', 17, 8, 4, 2), zone('paves', 16, 5, 6, 1)],
   decor: [
     // Les ruines du hameau, au nord-est, autour du puits.
@@ -79,11 +79,11 @@ export const GUE: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([6, -1], [6, 5], [18, 5], [18, 12], [8, 12], [8, 19]),
-    chemin([33, 9], [18, 9], [18, 12], [8, 12], [8, 19]),
-    chemin([33, 15], [14, 15], [14, 12], [8, 12], [8, 19]),
+    chemin([7, -1], [7, 5], [19, 5], [19, 13], [9, 13], [9, 19]),
+    chemin([33, 9], [19, 9], [19, 13], [9, 13], [9, 19]),
+    chemin([33, 15], [15, 15], [15, 13], [9, 13], [9, 19]),
   ],
-  departHeros: { x: 12, y: 12 },
+  departHeros: { x: 13, y: 13 },
   zones: [zone('boue', 9, 6, 8, 5), zone('boue', 19, 16, 8, 2), zone('paves', 13, 8, 3, 2)],
   decor: [
     // L'îlot au centre, de boue et de croix, avec son puits.
@@ -142,11 +142,11 @@ export const PENDUS: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([-1, 14], [10, 14], [10, 4], [22, 4], [22, 14], [33, 14]),
-    chemin([4, -1], [4, 9], [10, 9], [10, 4], [22, 4], [22, 14], [33, 14]),
-    chemin([28, -1], [28, 9], [22, 9], [22, 14], [33, 14]),
+    chemin([-1, 15], [11, 15], [11, 5], [23, 5], [23, 15], [33, 15]),
+    chemin([5, -1], [5, 9], [11, 9], [11, 5], [23, 5], [23, 15], [33, 15]),
+    chemin([29, -1], [29, 9], [23, 9], [23, 15], [33, 15]),
   ],
-  departHeros: { x: 16, y: 4 },
+  departHeros: { x: 17, y: 5 },
   zones: [zone('paves', 14, 8, 5, 2), zone('boue', 0, 17, 10, 1), zone('boue', 23, 9, 8, 2)],
   decor: [
     // Les potences au centre de l'arche.
@@ -202,11 +202,11 @@ export const CARREFOUR: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([-1, 5], [8, 5], [8, 9], [20, 9], [20, 13], [33, 13]),
-    chemin([-1, 15], [8, 15], [8, 9], [20, 9], [20, 13], [33, 13]),
-    chemin([16, -1], [16, 9], [20, 9], [20, 13], [33, 13]),
+    chemin([-1, 5], [9, 5], [9, 9], [21, 9], [21, 13], [33, 13]),
+    chemin([-1, 15], [9, 15], [9, 9], [21, 9], [21, 13], [33, 13]),
+    chemin([17, -1], [17, 9], [21, 9], [21, 13], [33, 13]),
   ],
-  departHeros: { x: 18, y: 9 },
+  departHeros: { x: 19, y: 9 },
   zones: [zone('paves', 10, 1, 5, 4), zone('boue', 11, 13, 7, 4), zone('boue', 25, 0, 6, 3)],
   decor: [
     // Le bûcher éteint de la place, au nord-ouest, et ses murs en ruine.

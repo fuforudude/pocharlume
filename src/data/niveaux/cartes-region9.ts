@@ -13,9 +13,9 @@ export const AVENUE: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([16, -1], [16, 5], [5, 5], [5, 13], [16, 13], [16, 19]),
+    chemin([17, -1], [17, 5], [5, 5], [5, 13], [17, 13], [17, 19]),
   ],
-  departHeros: { x: 16, y: 16 },
+  departHeros: { x: 17, y: 17 },
   zones: [zone('paves', 18, 5, 7, 3), zone('boue', 15, 9, 7, 2), zone('boue', 24, 13, 5, 2), zone('paves', 2, 1, 5, 2)],
   decor: [
     decor('torchere', 22, 1),
@@ -77,10 +77,10 @@ export const DOUVES: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([-1, 5], [12, 5], [12, 12], [22, 12], [22, 4], [33, 4]),
-    chemin([-1, 16], [22, 16], [22, 12], [22, 4], [33, 4]),
+    chemin([-1, 5], [13, 5], [13, 13], [23, 13], [23, 3], [33, 3]),
+    chemin([-1, 17], [23, 17], [23, 13], [23, 3], [33, 3]),
   ],
-  departHeros: { x: 28, y: 4 },
+  departHeros: { x: 29, y: 3 },
   zones: [zone('paves', 25, 12, 6, 3), zone('boue', 0, 1, 4, 2), zone('boue', 3, 9, 7, 3), zone('paves', 15, 7, 5, 3)],
   decor: [
     decor('etendard', 2.5, 1, true),
@@ -152,10 +152,10 @@ export const PONT_LEVIS: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([4, -1], [4, 10], [14, 10], [14, 5], [28, 5], [28, 19]),
-    chemin([-1, 16], [20, 16], [20, 11], [28, 11], [28, 19]),
+    chemin([5, -1], [5, 9], [15, 9], [15, 5], [29, 5], [29, 19]),
+    chemin([-1, 17], [21, 17], [21, 11], [29, 11], [29, 19]),
   ],
-  departHeros: { x: 28, y: 16 },
+  departHeros: { x: 29, y: 17 },
   zones: [zone('paves', 11, 0, 5, 2), zone('boue', 7, 4, 5, 4), zone('boue', 25, 1, 6, 2), zone('paves', 7, 12, 5, 2)],
   decor: [
     decor('torchere', 9.5, 1, true),

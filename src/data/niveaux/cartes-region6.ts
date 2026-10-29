@@ -13,9 +13,9 @@ export const FOSSOYAGE: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([-1, 3], [27, 3], [27, 8], [6, 8], [6, 14], [33, 14]),
+    chemin([-1, 3], [27, 3], [27, 9], [7, 9], [7, 15], [33, 15]),
   ],
-  departHeros: { x: 29, y: 14 },
+  departHeros: { x: 29, y: 15 },
   zones: [zone('paves', 24, 10, 6, 2), zone('boue', 13, 10, 6, 2), zone('boue', 0, 7, 4, 2)],
   decor: [
     decor('cailloux', 2.5, 1, true),
@@ -77,10 +77,10 @@ export const TERTRES: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([-1, 3], [14, 3], [14, 9], [24, 9], [24, 14], [33, 14]),
-    chemin([-1, 15], [17, 15], [17, 12], [24, 12], [24, 14], [33, 14]),
+    chemin([-1, 3], [15, 3], [15, 9], [25, 9], [25, 13], [33, 13]),
+    chemin([-1, 15], [17, 15], [17, 11], [25, 11], [25, 13], [33, 13]),
   ],
-  departHeros: { x: 29, y: 14 },
+  departHeros: { x: 29, y: 13 },
   zones: [zone('paves', 4, 10, 4, 2), zone('boue', 22, 3, 6, 2), zone('boue', 5, 6, 5, 2), zone('paves', 25, 0, 4, 2)],
   decor: [
     decor('os-epars', 8, 1, true),
@@ -152,10 +152,10 @@ export const OSSUAIRE: CarteModele = {
   largeur: 32,
   hauteur: 18,
   chemins: [
-    chemin([6, -1], [6, 7], [16, 7], [16, 13], [26, 13], [26, 9], [33, 9]),
-    chemin([33, 2], [21, 2], [21, 9], [26, 9], [33, 9]),
+    chemin([7, -1], [7, 7], [17, 7], [17, 13], [27, 13], [27, 9], [33, 9]),
+    chemin([33, 3], [21, 3], [21, 9], [27, 9], [33, 9]),
   ],
-  departHeros: { x: 30, y: 9 },
+  departHeros: { x: 31, y: 9 },
   zones: [zone('paves', 2, 9, 6, 3), zone('boue', 14, 15, 8, 2), zone('boue', 13, 2, 5, 2), zone('paves', 4, 14, 4, 3)],
   decor: [
     decor('cailloux', 3.5, 1),

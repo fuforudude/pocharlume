@@ -95,7 +95,7 @@ export function genererVagueInfinie(config: ConfigPartie, chemins: number, vague
   const region = config.infini?.region ?? 1;
   const { paquets: ordinaires, facteurPv: facteurVague } = remplirBudget(config, region, chemins, vague);
   const paquets = avecElites(ordinaires, partElites(vague), config.graine, vague);
-  if (facteurVague > 1) for (let i = 0; i < paquets.length; i++) paquets[i] = { ...(paquets[i] as Paquet), facteurPv: facteurVague };
+  if (facteurVague > 1) for (let i = 0; i < paquets.length; i++) paquets[i] = { ...(paquets[i] as Paquet), facteurPv: facteurVague * ((paquets[i] as Paquet).facteurPv ?? 1) };
   const facteurPv = pvMiniBoss(vague);
   const boss = INFINI.regions[region - 1]?.boss;
   if (facteurPv > 0 && boss) {

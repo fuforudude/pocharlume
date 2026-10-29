@@ -50,4 +50,5 @@ export const NIVEAU_CAMPAGNE_TEST: NiveauCampagne = {
   niveau: NIVEAU_TEST,
   visuel: VISUEL_TEST,
   boss: false,
+  horde: false,
 };

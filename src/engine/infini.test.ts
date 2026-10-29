@@ -1,7 +1,7 @@
 // Mode infini (jalon 4) : vagues générées de façon déterministe, budget, élites, mini-boss, fin de partie, rejeu.
 import { describe, expect, it } from 'vitest';
 import { ENNEMIS } from '../data/ennemis';
-import { budgetVague, menaceEnnemi } from '../data/equilibrage';
+import { budgetVague, EQUILIBRAGE, menaceEnnemi } from '../data/equilibrage';
 import { INFINI } from '../data/infini';
 import { NIVEAU_TEST, REGION1 } from '../data/niveaux/region1';
 import { REGLES } from '../data/regles';
@@ -38,7 +38,7 @@ function ordinaires(vague: Vague, region: number): Vague['paquets'] {
 }
 
 function menace(vague: Vague, region: number): number {
-  return ordinaires(vague, region).reduce((total, p) => total + p.nombre * menaceEnnemi(ENNEMIS[p.ennemi as keyof typeof ENNEMIS] as DefEnnemi), 0);
+  return ordinaires(vague, region).reduce((total, p) => total + p.nombre * menaceEnnemi(ENNEMIS[p.ennemi as keyof typeof ENNEMIS] as DefEnnemi) * (p.facteurPv ?? 1), 0);
 }
 
 describe('budget de menace de la vague n', () => {
@@ -121,9 +121,9 @@ describe('plafond du nombre d’ennemis par vague', () => {
     }
   });
 
-  it('les vagues qui tiennent dans le plafond restent celles du budget, sans facteur de PV', () => {
+  it('les vagues qui tiennent dans le plafond restent celles du budget, avec la seule robustesse des ennemis ordinaires', () => {
     const vague = genererVagueInfinie(configInfinie(1), CHEMINS, 12);
-    expect(ordinaires(vague, 1).every((p) => p.facteurPv === undefined)).toBe(true);
+    expect(ordinaires(vague, 1).every((p) => p.facteurPv === EQUILIBRAGE.robustesseOrdinaires)).toBe(true);
   });
 });
 
@@ -270,7 +270,7 @@ describe('élites : à partir de la vague 20', () => {
     const e = elites[0];
     if (!e) throw new Error('pas d’élite');
     const def = ENNEMIS[e.type as keyof typeof ENNEMIS] as DefEnnemi;
-    expect(e.pvMax / (def.pv * 1.08 * REGLES.elite.facteurPv * remplirBudget(etat.config, 1, etat.chemins.length, 20).facteurPv)).toBeCloseTo(1, 6);
+    expect(e.pvMax / (def.pv * 1.08 * REGLES.elite.facteurPv * EQUILIBRAGE.robustesseOrdinaires * remplirBudget(etat.config, 1, etat.chemins.length, 20).facteurPv)).toBeCloseTo(1, 6);
   });
 });
 
@@ -373,7 +373,10 @@ describe('partie infinie', () => {
     for (let i = 0; i < 90; i++) step(etat);
     const e = etat.ennemis[0];
     if (!e) throw new Error('aucun ennemi');
-    expect(e.pvMax).toBeCloseTo((ENNEMIS[e.type as keyof typeof ENNEMIS] as DefEnnemi).pv * 1.08, 6);
+    // Les règles de Matou (PV × 1,08) et la robustesse des ordinaires (au plus `robustesseOrdinaires`, moins si le budget restant est court).
+    const rapport = e.pvMax / ((ENNEMIS[e.type as keyof typeof ENNEMIS] as DefEnnemi).pv * 1.08);
+    expect(rapport).toBeGreaterThanOrEqual(1);
+    expect(rapport).toBeLessThanOrEqual(EQUILIBRAGE.robustesseOrdinaires + 1e-9);
   });
 
   it('joue sur la carte du niveau : ses chemins et ses cases interdites', () => {

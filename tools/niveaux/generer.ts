@@ -54,7 +54,7 @@ async function texteFichier(region: number, sortie: string): Promise<string> {
     `// Vagues figées des 10 niveaux de la région ${String(region)}, ${NOMS_REGION[region - 1] ?? ''}.`,
     `// GÉNÉRÉ par \`npm run niveaux\` (tools/niveaux/generer.ts) depuis plan-region${String(region)}.ts : ne pas modifier à la main.`,
     "// Pour retoucher les vagues d'un niveau, marquer `retouchees: true` dans son plan : le script les conserve.",
-    "// Format compact (format-vagues.ts) : cinq nombres par groupe, indice de l'ennemi dans LEGENDE, nombre, intervalle, chemin, délai.",
+    "// Format compact (format-vagues.ts) : six nombres par groupe, indice de l'ennemi dans LEGENDE, nombre, intervalle, chemin, délai, facteur de PV.",
     "import type { Vague } from '../../engine/definitions';",
     "import { decoderVagues } from './format-vagues';",
     '',

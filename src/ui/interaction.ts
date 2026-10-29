@@ -5,7 +5,7 @@ import { DIEUX } from '../data/dieux';
 import { OBJETS } from '../data/objets';
 import type { Action, EtatPartie, RaisonRefus } from '../engine';
 import type { CaseGrille } from '../engine/definitions';
-import { caseSousPoint, estCaseInterdite, tourSurCase, validerAction } from '../engine';
+import { caseSousPoint, estCaseDeChemin, estCaseInterdite, tourSurCase, validerAction } from '../engine';
 import type { FamilleTour } from '../engine/etat';
 import { chercherParId } from '../engine/recherche';
 import { tCle } from '../i18n';
@@ -94,7 +94,9 @@ export class Interaction {
     }
     if (!cible) return this.annuler();
     if (cible.type === 'heros') return this.selectionnerHeros(etat);
-    // Une case interdite (chemin, décor) sans tour ne s'ouvre pas : le joueur sait pourquoi.
+    // Une case du chemin n'offre aucune pose : le toucher referme seulement le menu ouvert (le héros s'y envoie par son mode).
+    if (estCaseDeChemin(etat.niveau.carte, cible.cx, cible.cy)) return this.annuler();
+    // Une case interdite (décor) sans tour ne s'ouvre pas : le joueur sait pourquoi.
     if (estCaseInterdite(etat.niveau, cible.cx, cible.cy) && !tourSurCase(etat, cible.cx, cible.cy)) return { action: null, refus: 'case_interdite' };
     this.mode = mode.type === 'menu' && mode.cx === cible.cx && mode.cy === cible.cy ? LIBRE : { type: 'menu', cx: cible.cx, cy: cible.cy };
     return RIEN;
@@ -106,7 +108,9 @@ export class Interaction {
    */
   viser(etat: EtatPartie, x: number, y: number): void {
     const mode = this.mode.type;
-    this.visee = mode === 'libre' || mode === 'menu' ? caseSousPoint(etat.niveau.carte, x, y) : null;
+    const sous = mode === 'libre' || mode === 'menu' ? caseSousPoint(etat.niveau.carte, x, y) : null;
+    // Le chemin ne s'éclaire pas : on n'y construit rien.
+    this.visee = sous && estCaseDeChemin(etat.niveau.carte, sous.cx, sous.cy) ? null : sous;
   }
 
   /** Le pointeur a quitté la carte, ou le doigt s'est levé : plus aucune case n'est éclairée. */
