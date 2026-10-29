@@ -34,7 +34,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     defiFer: { familles: ['caserne', 'magie'] },
     nom: 'niveau.r1.02.nom',
     ambiance: 'niveau.r1.02.ambiance',
-    vagues: { nombre: 7, ennemis: PAYSAN, graine: 1102, facteurBudget: 2 },
+    vagues: { nombre: 7, ennemis: PAYSAN, graine: 1102, facteurBudget: 3.2 },
   },
   {
     numero: 3,
