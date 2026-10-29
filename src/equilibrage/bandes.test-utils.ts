@@ -12,8 +12,23 @@ import { DIEUX_EVALUES, GRAINES_ENTRAINEMENT, GRAINES_EVALUATION, type Evaluatio
  */
 export const GRAINES_TEST = GRAINES_EVALUATION;
 
-/** Les régions dont les bandes s'imposent (jalon 4 : les dix). */
-export const REGIONS_EVALUEES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
+const TOUTES_LES_REGIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
+
+/**
+ * Les régions évaluées : les dix (jalon 4), ou celles de `BANDES_REGIONS` (ex. `3` ou `1,2`). La CI de déploiement s'en sert pour
+ * jouer une région par machine : sur 2 cœurs, les dix d'un coup dépassent le quart d'heure. Une valeur invalide est refusée
+ * plutôt que de laisser passer des tests qui n'évaluent rien.
+ */
+export const REGIONS_EVALUEES: readonly number[] = lireRegions(process.env['BANDES_REGIONS']);
+
+function lireRegions(valeur: string | undefined): readonly number[] {
+  if (valeur === undefined || valeur.trim() === '') return TOUTES_LES_REGIONS;
+  const regions = valeur.split(',').map((morceau) => Number(morceau.trim()));
+  if (regions.some((r) => !(TOUTES_LES_REGIONS as readonly number[]).includes(r))) {
+    throw new Error(`BANDES_REGIONS invalide : « ${valeur} » (attendu : numéros de région de 1 à 10, séparés par des virgules)`);
+  }
+  return [...new Set(regions)];
+}
 
 const TRAVAILLEUR = new URL('./bandes.travailleur.ts', import.meta.url);
 const CROCHET = pathToFileURL(fileURLToPath(new URL('../../tools/niveaux/enregistrer.ts', import.meta.url))).href;
@@ -42,9 +57,15 @@ export async function evaluerRegion(region: number, difficulte: string, bots?: r
   return (await Promise.all(DIEUX_EVALUES.map((dieu) => evaluerDieu(region, difficulte, dieu, bots)))).flat();
 }
 
-/** Les évaluations de chaque région évaluée (indice 0 = région 1), toutes calculées en parallèle. */
+/** Les évaluations de chaque région évaluée (indice 0 = région 1, vide pour une région non évaluée), calculées en parallèle. */
 export async function evaluerRegions(difficulte: string, bots?: readonly IdBot[]): Promise<Evaluation[][]> {
-  return Promise.all(REGIONS_EVALUEES.map((region) => evaluerRegion(region, difficulte, bots)));
+  const parRegion: Evaluation[][] = TOUTES_LES_REGIONS.map(() => []);
+  await Promise.all(
+    REGIONS_EVALUEES.map(async (region) => {
+      parRegion[region - 1] = await evaluerRegion(region, difficulte, bots);
+    }),
+  );
+  return parRegion;
 }
 
 /** Marge de temps pour une évaluation complète : environ 3 min 30 sur une machine libre, bien plus quand des simulations tournent à côté. */

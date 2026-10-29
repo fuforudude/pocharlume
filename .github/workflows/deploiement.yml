@@ -11,11 +11,17 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: deploiement
   cancel-in-progress: false
+
+# `npm run verifier` en entier, réparti sur plusieurs machines : sur les 2 cœurs d'une machine GitHub, les simulations
+# d'équilibrage des dix régions prennent plus d'une demi-heure d'un seul tenant. Le site ne part que si tout passe.
+env:
+  BANDES: src/equilibrage/bandes-chaton.test.ts src/equilibrage/bandes-defis.test.ts src/equilibrage/bandes-matou.test.ts src/equilibrage/bandes-vieux-sage.test.ts
 
 jobs:
   construire:
+    name: Lint, types, tests, build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -24,7 +30,11 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm run verifier
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - name: Tests (hors simulations des bandes, jouées région par région à côté)
+        run: npx vitest run $(for f in $BANDES; do printf -- '--exclude %s ' "$f"; done)
+      - run: npm run build
       - uses: actions/upload-artifact@v7
         with:
           name: site
@@ -34,8 +44,28 @@ jobs:
         with:
           path: dist
 
+  bandes:
+    name: Bandes, région ${{ matrix.region }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        region: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Simulations de la région ${{ matrix.region }}
+        env:
+          BANDES_REGIONS: ${{ matrix.region }}
+        run: npx vitest run $BANDES
+
   deployer:
-    needs: construire
+    name: GitHub Pages
+    needs: [construire, bandes]
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -47,11 +77,9 @@ jobs:
   # Le site sur le VPS (pocharlume.fr). La clé ne peut que synchroniser /var/www/pocharlume (rrsync côté serveur,
   # voir infra/vps/site-pocharlume.sh) ; l'empreinte du serveur est vérifiée (ED25519 SHA256:DEhyO4…8Pts).
   vps:
-    needs: construire
+    name: VPS
+    needs: [construire, bandes]
     runs-on: ubuntu-latest
-    concurrency:
-      group: vps
-      cancel-in-progress: false
     steps:
       - uses: actions/download-artifact@v8
         with:
