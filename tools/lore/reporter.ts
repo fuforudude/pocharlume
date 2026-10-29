@@ -91,7 +91,7 @@ function main(): void {
     }
     if (!trouve) {
       if (CLE_NOUVELLE.test(lore.cle)) nouveaux.push(lore);
-      else erreurs.push(`lore.md ligne ${lore.ligne} : la clé ${lore.cle} n'existe pas dans src/i18n/ et n'est pas d'un genre autorisé`);
+      else erreurs.push(`lore.md ligne ${String(lore.ligne)} : la clé ${lore.cle} n'existe pas dans src/i18n/ et n'est pas d'un genre autorisé`);
     }
   }
 
@@ -118,7 +118,7 @@ function main(): void {
   }
 
   const aEcrire = misAJour + (actuel === contenuLore ? 0 : 1);
-  console.log(`${textes.length} textes dans lore.md : ${identiques} déjà à jour, ${misAJour} mis à jour, ${nouveaux.length} dans fr-lore.ts.`);
+  console.log(`${String(textes.length)} textes dans lore.md : ${String(identiques)} déjà à jour, ${String(misAJour)} mis à jour, ${String(nouveaux.length)} dans fr-lore.ts.`);
   if (erreurs.length > 0) {
     for (const e of erreurs) console.error(`ERREUR ${e}`);
     process.exit(1);

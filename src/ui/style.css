@@ -192,6 +192,10 @@ button:focus-visible {
   }
 }
 
+html[data-sans-clavier] .touche {
+  display: none;
+}
+
 .touche {
   position: absolute;
   top: 1px;

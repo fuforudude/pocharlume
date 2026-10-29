@@ -24,9 +24,9 @@ export function lireLore(source: string): TexteLore[] {
     if (m === null) return;
     const cle = m[1] ?? '';
     const texte = (m[2] ?? '').trim();
-    if (texte === '') throw new Error(`lore.md ligne ${i + 1} : texte vide pour ${cle}`);
+    if (texte === '') throw new Error(`lore.md ligne ${String(i + 1)} : texte vide pour ${cle}`);
     const avant = vues.get(cle);
-    if (avant !== undefined) throw new Error(`lore.md ligne ${i + 1} : clé ${cle} déjà vue ligne ${avant}`);
+    if (avant !== undefined) throw new Error(`lore.md ligne ${String(i + 1)} : clé ${cle} déjà vue ligne ${String(avant)}`);
     vues.set(cle, i + 1);
     textes.push({ cle, texte, ligne: i + 1 });
   });

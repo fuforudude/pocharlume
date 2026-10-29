@@ -22,6 +22,7 @@ import { lignesBilanInfini, vueCartesInfini } from './ui/infini-vues';
 import { configDeRelance, configDuChoix, configInfini, debiterAuLancement, nouvelleGraine, relancerAvecDebit } from './ui/lancement';
 import { choixJouable } from './ui/meta-vues';
 import { NIVEAU_CAMPAGNE_TEST } from './ui/niveau-test';
+import { installerIndicationsClavier } from './ui/indications-clavier';
 import { afficherOptions } from './ui/options';
 import { lancerNiveau, graineSuivante, type PartieEnCours, type ResultatPartie, type RetourFin } from './ui/partie';
 import { texteRefusMeta } from './ui/raisons-meta';
@@ -352,6 +353,7 @@ async function demarrer(): Promise<void> {
   const { stockage, nom } = await ouvrirStockage();
   session = await Session.ouvrir(new Depot(stockage), ouvrirCanalNavigateur(), { defs: DEFS_META });
   installerAudio(() => session.sauvegarde.reglages);
+  installerIndicationsClavier();
   accueil();
   avertirSauvegarde(session.origine, nom === 'memoire');
 }
