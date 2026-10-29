@@ -1,6 +1,6 @@
-# Pollen, Trois-Pattes : héros du dieu Pollen. Chat tigré roux, rayures sombres bien marquées, oreille gauche
-# déchirée, foulard moutarde, ceinture d'outils. Une patte arrière manquante : un moignon bandé pend à gauche,
-# il ne marche que sur la patte avant-droite et boite (le corps retombe à chaque pas). Fronde de cuir.
+# Clopin, le Tendeur : fidèle de Trois-Pattes (id technique `pollen`). Chat tigré roux, rayures sombres bien marquées, oreille
+# gauche déchirée, foulard moutarde, ceinture d'outils. Un chat ordinaire à quatre pattes : la patte arrière gauche, bandée,
+# ne porte qu'à peine, il boite (le corps retombe à chaque pas). Corde de tendeur de pièges.
 # Squelette du chat de grange, grilles posées à l'origine (6, 18), pieds en y = 30.
 categorie unite
 palette commune
@@ -39,36 +39,36 @@ calque queue-b 2 8
 o
 .obo
 
-# Le moignon bandé (x 7-8) ne touche pas le sol ; la seule patte est à droite.
+# Patte arrière gauche bandée (x 7-8, lin pâle) qui touche à peine le sol, les deux pattes de droite portent.
 calque jambes 7 11
 zz.oo
-...BB
+zz.BB
 
-# Réception du saut : la patte avance, le moignon se balance.
+# Réception du boitement : la patte saine avance, la patte bandée se balance.
 calque jambes-c 7 11
 ..zz.oo
-......BB
+...z.BB
 
-# Fronde au repos : lanière enroulée, pierre dans la poche.
+# Corde de tendeur au repos : boucle enroulée, nœud coulant.
 calque arme 11 3
-.dd
-d..d
-.dP
-..P
+.JJ
+J..J
+.JB
+..B
 
-# Fronde qui tournoie au-dessus de la tête.
+# Corde qui tournoie au-dessus de la tête (lasso).
 calque arme-haut 6 -3
-..dd..
-.d..d.
-d....d
-.d..dP
-..dd..
+..JJ..
+.J..J.
+J....J
+.J..JB
+..JJ..
 
-# Bras tendu, lanière détendue, pierre partie.
+# Bras tendu, la boucle part devant lui.
 calque arme-frappe 11 5
-.....P
-oo.dd.
-..dd..
+.....B
+oo.JJ.
+..JJ..
 
 # Piège à loup posé devant lui.
 calque piege 12 10

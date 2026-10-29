@@ -127,6 +127,8 @@ export function creerChoixFiche(atlas: AtlasRendu, session: SessionChoix, signal
       rangee.append(b);
     }
     section.append(rangee);
+    // Le dieu n'a pas de visage : son symbole, son épithète (sur le bouton) et sa phrase.
+    section.append(el('p', 'choix-legende', tCle(DIEUX[choix.dieu].description)));
     return section;
   }
 

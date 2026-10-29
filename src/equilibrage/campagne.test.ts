@@ -276,7 +276,7 @@ describe('évaluation d’une région et rapport', () => {
     expect(rapport).toContain('Soigneux : niveaux avec perte');
     expect(rapport).toContain('dix variantes (5 préférences × 2 diversités)');
     // Les sorts et les tours divines des trois dieux y sont.
-    for (const nom of ['Voile de Nuit', 'Griffes d’Ombre', 'Chute du Colosse', 'Renforts', 'Pièges à Ressort', 'Ingéniosité', 'Sanctuaire de l’Ombre', 'Totem du Colosse', 'Atelier Boiteux']) {
+    for (const nom of ['Voile de Nuit', 'Griffes d’Ombre', 'Chute du Colosse', 'Renforts', 'Pièges à Ressort', 'Ingéniosité', 'Sanctuaire de l’Ombre', 'Totem du Colosse', 'Atelier de la Boiteuse']) {
       expect(rapport, nom).toContain(nom);
     }
     // Le texte annonce le vrai nombre de variantes de la recherche.

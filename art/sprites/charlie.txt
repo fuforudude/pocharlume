@@ -1,5 +1,5 @@
-# Charlie, le Colosse : héros du dieu Charlie. Énorme chat gris, poitrail blanc, collier de fer brisé,
-# balafre sur l'œil, petits yeux. Il frappe des deux poings. Grilles posées à l'origine (4, 10).
+# Gond, le Portier : fidèle du Colosse (id technique `charlie`, fichier historique). Gros chat brun au poitrail crème, collier
+# de cuir et une clé de portier pendue au cou, placide. Il frappe des deux poings. Grilles posées à l'origine (4, 10).
 categorie unite
 palette commune
 taille 32 32
@@ -9,60 +9,60 @@ origine 4 10
 sprite charlie
 
 calque tete 8 0
-u.......u.
-uv.....vu.
-uuuuuuuuu.
-uUPUUUUUuu
-uUUPkUUkUu
-uUUUUvvvvv
-.uUUvvvrvv
-..uuUvvvv.
+b.......b.
+bc.....cb.
+bbbbbbbbb.
+bBBBBBBBbb
+bBBBkBBkBb
+bBBBBccccc
+.bBBcccrcc
+..bbBcccc.
 
 calque yeux-clos 12 4
-U..U
+B..B
 
 calque corps 4 8
-....gpPpPpPpg...
-..uuuUvvvvvUuuu.
-.uuUUvvvvvvUUUuu
-uuUUUvvvvvvUUUUu
-uuUUUUvvvvUUUUuu
-uuuUUUUvvUUUUuuu
-uuu.UUUUUUUU.uuu
-vvv..uuuuuu..vvv
+....dYYYYYYYd...
+..bbbBcccccBbbb.
+.bbBBccYcccBBBbb
+bbBBBcYYcccBBBBb
+bbBBBBccccBBBBbb
+bbbBBBBccBBBBbbb
+bbb.BBBBBBBB.bbb
+ccc..bbbbbb..ccc
 
 calque corps-leve 4 -4
-.......vvvv
-......vvvvvv
-.....uvvvvvvu
-....uu......uu
-...uu........uu
-..uu..........uu
-..uu..........uu
-..uu..........uu
-..uu..........uu
-..uu..........uu
-..uu..........uu
-..uu..........uu
-..uugpPpPpPpgUuu
-..uuuUvvvvvUuuu
-..uUUvvvvvvUUU
-..uUUvvvvvvUUU
-..uUUUvvvvUUUU
-..uuUUUvvUUUUu
-....UUUUUUUU
-.....uuuuuu
+.......cccc
+......cccccc
+.....bccccccb
+....bb......bb
+...bb........bb
+..bb..........bb
+..bb..........bb
+..bb..........bb
+..bb..........bb
+..bb..........bb
+..bb..........bb
+..bb..........bb
+..bbdYYYYYYYdBbb
+..bbbBcccccBbbb
+..bBBccccccBBB
+..bBBccccccBBB
+..bBBBccccBBBB
+..bbBBBccBBBBb
+....BBBBBBBB
+.....bbbbbb
 
 calque corps-frappe 4 8
-....gpPpPpPpg
-..uuuUvvvvvUuuuu
-..uUUvvvvvvUUUuuu
-..uUUvvvvvvUUUUuuu
-..uUUUvvvvUUUU.uuu
-..uuUUUvvUUUu...uu
-....UUUUUUUU....uuu
-.....uuuuuu.....vvvv
-................vvvv
+....dYYYYYYYd
+..bbbBcccccBbbbb
+..bBBccccccBBBbbb
+..bBBccccccBBBBbbb
+..bBBBccccBBBB.bbb
+..bbBBBccBBBb...bb
+....BBBBBBBB....bbb
+.....bbbbbb.....cccc
+................cccc
 
 calque poussiere 13 16
 .q.......q
@@ -78,36 +78,36 @@ P.q..Pq.......qP..q..P
 PpPpPpPpP...PpPpPpPpPp
 
 calque queue 0 8
-.uu
-u..
-u..
-uu.
-.uu
+.bb
+b..
+b..
+bb.
+.bb
 
 calque queue-b 0 8
-uu.
-u..
-u..
-uu.
-.uu
+bb.
+b..
+b..
+bb.
+.bb
 
 calque jambes 7 17
-.uuu..uuu.
-.uuu..uuu.
-.uUu..uUu.
-vvvv..vvvv
+.bbb..bbb.
+.bbb..bbb.
+.bBb..bBb.
+cccc..cccc
 
 calque jambes-a 6 17
-.uuu....uuu.
-.uuu....uuu.
-uUu......uUu
-vvv......vvvv
+.bbb....bbb.
+.bbb....bbb.
+bBb......bBb
+ccc......cccc
 
 calque jambes-b 7 17
-..uuu.uuu.
-..uuu.uuu.
-..uUu.uUu.
-.vvvvvvvv.
+..bbb.bbb.
+..bbb.bbb.
+..bBb.bBb.
+.cccccccc.
 
 anim repos 260
 cadre queue + jambes + corps + tete

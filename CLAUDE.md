@@ -9,6 +9,7 @@ Capacitor plus tard.
 - Compiler : `npm run build` (`tsc --noEmit` puis `vite build`, site statique dans `dist/`)
 - Tester : `npm test` (Vitest)
 - Linter : `npm run lint` (ESLint, typescript-eslint strict avec typage)
+- Reporter le lore : `npm run lore` (reporte `docs/lore.md` dans `src/i18n/` ; `-- --verifier` compare sans écrire). `fr-lore.ts` est généré : corriger `lore.md`, jamais ce fichier.
 - Tout vérifier : `npm run verifier` (lint, types, tests, build). Doit être vert avant tout commit.
 
 ## Architecture

@@ -44,6 +44,6 @@
 #   objets     icone-fiole-soufre, icone-herbe-sabbat, icone-griffe-renfort, icone-sablier
 #   branches   icone-branche-caserne|tir|magie|artillerie (même image que icone-caserne… : atlas partagé) |sorts|heros
 #   divers     icone-competence, icone-cadenas (existantes : icone-braise, icone-etoile, icone-arete, icone-vie)
-#   dieux      icone-dieu-plume (plume), icone-dieu-charlie (patte du Colosse), icone-dieu-pollen (engrenage à trois dents)
+#   dieux      icone-dieu-plume (croissant d'ombre), icone-dieu-charlie (la porte de pierre), icone-dieu-pollen (trace à trois doigts)
 #   portraits  icone-portrait-<héros> : 24×24 ancre 12 13, recadrés sur le haut du cadre de repos du héros (opération `rogne`)
 #              ids : plume suie corbeau charlie mastoc brise-os pollen rouage lanterne
