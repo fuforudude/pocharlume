@@ -169,6 +169,13 @@ describe('carte du monde : lancer un niveau', () => {
     expect(surLancer).toHaveBeenCalledTimes(1);
   });
 
+  it('une partie infinie en cours est annoncée avec le texte de l’infini', () => {
+    monter({ partieEnCours: { niveau: 3, vague: 4, infini: true } });
+    appuyer('Enter');
+    bouton(t('fiche.lancer')).click();
+    expect(confirmation()?.textContent).toContain(t('lancer.perte_detail_infini', { n: 3, m: 4 }));
+  });
+
   it('annuler garde la carte et la fiche, sans rien lancer', () => {
     const { surLancer, surRetour } = monter({ partieEnCours: { niveau: 3, vague: 4 } });
     appuyer('Enter');

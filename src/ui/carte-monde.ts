@@ -67,7 +67,7 @@ export interface OptionsCarteMonde {
    * Une partie en cours qu'on peut reprendre : lancer un niveau la remplacerait, donc « Lancer » demande d'abord
    * confirmation.
    */
-  readonly partieEnCours?: { readonly niveau: number; readonly vague: number } | null;
+  readonly partieEnCours?: { readonly niveau: number; readonly vague: number; readonly infini?: true } | null;
   /** Les régions montrées ; par défaut celles du jeu (`REGIONS_MONDE`). */
   readonly regions?: readonly RegionMonde[];
   /** Numéro de la région montrée à l'ouverture si elle est ouverte ; par défaut la plus haute région ouverte. */
@@ -445,7 +445,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
       avertissement?.remove();
       avertissement = afficherConfirmation(racine, {
         titre: t('lancer.perte_titre'),
-        detail: t('lancer.perte_detail', { n: enCours.niveau, m: enCours.vague }),
+        detail: t(enCours.infini ? 'lancer.perte_detail_infini' : 'lancer.perte_detail', { n: enCours.niveau, m: enCours.vague }),
         confirmer: t('lancer.confirmer'),
         annuler: t('lancer.annuler'),
         surConfirmer: () => {
