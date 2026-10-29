@@ -38,7 +38,7 @@ describe('bilan de fin : défi, disciple offert, région ouverte', () => {
 
   it('une région que l’écran ne connaît pas est annoncée par son numéro', () => {
     expect(lignesBilan({ ...BILAN, regionDebloquee: 11 })).toEqual([t('fin.bilan_region_numero', { n: 11 })]);
-    expect(lignesBilan({ ...BILAN, regionDebloquee: 7 })).toEqual([t('fin.bilan_region', { nom: 'Les Routes de la Croisade' })]);
+    expect(lignesBilan({ ...BILAN, regionDebloquee: 7 })).toEqual([t('fin.bilan_region', { nom: 'La Croisade' })]);
   });
 
   it('tout ensemble, après le butin habituel et dans l’ordre : défi, disciple, région', () => {

@@ -62,5 +62,7 @@ describe('régions du monde', () => {
       expect(r.contenu !== null, `région ${String(r.numero)}`).toBe(livree);
     }
     expect(REGIONS_MONDE[0]?.contenu).not.toBeNull();
+    // Les dix régions sont livrées : la carte du monde les montre toutes.
+    expect(REGIONS_MONDE.every((r) => r.contenu !== null)).toBe(true);
   });
 });

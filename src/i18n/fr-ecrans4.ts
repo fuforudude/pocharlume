@@ -1,10 +1,5 @@
 // Textes du jalon 4 : régions 6 à 10, écran du mode infini, fin de partie infinie, fin de campagne.
 export const frEcrans4 = {
-  'region.6': 'Le Cimetière des Pendus',
-  'region.7': 'Les Routes de la Croisade',
-  'region.8': 'Le Tribunal des Cendres',
-  'region.9': 'Le Palais des Rois Fous',
-  'region.10': 'La Cathédrale du Soleil Blême',
 
   // Noms des cartes (clé `carte.nom.<id>`) : une carte sans nom ici s'affiche avec son identifiant mis en forme.
   'carte.nom.chaumes': 'Les Chaumes',
@@ -23,6 +18,21 @@ export const frEcrans4 = {
   'carte.nom.quarantaine': 'La Quarantaine',
   'carte.nom.faubourg': 'Le Faubourg',
   'carte.nom.marche': 'Le Marché',
+  'carte.nom.fossoyage': 'Le Fossoyage',
+  'carte.nom.tertres': 'Les Tertres',
+  'carte.nom.ossuaire': 'L’Ossuaire',
+  'carte.nom.bivouac': 'Le Bivouac',
+  'carte.nom.palissade': 'La Palissade',
+  'carte.nom.baliste': 'La Baliste',
+  'carte.nom.cloitre': 'Le Cloître',
+  'carte.nom.refectoire': 'Le Réfectoire',
+  'carte.nom.scriptorium': 'Le Scriptorium',
+  'carte.nom.avenue': 'L’Avenue',
+  'carte.nom.douves': 'Les Douves',
+  'carte.nom.pont_levis': 'Le Pont-Levis',
+  'carte.nom.nef': 'La Nef',
+  'carte.nom.transept': 'Le Transept',
+  'carte.nom.choeur': 'Le Chœur',
 
   // Mode infini : accueil, choix de la carte, record, paliers
   'accueil.infini': 'Mode infini',
