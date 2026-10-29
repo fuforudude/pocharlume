@@ -9,5 +9,8 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['src/**/*.test.ts', 'tools/**/*.test.ts'],
+    // Les simulations et la construction de l'atlas tournent en parallèle : sous charge, les délais par défaut sautent.
+    testTimeout: 30_000,
+    hookTimeout: 60_000,
   },
 });

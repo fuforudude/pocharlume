@@ -229,7 +229,7 @@ describe('élites : à partir de la vague 20', () => {
     expect(ordinaires(avec, 3).reduce((total, p) => total + p.nombre, 0)).toBe(base.paquets.reduce((total, p) => total + p.nombre, 0));
   });
 
-  it('en partie, les groupes d’élites apparaissent en élites (PV ×1,8)', () => {
+  it('en partie, les groupes d’élites apparaissent en élites (PV × REGLES.elite.facteurPv)', () => {
     const etat = creerPartie(NIVEAU_TEST, configInfinie(1, { graine: 5 }));
     etat.vagues.lancees = 19;
     lancerVague(etat, 0);

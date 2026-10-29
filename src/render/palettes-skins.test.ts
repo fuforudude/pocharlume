@@ -141,7 +141,7 @@ describe('catalogue des palettes', () => {
       // Seuil bas car la zone d'un sprite est un rectangle de l'atlas qui peut englober des pixels voisins (cadres dédoublonnés) : le ratio bouge à chaque ajout de sprites.
       expect(changes / opaques, id).toBeGreaterThan(0.04);
     }
-  }, 30_000);
+  }, 120_000);
 
   it('donne des rendus différents aux trois skins d’une même famille', () => {
     for (const famille of ['caserne', 'tir', 'magie', 'artillerie']) {

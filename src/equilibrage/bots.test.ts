@@ -9,7 +9,7 @@ import { distance, echantillonner, etatInitial, longueurVue, poidsDesChemins } f
 import { BOT_INACTIF, configPartie, jouerPartie, type Bot } from './simulation';
 
 /** Marge de temps pour les tests qui jouent plusieurs parties des niveaux 9 et 10 (longues, et plus lentes sur une machine chargée). */
-const DELAI_PARTIE_LONGUE = 30_000;
+const DELAI_PARTIE_LONGUE = 120_000;
 
 const niveau1 = REGION1[0]?.niveau ?? NIVEAU_TEST;
 

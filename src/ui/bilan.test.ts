@@ -27,6 +27,12 @@ describe('bilan de fin : défi, disciple offert, région ouverte', () => {
     expect(t('fin.bilan_defi', { defi: 'Fer', n: 4 })).toBe('Défi Fer réussi : +4 braises');
   });
 
+  it('les braises d’un défi ne sont annoncées qu’une fois', () => {
+    const lignes = lignesBilan({ ...BILAN, braises: BRAISES_DEFI, defiReussi: 'heroique' });
+    expect(lignes.filter((l) => l.includes('braises'))).toHaveLength(1);
+    expect(lignesBilan({ ...BILAN, braises: BRAISES_DEFI + 5, defiReussi: 'fer' })).toContain(t('fin.bilan_braises', { n: 5 }));
+  });
+
   it('un disciple offert est annoncé par son nom', () => {
     expect(lignesBilan({ ...BILAN, discipleOffert: 'suie' })).toEqual([t('fin.bilan_disciple', { nom: 'Suie' })]);
   });
@@ -43,7 +49,7 @@ describe('bilan de fin : défi, disciple offert, région ouverte', () => {
 
   it('tout ensemble, après le butin habituel et dans l’ordre : défi, disciple, région', () => {
     const lignes = lignesBilan({ ...BILAN, aretes: 120, braises: 9, defiReussi: 'heroique', discipleOffert: 'mastoc', regionDebloquee: 3 });
-    expect(lignes.map((l) => l.split(' ')[0])).toEqual(['+120', '+9', 'Défi', 'Mastoc', 'Région']);
+    expect(lignes.map((l) => l.split(' ')[0])).toEqual(['+120', '+5', 'Défi', 'Mastoc', 'Région']);
   });
 
   it('le mode infini débloqué et la fin de campagne sont annoncés', () => {

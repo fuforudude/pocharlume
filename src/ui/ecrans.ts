@@ -142,7 +142,9 @@ export interface ButinFin {
 export function lignesBilan(bilan: BilanPartie): string[] {
   const lignes: string[] = [];
   if (bilan.aretes > 0) lignes.push(t('fin.bilan_aretes', { n: bilan.aretes }));
-  if (bilan.braises > 0) lignes.push(t('fin.bilan_braises', { n: bilan.braises }));
+  // Les braises d'un défi réussi ont leur propre ligne plus bas : on ne les compte pas deux fois.
+  const braisesHorsDefi = bilan.braises - (bilan.defiReussi !== undefined ? BRAISES_DEFI : 0);
+  if (braisesHorsDefi > 0) lignes.push(t('fin.bilan_braises', { n: braisesHorsDefi }));
   const heros = bilan.heros !== null && Object.hasOwn(HEROS, bilan.heros) ? HEROS[bilan.heros] : null;
   const nom = heros ? tCle(heros.nom) : '';
   if (heros && bilan.xp > 0) lignes.push(t('fin.bilan_xp', { n: bilan.xp, nom }));
@@ -155,7 +157,7 @@ export function lignesBilan(bilan: BilanPartie): string[] {
   if (bilan.objetsRendus.length > 0) {
     lignes.push(t('fin.bilan_rendus', { noms: bilan.objetsRendus.map((o) => tCle(OBJETS[o].nom)).join(', ') }));
   }
-  // Jalon 3 : un défi réussi pour la première fois (ses braises sont déjà dans le total ci-dessus), un disciple offert par un
+  // Jalon 3 : un défi réussi pour la première fois (ses braises sont retirées de la ligne des braises ci-dessus), un disciple offert par un
   // boss, la région que cette victoire ouvre.
   if (bilan.defiReussi !== undefined) lignes.push(t('fin.bilan_defi', { defi: t(`fiche.mode_${bilan.defiReussi}`), n: BRAISES_DEFI }));
   if (bilan.discipleOffert !== undefined && Object.hasOwn(HEROS, bilan.discipleOffert)) {
