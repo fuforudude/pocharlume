@@ -8,7 +8,7 @@ import { construire, DOSSIER_SORTIE, lireSources, type Construction } from './co
 import { decoderPng } from './png.ts';
 
 /** Les cinq boss des régions 1 à 5 : cadres de 64×64. */
-const BOSS = ['boucher-vaudrelle', 'la-faim', 'juge-flammes', 'dame-puits', 'mere-rats'];
+const BOSS = ['boucher-vaudrelle', 'la-faim', 'juge-flammes', 'dame-puits', 'mere-rats', 'roi-fosses', 'prince-croise', 'grand-inquisiteur', 'roi-fou', 'soleil-bleme'];
 
 let resultat: Construction;
 let commite: AtlasJson;
@@ -197,9 +197,23 @@ describe('atlas commité', () => {
       expect(commite.sprites['effet-plongee']?.animations.impact).toBeDefined();
     });
 
-    it('garde l’atlas raisonnable (planche sous 1 Mo et moins de 1 200 px de haut)', () => {
+    it('garde l’atlas raisonnable (planche sous 1 Mo et moins de 2 048 px de haut : taille de texture sûre sur mobile)', () => {
       expect(resultat.png.length).toBeLessThan(1024 * 1024);
-      expect(resultat.image.hauteur).toBeLessThan(1200);
+      expect(resultat.image.hauteur).toBeLessThan(2048);
+    });
+
+    it('jalon 4 : sprites des régions 6 à 10 (14 ennemis et leurs élites, 5 boss), tuiles et décor, sans l’illustration de fin (hors atlas)', () => {
+      const ennemis = ['fossoyeur', 'creux', 'chauve-souris', 'fantassin', 'porte-banniere', 'cavalier', 'flagellant', 'inquisiteur', 'exorciste',
+        'garde-royal', 'arbaletrier-elite', 'chevalier', 'acolyte-cendre', 'ange-cendre'];
+      for (const nom of ennemis) {
+        for (const n of [nom, `${nom}-elite`]) {
+          expect(commite.sprites[n]?.categorie, n).toBe('ennemi');
+          expect(Object.keys(commite.sprites[n]?.animations ?? {}), n).toEqual(expect.arrayContaining(['repos', 'marche', 'attaque', 'blesse', 'mort']));
+        }
+      }
+      for (const nom of BOSS.slice(5)) expect(commite.sprites[nom]?.categorie, nom).toBe('ennemi');
+      for (const r of [6, 7, 8, 9, 10]) expect(Object.keys(commite.sprites).filter((n) => n.startsWith(`r${String(r)}-`)), String(r)).toHaveLength(21);
+      expect(commite.sprites['fin-campagne']).toBeUndefined();
     });
   });
 

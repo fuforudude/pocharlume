@@ -34,6 +34,32 @@ export const GRANDS_DECORS: ReadonlySet<string> = new Set([
   'maison-condamnee-2',
   'charrette-linceuls',
   'fosse-commune',
+  // Régions 6 à 10 (art/sprites/decor-region6.txt)
+  'arbre-ossements-1',
+  'arbre-ossements-2',
+  'mausolee-brise',
+  'ossuaire',
+  // Régions 6 à 10 (art/sprites/decor-region7.txt)
+  'tente-croisee-1',
+  'tente-croisee-2',
+  'baliste-brisee',
+  'chariot-armes',
+  // Régions 6 à 10 (art/sprites/decor-region8.txt)
+  'arche-cloitre',
+  'clocher-noir',
+  'statue-moine',
+  'fontaine-noire',
+  // Régions 6 à 10 (art/sprites/decor-region9.txt)
+  'tourelle-royale',
+  'fontaine-royale',
+  'statue-roi',
+  'herse-brisee',
+  // Régions 6 à 10 (art/sprites/decor-region10.txt)
+  'pilier-brise-1',
+  'pilier-brise-2',
+  'vitrail-brise',
+  'autel-bleme',
+  'statue-ange',
 ]);
 
 /** Emprise d'un décor : tout le sprite (le rectangle de pixels, ancre comprise). */

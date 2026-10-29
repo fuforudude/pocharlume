@@ -1,0 +1,213 @@
+# Décor de la Cathédrale du Soleil Blême (région 10) : piliers brisés, vitrail, autel au disque pâle, statue d'ange, cierge, plume, calice, dalle solaire. Comme le décor des autres régions : avec contour, ancre au pied ; les grands
+# objets font 32×32 (liste GRANDS_DECORS dans src/data/niveaux/habillage.ts, ils bloquent la pose des tours), les petits 16×16.
+# Dessinés par un script jetable (primitives) puis à retoucher à la main ici.
+categorie decor
+palette commune
+taille 32 32
+ancre 16 30
+
+# Pilier de nef, rompu.
+sprite pilier-brise-1
+origine 10 8
+....z.......
+...Zqzzzzzq.
+.Z.Zzqzzqzz.
+.Z..zzqzzqz.
+.ZZ.qzzqzzq.
+.ZZZzqzpqzz.
+.ZZZzzqpzqz.
+.ZZZqzzpzzq.
+.ZZZzqpzqzz.
+.ZZZzzpzzqz.
+.ZZZqzpqzzq.
+.ZZZzqpzqzz.
+.ZZZzpqzzqz.
+.ZZZqpzqzzq.
+.ZZZzqzzqzz.
+.ZZZzzqzzqz.
+.ZZZqzzqzzq.
+.ZZZzqzzqzz.
+.ZZZzzqzzqz.
+qqqqqqqqqqqq
+qqqqqqqqqqqq
+PPPPPPPPPPPP
+PPPPPPPPPPPP
+
+# Pilier de nef encore coiffé.
+sprite pilier-brise-2
+origine 9 2
+..zzzzzzzzzz..
+..zzzzzzzzzz..
+qqqqqqqqqqqqqq
+qqqqqqqqqqqqqq
+qqqqqqqqqqqqqq
+..ZZZzqzzqzz..
+..ZZZzzqzzqz..
+..ZZZqzzqzzq..
+..ZZZzqzzqzz..
+..ZZZzzqzzqz..
+..ZZZqzzqzzq..
+..ZZZzqzpqzz..
+..ZZZzzqpzqz..
+..ZZZqzzpzzq..
+..ZZZzqpzqzz..
+..ZZZzzpzzqz..
+..ZZZqzpqzzq..
+..ZZZzqpzqzz..
+..ZZZzpqzzqz..
+..ZZZqpzqzzq..
+..ZZZzqzzqzz..
+..ZZZzzqzzqz..
+..ZZZqzzqzzq..
+..ZZZzqzzqzz..
+..ZZZzzqzzqz..
+.qqqqqqqqqqqq.
+.qqqqqqqqqqqq.
+.PPPPPPPPPPPP.
+.PPPPPPPPPPPP.
+
+# Vitrail brisé : des éclats pâles dans le cadre.
+sprite vitrail-brise
+origine 7 3
+.........z........
+.....zzzzkzzzz....
+....zzzkkkkkzzz...
+...zzzkkkkkkkzzz..
+ZZzzzkkkkkkkkkzzzZ
+ZZzzzkkkkkkkkkzzzZ
+ZZzzzkkkkkkkkkzzzZ
+zzzzzkkkykkkkkzzzz
+zzzzkkkkykkkkkkzzz
+zzzzkkkkykkkkkzzzz
+zzzzkyyyykkkkkzzzz
+zzzzkyyykkkkkkzzzz
+zzzzkyyykkYYYkzzzz
+zzzzkyyykkYYYkzzzz
+zzzzkyyykkYYYkzzzz
+zzzzkkkkkkYYzkzzzz
+zzzzkkkkkkYYYkzzzz
+zzzzkkkkkkkkkkkzzz
+zzzzkxxxkkkkkkzzzz
+zzzzkxxxkkkkkkzzzz
+zzzzkxxxkkZZZkzzzz
+zzzzkxxxkkZZZkzzzz
+zzzzkkkkkkZZZkzzzz
+zzzzkkkykkZZZkzzzz
+zzzzkkkkkkZZZkzzzz
+zzzzkkkkkkkkkkzzzz
+qqqqqqqqqkqqqqqqqq
+qqqqqqqqqqqqqqqqqq
+
+# Autel du Soleil Blême : un disque pâle rayonnant.
+sprite autel-bleme
+origine 4 9
+......Z.....Y.....Z.....
+.........YYYYYYY........
+........YYYYzYYYY.......
+........YYzzzzzYY.......
+........YYzzwzzYY.......
+....Z..YYzzwwwzzYY..Z...
+........YYzzwzzYY.......
+........YYzzzzzYY.......
+........YYYYzYYYY.......
+.........YYYYYYY........
+.qqqqqZqqqqqYqqqqqZqqqq.
+.qqqqqqqqqqqqqqqqqqqqqq.
+..ZZZZZZZZZZZZZZZZZZZZ..
+..zzzzzzzzzzzzzzzzzzzz..
+..zzzzzzzzzzzzzzzzzzzz..
+..zzzzzzzzzzzzzzzzzzzz..
+..ZZZZZZZZZZZZZZZZZZZZ..
+..zzzzzzzzzzzzzzzzzzzz..
+qqqqqqqqqqqqqqqqqqqqqqqq
+qqqqqqqqqqqqqqqqqqqqqqqq
+qqqqqqqqqqqqqqqqqqqqqqqq
+PPPPPPPPPPPPPPPPPPPPPPPP
+
+# Statue d'ange aux ailes ouvertes, sans tête.
+sprite statue-ange
+origine 3 6
+.q.......................q
+..zz.......ZZZZ.......zzqq
+..zz.......ZZZZ.......zzq.
+..zzq.....zzzzzz......zz..
+.....q....zzzzzz.....qq...
+qq....q...zzzzzz....qq...q
+.qqq...q.zzzzzzzz..qq..qq.
+...qq.zzzzzzzzzzzzzzz.qq..
+.....qq..qZZZZZZZqq.qq....
+.......qqzzzzzzzz.qq......
+.........qzzzzzzzqq.......
+.........zzzzzzzz.........
+.........ZZZZZZZZ.........
+...qqqqqqqzzzzzzzqqqqqqq..
+.........zzzzzzzz.........
+.........zzzzzzzz.........
+.........ZZZZZZZZ.........
+.........zzzzzzzz.........
+.........zzzzzzzz.........
+.........zzzzzzzz.........
+......zzzzppppppzzzz......
+.....qqqqqqqqqqqqqqqq.....
+.....qqqqqqqqqqqqqqqq.....
+.....qqqqqqqqqqqqqqqq.....
+.....qqqqqqqqqqqqqqqq.....
+
+# Cierge pâle.
+sprite cierge-bleme
+taille 16 16
+ancre 8 15
+origine 4 4
+....y...
+....Y...
+..Zzzz..
+..Zzzz..
+..Zzzz..
+..Zzzz..
+..Zzzz..
+..Zzzz..
+..Zzzz..
+qqqqqqqq
+qqqqqqqq
+
+# Plume de cendre.
+sprite plume-cendre
+taille 16 16
+ancre 8 15
+origine 2 9
+..........vL
+.......vvUU.
+.....vUUUU..
+..vvvUU.....
+vUUU.vvv....
+MMMMMMMMMMMM
+
+# Calice brisé.
+sprite calice-brise
+taille 16 16
+ancre 8 15
+origine 4 4
+..YYkYkY
+..YYYkYY
+..YYYYYY
+...YYYY.
+....ZZ..
+....ZZ..
+....ZZ..
+....ZZ..
+..YYYYYY
+MMMYYYYY
+MMM.....
+
+# Dalle au disque solaire.
+sprite dalle-solaire
+taille 16 16
+ancre 8 15
+origine 1 8
+zzzzzzzzzzzzzz
+qqqZqqqYqqqqqq
+qqqqqYYYYYqqqq
+qqqqYYYzYYYqqq
+qqqqqYYYYYqqqq
+qqqqqqqYqqqZqq
+pppppppppppppp

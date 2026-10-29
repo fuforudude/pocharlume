@@ -51,3 +51,16 @@ export function construire(racine = RACINE): Construction {
   const { image, json } = construireAtlas(sprites);
   return { sprites, image, png: encoderPng(image), json, texteJson: serialiserAtlas(json) };
 }
+
+/**
+ * Illustrations plein cadre (art/illustrations/*.txt, même format que les sprites, une par fichier) : elles ne vont pas dans
+ * l'atlas (trop grandes) mais en PNG séparés dans public/illustrations/ (voir `npm run art`).
+ */
+export function construireIllustrations(racine = RACINE): SpriteDessine[] {
+  const dossier = join(racine, 'art', 'illustrations');
+  let fichiers: string[];
+  try { fichiers = fichiersTexte(dossier); } catch { return []; }
+  const palettes = lireSources(racine).palettes;
+  const sprites = fichiers.flatMap((f) => lireSprites(readFileSync(join(dossier, f), 'utf8'), `art/illustrations/${f}`));
+  return dessinerSprites({ sprites, palettes, planche: () => { throw new Error('une illustration n’utilise pas de planche Minifolks'); } });
+}

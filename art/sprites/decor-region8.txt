@@ -1,0 +1,189 @@
+# Décor de le Monastère Noir (région 8) : arche de cloître, clocher noir, statue de moine, fontaine noire, cierge, livre brûlé, crucifix, dalle gravée. Comme le décor des autres régions : avec contour, ancre au pied ; les grands
+# objets font 32×32 (liste GRANDS_DECORS dans src/data/niveaux/habillage.ts, ils bloquent la pose des tours), les petits 16×16.
+# Dessinés par un script jetable (primitives) puis à retoucher à la main ici.
+categorie decor
+palette commune
+taille 32 32
+ancre 16 30
+
+# Arche de cloître : deux piliers, un arc noir.
+sprite arche-cloitre
+origine 2 6
+.............p..............
+.............p..............
+..........GGGGGGGG..........
+..........GGGGGGGG..........
+..........GGGGGGGG..........
+.......PPPPPPPPPPPPPPP......
+PPPPPPPPPPPPPPPPPPPPPPPPPPPP
+PPPPPPpPPPPPPPPPPPPPPPPPPPPP
+.pppGppppkkkkkkkkkkGppppGpp.
+.pppGpppkkqkkkkkkqkkppGpppp.
+.pGppppkkkkkkkkkkkkkkppGppp.
+.gggggpkkkkkkkkkkkkkkpppGpp.
+.pppGpkkkkkkkkkkkkkkkkpGppp.
+.ppGppkkkkkkkkkkkkkkkkGpppp.
+.pGpppkkkkkkkkkkkkkkkkppppG.
+.GppppkkkkkkkkkkkkkkkkpppGp.
+.ppppGkkkkkkkkkkkkkkkkggggg.
+.pppGpkkkkkkkkkkkkkkkkpGppp.
+.ppGppkkkkkkkkkkkkkkkkGpppp.
+.pGpppkkkkkkkkkkkkkkkkppppG.
+.GppppkkkkkkkkkkkkkkkkpppGp.
+.ppppGkkkkkkkkkkkkkkkkppGpp.
+.pppGpkkkkkkkkkkkkkkkkpGppp.
+gggggggggggggggggggggggggggg
+gggggggggggggggggggggggggggg
+
+# Clocher noir : une fenêtre, une cloche absente.
+sprite clocher-noir
+origine 9 1
+.....GqG.....
+....GGGGG....
+....GGGGG....
+...GGGGGGG...
+..GGGGGGGGG..
+.GGGGGGGGGGG.
+.GGGGGGGGGGG.
+GGGGGGGGGGGGG
+PPPPPPPPPPPP.
+PPPPPPPPPPPP.
+.pPppppppPp..
+.pppppPpppp..
+.GGGkkkkGGG..
+.pppkYkkppp..
+.pppkkYkppp..
+.PppkYYkPpp..
+.GGGkYYkGGG..
+.pPpkYYkpPp..
+.pppppPpppp..
+gggggggggggg.
+.GGGGGGGGGG..
+.pppPpppppp..
+.Ppkkkkkkpp..
+.ppkkkkkkpp..
+.GGkkkkkkGG..
+.ppkkkkkkpp..
+.ppkkkkkkpP..
+.ppppppPppp..
+.GggggggggG..
+.Pggggggggp..
+
+# Statue de moine encapuchonné sur son socle.
+sprite statue-moine
+origine 9 4
+......PPP.....
+......PPP.....
+.....ppppp....
+.....ppppp....
+....ppGppGp...
+...pkkkkkkp...
+...pkkkkkkPP..
+...pkkkkkkP...
+...GppGppGp...
+...pGGGGGGP...
+...pppppppp...
+..GGpGppGpPP..
+..GGppppppPP..
+..GGPqqGqPPP..
+..GGpqqGqpPP..
+..GGpqqGqpPP..
+..GGpppGppPP..
+..GGPPPGPPPP..
+..GGppppppPP..
+...ppGppGpp...
+...pppppppp...
+..pppppppppp..
+.gggggggggggg.
+.gggggggggggg.
+.gggggggggggg.
+.gggggggggggg.
+hhhhhhhhhhhhhh
+
+# Fontaine noire : une vasque d'eau sombre.
+sprite fontaine-noire
+origine 2 11
+.............p.............
+............gG.............
+.........PPPPPPPP..........
+.........PPPPPPPP..........
+.........PPPPPPPP..........
+...........pppp............
+...........ppup............
+...........puuu............
+...........uuppu...........
+......PPPPuupppPuPPPP......
+....PPPkkuuppppkkukkPPP....
+..gPPkkkuuuppppuuuukkkPPg..
+.GPPkkkuuuuppppuuuuukkkPPg.
+.PPkkkkkuuuuuuuuuuukkkkkPP.
+gGPPkkkkkkkkkukkkkkkkkkPPgG
+.GgPPkkkkkkkkkkkkkkkkkPPgG.
+.gGgPPPkkkkkkkkkkkkkPPPggG.
+..ggGgPPPPPPPkPPPPPPPgGgg..
+....GggGggGggPgGggGggGg....
+......ggGggGggGggGggG......
+
+# Cierge.
+sprite cierge-noir
+taille 16 16
+ancre 8 15
+origine 4 3
+....e...
+....f...
+....y...
+..Zzzz..
+..Zzzz..
+..Zzzz..
+..Zzzz..
+..Zzzz..
+..Zzzz..
+..Zzzz..
+gggggggg
+gggggggg
+
+# Livre brûlé.
+sprite livre-brule
+taille 16 16
+ancre 8 15
+origine 2 9
+.UUUUUzZzze.
+kUUUUUZzzZze
+uUUUUUzzZzzu
+uUUUUUzZzzZu
+uuuuuuuuuuuu
+MMMMMMMMMMMM
+
+# Crucifix de bois.
+sprite crucifix
+taille 16 16
+ancre 8 15
+origine 3 0
+....bd....
+....bd....
+....bd....
+.dddbdddd.
+.dddbdddd.
+....bd....
+....bd....
+....bd....
+....bd....
+....bd....
+....bd....
+..pppppp..
+gggggggggg
+gggggggggg
+gggggggggg
+
+# Dalle gravée.
+sprite dalle-gravee
+taille 16 16
+ancre 8 15
+origine 1 8
+PPPPPPPPPPPPPP
+pppppppppppppp
+pppggggggggppp
+ppppppkppppppp
+pppggggggppppp
+pppppppppppppp
+gggggggggggggg

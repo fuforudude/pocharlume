@@ -1,4 +1,4 @@
-// Décor des régions 2 à 5 : chaque sprite existe dans l'atlas en catégorie decor, et la liste GRANDS_DECORS (qui sert à
+// Décor des régions 2 à 10 : chaque sprite existe dans l'atlas en catégorie decor, et la liste GRANDS_DECORS (qui sert à
 // écarter le décor du chemin) dit vrai : 32×32 dedans, 16×16 dehors.
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
@@ -24,9 +24,29 @@ const DECOR_PAR_REGION: Readonly<Record<number, { grands: readonly string[]; pet
     grands: ['maison-condamnee-1', 'maison-condamnee-2', 'charrette-linceuls', 'fosse-commune'],
     petits: ['croix-rouge', 'linceul', 'lanterne-peste', 'tas-ossements'],
   },
+  6: {
+    grands: ['arbre-ossements-1', 'arbre-ossements-2', 'mausolee-brise', 'ossuaire'],
+    petits: ['crane-charnier', 'croix-tombale', 'pelle-plantee', 'os-epars'],
+  },
+  7: {
+    grands: ['tente-croisee-1', 'tente-croisee-2', 'baliste-brisee', 'chariot-armes'],
+    petits: ['banniere-dechiree', 'epee-plantee', 'bouclier-abattu', 'brasero-camp'],
+  },
+  8: {
+    grands: ['arche-cloitre', 'clocher-noir', 'statue-moine', 'fontaine-noire'],
+    petits: ['cierge-noir', 'livre-brule', 'crucifix', 'dalle-gravee'],
+  },
+  9: {
+    grands: ['tourelle-royale', 'fontaine-royale', 'statue-roi', 'herse-brisee'],
+    petits: ['etendard', 'vase-royal', 'torchere', 'couronne-sol'],
+  },
+  10: {
+    grands: ['pilier-brise-1', 'pilier-brise-2', 'vitrail-brise', 'autel-bleme', 'statue-ange'],
+    petits: ['cierge-bleme', 'plume-cendre', 'calice-brise', 'dalle-solaire'],
+  },
 };
 
-describe('décor des régions 2 à 5', () => {
+describe('décor des régions 2 à 10', () => {
   for (const [region, { grands, petits }] of Object.entries(DECOR_PAR_REGION)) {
     it(`région ${region} : ${String(grands.length)} grands décors en 32×32 (dans GRANDS_DECORS) et ${String(petits.length)} petits en 16×16`, () => {
       for (const nom of grands) {
