@@ -36,8 +36,8 @@ async function sauverCarte(id: string, deplaces: Record<string, { x: number; y: 
 }
 
 describe('sources de sprites : aller-retour sans perte', () => {
-  it('compte les 66 fichiers de sprites', () => {
-    expect(FICHIERS).toHaveLength(66);
+  it('compte les 67 fichiers de sprites (dont statues.txt, jalon 5)', () => {
+    expect(FICHIERS).toHaveLength(67);
   });
 
   it('réécrire toutes les grilles de chaque fichier avec leur propre contenu le laisse identique à l\'octet près', () => {
@@ -127,16 +127,12 @@ describe('palette', () => {
 });
 
 describe('cartes', () => {
-  it('les cartes du jeu s\'ouvrent sans erreur de règle, statue désactivée avec un message', async () => {
+  it('les cartes du jeu s\'ouvrent sans erreur de règle', async () => {
     for (const c of (await a.cartes?.lister()) ?? []) {
       const doc = (await a.cartes?.ouvrir(c.id)) as DocumentCarte;
       expect(doc.verification.erreurs, c.id).toEqual([]);
       expect(doc.objets.length).toBeGreaterThan(20);
     }
-    const doc = (await a.cartes?.ouvrir('chaumes')) as DocumentCarte;
-    const statue = doc.genres.find((g) => g.id === 'statue');
-    expect(statue?.actif).toBe(false);
-    expect(statue?.raison).toMatch(/statues\.ts/);
   });
 
   it('refuse un décor sur le chemin ou hors de la carte', async () => {
@@ -182,10 +178,11 @@ describe('cartes', () => {
 
 describe('droits d\'écriture', () => {
   it('permet les sources graphiques et les fichiers de cartes, rien d\'autre', () => {
-    for (const ok of ['art/sprites/charlie.txt', 'art/palettes/commune.txt', 'src/data/niveaux/cartes.ts', 'src/data/niveaux/cartes-region2.ts']) {
+    for (const ok of ['art/sprites/charlie.txt', 'art/palettes/commune.txt', 'src/data/niveaux/cartes.ts', 'src/data/niveaux/cartes-region2.ts', 'src/data/niveaux/statues.ts']) {
       expect(estPermis(normaliser(ok), ECRITURE_PERMISE), ok).toBe(true);
     }
-    for (const non of ['src/engine/avancer.ts', 'src/data/niveaux/plan-region1.ts', 'src/data/niveaux/cartes-toutes.ts', 'package.json', 'tools/art/format.ts', 'public/sprites/atlas.png', 'artefact/x.txt']) {
+    const autres = ['src/data/niveaux/statues.test.ts', 'src/data/niveaux/statues2.ts', 'src/data/niveaux/statues.ts.bak', 'src/data/statues.ts', 'src/i18n/fr-lore.ts'];
+    for (const non of ['src/engine/avancer.ts', 'src/data/niveaux/plan-region1.ts', 'src/data/niveaux/cartes-toutes.ts', 'package.json', 'tools/art/format.ts', 'public/sprites/atlas.png', 'artefact/x.txt', ...autres]) {
       expect(estPermis(normaliser(non), ECRITURE_PERMISE), non).toBe(false);
     }
   });
@@ -208,7 +205,8 @@ describe('seuils de jouabilité des niveaux', () => {
     const plan = PLANS_REGIONS.flat()[0];
     const modele = (CARTES as Record<string, CarteModele>)[plan?.carte ?? ''];
     if (!plan || !modele) throw new Error('plan absent');
-    const bouchons = Array.from({ length: 16 * 9 }, (_, i) => ({ sprite: 'maison-ruine-1', x: 1 + (i % 16) * 2, y: 2 + Math.floor(i / 16) * 2 }));
+    // Un grand décor par tuile : un par case ne suffit plus depuis que les cartes suivent la grille (j5-densite).
+    const bouchons = Array.from({ length: 32 * 18 }, (_, i) => ({ sprite: 'maison-ruine-1', x: 1 + (i % 32), y: 2 + Math.floor(i / 32) }));
     const libres = mesures(niveauAvecDecors(modele, plan, [...modele.decor, ...bouchons]), plan).find((m) => m.nom === 'cases libres');
     expect(libres?.valeur).toBeLessThan(libres?.minimum ?? 0);
   });

@@ -60,7 +60,11 @@ L'adaptateur implémente `Adaptateur` (voir `types.ts`, entièrement commenté).
   `enregistrer`.
 - `cartes` (`ModuleCartes`) : des objets (`ObjetCarte` : position d'ancre, emprise, genre) à déplacer sur une grille ;
   `verifier(id, positions)` applique **vos** règles (erreurs, cases bloquées, bilan avant/après) et `enregistrer`
-  refuse une disposition invalide.
+  refuse une disposition invalide. Une erreur porte l'id de l'objet fautif : pendant un déplacement, l'interface ne
+  refuse que si l'erreur revient à l'objet déplacé, donc une règle entre deux objets (l'un posé sur l'autre) doit revenir
+  à celui qui a bougé. Des objets d'un même document peuvent vivre dans des fichiers différents (des décors dans un
+  fichier, un objet spécial dans un autre) : `enregistrer` rend alors une `Ecriture` par fichier et l'`empreinte` couvre
+  tous les fichiers lus.
 - `apresEcriture(chemins)` : commande lancée après un enregistrement (reconstruire un atlas, un cache…).
 
 - **Écritures concurrentes** : `ouvrir` rend une `empreinte` des fichiers que l'enregistrement réécrira ; le client la renvoie avec les lignes d'origine des calques (ou la position d'origine des seuls objets déplacés). L'adaptateur lève `ErreurConflit` (HTTP 409, rien n'est écrit) si le fichier a changé depuis ; après un enregistrement le client recharge le document, ses clés ayant pu changer. `ErreurRequete` donne un 400, `ErreurIntrouvable` un 404. Les écritures d'un enregistrement passent par des fichiers temporaires puis des renommages (retour en arrière si l'un échoue).

@@ -1,5 +1,5 @@
 // Adaptateur Pocharlume pour l'atelier : branche les sprites, la palette et les cartes du jeu sur le cœur générique
-// (tools/atelier). Écriture limitée aux sources graphiques et aux fichiers de données des cartes.
+// (tools/atelier). Écriture limitée aux sources graphiques et aux fichiers de données des cartes (décors et statues).
 import { spawn } from 'node:child_process';
 import { join } from 'node:path';
 import type { Adaptateur, ResultatApres } from '../atelier/types.ts';
@@ -9,7 +9,7 @@ import { fileUnique } from './file-unique.ts';
 import { moduleSprites } from './sprites.ts';
 
 /** Où l'atelier a le droit d'écrire dans Pocharlume. */
-export const ECRITURE_PERMISE: readonly string[] = ['art/', 'src/data/niveaux/cartes.ts', 'src/data/niveaux/cartes-region*.ts'];
+export const ECRITURE_PERMISE: readonly string[] = ['art/', 'src/data/niveaux/cartes.ts', 'src/data/niveaux/cartes-region*.ts', 'src/data/niveaux/statues.ts'];
 
 /** Reconstruit l'atlas (public/sprites/) sans toucher aux aperçus de art/apercu/ (`--sans-apercu`). */
 function reconstruireAtlas(racine: string): Promise<ResultatApres> {

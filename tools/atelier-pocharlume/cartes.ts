@@ -4,7 +4,8 @@
 //
 // Ce module isole tout ce qui dépend du format des données de carte : si ce format change (j5-densite), c'est ici
 // qu'on adapte. Les décors sont lus et réécrits dans le TEXTE du fichier (une ligne `decor('sprite', x, y[, true])`
-// chacun) ; seuls x et y des décors déplacés sont modifiés, tout le reste du fichier reste identique.
+// chacun) ; seuls x et y des décors déplacés sont modifiés, tout le reste du fichier reste identique. La statue de la
+// carte (objet `statue`) vit dans src/data/niveaux/statues.ts : sa lecture, son écriture et ses règles sont dans statues.ts.
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { Carte } from '../../src/engine/definitions';
@@ -19,7 +20,7 @@ import { PLANS_REGIONS } from '../../src/data/niveaux/plans';
 import { empreinte } from '../atelier/empreinte.ts';
 import { ErreurConflit, ErreurIntrouvable, ErreurRequete, type Ecriture, type ErreurCarte, type LigneBilan, type ModuleCartes, type ObjetCarte, type Positions, type VerificationCarte } from '../atelier/types.ts';
 import { mesures, niveauAvecDecors } from './seuils.ts';
-import { etatStatues } from './statues.ts';
+import { arrondirPosition, CHEMIN_STATUES, ID_STATUE, lireStatue, reecrireStatue, verifierStatue, type EtatStatues } from './statues.ts';
 
 const DOSSIER_CARTES = 'src/data/niveaux';
 const AVERTISSEMENT = 'Les cases constructibles changent : un niveau peut devenir plus facile ou plus dur. Relancer l\'équilibrage (npm run balance) et les tests avant de commiter.';
@@ -107,6 +108,17 @@ function decorsAvec(lignes: readonly LigneDecor[], positions: Positions): Decor[
   });
 }
 
+/** Empreinte de ce qu'un enregistrement de la carte relit : son fichier de décors et, s'il existe, statues.ts. */
+function empreinteCarte(texte: string, statues: EtatStatues): string {
+  return empreinte(statues.texte === null ? [texte] : [texte, statues.texte]);
+}
+
+/** Position de la statue dans une disposition (celle du fichier si elle n'a pas bougé), arrondie comme elle sera écrite. */
+function positionStatue(statue: NonNullable<EtatStatues['statue']>, positions: Positions): { x: number; y: number } {
+  const p = positions[ID_STATUE];
+  return p ? { x: arrondirPosition(p.x), y: arrondirPosition(p.y) } : { x: statue.x, y: statue.y };
+}
+
 function verifierCarte(racine: string, id: string, positions: Positions): VerificationCarte {
   const modele = modeleDe(id);
   const { carte: texte } = lireDecors(racine, id);
@@ -143,6 +155,12 @@ function verifierCarte(racine: string, id: string, positions: Positions): Verifi
       });
     }
   }
+  // La statue est jugée dans toute disposition : elle a pu bouger, ou un décor déplacé a pu changer sa case.
+  const { statue } = lireStatue(racine, id);
+  if (statue) {
+    const p = positionStatue(statue, positions);
+    erreurs.push(...verifierStatue({ carte: id, modele, sprite: statue.sprite, ...p, deplacee: p.x !== statue.x || p.y !== statue.y, avant, apres, ids: texte.decors.map((l) => idObjet(l.index)), deplaces: new Set(deplaces) }));
+  }
   const bilan: LigneBilan[] = [];
   const toutes = constructibles(modele, modele.chemins, apres);
   bilan.push({ libelle: 'Carte entière (tous les chemins)', avant: constructibles(modele, modele.chemins, avant).libres, apres: toutes.libres });
@@ -160,7 +178,8 @@ export function moduleCartes(racine: string): ModuleCartes {
     ouvrir: (id) => {
       const modele = modeleDe(id);
       const { texte, carte } = lireDecors(racine, id);
-      const statues = etatStatues(racine);
+      const statues = lireStatue(racine, id);
+      const statue = statues.statue;
       return Promise.resolve({
         id,
         nom: `${id.replaceAll('_', ' ')} (région ${String(modele.region)})`,
@@ -172,18 +191,21 @@ export function moduleCartes(racine: string): ModuleCartes {
         genres: [
           { id: 'decor', libelle: 'Petit décor', couleur: '#8fb35a', actif: true },
           { id: 'grand-decor', libelle: 'Grand décor (bloque des cases)', couleur: '#d98a3a', actif: true },
-          { id: 'statue', libelle: 'Statue', couleur: '#c9b6e8', actif: statues.actif, raison: statues.raison },
+          { id: 'statue', libelle: 'Statue (sur une case de décor)', couleur: '#c9b6e8', actif: statues.actif, ...(statues.raison === undefined ? {} : { raison: statues.raison }) },
         ],
-        objets: carte.decors.map((d): ObjetCarte => ({
-          id: idObjet(d.index),
-          genre: GRANDS_DECORS.has(d.sprite) ? 'grand-decor' : 'decor',
-          libelle: d.sprite,
-          x: d.x,
-          y: d.y,
-          emprise: emprise(d.sprite),
-        })),
+        objets: [
+          ...carte.decors.map((d): ObjetCarte => ({
+            id: idObjet(d.index),
+            genre: GRANDS_DECORS.has(d.sprite) ? 'grand-decor' : 'decor',
+            libelle: d.sprite,
+            x: d.x,
+            y: d.y,
+            emprise: emprise(d.sprite),
+          })),
+          ...(statue ? [{ id: ID_STATUE, genre: 'statue', libelle: statue.sprite, x: statue.x, y: statue.y, emprise: emprise(statue.sprite) }] : []),
+        ],
         verification: verifierCarte(racine, id, {}),
-        empreinte: empreinte([texte]),
+        empreinte: empreinteCarte(texte, statues),
       });
     },
 
@@ -191,10 +213,17 @@ export function moduleCartes(racine: string): ModuleCartes {
 
     enregistrer: (id, deplaces, empreinteClient): Promise<readonly Ecriture[]> => {
       const { texte, carte } = lireDecors(racine, id);
+      const statues = lireStatue(racine, id);
       const conflit = 'La carte a changé depuis son ouverture : la rouvrir avant d\'enregistrer (rien n\'a été écrit).';
-      if (empreinteClient !== empreinte([texte])) throw new ErreurConflit(conflit);
+      if (empreinteClient !== empreinteCarte(texte, statues)) throw new ErreurConflit(conflit);
       const positions: Record<string, { x: number; y: number }> = {};
       for (const [objet, p] of Object.entries(deplaces)) {
+        if (objet === ID_STATUE) {
+          const s = statues.statue;
+          if (!s || s.sprite !== p.origine.libelle || s.x !== p.origine.x || s.y !== p.origine.y) throw new ErreurConflit(conflit);
+          positions[objet] = { x: p.x, y: p.y };
+          continue;
+        }
         const m = /^decor-(\d+)$/.exec(objet);
         const d = m ? carte.decors[Number(m[1])] : undefined;
         if (!d) throw new ErreurConflit(conflit);
@@ -205,6 +234,7 @@ export function moduleCartes(racine: string): ModuleCartes {
       if (verification.erreurs.length > 0) throw new ErreurRequete(`Carte refusée : ${verification.erreurs.map((e) => e.message).join(' ; ')}`);
       const lignes = texte.split('\n');
       for (const [objet, p] of Object.entries(positions)) {
+        if (objet === ID_STATUE) continue;
         const d = carte.decors[Number(/^decor-(\d+)$/.exec(objet)?.[1])];
         if (!d || (p.x === d.x && p.y === d.y)) continue;
         const brute = lignes[d.ligne - 1] ?? '';
@@ -213,7 +243,16 @@ export function moduleCartes(racine: string): ModuleCartes {
         if (!lue) throw new ErreurConflit(conflit);
         lignes[d.ligne - 1] = `${lue[1] ?? ''}${lue[2] ?? ''}${lue[3] ?? ''}${String(p.x)}${lue[5] ?? ''}${String(p.y)}${lue[7] ?? ''}${cr}`;
       }
-      return Promise.resolve([{ chemin: carte.fichier, contenu: lignes.join('\n') }]);
+      const ecritures: Ecriture[] = [{ chemin: carte.fichier, contenu: lignes.join('\n') }];
+      // La statue déplacée : seule sa ligne change dans statues.ts (le fichier n'est pas réécrit si elle n'a pas bougé).
+      const p = positions[ID_STATUE];
+      if (p && statues.statue && statues.texte !== null) {
+        const { x, y } = positionStatue(statues.statue, positions);
+        const contenu = reecrireStatue(statues.texte, statues.statue, x, y);
+        if (contenu === null) throw new ErreurConflit(conflit);
+        ecritures.push({ chemin: CHEMIN_STATUES, contenu });
+      }
+      return Promise.resolve(ecritures);
     },
   };
 }
