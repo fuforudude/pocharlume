@@ -109,7 +109,7 @@ export function afficherEcranHeros(parent: HTMLElement, options: OptionsEcranHer
     }
     colonne.append(onglets);
     // Sans visage : l'épithète et la phrase du dieu choisi sous ses symboles.
-    colonne.append(el('p', 'desc', `${tCle(DIEUX[dieu].nom)} : ${tCle(DIEUX[dieu].description)}`));
+    colonne.append(el('p', 'desc', t('legende.nom_texte', { nom: tCle(DIEUX[dieu].nom), texte: tCle(DIEUX[dieu].description) })));
     const liste = el('div', 'heros-liste');
     for (const id of HEROS_PAR_DIEU[dieu]) {
       const vue = vueFicheHeros(session.sauvegarde, id);

@@ -6,7 +6,7 @@
 // Rejouable : `npm run lore` après chaque correction de lore.md. `npm run lore -- --verifier` ne modifie rien et
 // sort en erreur si le jeu et le document diffèrent.
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { CLE_NOUVELLE, litteral, lireLore, type TexteLore } from './lore.ts';
 
@@ -14,7 +14,7 @@ const RACINE = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const DOSSIER_I18N = join(RACINE, 'src', 'i18n');
 const FICHIER_LORE = join(DOSSIER_I18N, 'fr-lore.ts');
 const LITTERAL = String.raw`'(?:[^'\\\n]|\\.)*'`;
-const MARQUEUR = /\{\w+\}/g;
+const MARQUEUR = /\{[^}]*\}/g;
 
 function echapperRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -72,26 +72,28 @@ function main(): void {
   let identiques = 0;
 
   for (const lore of textes) {
-    let trouve = false;
-    for (const [chemin, contenu] of fichiers) {
-      const m = chercher(contenu, lore.cle);
-      if (m === null) continue;
-      trouve = true;
-      const ancien = lireLitteral(m[2] ?? '');
-      if (ancien === lore.texte) identiques++;
-      else {
-        if (marqueurs(ancien) !== marqueurs(lore.texte)) {
-          erreurs.push(`${lore.cle} : les marqueurs {…} changent (${marqueurs(ancien) || 'aucun'} devient ${marqueurs(lore.texte) || 'aucun'})`);
-          break;
-        }
-        fichiers.set(chemin, contenu.replace(m[0], () => `${m[1] ?? ''}${litteral(lore.texte)}`));
-        misAJour++;
-      }
-      break;
+    const trouves = [...fichiers].filter(([, contenu]) => chercher(contenu, lore.cle) !== null);
+    if (trouves.length > 1) {
+      erreurs.push(`${lore.cle} : la clé existe dans plusieurs fichiers (${trouves.map(([c]) => basename(c)).join(', ')})`);
+      continue;
     }
-    if (!trouve) {
-      if (CLE_NOUVELLE.test(lore.cle)) nouveaux.push(lore);
-      else erreurs.push(`lore.md ligne ${String(lore.ligne)} : la clé ${lore.cle} n'existe pas dans src/i18n/ et n'est pas d'un genre autorisé`);
+    const trouve = trouves[0];
+    if (trouve === undefined) {
+      if (!CLE_NOUVELLE.test(lore.cle)) erreurs.push(`lore.md ligne ${String(lore.ligne)} : la clé ${lore.cle} n'existe pas dans src/i18n/ et n'est pas d'un genre autorisé`);
+      else if (marqueurs(lore.texte) !== '') erreurs.push(`${lore.cle} : un texte nouveau ne peut pas contenir de marqueur {…} (${marqueurs(lore.texte)})`);
+      else nouveaux.push(lore);
+      continue;
+    }
+    const [chemin, contenu] = trouve;
+    const m = chercher(contenu, lore.cle);
+    if (m === null) continue;
+    const ancien = lireLitteral(m[2] ?? '');
+    if (ancien === lore.texte) identiques++;
+    else if (marqueurs(ancien) !== marqueurs(lore.texte)) {
+      erreurs.push(`${lore.cle} : les marqueurs {…} changent (${marqueurs(ancien) || 'aucun'} devient ${marqueurs(lore.texte) || 'aucun'})`);
+    } else {
+      fichiers.set(chemin, contenu.replace(m[0], () => `${m[1] ?? ''}${litteral(lore.texte)}`));
+      misAJour++;
     }
   }
 
@@ -110,7 +112,7 @@ function main(): void {
     // Relecture : chaque texte du document doit se retrouver à l'identique dans le jeu.
     const relus = new Map<string, string>();
     for (const contenu of [...fichiersTextes().values(), readFileSync(FICHIER_LORE, 'utf8')]) {
-      for (const m of contenu.matchAll(new RegExp(`'([a-z0-9_.]+)':\\s*(${LITTERAL})`, 'g'))) relus.set(m[1] ?? '', lireLitteral(m[2] ?? ''));
+      for (const m of contenu.matchAll(new RegExp(`'([A-Za-z0-9_.]+)':\\s*(${LITTERAL})`, 'g'))) relus.set(m[1] ?? '', lireLitteral(m[2] ?? ''));
     }
     for (const { cle, texte } of textes) {
       if (relus.get(cle) !== texte) erreurs.push(`${cle} : le texte écrit ne correspond pas à lore.md`);

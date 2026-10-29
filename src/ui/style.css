@@ -367,7 +367,7 @@ html[data-sans-clavier] .touche {
 .parole {
   position: absolute;
   left: 50%;
-  top: max(84px, calc(env(safe-area-inset-top) + 78px));
+  top: max(48px, calc(env(safe-area-inset-top) + 42px));
   transform: translateX(-50%);
   max-width: min(70vw, 520px);
   padding: 8px 14px;
@@ -380,6 +380,11 @@ html[data-sans-clavier] .touche {
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.6s;
+}
+
+/* Une invite de visée est visible (deux lignes au plus) : la parole passe dessous. */
+.invite.visible ~ .parole {
+  top: max(104px, calc(env(safe-area-inset-top) + 98px));
 }
 
 .parole.visible,

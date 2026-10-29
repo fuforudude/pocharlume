@@ -6,4 +6,4 @@ taille 32 32
 ancre 16 30
 
 sprite gros-matou
-derive charlie couleurs u=B U=o v=c P=b p=b g=d
+derive charlie-ancien couleurs u=B U=o v=c P=b p=b g=d

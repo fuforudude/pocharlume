@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { REGION1 } from '../data/niveaux/region1';
 import { fr } from '../i18n/fr';
-import { cleParoleBoss } from './parole-boss';
+import { cleParoleBoss, decompteParole } from './parole-boss';
 
 describe('cleParoleBoss', () => {
   const niveau = REGION1.find((n) => n.boss);
@@ -21,5 +21,15 @@ describe('cleParoleBoss', () => {
 describe('paroles', () => {
   it('chaque région a la sienne dans les textes', () => {
     for (let n = 1; n <= 10; n++) expect(fr).toHaveProperty(`boss.r${String(n)}.parole`);
+  });
+});
+
+describe('decompteParole', () => {
+  it('ne bouge pas en pause, descend en jeu, plus vite à ×2, sans passer sous zéro ni sauter après un long blocage', () => {
+    expect(decompteParole(5000, 16, true, 1)).toBe(5000);
+    expect(decompteParole(5000, 16, false, 1)).toBe(4984);
+    expect(decompteParole(5000, 16, false, 2)).toBe(4968);
+    expect(decompteParole(10, 16, false, 1)).toBe(0);
+    expect(decompteParole(5000, 60_000, false, 1)).toBe(4900);
   });
 });

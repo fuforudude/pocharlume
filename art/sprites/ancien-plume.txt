@@ -1,0 +1,145 @@
+# COPIE FIGÉE de l'ancien sprite de Plume (avant le jalon 5), sous le nom `plume-ancien`. Nielle (heros-plume.txt) a été
+# redessinée ; ce sprite reste la base de l'assassin d'ombre du Sanctuaire : ne pas le retoucher.
+# Plume, l'Ombre Première : héroïne du dieu Plume. Chat noir élancé (jambes longues, queue fine), yeux pâles,
+# liseré gris clair sur les oreilles, l'échine et les pattes pour rester lisible sur l'herbe sombre. Elle reprend
+# le squelette du chat de grange (mêmes animations) mais d'un pixel plus haut : grilles posées à l'origine (6, 17),
+# pieds en y = 30. Griffes seulement : un éclat de lame au bout de la patte avant.
+categorie unite
+palette commune
+taille 32 32
+ancre 16 30
+origine 6 17
+couleur 1 e4f0f4
+
+sprite plume-ancien
+modele soldat-grange
+
+calque tete 6 0
+v.....v.
+ku...uk.
+kkkkkkk.
+kkkk1k1.
+kkkuuUuu
+.kkuuuu.
+
+calque yeux-clos 10 3
+k.k
+
+calque yeux-mal 10 3
+W.W
+
+calque corps 5 6
+.vkkku
+ukkkkk
+ukkkuk
+.kkkkk
+.kukku
+
+calque queue 1 6
+k....
+u....
+k....
+ku...
+.kkkk
+
+calque queue-b 1 6
+.k...
+.u...
+k....
+ku...
+.kkkk
+
+calque jambes 7 11
+kk.kk
+ku.uk
+UU.UU
+
+calque jambes-a 6 11
+kk...kk
+kk...ku
+UU...UU
+
+calque jambes-b 7 11
+.kkk
+.kuk
+.UUU
+
+calque jambes-c 6 11
+.kk.kk
+.ku.uk
+.UU.UU
+
+# Griffes : trois éclats au bout de la patte avant.
+calque arme 11 7
+..1
+.1.
+1U
+
+calque arme-haut 8 -1
+.1..1
+..1..
+...U.
+....k
+.....u
+
+calque arme-frappe 11 6
+.....1
+kkkU1.
+.....1
+
+# Les trois griffures du coup.
+calque trace 13 2
+1....
+.1...1
+..1...1
+...1...1
+....1..
+
+calque trace-large 12 1
+.1....1
+..1....1
+...1....1
+....1....1
+.....1....1
+......1.....
+
+# Disparition dans l'ombre : le chat n'est plus qu'une silhouette d'encre.
+calque ombre 6 0
+.....k.k
+....kkkkk
+...kkkkkkk
+..kkkkkkkkk
+..kkkkkkkkk
+.kkkkkkkkkk
+.kkkkkkkkkk
+..kkkkkkkkk
+...kkk.kkk
+...kk...kk
+
+anim repos 220
+cadre queue + jambes + corps + arme + tete
+cadre queue-b + jambes + corps + arme + tete
+cadre queue-b + jambes + corps + arme + tete + yeux-clos
+cadre queue + jambes + corps decale 0 1 + arme decale 0 1 + tete decale 0 1
+
+# Vive : trois temps très courts.
+anim attaque 60
+cadre queue + jambes + corps decale -1 0 + tete decale -1 0 + arme-haut duree 80
+cadre queue + jambes-a + corps decale 2 0 + tete decale 2 0 + arme-frappe decale 2 0 + trace duree 70
+cadre queue + jambes-a + corps decale 2 0 + tete decale 2 1 + arme-frappe decale 2 1 duree 60
+cadre queue + jambes + corps + arme + tete duree 120
+
+# Griffes d'Ombre : elle s'efface, puis jaillit en trois coups.
+anim competence 90
+cadre queue + jambes + corps decale 0 2 + tete decale 0 2 duree 160
+cadre ombre decale 0 3 duree 110
+cadre ombre decale 5 0 duree 80
+cadre queue + jambes-a + corps decale 4 0 + tete decale 4 0 + arme-frappe decale 4 0 + trace-large decale 3 0 duree 90
+cadre queue + jambes-a + corps decale 4 0 + tete decale 4 1 + arme-frappe decale 4 1 + trace-large decale 3 1 duree 90
+cadre queue + jambes + corps + arme + tete duree 160
+
+anim mort 140
+cadre queue + jambes + corps decale -1 0 + arme decale -1 0 + tete decale -1 0 + yeux-mal decale -1 0
+cadre soldat-grange/mort.1 couleurs o=k O=U B=k b=u c=u r=u T=#00000000 i=#00000000 d=u
+cadre soldat-grange/mort.2 couleurs o=k O=U B=k b=u c=u r=u T=#00000000 i=#00000000 d=u duree 300
+cadre soldat-grange/mort.3 couleurs o=k O=U B=k b=u c=u r=u T=#00000000 i=#00000000 d=u duree 600
