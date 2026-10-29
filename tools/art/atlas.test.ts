@@ -13,10 +13,11 @@ const BOSS = ['boucher-vaudrelle', 'la-faim', 'juge-flammes', 'dame-puits', 'mer
 let resultat: Construction;
 let commite: AtlasJson;
 
+// Construire l'atlas complet prend plusieurs secondes, davantage quand la machine est chargée.
 beforeAll(() => {
   resultat = construire();
   commite = JSON.parse(readFileSync(join(DOSSIER_SORTIE, 'atlas.json'), 'utf8')) as AtlasJson;
-});
+}, 60_000);
 
 describe('atlas commité', () => {
   it('est à jour par rapport aux sources (sinon : npm run art)', () => {
