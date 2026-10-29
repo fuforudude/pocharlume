@@ -1,3 +1,4 @@
 public/sprites/atlas.json text eol=lf
 art/**/*.txt text eol=lf
 *.png binary
+*.sh text eol=lf
