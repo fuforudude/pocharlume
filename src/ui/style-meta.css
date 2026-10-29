@@ -1322,7 +1322,22 @@
 
 /* --- Mode infini (jalon 4) : cartes, paliers, choix du dieu, du héros et des objets --- */
 
+.ecran.infini > .carte {
+  width: calc(100% - 16px);
+}
+
+.ecran.infini .meta-corps {
+  overflow: hidden;
+}
+
+.bouton.infini-lancer {
+  min-width: 96px;
+  border-color: var(--or);
+  color: var(--or);
+}
+
 .infini-colonnes {
+  height: 100%;
   display: grid;
   grid-template-columns: minmax(150px, 0.9fr) minmax(170px, 1fr) minmax(220px, 1.3fr);
   gap: 12px;
@@ -1331,6 +1346,9 @@
 }
 
 .infini-colonne {
+  max-height: 100%;
+  overflow-y: auto;
+  touch-action: pan-y;
   display: flex;
   flex-direction: column;
   gap: 6px;

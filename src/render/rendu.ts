@@ -46,6 +46,8 @@ const COIN_VISEE = 5;
 const MARQUEUR_PLACEHOLDER = '#ff00ff';
 /** Un ennemi volant est dessiné plus haut que son ombre. */
 const ALTITUDE_VOL = 10;
+/** Opacité d'une tour aveuglée. */
+const OPACITE_AVEUGLE = 0.55;
 const FONDU_CADAVRE = 300;
 const DUREE_BLESSE = 180;
 /** Un assassin du Sanctuaire (non ciblable) est dessiné translucide. */
@@ -500,10 +502,13 @@ export class Rendu {
     // Les flammes de la rage sous les pieds d'un héros blessé, avant lui ; l'assassin du Sanctuaire est translucide.
     if (unite && (capacites?.rage ?? 0) > 0 && !unite.mort && unite.pv < unite.stats.pv) this.dessinerBoucle(this.rage, v.px, v.py, temps);
     const furtif = capacites?.ciblable === false;
+    // Une tour aveuglée (Soleil Blême) est dessinée en retrait, comme dans la brume.
+    const aveuglee = v.categorie === CATEGORIE.tour && (v.tour?.aveuglePas ?? 0) > 0;
     if (furtif) ctx.globalAlpha = OPACITE_FURTIF;
+    else if (aveuglee) ctx.globalAlpha = OPACITE_AVEUGLE;
     if (unite && !unite.mort && unite.noyade > 0 && v.noyadeMax > 0) this.dessinerNoyee(v, sprite, cadreA(anim, t), y, temps);
     else this.poser(v, sprite, cadreA(anim, t), v.px, y);
-    if (furtif) ctx.globalAlpha = 1;
+    if (furtif || aveuglee) ctx.globalAlpha = 1;
 
     if (v.categorie === CATEGORIE.tour) {
       this.dessinerTireur(v, temps);
@@ -513,7 +518,8 @@ export class Rendu {
         if (tour.boostPas > 0) this.dessinerBoucle(this.boost, v.px, v.py - 8, temps);
         // Tour en feu (Juge des Flammes, désactivée) et tour affamée (La Faim, cadence réduite).
         if (tour.desactivee > 0) this.dessinerBoucle(this.tourEnFeu, v.px, v.py - 8, temps);
-        if (tour.affamePas > 0) this.dessinerBoucle(this.tourAffamee, v.px, v.py - 8, temps);
+        // Tour gelée (Inquisiteur) ou affamée (La Faim) : le même voile glacé au-dessus d'elle.
+        if (tour.affamePas > 0 || tour.gel > 0) this.dessinerBoucle(this.tourAffamee, v.px, v.py - 8, temps);
       }
     } else if (ennemi && (ennemi.effetsPas[EFFET.etourdissement] ?? 0) > 0 && this.etourdi) {
       const a = this.atlas.animation(this.etourdi, 'repos');

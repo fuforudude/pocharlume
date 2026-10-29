@@ -91,8 +91,6 @@ export function afficherEcranInfini(parent: HTMLElement, options: OptionsEcranIn
   // --- Colonne du choix (dieu, héros, objets) et lancement ---
   const colonneChoix = el('section', 'infini-colonne infini-choix');
   const choisir = creerChoixFiche(atlas, session, signal);
-  const message = el('p', 'fiche-message');
-  message.setAttribute('role', 'status');
   const lancer = bouton('bouton grand', t('infini.lancer'), () => {
     const carte = cartes[choisie];
     if (!carte) return;
@@ -100,7 +98,7 @@ export function afficherEcranInfini(parent: HTMLElement, options: OptionsEcranIn
     const choix = choixJouable(session.sauvegarde, choisir.choix());
     const compose = configInfini(session.sauvegarde, choix, 0, carte.region);
     if (!compose.ok) {
-      message.textContent = t('infini.lancement_refuse', { raison: texteRefusMeta(compose.raison) });
+      ecran.dire(t('infini.lancement_refuse', { raison: texteRefusMeta(compose.raison) }), true);
       return;
     }
     controleur.abort();
@@ -110,7 +108,11 @@ export function afficherEcranInfini(parent: HTMLElement, options: OptionsEcranIn
   lancer.textContent = t('infini.lancer');
   lancer.classList.toggle('grise', cartes.length === 0);
   lancer.setAttribute('aria-disabled', String(cartes.length === 0));
-  colonneChoix.append(choisir.racine, lancer, message);
+  colonneChoix.append(choisir.racine);
+  // « Lancer » dans la barre du haut : toujours visible, même quand les colonnes défilent.
+  lancer.classList.remove('grand');
+  lancer.classList.add('infini-lancer');
+  ecran.racine.querySelector('.meta-entete')?.insertBefore(lancer, ecran.racine.querySelector('.meta-entete > .bouton'));
 
   const grille = el('div', 'infini-colonnes');
   grille.append(colonneCartes, colonnePaliers, colonneChoix);
