@@ -6,62 +6,76 @@ paragraphes libres (idées, corrections d'univers) : ils seront reportés dans l
 
 Ton voulu (spec) : entièrement sombre, textes courts et cryptiques, violence suggérée, jamais drôle, PEGI 12.
 
-Pas encore dans le jeu : les paroles des dieux avant chaque boss (prévues par la spec) et une description des
-ennemis (ils n'ont qu'un nom). Tu peux les écrire ici.
+Les trois dieux ne sont plus des héros (spec `docs/specs/2026-10-29-dieux-sans-visage.md`) : ils ne sont jamais
+incarnés ni dessinés. On ne les devine que par allusions, dans les descriptions des tours, des héros, des sorts,
+des objets, des apparences et des niveaux, et dans les inscriptions des vieilles statues cachées sur chaque carte.
+Partout, on ne les désigne que par des épithètes ; leurs vrais noms ne sont gravés qu'une seule fois, sur une seule
+statue (`inscription.avenue`). Les héros `heros.plume`, `heros.charlie` et `heros.pollen` sont désormais trois
+fidèles mortels, un par dieu. Les clés techniques ne changent pas.
+
+Pas encore dans le jeu : les inscriptions des statues, les paroles avant les boss et la description des ennemis.
+Elles sont écrites plus bas.
 
 ## Univers (source : la spec)
 C'est l'**An de la Grande Mort**. L'Église du **Soleil Blême** a déclaré les chats serviteurs des sorcières :
 on les brûle avec elles sur les bûchers, on les mange quand la famine vient, on les jette au puits pour conjurer la
 peste. Et plus les chats meurent, plus les rats prolifèrent, et plus la peste tue. Personne ne fait le lien.
 
-Bien avant l'Église, trois **Chats Suprêmes** étaient priés dans les granges et les cryptes. Ils ont brûlé sur le
-**Premier Bûcher**, et il ne reste d'eux que des braises. Le joueur est **le Dernier Veilleur**, un chat sans nom
-qui ranime ces braises et rassemble les survivants, région après région, jusqu'à la cathédrale où le Soleil Blême
-attend.
+Bien avant l'Église, trois **Chats Suprêmes** étaient priés dans les granges et les cryptes. On leur laissait du
+lait dans le noir, et le grain restait au grenier. Ils ont brûlé sur le **Premier Bûcher**, l'Église a gratté leurs
+noms de la pierre, et il ne reste d'eux que des braises et des statues qu'on ne regarde plus. Le joueur est **le
+Dernier Veilleur**, un chat sans nom qui ranime ces braises et rassemble les survivants, région après région,
+jusqu'à la cathédrale où le Soleil Blême attend.
 
-- **Plume**, la Dame des Ombres : chat noire, rapide et furtive. Elle a vendu son reflet pour que les chasseurs ne
-  la voient plus jamais.
-- **Charlie**, le Colosse : bête et puissant. Il a tenu seul la porte du dernier refuge pendant neuf nuits contre
-  les torches, et n'a jamais compris pourquoi il devait s'arrêter.
-- **Pollen**, Trois-Pattes : chat tigré ingénieux. Il a laissé sa patte dans un piège à loup des chasseurs de
-  sorcières. Les pièges qu'il a construits ensuite ont mieux marché.
+Personne ne sait plus à quoi ils ressemblaient. Il reste des épithètes, qui changent d'un village à l'autre :
+- **L'Ombre**, Celle qui n'a pas de reflet, la Silencieuse : on dit qu'elle a donné son reflet pour que les
+  chasseurs ne la voient plus. Ombre, silence, absence, furtivité.
+- **Le Colosse**, Celui qui tient la porte, l'Obstiné : on dit qu'il a tenu seul une porte neuf nuits contre les
+  torches, sans comprendre pourquoi il devait s'arrêter. Masse, poids, obstination.
+- **Trois-Pattes**, Celui qui a laissé sa patte, le Boiteux : on dit qu'un piège à loup a gardé sa patte, et que ses
+  pièges à lui ont mieux marché. Ingéniosité, ressorts, mécanismes.
 
-Les textes sont courts et cryptiques : descriptions d'objets, inscriptions sur les autels, paroles des dieux avant
-chaque boss. Rien n'est drôle. La violence est suggérée (fumée, silhouettes, cendres) et jamais montrée en gros
-plan, pour rester publiable sur le Play Store (classement PEGI 12 visé).
+Trois fidèles portent encore leur souvenir : **Nielle**, qui voile les miroirs pour l'Ombre ; **Gond**, qui dort
+contre les portes pour le Colosse ; **Clopin**, qui boite exprès pour Trois-Pattes.
+
+Les textes sont courts et cryptiques : descriptions d'objets, inscriptions des statues, murmures avant chaque
+boss. Rien n'est drôle. La violence est suggérée (fumée, silhouettes, cendres) et jamais montrée en gros plan, pour
+rester publiable sur le Play Store (classement PEGI 12 visé).
 
 ## Les trois dieux
 
-- `dieu.plume` : Plume
-- `dieu.plume.desc` : La Dame des Ombres. Elle a vendu son reflet : les chasseurs ne la voient plus.
-- `dieu.charlie` : Charlie
-- `dieu.charlie.desc` : Le Colosse. Il a tenu la porte neuf nuits, et n’a pas compris pourquoi s’arrêter.
-- `dieu.pollen` : Pollen
-- `dieu.pollen.desc` : Trois-Pattes. Le piège à loup a gardé sa patte, ses pièges ont gardé le reste.
+Ce qu'on voit au choix avant un niveau : un symbole, une épithète, une phrase. Jamais de visage.
+
+- `dieu.plume` : L’Ombre
+- `dieu.plume.desc` : Celle qui n’a pas de reflet. Ce qu’elle regarde ne la voit pas.
+- `dieu.charlie` : Le Colosse
+- `dieu.charlie.desc` : Celui qui tient la porte. Personne ne lui a dit de lâcher.
+- `dieu.pollen` : Trois-Pattes
+- `dieu.pollen.desc` : Celui qui a laissé sa patte. Le piège l’a gardée ; il a gardé le piège.
 
 ## Héros
 
-- `heros.plume` : Plume, l’Ombre Première
+- `heros.plume` : Nielle, Voile-Miroirs
 - `heros.plume.role` : Duelliste, esquive et critiques
-- `heros.plume.desc` : On ne la frappe pas. On la croit déjà passée.
+- `heros.plume.desc` : Elle a voilé tous les miroirs du hameau. Depuis, on la croit toujours déjà passée.
 - `heros.suie` : Suie
 - `heros.suie.role` : Assassin, exécute les blessés
 - `heros.suie.desc` : Elle sent le brûlé. Ce qu’elle touche ne repart pas.
 - `heros.corbeau` : Corbeau
 - `heros.corbeau.role` : Tireur, perce l’armure
 - `heros.corbeau.desc` : Il attend sur les toits que le bûcher s’éteigne.
-- `heros.charlie` : Charlie, le Colosse
+- `heros.charlie` : Gond, le Portier
 - `heros.charlie.role` : Tank, frappe de zone qui étourdit
-- `heros.charlie.desc` : Gros, lent, têtu. La porte tient encore.
+- `heros.charlie.desc` : Il dort adossé aux portes. Aucune ne s’est encore ouverte derrière lui.
 - `heros.mastoc` : Mastoc
 - `heros.mastoc.role` : Provocation, bloque trois ennemis
 - `heros.mastoc.desc` : Il a mangé tant de coups qu’ils lui reviennent par habitude.
 - `heros.brise_os` : Brise-Os
 - `heros.brise_os.role` : Berserker, plus fort blessé
 - `heros.brise_os.desc` : Il ne sait plus à qui est le sang. Cela l’aide.
-- `heros.pollen` : Pollen, Trois-Pattes
+- `heros.pollen` : Clopin, le Tendeur
 - `heros.pollen.role` : Pose des pièges, tire à la fronde
-- `heros.pollen.desc` : Là où il a boité, la terre se referme sur quelqu’un.
+- `heros.pollen.desc` : Il boite comme on prie. Là où il passe, la terre apprend à mordre.
 - `heros.rouage` : Rouage
 - `heros.rouage.role` : Ingénieur, construit une tourelle
 - `heros.rouage.desc` : Il parle aux ressorts. Ils lui répondent par des clous.
@@ -80,28 +94,28 @@ plan, pour rester publiable sur le Play Store (classement PEGI 12 visé).
 ## Sorts des dieux
 
 - `sort.voile_de_nuit` : Voile de Nuit
-- `sort.voile_de_nuit.desc` : La nuit tombe en plein jour. Les pas s’alourdissent, les flèches trouvent la gorge.
+- `sort.voile_de_nuit.desc` : La Silencieuse tire la nuit sur le jour. Les pas s’alourdissent, les flèches trouvent la gorge.
 - `sort.griffes_d_ombre` : Griffes d’Ombre
-- `sort.griffes_d_ombre.desc` : Ce qui est de chair ne se relève pas. Ce qui est plus que chair s’en souvient.
+- `sort.griffes_d_ombre.desc` : Ce qui est de chair ne se relève pas. Ce qui est plus que chair se souvient d’elle.
 - `sort.chute_du_colosse` : Chute du Colosse
-- `sort.chute_du_colosse.desc` : Le sol se souvient de son poids.
+- `sort.chute_du_colosse.desc` : Le sol se souvient d’un poids. Il ne dit pas lequel.
 - `sort.renforts` : Renforts
-- `sort.renforts.desc` : Deux gros matous sortent de la grange. Aucun ne dit pourquoi.
+- `sort.renforts.desc` : Deux gros matous sortent de la grange, dos à la porte. Aucun ne dit pour qui.
 - `sort.pieges_a_ressort` : Pièges à Ressort
-- `sort.pieges_a_ressort.desc` : Trois mâchoires dans la poussière. La quatrième, c’est vous.
+- `sort.pieges_a_ressort.desc` : Trois mâchoires dans la poussière. La quatrième a déjà mangé, il y a longtemps.
 - `sort.ingeniosite` : Ingéniosité
-- `sort.ingeniosite.desc` : Un peu d’os, beaucoup de ruse. Les machines voisines tournent plus vite.
+- `sort.ingeniosite.desc` : Un peu d’os, beaucoup de ruse. Les machines voisines tournent comme le Boiteux l’aurait voulu.
 
 ## Compétences des héros
 
 - `comp.pas_de_velours` : Pas de velours
-- `comp.pas_de_velours.desc` : Un coup raté vaut mieux qu’un cri.
+- `comp.pas_de_velours.desc` : Elle marche comme on lui a appris : sans bruit, sans reflet.
 - `comp.griffe_fantome` : Griffe fantôme
 - `comp.griffe_fantome.desc` : Elle frappe là où l’on ne regardait pas.
-- `comp.reflet_vendu` : Reflet vendu
-- `comp.reflet_vendu.desc` : Sans reflet, on va plus vite.
-- `comp.ombre_premiere` : Ombre première
-- `comp.ombre_premiere.desc` : Avant la lumière, il y avait elle.
+- `comp.reflet_vendu` : Miroir voilé
+- `comp.reflet_vendu.desc` : Elle n’a pas vendu son reflet. Elle le cache, en attendant.
+- `comp.ombre_premiere` : Ombre prêtée
+- `comp.ombre_premiere.desc` : Elle marche dans une ombre qui n’est pas la sienne.
 - `comp.lame_courte` : Lame courte
 - `comp.lame_courte.desc` : Courte, donc proche. Proche, donc fatale.
 - `comp.soif_de_sang` : Soif
@@ -114,18 +128,18 @@ plan, pour rester publiable sur le Play Store (classement PEGI 12 visé).
 - `comp.oeil_noir.desc` : Il voit plus loin que le dernier bûcher.
 - `comp.bec_aiguise` : Bec aiguisé
 - `comp.bec_aiguise.desc` : La cotte de mailles n’est qu’une promesse.
-- `comp.plumes_de_nuit` : Plumes de nuit
+- `comp.plumes_de_nuit` : Pennes de nuit
 - `comp.plumes_de_nuit.desc` : Les ailes battent, les flèches suivent.
 - `comp.festin` : Festin
 - `comp.festin.desc` : Les charognards ne perdent jamais.
 - `comp.poigne_de_fer` : Poigne de fer
-- `comp.poigne_de_fer.desc` : Ce qu’il tient ne se rend pas.
+- `comp.poigne_de_fer.desc` : Il tient comme on le lui a montré, sans savoir lâcher.
 - `comp.peau_epaisse` : Peau épaisse
-- `comp.peau_epaisse.desc` : Neuf nuits de torches ont laissé leur croûte.
+- `comp.peau_epaisse.desc` : Il a dormi contre des portes chaudes. Sa peau s’en souvient.
 - `comp.onde_de_choc` : Onde de choc
 - `comp.onde_de_choc.desc` : Le coup continue après le coup.
-- `comp.neuf_nuits` : Neuf nuits
-- `comp.neuf_nuits.desc` : Il tient. Il tiendra encore.
+- `comp.neuf_nuits` : Dixième nuit
+- `comp.neuf_nuits.desc` : Un autre a tenu neuf nuits. Lui compte la dixième.
 - `comp.mur_de_chair` : Mur de chair
 - `comp.mur_de_chair.desc` : Un mur qui respire.
 - `comp.cri_de_defi` : Cri de défi
@@ -143,13 +157,13 @@ plan, pour rester publiable sur le Play Store (classement PEGI 12 visé).
 - `comp.os_brises` : Os brisés
 - `comp.os_brises.desc` : Il ne reste que le bruit.
 - `comp.ressorts_rouilles` : Ressorts rouillés
-- `comp.ressorts_rouilles.desc` : Un piège vieux est un piège patient.
+- `comp.ressorts_rouilles.desc` : Il les déterre sous les vieilles granges. Ils étaient armés pour lui.
 - `comp.fronde_tordue` : Fronde tordue
 - `comp.fronde_tordue.desc` : Elle vise mal, et touche quand même.
-- `comp.trois_pattes` : Trois pattes
-- `comp.trois_pattes.desc` : On évite mieux ce qu’on a déjà perdu.
+- `comp.trois_pattes` : Pas boiteux
+- `comp.trois_pattes.desc` : Il boite par respect. Les coups ne savent plus où viser.
 - `comp.maitre_des_pieges` : Maître des pièges
-- `comp.maitre_des_pieges.desc` : Chaque pas est un choix, le leur est déjà fait.
+- `comp.maitre_des_pieges.desc` : Il tend les mâchoires comme un autre, avant lui. Le geste est resté.
 - `comp.boulons_neufs` : Boulons neufs
 - `comp.boulons_neufs.desc` : Les carreaux sont plus lourds que les remords.
 - `comp.deuxieme_servant` : Deuxième servant
@@ -161,7 +175,7 @@ plan, pour rester publiable sur le Play Store (classement PEGI 12 visé).
 - `comp.flamme_douce` : Flamme douce
 - `comp.flamme_douce.desc` : Une chaleur qui ne demande rien.
 - `comp.halo_de_cire` : Halo de cire
-- `comp.halo_de_cire.desc` : La lumière s’étale, les ombres reculent.
+- `comp.halo_de_cire.desc` : La lumière s’étale, les ombres reculent. Sauf une.
 - `comp.cire_et_cendre` : Cire et cendre
 - `comp.cire_et_cendre.desc` : Ce qui fond protège ce qui brûle.
 - `comp.derniere_lueur` : Dernière lueur
@@ -199,7 +213,7 @@ plan, pour rester publiable sur le Play Store (classement PEGI 12 visé).
 - `comptour.benediction` : Bénédiction
 - `comptour.benediction.desc` : Les plaies se ferment, sans prière.
 - `comptour.mur` : Mur
-- `comptour.mur.desc` : Les cottes tiennent debout après la mort.
+- `comptour.mur.desc` : Les cottes tiennent debout après la mort, comme une porte qu’on n’a pas lâchée.
 - `comptour.entailles_profondes` : Entailles profondes
 - `comptour.entailles_profondes.desc` : Le sang coule longtemps, et ne s’arrête pas seul.
 - `comptour.frenesie` : Frénésie
@@ -227,7 +241,7 @@ plan, pour rester publiable sur le Play Store (classement PEGI 12 visé).
 - `comptour.chaines_longues` : Chaînes longues
 - `comptour.chaines_longues.desc` : Un maillon de plus, un voisin de plus.
 - `comptour.entraves` : Entraves
-- `comptour.entraves.desc` : Marcher devient un travail.
+- `comptour.entraves.desc` : Marcher devient un travail. Boiter, une prière.
 
 ## Ennemis et boss
 
@@ -270,6 +284,63 @@ plan, pour rester publiable sur le Play Store (classement PEGI 12 visé).
 - `ennemi.acolyte_cendre` : Acolyte de Cendre
 - `ennemi.ange_cendre` : Ange de Cendre
 - `ennemi.soleil_bleme` : Le Soleil Blême
+
+## Ennemis : descriptions
+
+- `ennemi.paysan_affame.desc` : Il a mangé ses bêtes, puis ses semences. Il cherche ce qui reste.
+- `ennemi.mendiant.desc` : Il tend une main vide. L’autre est derrière son dos.
+- `ennemi.chien_errant.desc` : Son maître est sur un bûcher. Il a appris à chasser seul.
+- `ennemi.boucher_vaudrelle.desc` : Son étal ne désemplit pas. Personne ne demande d’où vient la viande.
+- `ennemi.glaneur.desc` : Il ramasse ce que les autres laissent tomber. Parfois, ce sont des chats.
+- `ennemi.corbeau_noir.desc` : Il suit les fourches à distance. Il sait toujours où elles vont.
+- `ennemi.epouvantail.desc` : Personne ne l’a planté là. Il avance quand on ne le regarde pas.
+- `ennemi.la_faim.desc` : Elle n’a pas de ventre. Elle a seulement des champs à vider.
+- `ennemi.porteur_torche.desc` : Il ne sait pas ce qu’il brûle. On le lui a dit, ça suffit.
+- `ennemi.chasseur_sorcieres.desc` : Il porte des mâchoires de fer à la ceinture. L’une a déjà servi.
+- `ennemi.delateur.desc` : Il ne frappe personne. Il donne des noms.
+- `ennemi.juge_flammes.desc` : Il a jugé le Premier Bûcher. Il en parle encore avec tendresse.
+- `ennemi.noyeur.desc` : Il tient les accusées sous l’eau, et compte lentement.
+- `ennemi.pelerin_voile.desc` : Sous le voile, il n’y a pas de visage. Il y a de l’eau.
+- `ennemi.sangsue.desc` : Elle prend peu, mais elle ne lâche jamais.
+- `ennemi.dame_puits.desc` : On lui a jeté tant de chats qu’elle les appelle par leur nom.
+- `ennemi.rat_peste.desc` : Il court là où les chats ne sont plus.
+- `ennemi.pestifere.desc` : Il marche encore. La fièvre décide où.
+- `ennemi.medecin_peste.desc` : Sous le bec, des herbes et de l’encens. Il recommande toujours le feu.
+- `ennemi.mere_rats.desc` : Elle a attendu que le dernier chat brûle. Puis elle a pondu.
+- `ennemi.fossoyeur.desc` : Sa pelle n’a jamais séché. Il creuse aussi pour les vivants.
+- `ennemi.creux.desc` : On l’a enterré trop vite. Il revient chercher ce qu’on lui a pris.
+- `ennemi.chauve_souris.desc` : Elle sort des côtes du charnier à l’heure des vêpres.
+- `ennemi.roi_fosses.desc` : Sa couronne est faite de dents. Il les a comptées une à une.
+- `ennemi.fantassin.desc` : Il a quitté son champ pour une croix. Il ne sait plus lequel il défend.
+- `ennemi.porte_banniere.desc` : Tant que la bannière flotte, ils ne reculent pas. Elle est cousue de suaires.
+- `ennemi.cavalier.desc` : Le cheval connaît la route. Le cavalier ne regarde plus.
+- `ennemi.prince_croise.desc` : Il a béni chaque lame de sa main. Les siens sont tombés quand même.
+- `ennemi.flagellant.desc` : Il se frappe pour expier. Il frappe les autres pour les aider.
+- `ennemi.inquisiteur.desc` : Il connaît la question. La réponse n’a jamais changé l’issue.
+- `ennemi.exorciste.desc` : Il chasse les démons à l’eau bénite. Le démon, c’est toujours un chat.
+- `ennemi.grand_inquisiteur.desc` : Il a gratté trois noms de la pierre. Il les entend encore la nuit.
+- `ennemi.garde_royal.desc` : Il garde une porte qui ne mène qu’à la folie du roi.
+- `ennemi.arbaletrier_elite.desc` : Il tire avant l’ordre. On ne le lui reproche jamais.
+- `ennemi.chevalier.desc` : L’armure avance seule depuis longtemps. Elle se souvient d’avoir eu un homme.
+- `ennemi.roi_fou.desc` : Il a fait sculpter cent statues de lui. Il n’en a abattu que trois autres.
+- `ennemi.acolyte_cendre.desc` : Il chante une prière pâle. Sa voix tombe en cendre avant de finir.
+- `ennemi.ange_cendre.desc` : Ses ailes sont faites de ce qui a brûlé. Il en a de très grandes.
+- `ennemi.soleil_bleme.desc` : Il n’éclaire pas. Il pâlit ce qu’il regarde, jusqu’à la cendre.
+
+## Paroles avant les boss
+
+Ce ne sont plus les dieux qui parlent : un murmure, une inscription, une voix sans source.
+
+- `boss.r1.parole` : Gravé sur l’étal, sous le sang sec : « Ici, on pesait les chats. La balance penche encore. »
+- `boss.r2.parole` : Le vent dans les gerbes creuses : « Elle a tout mangé. Il reste celui qui veille. »
+- `boss.r3.parole` : Un murmure sous les fagots : « Le premier était plus grand. Celui-ci n’en est que l’écho. »
+- `boss.r4.parole` : Une voix sous l’eau, sans bouche : « Elle non plus n’a jamais coulé. Ne lui demande pas pourquoi. »
+- `boss.r5.parole` : Gratté dans le mur d’une cave : « Ils ont brûlé ceux qui gardaient le grain. Les rats s’en souviennent. »
+- `boss.r6.parole` : Une voix qui monte des fosses : « Il compte ses morts. Ne lui donne pas ton nom. »
+- `boss.r7.parole` : Brodé sur une bannière déchirée : « Pour la Croix et le Soleil. » Dessous, plus ancien : « Pour la porte. »
+- `boss.r8.parole` : Une voix qui ne vient d’aucune cellule : « Il a tout lu. Sauf ce qu’on n’a jamais écrit. »
+- `boss.r9.parole` : Sous le trône, à demi effacé : « La couronne parle. Les statues… se taisent pour toi. »
+- `boss.r10.parole` : Personne ne parle. Seulement, très bas : « Garde tes braises dans l’ombre. Il ne voit pas ce qui n’a pas de reflet. »
 
 ## Régions
 
@@ -318,10 +389,50 @@ plan, pour rester publiable sur le Play Store (classement PEGI 12 visé).
 - `carte.nom.transept` : Le Transept
 - `carte.nom.choeur` : Le Chœur
 
+## Inscriptions des statues
+
+Une vieille statue par carte. Répartition (pour la relecture, rien de cela n’est affiché) : l’Ombre (gue, aire,
+ruelles, etang, ossuaire, cloitre, nef, choeur), le Colosse (chaumes, meules, beffroi, marche, fossoyage, bivouac,
+refectoire, pont_levis), Trois-Pattes (carrefour, sillons, ponton, faubourg, tertres, palissade, douves, transept),
+l’Église du Soleil Blême (pendus, place, saules, quarantaine, baliste, scriptorium, avenue). Seule l’inscription de
+l’Avenue porte les vrais noms.
+
+- `inscription.chaumes` : À Celui qui tient la porte. Tant qu’il tient, le grain reste au grenier, et le rat dehors.
+- `inscription.gue` : Ne cherche pas son visage dans l’eau. Elle n’y est pas. Elle n’y a jamais été.
+- `inscription.pendus` : Par ordre du Soleil Blême : qui nourrit un chat nourrit la sorcière. Les cordes sont prêtes.
+- `inscription.carrefour` : Trois chemins, trois pattes. Prends celui qui boite : c’est le seul sans piège.
+- `inscription.sillons` : Il a semé des ressorts sous les sillons. Les rats n’ont pas passé l’hiver. Les hommes ont oublié pourquoi.
+- `inscription.meules` : Neuf nuits. À la dixième, on n’a plus frappé à la porte. On a apporté le feu.
+- `inscription.aire` : Pour la Silencieuse : un bol de lait, posé dans le noir. Ne pas regarder qui le boit.
+- `inscription.ruelles` : Elle a donné son reflet contre un passage. Le passage… nous… le reste.
+- `inscription.place` : Ici fut dressé le Premier Bûcher. Trois bêtes y furent rendues à la cendre. Le ciel pâlit trois jours.
+- `inscription.beffroi` : On ne lui a jamais appris l’ordre de reculer. Personne n’a osé l’écrire.
+- `inscription.ponton` : La patte est restée dans la mâchoire. Il est revenu chercher la mâchoire.
+- `inscription.etang` : On a sondé l’étang pour trouver son corps. Les cordes sont revenues sèches.
+- `inscription.saules` : Que toute bête noire soit noyée avant le premier gel. Ainsi purifiés, nous serons épargnés.
+- `inscription.quarantaine` : Le mal venait des chats. Les chats sont morts. Le mal…
+- `inscription.faubourg` : Ses machines tournent encore dans les caves. Elles prennent les rats. Personne ne les remonte.
+- `inscription.marche` : On pesait le grain contre sa pierre. Elle était trop lourde pour mentir.
+- `inscription.fossoyage` : Ils ont dû attendre qu’il tombe de lui-même. Le bois a brûlé avant lui.
+- `inscription.tertres` : Ici repose une patte. Le reste ne repose pas.
+- `inscription.ossuaire` : On a compté les crânes. Il en manque toujours un : celui qui ne laissait pas d’ombre.
+- `inscription.bivouac` : Ils ont brûlé la porte. Pas ce qui la tenait.
+- `inscription.palissade` : Les pieux sont taillés à sa manière. Ceux qui les plantent ne savent pas de qui ils tiennent le geste.
+- `inscription.baliste` : Frappez la bête où qu’elle se cache. Le Soleil Blême ne compte pas les…
+- `inscription.cloitre` : Les moines ont fait vœu de silence. Ils croyaient l’avoir inventé.
+- `inscription.refectoire` : Les frères mangent debout, dos à la porte. Une vieille règle. Nul ne sait plus qui la gardait.
+- `inscription.scriptorium` : Rature trois noms à chaque copie. Si un nom résiste, brûle la page. Si la page résiste…
+- `inscription.avenue` : Ici furent effacés Plume, Charlie et Pollen, que priaient les granges. Que nul ne les nomme plus. Dessous, d’une griffe : « Pas oubliés. »
+- `inscription.douves` : Le pont tient par trois chaînes. La quatrième est restée dans un piège, il y a longtemps.
+- `inscription.pont_levis` : Il pèse ce que pèse une promesse tenue. Aucun treuil ne le lève seul.
+- `inscription.nef` : Ils ont bâti la nef sur la crypte, pour la faire taire. La crypte ne parlait déjà pas.
+- `inscription.transept` : Le sol sonne creux. En dessous, un mécanisme armé attend un pas, un seul.
+- `inscription.choeur` : Quand les braises se lèveront, un veilleur sans nom marchera devant. Il n’aura pas d’ombre : elle lui prêtera la sienne.
+
 ## Niveaux, région 1 : Le Village Affamé
 
 - `niveau.r1.01.nom` : La Porte Ouverte
-- `niveau.r1.01.ambiance` : Les cheminées ne fument plus. Quelqu’un a laissé la porte ouverte.
+- `niveau.r1.01.ambiance` : Les cheminées ne fument plus. Quelqu’un a laissé la porte ouverte. Avant, quelqu’un la tenait.
 - `niveau.r1.02.nom` : Le Puits Muet
 - `niveau.r1.02.ambiance` : On y jetait les chats pour chasser la peste. Le puits ne rend plus d’écho.
 - `niveau.r1.03.nom` : La Route des Pendus
@@ -352,7 +463,7 @@ plan, pour rester publiable sur le Play Store (classement PEGI 12 visé).
 - `niveau.r2.04.nom` : Le Chariot Brisé
 - `niveau.r2.04.ambiance` : Les roues se sont arrêtées en pleine fuite. Les chevaux, on les a mangés.
 - `niveau.r2.05.nom` : La Haie Calcinée
-- `niveau.r2.05.ambiance` : Même les haies ont brûlé. On ne se cache plus nulle part.
+- `niveau.r2.05.ambiance` : Même les haies ont brûlé. On ne se cache plus que dans l’ombre qui n’est à personne.
 - `niveau.r2.06.nom` : Le Champ des Gerbes
 - `niveau.r2.06.ambiance` : Les gerbes sont noires, les épis creux. La faim est la seule récolte qui ne manque pas.
 - `niveau.r2.07.nom` : Le Gué des Cendres
@@ -360,7 +471,7 @@ plan, pour rester publiable sur le Play Store (classement PEGI 12 visé).
 - `niveau.r2.08.nom` : L’Épouvantail du Sud
 - `niveau.r2.08.ambiance` : On l’a planté pour les corbeaux. Il regarde les chats, maintenant.
 - `niveau.r2.09.nom` : La Grange Rouge
-- `niveau.r2.09.ambiance` : Elle brûle depuis trois jours. Personne n’est venu l’éteindre.
+- `niveau.r2.09.ambiance` : Elle brûle depuis trois jours. Avant, on y laissait du lait, la nuit.
 - `niveau.r2.10.nom` : La Faim
 - `niveau.r2.10.ambiance` : Elle marche sur les champs morts. Chacun de ses pas affame la terre.
 
@@ -469,7 +580,7 @@ plan, pour rester publiable sur le Play Store (classement PEGI 12 visé).
 - `niveau.r7.05.nom` : La Palissade
 - `niveau.r7.05.ambiance` : On a taillé des pieux dans les églises voisines. Dieu a prêté son bois.
 - `niveau.r7.06.nom` : La Baliste Brisée
-- `niveau.r7.06.ambiance` : Elle a tiré une dernière fois, sur son propre camp.
+- `niveau.r7.06.ambiance` : Elle a tiré une dernière fois, sur son propre camp. Un ressort avait été changé.
 - `niveau.r7.07.nom` : Le Chariot d’Armes
 - `niveau.r7.07.ambiance` : Il roule seul vers le front. Plus personne ne le suit, mais il est toujours plein.
 - `niveau.r7.08.nom` : Le Serment sur l’Épée
@@ -490,7 +601,7 @@ plan, pour rester publiable sur le Play Store (classement PEGI 12 visé).
 - `niveau.r8.04.nom` : Le Réfectoire Noir
 - `niveau.r8.04.ambiance` : Les tables sont dressées pour un banquet de jeûne. Les bols sont pleins de cendre.
 - `niveau.r8.05.nom` : La Fontaine Noire
-- `niveau.r8.05.ambiance` : L’eau de la vasque ne reflète plus le ciel. Elle reflète ceux qui s’y penchent, autrement.
+- `niveau.r8.05.ambiance` : L’eau de la vasque reflète ceux qui s’y penchent. Pas tous.
 - `niveau.r8.06.nom` : Le Scriptorium
 - `niveau.r8.06.ambiance` : On y copiait la Parole. Maintenant, on y rature les noms.
 - `niveau.r8.07.nom` : La Cellule des Aveux
@@ -507,7 +618,7 @@ plan, pour rester publiable sur le Play Store (classement PEGI 12 visé).
 - `niveau.r9.01.nom` : La Porte de la Cité
 - `niveau.r9.01.ambiance` : Les gardes saluent ceux qui entrent. Ils ne disent rien à ceux qui voudraient sortir.
 - `niveau.r9.02.nom` : L’Avenue des Statues
-- `niveau.r9.02.ambiance` : Le roi s’est fait sculpter cent fois. Chaque statue regarde ailleurs.
+- `niveau.r9.02.ambiance` : Le roi s’est fait sculpter cent fois. Les trois socles du bout sont plus vieux que lui.
 - `niveau.r9.03.nom` : Les Douves Sombres
 - `niveau.r9.03.ambiance` : On y a jeté les dettes, les rivaux et les poètes. L’eau n’a rien oublié.
 - `niveau.r9.04.nom` : La Herse Brisée
@@ -555,7 +666,7 @@ plan, pour rester publiable sur le Play Store (classement PEGI 12 visé).
 - `objet.herbe_sabbat` : Herbe de Sabbat
 - `objet.herbe_sabbat.desc` : Cueillie la nuit sur une tombe fraîche. Elle rend cinq vies.
 - `objet.griffe_renfort` : Griffe de Renfort
-- `objet.griffe_renfort.desc` : Quelqu’un en a payé le prix. Un chat vient la réclamer.
+- `objet.griffe_renfort.desc` : Trop lourde pour une patte ordinaire. Un chat vient la réclamer quand même.
 - `objet.sablier` : Sablier
 - `objet.sablier.desc` : Le temps s’arrête cinq souffles. Seuls les grands le traversent.
 
@@ -566,7 +677,7 @@ plan, pour rester publiable sur le Play Store (classement PEGI 12 visé).
 - `collection.skin_caserne_2` : Grenier Calciné
 - `collection.skin_caserne_2.desc` : Il a brûlé deux fois. Les murs s’en souviennent.
 - `collection.skin_caserne_3` : Grenier des Veilleurs
-- `collection.skin_caserne_3.desc` : On y a veillé neuf nuits sans fermer l’œil.
+- `collection.skin_caserne_3.desc` : On y a veillé neuf nuits sans fermer l’œil, ni la porte.
 - `collection.skin_tir_1` : Clocher de Suie
 - `collection.skin_tir_1.desc` : La cloche est fêlée, le tir reste droit.
 - `collection.skin_tir_2` : Clocher Givré
@@ -578,7 +689,7 @@ plan, pour rester publiable sur le Play Store (classement PEGI 12 visé).
 - `collection.skin_magie_2` : Autel des Fiévreux
 - `collection.skin_magie_2.desc` : Les malades y ont prié. Quelque chose a répondu.
 - `collection.skin_magie_3` : Autel Sans Nom
-- `collection.skin_magie_3.desc` : Personne ne se souvient de qui on y priait.
+- `collection.skin_magie_3.desc` : Trois noms y étaient gravés. On a gratté jusqu’à la pierre nue.
 - `collection.skin_artillerie_1` : Rempart Rouillé
 - `collection.skin_artillerie_1.desc` : Le fer pleure sur la pierre.
 - `collection.skin_artillerie_2` : Rempart de Charbon
@@ -586,31 +697,31 @@ plan, pour rester publiable sur le Play Store (classement PEGI 12 visé).
 - `collection.skin_artillerie_3` : Rempart du Dernier Siège
 - `collection.skin_artillerie_3.desc` : Il a vu tomber les autres. Pas celui-ci.
 - `collection.skin_plume` : Manteau d’Ombre
-- `collection.skin_plume.desc` : Plume l’a cousu avec son propre reflet.
+- `collection.skin_plume.desc` : Cousu pour celle qui n’a pas de reflet. Nielle le porte à l’envers, par respect.
 - `collection.skin_charlie` : Pelage de Braise
-- `collection.skin_charlie.desc` : Neuf nuits de torches ont laissé leur couleur.
+- `collection.skin_charlie.desc` : La couleur d’une porte après neuf nuits de torches. Gond la porte sans savoir.
 - `collection.skin_pollen` : Patte de Fer
-- `collection.skin_pollen.desc` : Là où manque la patte, le fer n’oublie pas le piège.
+- `collection.skin_pollen.desc` : Une patte de fer pour honorer celle qui manque. Clopin boite quand même.
 - `collection.skin_suie` : Collier de Cendre
 - `collection.skin_suie.desc` : Chaque grain est un bûcher que Suie a vu.
-- `collection.skin_corbeau` : Plumes d’Encre
+- `collection.skin_corbeau` : Pennes d’Encre
 - `collection.skin_corbeau.desc` : Elles servaient à écrire les condamnations.
 - `collection.skin_mastoc` : Peau de Loup
 - `collection.skin_mastoc.desc` : Le dernier loup du village s’est couché pour de bon.
 - `collection.skin_brise_os` : Crocs Rouges
 - `collection.skin_brise_os.desc` : Ils ne sont pas teints. Ils ont servi.
 - `collection.skin_rouage` : Cuir Huilé
-- `collection.skin_rouage.desc` : Chaque couture a sa petite machine.
+- `collection.skin_rouage.desc` : Chaque couture a sa petite machine. Le patron vient d’un boiteux.
 - `collection.skin_lanterne` : Lanterne Veuve
 - `collection.skin_lanterne.desc` : Sa flamme brûle pour quelqu’un qui n’est plus là.
 - `collection.familier_rat` : Rat Boiteux
-- `collection.familier_rat.desc` : Il suit le chat qui ne l’a pas mangé.
+- `collection.familier_rat.desc` : Il suit le chat qui ne l’a pas mangé. Il boite du même côté que lui.
 - `collection.familier_crapaud` : Crapaud du Puits
 - `collection.familier_crapaud.desc` : Il est remonté seul. Il ne dit pas d’où.
 - `collection.familier_escargot` : Escargot Pèlerin
 - `collection.familier_escargot.desc` : Il arrivera. Il arrive toujours.
 - `collection.familier_chouette` : Chouette Aveugle
-- `collection.familier_chouette.desc` : Elle n’a pas besoin d’yeux pour voir venir le danger.
+- `collection.familier_chouette.desc` : Elle n’a pas besoin d’yeux. Elle entend passer ce qui ne fait pas de bruit.
 - `collection.familier_luciole` : Luciole des Marais
 - `collection.familier_luciole.desc` : Une petite lueur qui refuse de s’éteindre.
 - `collection.familier_lezard` : Lézard de Cendre
@@ -626,14 +737,14 @@ plan, pour rester publiable sur le Play Store (classement PEGI 12 visé).
 - `collection.familier_papillon_nuit` : Papillon de Nuit
 - `collection.familier_papillon_nuit.desc` : Il vole vers les flammes que tout le monde fuit.
 - `collection.familier_salamandre` : Salamandre du Bûcher
-- `collection.familier_salamandre.desc` : Née du Premier Bûcher, elle n’a jamais connu le froid.
+- `collection.familier_salamandre.desc` : Née du Premier Bûcher, elle n’a jamais connu le froid. Elle a vu qui y brûlait.
 
 ## Fin de campagne
 
 - `campagne.fin_titre` : Les Cendres Retombent
 - `campagne.fin_illustration` : Le Dernier Veilleur sur les marches de la cathédrale, devant le Soleil Blême éteint.
 - `campagne.fin_p1` : Le Soleil Blême s’éteint sur la cathédrale. Ni cri ni triomphe : de la cendre qui retombe sur les dalles, et au loin les cloches qui se taisent une à une.
-- `campagne.fin_p2` : Les bûchers ne sont plus que des braises. Dans les granges, dans les cryptes, des pas feutrés reviennent. Les Chats Suprêmes ne sont pas ressuscités : le Dernier Veilleur a seulement refusé de laisser mourir ce qu’ils avaient allumé.
+- `campagne.fin_p2` : Les bûchers ne sont plus que des braises. Dans les granges, dans les cryptes, des pas feutrés reviennent : une ombre sans reflet, une porte qui tient, un pas qui boite. Personne ne dit leurs noms. Le Dernier Veilleur a seulement refusé de laisser mourir ce qu’ils avaient allumé.
 - `campagne.fin_p3` : Les hommes oublieront. Les rats reviendront. Mais tant qu’une braise veille quelque part, la nuit n’est pas finie.
 
 ## Phrases de fin de partie
