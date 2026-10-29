@@ -62,9 +62,10 @@ jobs:
           CLE: ${{ secrets.VPS_DEPLOY_KEY }}
         run: |
           install -m 700 -d ~/.ssh
-          printf '%s
-' "$CLE" > ~/.ssh/deploiement
+          printf '%s\n' "$CLE" > ~/.ssh/deploiement
           chmod 600 ~/.ssh/deploiement
           echo '145.239.83.184 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC4rJXBJwAFz/bE/P73BRpZJgKmPhjkq9LxRjUXB5/S+' > ~/.ssh/known_hosts
           # --delay-updates : les nouveaux fichiers n'apparaissent qu'à la fin, le site n'est jamais à moitié à jour.
-          rsync -rlz --delete-after --delay-updates --chmod=D755,F644             -e 'ssh -i ~/.ssh/deploiement -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes'             dist/ deploy@145.239.83.184:./
+          rsync -rlz --delete-after --delay-updates --chmod=D755,F644 \
+            -e 'ssh -i ~/.ssh/deploiement -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes' \
+            dist/ deploy@145.239.83.184:./
