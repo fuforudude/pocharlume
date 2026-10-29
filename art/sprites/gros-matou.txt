@@ -1,9 +1,150 @@
-# Gros matou des Renforts (sort de Charlie) : la carrure de Charlie en matou roux, collier de cuir,
-# sans balafre. Mêmes animations que Charlie, recolorées.
+# Gros matou des Renforts (sort du Colosse) : une jeune recrue, version réduite et plus modeste de Gond (environ deux tiers
+# de sa taille, même cadre, mêmes animations et mêmes noms de cadres). Brun terne et dépareillé, poitrail gris-crème, ni
+# collier ni clé. Grilles posées à l'origine (4, 10), pieds en y = 30.
 categorie unite
 palette commune
 taille 32 32
 ancre 16 30
+origine 4 10
 
 sprite gros-matou
-derive charlie-ancien couleurs u=B U=o v=c P=b p=b g=d
+
+calque tete 6 7
+b.....b.
+bNNNNNb.
+NkNNkNNb
+NNNqqqqq
+.NNqrqq.
+
+calque yeux-clos 7 9
+N..N
+
+calque corps 4 12
+.bbNNNNNNbb.
+bNNNqqqqNNNb
+bNNNqqqqNNNb
+.bNNqqqqNNb.
+..bbNNNNbb..
+
+calque corps-leve 4 4
+cc........cc
+bb........bb
+bb........bb
+bb........bb
+bb........bb
+bb........bb
+bb........bb
+bb........bb
+.bbNNNNNNbb.
+bNNNqqqqNNNb
+bNNNqqqqNNNb
+.bNNqqqqNNb.
+..bbNNNNbb..
+
+calque corps-frappe 4 12
+.bbNNNNNNbb.
+bNNNqqqqNNNbbb
+bNNNqqqqNNNNbb
+.bNNqqqqNNb..cc
+..bbNNNNbb...cc
+
+calque poussiere 13 16
+.q.......q
+P.q.q..q.P
+.PqPPqqPP.
+PpPpPPpPpP
+
+calque grande-poussiere 0 15
+..q.................q.
+.P..q...........q..P..
+P.q..Pq.......qP..q..P
+.PqPPpPq.....PpPPqPPq.
+PpPpPpPpP...PpPpPpPpPp
+
+calque queue 2 13
+.bb
+b..
+b..
+.bb
+
+calque queue-b 2 13
+bb.
+b..
+b..
+.bb
+
+calque jambes 6 17
+.bb..bb.
+.bb..bb.
+.bN..Nb.
+qqq..qqq
+
+calque jambes-a 6 17
+.bb....bb.
+.bb....bb.
+bN......Nb
+qq......qq
+
+calque jambes-b 6 17
+..bb.bb..
+..bb.bb..
+..bN.Nb..
+.qqqqqqq.
+
+anim repos 260
+cadre queue + jambes + corps + tete
+cadre queue-b + jambes + corps + tete
+cadre queue-b + jambes + corps decale 0 1 + tete decale 0 1
+cadre queue + jambes + corps decale 0 1 + tete decale 0 1 + yeux-clos decale 0 1
+
+anim marche 140
+cadre queue + jambes-a + corps + tete
+cadre queue-b decale 0 -1 + jambes-b decale 0 -1 + corps decale 0 -1 + tete decale 0 -1
+cadre queue + jambes-a + corps decale 0 1 + tete decale 0 1
+cadre queue-b decale 0 -1 + jambes-b decale 0 -1 + corps decale 0 -1 + tete decale 0 -1
+
+# Deux poings levés puis abattus devant lui.
+anim attaque 110
+cadre queue + jambes + corps-leve + tete duree 220
+cadre queue + jambes-a + corps-frappe decale 1 1 + tete decale 1 2
+cadre queue + jambes-a + corps-frappe decale 1 1 + tete decale 1 2 + poussiere duree 180
+cadre queue + jambes + corps + tete duree 160
+
+# Chute du Colosse : il s'accroupit, bondit et retombe en écrasant le sol.
+anim competence 100
+cadre queue + jambes + corps decale 0 2 + tete decale 0 2 duree 200
+cadre queue decale 0 -6 + jambes-b decale 0 -6 + corps-leve decale 0 -5 + tete decale 0 -5
+cadre queue decale 0 -3 + jambes-b decale 0 -3 + corps-leve decale 0 -2 + tete decale 0 -2
+cadre queue + jambes-a + corps-frappe decale 0 1 + tete decale 0 2 + grande-poussiere duree 200
+cadre queue + jambes-a + corps-frappe decale 0 1 + tete decale 0 2 + poussiere decale -3 0 duree 200
+cadre queue + jambes + corps + tete duree 200
+
+anim blesse 130
+cadre queue + jambes + corps decale -1 0 + tete decale -1 0 + yeux-clos decale -1 0
+cadre queue + jambes + corps + tete
+
+anim mort 160
+cadre queue + jambes + corps decale -1 0 + tete decale -1 1 + yeux-clos decale -1 1
+cadre queue decale 0 3 + corps decale 0 3 + tete decale 0 4 + yeux-clos decale 0 4
+cadre duree 1000
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+...........b...b.
+..bb.......bN.Nb.
+.b..bbbbbbbbbbbbb
+.b.bbNNqqqNNNNNbb
+..bbNNqqqqNNNNkNb
+.qqqNNqqqqNNNNqqq
+.qqbbbNNqqNNbbNqr

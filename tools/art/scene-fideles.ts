@@ -1,11 +1,14 @@
-// Planche d'aperçu des trois fidèles (Nielle, Gond, Clopin : repos, marche, attaque, compétence) et des trois symboles des
+// Planche d'aperçu des trois fidèles (Nielle, Gond, Clopin) et le gros matou des Renforts (repos, marche, attaque, compétence) et des trois symboles des
 // dieux sans visage (l'Ombre, le Colosse, Trois-Pattes), sur l'herbe sombre. Sert seulement à juger les sprites en situation.
 import type { Couche } from './couche.ts';
 import { agrandirImage, poser } from './apercu.ts';
 import type { SpriteDessine } from './dessin.ts';
 import { nouvelleImage, type Image } from './png.ts';
 
-const FIDELES = ['heros-plume', 'charlie', 'heros-pollen'] as const;
+// Le gros matou des Renforts est montré à côté de Gond, pour comparer les tailles.
+const FIDELES = ['heros-plume', 'charlie', 'gros-matou', 'heros-pollen'] as const;
+/** Colonne de chaque symbole et portrait (le gros matou n'en a pas). */
+const COLONNES_DIEUX = [0, 1, 3] as const;
 const SYMBOLES = ['icone-dieu-plume', 'icone-dieu-charlie', 'icone-dieu-pollen'] as const;
 const PORTRAITS = ['icone-portrait-plume', 'icone-portrait-charlie', 'icone-portrait-pollen'] as const;
 const RANGEES: readonly (readonly [string, number])[] = [['repos', 0], ['marche', 1], ['attaque', 1], ['competence', 3]];
@@ -35,7 +38,7 @@ export function planFideles(sprites: readonly SpriteDessine[], facteur = 6): Ima
     FIDELES.forEach((nom, i) => { pose(nom, anim, indice, 2 + i * CASE + CASE / 2, r * RANGEE + 31); });
   });
   const baseSymboles = RANGEE * RANGEES.length + 22;
-  SYMBOLES.forEach((nom, i) => { pose(nom, 'repos', 0, 2 + i * CASE + CASE / 2, baseSymboles); });
-  PORTRAITS.forEach((nom, i) => { pose(nom, 'repos', 0, 2 + i * CASE + CASE / 2, baseSymboles + 30); });
+  SYMBOLES.forEach((nom, i) => { pose(nom, 'repos', 0, 2 + (COLONNES_DIEUX[i] ?? i) * CASE + CASE / 2, baseSymboles); });
+  PORTRAITS.forEach((nom, i) => { pose(nom, 'repos', 0, 2 + (COLONNES_DIEUX[i] ?? i) * CASE + CASE / 2, baseSymboles + 30); });
   return agrandirImage(image, facteur);
 }

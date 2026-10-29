@@ -1,5 +1,5 @@
 # COPIE FIGÉE de l'ancien sprite de Charlie (avant le jalon 5), sous le nom `charlie-ancien`. Gond (charlie.txt) a été
-# redessiné ; ce sprite reste la base du gros matou des Renforts et de Mastoc (modèle et gisant) : ne pas le retoucher.
+# redessiné ; ce sprite reste la base de Mastoc (modèle et gisant) : ne pas le retoucher.
 # Charlie, le Colosse : héros du dieu Charlie. Énorme chat gris, poitrail blanc, collier de fer brisé,
 # balafre sur l'œil, petits yeux. Il frappe des deux poings. Grilles posées à l'origine (4, 10).
 categorie unite
