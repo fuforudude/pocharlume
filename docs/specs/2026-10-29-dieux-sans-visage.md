@@ -15,10 +15,15 @@ dans des inscriptions sur de vieilles statues cachées dans les cartes.
   dessinés.
 - **Le choix du dieu avant un niveau** reste (tour divine et sorts), mais sans visage : un symbole, une épithète et
   une phrase cryptique, jamais de portrait.
-- **Noms des dieux** : à l'écran, des épithètes qui changent selon l'endroit mais gardent le même ressenti (pour
-  Plume : « L'Ombre », « Celle qui n'a pas de reflet »… ; pour Charlie : « Le Colosse », « Celui qui tient la
-  porte »… ; pour Pollen : « Trois-Pattes », « Celui qui a laissé sa patte »…). Les vrais noms Plume, Charlie et
-  Pollen n'apparaissent **qu'à un seul endroit** du jeu : une inscription.
+- **Noms des dieux** : à l'écran, des épithètes qui changent selon l'endroit mais gardent le même ressenti. Les vrais
+  noms Plume, Charlie et Pollen n'apparaissent que dans des récits anciens de leurs exploits, que les hommes ont voulu
+  faire oublier (inscriptions martelées, fragments effacés) ; jamais ailleurs.
+- **Fond de l'univers** (donné par l'utilisateur le 2026-10-29, voir `docs/lore.md`, section Univers) : une très
+  ancienne guerre entre chats et hommes ; les trois élus ; Charlie a tenu « la porte » neuf jours, neuf semaines,
+  neuf mois, peut-être neuf ans, et protégé la vie ; Plume a abandonné son ombre et terrifié les royaumes humains, la
+  mort n'a pas su la trouver ; Pollen, doyenne et générale, n'a laissé que sa patte dans un piège après une embuscade,
+  et les pièges ont suivi. La porte a séparé chats et hommes ; elle s'est rouverte, la guerre reprend : c'est le jeu.
+  Charlie porte la vie des chats, Plume la mort des hommes, Pollen la guerre des chats contre les hommes.
 - **Statues** : une vieille statue cachée dans le décor de chacune des 31 cartes. La toucher pendant une partie révèle
   son inscription une fois pour toutes, rangée dans un recueil « Inscriptions ». Pas de coût, aucun effet sur la
   partie. Inscriptions réparties entre les trois dieux et l'Église du Soleil Blême ; l'histoire se reconstitue en les
@@ -34,7 +39,7 @@ dans des inscriptions sur de vieilles statues cachées dans les cartes.
   Charlie et Pollen reste à part).
 
 ## Critères d'acceptation
-- [ ] Aucun texte du jeu ne contient « Plume », « Charlie » ou « Pollen », sauf une seule inscription (test sur `fr`).
+- [ ] Les noms « Plume », « Charlie » et « Pollen » n'apparaissent que dans des clés `inscription.*` (test sur `fr`).
 - [ ] Aucun écran n'affiche de portrait de dieu ; le choix avant un niveau montre symbole, épithète, phrase.
 - [ ] Les trois fidèles ont les mêmes statistiques et compétences que les anciens héros-dieux (test sur les données).
 - [ ] Chacune des 31 cartes a une statue sur une case de décor, hors chemin et hors case de tour (test).
