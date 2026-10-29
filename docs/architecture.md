@@ -515,6 +515,59 @@ subit les ennemis qui les tuent ou les contournent (Chasseur de Sorcières, Noye
 y répondent. Pistes : travailler les héros et sorts de Charlie et de Pollen (et les mécaniques d'ennemis qui visent les soldats) plutôt
 que les niveaux.
 
+### Équilibrage du jalon 4 (régions 6 à 10, défis, mode infini)
+Outils : `npm run balance` couvre maintenant les 100 niveaux, les défis des dix régions et l'infini (environ 12 minutes avec 16 fils ; le
+rapport a une section « Régions 2 à 10 », « Défis, régions 1 à 10 » et « Mode infini »). Mise au point : `npm run balance -- --niveaux=51-100
+--difficultes=heroique,fer` (une minute et demie, affiche la réussite du soigneux par défi et par région), `--infini[=chaumes,gue]` (infini seul,
+avec `--dieux=` et `--graines=`). `node --import ./tools/niveaux/enregistrer.ts tools/balance/affiner.ts 61-70` règle le `facteurBudget`
+des plans niveau par niveau (naïf : 35 à 80 % en Matou, 100 % en Chaton), `regler.ts --levier=budget` en donne une première estimation
+(`--levier=aretes` cherche les arêtes de départ comme au jalon 3). Après un changement de plan : `npm run niveaux` (les fichiers des régions 1
+à 5 ne changent pas), puis `npm run balance`. Tests : `bandes-chaton`, `bandes-defis` et `bandes-matou` couvrent les 10 régions ; `bandes-infini.test.ts`
+mesure l'infini (24 fils, une trentaine de secondes) ; `infini.test.ts` (équilibrage) vérifie l'état sérialisé à la vague 100.
+
+Ce qui a été trouvé et réglé :
+- **Budget de menace et ennemis des régions 7 à 10.** À budget b(L, w) égal, le naïf perdait presque tout dès la région 7, même avec 6000 arêtes
+  de départ : la menace de la spec ne chiffre ni l'armure de 60 à 90 % (la moyenne armure/résistance sous-estime un Garde Royal) ni les
+  invocations. Plutôt que de toucher la formule (les vagues des régions 1 à 5 sont figées et doivent rester identiques), chaque plan des
+  régions 6 à 10 a un `facteurBudget` (`plan-niveau.ts`, `generation.ts`) : facteurs moyens de 0,8 (région 6) à 0,35 (région 7), 0,4 (région 8),
+  0,25 (région 9) et 0,1 à 0,3 (région 10). Il est affiné par niveau parce que la réponse du naïf à ce facteur est chaotique (la composition
+  des vagues change à chaque valeur) ; les niveaux 64, 70, 82, 83, 90 et 98 ont changé de graine de vagues (injouables, ou sans leur premier ennemi).
+- **Acolyte de Cendre** (avant → après) : 140 PV → 80 PV, 2 Creux toutes les 8 s → 1 Creux toutes les 12 s (un groupe d'Acolytes se multipliait plus
+  vite que toute défense dès la vague 3 de la région 10). **Garde Royal** : 200 → 130 PV (la première vague du niveau 81 ne tenait pas dans son budget).
+- **Arêtes de départ** (première estimation 1395 à 2795, croissante) : région 6 de 900 à 1530, région 7 de 1155 à 1910, région 8 de 1200 à 2010,
+  région 9 de 1135 à 1920, région 10 de 1050 à 1850 (niveau 91 : 1350, niveau 100 : 2870). Elles fixent surtout les défis : Héroïque ×3 et
+  Fer ×10 ; la réussite de ceux-ci tient à quelques niveaux qui basculent pour un dieu (Pollen), d'où des retouches de 3 à 25 % par région.
+- `VERSION_DONNEES` 10 → 11.
+- **Sorties du simulateur** : `ResultatPartie.vagueTerminee` (dernière vague terminée), option `infini` et `vagueMax` de `jouerPartie`.
+
+Résultats (soigneux et naïf, 10 graines ; défis : soigneux, trois dieux ensemble) :
+
+| Région | Chaton naïf | Matou soigneux (Plume / Charlie / Pollen) | Matou naïf | Vieux Sage soigneux | Héroïque | Fer |
+| --- | --- | --- | --- | --- | --- | --- |
+| 6 | 100 % | 90 / 87 / 100 % | 72 / 14 / 69 % | 70 / 10 / 20 % | 55 % | 62 % |
+| 7 | 100 % | 99 / 92 / 94 % | 64 / 27 / 82 % | 81 / 6 / 7 % | 50 % | 87 % |
+| 8 | 100 % | 100 / 100 / 100 % | 65 / 28 / 84 % | 95 / 3 / 30 % | 68 % | 79 % |
+| 9 | 100 % | 100 / 93 / 90 % | 51 / 21 / 63 % | 86 / 0 / 6 % | 53 % | 90 % |
+| 10 | 100 % | 100 / 100 / 100 % | 48 / 23 / 63 % | 99 / 15 / 36 % | 67 % | 88 % |
+
+(Régions 1 à 5, défis : Héroïque 73, 66, 72, 48, 51 % ; Fer 78, 69, 62, 70, 45 %.)
+
+Mode infini : le budget de la vague n valait budget(1) × 1,08^(n−1) ; avec cette croissance le naïf (16 tours, toutes améliorées, 15 000 arêtes
+inutilisées) atteignait la vague 100 et le soigneux ne s'arrêtait plus, et les vagues hautes faisaient des milliers d'ennemis. Réglé à
+**×1,22 par vague** (mesures avant d'arrêter : 1,12 donne 43 au naïf, 1,15 donne 45 au soigneux, 1,18 donne 38, 1,20 donne 32 à 36 mais le naïf
+touche 31), et plafonné à **200 ennemis par vague** (`ennemisMaxParVague`) : au-delà, le budget est rempli avec moins d'ennemis et le surplus devient
+un facteur de PV et de prime de toute la vague (`remplirBudget` dans `engine/infini.ts`), si bien que l'état sérialisé reste sous `TAILLE_MAX_ETAT`
+(test à la vague 100, trois régions) et que les ennemis vivants restent bornés. Le plafond joue dès la vague 17 environ sur la région 1. Résultats (Matou,
+4 cartes de la région 1, 3 dieux, 10 graines) : **soigneux, médiane de la vague 27,5 à 33** ; **naïf, au plus la vague 28** (médiane 9 à 26 : il
+meurt souvent au premier mini-boss, vague 10). Autres cartes (information) : médiane du soigneux de 9 à 29. Le soigneux ne cherche pas sa variante en
+infini (une seule, équilibrée) et lit les 30 premières vagues. **Plafond des PV du mini-boss : aucun** (30 % + 15 points par mini-boss, linéaire, soit 1,65
+des PV du boss à la vague 100) : le budget exponentiel dépasse tout bien avant la vague 80, le mini-boss n'y rend rien absurde.
+
+Ce qui n'est pas tenu (suspendu) : voir la spec, « Équilibrage du jalon 4 ». Chiffres de Vieux Sage ci-dessus : Plume est dans la bande ou au-dessus (70 à 99 %),
+Charlie et Pollen très en dessous (0 à 36 %) ; ce sont les dieux qu'il faut reprendre (comme au jalon 3), pas les niveaux. Matou : le soigneux gagne 87 à 100 %
+(et non tout) aux régions 6, 7 et 9, il perd au moins une vie sur peu de niveaux, le naïf de Charlie sort de la bande par le bas (14 à 28 %) et celui de Pollen par le haut
+(82 à 84 % aux régions 7 et 8) ; la courbe de difficulté n'est pas monotone et le niveau 10 n'est pas parmi les 3 plus durs.
+
 ### Équilibrage des trois dieux (jalon 2, tâche 6)
 - **Constat.** Le héros porte la difficulté. Les ennemis arrivent en colonnes serrées (0,3 s d'écart) et un héros ne bloque
   qu'un ennemi à la fois : seul le coup de zone de Charlie (il touche tout ce qui est dans un rayon d'une tuile autour de sa

@@ -573,6 +573,33 @@ jalon 4 ») : elles suivent la spec d'origine et les choix du jalon 3, et resten
 - `npm run balance` couvre les 100 niveaux dans les 3 difficultés et les défis.
 - Infini, en Matou : le bot soigneux atteint en médiane entre la vague 25 et la vague 45 sur une carte de la région
   1, et le bot naïf ne passe pas la vague 30.
+- **État à la fin de la tâche d'équilibrage du jalon 4** (régime du jalon 3, détail dans docs/architecture.md, « Équilibrage du jalon 4 », et
+  balance-report.md) :
+  - **Tenues et imposées** (un test et `npm run balance` échouent si elles sortent) : Chaton (le naïf gagne tout) et le héros seul qui
+    perd, sur les 100 niveaux et les 3 dieux ; défis (le soigneux réussit 40 à 90 % des Héroïques et des Fer, sur chacune des 10 régions) ;
+    puissance des tours ; **infini** (en Matou, sur les 4 cartes de la région 1 et pour les 3 dieux : médiane du soigneux entre la vague 25 et
+    la vague 45, le naïf ne dépasse jamais la vague 30 ; test `bandes-infini.test.ts`, une trentaine de secondes).
+  - **Non tenues, suspendues** (calculées, listées, non bloquantes ; `BANDES_SUSPENDUES_IMPOSEES=1` les impose) : Matou (le soigneux ne gagne
+    pas tout aux régions 6 à 9 et ne perd pas de vie sur la moitié des niveaux ; le naïf sort de 30 à 70 % pour certains dieux), Vieux Sage
+    (Plume dans la bande ou un peu au-dessus, Charlie et Pollen très en dessous : de 0 à 36 % aux régions 6 à 10), **écart entre dieux** et
+    **courbe de difficulté** (le niveau 10 de chaque région n'est pas parmi les 3 plus durs du naïf : le boss est battu par le naïf plus
+    souvent que certains niveaux ordinaires). Les causes sont celles du jalon 3 (Charlie et Pollen ne contrent pas les ennemis qui
+    contournent ou tuent les soldats ; le soigneux est plus économe que le naïf), aggravées par les armures de 60 à 90 % des régions 7 à 9.
+    Aucun dieu, héros ni sort n'a été modifié.
+- **Écarts assumés** :
+  - Les régions 6 à 10 ont un `facteurBudget` par niveau (champ du plan, absent des régions 1 à 5) qui multiplie le budget de menace b(L, w) :
+    la menace d'un ennemi (PV ÷ (1 − protection moyenne) × vitesse) ne chiffre ni une armure de 90 % contre des tours physiques, ni
+    les invocations de l'Acolyte de Cendre ; à budget égal, les régions 7 à 10 étaient injouables pour le naïf à toute quantité d'arêtes
+    (facteurs de 0,02 à 0,98). Les vagues des régions 1 à 5 sont restées identiques octet pour octet.
+  - Valeurs d'ennemis changées par rapport au tableau ci-dessus : l'Acolyte de Cendre invoque **1** Creux toutes les **12 s** (et non 2 toutes
+    les 8 s) et a 80 PV (et non 140) ; le Garde Royal a 130 PV (et non 200), armure 90 % inchangée.
+  - Mode infini : le budget croît de **22 %** par vague (et non 8 %) : à 8 %, le naïf (16 tours, tout amélioré) atteignait la vague 100 ; plafond
+    de 200 ennemis par vague (paramètre `ennemisMaxParVague`), le surplus de budget devient un facteur de PV (et de prime) de la vague, ce
+    qui garde l'état sérialisé sous `TAILLE_MAX_ETAT` et les saccades bornées. Le PV du mini-boss (30 % + 15 points par mini-boss, 1,65 à la
+    vague 100) n'est pas plafonné : il est linéaire alors que le budget est exponentiel, il ne rend rien absurde (au-delà de la vague 50
+    plus personne ne tient).
+  - Le niveau de la bande de défis est tenu de justesse à certains endroits (Fer 88 à 90 % aux régions 7, 9 et 10) : une retouche sans
+    rapport peut le faire sortir (les résultats changent par sauts de 10 points quand un niveau bascule pour un dieu).
 
 ### Critères d'acceptation détaillés du jalon 4
 - [x] Les régions 6 à 10 sont jouables de bout en bout, chacune débloquée par le boss de la précédente, et la
