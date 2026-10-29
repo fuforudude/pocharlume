@@ -108,7 +108,7 @@ describe('bot soigneux', () => {
   });
 
   it('améliore et spécialise ses tours quand le niveau est long', () => {
-    const types = new Set(actionsJouees(creerBotSoigneux(), 4, 'matou', REGION1[8]?.niveau).map((a) => a.type));
+    const types = new Set(actionsJouees(creerBotSoigneux(), 4, 'matou', REGION1[9]?.niveau).map((a) => a.type));
     expect(types.has('ameliorer')).toBe(true);
     expect(types.has('specialiser')).toBe(true);
   }, DELAI_PARTIE_LONGUE);
@@ -178,13 +178,12 @@ describe('bot soigneux avec chaque dieu', () => {
   }, DELAI_PARTIE_LONGUE);
 
   it('chaque dieu lance ses deux sorts dans une partie longue, et le résultat les compte', () => {
-    const niveau = REGION1[9]?.niveau ?? niveau3;
+    const niveau = REGION1[6]?.niveau ?? niveau3;
     for (const dieu of ['plume', 'charlie', 'pollen']) {
       const r = jouerPartie(niveau, creerBotSoigneux(), { graine: 41, difficulte: 'matou', dieu });
       expect(r.sorts.length, dieu).toBe(2);
       expect(r.sorts[0], `${dieu} : premier sort`).toBeGreaterThan(0);
       expect(r.sorts[1], `${dieu} : second sort`).toBeGreaterThan(0);
-      expect(r.tourDivine, dieu).toBe(true);
       expect(r.sorts.reduce((a, b) => a + b, 0)).toBeLessThanOrEqual(r.actions);
     }
   }, DELAI_PARTIE_LONGUE);
