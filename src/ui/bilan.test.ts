@@ -45,4 +45,10 @@ describe('bilan de fin : défi, disciple offert, région ouverte', () => {
     const lignes = lignesBilan({ ...BILAN, aretes: 120, braises: 9, defiReussi: 'heroique', discipleOffert: 'mastoc', regionDebloquee: 3 });
     expect(lignes.map((l) => l.split(' ')[0])).toEqual(['+120', '+9', 'Défi', 'Mastoc', 'Région']);
   });
+
+  it('le mode infini débloqué et la fin de campagne sont annoncés', () => {
+    expect(lignesBilan({ ...BILAN, infiniDebloque: true })).toEqual([t('fin.bilan_infini_debloque')]);
+    expect(lignesBilan({ ...BILAN, campagneTerminee: true })).toEqual([t('fin.bilan_campagne')]);
+    expect(t('fin.bilan_infini_debloque')).toBe('Mode infini débloqué : il t’attend sur l’accueil.');
+  });
 });

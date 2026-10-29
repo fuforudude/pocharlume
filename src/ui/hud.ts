@@ -91,6 +91,7 @@ export class Hud {
     etat: EtatPartie,
     private readonly commandes: CommandesHud,
     signal: AbortSignal,
+    private readonly infini?: { readonly record: () => number },
   ) {
     this.racine = el('div', 'hud');
 
@@ -198,7 +199,15 @@ export class Hud {
     }
     this.viesPrecedentes = etat.vies;
     this.aretes.mettreSelon(etat.aretes, () => String(etat.aretes));
-    this.vague.mettreSelon(etat.vagues.lancees, () => t('hud.vague', { n: etat.vagues.lancees, m: etat.niveau.vagues.length }));
+    if (this.infini) {
+      // Mode infini : pas de total de vagues (le niveau n'en a aucune), mais le record de la carte.
+      const record = this.infini.record();
+      this.vague.mettreSelon(etat.vagues.lancees * 10_000 + record, () =>
+        record > 0 ? t('hud.vague_infini_record', { n: etat.vagues.lancees, r: record }) : t('hud.vague_infini', { n: etat.vagues.lancees }),
+      );
+    } else {
+      this.vague.mettreSelon(etat.vagues.lancees, () => t('hud.vague', { n: etat.vagues.lancees, m: etat.niveau.vagues.length }));
+    }
     this.vitesse.mettreSelon(vue.vitesse, () => t('hud.vitesse', { n: vue.vitesse }));
     basculerClasse(this.boutonPause, 'actif', vue.pause);
 

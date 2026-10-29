@@ -8,7 +8,7 @@
 // - tout ce que la partie installe (événements, DOM, boucle) est retiré par `arreter()`.
 import { audio, jouerInterface } from '../audio';
 import type { NiveauCampagne } from '../data/visuel';
-import { avancer, caseExiste, centreCase, creerPartie, validerAction } from '../engine';
+import { avancer, caseExiste, centreCase, creerPartie, derniereVagueTerminee, validerAction } from '../engine';
 import type { Action, ConfigPartie, EntreeJournal, EtatPartie, ResultatAction } from '../engine';
 import { chargerAtlas } from '../render/atlas';
 import type { BilanPartie, RaisonFin } from '../save';
@@ -41,12 +41,16 @@ export interface ResultatPartie {
   readonly journal: readonly EntreeJournal[];
   /** Objets emportés que le joueur a utilisés (un par emplacement utilisé), à retirer du stock. */
   readonly objetsUtilises: readonly string[];
+  /** Dernière vague terminée (0 si la première ne l'est pas) : le score d'une partie du mode infini. */
+  readonly vagueTerminee: number;
 }
 
 /** Ce que l'enregistrement d'une fin de partie rend à l'écran de fin : le butin, ou la raison pour laquelle il est refusé. */
 export interface RetourFin {
   readonly bilan: BilanPartie | null;
   readonly refus: RaisonFin | null;
+  /** Mode infini : les lignes du bilan (voir `ButinFin`), à la place de `bilan` ; null : gains non enregistrés. */
+  readonly lignesInfini?: readonly string[] | null;
 }
 
 export interface OptionsPartie {
@@ -69,6 +73,11 @@ export interface OptionsPartie {
    * en cours, pour qu'une reprise ne rende pas l'objet de nouveau disponible. L'appelant ne doit pas modifier l'état.
    */
   surObjet?: (etat: EtatPartie) => void;
+  /**
+   * Partie du mode infini : le HUD montre « Vague N » et le record de la carte (relu à chaque image, il change quand une
+   * partie est enregistrée), et l'écran de fin est celui de l'infini (vague atteinte, record, paliers).
+   */
+  infini?: { readonly record: () => number };
   /** Appelée dès que la partie tourne, y compris après « Rejouer » (qui lance une nouvelle partie). */
   surDemarrage?: (partie: PartieEnCours) => void;
   /**
@@ -227,6 +236,7 @@ export async function lancerNiveau(
     config: etat.config,
     journal: etat.journal,
     objetsUtilises: objetsUtilises(),
+    vagueTerminee: derniereVagueTerminee(etat),
   });
   const quitter = options.surQuitter
     ? (): void => {
@@ -249,7 +259,7 @@ export async function lancerNiveau(
     basculerHeros: () => { traiter(interaction.basculerHeros(etat)); },
     choisirElement: (element) => { traiter(interaction.choisirElement(element)); },
     survolerElement: (element) => { interaction.survolerElement(element); },
-  }, signal);
+  }, signal, options.infini);
 
   // La carte peut dépasser de l'écran de la largeur des barres du HUD : une case collée au bord reste atteignable.
   const mesurerInterface = (): void => {
@@ -412,7 +422,7 @@ export async function lancerNiveau(
     ecranFinAffiche = true;
     if (etat.statut === 'en_cours') return;
     const continuer = options.surContinuer;
-    afficherFin(racine, atlas, { statut: etat.statut, etoiles: etat.etoiles, vies: etat.vies, viesDepart: etat.viesDepart }, {
+    afficherFin(racine, atlas, { statut: etat.statut, etoiles: etat.etoiles, vies: etat.vies, viesDepart: etat.viesDepart, ...(options.infini ? { infini: true } : {}) }, {
       surRejouer: () => {
         if (relanceEnCours) return;
         relanceEnCours = true;

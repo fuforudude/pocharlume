@@ -24,6 +24,8 @@ export interface OptionsAccueil {
   readonly autres?: readonly ChoixNiveau[];
   /** Vague à laquelle reprendre une partie sauvegardée : affiche « Reprendre à la vague N ». */
   reprise?: { readonly vague: number; readonly surReprendre: () => void };
+  /** « Mode infini » : présent seulement quand le mode est ouvert (boss de la région 1 battu). */
+  surInfini?: () => void;
 }
 
 export function afficherAccueil(parent: HTMLElement, options: OptionsAccueil): HTMLElement {
@@ -34,6 +36,12 @@ export function afficherAccueil(parent: HTMLElement, options: OptionsAccueil): H
   jouer.textContent = t('accueil.jouer');
   let boutonFocus = jouer;
   boutons.append(jouer);
+  if (options.surInfini) {
+    const infini = bouton('bouton grand secondaire', t('accueil.infini'), options.surInfini);
+    infini.textContent = t('accueil.infini');
+    infini.dataset.cle = 'infini';
+    boutons.append(infini);
+  }
   const reglages = bouton('bouton grand secondaire', t('accueil.options'), options.surOptions);
   reglages.textContent = t('accueil.options');
   boutons.append(reglages);
@@ -115,12 +123,19 @@ export interface ResultatAffiche {
   readonly etoiles: number;
   readonly vies: number;
   readonly viesDepart: number;
+  /** Partie du mode infini : pas d'étoiles ni de vies restantes, le bilan dit la vague atteinte et le record. */
+  readonly infini?: boolean;
 }
 
 /** Ce qu'une partie a rapporté, tel que l'écran de fin le reçoit (voir `afficherFin`). */
 export interface ButinFin {
   readonly bilan: BilanPartie | null;
   readonly refus: RaisonFin | null;
+  /**
+   * Mode infini : les lignes du bilan de la partie (vague, record, paliers), à la place de celles de `bilan` ; null si les
+   * gains n'ont pas pu être enregistrés. Absent : partie de campagne.
+   */
+  readonly lignesInfini?: readonly string[] | null;
 }
 
 /** Les lignes du butin : arêtes, braises, expérience, niveau gagné, objets consommés. Vide si la partie n'a rien rapporté. */
@@ -150,6 +165,9 @@ export function lignesBilan(bilan: BilanPartie): string[] {
     const region = REGIONS_MONDE.find((r) => r.numero === bilan.regionDebloquee);
     lignes.push(region ? t('fin.bilan_region', { nom: tCle(region.nom) }) : t('fin.bilan_region_numero', { n: bilan.regionDebloquee }));
   }
+  // Jalon 4 : la première victoire sur le boss de la région 1 ouvre le mode infini, celle sur le Soleil Blême finit la campagne.
+  if (bilan.infiniDebloque === true) lignes.push(t('fin.bilan_infini_debloque'));
+  if (bilan.campagneTerminee === true) lignes.push(t('fin.bilan_campagne'));
   return lignes;
 }
 
@@ -172,12 +190,13 @@ export function afficherFin(
   actions: ActionsFin,
   butin: Promise<ButinFin | null> | null = null,
 ): HTMLElement {
-  const victoire = resultat.statut === 'victoire';
-  const ecran = el('div', `ecran fin ${victoire ? 'victoire' : 'defaite'}`);
+  const infini = resultat.infini === true;
+  const victoire = resultat.statut === 'victoire' && !infini;
+  const ecran = el('div', `ecran fin ${victoire ? 'victoire' : 'defaite'}${infini ? ' infini' : ''}`);
   ecran.setAttribute('role', 'dialog');
   const carte = el('div', 'carte');
-  carte.append(el('h2', 'titre', t(victoire ? 'fin.victoire' : 'fin.defaite')));
-  carte.append(el('p', 'detail', t(victoire ? 'fin.victoire_detail' : 'fin.defaite_detail')));
+  carte.append(el('h2', 'titre', t(infini ? 'fin.infini_titre' : victoire ? 'fin.victoire' : 'fin.defaite')));
+  carte.append(el('p', 'detail', t(infini ? 'fin.infini_detail' : victoire ? 'fin.victoire_detail' : 'fin.defaite_detail')));
   if (victoire) {
     const etoiles = el('div', 'etoiles');
     etoiles.setAttribute('role', 'img');
@@ -188,7 +207,7 @@ export function afficherFin(
     }
     carte.append(etoiles);
   }
-  carte.append(el('p', 'detail', t('fin.vies', { n: Math.max(0, resultat.vies), m: resultat.viesDepart })));
+  if (!infini) carte.append(el('p', 'detail', t('fin.vies', { n: Math.max(0, resultat.vies), m: resultat.viesDepart })));
   if (butin) {
     const bloc = el('div', 'bilan');
     bloc.setAttribute('role', 'status');
@@ -198,6 +217,12 @@ export function afficherFin(
       bloc.replaceChildren();
       if (!retour) {
         bloc.remove();
+        return;
+      }
+      if (retour.lignesInfini !== undefined) {
+        const lignes = retour.lignesInfini;
+        if (lignes === null) bloc.append(el('p', 'bilan-refus', t('fin.bilan_refuse')));
+        else for (const ligne of lignes) bloc.append(el('p', 'bilan-ligne', ligne));
         return;
       }
       if (retour.refus !== null || !retour.bilan) {
@@ -277,4 +302,40 @@ export function creerAvisPaysage(parent: HTMLElement): HTMLElement {
   voile.append(el('p', 'detail', t('ecran.tourne_detail')));
   parent.append(voile);
   return voile;
+}
+
+export interface OptionsFinCampagne {
+  /** Adresse de l'illustration (hors atlas : public/illustrations/fin-campagne.png). */
+  readonly illustration: string;
+  readonly surContinuer: () => void;
+}
+
+/**
+ * L'écran de fin de campagne, à la première victoire sur le Soleil Blême : l'illustration, un court texte, « Continuer ».
+ * En paysage 812 x 375 l'illustration (320 x 180, en taille réelle) est à gauche et le texte à droite, qui défile s'il est trop long.
+ */
+export function afficherFinCampagne(parent: HTMLElement, options: OptionsFinCampagne): HTMLElement {
+  const ecran = el('div', 'ecran fin-campagne');
+  ecran.setAttribute('role', 'dialog');
+  ecran.setAttribute('aria-label', t('campagne.fin_titre'));
+  const carte = el('div', 'carte');
+  const illustration = image(options.illustration, 'illustration-fin', t('campagne.fin_illustration'));
+  const texte = el('div', 'texte-fin');
+  texte.append(
+    el('h2', 'titre', t('campagne.fin_titre')),
+    el('p', 'lore', t('campagne.fin_p1')),
+    el('p', 'lore', t('campagne.fin_p2')),
+    el('p', 'lore', t('campagne.fin_p3')),
+  );
+  const continuer = bouton('bouton grand', t('campagne.fin_continuer'), () => {
+    ecran.remove();
+    options.surContinuer();
+  });
+  continuer.textContent = t('campagne.fin_continuer');
+  texte.append(continuer);
+  carte.append(illustration, texte);
+  ecran.append(carte);
+  parent.append(ecran);
+  continuer.focus({ preventScroll: true });
+  return ecran;
 }

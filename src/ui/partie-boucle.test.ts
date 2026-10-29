@@ -643,3 +643,52 @@ describe('apparence : skins équipés et familier du héros', () => {
     expect(rendu.collections[1]).toEqual(rendu.collections[0]);
   });
 });
+
+describe('partie du mode infini', () => {
+  const CONFIG_INFINI: ConfigPartie = { ...CONFIG, infini: { region: 1 } };
+
+  it('le HUD montre « Vague N » sans total, puis le record de la carte quand il y en a un', async () => {
+    let record = 0;
+    const partie = await demarrer({ infini: { record: () => record } }, CONFIG_INFINI);
+    expect(partie.etat.niveau.vagues).toHaveLength(0);
+    reprendreSiPause();
+    imagesJusqua(() => partie.etat.vagues.lancees >= 1);
+    const texte = (): string => document.querySelector('.hud .groupe.haut-gauche .puce:last-child')?.textContent ?? '';
+    expect(texte()).toBe(t('hud.vague_infini', { n: 1 }));
+    record = 12;
+    images(1);
+    expect(texte()).toBe(t('hud.vague_infini_record', { n: 1, r: 12 }));
+  });
+
+  it('la défaite est l’écran de fin de l’infini (ni étoiles ni vies), et surFin reçoit la dernière vague terminée', async () => {
+    const lignes = ['Dernière vague terminée : 3', 'Nouveau record'];
+    const partie = await lancerNiveau(NIVEAU, CONFIG_INFINI, (r) => { fins.push(r); return Promise.resolve({ bilan: null, refus: null, lignesInfini: lignes }); }, {
+      parent: document.body,
+      infini: { record: () => 0 },
+    });
+    parties.push(partie);
+    imagesJusqua(() => partie.etat.vagues.lancees >= 1);
+    partie.etat.vies = 0;
+    imagesJusqua(() => document.querySelector('.ecran.fin') !== null);
+    expect(document.querySelector('.ecran.fin .titre')?.textContent).toBe(t('fin.infini_titre'));
+    expect(document.querySelector('.ecran.fin .etoiles')).toBeNull();
+    expect(document.body.textContent).not.toContain('Vies restantes');
+    expect(fins[0]?.statut).toBe('defaite');
+    expect(fins[0]?.vagueTerminee).toBe(0);
+    await vi.waitFor(() => { expect(document.querySelectorAll('.bilan-ligne')).toHaveLength(2); });
+    expect([...document.querySelectorAll('.bilan-ligne')].map((l) => l.textContent)).toEqual(lignes);
+  });
+
+  it('des gains infinis non enregistrés sont dits', async () => {
+    const partie = await lancerNiveau(NIVEAU, CONFIG_INFINI, () => Promise.resolve({ bilan: null, refus: null, lignesInfini: null }), { parent: document.body, infini: { record: () => 0 } });
+    parties.push(partie);
+    partie.etat.vies = 0;
+    imagesJusqua(() => document.querySelector('.ecran.fin') !== null);
+    await vi.waitFor(() => { expect(document.querySelector('.bilan-refus')?.textContent).toBe(t('fin.bilan_refuse')); });
+  });
+});
+
+function reprendreSiPause(): void {
+  const pause = [...document.querySelectorAll<HTMLButtonElement>('button')].find((b) => b.textContent === t('pause.reprendre') && !b.closest('[hidden]'));
+  pause?.click();
+}
