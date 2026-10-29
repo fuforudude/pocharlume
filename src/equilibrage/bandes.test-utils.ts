@@ -47,5 +47,5 @@ export async function evaluerRegions(difficulte: string, bots?: readonly IdBot[]
   return Promise.all(REGIONS_EVALUEES.map((region) => evaluerRegion(region, difficulte, bots)));
 }
 
-/** Marge de temps pour une évaluation complète (les parties se jouent en quelques secondes ; le test s'arrête avant). */
-export const DELAI_EVALUATION = 300_000;
+/** Marge de temps pour une évaluation complète : environ 3 min 30 sur une machine libre, bien plus quand des simulations tournent à côté. */
+export const DELAI_EVALUATION = 900_000;

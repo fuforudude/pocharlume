@@ -1,6 +1,6 @@
 # Pocharlume : tower defense de chats
 
-Statut : en cours (jalon 1 livré le 2026-10-25, jalon 2 le 2026-10-28, jalon 3 le 2026-10-29)
+Statut : en cours (jalon 1 livré le 2026-10-25, jalon 2 le 2026-10-28, jalon 3 et jalon 4 le 2026-10-29)
 Date : 2026-10-25
 
 ## Besoin
@@ -239,8 +239,17 @@ et du Sanctuaire à 3,5 tuiles. Les sols sont redessinés mais sans planche « a
 écran tactile.
 
 ### Jalon 4 : régions 6 à 10 et mode infini
-- [ ] Les 100 niveaux jouables. Le simulateur vérifie les 100 niveaux dans les 3 difficultés.
-- [ ] Mode infini : record par carte, mini-boss toutes les 10 vagues, paliers payés une seule fois.
+- [x] Les 100 niveaux jouables. Le simulateur vérifie les 100 niveaux dans les 3 difficultés.
+- [x] Mode infini : record par carte, mini-boss toutes les 10 vagues, paliers payés une seule fois.
+
+Écarts à la livraison du jalon 4 : comme au jalon 3, seules les bandes imposées sont bloquantes (Chaton, héros seul,
+défis 40 à 90 %, infini) ; les bandes Matou et Vieux Sage restent suspendues et hors cible, toujours au détriment de
+Charlie et Pollen en Vieux Sage (0 à 36 % aux régions 6 à 10, contre 70 à 99 % pour Plume). Les défis Fer des régions 7,
+9 et 10 tiennent de justesse (87 à 90 %). Régions 6 à 10 réglées par un facteur de budget par niveau ; Acolyte de Cendre
+(80 PV, 1 Creux toutes les 12 s) et Garde Royal (130 PV) allégés par rapport au tableau ci-dessous. Infini : budget
+×1,22 par vague (au lieu de 1,08), 200 ennemis au plus par vague, le surplus passe en PV. Pas de relance complète de
+`npm run balance` après la dernière correction du classement des écarts. L'écran de fin d'une partie infinie n'a pas
+été vu au navigateur.
 
 ### Jalon 5 : roguelike, finitions, Android
 - [ ] Mode roguelike complet (carte à embranchements, bénédictions, marchand, repos, reliques à débloquer).
