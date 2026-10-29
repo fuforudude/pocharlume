@@ -2,6 +2,7 @@
 // Le moteur ne lit jamais ce fichier. Coordonnées en tuiles, comme la carte du moteur.
 
 import type { Niveau } from '../engine/definitions';
+import type { StatueCarte } from './niveaux/statues';
 
 /** Un élément de décor, posé par son ancre (le pied) au point (x, y). */
 export interface Decor {
@@ -24,6 +25,11 @@ export interface VisuelCarte {
   readonly region: number; // 1 à 10, choisit le jeu de tuiles
   readonly zones: readonly ZoneSol[];
   readonly decor: readonly Decor[];
+  /**
+   * La vieille statue cachée de la carte (son sprite est déjà dans `decor`) : l'interface la rend touchable pendant la partie.
+   * Absente d'une carte sans inscription (niveau de test).
+   */
+  readonly statue?: StatueCarte;
 }
 
 /** Un niveau de campagne : la partie simulée, son habillage et sa place dans la région. */

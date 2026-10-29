@@ -43,6 +43,7 @@ import type { Chargement, Depot, OrigineChargement } from './depot';
 import { DIFFICULTES_SAUVEGARDE, type DifficulteSauvegarde, type Reglages, type Sauvegarde } from './format';
 import { avecPartieEnCours, partieEnCours, reprendrePartie } from './partie';
 import { changerReglages } from './progression';
+import { trouverInscription, type RaisonInscription } from './transactions-inscriptions';
 import { validerSauvegarde } from './validation';
 import {
   acheterDisciple,
@@ -649,6 +650,20 @@ export class Session {
   /** Équipe un familier sur un héros, ou le retire avec `null`. */
   async equiperFamilier(heros: string, familier: string | null): Promise<ResultatTransaction<RaisonEquipementCollection>> {
     return sansDetail(await this.lancer((s) => depuisTransaction(equiperFamilier(s, heros, familier))));
+  }
+
+  // --- Inscriptions des statues ---
+
+  /**
+   * Une statue a été touchée : son inscription est trouvée, pour toujours (la première fois seulement ; ensuite rien ne change). Rend vrai
+   * si l'inscription est nouvelle. Aucun coût, aucun effet sur la partie.
+   */
+  async trouverInscription(id: string): Promise<ResultatTransactionAvecDetail<boolean, RaisonInscription>> {
+    const issue = await this.lancer<boolean, RaisonInscription>((s) => {
+      const r = trouverInscription(s, id);
+      return r.ok ? { ok: true, sauvegarde: r.sauvegarde, detail: r.nouvelle } : r;
+    });
+    return issue.ok ? { ok: true, sauvegarde: issue.sauvegarde, ecrite: issue.ecrite, detail: issue.detail } : issue;
   }
 
   // --- Export et import ---------------------------------------------------------------------------------------

@@ -692,3 +692,80 @@ function reprendreSiPause(): void {
   const pause = [...document.querySelectorAll<HTMLButtonElement>('button')].find((b) => b.textContent === t('pause.reprendre') && !b.closest('[hidden]'));
   pause?.click();
 }
+
+describe('vieille statue cachée', () => {
+  const STATUE = NIVEAU.visuel.statue;
+  if (!STATUE) throw new Error('niveau 1 sans statue');
+  const ouverte = (): HTMLElement | null => document.querySelector<HTMLElement>('.inscription-statue');
+
+  it('la toucher ouvre son inscription et met la partie en pause ; la refermer la relance, sans rien écrire au journal', async () => {
+    const surInscription = vi.fn(() => true);
+    const partie = await demarrer({ surInscription });
+    images(5);
+    const journal = partie.etat.journal.length;
+    toucherCarte(STATUE.x, STATUE.y - 0.5);
+    expect(surInscription).toHaveBeenCalledWith(STATUE.id);
+    expect(ouverte()?.textContent).toContain(t('inscription.chaumes'));
+    expect(ouverte()?.textContent).toContain(t('inscriptions.nouvelle'));
+    const pas = partie.etat.pas;
+    images(20);
+    expect(partie.etat.pas).toBe(pas);
+    boutonTexte(t('inscriptions.refermer')).click();
+    expect(ouverte()).toBeNull();
+    images(10);
+    expect(partie.etat.pas).toBeGreaterThan(pas);
+    expect(partie.etat.journal.length).toBe(journal);
+  });
+
+  it('une seconde lecture dit que l’inscription est déjà dans le recueil ; hors sauvegarde, elle ne dit rien', async () => {
+    await demarrer({ surInscription: () => false });
+    toucherCarte(STATUE.x, STATUE.y - 0.5);
+    expect(ouverte()?.textContent).toContain(t('inscriptions.relue'));
+    document.body.replaceChildren();
+    for (const p of parties) p.arreter();
+    await demarrer({ surInscription: () => null });
+    toucherCarte(STATUE.x, STATUE.y - 0.5);
+    expect(ouverte()?.textContent).toContain(t('inscription.chaumes'));
+    expect(ouverte()?.textContent).not.toContain(t('inscriptions.relue'));
+    expect(ouverte()?.textContent).not.toContain(t('inscriptions.nouvelle'));
+  });
+
+  it('un clic fantôme juste après le toucher ne referme pas la fenêtre', async () => {
+    await demarrer({ surInscription: () => true });
+    toucherCarte(STATUE.x, STATUE.y - 0.5);
+    boutonTexte(t('inscriptions.refermer')).click();
+    expect(ouverte()).not.toBeNull();
+  });
+
+  it('Échap referme la fenêtre ; une pause demandée avant reste en pause', async () => {
+    const partie = await demarrer({ surInscription: () => true });
+    toucherCarte(STATUE.x, STATUE.y - 0.5);
+    appuyer('Escape');
+    expect(ouverte()).toBeNull();
+    images(5);
+    expect(partie.etat.pas).toBeGreaterThan(0);
+  });
+
+  it('toucher la case voisine, libre, garde le menu de pose ; la statue ne gêne pas', async () => {
+    const partie = await demarrer({ surInscription: () => true });
+    toucherCarte(CENTRE.x, CENTRE.y);
+    expect(ouverte()).toBeNull();
+    expect(partie.mode.type).toBe('menu');
+  });
+
+  it('pendant la visée du héros, toucher la statue envoie le héros au lieu d’ouvrir l’inscription', async () => {
+    const surInscription = vi.fn(() => true);
+    const partie = await demarrer({ surInscription });
+    appuyer('e');
+    expect(partie.mode.type).toBe('heros');
+    toucherCarte(STATUE.x, STATUE.y - 0.5);
+    expect(ouverte()).toBeNull();
+    expect(surInscription).not.toHaveBeenCalled();
+  });
+
+  it('une partie sans surInscription ouvre quand même la fenêtre, sans rien en dire', async () => {
+    await demarrer();
+    toucherCarte(STATUE.x, STATUE.y - 0.5);
+    expect(ouverte()?.textContent).toContain(t('inscription.chaumes'));
+  });
+});

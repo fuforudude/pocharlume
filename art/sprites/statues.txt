@@ -1,0 +1,81 @@
+# Statues cachées dans le décor des 31 cartes (jalon 5, « Les dieux sans visage ») : de vieilles statues de chat, usées, couvertes
+# de mousse ou de fissures. Une variante par origine d'inscription (voir docs/lore.md, « Inscriptions des statues ») ; ce ne sont
+# pas des portraits, seulement des pierres que les siècles ont rongées. Décor de 16×16, ancre au pied, avec contour ; le toucher
+# en partie est géré par l'interface (src/ui/statue.ts), pas par le sprite.
+#   statue-colosse        large et lourde, assise, fendue du front au socle
+#   statue-ombre          mince et haute, étirée comme une ombre, la mousse au pied
+#   statue-trois-pattes   de profil, trois pattes seulement, la quatrième cassée net
+#   statue-eglise         la tête martelée, un disque pâle gravé au socle (les hommes ont voulu effacer)
+categorie decor
+palette commune
+taille 16 16
+ancre 8 15
+
+sprite statue-colosse
+origine 1 1
+...p......p...
+...pPp..pGp...
+...pPGppGGgp..
+...pPGGGGGgp..
+...pGkGGGkGp..
+...pGGGqGGgp..
+....pGGGGgp...
+...pPGGGGGgp..
+..pPPGGGGkGgpp
+.pPPGGGkGGGGgg
+.pPGGGGkGGGGgp
+.pPGGpGkpGGGgp
+pPPPPPPPPPPPPp
+gGGGGGhGGGGGGg
+
+sprite statue-ombre
+origine 3 0
+.p......p.
+.pPp..pGp.
+.pPGppGgp.
+.pGkGGkGp.
+..pGqqGg..
+..pPGGGg..
+...pGGg...
+..pPGGGg..
+..pPGGGg..
+..pGGGGgp.
+..pPGGGgp.
+.pPGGGGGgp
+.pPGhGGGgp
+pPPPPPPPPp
+gGGGGGhHHg
+
+sprite statue-trois-pattes
+origine 1 2
+..........p.p.
+.........pPGGp
+p........pGkGg
+pp.......pGGqg
+.pp.pGGGGGGGgg
+..pPGGGGkGGGgg
+..pPGGGGkGGGgg
+..pGGGGGGkGGgg
+..pGp.pGp.pGp.
+..pGp.pGp.pGp.
+..pGp.hHp.pGp.
+pPPPPPPPPPPPpq
+gGGGGGGGGGGGGg
+
+sprite statue-eglise
+origine 1 0
+...p.qp.pq.p..
+...pPqGPGqgp..
+...pPGGGGGgp..
+...pGGqGGGgp..
+...pGGGGqGgp..
+...pGGGGGGgp..
+....pGGGGgp...
+...pPGGGGGgp..
+..pPPGGGGGGgpp
+.pPPGGGGGGGGgg
+.pPGGGGGGGHGgp
+.pPGGpGGpGGGgp
+pPPPPPPPPPPPPp
+gGGGZZZZZZGGGg
+gGGGZzzzzZGGGg

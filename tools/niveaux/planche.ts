@@ -4,6 +4,8 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { decorVisible } from '../../src/data/niveaux/assemblage.ts';
 import type { CarteModele } from '../../src/data/niveaux/modele-carte.ts';
+import type { IdCarte } from '../../src/data/niveaux/cartes-toutes.ts';
+import { SPRITE_STATUE, STATUES } from '../../src/data/niveaux/statues.ts';
 import { construireSol } from '../../src/render/sol.ts';
 import { TUILE } from '../../src/render/camera.ts';
 import { poser } from '../art/apercu.ts';
@@ -54,7 +56,7 @@ function point(image: Image, x: number, y: number, [r, v, b]: readonly [number, 
 }
 
 /** Une carte entière (tous chemins) sur une image de 512 × 288. */
-export function dessinerCarte(modele: CarteModele): Image {
+export function dessinerCarte(modele: CarteModele, avecStatue = false): Image {
   const carte = { largeur: modele.largeur, hauteur: modele.hauteur, chemins: modele.chemins, departHeros: modele.departHeros };
   const decor = decorVisible(modele, carte);
   const visuel = { region: modele.region, zones: modele.zones, decor };
@@ -65,6 +67,10 @@ export function dessinerCarte(modele: CarteModele): Image {
   });
   // Ancre des tuiles : en haut à gauche, comme pour le sol du jeu.
   const objets = decor.map((d) => ({ sprite: d.sprite, x: d.x, y: d.y, miroir: d.miroir === true })).sort((a, b) => a.y - b.y);
+  // La vieille statue de la carte (jalon 5), à sa place dans l'ordre de dessin (par ordonnée du pied).
+  const statue = avecStatue && modele.id in STATUES ? STATUES[modele.id as IdCarte] : undefined;
+  if (statue) objets.push({ sprite: SPRITE_STATUE[statue.origine], x: statue.x, y: statue.y, miroir: false });
+  objets.sort((a, b) => a.y - b.y);
   for (const o of objets) poserSprite(image, o.sprite, Math.round(o.x * TUILE), Math.round(o.y * TUILE), o.miroir);
   const hx = Math.round(modele.departHeros.x * TUILE);
   const hy = Math.round(modele.departHeros.y * TUILE);

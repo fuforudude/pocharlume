@@ -56,6 +56,14 @@ export {
   type RaisonFinInfinie,
   type ResultatFinInfinie,
 } from './transactions-infini';
+export {
+  inscriptionTrouvee,
+  nombreInscriptionsTrouvees,
+  reunirInscriptions,
+  trouverInscription,
+  type RaisonInscription,
+  type ResultatInscription,
+} from './transactions-inscriptions';
 export { migrer, type ResultatMigration } from './migrations';
 export { normaliserImport } from './normalisation';
 export { avecPartieEnCours, partieEnCours, reprendrePartie } from './partie';

@@ -1,0 +1,101 @@
+/* Inscriptions des vieilles statues (jalon 5) : la fenêtre ouverte en partie et le recueil de la carte du monde. */
+
+/* --- Fenêtre ouverte en touchant une statue pendant une partie --- */
+
+.ecran.inscription-statue {
+  z-index: 15;
+}
+
+.ecran.inscription-statue .carte {
+  box-sizing: border-box;
+  width: min(480px, calc(100% - 24px));
+  max-height: calc(100% - 16px);
+  gap: 8px;
+  padding: 14px 20px;
+  overflow-y: auto;
+  touch-action: pan-y;
+}
+
+.ecran.inscription-statue .titre {
+  font-size: 20px;
+}
+
+.inscription-texte {
+  margin: 0;
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--texte);
+}
+
+/* --- Recueil --- */
+
+.ecran-inscriptions .inscriptions-compteur {
+  color: var(--or);
+}
+
+.inscriptions-vide {
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--texte-doux);
+}
+
+.inscriptions-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.inscription {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 10px;
+  background: var(--panneau);
+  border: 2px solid var(--bord);
+  border-radius: 6px;
+}
+
+.inscription:focus-visible {
+  outline: 2px solid var(--or);
+  outline-offset: 1px;
+}
+
+.inscription-lieu {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--texte-doux);
+}
+
+.inscription .inscription-texte {
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.inscription.inconnue {
+  border-style: dashed;
+  opacity: 0.8;
+}
+
+.inscription.inconnue .inscription-texte {
+  font-style: normal;
+  font-size: 18px;
+  letter-spacing: 3px;
+  color: var(--texte-doux);
+}
+
+.inscription.trouvee {
+  border-color: var(--bord-clair);
+}
+
+@media (max-width: 640px) {
+  .inscriptions-liste {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

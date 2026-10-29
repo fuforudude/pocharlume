@@ -3,6 +3,7 @@
 // (session) et dans src/ui/ (carte-monde-logique, partie), où elle est testée.
 import './ui/style.css';
 import './ui/style-meta.css';
+import './ui/style-inscriptions.css';
 import { installerAudio } from './audio';
 import { DEFS_META } from './data/heros';
 import { REGION1 } from './data/niveaux/region1';
@@ -10,13 +11,14 @@ import type { NiveauCampagne } from './data/visuel';
 import type { DefiPartie, EtatPartie } from './engine';
 import { t } from './i18n';
 import { chargerAtlas, type AtlasRendu } from './render/atlas';
-import { campagneTerminee, Depot, difficulteDe, infiniOuvert, ouvrirCanalNavigateur, ouvrirStockage, recordDeLaCarte, Session, type ChoixPartie, type DifficulteSauvegarde } from './save';
+import { campagneTerminee, Depot, difficulteDe, infiniOuvert, inscriptionTrouvee, ouvrirCanalNavigateur, ouvrirStockage, recordDeLaCarte, Session, type ChoixPartie, type DifficulteSauvegarde } from './save';
 import { afficherBoutique } from './ui/boutique';
 import { afficherCaisses } from './ui/caisses';
 import { afficherCarteMonde, type EcranCarteMonde } from './ui/carte-monde';
 import { afficherCollection } from './ui/collection';
 import { afficherEcranHeros } from './ui/ecran-heros';
 import { afficherEcranInfini } from './ui/ecran-infini';
+import { afficherEcranInscriptions } from './ui/ecran-inscriptions';
 import { afficherAccueil, afficherAvis, afficherConfirmation, afficherFinCampagne, type ChoixNiveau } from './ui/ecrans';
 import { lignesBilanInfini, vueCartesInfini } from './ui/infini-vues';
 import { configDeRelance, configDuChoix, configInfini, debiterAuLancement, nouvelleGraine, relancerAvecDebit } from './ui/lancement';
@@ -140,6 +142,13 @@ async function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, l
           .then((r) => { if (r?.bilan?.campagneTerminee === true) finDeCampagne(); else carte(); })
           .catch((erreur: unknown) => { console.error(erreur); carte(); });
       },
+      // Une vieille statue touchée : son inscription entre au recueil (la première fois seulement). Hors sauvegarde, rien n'est gagné.
+      surInscription: (id) => {
+        if (horsSauvegarde) return null;
+        const nouvelle = !inscriptionTrouvee(session.sauvegarde, id);
+        if (nouvelle) session.trouverInscription(id).catch(console.error);
+        return nouvelle;
+      },
       ...(infini ? { infini: { record: () => recordDeLaCarte(session.sauvegarde, infini.carte) } } : {}),
       ...(horsSauvegarde
         ? {}
@@ -249,6 +258,10 @@ function carte(): void {
         surBoutique: () => {
           carteOuverte?.suspendre(true);
           ouvrirBoutique(atlas);
+        },
+        surInscriptions: () => {
+          carteOuverte?.suspendre(true);
+          afficherEcranInscriptions(app, { atlas, session, surFermer: carte });
         },
         surOptions: () => {
           // La carte dort sous les options : plus de clavier ni de dessin ; elle est rouverte à la fermeture.

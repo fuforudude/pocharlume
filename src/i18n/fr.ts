@@ -5,6 +5,7 @@ import { frEcrans3 } from './fr-ecrans3';
 import { frEcrans4 } from './fr-ecrans4';
 import { frEnnemis } from './fr-ennemis';
 import { frHorde } from './fr-horde';
+import { frInscriptions } from './fr-inscriptions';
 import { frEnnemisRegions6a10 } from './fr-ennemis-regions-6-10';
 import { frLore } from './fr-lore';
 import { frMeta } from './fr-meta';
@@ -215,6 +216,9 @@ export const fr = {
 
   // Niveaux de horde du jalon 5 (fr-horde.ts)
   ...frHorde,
+
+  // Interface des inscriptions des statues : recueil, fenêtre en partie (fr-inscriptions.ts)
+  ...frInscriptions,
 
   // Inscriptions, paroles des boss, descriptions des ennemis (fr-lore.ts, généré depuis docs/lore.md)
   ...frLore,

@@ -20,6 +20,7 @@
     "niveaux:bilan": "node --import ./tools/niveaux/enregistrer.ts tools/niveaux/bilan.ts",
     "niveaux:resume": "node --import ./tools/niveaux/enregistrer.ts tools/niveaux/resume.ts",
     "niveaux:apercu": "node --import ./tools/niveaux/enregistrer.ts tools/niveaux/apercu.ts",
+    "niveaux:statues": "node --import ./tools/niveaux/enregistrer.ts tools/niveaux/statues.ts",
     "verifier": "npm run lint && tsc --noEmit && npm run test && npm run build"
   },
   "devDependencies": {

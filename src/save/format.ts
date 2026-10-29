@@ -10,11 +10,13 @@
 // - v4 : (dans `meta`) région la plus haute ouverte, défis réussis par niveau, collection (objets possédés et rangs, éclats,
 //        compteurs de garantie par caisse, skins et familiers équipés).
 // - v5 : (dans `meta`) mode infini : record par carte (dernière vague terminée) et paliers déjà payés.
+// - v6 : (dans `meta`) inscriptions des vieilles statues déjà trouvées (une par carte, jamais perdue).
 import { AVATARS, BRANCHES_ARBRE, coutCumuleArbre, IDS_OBJETS, type IdBranche, type IdDefi, type IdDieu, type IdHeros, type IdObjet, type PalierInfini } from '../data/meta';
+import type { IdInscription } from '../data/niveaux/statues';
 import type { ConfigPartie } from '../engine/etat';
 import { collectionVide, type Collection } from '../meta/collection';
 
-export const VERSION_SAUVEGARDE = 5;
+export const VERSION_SAUVEGARDE = 6;
 
 /** Nombre de niveaux de la campagne (10 régions de 10 niveaux). */
 export const NOMBRE_NIVEAUX = 100;
@@ -122,6 +124,11 @@ export interface Meta {
   defis: Record<string, DefisNiveau>;
   collection: Collection;
   infini: Infini;
+  /**
+   * Inscriptions des statues trouvées (identifiant de la carte qui porte la statue), sans doublon et dans l'ordre des cartes de la
+   * campagne. Trouvée une fois, une inscription l'est pour toujours : rien ne la retire, une sauvegarde importée ne la perd pas.
+   */
+  inscriptions: IdInscription[];
 }
 
 export interface Sauvegarde {
@@ -148,6 +155,7 @@ export function metaParDefaut(): Meta {
     defis: {},
     collection: collectionVide(),
     infini: { records: {}, paliers: [] },
+    inscriptions: [],
   };
 }
 

@@ -11,6 +11,7 @@ import {
   type Reglages,
   type Sauvegarde,
 } from './format';
+import { reunirInscriptions } from './transactions-inscriptions';
 import { estEntierEntre } from './validation';
 
 function cle(numero: number): string {
@@ -132,7 +133,10 @@ export function fusionnerProgressions(a: Sauvegarde, b: Sauvegarde): Sauvegarde 
       change = true;
     }
   }
+  // Les inscriptions trouvées de `b` s'ajoutent à celles de `a` : une inscription trouvée ne se perd pas.
+  const inscriptions = reunirInscriptions(a.meta.inscriptions, b.meta.inscriptions);
+  if (inscriptions.length > a.meta.inscriptions.length) change = true;
   if (!change) return a;
   const niveauMax = Math.max(a.progression.niveauMax, b.progression.niveauMax);
-  return { ...a, progression: { niveauMax, etoiles }, meta: { ...a.meta, regionMax: regionOuverte(niveauMax), defis, infini: { ...a.meta.infini, records } } };
+  return { ...a, progression: { niveauMax, etoiles }, meta: { ...a.meta, regionMax: regionOuverte(niveauMax), defis, infini: { ...a.meta.infini, records }, inscriptions } };
 }

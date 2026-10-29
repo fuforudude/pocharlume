@@ -11,6 +11,7 @@ import type { NiveauCampagne } from '../data/visuel';
 import { avancer, caseExiste, centreCase, creerPartie, derniereVagueTerminee, validerAction } from '../engine';
 import type { Action, ConfigPartie, EntreeJournal, EtatPartie, ResultatAction } from '../engine';
 import { t } from '../i18n';
+import type { IdInscription } from '../data/niveaux/statues';
 import { chargerAtlas } from '../render/atlas';
 import type { BilanPartie, RaisonFin } from '../save';
 import { ECART_MAX_MS, PasFixes } from '../render/pas-fixes';
@@ -20,11 +21,13 @@ import { commandeClavier, type Commande } from './clavier';
 import { afficherFin, creerAvisPaysage, creerPause } from './ecrans';
 import { Gestes } from './gestes';
 import { Hud } from './hud';
+import { afficherInscription, type InscriptionOuverte } from './inscription-partie';
 import { Interaction, type Issue, type Mode } from './interaction';
 import { mesurerMarges } from './marges';
 import { elementsMenu, type ElementMenu } from './menu-cercle';
 import { cleParoleBoss } from './parole-boss';
 import { texteRefus } from './refus';
+import { statueTouchee } from './statue';
 import { el } from './dom';
 
 /** Résultat d'une partie terminée, transmis à `surFin` (étoiles, vies, journal pour une future vérification). */
@@ -105,6 +108,12 @@ export interface OptionsPartie {
    * (en Fer les skins restent visibles, seul le bonus est ignoré).
    */
   equipes?: Equipes;
+  /**
+   * Une vieille statue de la carte a été touchée (`niveau.visuel.statue`) : l'appelant range son inscription dans la sauvegarde et
+   * répond vrai si elle est nouvelle, faux si elle était déjà trouvée, null s'il n'y a rien à en dire (partie hors sauvegarde).
+   * La partie, elle, ne change pas : elle se met en pause le temps de la lecture, sans rien écrire dans le journal du moteur.
+   */
+  surInscription?: (id: string) => boolean | null;
 }
 
 /** Temps passé dans la partie, pour mesurer le rendu (voir `PartieEnCours.mesures`). */
@@ -194,6 +203,10 @@ export async function lancerNiveau(
   /** Le butin de la partie, quand `surFin` en promet un. */
   let retourFin: Promise<RetourFin | null> | null = null;
   let identifiantImage = 0;
+  /** La fenêtre d'une inscription de statue, tant qu'elle est ouverte : la simulation attend, comme en pause. */
+  let inscription: InscriptionOuverte | null = null;
+  /** La pause demandée par le joueur (bouton, touche P, onglet caché…), à retrouver à la fermeture de l'inscription. */
+  let pauseDemandee = false;
   let pasMenu = -1;
   let elementsDuMenu: ElementMenu[] | null = null;
   let caseMenu = '';
@@ -223,8 +236,25 @@ export async function lancerNiveau(
   const definirPause = (pause: boolean): void => {
     if (finie) return;
     if (pause && !pas.pause) interaction.annuler();
-    pas.pause = pause;
+    pauseDemandee = pause;
+    // Une inscription ouverte garde la partie en pause, même si l'écran de pause se ferme par-dessus.
+    pas.pause = pause || inscription !== null;
     ecranPause.afficher(pause);
+  };
+  /** Touche d'une statue : la partie attend, la fenêtre montre l'inscription, la fermer relance la partie là où elle était. */
+  const lireInscription = (id: string): void => {
+    if (finie || inscription) return;
+    interaction.annuler();
+    const nouvelle = options.surInscription?.(id) ?? null;
+    pas.pause = true;
+    inscription = afficherInscription(racine, {
+      id: id as IdInscription,
+      nouvelle,
+      surFermer: () => {
+        inscription = null;
+        pas.pause = pauseDemandee;
+      },
+    });
   };
   /** Les objets emportés que la partie a utilisés, un par emplacement utilisé. */
   const objetsUtilises = (): string[] => etat.config.objets.filter((_, i) => etat.objetsUtilises[i] === true);
@@ -288,7 +318,15 @@ export async function lancerNiveau(
     toucher: (x, y) => {
       if (finie || pas.pause) return;
       const rayon = Math.max(RAYON_TOUCHE_MIN_TUILES, RAYON_TOUCHE_CSS / rendu.pixelsCssParTuile);
-      traiter(interaction.toucher(etat, rendu.enTuilesX(x), rendu.enTuilesY(y), rayon));
+      const tx = rendu.enTuilesX(x);
+      const ty = rendu.enTuilesY(y);
+      // Une vieille statue : l'inscription s'ouvre (méta : rien n'entre dans la file d'actions du moteur).
+      const statue = niveau.visuel.statue;
+      if (statue && statueTouchee(etat, interaction.mode, statue, tx, ty, rayon)) {
+        lireInscription(statue.id);
+        return;
+      }
+      traiter(interaction.toucher(etat, tx, ty, rayon));
     },
     glisser: (dx, dy) => {
       enGlissement = true;
@@ -544,6 +582,7 @@ export async function lancerNiveau(
   function arreter(): void {
     if (arretee) return;
     arretee = true;
+    inscription?.fermer();
     cancelAnimationFrame(identifiantImage);
     controleur.abort();
     hud.detruire();

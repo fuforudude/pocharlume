@@ -1,4 +1,4 @@
-// Outils réservés aux tests de la sauvegarde (jamais importés par le jeu) : sauvegardes d'exemple, fixtures v1 à v4, définitions de héros d'essai, stockages truqués.
+// Outils réservés aux tests de la sauvegarde (jamais importés par le jeu) : sauvegardes d'exemple, fixtures v1 à v5, définitions de héros d'essai, stockages truqués.
 import { readFileSync } from 'node:fs';
 import { IDS_HEROS } from '../data/meta';
 import { VERSION_DONNEES } from '../data/version';
@@ -11,6 +11,7 @@ export const FIXTURE_V1 = readFileSync(new URL('./fixtures/sauvegarde-v1.json', 
 export const FIXTURE_V2 = readFileSync(new URL('./fixtures/sauvegarde-v2.json', import.meta.url), 'utf8');
 export const FIXTURE_V3 = readFileSync(new URL('./fixtures/sauvegarde-v3.json', import.meta.url), 'utf8');
 export const FIXTURE_V4 = readFileSync(new URL('./fixtures/sauvegarde-v4.json', import.meta.url), 'utf8');
+export const FIXTURE_V5 = readFileSync(new URL('./fixtures/sauvegarde-v5.json', import.meta.url), 'utf8');
 
 /**
  * Définitions de héros d'essai (les vraies viennent de src/data/heros.ts) : 4 compétences par héros, les trois
@@ -71,6 +72,8 @@ export function sauvegardeRemplie(): Sauvegarde {
       },
       // Mode infini ouvert (niveau 10 gagné) : deux cartes jouées, les paliers 10 et 20 payés.
       infini: { records: { chaumes: 23, gue: 12 }, paliers: [10, 20] },
+      // Trois inscriptions de statues trouvées (dans l'ordre des cartes).
+      inscriptions: ['chaumes', 'pendus', 'choeur'],
     },
     partie: PARTIE,
   };

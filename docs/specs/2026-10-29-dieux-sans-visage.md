@@ -42,12 +42,12 @@ dans des inscriptions sur de vieilles statues cachées dans les cartes.
 - [ ] Les noms « Plume », « Charlie » et « Pollen » n'apparaissent que dans des clés `inscription.*` (test sur `fr`).
 - [ ] Aucun écran n'affiche de portrait de dieu ; le choix avant un niveau montre symbole, épithète, phrase.
 - [ ] Les trois fidèles ont les mêmes statistiques et compétences que les anciens héros-dieux (test sur les données).
-- [ ] Chacune des 31 cartes a une statue sur une case de décor, hors chemin et hors case de tour (test).
-- [ ] Toucher une statue en partie révèle son inscription (fenêtre courte, la partie se met en pause) ; une seconde
-  fois, rien de nouveau n'est gagné.
-- [ ] Les inscriptions trouvées survivent à un rechargement et à l'export/import de la sauvegarde (migration testée).
-- [ ] Le recueil « Inscriptions » liste les trouvées (texte) et les autres (« ??? », avec la région).
-- [ ] Le toucher d'une statue ne gêne pas la pose d'une tour sur une case voisine (QA au navigateur, 812×375).
+- [x] Chacune des 31 cartes a une statue sur une case de décor, hors chemin et hors case de tour (test : `src/data/niveaux/statues.test.ts`).
+- [x] Toucher une statue en partie révèle son inscription (fenêtre courte, la partie se met en pause) ; une seconde
+  fois, rien de nouveau n'est gagné (tests : `partie-boucle.test.ts`, `inscriptions.test.ts` ; vérifié au navigateur).
+- [x] Les inscriptions trouvées survivent à un rechargement et à l'export/import de la sauvegarde (migration v5 vers v6 testée, fixture `sauvegarde-v5.json`).
+- [x] Le recueil « Inscriptions » liste les trouvées (texte) et les autres (« ??? », avec la région) (test : `ecran-inscriptions.test.ts` ; vérifié au navigateur en 812×375).
+- [x] Le toucher d'une statue ne gêne pas la pose d'une tour sur une case voisine (la zone de toucher est la case de la statue, elle seule ; vérifié au navigateur en 812×375 et par test).
 
 ## Tâches
 1. Réécriture de `docs/lore.md` par un agent (lancée le 2026-10-29) ; relecture par l'utilisateur.

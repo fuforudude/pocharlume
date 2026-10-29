@@ -8,6 +8,7 @@ import { distanceRectChemin } from './geometrie';
 import { casesInterditesDuNiveau } from './grille-niveau';
 import { DEMI_LARGEUR_CHEMIN, empriseDecor, MARGE_DECOR } from './habillage';
 import type { PlanNiveau } from './plan-niveau';
+import { SPRITE_STATUE, STATUES } from './statues';
 
 function choisir<T>(liste: readonly T[], indices: readonly number[], quoi: string, plan: PlanNiveau): T[] {
   return indices.map((i) => {
@@ -47,6 +48,7 @@ export function assemblerNiveau(plan: PlanNiveau, vagues: readonly Vague[]): Niv
     departHeros: modele.departHeros,
   };
   const decor = decorVisible(modele, carte);
+  const statue = STATUES[plan.carte];
   const niveau: Niveau = {
     id: `r${String(region)}-${String(rang).padStart(2, '0')}`,
     aretesDepart: plan.aretesDepart,
@@ -60,7 +62,8 @@ export function assemblerNiveau(plan: PlanNiveau, vagues: readonly Vague[]): Niv
   return {
     numero: plan.numero,
     niveau,
-    visuel: { region, zones: modele.zones, decor },
+    // La statue de la carte est un décor de plus (petit : il ne bloque rien) que l'interface rend touchable.
+    visuel: { region, zones: modele.zones, decor: [...decor, { sprite: SPRITE_STATUE[statue.origine], x: statue.x, y: statue.y }], statue },
     boss: plan.vagues.boss !== undefined,
     horde: plan.vagues.horde === true,
   };

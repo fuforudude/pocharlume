@@ -112,8 +112,16 @@ function v4versV5(v4: Brut): Brut {
   return { ...v4, version: 5, meta: { ...objet(v4.meta), infini: { records: {}, paliers: [] } } };
 }
 
+/**
+ * v5 vers v6 : tout est gardé tel quel ; `meta` reçoit la liste des inscriptions trouvées, vide (écrite en dur ici comme pour les versions
+ * précédentes). Rien n'est perdu : les statues n'existaient pas, il n'y a aucune inscription à reprendre.
+ */
+function v5versV6(v5: Brut): Brut {
+  return { ...v5, version: 6, meta: { ...objet(v5.meta), inscriptions: [] } };
+}
+
 /** `MIGRATIONS[n]` fait passer une sauvegarde de la version n à la version n + 1. */
-export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: v1versV2, 2: v2versV3, 3: v3versV4, 4: v4versV5 };
+export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: v1versV2, 2: v2versV3, 3: v3versV4, 4: v4versV5, 5: v5versV6 };
 
 /**
  * Migre une sauvegarde brute (n'importe quelle version connue) vers la version courante et la valide. `defs`

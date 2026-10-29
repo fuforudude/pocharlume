@@ -2,7 +2,7 @@
 // la région et la fiche d'un niveau en DOM. Toucher ou Entrée sur un nœud ouvre la fiche (nom, ambiance, mode Normal,
 // Héroïque ou Fer, meilleures étoiles par difficulté, choix de la difficulté, du dieu, du héros et des objets emportés,
 // « Lancer »). Échap ou Retour arrière ferme la fiche, puis quitte la carte. La barre du haut montre les monnaies (arêtes,
-// braises, étoiles à dépenser) et mène aux écrans des héros et de la boutique.
+// braises, étoiles à dépenser) et mène aux écrans des héros, de la boutique et du recueil des inscriptions.
 //
 // Les régions (jalon 3) : une rangée de pastilles, de flèches et le clavier (Page haut, Page bas) passent d'une région
 // ouverte à l'autre ; les régions pas encore ouvertes se voient grisées avec un cadenas et disent comment les ouvrir. Les
@@ -61,6 +61,8 @@ export interface OptionsCarteMonde {
   surHeros: () => void;
   /** « Boutique » : idem pour la boutique (arbre et objets). */
   surBoutique: () => void;
+  /** « Inscriptions » : idem pour le recueil des inscriptions des statues. Absent : pas de bouton. */
+  surInscriptions?: () => void;
   /** « Revoir la fin » (campagne terminée) : l'écran est déjà arrêté. Absent : pas de bouton. */
   surRevoirFin?: () => void;
   /** « Retour » ou Échap sans fiche ouverte : l'écran est déjà arrêté. */
@@ -174,6 +176,9 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   heros.textContent = t('carte.heros');
   const boutique = bouton('bouton', t('carte.boutique'), options.surBoutique, signal);
   boutique.textContent = t('carte.boutique');
+  const surInscriptions = options.surInscriptions;
+  const inscriptions = surInscriptions ? bouton('bouton', t('carte.inscriptions'), surInscriptions, signal) : null;
+  if (inscriptions) inscriptions.textContent = t('carte.inscriptions');
   const reglages = bouton('bouton', t('carte.options'), options.surOptions, signal);
   reglages.textContent = t('carte.options');
   const revoirFin = options.surRevoirFin;
@@ -184,7 +189,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
       }, signal)
     : null;
   if (revoir) revoir.textContent = t('carte.revoir_fin');
-  barre.append(retour, titre, monnaies, heros, boutique, ...(revoir ? [revoir] : []), reglages);
+  barre.append(retour, titre, monnaies, heros, boutique, ...(inscriptions ? [inscriptions] : []), ...(revoir ? [revoir] : []), reglages);
   racine.append(barre);
 
   const textesDe = (numero: number): { nom: string; ambiance: string } | null => {
