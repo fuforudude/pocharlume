@@ -375,7 +375,7 @@ function mettreAJourUnite(etat: EtatPartie, u: Unite): void {
   let cible = u.cible === -1 ? undefined : chercherParId(etat.ennemis, u.cible);
   if (cible) {
     const laisse = u.stats.portee * REGLES.laisseEngagement;
-    if (!cible.vivant || distance2(cible.x, cible.y, u.ancreX, u.ancreY) > laisse * laisse) {
+    if (!cible.vivant || cible.charge > 0 || distance2(cible.x, cible.y, u.ancreX, u.ancreY) > laisse * laisse) {
       if (cible.bloqueur === u.id) {
         cible.bloqueur = -1;
         u.bloques = Math.max(0, u.bloques - 1);
