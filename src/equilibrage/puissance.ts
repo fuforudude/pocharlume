@@ -2,7 +2,7 @@
 // à la moyenne de son palier.
 import type { DefNiveauTour } from '../engine';
 import { DIEUX } from '../data/dieux';
-import { dpsEfficace, EQUILIBRAGE, paliersFamille, puissanceTour } from '../data/equilibrage';
+import { dpsEfficace, EQUILIBRAGE, paliersFamille, porteePourPuissance, puissanceTour } from '../data/equilibrage';
 import { FAMILLES, TOURS } from '../data/tours';
 
 export interface PuissanceTour {
@@ -78,7 +78,7 @@ export function puissancesDivines(): PuissanceDivine[] {
       dieu,
       nom: def.tourDivine.nom,
       cout,
-      puissance: (dpsDivine(def.tourDivine) * def.tourDivine.portee) / cout,
+      puissance: (dpsDivine(def.tourDivine) * porteePourPuissance(def.tourDivine)) / cout,
       reference,
       tours: voisines.map((t) => ({ nom: t.def.nom, palier: t.palier, coutCumule: t.coutCumule })),
     };

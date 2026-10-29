@@ -68,6 +68,12 @@ export function partsSpeciales(niveau: Niveau): { volants: number; furtifs: numb
   return total > 0 ? { volants: volants / total, furtifs: furtifs / total } : { volants: 0, furtifs: 0 };
 }
 
+/** Numéro (1 à N) de la première vague du niveau qui compte un furtif, 0 s'il n'y en a aucun. */
+export function premiereVagueFurtifs(niveau: Niveau): number {
+  const i = niveau.vagues.findIndex((v) => v.paquets.some((p) => table[p.ennemi]?.furtif === true));
+  return i + 1;
+}
+
 /** Longueur de chemin (en tuiles) à moins de `portee` du point, chaque chemin pesé par `poids`. */
 export function longueurVue(echantillons: readonly Echantillon[], poids: readonly number[], p: Point, portee: number): number {
   let total = 0;

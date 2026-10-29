@@ -360,7 +360,7 @@ describe('caserne', () => {
     expect(appliquerAction(etat, { type: 'deplacerRalliement', ...ce(1), x: 11.5, y: 5 })).toEqual({ ok: true });
     avancerSecondes(etat, 3);
     for (const s of etat.unites.filter((u) => u.genre === 'soldat')) expect(distance(s.x, s.y, 11.5, 5)).toBeLessThan(1);
-    expect(appliquerAction(etat, { type: 'deplacerRalliement', ...ce(1), x: 13, y: 5 })).toEqual({ ok: false, raison: 'hors_portee' });
+    expect(appliquerAction(etat, { type: 'deplacerRalliement', ...ce(1), x: 15, y: 5 })).toEqual({ ok: false, raison: 'hors_portee' });
     expect(appliquerAction(etat, { type: 'deplacerRalliement', ...ce(1), x: 10, y: 8.5 })).toEqual({ ok: false, raison: 'hors_chemin' });
     expect(appliquerAction(etat, { type: 'deplacerRalliement', ...ce(0), x: 5, y: 5 })).toEqual({ ok: false, raison: 'pas_une_caserne' });
     expect(appliquerAction(etat, { type: 'deplacerRalliement', ...ce(2), x: 15, y: 5 })).toEqual({ ok: false, raison: 'case_vide' });
@@ -396,7 +396,7 @@ describe('tour divine de Charlie : Totem du Colosse', () => {
     expect(appliquerAction(etat, { type: 'specialiser', ...ce(0), voie: 'A' })).toEqual({ ok: false, raison: 'specialisation_impossible' });
   });
 
-  it('lance une onde de choc qui étourdit les ennemis au sol autour de lui', () => {
+  it('lance une onde de choc qui étourdit les ennemis autour de lui, volants compris', () => {
     const etat = partie();
     construire(etat, 1, 'divine');
     const sol = cible(etat, 10);
@@ -407,6 +407,7 @@ describe('tour divine de Charlie : Totem du Colosse', () => {
     expect(sol.pv).toBeLessThan(sol.pvMax);
     expect(sol.effetsPas[EFFET.etourdissement]).toBeGreaterThan(0);
     expect(loin.pv).toBe(loin.pvMax);
-    expect(volant.pv).toBe(volant.pvMax);
+    expect(volant.pv).toBeLessThan(volant.pvMax);
+    expect(volant.effetsPas[EFFET.etourdissement]).toBeGreaterThan(0);
   });
 });

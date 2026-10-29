@@ -46,7 +46,7 @@ const plume: DefDieu = {
   tourDivine: niveau({
     nom: 'tour.sanctuaire_de_l_ombre',
     cout: 200,
-    portee: 3,
+    portee: 3.5,
     revele: true,
     soldats: soldats({
       nom: 'unite.assassin_du_sanctuaire',
@@ -73,14 +73,14 @@ const charlie: DefDieu = {
     {
       nom: 'sort.chute_du_colosse',
       description: 'sort.chute_du_colosse.desc',
-      recharge: 40,
+      recharge: 25,
       rechargeInitiale: 10,
       rayon: 1.6,
       surChemin: false,
       global: false,
       effets: [
-        { type: 'degats', degats: [50, 80], typeDegats: 'physique', volants: false },
-        { type: 'effet', effet: { type: 'etourdissement', chance: 1, duree: 2.5, valeur: 0 }, volants: false },
+        { type: 'degats', degats: [50, 80], typeDegats: 'physique', volants: true },
+        { type: 'effet', effet: { type: 'etourdissement', chance: 1, duree: 2.5, valeur: 0 }, volants: true },
       ],
     },
     {
@@ -130,6 +130,8 @@ const charlie: DefDieu = {
     degats: [20, 30],
     effets: [{ type: 'etourdissement', chance: 1, duree: 1, valeur: 0 }],
     onde: true,
+    revele: true,
+    volants: true,
   }),
 };
 

@@ -24,7 +24,7 @@ import { DIEUX } from '../data/dieux';
 import { dpsEfficace } from '../data/equilibrage';
 import { REGLES } from '../data/regles';
 import { FAMILLES, TOURS } from '../data/tours';
-import { distance, echantillonner, longueurVue, PAS_ECHANTILLON, partsSpeciales, poidsDesChemins, type Echantillon } from './geometrie';
+import { distance, echantillonner, longueurVue, PAS_ECHANTILLON, partsSpeciales, poidsDesChemins, premiereVagueFurtifs, type Echantillon } from './geometrie';
 import { jouerPartie, type Bot, type Joueur, type ResultatPartie } from './simulation';
 
 /** Une préférence de famille : le poids multiplie la valeur d'une tour de cette famille. */
@@ -70,6 +70,8 @@ export interface OptionsSoigneux {
 interface Candidat {
   readonly action: Action;
   readonly ratio: number;
+  /** Achat qu'on attend plutôt que de dépenser ailleurs (un furtif non révélé passe sans qu'aucune tour le touche). */
+  readonly imperatif?: boolean;
 }
 
 const dieux: Readonly<Record<string, DefDieu>> = DIEUX;
@@ -88,7 +90,7 @@ function utilite(dps: number): number {
 }
 
 /** Part de menace furtive à partir de laquelle le bot se soucie des Guetteurs des Toits. */
-const PART_FURTIFS_MIN = 0.02;
+const PART_FURTIFS_MIN = 0.001;
 
 function dpsMoyen(def: DefNiveauTour): number {
   const dps = dpsEfficace(def);
@@ -115,6 +117,12 @@ function prixDe(def: DefNiveauTour, famille: IdFamille, bonus: BonusFamille): nu
   return bonus.famille === famille ? ajusterMontant(def.cout, 1 + bonus.prix) : def.cout;
 }
 
+/** Le défi Fer n'autorise que deux familles de tours ; hors Fer, toutes. */
+function famillePermise(etat: EtatPartie, famille: IdFamille): boolean {
+  if (etat.config.defi !== 'fer') return true;
+  return etat.niveau.defiFer?.familles.includes(famille) ?? true;
+}
+
 function defCourante(tour: Tour): DefNiveauTour | undefined {
   if (tour.famille === 'divine') return undefined;
   const famille = TOURS[tour.famille];
@@ -130,6 +138,8 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
   let echantillons: Echantillon[] = [];
   let poids: number[] = [];
   let parts = { volants: 0, furtifs: 0 };
+  /** Numéro (1 à N) de la première vague qui compte un furtif, 0 s'il n'y en a pas. */
+  let vagueFurtifs = 0;
   const vues = new Map<string, number>();
   /** Indices des points d'échantillonnage à portée d'une case, par (case, portée). */
   const alentours = new Map<string, Int32Array>();
@@ -295,7 +305,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
   function candidats(etat: EtatPartie): Candidat[] {
     const liste: Candidat[] = [];
     majCouverture(etat);
-    for (const famille of FAMILLES) {
+    for (const famille of FAMILLES.filter((f) => famillePermise(etat, f))) {
       const def = TOURS[famille].niveaux[0];
       for (const { cx, cy } of meilleuresCasesLibres(etat, famille, CASES_PAR_FAMILLE)) {
         liste.push({ action: { type: 'construire', cx, cy, tour: famille }, ratio: valeur(etat, cx, cy, def, famille) / cout(etat, def, famille) });
@@ -334,17 +344,20 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
    * chemin. Une valeur juste au-dessus du meilleur autre achat : le bot économise jusqu'à pouvoir la payer.
    */
   function candidatGuetteurs(etat: EtatPartie, meilleurRatio: number): Candidat | null {
-    if (parts.furtifs < PART_FURTIFS_MIN) return null;
+    if (parts.furtifs < PART_FURTIFS_MIN || !famillePermise(etat, 'tir')) return null;
+    // Pas avant que le premier furtif approche : les premières vagues se gagnent avec une défense ordinaire.
+    if (etat.vagues.lancees < vagueFurtifs - 2) return null;
     const requis = etat.niveau.carte.chemins.length;
     if (etat.tours.filter((t) => t.famille === 'tir' && t.voie === 'A').length >= requis) return null;
-    const tir = etat.tours.filter((t) => t.famille === 'tir' && t.voie !== 'A').sort((a, b) => b.niveau - a.niveau)[0];
+    // Une tour de tir déjà spécialisée (voie B) ne peut plus devenir Guetteurs : seules celles du niveau 1 à 3 servent.
+    const tir = etat.tours.filter((t) => t.famille === 'tir' && t.niveau < 4).sort((a, b) => b.niveau - a.niveau)[0];
     const ratio = meilleurRatio * 1.02;
     if (tir) {
-      if (tir.niveau >= 3) return { action: { type: 'specialiser', cx: tir.cx, cy: tir.cy, voie: 'A' }, ratio };
-      return { action: { type: 'ameliorer', cx: tir.cx, cy: tir.cy }, ratio };
+      if (tir.niveau >= 3) return { action: { type: 'specialiser', cx: tir.cx, cy: tir.cy, voie: 'A' }, ratio, imperatif: true };
+      return { action: { type: 'ameliorer', cx: tir.cx, cy: tir.cy }, ratio, imperatif: true };
     }
     const meilleure = meilleureCase(etat, 'tir', TOURS.tir.niveaux[0].portee);
-    return meilleure ? { action: { type: 'construire', cx: meilleure.cx, cy: meilleure.cy, tour: 'tir' }, ratio } : null;
+    return meilleure ? { action: { type: 'construire', cx: meilleure.cx, cy: meilleure.cy, tour: 'tir' }, ratio, imperatif: true } : null;
   }
 
   /**
@@ -355,6 +368,8 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     if (!(options.tourDivine ?? true)) return null;
     const dieu = dieux[etat.config.dieu];
     if (!dieu || etat.tours.length < 3 || etat.tours.some((t) => t.famille === 'divine')) return null;
+    // Au défi Fer, la tour divine suit la famille de son dieu : elle n'est permise que si cette famille l'est.
+    if (!famillePermise(etat, dieu.bonus.famille)) return null;
     const meilleure = meilleureCase(etat, 'divine', dieu.tourDivine.portee);
     return meilleure ? { action: { type: 'construire', cx: meilleure.cx, cy: meilleure.cy, tour: 'divine' }, ratio: meilleurRatio * 1.01 } : null;
   }
@@ -364,6 +379,8 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     const liste = candidats(etat);
     const meilleur = liste[0];
     if (!meilleur) return null;
+    // Les Guetteurs des Toits face à des furtifs se paient d'abord : on économise plutôt que de dépenser ailleurs.
+    if (meilleur.imperatif && validerAction(etat, meilleur.action) === 'aretes_insuffisantes') return null;
     for (const c of liste) {
       if (c.ratio < meilleur.ratio * 0.75) break;
       if (validerAction(etat, c.action) === null) return c.action;
@@ -535,6 +552,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
         echantillons = echantillonner(etat);
         poids = poidsDesChemins(etat.niveau);
         parts = partsSpeciales(etat.niveau);
+        vagueFurtifs = premiereVagueFurtifs(etat.niveau);
       }
       const actions: Action[] = [];
       const achat = acheter(etat);

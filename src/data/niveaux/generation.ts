@@ -3,7 +3,7 @@
 // jamais de vague à l'exécution. Les tests vérifient que le fichier figé correspond à ce que ce code produit.
 import type { DefEnnemi, Vague } from '../../engine/definitions';
 import { ENNEMIS, type IdEnnemi } from '../ennemis';
-import { genererVague } from '../equilibrage';
+import { EQUILIBRAGE, genererVague } from '../equilibrage';
 import type { PlanNiveau } from './plan-niveau';
 
 /** Un boss ajouté à une vague, en plus de ses ennemis ordinaires (son budget dépasse celui de la vague). */
@@ -34,7 +34,13 @@ export function vaguesDuPlan(plan: PlanNiveau): Vague[] {
 }
 
 export function genererVaguesNiveau(plan: PlanVagues): Vague[] {
-  const ennemis = plan.ennemis.map((id) => [id, ENNEMIS[id] as DefEnnemi] as const);
+  const tous = plan.ennemis.map((id) => [id, ENNEMIS[id] as DefEnnemi] as const);
+  // Un volant ou un furtif exige un contre précis (tour qui touche le ciel, qui révèle) : dans un niveau qui en compte, les ennemis
+  // ordinaires sont tirés `EQUILIBRAGE.repetitionOrdinaires` fois plus souvent, pour qu'ils ne fassent pas la moitié de la menace.
+  const aDesSpeciaux = tous.some(([, def]) => def.volant || def.furtif);
+  const ennemis = aDesSpeciaux
+    ? tous.flatMap((e) => (e[1].volant || e[1].furtif ? [e] : Array.from({ length: EQUILIBRAGE.repetitionOrdinaires }, () => e)))
+    : tous;
   const vagues: Vague[] = [];
   for (let w = 1; w <= plan.nombre; w++) {
     const paquets = [...genererVague({ niveau: plan.niveau, vague: w, ennemis, graine: plan.graine, chemins: plan.chemins }).paquets];

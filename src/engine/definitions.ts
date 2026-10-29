@@ -658,10 +658,10 @@ export interface Regles {
     /** Vies de plus que coûte l'ennemi s'il s'échappe. */
     readonly viesEnPlus: number;
   };
-  /** Défi Héroïque : nombre de vies (tous les groupes non-boss en élite). */
-  readonly heroique: { readonly vies: number };
+  /** Défi Héroïque : nombre de vies (tous les groupes non-boss en élite) et facteur sur les arêtes de départ. */
+  readonly heroique: { readonly vies: number; readonly facteurAretes: number };
   /** Défi Fer : toutes les vagues en une, effectifs multipliés (arrondi au-dessus), boss exceptés. */
-  readonly fer: { readonly facteurEffectifs: number };
+  readonly fer: { readonly facteurEffectifs: number; readonly facteurAretes: number };
   /** Nombre de morts récentes gardées en mémoire (le Roi des Fosses en relève les plus récentes). */
   readonly memoireMorts: number;
   /** Bonus de collection : total maximal (0,1 = +10 %) par tour de base ou pour le héros. */

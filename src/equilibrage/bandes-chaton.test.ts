@@ -1,21 +1,21 @@
-// Bandes du Chaton (spec, « Système d'équilibrage ») : le bot naïf gagne tous les niveaux, et le héros seul
-// ne suffit pas à partir du niveau 2.
+// Bandes du Chaton (spec, « Système d'équilibrage ») sur chacune des régions 1 à 5 : le bot naïf gagne tous les niveaux, et le héros
+// seul ne suffit pas à partir du niveau 2.
 import { beforeAll, describe, expect, it } from 'vitest';
-import { ecartsBloquants, ecartsChaton, ecartsSansDefense } from './bandes';
+import { ecartsChaton, ecartsSansDefense } from './bandes';
 import type { Evaluation } from './campagne';
-import { DELAI_EVALUATION, evaluerRegion1 } from './bandes.test-utils';
+import { DELAI_EVALUATION, evaluerRegions, REGIONS_EVALUEES } from './bandes.test-utils';
 
-let evaluations: Evaluation[] = [];
+let parRegion: Evaluation[][] = [];
 beforeAll(async () => {
-  evaluations = await evaluerRegion1('chaton');
+  parRegion = await evaluerRegions('chaton', ['naif', 'inactif']);
 }, DELAI_EVALUATION);
 
-describe('bandes en Chaton', () => {
+describe.each(REGIONS_EVALUEES)('bandes en Chaton, région %i', (region) => {
   it('le bot naïf gagne 100 % des niveaux', () => {
-    expect(ecartsBloquants(ecartsChaton(evaluations))).toEqual([]);
+    expect(ecartsChaton(parRegion[region - 1] ?? [])).toEqual([]);
   });
 
   it('sans défense, on perd tous les niveaux à partir du niveau 2', () => {
-    expect(ecartsSansDefense(evaluations)).toEqual([]);
+    expect(ecartsSansDefense(parRegion[region - 1] ?? [])).toEqual([]);
   });
 });

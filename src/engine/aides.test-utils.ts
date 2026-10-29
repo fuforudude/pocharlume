@@ -61,7 +61,8 @@ export function ce(i: number): CaseGrille {
 
 /**
  * Cases de `NIVEAU_TEST` (indices 0 à 5). 0 à 3 sont à 2 tuiles d'un axe de chemin impair (une caserne y a un chemin à portée) :
- * centres (15, 11), (19, 15), (29, 5), (29, 9). 4 et 5 sont à 3 tuiles de l'axe : pas de caserne, mais tout le reste.
+ * centres (15, 11), (19, 15), (29, 5), (29, 9). 4 et 5 sont à 3 tuiles de l'axe : une caserne y a un chemin à portée (3,5). 6 est à
+ * plus de 4 tuiles de tout chemin : pas de caserne, mais tout le reste.
  */
 export const CASES_TEST: readonly CaseGrille[] = [
   { cx: 7, cy: 5 },
@@ -70,6 +71,7 @@ export const CASES_TEST: readonly CaseGrille[] = [
   { cx: 14, cy: 4 },
   { cx: 4, cy: 4 },
   { cx: 10, cy: 4 },
+  { cx: 9, cy: 1 },
 ];
 
 /** La case numéro `i` de `NIVEAU_TEST`. */

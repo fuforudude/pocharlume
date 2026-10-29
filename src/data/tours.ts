@@ -49,23 +49,23 @@ export function soldats(champs: Pick<StatsSoldats, 'pv' | 'degats'> & Partial<St
 const caserne: DefFamille = {
   id: 'caserne',
   niveaux: [
-    niveau({ nom: 'tour.grenier_des_griffes', cout: 70, portee: 2.5, soldats: soldats({ pv: 50, degats: [1, 3] }) }),
-    niveau({ nom: 'tour.grenier_des_griffes', cout: 110, portee: 2.5, soldats: soldats({ pv: 90, degats: [3, 5], armure: 0.3 }) }),
-    niveau({ nom: 'tour.grenier_des_griffes', cout: 160, portee: 2.5, soldats: soldats({ pv: 130, degats: [5, 8], armure: 0.3 }) }),
+    niveau({ nom: 'tour.grenier_des_griffes', cout: 70, portee: 3.5, soldats: soldats({ pv: 50, degats: [1, 3] }) }),
+    niveau({ nom: 'tour.grenier_des_griffes', cout: 110, portee: 3.5, soldats: soldats({ pv: 90, degats: [3, 5], armure: 0.3 }) }),
+    niveau({ nom: 'tour.grenier_des_griffes', cout: 160, portee: 3.5, soldats: soldats({ pv: 130, degats: [5, 8], armure: 0.3 }) }),
   ],
   specialisations: {
     A: niveau({
       competences: COMPETENCES_TOURS.caserneA,
       nom: 'tour.garde_du_cloitre',
       cout: 230,
-      portee: 2.8,
+      portee: 3.8,
       soldats: soldats({ nom: 'unite.garde_du_cloitre', pv: 120, degats: [6, 10], armure: 0.6, capacite: 2 }),
     }),
     B: niveau({
       competences: COMPETENCES_TOURS.caserneB,
       nom: 'tour.ecorcheurs',
       cout: 230,
-      portee: 2.8,
+      portee: 3.8,
       soldats: soldats({
         nom: 'unite.ecorcheur',
         pv: 150,

@@ -116,7 +116,7 @@ export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
     vies,
     viesDepart: vies,
     viePerdue: false,
-    aretes: ajusterMontant(niveau.aretesDepart, difficulte.aretesDepart),
+    aretes: ajusterMontant(niveau.aretesDepart, difficulte.aretesDepart * (defi === 'heroique' ? REGLES.heroique.facteurAretes : defi === 'fer' ? REGLES.fer.facteurAretes : 1)),
     vagues: { lancees: 0, prochaine: infini || copie.vagues.length > 0 ? enPas(REGLES.delaiPremiereVague) : -1, paquets: [] },
     ennemis: [],
     unites: [],

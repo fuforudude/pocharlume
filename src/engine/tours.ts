@@ -193,7 +193,7 @@ function ondeDeChoc(etat: EtatPartie, t: Tour): boolean {
   const portee2 = portee * portee;
   let present = false;
   for (const e of etat.ennemis) {
-    if (e.vivant && !e.volant && estVisible(e, s.revele) && distance2(e.x, e.y, t.x, t.y) <= portee2) {
+    if (e.vivant && (s.volants || !e.volant) && estVisible(e, s.revele) && distance2(e.x, e.y, t.x, t.y) <= portee2) {
       present = true;
       break;
     }
@@ -201,7 +201,7 @@ function ondeDeChoc(etat: EtatPartie, t: Tour): boolean {
   if (!present) return false;
   etat.evenements.push({ type: 'onde', tour: t.id, x: t.x, y: t.y, rayon: portee });
   for (const e of etat.ennemis) {
-    if (!e.vivant || e.volant || !estVisible(e, s.revele) || distance2(e.x, e.y, t.x, t.y) > portee2) continue;
+    if (!e.vivant || (e.volant && !s.volants) || !estVisible(e, s.revele) || distance2(e.x, e.y, t.x, t.y) > portee2) continue;
     infligerDegats(etat, e, tirerEntre(etat, s.degats[0], s.degats[1]), s.typeDegats);
     appliquerEffets(etat, e, s.effets);
   }

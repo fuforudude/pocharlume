@@ -1,25 +1,26 @@
-// `npm run balance` : rejoue les 50 niveaux des régions 1 à 5 dans les trois difficultés avec chacun des trois dieux
-// (son avatar, sans amélioration ni objet) et les bots (naïf, soigneux, sans défense) sur toutes les graines
-// d'évaluation, plus, pour la région 1, les vérifications supplémentaires (disciples, arbre au maximum, héros de niveau 10,
-// soigneux sans tour divine). Écrit balance-report.md à la racine et affiche les écarts aux bandes cibles. Code de sortie 1
-// si une bande de la région 1 n'est pas respectée (tant que `BANDES_IMPOSEES` est vrai : suspendu, voir bandes.ts) ; les écarts des régions 2 à 5, qui n'ont pas encore de bandes imposées
-// (tâche 6 du jalon 3), sont affichés et écrits dans le rapport mais ne font pas échouer la commande.
-// Chaque tâche (niveau, difficulté, dieu ou profil) se calcule dans un fil à part ; le résultat ne dépend pas de leur
-// ordre d'arrivée (les évaluations sont remises dans l'ordre avant la rédaction).
+// `npm run balance` : rejoue les 50 niveaux des régions 1 à 5 dans les trois difficultés et les deux défis avec chacun des trois
+// dieux (son avatar, sans amélioration ni objet) et les bots (naïf, soigneux, sans défense ; le soigneux seul pour les défis) sur
+// toutes les graines d'évaluation, plus, pour la région 1, les vérifications supplémentaires (disciples, arbre au maximum, héros
+// de niveau 10, soigneux sans tour divine). Écrit balance-report.md à la racine et affiche les écarts aux bandes cibles. Code de
+// sortie 1 si une bande d'une région (1 à 5) n'est pas respectée.
+// Les tâches (niveau, difficulté, dieu ou profil) se calculent dans un petit nombre de fils qui restent en vie et les prennent
+// une à une ; le résultat ne dépend pas de leur ordre d'arrivée (les évaluations sont remises dans l'ordre avant la rédaction).
 //
 // Mise au point : `npm run balance -- --dieux=plume,pollen --difficultes=matou --graines=5 --entrainement=1 --detail`
 // (`--entrainement=1` reproduit les tests des bandes) ne joue que les bandes demandées, affiche un résumé compact (`--detail` : niveau par niveau, avec sorts lancés et tour divine) et
-// n'écrit pas le rapport. `--niveaux=11-20` (ou `--niveaux=3,12,40-42`) limite les niveaux joués ; sans lui, la mise au point
-// porte sur la région 1 comme avant.
+// n'écrit pas le rapport. `--difficultes=heroique,fer` joue les défis. `--niveaux=11-20` (ou `--niveaux=3,12,40-42`) limite les
+// niveaux joués ; sans lui, la mise au point porte sur la région 1.
 import { writeFileSync } from 'node:fs';
 import { availableParallelism } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { Worker } from 'node:worker_threads';
 import { CAMPAGNE } from '../../src/data/niveaux/campagne.ts';
-import { BANDES_IMPOSEES, correlationDeRang, courbeDifficulte, nomDuDieu, verifierBandes } from '../../src/equilibrage/bandes.ts';
+import { correlationDeRang, courbeDifficulte, ecartsImposes, nomDuDieu, verifierBandes } from '../../src/equilibrage/bandes.ts';
 import {
+  DEFIS_EVALUES,
   DIEUX_EVALUES,
   DIFFICULTES_EVALUEES,
+  estDefi,
   GRAINES_ENTRAINEMENT,
   GRAINES_EVALUATION,
   synthetiser,
@@ -29,7 +30,7 @@ import {
 } from '../../src/equilibrage/campagne.ts';
 import { profilProgression, profilsDisciples, profilSansTourDivine } from '../../src/equilibrage/profils.ts';
 import { redigerRapport } from '../../src/equilibrage/rapport.ts';
-import { ecartsDeRegion, evaluationsDeRegion, redigerRegions } from '../../src/equilibrage/rapport-regions.ts';
+import { ecartsDeLaRegion, evaluationsDeRegion, redigerDefis, redigerRegions } from '../../src/equilibrage/rapport-regions.ts';
 import type { TacheBandes, TacheProfil } from './travailleur.ts';
 
 const SORTIE = fileURLToPath(new URL('../../balance-report.md', import.meta.url));
@@ -38,19 +39,6 @@ const CROCHET = pathToFileURL(fileURLToPath(new URL('../niveaux/enregistrer.ts',
 
 type Tache = TacheBandes | TacheProfil;
 
-function calculer(tache: Tache): Promise<(Evaluation | EvaluationProfil)[]> {
-  return new Promise((resolve, reject) => {
-    const fil = new Worker(TRAVAILLEUR, { workerData: tache, execArgv: ['--import', CROCHET] });
-    fil.once('message', (evaluations: (Evaluation | EvaluationProfil)[]) => {
-      resolve(evaluations);
-    });
-    fil.once('error', reject);
-    fil.once('exit', (code) => {
-      if (code !== 0) reject(new Error(`Fil du niveau ${String(tache.numero)} (${tache.difficulte}) arrêté avec le code ${String(code)}`));
-    });
-  });
-}
-
 const options = new Map<string, string>();
 for (const argument of process.argv.slice(2)) {
   const [cle, valeur] = argument.replace(/^--/, '').split('=');
@@ -58,7 +46,7 @@ for (const argument of process.argv.slice(2)) {
 }
 const liste = (cle: string, tout: readonly string[]): readonly string[] => (options.has(cle) ? (options.get(cle) ?? '').split(',') : tout);
 const dieuxVoulus = liste('dieux', DIEUX_EVALUES);
-const difficultesVoulues = liste('difficultes', DIFFICULTES_EVALUEES);
+const difficultesVoulues = liste('difficultes', [...DIFFICULTES_EVALUEES, ...DEFIS_EVALUES]);
 const graines = Number(options.get('graines') ?? GRAINES_EVALUATION.length);
 const entrainement = Number(options.get('entrainement') ?? GRAINES_ENTRAINEMENT.length);
 const profilsVoulus = (options.get('profils') ?? '').split(',').filter((x) => x !== '');
@@ -76,10 +64,12 @@ const numeros = options.has('niveaux')
   : miseAuPoint
     ? NIVEAUX_REGION1
     : CAMPAGNE.map((n) => n.numero);
+// En mise au point, les défis ne se jouent que sur demande (`--difficultes=heroique,fer`).
+const difficultesJouees = miseAuPoint && !options.has('difficultes') ? difficultesVoulues.filter((d) => !estDefi(d)) : difficultesVoulues;
 
 const debut = performance.now();
 const taches: Tache[] = numeros.flatMap((numero) =>
-  difficultesVoulues.flatMap((difficulte) => dieuxVoulus.map((dieu): Tache => ({ type: 'bandes', numero, difficulte, dieu, graines, entrainement }))),
+  difficultesJouees.flatMap((difficulte) => dieuxVoulus.map((dieu): Tache => ({ type: 'bandes', numero, difficulte, dieu, graines, entrainement }))),
 );
 // Vérifications supplémentaires : toutes dans le rapport complet, au choix (`--profils=disciples,progression,divine`) en mise au point.
 const complet = !miseAuPoint;
@@ -106,17 +96,34 @@ for (const numero of numeros.filter((n) => NIVEAUX_REGION1.includes(n))) {
 }
 
 const resultats = new Map<number, (Evaluation | EvaluationProfil)[]>();
-let prochaine = 0;
+let suivante = 0;
 let terminees = 0;
 
-async function boucle(): Promise<void> {
-  for (let i = prochaine++; i < taches.length; i = prochaine++) {
-    const tache = taches[i];
-    if (!tache) return;
-    resultats.set(i, await calculer(tache));
-    terminees++;
-    process.stdout.write(`\r${String(terminees)}/${String(taches.length)} tâches calculées`);
-  }
+/** Un fil qui reste en vie et prend les tâches une à une : démarrer un fil et charger le jeu coûte autant qu'une évaluation. */
+function boucle(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const fil = new Worker(TRAVAILLEUR, { execArgv: ['--import', CROCHET] });
+    let courante = -1;
+    const donner = (): void => {
+      const i = suivante++;
+      if (i >= taches.length) {
+        void fil.terminate().then(() => {
+          resolve();
+        });
+        return;
+      }
+      courante = i;
+      fil.postMessage(taches[i]);
+    };
+    fil.on('message', (evaluations: (Evaluation | EvaluationProfil)[]) => {
+      resultats.set(courante, evaluations);
+      terminees++;
+      process.stdout.write(`\r${String(terminees)}/${String(taches.length)} tâches calculées`);
+      donner();
+    });
+    fil.once('error', reject);
+    donner();
+  });
 }
 
 await Promise.all(Array.from({ length: Math.min(availableParallelism(), taches.length) }, boucle));
@@ -131,18 +138,23 @@ taches.forEach((tache, i) => {
   }
 });
 
+/** Les écarts aux bandes de toutes les régions évaluées (1 à 5), ceux de la région 1 avec la puissance des tours. */
+function ecartsDeTout(): string[] {
+  const regions = [1, 2, 3, 4, 5].filter((r) => evaluationsDeRegion(evaluations, r).length > 0);
+  return regions.flatMap((r) => (r === 1 ? verifierBandes(evaluationsDeRegion(evaluations, 1)) : ecartsDeLaRegion(evaluations, r)));
+}
+
 if (miseAuPoint) {
   const un = (x: number): string => (Math.round(x * 10) / 10).toFixed(1);
   const pct = (x: number): string => String(Math.round(x * 100)).padStart(3);
-  for (const difficulte of difficultesVoulues) {
+  for (const difficulte of difficultesJouees) {
     for (const dieu of dieuxVoulus) {
       const parBot = (bot: 'naif' | 'soigneux'): ReturnType<typeof synthetiser> =>
         synthetiser(evaluations.filter((e) => e.dieu === dieu && e.difficulte === difficulte && e.bot === bot).flatMap((e) => [...e.parties]));
       const s = parBot('soigneux');
       const n = parBot('naif');
-      console.log(
-        `${difficulte.padEnd(10)} ${nomDuDieu(dieu).padEnd(8)} soigneux ${pct(s.tauxVictoire)} % vies ${un(s.viesMoyennes).padStart(4)} | naïf ${pct(n.tauxVictoire)} % vies ${un(n.viesMoyennes).padStart(4)}`,
-      );
+      const naif = estDefi(difficulte) ? '' : ` | naïf ${pct(n.tauxVictoire)} % vies ${un(n.viesMoyennes).padStart(4)}`;
+      console.log(`${difficulte.padEnd(10)} ${nomDuDieu(dieu).padEnd(8)} soigneux ${pct(s.tauxVictoire)} % vies ${un(s.viesMoyennes).padStart(4)}${naif}`);
       if (difficulte === 'matou') {
         const courbe = courbeDifficulte(evaluations, 'matou', dieu);
         console.log(`   courbe du naïf (vies par niveau) : ${courbe.map((c) => un(c.vies)).join(' ')} | rho ${un(correlationDeRang(courbe))}`);
@@ -151,14 +163,15 @@ if (miseAuPoint) {
       for (const niveau of numeros) {
         const es = trouver(evaluations, niveau, difficulte, 'soigneux', dieu);
         const en = trouver(evaluations, niveau, difficulte, 'naif', dieu);
-        if (!es || !en) continue;
+        if (!es || (!en && !estDefi(difficulte))) continue;
         const ss = synthetiser(es.parties);
-        const sn = synthetiser(en.parties);
+        const sn = en ? synthetiser(en.parties) : undefined;
         const sorts = [0, 1].map((k) => es.parties.reduce((a, p) => a + (p.sorts[k] ?? 0), 0) / es.parties.length);
         const divine = es.parties.filter((p) => p.tourDivine).length;
+        const naifNiveau = sn ? ` | naïf ${pct(sn.tauxVictoire)} % vies ${un(sn.viesMoyennes).padStart(4)}` : '';
         console.log(
           `   niv ${String(niveau).padStart(2)} soig ${pct(ss.tauxVictoire)} % vies ${un(ss.viesMoyennes).padStart(4)} aretes ${String(Math.round(ss.aretesFinMoyennes)).padStart(4)} ` +
-            `sorts ${un(sorts[0] ?? 0)}/${un(sorts[1] ?? 0)} divine ${String(divine)}/${String(es.parties.length)} | naïf ${pct(sn.tauxVictoire)} % vies ${un(sn.viesMoyennes).padStart(4)}`,
+            `sorts ${un(sorts[0] ?? 0)}/${un(sorts[1] ?? 0)} divine ${String(divine)}/${String(es.parties.length)}${naifNiveau}`,
         );
       }
     }
@@ -166,9 +179,7 @@ if (miseAuPoint) {
   // Écarts aux bandes : tous si l'on a joué tous les dieux et toutes les difficultés, sinon seulement ceux des dieux joués.
   if (!options.has('difficultes')) {
     const complets = dieuxVoulus.length === DIEUX_EVALUES.length;
-    const ecarts = (numeros.every((n) => NIVEAUX_REGION1.includes(n)) ? verifierBandes(evaluations) : ecartsDeRegion(evaluations)).filter(
-      (e) => complets || dieuxVoulus.some((d) => e.includes(`(${nomDuDieu(d)})`)),
-    );
+    const ecarts = ecartsDeTout().filter((e) => complets || dieuxVoulus.some((d) => e.includes(`(${nomDuDieu(d)})`)));
     console.log(ecarts.length === 0 ? 'Toutes les bandes sont respectées.' : [`${String(ecarts.length)} écart(s) aux bandes :`, ...ecarts.map((e) => `- ${e}`)].join('\n'));
   }
   const groupes = new Map<string, EvaluationProfil[]>();
@@ -182,23 +193,30 @@ if (miseAuPoint) {
   }
   console.log(`${String(Math.round((performance.now() - debut) / 100) / 10)} s.`);
 } else {
-  // Rapport principal : région 1, comme avant ; puis la section des régions 2 à 5 (premier passage).
+  // Rapport principal : région 1, comme avant ; puis les régions 2 à 5 et les défis des cinq régions.
   const region1 = evaluationsDeRegion(evaluations, 1);
-  writeFileSync(SORTIE, `${redigerRapport(region1, graines, profils).trimEnd()}
+  writeFileSync(
+    SORTIE,
+    `${redigerRapport(region1, graines, profils).trimEnd()}
 
 ${redigerRegions(evaluations, [2, 3, 4, 5]).trimEnd()}
-`);
-  const ecarts = verifierBandes(region1);
+
+${redigerDefis(evaluations, [1, 2, 3, 4, 5]).trimEnd()}
+`,
+  );
+  const ecarts = ecartsDeTout();
+  const imposes = ecartsImposes(ecarts);
   console.log(`balance-report.md écrit en ${String(Math.round((performance.now() - debut) / 100) / 10)} s.`);
   if (ecarts.length === 0) {
-    console.log('Toutes les bandes de la région 1 sont respectées.');
+    console.log('Toutes les bandes des régions 1 à 5 et des défis sont respectées.');
   } else {
-    console.log(`${String(ecarts.length)} écart(s) aux bandes de la région 1${BANDES_IMPOSEES ? '' : ' (bandes suspendues le temps de l’équilibrage après la grille, voir BANDES_IMPOSEES : la commande n’échoue pas)'} :`);
-    for (const e of ecarts) console.log(`- ${e}`);
-    if (BANDES_IMPOSEES) process.exitCode = 1;
-  }
-  for (const region of [2, 3, 4, 5]) {
-    const ecartsRegion = ecartsDeRegion(evaluationsDeRegion(evaluations, region));
-    console.log(`Région ${String(region)} (bandes pas encore imposées) : ${String(ecartsRegion.length)} écart(s).`);
+    const suspendus = ecarts.filter((e) => !imposes.includes(e));
+    console.log(`${String(imposes.length)} écart(s) aux bandes imposées${imposes.length === 0 ? '' : ' :'}`);
+    for (const e of imposes) console.log(`- ${e}`);
+    if (suspendus.length > 0) {
+      console.log(`${String(suspendus.length)} écart(s) aux bandes suspendues (Matou, Vieux Sage : voir bandes.ts, ils ne bloquent pas) :`);
+      for (const e of suspendus) console.log(`- ${e}`);
+    }
+    if (imposes.length > 0) process.exitCode = 1;
   }
 }

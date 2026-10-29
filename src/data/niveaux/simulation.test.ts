@@ -14,26 +14,14 @@ const DELAI_PARTIE_LONGUE = 30_000;
 
 describe('les niveaux de la région 1 se jouent', () => {
   for (const campagne of REGION1) {
-    it(`niveau ${String(campagne.numero)} : le bot soigneux gagne en Matou sur au moins deux graines sur trois, avec l'un des dieux`, () => {
+    it(`niveau ${String(campagne.numero)} : le bot soigneux gagne en Matou, quelle que soit la graine`, () => {
       // Matou est assez dur pour que le bot sans recherche perde parfois : on joue la variante retenue à l'entraînement, comme le simulateur.
-      // « Au moins deux sur trois, avec l'un des trois dieux » et non « toutes, avec Charlie » depuis la pose libre des tours (spec du
-      // 2026-10-28) : la difficulté des niveaux, réglée pour des socles fixes, n'est pas encore rééquilibrée (le niveau 10 de Charlie, par
-      // exemple, est devenu trop dur) ; à resserrer avec les bandes (BANDES_IMPOSEES, bandes.ts). Le niveau n'est pas impossible.
-      const victoiresParDieu: string[] = [];
-      for (const dieu of ['charlie', 'plume', 'pollen']) {
-        const { variante } = optimiserBot(campagne.niveau, 'matou', GRAINES_ENTRAINEMENT, { dieu });
-        let victoires = 0;
-        for (const graine of [7, 8, 9]) {
-          const bilan = jouerPartie(campagne.niveau, creerBotSoigneux({ variante }), { graine, difficulte: 'matou', dieu });
-          if (bilan.statut === 'victoire') {
-            victoires++;
-            expect(bilan.etoiles).toBeGreaterThanOrEqual(1);
-          }
-        }
-        victoiresParDieu.push(`${dieu} ${String(victoires)}/3`);
-        if (victoires >= 2) return;
+      const { variante } = optimiserBot(campagne.niveau, 'matou', GRAINES_ENTRAINEMENT);
+      for (const graine of [7, 8, 9]) {
+        const bilan = jouerPartie(campagne.niveau, creerBotSoigneux({ variante }), { graine, difficulte: 'matou' });
+        expect(bilan.statut, `graine ${String(graine)}`).toBe('victoire');
+        expect(bilan.etoiles).toBeGreaterThanOrEqual(1);
       }
-      expect.fail(`aucun dieu ne gagne deux graines sur trois : ${victoiresParDieu.join(', ')}`);
     }, DELAI_PARTIE_LONGUE);
 
     it(`niveau ${String(campagne.numero)} : sans aucune tour, on perd en Matou`, () => {

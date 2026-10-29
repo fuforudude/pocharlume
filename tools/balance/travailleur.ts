@@ -1,8 +1,17 @@
-// Fil de calcul de `npm run balance` : évalue un niveau dans une difficulté (pour un dieu, ou pour un profil de
-// vérification supplémentaire) et renvoie les évaluations au fil principal (tools/balance/index.ts).
-import { parentPort, workerData } from 'node:worker_threads';
+// Fil de calcul de `npm run balance` : évalue des niveaux dans une difficulté (pour un dieu, ou pour un profil de
+// vérification supplémentaire) et renvoie les évaluations au fil principal (tools/balance/index.ts). Un fil reste en vie et
+// traite les tâches qu'on lui envoie l'une après l'autre : démarrer un fil et charger le jeu coûte autant qu'une évaluation.
+import { parentPort } from 'node:worker_threads';
 import { niveauDeCampagne } from '../../src/data/niveaux/campagne.ts';
-import { evaluerCampagne, evaluerProfil, GRAINES_ENTRAINEMENT, GRAINES_EVALUATION, type Profil } from '../../src/equilibrage/campagne.ts';
+import {
+  evaluerCampagne,
+  evaluerProfil,
+  GRAINES_ENTRAINEMENT,
+  GRAINES_EVALUATION,
+  type Evaluation,
+  type EvaluationProfil,
+  type Profil,
+} from '../../src/equilibrage/campagne.ts';
 
 export interface TacheBandes {
   readonly type: 'bandes';
@@ -23,13 +32,16 @@ export interface TacheProfil {
   readonly bots: readonly ('naif' | 'soigneux')[];
 }
 
-const tache = workerData as TacheBandes | TacheProfil;
-const campagne = niveauDeCampagne(tache.numero);
-if (!campagne) throw new Error(`Niveau ${String(tache.numero)} introuvable`);
-const graines =
-  tache.graines <= GRAINES_EVALUATION.length ? GRAINES_EVALUATION.slice(0, tache.graines) : Array.from({ length: tache.graines }, (_, i) => 101 + i);
-parentPort?.postMessage(
-  tache.type === 'bandes'
+function calculer(tache: TacheBandes | TacheProfil): (Evaluation | EvaluationProfil)[] {
+  const campagne = niveauDeCampagne(tache.numero);
+  if (!campagne) throw new Error(`Niveau ${String(tache.numero)} introuvable`);
+  const graines =
+    tache.graines <= GRAINES_EVALUATION.length ? GRAINES_EVALUATION.slice(0, tache.graines) : Array.from({ length: tache.graines }, (_, i) => 101 + i);
+  return tache.type === 'bandes'
     ? evaluerCampagne({ niveaux: [campagne], difficultes: [tache.difficulte], dieux: [tache.dieu], graines, grainesEntrainement: GRAINES_ENTRAINEMENT.slice(0, tache.entrainement) })
-    : evaluerProfil(campagne, tache.difficulte, tache.profil, { graines, bots: tache.bots }),
-);
+    : evaluerProfil(campagne, tache.difficulte, tache.profil, { graines, bots: tache.bots });
+}
+
+parentPort?.on('message', (tache: TacheBandes | TacheProfil) => {
+  parentPort?.postMessage(calculer(tache));
+});

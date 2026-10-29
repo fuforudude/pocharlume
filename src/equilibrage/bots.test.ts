@@ -64,7 +64,9 @@ describe('bot naïf', () => {
   });
 
   it('construit, améliore et spécialise seulement : ni sorts, ni ordres au héros, ni appel de vague', () => {
-    const actions = actionsJouees(creerBotNaif({ graine: 9 }), 4);
+    // Avec assez d'arêtes pour remplir ses emplacements, le débutant améliore ses tours.
+    const riche = { ...niveau1, aretesDepart: 3000 };
+    const actions = [4, 5].flatMap((graine) => actionsJouees(creerBotNaif({ graine: 9 }), graine, 'matou', riche));
     const types = new Set(actions.map((a) => a.type));
     expect(types.has('construire')).toBe(true);
     expect(types.has('ameliorer')).toBe(true);
@@ -162,7 +164,7 @@ describe('bot soigneux avec chaque dieu', () => {
 
   it('les trois dieux construisent leur tour divine, sauf si on la retire au bot', () => {
     // Le niveau 5 est assez long pour que le bot, même sans recherche de variante, réunisse ses 200 arêtes.
-    const niveau5 = REGION1[4]?.niveau ?? niveau3;
+    const niveau5 = { ...(REGION1[4]?.niveau ?? niveau3), aretesDepart: 700 };
     for (const dieu of ['plume', 'charlie', 'pollen']) {
       const bot = creerBotSoigneux();
       const etat = creerPartie(niveau5, configPartie({ graine: 33, difficulte: 'matou', dieu }));
