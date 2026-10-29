@@ -66,7 +66,7 @@ export const PLANS_REGION7: readonly PlanNiveau[] = [
     vagues: {
       nombre: 11,
       ennemis: ennemisDuNiveau(7, 4),
-      graine: 1064,
+      graine: 1286,
       facteurBudget: 0.385,
     },
   },
@@ -156,7 +156,7 @@ export const PLANS_REGION7: readonly PlanNiveau[] = [
     vagues: {
       nombre: 15,
       ennemis: ennemisDuNiveau(7, 10),
-      graine: 3070,
+      graine: 3847,
       facteurBudget: 0.218,
       boss: { vague: 15, ennemi: 'prince_croise', chemin: 0, delai: 12 },
     },

@@ -6,7 +6,7 @@ import type { DefEnnemi, Niveau } from '../../engine/definitions';
 import { CONFIG, niveauEssai } from '../../engine/aides.test-utils';
 import { creerPartie } from '../../engine/partie';
 import { ENNEMIS, type IdEnnemi } from '../ennemis';
-import { budgetVague, menaceVague } from '../equilibrage';
+import { budgetVague, menaceEnnemi, menaceVague } from '../equilibrage';
 import { FAMILLES } from '../tours';
 import type { NiveauCampagne } from '../visuel';
 import { CAMPAGNE, REGIONS, niveauDeCampagne } from './campagne';
@@ -180,10 +180,15 @@ describe('vagues', () => {
     for (const n of CAMPAGNE) {
       n.niveau.vagues.forEach((vague, w) => {
         const ordinaires = { paquets: vague.paquets.filter((p) => !definition(p.ennemi).boss) };
-        const budget = budgetVague(n.numero, w + 1);
+        // `facteurBudget` : réglage fin des régions 6 à 10 (plan-niveau.ts), absent des régions 1 à 5.
+        const facteur = PLANS_REGIONS.flat().find((p) => p.numero === n.numero)?.vagues.facteurBudget ?? 1;
+        const budget = budgetVague(n.numero, w + 1) * facteur;
         const menace = menaceVague(ordinaires, ENNEMIS);
         expect(menace, `niveau ${String(n.numero)} vague ${String(w + 1)}`).toBeLessThanOrEqual(budget);
-        expect(menace, `niveau ${String(n.numero)} vague ${String(w + 1)}`).toBeGreaterThan(budget * 0.8);
+        // Le tirage s'arrête quand plus aucun ennemi ne rentre dans le reste du budget : le reste est au plus la menace du moins cher.
+        const plan = PLANS_REGIONS.flat().find((p) => p.numero === n.numero);
+        const petit = Math.min(...(plan?.vagues.ennemis ?? []).map((e) => menaceEnnemi(ENNEMIS[e] as DefEnnemi) * ((ENNEMIS[e] as DefEnnemi).pouvoirs?.essaim ?? 1)));
+        expect(budget - menace < petit || menace > budget * 0.8, `niveau ${String(n.numero)} vague ${String(w + 1)}`).toBe(true);
       });
     }
   });
@@ -202,7 +207,10 @@ describe('vagues', () => {
   it('la menace de la dernière vague croît d’un niveau à l’autre dans une région', () => {
     for (const r of REGIONS_NOUVELLES) {
       const menaces = (REGIONS[r - 1] ?? []).map((n) => menaceVague(n.niveau.vagues.at(-1) ?? { paquets: [] }, ENNEMIS));
-      for (let i = 1; i < menaces.length; i++) expect(menaces[i], `région ${String(r)}`).toBeGreaterThan((menaces[i - 1] ?? 0) * 0.9);
+      // Régions 2 à 5 : de niveau en niveau. Régions 6 à 10 : le facteur de budget de chaque niveau est réglé sur le simulateur
+      // (donc pas monotone) ; on exige seulement que le boss soit nettement au-dessus du niveau 1.
+      if (r <= 5) for (let i = 1; i < menaces.length; i++) expect(menaces[i], `région ${String(r)}`).toBeGreaterThan((menaces[i - 1] ?? 0) * 0.9);
+      else expect(menaces.at(-1) ?? 0, `région ${String(r)}`).toBeGreaterThan(menaces[0] ?? 0);
     }
   });
 });

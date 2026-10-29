@@ -14,7 +14,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
     numero: 81,
     carte: 'avenue',
     chemins: [0],
-    aretesDepart: 1170,
+    aretesDepart: 2100,
     defiFer: { familles: ['caserne', 'magie'] },
     nom: 'niveau.r9.01.nom',
     ambiance: 'niveau.r9.01.ambiance',
@@ -22,7 +22,8 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
       nombre: 10,
       ennemis: ennemisDuNiveau(9, 1),
       graine: 2081,
-      facteurBudget: 0.157,
+      facteurBudget: 0.217,
+
     },
   },
   {
@@ -38,6 +39,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
       ennemis: ennemisDuNiveau(9, 2),
       graine: 3415,
       facteurBudget: 0.209,
+
     },
   },
   {
@@ -53,6 +55,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
       ennemis: ennemisDuNiveau(9, 3),
       graine: 4194,
       facteurBudget: 0.217,
+
     },
   },
   {
@@ -68,6 +71,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
       ennemis: ennemisDuNiveau(9, 4),
       graine: 1084,
       facteurBudget: 0.366,
+
     },
   },
   {
@@ -83,6 +87,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
       ennemis: ennemisDuNiveau(9, 5),
       graine: 2085,
       facteurBudget: 0.294,
+
     },
   },
   {
@@ -98,6 +103,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
       ennemis: ennemisDuNiveau(9, 6),
       graine: 3086,
       facteurBudget: 0.638,
+
     },
   },
   {
@@ -113,6 +119,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
       ennemis: ennemisDuNiveau(9, 7),
       graine: 4087,
       facteurBudget: 0.245,
+
     },
   },
   {
@@ -128,6 +135,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
       ennemis: ennemisDuNiveau(9, 8),
       graine: 1088,
       facteurBudget: 0.252,
+
     },
   },
   {
@@ -143,6 +151,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
       ennemis: ennemisDuNiveau(9, 9),
       graine: 2089,
       facteurBudget: 0.258,
+
     },
   },
   {
@@ -158,6 +167,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
       ennemis: ennemisDuNiveau(9, 10),
       graine: 3090,
       facteurBudget: 0.207,
+
       boss: { vague: 15, ennemi: 'roi_fou', chemin: 0, delai: 12 },
     },
   },

@@ -2,6 +2,9 @@
 import { CAMPAGNE } from '../../src/data/niveaux/campagne.ts';
 import { vaguesDuPlan } from '../../src/data/niveaux/generation.ts';
 import { PLANS_REGIONS } from '../../src/data/niveaux/plans.ts';
+import type { DefEnnemi } from '../../src/engine/definitions.ts';
+import { ENNEMIS } from '../../src/data/ennemis.ts';
+import { budgetVague, menaceEnnemi } from '../../src/data/equilibrage.ts';
 import { creerBotNaif } from '../../src/equilibrage/bot-naif.ts';
 import { jouerPartie } from '../../src/equilibrage/simulation.ts';
 const [a, b] = process.argv[2]?.split('-').map(Number) ?? [51, 60];
@@ -21,6 +24,9 @@ const sortie: Record<string, number> = {};
 for (let n = a ?? 51; n <= (b ?? 60); n++) {
   const plan = PLANS_REGIONS.flat().find((p) => p.numero === n);
   let f = plan?.vagues.facteurBudget ?? 1;
+  // Plancher : la première vague doit contenir au moins l'ennemi le moins cher du niveau (et un groupe entier d'essaim).
+  const plancher = (Math.min(...(plan?.vagues.ennemis ?? []).map((e) => menaceEnnemi(ENNEMIS[e] as DefEnnemi) * ((ENNEMIS[e] as DefEnnemi).pouvoirs?.essaim ?? 1))) * 1.05) / budgetVague(n, 1);
+  f = Math.max(f, Math.ceil(plancher * 1000) / 1000);
   let dernier = '';
   for (let i = 0; i < 8; i++) {
     const m = taux(n, f, 'matou');
@@ -29,7 +35,7 @@ for (let n = a ?? 51; n <= (b ?? 60); n++) {
     if (m < 0.35 || c < 1) f *= m < 0.35 ? 0.78 : 0.88;
     else if (m > 0.8) f *= 1.28;
     else break;
-    f = Math.round(f * 1000) / 1000;
+    f = Math.max(Math.ceil(plancher * 1000) / 1000, Math.round(f * 1000) / 1000);
   }
   sortie[String(n)] = f;
   console.error(`niveau ${String(n)} facteur ${String(f)} (${dernier})`);

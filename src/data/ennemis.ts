@@ -442,7 +442,7 @@ export const ENNEMIS = {
 
   // --- Région 9 : la Cité du Roi -------------------------------------------------------------------
   /** Armure 90 %, lent. */
-  garde_royal: ennemi({ nom: 'ennemi.garde_royal', pv: 200, vitesse: 0.6, armure: 0.9, degats: [7, 10], cadence: 1.4, coutVies: 1, prime: 22 }),
+  garde_royal: ennemi({ nom: 'ennemi.garde_royal', pv: 130, vitesse: 0.6, armure: 0.9, degats: [7, 10], cadence: 1.4, coutVies: 1, prime: 22 }),
   /** Tire sur les soldats et le héros à 3,5 tuiles. */
   arbaletrier_elite: ennemi({
     nom: 'ennemi.arbaletrier_elite',
@@ -494,7 +494,7 @@ export const ENNEMIS = {
   /** Résistance magique 30 % ; invoque 2 Creux toutes les 8 s. */
   acolyte_cendre: ennemi({
     nom: 'ennemi.acolyte_cendre',
-    pv: 140,
+    pv: 80,
     vitesse: 0.8,
     resistance: 0.3,
     degats: [4, 6],
