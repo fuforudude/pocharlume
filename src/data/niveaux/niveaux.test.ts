@@ -301,7 +301,8 @@ describe('progression de la région', () => {
     for (const n of REGION1) {
       n.niveau.vagues.forEach((vague, w) => {
         const ordinaires = { paquets: vague.paquets.filter((p) => !ENNEMIS[p.ennemi as keyof typeof ENNEMIS].boss) };
-        const budget = budgetVague(n.numero, w + 1);
+        // `facteurBudget` (jalon 5) : les niveaux 2 et 4 pèsent plus lourd pour que le héros seul y perde en Chaton.
+        const budget = budgetVague(n.numero, w + 1) * (PLANS_REGIONS[0]?.[n.numero - 1]?.vagues.facteurBudget ?? 1);
         const menace = menaceVague(ordinaires, ENNEMIS);
         expect(menace, `niveau ${String(n.numero)} vague ${String(w + 1)}`).toBeLessThanOrEqual(budget);
         expect(menace, `niveau ${String(n.numero)} vague ${String(w + 1)}`).toBeGreaterThan(budget * 0.8);
@@ -310,7 +311,8 @@ describe('progression de la région', () => {
   });
 
   it('la menace des vagues croît d’un niveau à l’autre pour une même vague', () => {
-    const menaces = REGION1.map((n) => menaceVague(n.niveau.vagues[5] ?? { paquets: [] }, ENNEMIS));
+    // Hors réglage fin du niveau (`facteurBudget`).
+    const menaces = REGION1.map((n) => menaceVague(n.niveau.vagues[5] ?? { paquets: [] }, ENNEMIS) / (PLANS_REGIONS[0]?.[n.numero - 1]?.vagues.facteurBudget ?? 1));
     for (let i = 1; i < menaces.length; i++) expect(menaces[i]).toBeGreaterThan((menaces[i - 1] ?? 0) * 0.9);
   });
 });

@@ -31,6 +31,8 @@ import {
 import { profilProgression, profilsDisciples, profilSansTourDivine } from '../../src/equilibrage/profils.ts';
 import { CARTES_INFINI_AUTRES, CARTES_INFINI_REGION1, ecartsInfini, mediane, redigerInfini, type MesureInfini } from '../../src/equilibrage/infini.ts';
 import { redigerRapport } from '../../src/equilibrage/rapport.ts';
+import { moyennesZone, NIVEAUX_ZONE_HORDE, NIVEAUX_ZONE_ORDINAIRES, redigerZone } from '../../src/equilibrage/zone.ts';
+import { niveauDeCampagne } from '../../src/data/niveaux/campagne.ts';
 import { ecartsDeLaRegion, evaluationsDeRegion, redigerDefis, redigerRegions } from '../../src/equilibrage/rapport-regions.ts';
 import type { TacheBandes, TacheInfini, TacheProfil } from './travailleur.ts';
 
@@ -222,6 +224,9 @@ if (miseAuPoint) {
 } else {
   // Rapport principal : région 1, comme avant ; puis les régions 2 à 10 et les défis des dix régions.
   const region1 = evaluationsDeRegion(evaluations, 1);
+  // La zone : mesurée dans le fil principal (une à trois minutes).
+  const niveauDe = (n: number) => niveauDeCampagne(n)?.niveau;
+  const zone = redigerZone(moyennesZone(NIVEAUX_ZONE_ORDINAIRES, niveauDe, DIEUX_EVALUES), moyennesZone(NIVEAUX_ZONE_HORDE, niveauDe, DIEUX_EVALUES));
   writeFileSync(
     SORTIE,
     `${redigerRapport(region1, graines, profils).trimEnd()}
@@ -231,6 +236,8 @@ ${redigerRegions(evaluations, [2, 3, 4, 5, 6, 7, 8, 9, 10]).trimEnd()}
 ${redigerDefis(evaluations, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).trimEnd()}
 
 ${redigerInfini(mesuresInfini).trimEnd()}
+
+${zone.trimEnd()}
 `,
   );
   const ecarts = ecartsDeTout();

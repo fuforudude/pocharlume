@@ -568,6 +568,72 @@ Charlie et Pollen très en dessous (0 à 36 %) ; ce sont les dieux qu'il faut re
 (et non tout) aux régions 6, 7 et 9, il perd au moins une vie sur peu de niveaux, le naïf de Charlie sort de la bande par le bas (14 à 28 %) et celui de Pollen par le haut
 (82 à 84 % aux régions 7 et 8) ; la courbe de difficulté n'est pas monotone et le niveau 10 n'est pas parmi les 3 plus durs.
 
+### Équilibrage du jalon 5 (moins d'ennemis, plus solides, zone)
+Spec : `docs/specs/2026-10-29-densite-ennemis.md`. Les tours de zone dominaient parce que la menace d'un ennemi est linéaire en PV et que les
+colonnes étaient serrées (0,3 s entre deux ennemis) : dix ennemis de 50 PV valent un ennemi de 500 PV, et un coup de zone les touchait tous.
+
+Mécanique (`src/data/equilibrage.ts`, `generation.ts`, `plan-niveau.ts`) :
+- **Robustesse** : `EQUILIBRAGE.robustesseOrdinaires` = 2. Hors horde, chaque ennemi tiré coûte 2 fois sa menace au budget et son paquet porte
+  `facteurPv: 2` (PV et prime ×2, déjà géré par le moteur pour le mini-boss de l'infini) : la menace totale d'une vague (nombre × PV) est
+  inchangée, l'effectif est divisé par 2 (de 79 à 41 ennemis par vague en moyenne sur les 90 niveaux ordinaires, 44 à 51 % de moins selon la région).
+  Quand le budget restant ne paie plus un ennemi renforcé entier, le facteur baisse (jamais sous 1) : sans cela les premières vagues des
+  régions 7 à 10, au petit budget, n'auraient aucun ennemi cher. `menaceVague` compte le facteur. Les boss ne sont jamais renforcés.
+- **Espacement** : `EQUILIBRAGE.ecartMinimalTuiles` = 1,3 (la spec demande au moins 0,8). L'intervalle d'un paquet vaut `ceil(1,3 / vitesse)` au
+  dixième de seconde supérieur (`intervallePaquet`), hors essaims, qui gardent leurs colonnes serrées (0,3 s). Avec 0,8 la zone sans caserne gagnait
+  9 points de plus que sans zone dans les niveaux ordinaires, 7 avec 1,25, 2 avec 1,3 ; avec 1,4 ni la caserne ni la zone n'ont plus d'effet
+  (mesures de `zone.ts`, voir plus bas).
+- **Horde** : `PlanNiveau.vagues.horde` (et `Niveau.horde`, `NiveauCampagne.horde`) garde la densité d'avant (robustesse 1, colonnes à 0,3 s, essaims).
+  Deux niveaux par région : les niveaux 3 et 7 de chaque région (3, 7, 13, 17, …, 93, 97), sur des cartes à virages serrés (le 3 : un seul chemin
+  qui serpente) ou à long tronc commun (le 7 : deux entrées qui se rejoignent). Le boss n'est jamais une horde. La fiche du niveau montre
+  « Horde » et une phrase d'aide (`src/i18n/fr-horde.ts`).
+- **Estimation de puissance** (`dpsEfficace(def, ciblesParRayon, presenceChaine)`) : `ciblesParRayonDeZone` 1,5 → 1,2 (colonne espacée) ; 1,2 est
+  la valeur la plus basse qui garde chaque tour à ±15 % de son palier (à 1, la catapulte sort à −17 % et le mortier à −22 %) sans toucher aux
+  chiffres des tours. `ciblesParRayonDeZoneBloquees` 3,5 (ennemis arrêtés par des soldats, au contact) et `ciblesParRayonDeZoneHorde` 4,5 ne servent
+  qu'au bot soigneux.
+- **Format des vagues figées** : six nombres par groupe (le sixième est le facteur de PV, 1 = normal). `VERSION_DONNEES` 11 → 12.
+- **Infini** : le moteur utilise le même générateur (robustesse 2 comprise) et multiplie le facteur du plafond par celui de la robustesse
+  (`facteurPv × facteurVague`). Le plafond `ennemisMaxParVague` reste à 200 (la robustesse divise déjà l'effectif par deux) et la croissance à ×1,22 :
+  soigneux, médiane de la vague 32 à 36 sur la région 1 (bande 25 à 45), naïf au plus la vague 29 (bande : 30).
+
+Bot soigneux (« bloquer puis zone », `bot-soigneux.ts`) : il marque, pour chaque point du chemin, s'il est arrêté par des soldats (à 1,5 tuile du ralliement d'une
+caserne) ; une tour de zone y est valorisée avec `ciblesParRayonDeZoneBloquees`, ailleurs avec `ciblesParRayonDeZone` ; une caserne vaut aussi ce
+qu'elle apporte à la zone déjà posée (`utiliteBlocage`) et, pour la nouvelle variante « bloquer puis zone » (`VarianteSoigneux.blocage`), à une catapulte
+attendue derrière elle. Les variantes passent de dix à douze (6 préférences × 2 diversités). En horde, il estime la zone avec `ciblesParRayonDeZoneHorde`.
+`OptionsSoigneux.familles` restreint les familles permises (compositions des mesures).
+
+Mesure de la zone (`src/equilibrage/zone.ts`, tests `zone-ordinaires.test.ts` et `zone-horde.test.ts`, section « La zone » de `balance-report.md`) : taux de
+victoire du soigneux (sans tour divine, 45 % des arêtes de départ en Vieux Sage, trois dieux, six graines) avec quatre compositions : sans zone (tir, magie),
+zone sans caserne (+ artillerie), caserne sans zone, caserne et zone. Tolérances (chaque taux porte sur 144 parties ordinaires ou 54 de horde) : « pas plus »
+= au plus 6 points de plus ; « plus » = au moins 10 points ; horde = au moins 20 points. Résultat du rapport : niveaux ordinaires 60 % sans zone, 58 % zone seule
+(−1 point), 57 % caserne seule, 69 % caserne et zone (+12) ; horde 17 %, 59 % (+43), 6 %, 63 %. Les mesures sont sensibles (un seuil de sort du bot, la graine d'un
+niveau les déplacent de quelques points) : ne pas resserrer les tolérances sans agrandir l'échantillon.
+
+Rééquilibrage (avant → après) :
+- **Régions 6 à 10** : `facteurBudget` refait par `affiner.ts` (naïf entre 35 et 80 % en Matou, 100 % en Chaton) : par exemple niveau 78 : 0,477 → 1,001, niveau 80 : 0,393 → 1,055
+  (les ennemis renforcés et espacés rendaient ces niveaux trop faciles), niveau 100 : 0,042 → 0,15 (le héros de Pollen seul le gagnait). Niveau 85 : graine 2085 → 2086
+  (le Garde Royal n'y apparaissait plus). Arêtes de départ de la région 10 ×0,92 et de la région 9 ×0,92 puis ×0,9 : le Fer y dépassait 90 %.
+- **Régions 1 à 5** : niveaux 2 et 4 de la région 1 : `facteurBudget` 3,2 et 1,5 (le héros de Pollen seul les gagnait en Chaton : ses tirs à distance tuent des ennemis espacés
+  un à un) ; niveau 5 : 220 → 280 arêtes (le soigneux le perdait en Matou à la graine 8) ; niveau 13 (horde) : 975 → 1250 arêtes (le naïf de Charlie perdait en Chaton).
+- Tests adaptés : les tests de budget de la région 1 tiennent compte du `facteurBudget` des niveaux 2 et 4 ; le test de rejeu joue le niveau 3 (le plan de construction
+  fixe de `bot.test-utils.ts` perd les autres niveaux, sans que le moteur soit en cause) ; les tests de sorts du bot jouent le niveau 10.
+
+Résultats (10 graines, comme les bandes) : voir `balance-report.md`. **Bandes imposées : toutes tenues** (Chaton, le héros seul perd, défis, infini, puissance).
+Défis (soigneux, trois dieux), Héroïque / Fer par région : R1 87 / 85 %, R2 74 / 86, R3 83 / 77, R4 84 / 84, R5 83 / 58, R6 79 / 76, R7 63 / 86, R8 85 / 80,
+R9 55 / 88, R10 83 / 86 (jalon 4 : R1 73 / 78, R2 66 / 69, R3 72 / 62, R4 48 / 70, R5 51 / 45 pour les régions 1 à 5 ; R6 55 / 62, R7 50 / 87, R8 68 / 79, R9 53 / 90, R10 67 / 88).
+Soigneux / naïf en Matou par région, Plume / Charlie / Pollen : région 1 100 / 100 / 100 et 75 / 51 / 98 % ; région 5 100 / 99 / 100 et 81 / 46 / 82 % ;
+région 10 100 / 100 / 100 et 80 / 40 / 89 %. Toujours suspendues (Matou et Vieux Sage, comme aux jalons 3 et 4) : Charlie et Pollen très en dessous de Plume en Vieux Sage,
+Pollen trop fort pour le naïf en Matou, courbe de difficulté non monotone.
+
+Outils : `tools/cartes/densite.ts` (effectifs par vague avec et sans robustesse), `tools/cartes/aligner.py` (alignement des chemins sur la grille), `tools/cartes/avant-apres.ts`.
+
+### Chemins sur la grille des cases (jalon 5)
+Les chemins des 31 cartes (`cartes*.ts`) passent par le centre des cases : coordonnées de tuile impaires (la case `i` couvre les tuiles `2i` et `2i+1`), segments
+horizontaux ou verticaux, entrée et sortie par le bord de la carte. Le chemin dessiné (2 tuiles de large) et les cases interdites par le chemin (`tuilesDeChemin`) sont
+alors exactement les cases traversées par l'axe : plus aucune case à moitié chemin. `estCaseDeChemin` (engine/grille.ts) le dit ; l'interface n'ouvre ni menu ni
+surbrillance de pose sur une case de chemin (le toucher referme seulement le menu ouvert). Conversion : `tools/cartes/aligner.py` (chaque coordonnée paire passe
+à l'impair voisin, en gardant l'ordre des coordonnées ; il refuse de fusionner deux files). Tests : `chemins-grille.test.ts` (règle sur les 31 cartes) et
+`sol-chemin-grille.test.ts` (sol dessiné et cases interdites identiques). Planche : `docs/cartes/chemins-avant-apres.png`. La carte de test (`NIVEAU_TEST`) n'a pas été alignée.
+
 ### Équilibrage des trois dieux (jalon 2, tâche 6)
 - **Constat.** Le héros porte la difficulté. Les ennemis arrivent en colonnes serrées (0,3 s d'écart) et un héros ne bloque
   qu'un ennemi à la fois : seul le coup de zone de Charlie (il touche tout ce qui est dans un rayon d'une tuile autour de sa

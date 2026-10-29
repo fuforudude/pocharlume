@@ -14,7 +14,7 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
     numero: 91,
     carte: 'nef',
     chemins: [0],
-    aretesDepart: 1350,
+    aretesDepart: 1240,
     defiFer: { familles: ['caserne', 'magie'] },
     nom: 'niveau.r10.01.nom',
     ambiance: 'niveau.r10.01.ambiance',
@@ -32,7 +32,7 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
     numero: 92,
     carte: 'transept',
     chemins: [0],
-    aretesDepart: 1135,
+    aretesDepart: 1045,
     defiFer: { familles: ['artillerie', 'magie'] },
     nom: 'niveau.r10.02.nom',
     ambiance: 'niveau.r10.02.ambiance',
@@ -50,7 +50,7 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
     numero: 93,
     carte: 'choeur',
     chemins: [0],
-    aretesDepart: 1215,
+    aretesDepart: 1120,
     defiFer: { familles: ['caserne', 'magie'] },
     nom: 'niveau.r10.03.nom',
     ambiance: 'niveau.r10.03.ambiance',
@@ -69,7 +69,7 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
     numero: 94,
     carte: 'transept',
     chemins: [1],
-    aretesDepart: 1300,
+    aretesDepart: 1195,
     defiFer: { familles: ['magie', 'tir'] },
     nom: 'niveau.r10.04.nom',
     ambiance: 'niveau.r10.04.ambiance',
@@ -87,7 +87,7 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
     numero: 95,
     carte: 'choeur',
     chemins: [1],
-    aretesDepart: 1380,
+    aretesDepart: 1270,
     defiFer: { familles: ['caserne', 'tir'] },
     nom: 'niveau.r10.05.nom',
     ambiance: 'niveau.r10.05.ambiance',
@@ -95,7 +95,7 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
       nombre: 12,
       ennemis: ennemisDuNiveau(10, 5),
       graine: 4095,
-      facteurBudget: 0.2,
+      facteurBudget: 0.689,
 
 
 
@@ -105,7 +105,7 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
     numero: 96,
     carte: 'nef',
     chemins: [0],
-    aretesDepart: 1465,
+    aretesDepart: 1350,
     defiFer: { familles: ['artillerie', 'tir'] },
     nom: 'niveau.r10.06.nom',
     ambiance: 'niveau.r10.06.ambiance',
@@ -113,7 +113,7 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
       nombre: 12,
       ennemis: ennemisDuNiveau(10, 6),
       graine: 1096,
-      facteurBudget: 0.3,
+      facteurBudget: 0.384,
 
 
 
@@ -123,7 +123,7 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
     numero: 97,
     carte: 'transept',
     chemins: [0, 1],
-    aretesDepart: 1545,
+    aretesDepart: 1420,
     defiFer: { familles: ['magie', 'tir'] },
     nom: 'niveau.r10.07.nom',
     ambiance: 'niveau.r10.07.ambiance',
@@ -132,7 +132,7 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
       ennemis: ennemisDuNiveau(10, 7),
       graine: 2097,
       horde: true,
-      facteurBudget: 0.25,
+      facteurBudget: 0.195,
 
 
 
@@ -142,7 +142,7 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
     numero: 98,
     carte: 'choeur',
     chemins: [0, 1],
-    aretesDepart: 1630,
+    aretesDepart: 1500,
     defiFer: { familles: ['caserne', 'tir'] },
     nom: 'niveau.r10.08.nom',
     ambiance: 'niveau.r10.08.ambiance',
@@ -150,7 +150,7 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
       nombre: 13,
       ennemis: ennemisDuNiveau(10, 8),
       graine: 3653,
-      facteurBudget: 0.117,
+      facteurBudget: 0.246,
 
 
 
@@ -160,7 +160,7 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
     numero: 99,
     carte: 'transept',
     chemins: [0, 1],
-    aretesDepart: 1710,
+    aretesDepart: 1575,
     defiFer: { familles: ['artillerie', 'tir'] },
     nom: 'niveau.r10.09.nom',
     ambiance: 'niveau.r10.09.ambiance',
@@ -178,7 +178,7 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
     numero: 100,
     carte: 'choeur',
     chemins: [0, 1],
-    aretesDepart: 2870,
+    aretesDepart: 2640,
     defiFer: { familles: ['magie', 'tir'] },
     nom: 'niveau.r10.10.nom',
     ambiance: 'niveau.r10.10.ambiance',
@@ -186,7 +186,7 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
       nombre: 15,
       ennemis: ennemisDuNiveau(10, 10),
       graine: 1100,
-      facteurBudget: 0.042,
+      facteurBudget: 0.15,
 
 
 

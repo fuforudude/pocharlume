@@ -12,6 +12,6 @@ PLANS_REGIONS.forEach((plans, r) => {
     vag += p.vagues.nombre;
   }
   ta += a; tn += n; tv += vag;
-  console.log(`région ${r + 1} : ${(a / vag).toFixed(1)} -> ${(n / vag).toFixed(1)} ennemis par vague (${Math.round((1 - n / a) * 100)} % en moins)`);
+  console.log(`région ${String(r + 1)} : ${(a / vag).toFixed(1)} -> ${(n / vag).toFixed(1)} ennemis par vague (${String(Math.round((1 - n / a) * 100))} % en moins)`);
 });
-console.log(`total : ${(ta / tv).toFixed(1)} -> ${(tn / tv).toFixed(1)} (${Math.round((1 - tn / ta) * 100)} % en moins)`);
+console.log(`total : ${(ta / tv).toFixed(1)} -> ${(tn / tv).toFixed(1)} (${String(Math.round((1 - tn / ta) * 100))} % en moins)`);

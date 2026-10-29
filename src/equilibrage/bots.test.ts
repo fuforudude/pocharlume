@@ -178,7 +178,7 @@ describe('bot soigneux avec chaque dieu', () => {
   }, DELAI_PARTIE_LONGUE);
 
   it('chaque dieu lance ses deux sorts dans une partie longue, et le résultat les compte', () => {
-    const niveau = REGION1[7]?.niveau ?? niveau3;
+    const niveau = REGION1[9]?.niveau ?? niveau3;
     for (const dieu of ['plume', 'charlie', 'pollen']) {
       const r = jouerPartie(niveau, creerBotSoigneux(), { graine: 41, difficulte: 'matou', dieu });
       expect(r.sorts.length, dieu).toBe(2);
