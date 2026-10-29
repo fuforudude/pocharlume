@@ -1,3 +1,5 @@
+import { ErreurRequete } from './types.ts';
+
 // Édition ciblée d'un fichier texte : on ne réécrit que les lignes de grille qui changent. Les commentaires, les
 // fins de ligne (LF ou CRLF), l'indentation et tout le reste du fichier restent identiques à l'octet près.
 
@@ -8,6 +10,8 @@ export interface BlocGrille {
   readonly longueur: number;
   /** Lignes voulues (peuvent être plus nombreuses : la grille s'allonge). */
   readonly lignes: readonly string[];
+  /** Les lignes que la grille actuelle doit avoir (sans indentation) : si le fichier dit autre chose (commentaire au milieu, fichier modifié), on refuse. */
+  readonly attendues?: readonly string[];
 }
 
 function sansPointsFinaux(ligne: string): string {
@@ -37,6 +41,9 @@ export function remplacerGrilles(texte: string, blocs: readonly BlocGrille[]): s
     const anciennes = lignes.slice(debut, debut + bloc.longueur);
     if (anciennes.length !== bloc.longueur) throw new Error(`Grille hors du fichier à la ligne ${String(bloc.debut)}`);
     const brutes = anciennes.map((l) => l.replace(/\r$/, ''));
+    if (bloc.attendues && JSON.stringify(brutes.map((l) => l.trim())) !== JSON.stringify(bloc.attendues)) {
+      throw new ErreurRequete(`Grille de la ligne ${String(bloc.debut)} : le fichier ne correspond pas à la grille lue (commentaire au milieu de la grille ou fichier modifié), elle ne peut pas être retouchée ici`);
+    }
     const indent = /^\s*/.exec(brutes[0] ?? '')?.[0] ?? '';
     const fusionnees = fusionnerGrille(brutes.map((l) => l.trim()), bloc.lignes);
     const sortie = fusionnees.map((l, k) => {

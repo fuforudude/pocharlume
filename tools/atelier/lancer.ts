@@ -26,11 +26,11 @@ if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error(`Por
 const serveur = await createServer({
   configFile: false,
   root: join(import.meta.dirname, 'client'),
-  // Le cache de Vite va dans le dossier du cœur, jamais dans les dossiers du projet.
+  // Le cache de Vite va dans node_modules du projet (à côté de la config) : jamais dans les dossiers où l'atelier écrit.
   cacheDir: join(dirname(fichierConfig), 'node_modules', '.vite-atelier'),
   clearScreen: false,
   plugins: [pluginAtelier(adaptateur)],
-  server: { host: '127.0.0.1', port, strictPort: true, open: false, fs: { allow: [join(import.meta.dirname, 'client')] } },
+  server: { host: '127.0.0.1', cors: false, port, strictPort: true, open: false, fs: { allow: [join(import.meta.dirname, 'client')] } },
 });
 await serveur.listen();
 console.log(`Atelier « ${adaptateur.nom} » : http://127.0.0.1:${String(port)}/ (Ctrl+C pour arrêter)`);

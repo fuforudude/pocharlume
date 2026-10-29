@@ -6,14 +6,34 @@ import { describe, expect, it } from 'vitest';
 import { lireSprites } from '../art/format.ts';
 import { estPermis, normaliser } from '../atelier/chemins.ts';
 import { remplacerGrilles, type BlocGrille } from '../atelier/ecriture-texte.ts';
-import type { DocumentCarte, DocumentSprite } from '../atelier/types.ts';
+import { ErreurConflit, type DocumentCarte, type DocumentSprite } from '../atelier/types.ts';
 import { ECRITURE_PERMISE, adaptateurPocharlume } from './adaptateur.ts';
+import { CARTES, type CarteModele } from '../../src/data/niveaux/cartes-toutes';
+import { PLANS_REGIONS } from '../../src/data/niveaux/plans';
+import { mesures, niveauAvecDecors } from './seuils.ts';
 import { charger, grillesDe, indexParNom } from './sources.ts';
 
 const RACINE = join(import.meta.dirname, '..', '..');
 const DOSSIER_SPRITES = join(RACINE, 'art', 'sprites');
 const FICHIERS = readdirSync(DOSSIER_SPRITES).filter((f) => f.endsWith('.txt')).sort();
 const a = adaptateurPocharlume(RACINE);
+
+/** Enregistre des calques comme le fait l'interface : lignes d'origine et empreinte de l'ouverture. */
+async function sauverSprite(id: string, modifs: Record<string, readonly string[]>): Promise<readonly { chemin: string; contenu: string }[]> {
+  const doc = (await a.sprites?.ouvrir(id)) as DocumentSprite;
+  const origine = Object.fromEntries(Object.keys(modifs).map((k) => [k, doc.calques.find((c) => c.id === k)?.lignes ?? []]));
+  return (await a.sprites?.enregistrer(id, modifs, { origine, empreinte: doc.empreinte })) ?? [];
+}
+
+/** Idem pour une carte : seuls les objets déplacés partent, avec leur origine. */
+async function sauverCarte(id: string, deplaces: Record<string, { x: number; y: number }>): Promise<readonly { chemin: string; contenu: string }[]> {
+  const doc = (await a.cartes?.ouvrir(id)) as DocumentCarte;
+  const complets = Object.fromEntries(Object.entries(deplaces).map(([oid, p]) => {
+    const o = doc.objets.find((x) => x.id === oid) as DocumentCarte['objets'][number];
+    return [oid, { ...p, origine: { libelle: o.libelle, x: o.x, y: o.y } }];
+  }));
+  return (await a.cartes?.enregistrer(id, complets, doc.empreinte)) ?? [];
+}
 
 describe('sources de sprites : aller-retour sans perte', () => {
   it('compte les 66 fichiers de sprites', () => {
@@ -46,8 +66,8 @@ describe('sources de sprites : aller-retour sans perte', () => {
       if (!sprite) continue;
       const modifs: Record<string, readonly string[]> = {};
       for (const g of grillesDe(sprite, parNom)) modifs[g.cle] = g.grille.lignes;
-      const ecritures = await a.sprites?.enregistrer(sprite.nom, modifs);
-      for (const e of ecritures ?? []) expect(e.contenu, e.chemin).toBe(readFileSync(join(RACINE, e.chemin), 'utf8'));
+      const ecritures = await sauverSprite(sprite.nom, modifs);
+      for (const e of ecritures) expect(e.contenu, e.chemin).toBe(readFileSync(join(RACINE, e.chemin), 'utf8'));
     }
   });
 
@@ -69,20 +89,20 @@ describe('édition d\'un sprite', () => {
     lignes[0] = lettre + (lignes[0] ?? '').slice(1);
     const modifs = { [calque?.id ?? '']: lignes };
 
-    const [e] = (await a.sprites?.enregistrer('paysan-affame', modifs)) ?? [];
+    const [e] = await sauverSprite('paysan-affame', modifs);
     const avant = readFileSync(join(RACINE, e?.chemin ?? ''), 'utf8').split('\n');
     const apres = (e?.contenu ?? '').split('\n');
     expect(apres).toHaveLength(avant.length);
     expect(avant.filter((l, i) => l !== apres[i])).toHaveLength(1);
 
-    const nouveau = await a.sprites?.apercu('paysan-affame', modifs);
+    const nouveau = await a.sprites?.apercu('paysan-affame', modifs, { [calque?.id ?? '']: calque?.lignes ?? [] });
     const meme = (x: string | undefined, y: string | undefined): boolean => x === y;
     expect(meme(nouveau?.apercu.animations[0]?.cadres[0]?.image.rvba, doc.apercu.animations[0]?.cadres[0]?.image.rvba)).toBe(false);
     expect(nouveau?.derives.map((d) => d.nom)).toContain('paysan-affame-elite');
   });
 
   it('refuse une grille inconnue', async () => {
-    await expect((async () => a.sprites?.enregistrer('paysan-affame', { 'art/sprites/x.txt:1': ['a'] }))()).rejects.toThrow(/inconnue/);
+    await expect(sauverSprite('paysan-affame', { 'art/sprites/x.txt:1': ['a'] })).rejects.toBeInstanceOf(ErreurConflit);
   });
 });
 
@@ -127,7 +147,7 @@ describe('cartes', () => {
     expect(surChemin?.erreurs.some((e) => e.objet === arbre.id && /chemin/.test(e.message))).toBe(true);
     const dehors = await a.cartes?.verifier('chaumes', { [arbre.id]: { x: 40, y: 8 } });
     expect(dehors?.erreurs.some((e) => e.objet === arbre.id && /sortirait/.test(e.message))).toBe(true);
-    await expect((async () => a.cartes?.enregistrer('chaumes', { [arbre.id]: { x: 12, y: 8 } }))()).rejects.toThrow(/refusée/);
+    await expect(sauverCarte('chaumes', { [arbre.id]: { x: 12, y: 8 } })).rejects.toThrow(/refusée/);
   });
 
   it('un décor déplacé sur une case libre ne modifie qu\'une ligne du fichier et change le décompte des cases', async () => {
@@ -140,7 +160,7 @@ describe('cartes', () => {
         const v = await a.cartes?.verifier('chaumes', { [grand.id]: { x, y } });
         if (v?.erreurs.length === 0 && v.bilan.some((l) => l.avant !== l.apres)) {
           trouve = true;
-          const [e] = (await a.cartes?.enregistrer('chaumes', { [grand.id]: { x, y } })) ?? [];
+          const [e] = await sauverCarte('chaumes', { [grand.id]: { x, y } });
           expect(e?.chemin).toBe('src/data/niveaux/cartes.ts');
           const avant = readFileSync(join(RACINE, e?.chemin ?? ''), 'utf8').split('\n');
           const apres = (e?.contenu ?? '').split('\n');
@@ -155,7 +175,7 @@ describe('cartes', () => {
   });
 
   it('enregistrer sans déplacement ne change pas le fichier', async () => {
-    const [e] = (await a.cartes?.enregistrer('sillons', {})) ?? [];
+    const [e] = await sauverCarte('sillons', {});
     expect(e?.contenu).toBe(readFileSync(join(RACINE, e?.chemin ?? ''), 'utf8'));
   });
 });
@@ -168,5 +188,28 @@ describe('droits d\'écriture', () => {
     for (const non of ['src/engine/avancer.ts', 'src/data/niveaux/plan-region1.ts', 'src/data/niveaux/cartes-toutes.ts', 'package.json', 'tools/art/format.ts', 'public/sprites/atlas.png', 'artefact/x.txt']) {
       expect(estPermis(normaliser(non), ECRITURE_PERMISE), non).toBe(false);
     }
+  });
+});
+
+describe('seuils de jouabilité des niveaux', () => {
+  it('toutes les cartes des niveaux de la campagne respectent les seuils, comme les tests de niveaux', () => {
+    const sous: string[] = [];
+    for (const plan of PLANS_REGIONS.flat()) {
+      const modele = (CARTES as Record<string, CarteModele>)[plan.carte];
+      if (!modele) continue;
+      for (const m of mesures(niveauAvecDecors(modele, plan, modele.decor), plan)) {
+        if (m.valeur < m.minimum) sous.push(`niveau ${String(plan.numero)} : ${String(m.valeur)} ${m.nom}`);
+      }
+    }
+    expect(sous).toEqual([]);
+  });
+
+  it('assez de grands décors font passer un niveau sous le seuil de cases libres', () => {
+    const plan = PLANS_REGIONS.flat()[0];
+    const modele = (CARTES as Record<string, CarteModele>)[plan?.carte ?? ''];
+    if (!plan || !modele) throw new Error('plan absent');
+    const bouchons = Array.from({ length: 16 * 9 }, (_, i) => ({ sprite: 'maison-ruine-1', x: 1 + (i % 16) * 2, y: 2 + Math.floor(i / 16) * 2 }));
+    const libres = mesures(niveauAvecDecors(modele, plan, [...modele.decor, ...bouchons]), plan).find((m) => m.nom === 'cases libres');
+    expect(libres?.valeur).toBeLessThan(libres?.minimum ?? 0);
   });
 });

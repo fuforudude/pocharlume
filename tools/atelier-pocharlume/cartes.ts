@@ -16,7 +16,9 @@ import { distanceRectChemin } from '../../src/data/niveaux/geometrie';
 import { casesInterditesDuNiveau } from '../../src/data/niveaux/grille-niveau';
 import { DEMI_LARGEUR_CHEMIN, empriseDecor, GRANDS_DECORS, MARGE_DECOR } from '../../src/data/niveaux/habillage';
 import { PLANS_REGIONS } from '../../src/data/niveaux/plans';
-import type { Ecriture, ErreurCarte, LigneBilan, ModuleCartes, ObjetCarte, Positions, VerificationCarte } from '../atelier/types.ts';
+import { empreinte } from '../atelier/empreinte.ts';
+import { ErreurConflit, ErreurIntrouvable, ErreurRequete, type Ecriture, type ErreurCarte, type LigneBilan, type ModuleCartes, type ObjetCarte, type Positions, type VerificationCarte } from '../atelier/types.ts';
+import { mesures, niveauAvecDecors } from './seuils.ts';
 import { etatStatues } from './statues.ts';
 
 const DOSSIER_CARTES = 'src/data/niveaux';
@@ -46,7 +48,7 @@ function fichiersCartes(racine: string): string[] {
 
 /** Lit dans le texte les décors de la carte `id` (dans l'ordre du tableau `decor: [...]`). Lève si le format n'est pas reconnu. */
 export function lireDecors(racine: string, id: string): { texte: string; carte: CarteTexte } {
-  if (!/^[a-z0-9_]+$/.test(id)) throw new Error(`Carte inconnue : ${id}`);
+  if (!/^[a-z0-9_]+$/.test(id)) throw new ErreurIntrouvable(`Carte inconnue : ${id}`);
   for (const fichier of fichiersCartes(racine)) {
     const texte = readFileSync(join(racine, fichier), 'utf8');
     const lignes = texte.split('\n');
@@ -65,12 +67,12 @@ export function lireDecors(racine: string, id: string): { texte: string; carte: 
     }
     throw new Error(`Carte ${id} : fin du tableau decor introuvable dans ${fichier}`);
   }
-  throw new Error(`Carte inconnue : ${id}`);
+  throw new ErreurIntrouvable(`Carte inconnue : ${id}`);
 }
 
 function modeleDe(id: string): CarteModele {
   const modele = (CARTES as Record<string, CarteModele>)[id];
-  if (!modele) throw new Error(`Carte inconnue : ${id}`);
+  if (!modele) throw new ErreurIntrouvable(`Carte inconnue : ${id}`);
   return modele;
 }
 
@@ -129,6 +131,18 @@ function verifierCarte(racine: string, id: string, positions: Positions): Verifi
       }
     }
   });
+  // Un niveau ne doit pas passer sous les seuils de jouabilité des tests de niveaux à cause d'un décor déplacé.
+  const deplaces = apres.flatMap((d, i) => { const depart = avant[i]; return depart?.x === d.x && depart.y === d.y ? [] : [idObjet(i)]; });
+  if (deplaces.length > 0) {
+    for (const plan of PLANS_REGIONS.flat().filter((p) => p.carte === id)) {
+      const avantMesures = mesures(niveauAvecDecors(modele, plan, avant), plan);
+      mesures(niveauAvecDecors(modele, plan, apres), plan).forEach((m, k) => {
+        if (m.valeur < m.minimum && m.valeur < (avantMesures[k]?.valeur ?? Infinity)) {
+          for (const objet of deplaces) erreurs.push({ objet, message: `Niveau ${String(plan.numero)} : ${String(m.valeur)} ${m.nom}, il en faut au moins ${String(m.minimum)}` });
+        }
+      });
+    }
+  }
   const bilan: LigneBilan[] = [];
   const toutes = constructibles(modele, modele.chemins, apres);
   bilan.push({ libelle: 'Carte entière (tous les chemins)', avant: constructibles(modele, modele.chemins, avant).libres, apres: toutes.libres });
@@ -145,7 +159,7 @@ export function moduleCartes(racine: string): ModuleCartes {
 
     ouvrir: (id) => {
       const modele = modeleDe(id);
-      const { carte } = lireDecors(racine, id);
+      const { texte, carte } = lireDecors(racine, id);
       const statues = etatStatues(racine);
       return Promise.resolve({
         id,
@@ -169,25 +183,34 @@ export function moduleCartes(racine: string): ModuleCartes {
           emprise: emprise(d.sprite),
         })),
         verification: verifierCarte(racine, id, {}),
+        empreinte: empreinte([texte]),
       });
     },
 
     verifier: (id, positions) => Promise.resolve(verifierCarte(racine, id, positions)),
 
-    enregistrer: (id, positions): Promise<readonly Ecriture[]> => {
-      const verification = verifierCarte(racine, id, positions);
-      if (verification.erreurs.length > 0) throw new Error(`Carte refusée : ${verification.erreurs.map((e) => e.message).join(' ; ')}`);
+    enregistrer: (id, deplaces, empreinteClient): Promise<readonly Ecriture[]> => {
       const { texte, carte } = lireDecors(racine, id);
-      const lignes = texte.split('\n');
-      for (const [objet, p] of Object.entries(positions)) {
+      const conflit = 'La carte a changé depuis son ouverture : la rouvrir avant d\'enregistrer (rien n\'a été écrit).';
+      if (empreinteClient !== empreinte([texte])) throw new ErreurConflit(conflit);
+      const positions: Record<string, { x: number; y: number }> = {};
+      for (const [objet, p] of Object.entries(deplaces)) {
         const m = /^decor-(\d+)$/.exec(objet);
         const d = m ? carte.decors[Number(m[1])] : undefined;
-        if (!d) throw new Error(`Objet inconnu : ${objet}`);
-        if (p.x === d.x && p.y === d.y) continue;
+        if (!d) throw new ErreurConflit(conflit);
+        if (d.sprite !== p.origine.libelle || d.x !== p.origine.x || d.y !== p.origine.y) throw new ErreurConflit(conflit);
+        positions[objet] = { x: p.x, y: p.y };
+      }
+      const verification = verifierCarte(racine, id, positions);
+      if (verification.erreurs.length > 0) throw new ErreurRequete(`Carte refusée : ${verification.erreurs.map((e) => e.message).join(' ; ')}`);
+      const lignes = texte.split('\n');
+      for (const [objet, p] of Object.entries(positions)) {
+        const d = carte.decors[Number(/^decor-(\d+)$/.exec(objet)?.[1])];
+        if (!d || (p.x === d.x && p.y === d.y)) continue;
         const brute = lignes[d.ligne - 1] ?? '';
         const cr = brute.endsWith('\r') ? '\r' : '';
         const lue = LIGNE_DECOR.exec(brute.replace(/\r$/, ''));
-        if (!lue) throw new Error(`Ligne ${String(d.ligne)} modifiée depuis la lecture`);
+        if (!lue) throw new ErreurConflit(conflit);
         lignes[d.ligne - 1] = `${lue[1] ?? ''}${lue[2] ?? ''}${lue[3] ?? ''}${String(p.x)}${lue[5] ?? ''}${String(p.y)}${lue[7] ?? ''}${cr}`;
       }
       return Promise.resolve([{ chemin: carte.fichier, contenu: lignes.join('\n') }]);

@@ -15,7 +15,7 @@ node tools/atelier/lancer.ts --config atelier.config.ts [--port 5199]
 ```
 
 Le serveur n'écoute que sur `127.0.0.1`, sur le port demandé : si ce port est pris, il s'arrête au lieu d'en choisir un
-autre. Chaque requête de l'API est refusée si son `Host` ou son `Origin` n'est pas local. Il ne commite ni ne pousse rien.
+autre. Chaque requête de l'API est refusée (403) si son `Host` ou son `Origin` n'est pas local, et un POST doit avoir exactement l'`Origin` du serveur et un corps JSON de 8 Mo au plus (415, 413). Il ne commite ni ne pousse rien.
 
 ## Interface (clavier et souris)
 
@@ -62,6 +62,8 @@ L'adaptateur implémente `Adaptateur` (voir `types.ts`, entièrement commenté).
   `verifier(id, positions)` applique **vos** règles (erreurs, cases bloquées, bilan avant/après) et `enregistrer`
   refuse une disposition invalide.
 - `apresEcriture(chemins)` : commande lancée après un enregistrement (reconstruire un atlas, un cache…).
+
+- **Écritures concurrentes** : `ouvrir` rend une `empreinte` des fichiers que l'enregistrement réécrira ; le client la renvoie avec les lignes d'origine des calques (ou la position d'origine des seuls objets déplacés). L'adaptateur lève `ErreurConflit` (HTTP 409, rien n'est écrit) si le fichier a changé depuis ; après un enregistrement le client recharge le document, ses clés ayant pu changer. `ErreurRequete` donne un 400, `ErreurIntrouvable` un 404. Les écritures d'un enregistrement passent par des fichiers temporaires puis des renommages (retour en arrière si l'un échoue).
 
 Aides fournies : `ecriture-texte.ts` (`remplacerGrilles` ne réécrit que les lignes de grille qui changent, fins de ligne
 et commentaires conservés à l'octet près) et `chemins.ts` (`estPermis`, `verifierChemin`).

@@ -6,10 +6,11 @@
 //   fond 2d3a24         couleur du sol de l'aperçu (RRGGBB)
 //   couleur G 40c040    lettre de palette
 //   cadre               début d'un cadre ; les lignes qui suivent (jusqu'à une ligne vide) sont sa grille
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import { remplacerGrilles } from '../ecriture-texte.ts';
-import type { Adaptateur, ApercuSprite, CalquesModifies, DocumentSprite, EntreePalette, Ecriture } from '../types.ts';
+import { empreinte } from '../empreinte.ts';
+import { ErreurConflit, ErreurIntrouvable, type Adaptateur, type ApercuSprite, type CalquesModifies, type DocumentSprite, type EntreePalette, type Ecriture } from '../types.ts';
 
 interface CadrePix { readonly debut: number; readonly lignes: string[] }
 interface SpritePix {
@@ -65,7 +66,7 @@ function rendre(id: string, sprite: SpritePix, cadres: readonly (readonly string
 export function adaptateurPix(racine: string): Adaptateur {
   const dossier = join(racine, 'sprites');
   const lire = (id: string): { texte: string; sprite: SpritePix } => {
-    if (!/^[\w-]+$/.test(id)) throw new Error(`Sprite inconnu : ${id}`);
+    if (!/^[\w-]+$/.test(id) || !existsSync(join(dossier, `${id}.pix`))) throw new ErreurIntrouvable(`Sprite inconnu : ${id}`);
     const texte = readFileSync(join(dossier, `${id}.pix`), 'utf8');
     return { texte, sprite: lirePix(texte) };
   };
@@ -76,8 +77,9 @@ export function adaptateurPix(racine: string): Adaptateur {
     sprites: {
       lister: () => Promise.resolve(readdirSync(dossier).filter((f) => f.endsWith('.pix')).sort().map((f) => ({ id: basename(f, '.pix'), nom: basename(f, '.pix'), groupe: 'Sprites' }))),
       ouvrir: (id): Promise<DocumentSprite> => {
-        const { sprite } = lire(id);
+        const { sprite, texte } = lire(id);
         return Promise.resolve({
+          empreinte: empreinte([texte]),
           id, nom: id, largeur: sprite.largeur, hauteur: sprite.hauteur, palette: sprite.palette, fond: sprite.fond,
           calques: sprite.cadres.map((c, i) => ({ id: String(i), nom: `cadre ${String(i + 1)}`, x: 0, y: 0, lignes: c.lignes })),
           apercu: rendre(id, sprite, sprite.cadres.map((c) => c.lignes)), derives: [],
@@ -87,8 +89,9 @@ export function adaptateurPix(racine: string): Adaptateur {
         const { sprite } = lire(id);
         return Promise.resolve({ apercu: rendre(id, sprite, sprite.cadres.map((c, i) => calques[String(i)] ?? c.lignes)), derives: [] });
       },
-      enregistrer: (id, calques): Promise<readonly Ecriture[]> => {
+      enregistrer: (id, calques, base): Promise<readonly Ecriture[]> => {
         const { texte, sprite } = lire(id);
+        if (base.empreinte !== empreinte([texte])) throw new ErreurConflit('Le fichier a changé depuis l\'ouverture : rouvrir le sprite.');
         const blocs = Object.entries(calques).map(([cle, lignes]) => {
           const cadre = sprite.cadres[Number(cle)];
           if (!cadre) throw new Error(`Calque inconnu : ${cle}`);

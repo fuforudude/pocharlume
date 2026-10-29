@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import type { Adaptateur, ResultatApres } from '../atelier/types.ts';
 import { moduleCartes } from './cartes.ts';
 import { modulePalette } from './palette.ts';
+import { fileUnique } from './file-unique.ts';
 import { moduleSprites } from './sprites.ts';
 
 /** Où l'atelier a le droit d'écrire dans Pocharlume. */
@@ -26,6 +27,8 @@ function reconstruireAtlas(racine: string): Promise<ResultatApres> {
 }
 
 export function adaptateurPocharlume(racine: string): Adaptateur {
+  // Une reconstruction à la fois : deux enregistrements rapprochés n'écrivent pas l'atlas en même temps.
+  const reconstruire = fileUnique(() => reconstruireAtlas(racine));
   return {
     nom: 'Pocharlume',
     racine,
@@ -33,6 +36,6 @@ export function adaptateurPocharlume(racine: string): Adaptateur {
     sprites: moduleSprites(racine),
     palette: modulePalette(racine),
     cartes: moduleCartes(racine),
-    apresEcriture: (chemins) => (chemins.some((c) => c.startsWith('art/')) ? reconstruireAtlas(racine) : Promise.resolve({ ok: true, message: 'carte enregistrée' })),
+    apresEcriture: (chemins) => (chemins.some((c) => c.startsWith('art/')) ? reconstruire() : Promise.resolve({ ok: true, message: 'carte enregistrée' })),
   };
 }

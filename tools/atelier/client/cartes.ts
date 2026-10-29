@@ -22,6 +22,7 @@ export async function monterCartes(racine: HTMLElement, ctx: Contexte): Promise<
   let futur: Deplacement[] = [];
   let unite = 24;
   let version = 0;
+  let empreinte = '';
 
   const ul = el('ul', { 'aria-label': 'Cartes' });
   const filtre = el('input', { type: 'search', placeholder: 'Filtrer les cartes…', 'aria-label': 'Filtrer les cartes' });
@@ -57,17 +58,37 @@ export async function monterCartes(racine: HTMLElement, ctx: Contexte): Promise<
   }
   filtre.addEventListener('input', remplirListe);
 
-  const positions = (): Positions => Object.fromEntries(objets.map((o) => [o.id, { x: o.x, y: o.y }]));
-  const modifie = (): boolean => objets.some((o) => { const p = origine.get(o.id); return p === undefined || p.x !== o.x || p.y !== o.y; });
+  /** Dernières positions acceptées par le serveur : seules celles-là s'enregistrent (l'écran peut avoir une longueur d'avance). */
+  let valides = new Map<string, { x: number; y: number }>();
+  /** Les déplacements s'exécutent l'un après l'autre : chacun part de la position acceptée par le précédent. */
+  let chaine: Promise<void> = Promise.resolve();
+  const enfiler = (f: () => Promise<void>): void => {
+    chaine = chaine.then(f).catch((e: unknown) => { ctx.etat(e instanceof Error ? e.message : String(e), 'erreur'); });
+  };
+  /** Objets dont la position acceptée diffère de l'ouverture, plus éventuellement un objet à l'essai. */
+  const deplacees = (essai?: { id: string; x: number; y: number }): Positions => {
+    const sortie: Record<string, { x: number; y: number }> = {};
+    for (const [id, p] of valides) {
+      const depart = origine.get(id);
+      if (depart === undefined || depart.x !== p.x || depart.y !== p.y) sortie[id] = p;
+    }
+    if (essai) sortie[essai.id] = { x: essai.x, y: essai.y };
+    return sortie;
+  };
+  const modifie = (): boolean => Object.keys(deplacees()).length > 0;
   const genre = (o: ObjetCarte): DocumentCarte['genres'][number] | undefined => doc?.genres.find((g) => g.id === o.genre);
 
-  async function ouvrirCarte(id: string): Promise<void> {
-    if (modifie() && !confirm('Des déplacements ne sont pas enregistrés. Les abandonner ?')) return;
+  async function ouvrirCarte(id: string, rechargement = false): Promise<void> {
+    if (!rechargement && modifie() && !confirm('Des déplacements ne sont pas enregistrés. Les abandonner ?')) return;
+    const ma = ++version;
     try {
       const d = await appeler<DocumentCarte>(`/api/cartes/doc?id=${encodeURIComponent(id)}`);
+      if (ma !== version) return;
       doc = d;
+      empreinte = d.empreinte;
       objets = d.objets.map((o) => ({ ...o }));
       origine = new Map(objets.map((o) => [o.id, { x: o.x, y: o.y }]));
+      valides = new Map(origine);
       verification = d.verification;
       selection = null;
       passe = [];
@@ -170,13 +191,19 @@ export async function monterCartes(racine: HTMLElement, ctx: Contexte): Promise<
     }));
   }
 
+  /** Vérification pendant le glissement : l'objet tenu à sa position du moment, les autres à leur dernière position acceptée. */
   const verifier = dernierSeulement(async () => {
-    if (!doc) return;
+    if (!doc || !glisse) return;
+    const tenu = objets.find((o) => o.id === glisse?.id);
     const ma = ++version;
-    const v = await appeler<VerificationCarte>('/api/cartes/verifier', { id: doc.id, positions: positions() });
-    if (ma !== version) return;
-    verification = v;
-    rendre();
+    try {
+      const v = await appeler<VerificationCarte>('/api/cartes/verifier', { id: doc.id, positions: deplacees(tenu ? { id: tenu.id, x: tenu.x, y: tenu.y } : undefined) });
+      if (ma !== version) return;
+      verification = v;
+      rendre();
+    } catch (e) {
+      ctx.etat(e instanceof Error ? e.message : String(e), 'erreur');
+    }
   });
 
   const aimanter = (v: number): number => {
@@ -222,28 +249,41 @@ export async function monterCartes(racine: HTMLElement, ctx: Contexte): Promise<
     rendre();
     verifier();
   });
-  const lacher = async (): Promise<void> => {
+  const lacher = (): void => {
     if (!glisse || !doc) return;
     const g = glisse;
     glisse = null;
     const o = objets.find((x) => x.id === g.id);
-    if (!o || (o.x === g.depart.x && o.y === g.depart.y)) return;
-    await terminerDeplacement(g.id, g.depart, { x: o.x, y: o.y });
+    if (!o) return;
+    const cible = { x: o.x, y: o.y };
+    enfiler(() => essayer(g.id, () => cible));
   };
-  toile.addEventListener('pointerup', () => { void lacher(); });
-  toile.addEventListener('pointercancel', () => { void lacher(); });
+  toile.addEventListener('pointerup', lacher);
+  toile.addEventListener('pointercancel', lacher);
 
-  /** Vérifie l'arrivée : refusée, l'objet revient à son départ. */
-  async function terminerDeplacement(id: string, avant: { x: number; y: number }, apres: { x: number; y: number }): Promise<void> {
+  /**
+   * Essaie de poser l'objet : la cible se calcule à partir de la dernière position acceptée. Le serveur vérifie les règles ;
+   * refusée, la position retombe sur la dernière acceptée (jamais sur une position qui n'a pas été vérifiée).
+   */
+  async function essayer(id: string, cible: (depart: { x: number; y: number }) => { x: number; y: number }): Promise<void> {
     if (!doc) return;
-    const v = await appeler<VerificationCarte>('/api/cartes/verifier', { id: doc.id, positions: positions() });
+    const avant = valides.get(id);
+    if (!avant) return;
+    const apres = cible(avant);
+    deplacer(id, apres.x, apres.y);
+    if (apres.x === avant.x && apres.y === avant.y) { rendre(); return; }
+    rendre();
+    const ma = ++version;
+    const v = await appeler<VerificationCarte>('/api/cartes/verifier', { id: doc.id, positions: deplacees({ id, ...apres }) });
     const fautes = v.erreurs.filter((e) => e.objet === id);
     if (fautes.length > 0) {
       deplacer(id, avant.x, avant.y);
-      verification = await appeler<VerificationCarte>('/api/cartes/verifier', { id: doc.id, positions: positions() });
+      const retour = await appeler<VerificationCarte>('/api/cartes/verifier', { id: doc.id, positions: deplacees() });
+      if (ma === version) verification = retour;
       ctx.etat(`Refusé : ${fautes.map((f) => f.message).join(' ; ')}`, 'erreur');
     } else {
-      verification = v;
+      valides.set(id, apres);
+      if (ma === version) verification = v;
       passe.push({ id, avant, apres });
       futur = [];
       ctx.etat('Déplacé.', 'ok');
@@ -253,43 +293,56 @@ export async function monterCartes(racine: HTMLElement, ctx: Contexte): Promise<
   }
 
   function annulerRefaire(sens: 'annuler' | 'refaire'): void {
-    const m = sens === 'annuler' ? passe.pop() : futur.pop();
-    if (!m) return;
-    (sens === 'annuler' ? futur : passe).push(m);
-    const p = sens === 'annuler' ? m.avant : m.apres;
-    deplacer(m.id, p.x, p.y);
-    ctx.signalerModif(modifie());
-    rendre();
-    verifier();
+    enfiler(async () => {
+      const m = sens === 'annuler' ? passe.pop() : futur.pop();
+      if (!m || !doc) return;
+      (sens === 'annuler' ? futur : passe).push(m);
+      const p = sens === 'annuler' ? m.avant : m.apres;
+      valides.set(m.id, p);
+      deplacer(m.id, p.x, p.y);
+      ctx.signalerModif(modifie());
+      rendre();
+      const ma = ++version;
+      const v = await appeler<VerificationCarte>('/api/cartes/verifier', { id: doc.id, positions: deplacees() });
+      if (ma === version) { verification = v; rendre(); }
+    });
   }
 
   remplirListe();
   ctx.etat(`${String(liste.length)} cartes. Choisir une carte dans la liste.`);
 
   return {
-    ouvrir: ouvrirCarte,
+    ouvrir: (id: string) => ouvrirCarte(id),
     async enregistrer() {
       if (!doc) return;
-      if (!modifie()) { ctx.etat('Rien à enregistrer.'); return; }
-      const r = await appeler<{ ecrits: string[]; apres: { ok: boolean; message: string } | null }>('/api/cartes/enregistrer', { id: doc.id, positions: positions() });
-      origine = new Map(objets.map((o) => [o.id, { x: o.x, y: o.y }]));
-      ctx.signalerModif(false);
+      await chaine;
+      const moved = deplacees();
+      if (Object.keys(moved).length === 0) { ctx.etat('Rien à enregistrer.'); return; }
+      ctx.etat('Enregistrement…');
+      // Seuls les objets déplacés partent, avec ce qu'ils étaient à l'ouverture : le serveur refuse si le fichier a changé.
+      const deplaces: Record<string, { x: number; y: number; origine: { libelle: string; x: number; y: number } }> = {};
+      for (const [id, p] of Object.entries(moved)) {
+        const depart = origine.get(id);
+        const o = objets.find((x) => x.id === id);
+        if (!depart || !o) continue;
+        deplaces[id] = { x: p.x, y: p.y, origine: { libelle: o.libelle, x: depart.x, y: depart.y } };
+      }
+      const r = await appeler<{ ecrits: string[]; apres: { ok: boolean; message: string } | null }>('/api/cartes/enregistrer', { id: doc.id, deplaces, empreinte });
+      // On repart du fichier tel qu'il est maintenant.
+      await ouvrirCarte(doc.id, true);
       ctx.etat(`Enregistré : ${r.ecrits.join(', ') || 'aucun changement'}. Un changement de carte peut demander de rééquilibrer.`, 'ok');
-      rendreCotes();
     },
     touche(e) {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) { annulerRefaire('annuler'); return true; }
       if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'y' || (e.key.toLowerCase() === 'z' && e.shiftKey))) { annulerRefaire('refaire'); return true; }
       const fleches: Record<string, [number, number]> = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
-      const f = fleches[e.key];
+      const fleche = fleches[e.key];
       const o = objets.find((x) => x.id === selection);
-      if (f && o && doc && genre(o)?.actif !== false) {
+      if (fleche && o && doc && genre(o)?.actif !== false) {
         const pas = e.shiftKey ? doc.pas : doc.aimantation;
-        const avant = { x: o.x, y: o.y };
-        const apres = { x: o.x + f[0] * pas, y: o.y + f[1] * pas };
-        deplacer(o.id, apres.x, apres.y);
-        rendre();
-        void terminerDeplacement(o.id, avant, apres);
+        const id = o.id;
+        // Chaque flèche part de la dernière position acceptée, pas de ce que l'écran montre.
+        enfiler(() => essayer(id, (depart) => ({ x: depart.x + fleche[0] * pas, y: depart.y + fleche[1] * pas })));
         return true;
       }
       return false;

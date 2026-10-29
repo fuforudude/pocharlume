@@ -1,14 +1,12 @@
 // API JSON de l'atelier, indépendante de HTTP : une requête (méthode, chemin, corps) donne une réponse. Le plugin
 // du serveur ne fait que la brancher ; les tests l'appellent directement.
 import { ecrireFichiers, ErreurChemin } from './chemins.ts';
-import type { Adaptateur, CalquesModifies, Positions } from './types.ts';
+import { ErreurConflit, ErreurIntrouvable, ErreurRequete, type Adaptateur, type CalquesModifies, type Deplacements, type Positions } from './types.ts';
 
 export interface Reponse {
   readonly statut: number;
   readonly corps: unknown;
 }
-
-export class ErreurRequete extends Error {}
 
 function objet(valeur: unknown, quoi: string): Record<string, unknown> {
   if (typeof valeur !== 'object' || valeur === null || Array.isArray(valeur)) throw new ErreurRequete(`${quoi} : objet attendu`);
@@ -43,6 +41,21 @@ function positions(valeur: unknown): Positions {
   return sortie;
 }
 
+function deplacements(valeur: unknown): Deplacements {
+  const brut = objet(valeur, 'deplaces');
+  const sortie: Record<string, Deplacements[string]> = {};
+  const nombre = (v: unknown, quoi: string): number => {
+    if (typeof v !== 'number' || !Number.isFinite(v)) throw new ErreurRequete(`${quoi} : nombre attendu`);
+    return v;
+  };
+  for (const [id, p] of Object.entries(brut)) {
+    const o = objet(p, `déplacement de ${id}`);
+    const origine = objet(o['origine'], `origine de ${id}`);
+    sortie[id] = { x: nombre(o['x'], id), y: nombre(o['y'], id), origine: { libelle: texte(origine['libelle'], 'libelle'), x: nombre(origine['x'], id), y: nombre(origine['y'], id) } };
+  }
+  return sortie;
+}
+
 function changements(valeur: unknown): Record<string, string> {
   const brut = objet(valeur, 'changements');
   const sortie: Record<string, string> = {};
@@ -68,11 +81,10 @@ export async function traiter(a: Adaptateur, methode: string, chemin: string, re
     if (erreur instanceof ErreurRequete) return { statut: 400, corps: { erreur: message } };
     if (erreur instanceof ErreurChemin) return { statut: 403, corps: { erreur: message } };
     if (erreur instanceof ErreurIntrouvable) return { statut: 404, corps: { erreur: message } };
+    if (erreur instanceof ErreurConflit) return { statut: 409, corps: { erreur: message } };
     return { statut: 500, corps: { erreur: message } };
   }
 }
-
-class ErreurIntrouvable extends Error {}
 
 async function router(a: Adaptateur, methode: string, chemin: string, q: URLSearchParams, corps: unknown): Promise<unknown> {
   const pris = (nom: string): string => texte(q.get(nom), nom);
@@ -90,11 +102,12 @@ async function router(a: Adaptateur, methode: string, chemin: string, q: URLSear
       return module(a.sprites, 'sprites').ouvrir(pris('id'));
     case 'POST /api/sprites/apercu': {
       const o = objet(corps, 'corps');
-      return module(a.sprites, 'sprites').apercu(texte(o['id'], 'id'), calques(o['calques']));
+      return module(a.sprites, 'sprites').apercu(texte(o['id'], 'id'), calques(o['calques']), calques(o['origine']));
     }
     case 'POST /api/sprites/enregistrer': {
       const o = objet(corps, 'corps');
-      const ecritures = await module(a.sprites, 'sprites').enregistrer(texte(o['id'], 'id'), calques(o['calques']));
+      const base = objet(o['base'], 'base');
+      const ecritures = await module(a.sprites, 'sprites').enregistrer(texte(o['id'], 'id'), calques(o['calques']), { origine: calques(base['origine']), empreinte: texte(base['empreinte'], 'empreinte') });
       return enregistrer(a, ecritures);
     }
     case 'GET /api/palette':
@@ -120,7 +133,7 @@ async function router(a: Adaptateur, methode: string, chemin: string, q: URLSear
     }
     case 'POST /api/cartes/enregistrer': {
       const o = objet(corps, 'corps');
-      const ecritures = await module(a.cartes, 'cartes').enregistrer(texte(o['id'], 'id'), positions(o['positions']));
+      const ecritures = await module(a.cartes, 'cartes').enregistrer(texte(o['id'], 'id'), deplacements(o['deplaces']), texte(o['empreinte'], 'empreinte'));
       return enregistrer(a, ecritures);
     }
     default:

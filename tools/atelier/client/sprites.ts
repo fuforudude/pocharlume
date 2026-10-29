@@ -101,11 +101,16 @@ export async function monterSprites(racine: HTMLElement, ctx: Contexte): Promise
     boutonRefaire.disabled = !historique.peutRefaire();
   }
 
-  async function ouvrirSprite(id: string): Promise<void> {
-    if (modifie() && !confirm('Des changements ne sont pas enregistrés. Les abandonner ?')) return;
+  /** Ouvre un sprite. `rechargement` : même sprite après un enregistrement, sans question et en gardant calque et zoom. */
+  async function ouvrirSprite(id: string, rechargement = false): Promise<void> {
+    if (!rechargement && modifie() && !confirm('Des changements ne sont pas enregistrés. Les abandonner ?')) return;
+    // Un aperçu demandé pour le sprite d'avant arrivera en retard : il sera ignoré.
+    const ma = ++version;
     try {
       ctx.etat('Ouverture…');
       const d = await appeler<DocumentSprite>(`/api/sprites/doc?id=${encodeURIComponent(id)}`);
+      if (ma !== version) return;
+      const nomCalque = rechargement ? calqueCourant()?.nom : undefined;
       doc = d;
       apercu = d.apercu;
       derives = d.derives;
@@ -114,9 +119,9 @@ export async function monterSprites(racine: HTMLElement, ctx: Contexte): Promise
       historique = new Historique();
       // Le calque le plus fourni d'abord : c'est en général celui qu'on veut retoucher.
       const pixels = (c: CalqueSprite): number => c.lignes.join('').replaceAll('.', '').length;
-      calqueId = [...d.calques].sort((x, y) => pixels(y) - pixels(x))[0]?.id ?? '';
-      lettre = d.palette.find((p) => p.lettre !== TRANSPARENT)?.lettre ?? '';
-      zoom = Math.max(3, Math.min(24, Math.floor(Math.min((window.innerHeight - 250) / d.hauteur, (window.innerWidth - 640) / d.largeur))));
+      calqueId = (nomCalque === undefined ? undefined : d.calques.find((c) => c.nom === nomCalque)?.id) ?? [...d.calques].sort((x, y) => pixels(y) - pixels(x))[0]?.id ?? '';
+      if (!rechargement || !d.palette.some((p) => p.lettre === lettre)) lettre = d.palette.find((p) => p.lettre !== TRANSPARENT)?.lettre ?? '';
+      if (!rechargement) zoom = Math.max(3, Math.min(24, Math.floor(Math.min((window.innerHeight - 250) / d.hauteur, (window.innerWidth - 640) / d.largeur))));
       selectCalque.replaceChildren(...d.calques.map((c) => {
         const partage = c.partageAvec && c.partageAvec.length > 0 ? ` (partagé : ${c.partageAvec.join(', ')})` : '';
         return el('option', { value: c.id, texte: `${c.nom}${partage}` });
@@ -156,6 +161,41 @@ export async function monterSprites(racine: HTMLElement, ctx: Contexte): Promise
   // --- Dessin -------------------------------------------------------------------------------------------------
   const calqueCourant = (): CalqueSprite | undefined => doc?.calques.find((c) => c.id === calqueId);
 
+  const idCourant = (): string | undefined => doc?.id;
+
+  /** Le cadre rendu montré en fond (celui du calque retouché si l'adaptateur le dit, sinon le repos). */
+  function cadreDeFond(): ApercuSprite['animations'][number]['cadres'][number] | undefined {
+    if (!apercu) return undefined;
+    const ref = calqueCourant()?.contexte;
+    const anim = apercu.animations.find((a) => a.nom === ref?.animation) ?? apercu.animations.find((a) => a.nom === 'repos') ?? apercu.animations[0];
+    return anim?.cadres[ref?.indice ?? 0] ?? anim?.cadres[0];
+  }
+
+  /** Lettre de palette dont la couleur est celle du rendu composé sous ce pixel (pipette sur un cadre qui n'est pas dans le calque). */
+  function lettreDuRendu(px: number, py: number): string | null {
+    const cadre = cadreDeFond();
+    if (!cadre || !doc) return null;
+    const c = canvasDe(cadre.image);
+    const x = Math.min(c.width - 1, Math.floor(((px + 0.5) * c.width) / doc.largeur));
+    const y = Math.min(c.height - 1, Math.floor(((py + 0.5) * c.height) / doc.hauteur));
+    const [rr = 0, vv = 0, bb = 0, aa = 0] = c.getContext('2d')?.getImageData(x, y, 1, 1).data ?? [];
+    if (aa === 0) return null;
+    const hex = (n: number): string => n.toString(16).padStart(2, '0');
+    const voulu = `#${hex(rr)}${hex(vv)}${hex(bb)}`;
+    return doc.palette.find((p) => p.couleur.slice(0, 7) === voulu && (p.couleur.length === 7 || p.couleur.slice(7) === 'ff'))?.lettre ?? null;
+  }
+
+  /** Les calques modifiés depuis l'ouverture, avec leurs lignes d'origine. */
+  function modifies(): { calques: Record<string, readonly string[]>; origine: Record<string, readonly string[]> } {
+    const calques: Record<string, readonly string[]> = {};
+    const base: Record<string, readonly string[]> = {};
+    for (const [id, lignes] of travail) {
+      const avant = origine.get(id) ?? [];
+      if (JSON.stringify(lignes) !== JSON.stringify(avant)) { calques[id] = lignes; base[id] = avant; }
+    }
+    return { calques, origine: base };
+  }
+
   function redessiner(): void {
     if (!doc) return;
     const d = doc;
@@ -171,9 +211,7 @@ export async function monterSprites(racine: HTMLElement, ctx: Contexte): Promise
     }
     const calque = calqueCourant();
     if (fondVisible && apercu) {
-      const ref = calque?.contexte;
-      const anim = apercu.animations.find((a) => a.nom === ref?.animation) ?? apercu.animations.find((a) => a.nom === 'repos') ?? apercu.animations[0];
-      const cadre = anim?.cadres[ref?.indice ?? 0] ?? anim?.cadres[0];
+      const cadre = cadreDeFond();
       if (cadre) {
         g.globalAlpha = 0.4;
         g.drawImage(canvasDe(cadre.image), 0, 0, toile.width, toile.height);
@@ -232,11 +270,10 @@ export async function monterSprites(racine: HTMLElement, ctx: Contexte): Promise
   const rafraichir = dernierSeulement(async () => {
     if (!doc) return;
     const ma = ++version;
-    const corps: Record<string, readonly string[]> = {};
-    for (const [id, lignes] of travail) corps[id] = lignes;
+    const idDoc = doc.id;
     try {
-      const r = await appeler<{ apercu: ApercuSprite; derives: ApercuSprite[] }>('/api/sprites/apercu', { id: doc.id, calques: corps });
-      if (ma !== version) return;
+      const r = await appeler<{ apercu: ApercuSprite; derives: ApercuSprite[] }>('/api/sprites/apercu', { id: idDoc, ...modifies() });
+      if (ma !== version || idCourant() !== idDoc) return;
       apercu = r.apercu;
       derives = r.derives;
       afficherApercu();
@@ -277,7 +314,8 @@ export async function monterSprites(racine: HTMLElement, ctx: Contexte): Promise
     if (!calque) return;
     if (e.button === 2 || outil === 'pipette') {
       const c = lire(travail.get(calque.id) ?? [], px - calque.x, py - calque.y);
-      if (c !== TRANSPARENT && c !== '_') { lettre = c; remplirNuancier(); if (outil === 'pipette') choisirOutil('pinceau'); }
+      const trouvee = c !== TRANSPARENT && c !== '_' ? c : lettreDuRendu(px, py);
+      if (trouvee) { lettre = trouvee; remplirNuancier(); choisirOutil('pinceau'); } else ctx.etat('Rien à prélever ici.');
       return;
     }
     if (outil === 'pinceau' && lettre === '') return;
@@ -337,13 +375,13 @@ export async function monterSprites(racine: HTMLElement, ctx: Contexte): Promise
     ouvrir: ouvrirSprite,
     async enregistrer() {
       if (!doc) return;
-      const corps: Record<string, readonly string[]> = {};
-      for (const [id, lignes] of travail) if (JSON.stringify(lignes) !== JSON.stringify(origine.get(id))) corps[id] = lignes;
-      if (Object.keys(corps).length === 0) { ctx.etat('Rien à enregistrer.'); return; }
+      const { calques, origine: base } = modifies();
+      if (Object.keys(calques).length === 0) { ctx.etat('Rien à enregistrer.'); return; }
       ctx.etat('Enregistrement…');
-      const r = await appeler<{ ecrits: string[]; apres: { ok: boolean; message: string } | null }>('/api/sprites/enregistrer', { id: doc.id, calques: corps });
+      const r = await appeler<{ ecrits: string[]; apres: { ok: boolean; message: string } | null }>('/api/sprites/enregistrer', { id: doc.id, calques, base: { origine: base, empreinte: doc.empreinte } });
+      // Les lignes du fichier ont pu changer de numéro (grille allongée) : on repart du fichier tel qu'il est maintenant.
       origine = new Map(travail);
-      signaler();
+      await ouvrirSprite(doc.id, true);
       ctx.etat(`Enregistré : ${r.ecrits.join(', ') || 'aucun changement'}${r.apres ? ` — ${r.apres.message}` : ''}`, r.apres && !r.apres.ok ? 'erreur' : 'ok');
     },
     touche(e) {

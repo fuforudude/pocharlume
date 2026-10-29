@@ -64,7 +64,13 @@ export async function monterPalette(racine: HTMLElement, ctx: Contexte): Promise
 
   const rafraichir = dernierSeulement(async () => {
     if (changements.size === 0) { vignettes.replaceChildren(); titreVignettes.textContent = 'Sprites concernés'; return; }
-    const r = await appeler<VignetteSprite[]>('/api/palette/apercu', { nom: doc.nom, changements: Object.fromEntries(changements) });
+    let r: VignetteSprite[];
+    try {
+      r = await appeler<VignetteSprite[]>('/api/palette/apercu', { nom: doc.nom, changements: Object.fromEntries(changements) });
+    } catch (e) {
+      ctx.etat(e instanceof Error ? e.message : String(e), 'erreur');
+      return;
+    }
     titreVignettes.textContent = `Sprites concernés (${String(r.length)})`;
     vignettes.replaceChildren(...r.map((v) => {
       const c = el('canvas', { width: String(v.image.largeur), height: String(v.image.hauteur), style: `width:${String(Math.min(v.image.largeur * 2, 72))}px` });

@@ -1,9 +1,9 @@
 // Module « palette » de l'adaptateur Pocharlume : les palettes partagées art/palettes/*.txt (`lettre RRGGBB commentaire`).
 // Changer une couleur ne réécrit que le code couleur de sa ligne.
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, join } from 'node:path';
 import type { SpriteSource } from '../art/format.ts';
-import type { DocumentPalette, Ecriture, ModulePalette, VignetteSprite } from '../atelier/types.ts';
+import { ErreurIntrouvable, type DocumentPalette, type Ecriture, type ModulePalette, type VignetteSprite } from '../atelier/types.ts';
 import { apercuDe, charger, dependants, grillesDe, indexParNom, rendre, type Sources } from './sources.ts';
 
 /** À partir de ce nombre de sprites touchés, le changement d'une couleur mérite un avertissement. */
@@ -31,7 +31,7 @@ function concernes(sources: Sources, palette: string, lettre: string): Set<strin
 export function modulePalette(racine: string): ModulePalette {
   const dossier = join(racine, 'art', 'palettes');
   const cheminDe = (nom: string): string => {
-    if (!/^[\w-]+$/.test(nom)) throw new Error(`Palette inconnue : ${nom}`);
+    if (!/^[\w-]+$/.test(nom) || !existsSync(join(dossier, `${nom}.txt`))) throw new ErreurIntrouvable(`Palette inconnue : ${nom}`);
     return join(dossier, `${nom}.txt`);
   };
   return {

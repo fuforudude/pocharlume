@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -52,5 +52,20 @@ describe('chemins d\'écriture', () => {
     } finally {
       rmSync(dehors, { recursive: true, force: true });
     }
+  });
+});
+
+describe('écriture atomique', () => {
+  it('si un renommage ou une écriture échoue, aucun fichier du lot n\'est modifié et aucun temporaire ne reste', () => {
+    writeFileSync(join(racine, 'art', 'a.txt'), 'avant');
+    mkdirSync(join(racine, 'art', 'dossier'));
+    expect(() => ecrireFichiers(racine, [{ chemin: 'art/a.txt', contenu: 'apres' }, { chemin: 'art/dossier', contenu: 'x' }], PERMIS)).toThrow();
+    expect(readFileSync(join(racine, 'art', 'a.txt'), 'utf8')).toBe('avant');
+    expect(readdirSync(join(racine, 'art')).sort()).toEqual(['a.txt', 'dossier']);
+  });
+
+  it('écrit tous les fichiers du lot sans laisser de temporaire', () => {
+    expect(ecrireFichiers(racine, [{ chemin: 'art/a.txt', contenu: '1' }, { chemin: 'art/b.txt', contenu: '2' }], PERMIS)).toEqual(['art/a.txt', 'art/b.txt']);
+    expect(readdirSync(join(racine, 'art')).sort()).toEqual(['a.txt', 'b.txt']);
   });
 });

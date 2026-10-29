@@ -1,5 +1,5 @@
 // Le cœur sert à autre chose que Pocharlume : un second adaptateur, au format `.pix`, passe par la même API.
-import { cpSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -42,9 +42,9 @@ describe('adaptateur d\'exemple (.pix)', () => {
     const doc = (await appeler(a, 'GET', '/api/sprites/doc?id=slime')).corps as DocumentSprite;
     const lignes = [...(doc.calques[0]?.lignes ?? [])];
     lignes[0] = 'W.......';
-    const apercu = (await appeler(a, 'POST', '/api/sprites/apercu', { id: 'slime', calques: { 0: lignes } })).corps as { apercu: ApercuSprite };
+    const apercu = (await appeler(a, 'POST', '/api/sprites/apercu', { id: 'slime', calques: { 0: lignes }, origine: { 0: doc.calques[0]?.lignes ?? [] } })).corps as { apercu: ApercuSprite };
     expect(apercu.apercu.animations[0]?.cadres[0]?.image.rvba).not.toBe(doc.apercu.animations[0]?.cadres[0]?.image.rvba);
-    const r = await appeler(a, 'POST', '/api/sprites/enregistrer', { id: 'slime', calques: { 0: lignes } });
+    const r = await appeler(a, 'POST', '/api/sprites/enregistrer', { id: 'slime', calques: { 0: lignes }, base: { origine: { 0: doc.calques[0]?.lignes ?? [] }, empreinte: doc.empreinte } });
     expect(r.statut).toBe(200);
     const apres = readFileSync(join(copie, 'sprites', 'slime.pix'), 'utf8');
     const l1 = avant.split('\n');
@@ -58,7 +58,19 @@ describe('adaptateur d\'exemple (.pix)', () => {
   it('refuse d\'écrire hors des dossiers permis', async () => {
     const a = { ...adaptateurPix(copie), ecriturePermise: ['autre/'] };
     const doc = (await appeler(a, 'GET', '/api/sprites/doc?id=slime')).corps as DocumentSprite;
-    const r = await appeler(a, 'POST', '/api/sprites/enregistrer', { id: 'slime', calques: { 0: [...(doc.calques[0]?.lignes ?? []), 'W'] } });
+    const r = await appeler(a, 'POST', '/api/sprites/enregistrer', { id: 'slime', calques: { 0: [...(doc.calques[0]?.lignes ?? []), 'W'] }, base: { origine: { 0: doc.calques[0]?.lignes ?? [] }, empreinte: doc.empreinte } });
     expect(r.statut).toBe(403);
+  });
+});
+
+describe('adaptateur d\'exemple : erreurs HTTP', () => {
+  it('id inconnu : 404 ; fichier modifié depuis l\'ouverture : 409', async () => {
+    const a = adaptateurPix(copie);
+    expect((await appeler(a, 'GET', '/api/sprites/doc?id=nexiste-pas')).statut).toBe(404);
+    const doc = (await appeler(a, 'GET', '/api/sprites/doc?id=slime')).corps as DocumentSprite;
+    const chemin = join(copie, 'sprites', 'slime.pix');
+    writeFileSync(chemin, `# changé à la main\n${readFileSync(chemin, 'utf8')}`);
+    const r = await appeler(a, 'POST', '/api/sprites/enregistrer', { id: 'slime', calques: { 0: ['W'] }, base: { origine: { 0: doc.calques[0]?.lignes ?? [] }, empreinte: doc.empreinte } });
+    expect(r.statut).toBe(409);
   });
 });

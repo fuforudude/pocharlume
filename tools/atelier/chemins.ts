@@ -1,6 +1,6 @@
 // Garde-fou des écritures : un chemin n'est écrit que s'il est normalisé, sous la racine du projet, permis par
 // l'adaptateur et qu'aucun lien symbolique ne le détourne. Aucun chemin en dur : tout vient de l'adaptateur.
-import { existsSync, lstatSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
+import { existsSync, lstatSync, mkdirSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import type { Ecriture } from './types.ts';
 
@@ -76,18 +76,39 @@ export function verifierChemin(racine: string, chemin: string, permis: readonly 
 }
 
 /**
- * Écrit les fichiers, tout ou rien : tous les chemins sont vérifiés avant la première écriture. Un fichier dont le
- * contenu ne change pas n'est pas réécrit. Rend les chemins réellement écrits.
+ * Écrit les fichiers, tout ou rien : tous les chemins sont vérifiés avant la première écriture, puis chaque contenu est
+ * écrit dans un fichier temporaire voisin, et les renommages ne viennent qu'ensuite. Si l'un d'eux échoue, les fichiers
+ * déjà remplacés retrouvent leur contenu d'avant. Un fichier dont le contenu ne change pas n'est pas réécrit. Rend les
+ * chemins réellement écrits.
  */
 export function ecrireFichiers(racine: string, ecritures: readonly Ecriture[], permis: readonly string[]): string[] {
   const cibles = ecritures.map((e) => ({ absolu: verifierChemin(racine, e.chemin, permis), chemin: normaliser(e.chemin), contenu: e.contenu }));
-  const ecrits: string[] = [];
-  for (const cible of cibles) {
-    const actuel = existsSync(cible.absolu) ? readFileSync(cible.absolu, 'utf8') : null;
-    if (actuel === cible.contenu) continue;
-    mkdirSync(dirname(cible.absolu), { recursive: true });
-    writeFileSync(cible.absolu, cible.contenu, 'utf8');
-    ecrits.push(cible.chemin);
+  const aEcrire = cibles.flatMap((c) => {
+    const actuel = existsSync(c.absolu) ? readFileSync(c.absolu, 'utf8') : null;
+    return actuel === c.contenu ? [] : [{ ...c, actuel, temporaire: `${c.absolu}.atelier-tmp` }];
+  });
+  try {
+    for (const c of aEcrire) {
+      mkdirSync(dirname(c.absolu), { recursive: true });
+      writeFileSync(c.temporaire, c.contenu, 'utf8');
+    }
+  } catch (erreur) {
+    for (const c of aEcrire) rmSync(c.temporaire, { force: true });
+    throw erreur;
   }
-  return ecrits;
+  const remplaces: typeof aEcrire = [];
+  try {
+    for (const c of aEcrire) {
+      renameSync(c.temporaire, c.absolu);
+      remplaces.push(c);
+    }
+  } catch (erreur) {
+    for (const c of aEcrire) rmSync(c.temporaire, { force: true });
+    for (const c of remplaces) {
+      if (c.actuel === null) rmSync(c.absolu, { force: true });
+      else writeFileSync(c.absolu, c.actuel, 'utf8');
+    }
+    throw erreur;
+  }
+  return aEcrire.map((c) => c.chemin);
 }
