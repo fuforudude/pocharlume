@@ -2,7 +2,7 @@
 // région de la carte et de n (jamais de l'état ni du générateur de la partie) : même graine, mêmes vagues, et le rejeu
 // d'un journal reste exact. Toutes les valeurs sont dans src/data/infini.ts.
 import { INFINI } from '../data/infini';
-import { budgetVague, genererVague } from '../data/equilibrage';
+import { budgetVague, genererVague, menaceEnnemi } from '../data/equilibrage';
 import { creerGenerateur, tirer } from './aleatoire';
 import { defEnnemi } from './contenu';
 import type { DefEnnemi, Paquet, Vague } from './definitions';
@@ -71,11 +71,13 @@ function total(paquets: readonly Paquet[]): number {
  * remplit son budget en ennemis (facteur 1). Sinon le budget est réduit (par approches successives, déterministes) jusqu'à ce que le
  * nombre d'ennemis tienne, et le facteur vaut budget ÷ budget réduit : la menace totale (nombre × PV) reste celle du budget.
  */
-function remplirBudget(config: ConfigPartie, region: number, chemins: number, vague: number): { paquets: Paquet[]; facteurPv: number } {
+export function remplirBudget(config: ConfigPartie, region: number, chemins: number, vague: number): { paquets: Paquet[]; facteurPv: number } {
   const ennemis = ennemisInfini(region);
   const budget = budgetInfini(vague);
   const generer = (b: number): Paquet[] => [...genererVague({ niveau: region, vague, ennemis, graine: config.graine, chemins, budget: b }).paquets];
-  let reduit = budget;
+  // Départ de la réduction : un budget qui ne produit qu'un nombre raisonnable de paquets (les budgets des vagues très hautes sont énormes).
+  const plusGrandeMenace = Math.max(...ennemis.map(([, def]) => menaceEnnemi(def) * (def.pouvoirs?.essaim ?? 1)));
+  let reduit = Math.min(budget, INFINI.ennemisMaxParVague * plusGrandeMenace);
   let paquets = generer(reduit);
   for (let essai = 0; essai < 8 && total(paquets) > INFINI.ennemisMaxParVague; essai++) {
     reduit *= (INFINI.ennemisMaxParVague / total(paquets)) * 0.95;

@@ -52,7 +52,7 @@ describe('ennemis des régions 6 à 10', () => {
     expect(ENNEMIS.flagellant.pouvoirs?.rage).toEqual({ pv: 0.5, vitesse: 0.5, degats: 0.5 });
     expect(ENNEMIS.inquisiteur.pouvoirs?.periodiques).toEqual([{ cadence: 8, actions: [{ type: 'figer_tour', nombre: 1, duree: 3, rayon: 2.5 }] }]);
     expect(ENNEMIS.exorciste.pouvoirs?.periodiques).toEqual([{ cadence: 6, actions: [{ type: 'bannir', rayon: 2, etourdissement: 2 }] }]);
-    expect(ENNEMIS.acolyte_cendre.pouvoirs?.periodiques).toEqual([{ cadence: 8, actions: [{ type: 'invoquer', ennemi: 'creux', nombre: 2, ecart: 0.5 }] }]);
+    expect(ENNEMIS.acolyte_cendre.pouvoirs?.periodiques).toEqual([{ cadence: 12, actions: [{ type: 'invoquer', ennemi: 'creux', nombre: 1, ecart: 0.5 }] }]);
   });
 
   it('les boss de la spec', () => {

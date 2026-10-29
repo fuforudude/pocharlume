@@ -28,13 +28,19 @@ const difficulte = options.get('difficulte') ?? 'matou';
 const haut = Number(options.get('haut') ?? 0.75);
 const bas = Number(options.get('bas') ?? 0.3);
 
-function tauxNaif(numero: number, aretes: number): number {
+const levier = options.get('levier') ?? 'aretes';
+const aretesFixees = options.has('aretes') ? Number(options.get('aretes')) : undefined;
+
+function tauxNaif(numero: number, aretes: number, facteur?: number): number {
   const campagne = CAMPAGNE.find((c) => c.numero === numero);
   if (!campagne) throw new Error(`Niveau ${String(numero)} inconnu`);
   const niveau = { ...campagne.niveau, aretesDepart: aretes };
   // GRAINE=1234 : essaie une autre graine de vagues pour ce niveau (sans rien écrire).
   const plan = PLANS_REGIONS.flat().find((p) => p.numero === numero);
-  const vagues = process.env.GRAINE && plan ? vaguesDuPlan({ ...plan, vagues: { ...plan.vagues, graine: Number(process.env.GRAINE) } }) : niveau.vagues;
+  const vagues =
+    plan && (process.env.GRAINE || facteur !== undefined)
+      ? vaguesDuPlan({ ...plan, vagues: { ...plan.vagues, ...(process.env.GRAINE ? { graine: Number(process.env.GRAINE) } : {}), ...(facteur === undefined ? {} : { facteurBudget: facteur }) } })
+      : niveau.vagues;
   Object.assign(niveau, { vagues });
   let gagnees = 0;
   let total = 0;
@@ -52,8 +58,24 @@ const resultat: Record<string, number> = {};
 for (const numero of numeros) {
   const k = ((numero - 1) % 10) + 1;
   const cible = haut + ((bas - haut) * (k - 1)) / 9;
-  let bas_ = 100;
-  let haut_ = 6000;
+  if (levier === 'budget') {
+    const campagne = CAMPAGNE.find((c) => c.numero === numero);
+    const aretes = aretesFixees ?? campagne?.niveau.aretesDepart ?? 1000;
+    let petit = 0.03;
+    let grand = 3;
+    // Le taux baisse quand le facteur monte : dichotomie sur une échelle logarithmique.
+    for (let i = 0; i < 9; i++) {
+      const milieu = Math.sqrt(petit * grand);
+      if (tauxNaif(numero, aretes, milieu) > cible) petit = milieu;
+      else grand = milieu;
+    }
+    const f = Math.round(petit * 100) / 100;
+    resultat[String(numero)] = f;
+    console.error(`niveau ${String(numero)} : cible ${String(Math.round(cible * 100))} % -> facteur ${String(f)} (aretes ${String(aretes)}, taux ${String(Math.round(tauxNaif(numero, aretes, f) * 100))} %)`);
+    continue;
+  }
+  let bas_ = Number(options.get("min") ?? 100);
+  let haut_ = Number(options.get("max") ?? 6000);
   // Le taux croît avec les arêtes : dichotomie sur une échelle logarithmique grossière (pas de 1 %).
   for (let i = 0; i < 9; i++) {
     const milieu = Math.round(Math.sqrt(bas_ * haut_));

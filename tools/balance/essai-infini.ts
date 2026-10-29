@@ -1,3 +1,6 @@
+import { INFINI } from '../../src/data/infini.ts';
+if (process.env.CROISSANCE) (INFINI as { croissance: number }).croissance = Number(process.env.CROISSANCE);
+if (process.env.PLAFOND) (INFINI as { ennemisMaxParVague: number }).ennemisMaxParVague = Number(process.env.PLAFOND);
 import { mesurerInfini, CARTES_INFINI_REGION1, CARTES_INFINI_AUTRES, mediane } from '../../src/equilibrage/infini.ts';
 const bot = (process.argv[2] ?? 'naif') as 'naif' | 'soigneux';
 const dieu = process.argv[3] ?? 'charlie';

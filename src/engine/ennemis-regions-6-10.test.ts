@@ -482,20 +482,20 @@ describe('Chevalier : rapide, armure 60 %, résistance magique 30 %', () => {
   });
 });
 
-describe('Acolyte de Cendre : résistance magique 30 %, invoque 2 Creux toutes les 8 s', () => {
-  it('appelle 2 Creux à chaque salve, derrière lui sur son chemin', () => {
+describe('Acolyte de Cendre : résistance magique 30 %, invoque 1 Creux toutes les 12 s (réglage du jalon 4)', () => {
+  it('appelle 1 Creux à chaque salve, derrière lui sur son chemin', () => {
     const etat = partieEssai();
-    const a = ennemiDonnees(etat, 'acolyte_cendre', 20, { pv: 1e9, degats: [0, 0] });
-    avancerSecondes(etat, 7.6);
+    const a = ennemiDonnees(etat, 'acolyte_cendre', 3, { pv: 1e9, degats: [0, 0] });
+    avancerSecondes(etat, 11.6);
     expect(ennemisDe(etat, 'creux')).toHaveLength(0);
     const vus = evenementsPendant(etat, 0.6);
-    expect(vus).toContainEqual(expect.objectContaining({ type: 'appel', ennemi: a.id, typeEnnemi: 'creux', nombre: 2 }));
+    expect(vus).toContainEqual(expect.objectContaining({ type: 'appel', ennemi: a.id, typeEnnemi: 'creux', nombre: 1 }));
     const creux = ennemisDe(etat, 'creux');
-    expect(creux).toHaveLength(2);
-    for (const c of creux) expect(c.distance).toBeLessThanOrEqual(20.5);
-    expect(Math.max(...creux.map((c) => c.distance))).toBeGreaterThan(19.5);
-    avancerSecondes(etat, 8);
-    expect(ennemisDe(etat, 'creux')).toHaveLength(4);
+    expect(creux).toHaveLength(1);
+    for (const c of creux) expect(c.distance).toBeLessThanOrEqual(3.5);
+    expect(Math.max(...creux.map((c) => c.distance))).toBeGreaterThan(2.5);
+    avancerSecondes(etat, 12.6);
+    expect(ennemisDe(etat, 'creux')).toHaveLength(2);
   });
 
   it('résiste à 30 % de la magie', () => {

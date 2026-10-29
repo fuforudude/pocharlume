@@ -744,7 +744,7 @@ export interface RegionInfini {
 export interface ParametresInfini {
   /** Numéro de campagne dont le budget de la première vague sert de base : le budget de la vague n est ce budget × croissance^(n−1). */
   readonly niveauBase: number;
-  /** Multiplicateur du budget d'une vague à la suivante (1,08). */
+  /** Multiplicateur du budget d'une vague à la suivante (1,22 depuis le réglage du jalon 4). */
   readonly croissance: number;
   /**
    * Nombre maximal d'ennemis (mini-boss non compris) dans une vague. Au-delà, le budget de menace est rempli avec moins d'ennemis, et

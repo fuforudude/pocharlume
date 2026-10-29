@@ -1,7 +1,7 @@
 // Mode infini (jalon 4) : vagues générées de façon déterministe, budget, élites, mini-boss, fin de partie, rejeu.
 import { describe, expect, it } from 'vitest';
 import { ENNEMIS } from '../data/ennemis';
-import { budgetVague, genererVague, menaceEnnemi } from '../data/equilibrage';
+import { budgetVague, menaceEnnemi } from '../data/equilibrage';
 import { INFINI } from '../data/infini';
 import { NIVEAU_TEST, REGION1 } from '../data/niveaux/region1';
 import { REGLES } from '../data/regles';
@@ -12,7 +12,7 @@ import { verifierConfig } from './config';
 import { defEnnemi } from './contenu';
 import type { DefEnnemi, Vague } from './definitions';
 import type { ConfigPartie, EtatPartie } from './etat';
-import { budgetInfini, ennemisInfini, genererVagueInfinie, partElites, pvMiniBoss } from './infini';
+import { budgetInfini, ennemisInfini, genererVagueInfinie, partElites, pvMiniBoss, remplirBudget } from './infini';
 import { infligerDegats } from './degats';
 import { ajouterEnnemi } from './ennemis';
 import { estCaseInterdite } from './grille';
@@ -26,9 +26,9 @@ function configInfinie(region = 1, surcharges: Partial<ConfigPartie> = {}): Conf
 
 const CHEMINS = NIVEAU_TEST.carte.chemins.length;
 
-/** Le produit 1,08 × 1,08 … (n − 1 fois) : la formule du budget, écrite autrement que dans le moteur. */
+/** Le produit 1,22 × 1,22 … (n − 1 fois) : la formule du budget, écrite autrement que dans le moteur. */
 function croissance(n: number): number {
-  return Array.from({ length: n - 1 }).reduce<number>((produit) => produit * 1.08, 1);
+  return Array.from({ length: n - 1 }).reduce<number>((produit) => produit * 1.22, 1);
 }
 
 /** Les groupes d'une vague qui ne sont pas le boss de la région. */
@@ -42,19 +42,19 @@ function menace(vague: Vague, region: number): number {
 }
 
 describe('budget de menace de la vague n', () => {
-  it('suit budget(vague 1) × 1,08^(n − 1)', () => {
+  it('suit budget(vague 1) × 1,22^(n − 1)', () => {
     expect(budgetInfini(1)).toBe(budgetVague(1, 1));
     expect(budgetInfini(1)).toBe(260);
-    for (const n of [2, 3, 10, 25, 50, 100]) expect(budgetInfini(n)).toBeCloseTo(260 * croissance(n), 6);
-    expect(budgetInfini(10)).toBeCloseTo(519.74, 1);
-    expect(budgetInfini(30)).toBeCloseTo(2422.5, 0);
+    for (const n of [2, 3, 10, 25, 50, 100]) expect(budgetInfini(n) / (260 * croissance(n))).toBeCloseTo(1, 9);
+    expect(budgetInfini(10)).toBeCloseTo(1556.7, 0);
+    expect(budgetInfini(30)).toBeCloseTo(260 * croissance(30), 0);
   });
 
   it('chaque vague générée remplit son budget sans le dépasser, dans toutes les régions', () => {
     for (const region of [1, 3, 6, 10]) {
       const candidats = ennemisInfini(region);
       const petit = Math.min(...candidats.map(([, def]) => menaceEnnemi(def) * (def.pouvoirs?.essaim ?? 1)));
-      for (let n = 1; n <= 40; n++) {
+      for (let n = 1; n <= 16; n++) {
         const budget = budgetInfini(n);
         const vague = genererVagueInfinie(configInfinie(region), CHEMINS, n);
         const total = menace(vague, region);
@@ -122,7 +122,7 @@ describe('plafond du nombre d’ennemis par vague', () => {
   });
 
   it('les vagues qui tiennent dans le plafond restent celles du budget, sans facteur de PV', () => {
-    const vague = genererVagueInfinie(configInfinie(1), CHEMINS, 25);
+    const vague = genererVagueInfinie(configInfinie(1), CHEMINS, 12);
     expect(ordinaires(vague, 1).every((p) => p.facteurPv === undefined)).toBe(true);
   });
 });
@@ -248,7 +248,7 @@ describe('élites : à partir de la vague 20', () => {
 
   it('couper les groupes en élites et ordinaires garde l’effectif, les chemins et le rythme de la vague de base', () => {
     const config = configInfinie(3);
-    const base = genererVague({ niveau: 3, vague: 25, ennemis: ennemisInfini(3), graine: config.graine, chemins: CHEMINS, budget: budgetInfini(25) });
+    const base = { paquets: remplirBudget(config, 3, CHEMINS, 25).paquets };
     const avec = genererVagueInfinie(config, CHEMINS, 25);
     expect(avec.paquets.some((p) => p.elite === true)).toBe(true);
     for (const [i, p] of base.paquets.entries()) {
@@ -270,7 +270,7 @@ describe('élites : à partir de la vague 20', () => {
     const e = elites[0];
     if (!e) throw new Error('pas d’élite');
     const def = ENNEMIS[e.type as keyof typeof ENNEMIS] as DefEnnemi;
-    expect(e.pvMax).toBeCloseTo(def.pv * 1.08 * REGLES.elite.facteurPv, 6);
+    expect(e.pvMax / (def.pv * 1.08 * REGLES.elite.facteurPv * remplirBudget(etat.config, 1, etat.chemins.length, 20).facteurPv)).toBeCloseTo(1, 6);
   });
 });
 
@@ -491,7 +491,7 @@ describe('configuration du mode infini', () => {
       expect(defEnnemi(r.boss)?.boss, r.boss).toBe(true);
       for (const id of r.ennemis) expect(defEnnemi(id)?.boss, id).toBe(false);
     }
-    expect(INFINI.croissance).toBe(1.08);
+    expect(INFINI.croissance).toBe(1.22);
     expect(INFINI.miniBoss).toMatchObject({ intervalle: 10, pvDepart: 0.3, pvParMiniBoss: 0.15 });
     expect(INFINI.elites).toMatchObject({ premiereVague: 20, partDepart: 0.1, partParPalier: 0.05, intervalle: 10, partMax: 0.6 });
   });

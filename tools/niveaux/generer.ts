@@ -41,7 +41,7 @@ async function texteFichier(region: number, sortie: string): Promise<string> {
   const compact = encoderVagues(niveaux);
   const blocs = plans.map((plan, i) => {
     const vagues = niveaux[i] ?? [];
-    const detail = vagues.map((v, w) => `${String(Math.round(menaceVague(v, ENNEMIS)))}/${String(Math.round(budgetVague(plan.numero, w + 1)))}`).join(' ');
+    const detail = vagues.map((v, w) => `${String(Math.round(menaceVague(v, ENNEMIS)))}/${String(Math.round(budgetVague(plan.numero, w + 1) * (plan.vagues.facteurBudget ?? 1)))}`).join(' ');
     const retouche = plan.vagues.retouchees === true ? ' (retouchées à la main)' : '';
     return [
       `  // Niveau ${String(plan.numero)} : ${String(vagues.length)} vagues, menace/budget : ${detail}${retouche}.`,

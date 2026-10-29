@@ -23,6 +23,12 @@ export interface PlanNiveau {
     readonly nombre: number;
     readonly ennemis: readonly IdEnnemi[];
     readonly graine: number;
+    /**
+     * Facteur sur le budget de menace b(L, w) des vagues du niveau (1 si absent). Réglage fin des régions 6 à 10 (jalon 4) : la menace
+     * d'un ennemi ne chiffre pas ce que valent ses mécaniques contre un joueur (armure 60 à 90 %, invocations), si bien que le même
+     * budget y est plus dur qu'aux régions 1 à 5. Jamais utilisé par les régions 1 à 5 (leurs vagues sont intactes).
+     */
+    readonly facteurBudget?: number;
     readonly boss?: BossDeVague;
     /** Vagues retouchées à la main : le test de cohérence avec le générateur les laisse de côté. */
     readonly retouchees?: boolean;

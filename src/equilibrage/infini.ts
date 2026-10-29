@@ -29,7 +29,7 @@ export const CARTES_INFINI_AUTRES: readonly CarteInfini[] = [
   { id: 'region10', numero: 91, region: 10 },
 ];
 
-/** Au-delà de cette vague terminée on arrête la partie : le coût d'une partie croît avec le budget (×1,08 par vague). */
+/** Au-delà de cette vague terminée on arrête la partie : le coût d'une partie croît avec le budget (×1,22 par vague). */
 export const VAGUE_MAX_INFINI = 100;
 
 /** Les graines de l'infini : les dix graines d'évaluation des bandes. */

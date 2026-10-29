@@ -5,8 +5,8 @@ import type { ParametresInfini } from '../engine/definitions';
 export const INFINI: ParametresInfini = {
   // Le budget de la vague 1 est celui de la première vague du premier niveau de la campagne (budgetVague(1, 1)).
   niveauBase: 1,
-  // Budget de la vague n = budget de la vague 1 × 1,08^(n−1).
-  croissance: 1.08,
+  // Budget de la vague n = budget de la vague 1 × 1,22^(n−1) (1,08 avant le réglage du jalon 4 : trop doux, voir la spec).
+  croissance: 1.22,
   // Au plus 200 ennemis par vague (mini-boss à part) : au-delà, le surplus de budget gonfle les PV de la vague (voir engine/infini.ts).
   ennemisMaxParVague: 200,
   regions: [

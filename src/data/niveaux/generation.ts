@@ -3,7 +3,7 @@
 // jamais de vague à l'exécution. Les tests vérifient que le fichier figé correspond à ce que ce code produit.
 import type { DefEnnemi, Vague } from '../../engine/definitions';
 import { ENNEMIS, type IdEnnemi } from '../ennemis';
-import { EQUILIBRAGE, genererVague } from '../equilibrage';
+import { budgetVague, EQUILIBRAGE, genererVague } from '../equilibrage';
 import type { PlanNiveau } from './plan-niveau';
 
 /** Un boss ajouté à une vague, en plus de ses ennemis ordinaires (son budget dépasse celui de la vague). */
@@ -23,6 +23,8 @@ export interface PlanVagues {
   /** Ennemis débloqués pour ce niveau, tirés dans cet ordre (l'ordre compte pour le déterminisme). */
   readonly ennemis: readonly IdEnnemi[];
   readonly graine: number;
+  /** Facteur sur le budget de menace des vagues (1 par défaut : voir `PlanNiveau`). */
+  readonly facteurBudget?: number;
   /** Nombre de chemins du niveau. */
   readonly chemins: number;
   readonly boss?: BossDeVague;
@@ -43,7 +45,14 @@ export function genererVaguesNiveau(plan: PlanVagues): Vague[] {
     : tous;
   const vagues: Vague[] = [];
   for (let w = 1; w <= plan.nombre; w++) {
-    const paquets = [...genererVague({ niveau: plan.niveau, vague: w, ennemis, graine: plan.graine, chemins: plan.chemins }).paquets];
+    const paquets = [...genererVague({
+        niveau: plan.niveau,
+        vague: w,
+        ennemis,
+        graine: plan.graine,
+        chemins: plan.chemins,
+        ...(plan.facteurBudget === undefined ? {} : { budget: budgetVague(plan.niveau, w) * plan.facteurBudget }),
+      }).paquets];
     const boss = plan.boss;
     if (boss && boss.vague === w) {
       paquets.push({ ennemi: boss.ennemi, nombre: 1, intervalle: 0, chemin: boss.chemin, delai: boss.delai });

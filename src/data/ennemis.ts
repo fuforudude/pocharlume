@@ -501,7 +501,7 @@ export const ENNEMIS = {
     cadence: 1.3,
     coutVies: 1,
     prime: 24,
-    pouvoirs: { periodiques: [{ cadence: 8, actions: [{ type: 'invoquer', ennemi: 'creux', nombre: 2, ecart: 0.5 }] }] },
+    pouvoirs: { periodiques: [{ cadence: 12, actions: [{ type: 'invoquer', ennemi: 'creux', nombre: 1, ecart: 0.5 }] }] },
   }),
   /** Volant, armure 30 %, résistance magique 60 %. */
   ange_cendre: ennemi({
