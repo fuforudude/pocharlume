@@ -1,12 +1,12 @@
 // Structure d'une carte dessinée à la main (32 × 18 tuiles) et petits constructeurs pour l'écrire. Les cartes
-// elles-mêmes sont dans cartes.ts (région 1) et cartes-region2.ts à cartes-region5.ts ; `CARTES` (cartes-toutes.ts) les
+// elles-mêmes sont dans cartes.ts (région 1) et cartes-region2.ts à cartes-region10.ts ; `CARTES` (cartes-toutes.ts) les
 // rassemble.
 import type { CheminCarte, Point } from '../../engine/definitions';
 import type { Decor, ZoneSol } from '../visuel';
 
 export interface CarteModele {
   readonly id: string;
-  /** Région dont la carte porte le jeu de tuiles et le décor (1 à 5). */
+  /** Région dont la carte porte le jeu de tuiles et le décor (1 à 10). */
   readonly region: number;
   readonly largeur: number;
   readonly hauteur: number;

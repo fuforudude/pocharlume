@@ -1,4 +1,4 @@
-// La campagne des régions 1 à 5 : 50 niveaux, 16 cartes (3 nouvelles par région 2 à 5), ennemis et boss de chaque région,
+// La campagne des régions 1 à 10 : 100 niveaux, 31 cartes (3 nouvelles par région 2 à 10), ennemis et boss de chaque région,
 // essaims, vagues dans le budget de menace, défi Fer jouable. Les contrôles de géométrie des cartes et de l'habillage sont
 // dans niveaux.test.ts, qui parcourt aussi toute la campagne.
 import { describe, expect, it } from 'vitest';
@@ -14,17 +14,17 @@ import { CARTES } from './cartes-toutes';
 import { BOSS_REGIONS, ENNEMIS_REGIONS, ennemisDuNiveau } from './plan-niveau';
 import { PLANS_REGIONS } from './plans';
 
-const REGIONS_NOUVELLES = [2, 3, 4, 5];
+const REGIONS_NOUVELLES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
 const region = (numero: number): number => Math.floor((numero - 1) / 10) + 1;
 const rang = (numero: number): number => ((numero - 1) % 10) + 1;
 const definition = (id: string): DefEnnemi => ENNEMIS[id as IdEnnemi];
 const ennemisDe = (n: NiveauCampagne): Set<string> => new Set(n.niveau.vagues.flatMap((v) => v.paquets.map((p) => p.ennemi)));
 
-describe('les 50 niveaux', () => {
-  it('sont numérotés de 1 à 50, par régions de 10, avec des identifiants distincts', () => {
-    expect(CAMPAGNE.map((n) => n.numero)).toEqual(Array.from({ length: 50 }, (_, i) => i + 1));
-    expect(REGIONS.map((r) => r.length)).toEqual([10, 10, 10, 10, 10]);
-    expect(new Set(CAMPAGNE.map((n) => n.niveau.id)).size).toBe(50);
+describe('les 100 niveaux', () => {
+  it('sont numérotés de 1 à 100, par régions de 10, avec des identifiants distincts', () => {
+    expect(CAMPAGNE.map((n) => n.numero)).toEqual(Array.from({ length: 100 }, (_, i) => i + 1));
+    expect(REGIONS.map((r) => r.length)).toEqual([10, 10, 10, 10, 10, 10, 10, 10, 10, 10]);
+    expect(new Set(CAMPAGNE.map((n) => n.niveau.id)).size).toBe(100);
     for (const n of CAMPAGNE) expect(n.niveau.id).toBe(`r${String(region(n.numero))}-${String(rang(n.numero)).padStart(2, '0')}`);
   });
 
@@ -33,7 +33,9 @@ describe('les 50 niveaux', () => {
     expect(niveauDeCampagne(37)?.niveau.id).toBe('r4-07');
     expect(niveauDeCampagne(50)?.niveau.id).toBe('r5-10');
     expect(niveauDeCampagne(0)).toBeUndefined();
-    expect(niveauDeCampagne(51)).toBeUndefined();
+    expect(niveauDeCampagne(51)?.niveau.id).toBe('r6-01');
+    expect(niveauDeCampagne(100)?.niveau.id).toBe('r10-10');
+    expect(niveauDeCampagne(101)).toBeUndefined();
   });
 
   it('suivent leur plan : numéro, entrées, arêtes de départ', () => {
@@ -65,11 +67,11 @@ describe('les 50 niveaux', () => {
   });
 });
 
-describe('les 12 nouvelles cartes', () => {
+describe('les 27 nouvelles cartes', () => {
   const nouvelles = Object.values(CARTES).filter((c) => c.region >= 2);
 
-  it('sont trois par région 2 à 5, de 32 × 18 tuiles, avec un jeu de tuiles de leur région', () => {
-    expect(nouvelles).toHaveLength(12);
+  it('sont trois par région 2 à 10, de 32 × 18 tuiles, avec un jeu de tuiles de leur région', () => {
+    expect(nouvelles).toHaveLength(27);
     for (const r of REGIONS_NOUVELLES) {
       const cartes = nouvelles.filter((c) => c.region === r);
       expect(cartes, `région ${String(r)}`).toHaveLength(3);
@@ -95,16 +97,17 @@ describe('les 12 nouvelles cartes', () => {
 });
 
 describe('ennemis des régions', () => {
-  it('chaque région a trois ennemis ordinaires et un boss, tous dans les données', () => {
-    expect(ENNEMIS_REGIONS).toHaveLength(5);
-    for (const liste of ENNEMIS_REGIONS) {
-      expect(liste).toHaveLength(3);
+  it('chaque région a trois ennemis ordinaires (deux pour la région 10) et un boss, tous dans les données', () => {
+    expect(ENNEMIS_REGIONS).toHaveLength(10);
+    expect(BOSS_REGIONS).toHaveLength(10);
+    ENNEMIS_REGIONS.forEach((liste, r) => {
+      expect(liste).toHaveLength(r === 9 ? 2 : 3);
       for (const id of liste) expect(definition(id).boss, id).toBe(false);
-    }
+    });
     for (const id of BOSS_REGIONS) expect(definition(id).boss, id).toBe(true);
   });
 
-  it('un niveau de région 2 à 5 emploie les ennemis de sa région, puis dès le niveau 4 ceux des régions précédentes', () => {
+  it('un niveau de région 2 à 10 emploie les ennemis de sa région, puis dès le niveau 4 ceux des régions précédentes', () => {
     for (const r of REGIONS_NOUVELLES) {
       const propres = ENNEMIS_REGIONS[r - 1] ?? [];
       const anciens = ENNEMIS_REGIONS.slice(0, r - 1).flat();
@@ -138,7 +141,7 @@ describe('ennemis des régions', () => {
     }
   });
 
-  it('les essaims arrivent par groupes entiers (6 sangsues, 8 rats de peste)', () => {
+  it('les essaims arrivent par groupes entiers (6 sangsues, 8 rats de peste, 5 chauves-souris)', () => {
     let vus = 0;
     for (const n of CAMPAGNE) {
       for (const [w, v] of n.niveau.vagues.entries()) {
@@ -153,6 +156,7 @@ describe('ennemis des régions', () => {
     expect(vus).toBeGreaterThan(20);
     expect(definition('sangsue').pouvoirs?.essaim).toBe(6);
     expect(definition('rat_peste').pouvoirs?.essaim).toBe(8);
+    expect(definition('chauve_souris').pouvoirs?.essaim).toBe(5);
   });
 });
 
@@ -184,7 +188,7 @@ describe('vagues', () => {
     }
   });
 
-  it('chaque région 2 à 5 a de 8 à 15 vagues par niveau, et leur nombre ne baisse jamais', () => {
+  it('chaque région 2 à 10 a de 8 à 15 vagues par niveau, et leur nombre ne baisse jamais', () => {
     for (const r of REGIONS_NOUVELLES) {
       const nombres = (REGIONS[r - 1] ?? []).map((n) => n.niveau.vagues.length);
       for (const nb of nombres) {
@@ -204,7 +208,7 @@ describe('vagues', () => {
 });
 
 describe('élites en Vieux Sage', () => {
-  it('la région 1 n’en joue pas (ses bandes de Vieux Sage ne les supportent pas), les régions 2 à 5 si', () => {
+  it('la région 1 n’en joue pas (ses bandes de Vieux Sage ne les supportent pas), les régions 2 à 10 si', () => {
     for (const n of CAMPAGNE) expect(n.niveau.sansElites === true, `niveau ${String(n.numero)}`).toBe(n.numero <= 10);
   });
 });
@@ -246,14 +250,14 @@ describe('défi Fer', () => {
       if (i > 0) expect(cle(p), `niveaux ${String(i)} et ${String(i + 1)}`).not.toBe(cle(paires[i - 1]));
     });
     expect(usage.size).toBe(6);
-    for (const [paire, n] of usage) expect(n, paire).toBeLessThanOrEqual(15);
+    for (const [paire, n] of usage) expect(n, paire).toBeLessThanOrEqual(30);
   });
 
-  it('la tour divine de chaque dieu reste possible sur au moins un niveau sur deux', () => {
+  it('la tour divine de chaque dieu reste possible sur au moins 30 niveaux sur 100', () => {
     // Plume : tir, Charlie : caserne, Pollen : artillerie.
     for (const famille of ['tir', 'caserne', 'artillerie']) {
       const n = CAMPAGNE.filter((c) => c.niveau.defiFer?.familles.includes(famille)).length;
-      expect(n, famille).toBeGreaterThanOrEqual(15);
+      expect(n, famille).toBeGreaterThanOrEqual(30);
     }
   });
 });

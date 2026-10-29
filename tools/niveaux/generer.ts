@@ -13,7 +13,7 @@ import { CHAMPS_PAR_GROUPE, encoderVagues, type VagueCompacte } from '../../src/
 import { vaguesDuPlan } from '../../src/data/niveaux/generation.ts';
 import { PLANS_REGIONS } from '../../src/data/niveaux/plans.ts';
 
-const NOMS_REGION = ['du Village Affamé', 'des Champs Brûlés', 'du Bourg des Bûchers', 'des Marais de l’Ordalie', 'de la Ville Pestiférée'] as const;
+const NOMS_REGION = ['du Village Affamé', 'des Champs Brûlés', 'du Bourg des Bûchers', 'des Marais de l’Ordalie', 'de la Ville Pestiférée', 'du Charnier', 'de la Croisade', 'du Monastère Noir', 'de la Cité du Roi', 'de la Cathédrale du Soleil Blême'] as const;
 
 /** Une vague : ses nombres à la suite, un groupe par ligne. */
 function ecrireVague(vague: VagueCompacte): string {

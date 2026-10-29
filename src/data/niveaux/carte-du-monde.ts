@@ -1,4 +1,4 @@
-// Cartes du monde des régions 1 à 5 : où se trouvent les 10 niveaux de la région et le chemin qui les relie. Une route par
+// Cartes du monde des régions 1 à 10 : où se trouvent les 10 niveaux de la région et le chemin qui les relie. Une route par
 // région, chacune sur son fond de 512 × 288 pixels logiques (le rendu choisit le zoom entier). L'écran de la carte du monde
 // dessine le fond, le tracé et les nœuds de la région affichée (qui dépend de `regionMax` de la sauvegarde) ; il ne contient
 // aucune position en dur. `noeudsDeRegion` et `traceDeRegion` donnent la route d'une région.
@@ -160,18 +160,153 @@ export const TRACE_REGION5: readonly (readonly Point[])[] = [
   route([360, 104], [440, 104], [440, 48]),
 ];
 
+/** Le Charnier : la route zigzague de fosse en fosse depuis le nord-ouest, redescend vers les ossuaires du sud, puis remonte vers le trône du Roi des Fosses, au nord-est. */
+export const NOEUDS_REGION6: readonly NoeudNiveau[] = [
+  noeud(1, 40, 60),
+  noeud(2, 110, 96),
+  noeud(3, 60, 150),
+  noeud(4, 130, 196),
+  noeud(5, 80, 244),
+  noeud(6, 190, 236),
+  noeud(7, 250, 180),
+  noeud(8, 320, 226),
+  noeud(9, 390, 160),
+  noeud(10, 452, 80),
+];
+
+/** Les 9 tronçons de la région 6, comme TRACE_REGION1. */
+export const TRACE_REGION6: readonly (readonly Point[])[] = [
+  route([40, 60], [59, 81], [91, 75], [110, 96]),
+  route([110, 96], [101, 121], [69, 125], [60, 150]),
+  route([60, 150], [78, 174], [112, 172], [130, 196]),
+  route([130, 196], [120, 219], [90, 221], [80, 244]),
+  route([80, 244], [117, 251], [153, 229], [190, 236]),
+  route([190, 236], [203, 210], [237, 206], [250, 180]),
+  route([250, 180], [268, 204], [302, 202], [320, 226]),
+  route([320, 226], [336, 197], [374, 189], [390, 160]),
+  route([390, 160], [419, 139], [423, 101], [452, 80]),
+];
+
+/** La Croisade : la route du camp avance en dents de scie d’ouest en est, descend vers l’arrière-garde, puis revient vers l’ouest jusqu’à la tente du Prince Croisé, au sud. */
+export const NOEUDS_REGION7: readonly NoeudNiveau[] = [
+  noeud(1, 40, 150),
+  noeud(2, 96, 100),
+  noeud(3, 160, 140),
+  noeud(4, 216, 90),
+  noeud(5, 280, 140),
+  noeud(6, 336, 90),
+  noeud(7, 400, 150),
+  noeud(8, 452, 210),
+  noeud(9, 380, 248),
+  noeud(10, 250, 246),
+];
+
+/** Les 9 tronçons de la région 7, comme TRACE_REGION1. */
+export const TRACE_REGION7: readonly (readonly Point[])[] = [
+  route([40, 150], [65, 141], [71, 109], [96, 100]),
+  route([96, 100], [123, 105], [133, 135], [160, 140]),
+  route([160, 140], [185, 131], [191, 99], [216, 90]),
+  route([216, 90], [243, 99], [253, 131], [280, 140]),
+  route([280, 140], [305, 131], [311, 99], [336, 90]),
+  route([336, 90], [364, 103], [372, 137], [400, 150]),
+  route([400, 150], [410, 177], [442, 183], [452, 210]),
+  route([452, 210], [433, 232], [399, 226], [380, 248]),
+  route([380, 248], [337, 237], [293, 257], [250, 246]),
+];
+
+/** Le Monastère Noir : une route de galeries à angle droit longe le cloître par le nord, redescend par l’est, revient par le sud et rentre au cœur du monastère, chez le Grand Inquisiteur. */
+export const NOEUDS_REGION8: readonly NoeudNiveau[] = [
+  noeud(1, 40, 48),
+  noeud(2, 140, 48),
+  noeud(3, 240, 48),
+  noeud(4, 340, 48),
+  noeud(5, 440, 48),
+  noeud(6, 440, 136),
+  noeud(7, 440, 240),
+  noeud(8, 340, 240),
+  noeud(9, 240, 240),
+  noeud(10, 240, 140),
+];
+
+/** Les 9 tronçons de la région 8, comme TRACE_REGION1. */
+export const TRACE_REGION8: readonly (readonly Point[])[] = [
+  route([40, 48], [140, 48]),
+  route([140, 48], [240, 48]),
+  route([240, 48], [340, 48]),
+  route([340, 48], [440, 48]),
+  route([440, 48], [440, 136]),
+  route([440, 136], [440, 240]),
+  route([440, 240], [340, 240]),
+  route([340, 240], [240, 240]),
+  route([240, 240], [240, 140]),
+];
+
+/** La Cité du Roi : la route monte les avenues en arcs successifs, de la porte du sud-ouest jusqu’aux remparts du nord, puis redescend vers la salle du trône du Roi Fou, au sud-est. */
+export const NOEUDS_REGION9: readonly NoeudNiveau[] = [
+  noeud(1, 40, 250),
+  noeud(2, 110, 200),
+  noeud(3, 60, 140),
+  noeud(4, 130, 90),
+  noeud(5, 200, 140),
+  noeud(6, 270, 90),
+  noeud(7, 340, 140),
+  noeud(8, 410, 90),
+  noeud(9, 450, 160),
+  noeud(10, 440, 240),
+];
+
+/** Les 9 tronçons de la région 9, comme TRACE_REGION1. */
+export const TRACE_REGION9: readonly (readonly Point[])[] = [
+  route([40, 250], [69, 241], [81, 209], [110, 200]),
+  route([110, 200], [86, 186], [84, 154], [60, 140]),
+  route([60, 140], [89, 131], [101, 99], [130, 90]),
+  route([130, 90], [159, 99], [171, 131], [200, 140]),
+  route([200, 140], [229, 131], [241, 99], [270, 90]),
+  route([270, 90], [299, 99], [311, 131], [340, 140]),
+  route([340, 140], [369, 131], [381, 99], [410, 90]),
+  route([410, 90], [432, 108], [428, 142], [450, 160]),
+  route([450, 160], [437, 185], [453, 215], [440, 240]),
+];
+
+/** La Cathédrale du Soleil Blême : la route suit la nef d’ouest en est, tourne dans le transept, serpente jusqu’au chœur et s’élève vers l’autel du Soleil Blême, au nord-est. */
+export const NOEUDS_REGION10: readonly NoeudNiveau[] = [
+  noeud(1, 40, 144),
+  noeud(2, 120, 144),
+  noeud(3, 200, 144),
+  noeud(4, 280, 144),
+  noeud(5, 280, 70),
+  noeud(6, 360, 70),
+  noeud(7, 360, 144),
+  noeud(8, 360, 220),
+  noeud(9, 440, 220),
+  noeud(10, 440, 56),
+];
+
+/** Les 9 tronçons de la région 10, comme TRACE_REGION1. */
+export const TRACE_REGION10: readonly (readonly Point[])[] = [
+  route([40, 144], [120, 144]),
+  route([120, 144], [200, 144]),
+  route([200, 144], [280, 144]),
+  route([280, 144], [280, 70]),
+  route([280, 70], [360, 70]),
+  route([360, 70], [360, 144]),
+  route([360, 144], [360, 220]),
+  route([360, 220], [440, 220]),
+  route([440, 220], [440, 56]),
+];
+
 /** Les nœuds de chaque région, dans l'ordre (indice 0 = région 1). */
-export const NOEUDS_REGIONS: readonly (readonly NoeudNiveau[])[] = [NOEUDS_REGION1, NOEUDS_REGION2, NOEUDS_REGION3, NOEUDS_REGION4, NOEUDS_REGION5];
+export const NOEUDS_REGIONS: readonly (readonly NoeudNiveau[])[] = [NOEUDS_REGION1, NOEUDS_REGION2, NOEUDS_REGION3, NOEUDS_REGION4, NOEUDS_REGION5, NOEUDS_REGION6, NOEUDS_REGION7, NOEUDS_REGION8, NOEUDS_REGION9, NOEUDS_REGION10];
 
 /** Les tronçons de chaque région, dans l'ordre (indice 0 = région 1). */
-export const TRACES_REGIONS: readonly (readonly (readonly Point[])[])[] = [TRACE_REGION1, TRACE_REGION2, TRACE_REGION3, TRACE_REGION4, TRACE_REGION5];
+export const TRACES_REGIONS: readonly (readonly (readonly Point[])[])[] = [TRACE_REGION1, TRACE_REGION2, TRACE_REGION3, TRACE_REGION4, TRACE_REGION5, TRACE_REGION6, TRACE_REGION7, TRACE_REGION8, TRACE_REGION9, TRACE_REGION10];
 
-/** Les nœuds de la région `region` (1 à 5), ou `undefined` si elle n'a pas de carte. */
+/** Les nœuds de la région `region` (1 à 10), ou `undefined` si elle n'a pas de carte. */
 export function noeudsDeRegion(region: number): readonly NoeudNiveau[] | undefined {
   return Number.isInteger(region) ? NOEUDS_REGIONS[region - 1] : undefined;
 }
 
-/** Les tronçons de la région `region` (1 à 5), ou `undefined` si elle n'a pas de carte. */
+/** Les tronçons de la région `region` (1 à 10), ou `undefined` si elle n'a pas de carte. */
 export function traceDeRegion(region: number): readonly (readonly Point[])[] | undefined {
   return Number.isInteger(region) ? TRACES_REGIONS[region - 1] : undefined;
 }

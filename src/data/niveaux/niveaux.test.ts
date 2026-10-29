@@ -28,6 +28,9 @@ const ATLAS = (JSON.parse(readFileSync(new URL('../../../public/sprites/atlas.js
 /** Portée de la plus courte des tours de tir, de magie ou d'artillerie au niveau 1 : une case utile doit y voir le chemin. */
 const PORTEE_TIR_MIN = Math.min(...FAMILLES.filter((f) => f !== 'caserne').map((f) => TOURS[f].niveaux[0].portee));
 
+/** Portée de ralliement d'une caserne (tuiles) : une case de caserne valide a un chemin à cette distance au plus de son centre. */
+const PORTEE_RALLIEMENT = 3.5;
+
 function dist(a: Point, b: Point): number {
   return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
 }
@@ -97,7 +100,7 @@ function verifierCarte(niveau: Niveau): void {
   });
 }
 
-describe('grille de construction des 50 niveaux', () => {
+describe('grille de construction des 100 niveaux', () => {
   const taille = REGLES.tailleCase;
 
   it('chaque niveau a ses cases interdites tirées de son chemin et de ses grands décors visibles', () => {
@@ -159,6 +162,14 @@ describe('grille de construction des 50 niveaux', () => {
       expect(libres.length, `niveau ${String(n.numero)}`).toBeGreaterThanOrEqual(40);
       const utiles = libres.filter((c) => distanceAuNiveau(n.niveau, centreCase(c.cx, c.cy)) <= PORTEE_TIR_MIN);
       expect(utiles.length, `niveau ${String(n.numero)}`).toBeGreaterThanOrEqual(8);
+    }
+  });
+
+  it('laisse assez de cases de caserne valides : un chemin à portée de ralliement (3,5 tuiles), sur chacun des 100 niveaux', () => {
+    for (const n of CAMPAGNE) {
+      const libres = casesLibres({ niveau: n.niveau, tours: [] });
+      const valides = libres.filter((c) => distanceAuNiveau(n.niveau, centreCase(c.cx, c.cy)) <= PORTEE_RALLIEMENT);
+      expect(valides.length, `niveau ${String(n.numero)}`).toBeGreaterThanOrEqual(12);
     }
   });
 });
@@ -346,7 +357,7 @@ describe('habillage', () => {
 
 describe('textes', () => {
   it('chaque niveau a un nom et une phrase d’ambiance en français, distincts', () => {
-    expect(TEXTES_REGIONS.map((t) => t.length)).toEqual([10, 10, 10, 10, 10]);
+    expect(TEXTES_REGIONS.map((t) => t.length)).toEqual([10, 10, 10, 10, 10, 10, 10, 10, 10, 10]);
     const cles = new Set(Object.keys(fr));
     const textes = fr as Record<string, string>;
     const vus = new Set<string>();

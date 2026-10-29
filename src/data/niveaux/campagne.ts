@@ -1,4 +1,4 @@
-// La campagne des régions 1 à 5 : 50 niveaux numérotés de 1 à 50, assemblés depuis leur plan (plans.ts), leur carte
+// La campagne des régions 1 à 10 : 100 niveaux numérotés de 1 à 100, assemblés depuis leur plan (plans.ts), leur carte
 // (cartes-toutes.ts) et leurs vagues figées (vagues-region<N>.ts, générées par `npm run niveaux`). La région 1 est aussi
 // exportée par region1.ts avec son niveau de test.
 import type { Vague } from '../../engine/definitions';
@@ -12,6 +12,11 @@ import { VAGUES_REGION2 } from './vagues-region2';
 import { VAGUES_REGION3 } from './vagues-region3';
 import { VAGUES_REGION4 } from './vagues-region4';
 import { VAGUES_REGION5 } from './vagues-region5';
+import { VAGUES_REGION6 } from './vagues-region6';
+import { VAGUES_REGION7 } from './vagues-region7';
+import { VAGUES_REGION8 } from './vagues-region8';
+import { VAGUES_REGION9 } from './vagues-region9';
+import { VAGUES_REGION10 } from './vagues-region10';
 
 /** Les vagues figées de chaque région, dans l'ordre de leurs plans (indice 0 = région 1). */
 export const VAGUES_REGIONS: readonly (readonly (readonly Vague[])[])[] = [
@@ -20,6 +25,11 @@ export const VAGUES_REGIONS: readonly (readonly (readonly Vague[])[])[] = [
   VAGUES_REGION3,
   VAGUES_REGION4,
   VAGUES_REGION5,
+  VAGUES_REGION6,
+  VAGUES_REGION7,
+  VAGUES_REGION8,
+  VAGUES_REGION9,
+  VAGUES_REGION10,
 ];
 
 export function construireRegion(plans: readonly PlanNiveau[], vagues: readonly (readonly Vague[])[]): readonly NiveauCampagne[] {
@@ -33,10 +43,10 @@ export function construireRegion(plans: readonly PlanNiveau[], vagues: readonly 
 /** Les niveaux de chaque région, dans l'ordre (indice 0 = région 1), chacun avec son numéro de campagne. */
 export const REGIONS: readonly (readonly NiveauCampagne[])[] = PLANS_REGIONS.map((plans, i) => (i === 0 ? REGION1 : construireRegion(plans, VAGUES_REGIONS[i] ?? [])));
 
-/** Les 50 niveaux des régions 1 à 5, dans l'ordre. */
+/** Les 100 niveaux des régions 1 à 10, dans l'ordre. */
 export const CAMPAGNE: readonly NiveauCampagne[] = REGIONS.flat();
 
-/** Le niveau de campagne de ce numéro (1 à 50), ou `undefined`. */
+/** Le niveau de campagne de ce numéro (1 à 100), ou `undefined`. */
 export function niveauDeCampagne(numero: number): NiveauCampagne | undefined {
   return CAMPAGNE[numero - 1];
 }

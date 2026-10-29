@@ -36,17 +36,23 @@ export const ENNEMIS_REGIONS: readonly (readonly IdEnnemi[])[] = [
   ['porteur_torche', 'chasseur_sorcieres', 'delateur'],
   ['noyeur', 'pelerin_voile', 'sangsue'],
   ['rat_peste', 'pestifere', 'medecin_peste'],
+  ['fossoyeur', 'creux', 'chauve_souris'],
+  ['fantassin', 'porte_banniere', 'cavalier'],
+  ['flagellant', 'inquisiteur', 'exorciste'],
+  ['garde_royal', 'arbaletrier_elite', 'chevalier'],
+  // La région 10 n'a que deux ennemis ordinaires : le Soleil Blême tient le reste de la cathédrale.
+  ['acolyte_cendre', 'ange_cendre'],
 ];
 
 /** Le boss de chaque région, au niveau 10 (indice 0 = région 1). */
-export const BOSS_REGIONS: readonly IdEnnemi[] = ['boucher_vaudrelle', 'la_faim', 'juge_flammes', 'dame_puits', 'mere_rats'];
+export const BOSS_REGIONS: readonly IdEnnemi[] = ['boucher_vaudrelle', 'la_faim', 'juge_flammes', 'dame_puits', 'mere_rats', 'roi_fosses', 'prince_croise', 'grand_inquisiteur', 'roi_fou', 'soleil_bleme'];
 
 /** Niveau de la région à partir duquel les ennemis des régions précédentes se mêlent aux siens. */
 export const NIVEAU_MELANGE = 4;
 
 /**
- * Les ennemis du niveau `k` (1 à 10) de la région `region` (2 à 5), dans l'ordre du tirage : ceux de la région, un de
- * plus à chaque niveau (tous au niveau 3), puis dès le niveau 4 ceux des régions précédentes, de la plus proche à la plus
+ * Les ennemis du niveau `k` (1 à 10) de la région `region` (2 à 10), dans l'ordre du tirage : ceux de la région, un de
+ * plus à chaque niveau (tous au niveau 3, ou au niveau 2 pour la région 10 qui n'en a que deux), puis dès le niveau 4 ceux des régions précédentes, de la plus proche à la plus
  * lointaine. Le boss n'en fait pas partie : le plan l'ajoute à la dernière vague du niveau 10.
  */
 export function ennemisDuNiveau(region: number, k: number): readonly IdEnnemi[] {

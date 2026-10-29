@@ -33,27 +33,28 @@ function secroisent(a: Point, b: Point, c: Point, d: Point): boolean {
   return orientation(a, b, c) * orientation(a, b, d) < 0 && orientation(c, d, a) * orientation(c, d, b) < 0;
 }
 
-describe('carte du monde : cinq régions', () => {
+describe('carte du monde : dix régions', () => {
   it('a une route par région, avec dix nœuds chacune', () => {
-    expect(NOEUDS_REGIONS).toHaveLength(5);
-    expect(TRACES_REGIONS).toHaveLength(5);
+    expect(NOEUDS_REGIONS).toHaveLength(10);
+    expect(TRACES_REGIONS).toHaveLength(10);
     expect(NOEUDS_REGIONS[0]).toBe(NOEUDS_REGION1);
     expect(TRACES_REGIONS[0]).toBe(TRACE_REGION1);
     for (const noeuds of NOEUDS_REGIONS) expect(noeuds).toHaveLength(10);
   });
 
-  it('noeudsDeRegion et traceDeRegion rendent la route d’une région de 1 à 5, rien d’autre', () => {
+  it('noeudsDeRegion et traceDeRegion rendent la route d’une région de 1 à 10, rien d’autre', () => {
     expect(noeudsDeRegion(3)).toBe(NOEUDS_REGIONS[2]);
     expect(traceDeRegion(5)).toBe(TRACES_REGIONS[4]);
-    for (const r of [0, 6, 1.5, -1, Number.NaN]) {
+    expect(noeudsDeRegion(10)).toBe(NOEUDS_REGIONS[9]);
+    for (const r of [0, 11, 1.5, -1, Number.NaN]) {
       expect(noeudsDeRegion(r)).toBeUndefined();
       expect(traceDeRegion(r)).toBeUndefined();
     }
   });
 
-  it('les cinq routes ne se ressemblent pas : chaque région a ses propres positions', () => {
+  it('les dix routes ne se ressemblent pas : chaque région a ses propres positions', () => {
     const cles = NOEUDS_REGIONS.map((n) => JSON.stringify(n.map((x) => [x.x, x.y])));
-    expect(new Set(cles).size).toBe(5);
+    expect(new Set(cles).size).toBe(10);
   });
 
   NOEUDS_REGIONS.forEach((noeuds, r) => {
