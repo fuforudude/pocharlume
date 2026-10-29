@@ -45,14 +45,17 @@ export function ennemisInfini(region: number): (readonly [string, DefEnnemi])[] 
 /**
  * Chaque groupe est coupé en une part d'élites et une part ordinaire, à la suite l'une de l'autre. Le nombre d'élites d'un
  * groupe est `nombre × part` arrondi au hasard (graine de la vague) : la part est exacte en moyenne, même pour de petits groupes.
+ * Un essaim se coupe par groupes entiers (un groupe de 5 Chauves-Souris est d'élite en entier ou pas du tout).
  */
 function avecElites(paquets: readonly Paquet[], part: number, graine: number, vague: number): Paquet[] {
   if (part <= 0) return [...paquets];
   const g = creerGenerateur((graine ^ 0x5bd1e995 ^ Math.imul(vague, 0x27d4eb2f)) >>> 0);
   const sortie: Paquet[] = [];
   for (const p of paquets) {
-    const exact = p.nombre * part;
-    const elites = Math.min(p.nombre, Math.floor(exact) + (tirer(g) < exact - Math.floor(exact) ? 1 : 0));
+    const taille = defEnnemi(p.ennemi)?.pouvoirs?.essaim ?? 1;
+    const groupes = Math.max(1, Math.floor(p.nombre / taille));
+    const exact = groupes * part;
+    const elites = Math.min(p.nombre, taille * (Math.floor(exact) + (tirer(g) < exact - Math.floor(exact) ? 1 : 0)));
     if (elites > 0) sortie.push({ ...p, nombre: elites, elite: true });
     if (elites < p.nombre) sortie.push({ ...p, nombre: p.nombre - elites, delai: p.delai + elites * p.intervalle });
   }

@@ -641,3 +641,40 @@ valeurs de départ cohérentes avec `menaceEnnemi` : l'équilibrage fin est celu
   (son réglé par la tâche du rendu : voir « Son ») ; `RaisonRefus` gagne `famille_interdite` (texte dans `fr.ts`, `refus.ts`).
 - **Tests** : `ennemis-regions.test.ts` (12 ennemis), `boss-regions.test.ts` (4 boss), `elites.test.ts`, `defis.test.ts`,
   `bonus-collection.test.ts`, `src/data/ennemis-jalon3.test.ts` (données) et le bloc « essaims » de `src/data/equilibrage.test.ts`.
+
+## Ennemis des régions 6 à 10 et mode infini (jalon 4, moteur)
+
+Tout est piloté par les données (`src/data/ennemis.ts`, `src/data/infini.ts`) ; le moteur ne connaît aucun ennemi par son nom.
+
+- **Pouvoirs ajoutés** (`PouvoirsEnnemi`, `definitions.ts`) : `enterrement` (un soldat tombé à portée met `facteur` fois plus de temps à
+  réapparaître, `unites.ts`), `aura` (bonus de vitesse recalculé à chaque pas dans `pouvoirs-ennemis.ts`, le plus fort des bonus
+  gagne, jamais la somme ; stocké dans `Ennemi.bonusVitesse`), `renversement` (le Cavalier étourdit une fois l'unité non héros qui
+  le bloque, `Unite.etourdi`, et passe), `rage` (sous une part de PV : vitesse et dégâts, dérivée des PV, rien n'est stocké),
+  `insensibleRalentissement`, et `Relevement.sauf` (le Creux ne se relève pas d'un coup mortel de ce type de dégâts).
+- **Actions de boss ajoutées** (`ActionEnnemi`) : `figer_tour` (`Tour.gel`, même effet que `desactivee`), `aveugler` (`Tour.aveuglePas` et
+  `aveugleFacteur`, portée de tir réduite), `bannir` (tue une invocation `spectre` ou `renfort` à portée, sinon étourdit le héros),
+  `relever_morts` (relit `etat.morts`, les `REGLES.memoireMorts` derniers ennemis non boss morts), `charger` (`Ennemi.charge` : vitesse ×,
+  ignore les soldats, qui ne peuvent plus l'engager), `invulnerabilite`. Une action périodique peut avoir une `phase` `[haut, bas]`
+  (fractions de PV) ; hors phase son délai repart de zéro. Une action sans effet (personne à geler, à bannir, à relever) est retentée
+  au pas suivant au lieu d'attendre toute la cadence.
+- **Infini.** `ConfigPartie.infini = { region }` (1 à 10, `verifierConfig`) : le moteur ignore les vagues du niveau (`niveau.vagues`
+  vaut `[]` dans l'état), génère la vague n à son lancement avec `genererVagueInfinie` (`engine/infini.ts`) et ne déclare jamais la
+  victoire (seulement la défaite). Une vague ne dépend que de la graine de la config, de la région et de n : ni de l'état ni du
+  générateur de la partie, donc le rejeu du journal reste exact et une vague peut se recalculer à volonté. Règles de Matou imposées
+  (`difficulteDeConfig`, comme pour les défis), 20 vies, objets et bonus de collection permis, pas de défi. Les arêtes de départ sont
+  celles du niveau passé à `creerPartie` ; la carte (chemins, cases interdites) est aussi celle de ce niveau.
+- **Budget et tirage.** Budget de la vague n = `budgetVague(1, 1) × 1,08^(n−1)` (par produits successifs : `**` est interdit dans le
+  moteur), rempli par `genererVague` (option `budget`) parmi les ennemis ordinaires des régions 1 à `region`. Élites : part
+  `partElites(n)` (0 avant la vague 20, 10 %, +5 points toutes les 10 vagues, au plus 60 %), les groupes étant coupés en élites et
+  ordinaires par arrondi au hasard (graine de la vague) ; un essaim se coupe par groupes entiers. Mini-boss : `pvMiniBoss(n)`, le boss
+  de la région avec `Paquet.facteurPv` (PV et prime × la part), 5 s après le lancement de la vague, avec elle.
+- **Vague atteinte et terminée.** `vagueAtteinte(etat)` = vagues lancées ; `derniereVagueTerminee(etat)` = la plus grande vague dont
+  tous les groupes sont apparus et tous les ennemis ont disparu, les précédentes comprises. Chaque `Ennemi` porte son `vague`
+  (index de 0) : un ennemi appelé ou relevé garde celui de sa source.
+- **Versions.** `VERSION_ETAT` 6 (champs d'ennemi, d'unité, de tour, `etat.morts`, `PaquetActif.facteurPv`), `VERSION_DONNEES` 9. Les
+  sauvegardes en cours d'une version précédente sont oubliées par la couche de sauvegarde, comme aux jalons précédents.
+- **Événements ajoutés** : `enterre`, `renversement`, `tour_gelee`, `aveuglement`, `bannissement`, `resurrection`, `charge`,
+  `invulnerabilite`. Sons réglés dans `src/audio/table.ts` avec les sons existants ; le rendu (`src/render/suivi.ts`) les ignore pour
+  l'instant (tâches de sprites et d'interface).
+- **Tests** : `ennemis-regions-6-10.test.ts` (14 ennemis), `boss-regions-6-10.test.ts` (5 boss), `infini.test.ts`,
+  `src/data/ennemis-jalon4.test.ts` (données).

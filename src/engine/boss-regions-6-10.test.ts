@@ -56,7 +56,9 @@ describe('Le Roi des Fosses : toutes les 15 s, relève les 4 derniers ennemis mo
     const distances = releves.map((e) => e.distance).sort((a, b) => a - b);
     expect(distances[0]).toBeGreaterThanOrEqual(4);
     expect(distances[0]).toBeLessThan(4.9);
-    distances.forEach((d, i) => expect(d - (distances[0] ?? 0)).toBeCloseTo(i, 6));
+    distances.forEach((d, i) => {
+      expect(d - (distances[0] ?? 0)).toBeCloseTo(i, 6);
+    });
     for (const e of releves) expect(e.pv).toBeCloseTo(e.pvMax * 0.5, 6);
   });
 

@@ -5,7 +5,6 @@ import { TOURS } from '../data/tours';
 import { avancerSecondes, compter, construireTour, ennemiDonnees, ennemiEssai, ennemisDe, evenementsPendant, heros, partieEssai } from './aides.test-utils';
 import { infligerDegats } from './degats';
 import { genererVague } from '../data/equilibrage';
-import type { DefEnnemi } from './definitions';
 import { ajouterEnnemi } from './ennemis';
 import type { Ennemi, EtatPartie, Unite } from './etat';
 import { step } from './partie';
@@ -141,7 +140,7 @@ describe('Chauve-Souris : volante, essaim par groupes de 5, rapide et fragile', 
   });
 
   it('le générateur de vagues la fait arriver par multiples de 5', () => {
-    const vague = genererVague({ niveau: 60, vague: 5, ennemis: [['chauve_souris', ENNEMIS.chauve_souris as DefEnnemi]], graine: 7, chemins: 2 });
+    const vague = genererVague({ niveau: 60, vague: 5, ennemis: [['chauve_souris', ENNEMIS.chauve_souris]], graine: 7, chemins: 2 });
     expect(vague.paquets.length).toBeGreaterThan(0);
     for (const p of vague.paquets) expect(p.nombre % 5).toBe(0);
   });
