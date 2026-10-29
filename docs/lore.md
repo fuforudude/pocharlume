@@ -48,7 +48,7 @@ guerre.
 Le joueur est **le Dernier Veilleur**, un chat sans nom qui veille à la porte rouverte, ranime les braises et
 rassemble les survivants, région après région, jusqu'à la cathédrale où le Soleil Blême attend.
 
-Trois fidèles portent le souvenir des élus : **Nielle**, qui voile les miroirs pour l'Ombre ; **Gond**, qui dort
+Trois fidèles portent le souvenir des élus : **Nielle**, qui souffle les lampes pour l'Ombre ; **Gond**, qui dort
 contre les portes pour le Colosse ; **Clopin**, qui boite en mémoire de Trois-Pattes.
 
 Les textes sont courts et cryptiques : descriptions d'objets, inscriptions des statues, murmures avant chaque
@@ -68,9 +68,9 @@ Ce qu'on voit au choix avant un niveau : un symbole, une épithète, une phrase.
 
 ## Héros
 
-- `heros.plume` : Nielle, Voile-Miroirs
+- `heros.plume` : Nielle, Souffle-Lampes
 - `heros.plume.role` : Duelliste, esquive et critiques
-- `heros.plume.desc` : Elle a voilé tous les miroirs du hameau. Une façon de prier une ancienne divinité, paraît-il.
+- `heros.plume.desc` : Elle souffle les lampes avant d’entrer. Sans lumière, pas d’ombre : une façon de prier une ancienne divinité, paraît-il.
 - `heros.suie` : Suie
 - `heros.suie.role` : Assassin, exécute les blessés
 - `heros.suie.desc` : Elle sent le brûlé. Ce qu’elle touche ne repart pas.
@@ -215,7 +215,7 @@ Ce qu'on voit au choix avant un niveau : un symbole, une épithète, une phrase.
 - `unite.gros_matou` : Gros matou
 - `tour.totem_du_colosse` : Totem du Colosse
 - `tour.sanctuaire_de_l_ombre` : Sanctuaire de l’Ombre
-- `tour.atelier_boiteux` : Atelier Boiteux
+- `tour.atelier_boiteux` : Atelier de la Boiteuse
 - `unite.assassin_du_sanctuaire` : Assassin de l’ombre
 - `unite.tourelle_de_l_atelier` : Tourelle de l’Atelier
 - `unite.tourelle_de_rouage` : Tourelle de Rouage
@@ -727,8 +727,8 @@ Vrais noms : marche et avenue pour le Colosse, ruelles et avenue pour l’Ombre,
 - `collection.skin_rouage.desc` : Chaque couture a sa petite machine. Le patron vient d’une boiteuse.
 - `collection.skin_lanterne` : Lanterne Veuve
 - `collection.skin_lanterne.desc` : Sa flamme brûle pour quelqu’un qui n’est plus là.
-- `collection.familier_rat` : Rat Boiteux
-- `collection.familier_rat.desc` : Il suit le chat qui ne l’a pas mangé. Il boite du même côté que lui.
+- `collection.familier_rat` : Rate Boiteuse
+- `collection.familier_rat.desc` : Elle suit le chat qui ne l’a pas mangée. Elle boite du même côté que lui.
 - `collection.familier_crapaud` : Crapaud du Puits
 - `collection.familier_crapaud.desc` : Il est remonté seul. Il ne dit pas d’où.
 - `collection.familier_escargot` : Escargot Pèlerin
