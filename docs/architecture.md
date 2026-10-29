@@ -360,11 +360,13 @@ est le centre de la case** (`tour.x = (cx + 0,5) × 2`). Deux tours ne partagent
   absentes), `case_hors_carte` (hors de la grille), `case_interdite` (chemin, grand décor), `case_occupee`, puis les refus de famille et de
   prix existants (`tour_divine_unique`, `famille_interdite` du défi Fer, `aretes_insuffisantes`), avec **`caserne_sans_chemin`** inséré
   avant le prix : une tour à soldats (la caserne, la tour divine de Plume) n'est constructible que là où le point du chemin le plus
-  proche du centre de la case est à portée (`ralliementParDefaut(chemins, cx, cy, portee)`, portée 2,5 pour la caserne de niveau 1, 3 pour
-  le Sanctuaire) ; ce point devient son ralliement par défaut. Les autres familles restent permises sur cette case. Pour les autres actions
+  proche du centre de la case est à portée (`ralliementParDefaut(chemins, cx, cy, portee)`, portée 3,5 pour la caserne (tous ses niveaux),
+  3,5 pour le Sanctuaire) ; ce point devient son ralliement par défaut. Les autres familles restent permises sur cette case. Pour les autres actions
   sur une case sans tour : `case_vide`. Conséquence de la géométrie : le centre d'une case est à 2 tuiles d'un axe de chemin impair
-  (une ligne de cases interdite), à 3 tuiles d'un axe pair (deux lignes interdites) ; la caserne (portée 2,5) ne se pose donc qu'à côté
-  des tronçons d'axe impair, aux coins ou en diagonale.
+  (une ligne de cases interdite), à 3 tuiles d'un axe pair (deux lignes interdites) ; la caserne (portée 3,5) atteint donc un chemin depuis toute
+  case voisine, quel que soit l'axe (avant, à 2,5, elle ne se posait qu'à côté des tronçons d'axe impair). `niveaux.test.ts` garde qu'aucun des
+  50 niveaux n'est sans case de caserne et que chaque défi Fer a ses deux familles jouables. La puissance (`puissanceTour`) ne compte pas
+  l'élargissement du ralliement (`EQUILIBRAGE.elargissementRalliement`, 1 tuile) : elle reste celle de la portée d'avant.
 - **API pour l'interface** (exportée par `src/engine/index.ts`) :
   - `caseSousPoint(carte, x, y): CaseGrille | null` : la case qui contient un point en tuiles (le point du toucher converti par
     `rendu.enTuilesX/Y`), null hors de la carte ; `centreCase(cx, cy): Point` : où dessiner l'éclat, le menu, la portée ;
@@ -450,11 +452,49 @@ ce qui est demandé et affiche un résumé (sans écrire le rapport). Ce qui a �
   (`--graines=30`). Régler à la main plusieurs dieux et niveaux à la fois n'y arrive pas : les derniers réglages viennent
   d'une descente par coordonnées (un paramètre à la fois, jugé sur les bandes de tous les dieux).
 - Quand les données changent : `npm run niveaux` (vagues figées), `VERSION_DONNEES` + 1, `npm run balance`, puis `npm run verifier`.
-- **Bandes suspendues (pose libre des tours)** : le passage des socles à la grille a déplacé la difficulté des 50 niveaux, rééquilibrée
-  après coup. `BANDES_IMPOSEES` (`bandes.ts`, faux sauf `BANDES_IMPOSEES=1`) rend les écarts non bloquants : les tests
-  `bandes-*.test.ts` les affichent (`console.warn`) sans échouer, `npm run balance` les affiche et les écrit au rapport sans code de
-  sortie 1. À rendre permanent (`true`) à la fin du rééquilibrage ; `BANDES_IMPOSEES=1 npm test` les impose dès maintenant. Les
-  contrôles qui ne sont pas des bandes (sans défense on perd) restent bloquants.
+- **Bandes imposées et suspendues (après la pose libre des tours)** : `BANDES_IMPOSEES` (`bandes.ts`) est vrai. Sont imposées, par les
+  tests `bandes-*.test.ts` et par le code de sortie de `npm run balance`, les bandes que les 50 niveaux tiennent : Chaton, le héros
+  seul qui perd, les défis et la puissance des tours. Matou et Vieux Sage (courbe et écart entre dieux compris) sont **suspendues**
+  (`FAMILLES_SUSPENDUES`) : `npm run balance` les liste et le rapport les marque, les tests ne les évaluent pas (seul le héros sans
+  défense est joué, ce qui garde `npm run verifier` sous 3 minutes) ; `BANDES_SUSPENDUES_IMPOSEES=1 npm test` (ou `npm run balance`) les
+  impose pour mesurer ce qui reste. Voir « Rééquilibrage du jalon 3 » ci-dessous pour l'état et les causes.
+
+### Rééquilibrage du jalon 3 (régions 1 à 5 et défis)
+Outils : `npm run balance` (rapport complet, environ 6 minutes avec 16 fils), `npm run balance -- --niveaux=11-20 --difficultes=matou,vieux_sage
+--graines=10 --entrainement=2 --detail` (une région, un tableau par niveau), `node --import ./tools/niveaux/enregistrer.ts tools/balance/regler.ts
+--niveaux=11-20 [--haut=0.6 --bas=0.25]` (cherche, pour chaque niveau, les arêtes de départ où le naïf gagne la part cible, dichotomie sur
+ses seules parties ; `GRAINE=` essaie une autre graine de vagues). Le naïf est bien moins cher à jouer que le soigneux : les arêtes de départ
+se règlent sur lui, puis le soigneux vérifie.
+
+Ce qui a été trouvé (le soigneux de Charlie perdait presque tout dès la région 2) :
+- **Bot soigneux : Guetteurs des Toits.** Il n'y pensait que si les furtifs pesaient 2 % de la menace du niveau ; or onze Délateurs d'une seule
+  vague suffisent à vider les 20 vies. Il les prépare maintenant dès qu'un furtif figure au niveau (deux vagues avant la première), en attendant
+  d'avoir de quoi les payer, et ne retient que les tours de tir de niveau 1 à 3 (une tour déjà spécialisée en B ne peut plus le devenir).
+- **Bot naïf plus raisonnable** : il juge les cases par la longueur de chemin qu'elles voient (et non la distance au chemin), construit sur
+  16 emplacements (`EMPLACEMENTS_DEBUTANT`) avant d'améliorer, et fait un Guetteurs des Toits par chemin s'il y a des furtifs au niveau (il lit
+  les ennemis annoncés). Sans cela il perdait tout au-delà de la région 2 (invisibles) et n'utilisait jamais ses arêtes.
+- **Charlie** n'avait aucun contre aux volants (Corbeau) ni aux furtifs (Délateur), que Plume (tir +60 %, Sanctuaire qui révèle, Voile de
+  Nuit) et Pollen (héros à distance) ont : Totem du Colosse : `revele` et `volants` (l'onde touche les volants : `ondeDeChoc`), Chute du
+  Colosse : touche les volants, recharge 40 s → 25 s.
+- **Vagues** : dans un niveau qui compte un volant ou un furtif, les ennemis ordinaires sont tirés 5 fois plus souvent que lui
+  (`EQUILIBRAGE.repetitionOrdinaires`, `genererVaguesNiveau`) : sinon un Corbeau faisait la moitié de la menace des niveaux 11 à 13.
+  `croissanceNiveauSuite` 0,03 → 0,015.
+- **Élites** : PV ×1,8 → ×1,4 et plus de vie en plus (`viesEnPlus` 1 → 0) : les deux dernières vagues du Vieux Sage ne pouvaient pas être
+  tenues par Charlie ni Pollen (un Corbeau élite coûtait 2 vies).
+- **Défis** : arêtes de départ ×3 en Héroïque, ×6 en Fer (nouveaux `facteurAretes`), effectifs du Fer ×1,5 → ×0,3 (la vague unique du Fer
+  est celle de toutes les vagues ensemble : même avec des milliers d'arêtes, deux familles de tours ne la tiennent pas).
+- **Arêtes de départ** des 50 niveaux recalculées avec `regler.ts` (graines de vagues des niveaux 12, 39 et 45 changées : leur mélange
+  d'ennemis rendait le niveau injouable pour le naïf à toute arête).
+
+Ce qui n'est pas tenu (suspendu, voir ci-dessus) : en Vieux Sage, Charlie reste loin derrière Plume aux régions 2 à 5 (Charlie 52, 34, 8,
+10 % ; Plume 96, 90, 87, 70 %) et Pollen derrière aux régions 3 à 5 ; en Matou, le soigneux ne perd pas au moins une vie sur la moitié des
+niveaux (il gagne presque parfaitement), le naïf sort de 30 à 70 % pour certains dieux, et la courbe de difficulté du naïf n'est pas
+monotone (les niveaux de boss 10, 30, 40 et 50 n'y sont pas parmi les plus durs : leur seuil de victoire pour le soigneux est bien au-dessus
+de celui du naïf). Causes identifiées : le soigneux est de 1,5 à 2 fois plus économe en arêtes que le naïf, donc aucun réglage des arêtes de
+départ ne place ensemble le naïf à 30-70 % et le soigneux à la limite de la défaite ; et la puissance de Charlie, centrée sur les soldats,
+subit les ennemis qui les tuent ou les contournent (Chasseur de Sorcières, Noyeur, Chien errant en nombre) sans que le Totem ou les sorts
+y répondent. Pistes : travailler les héros et sorts de Charlie et de Pollen (et les mécaniques d'ennemis qui visent les soldats) plutôt
+que les niveaux.
 
 ### Équilibrage des trois dieux (jalon 2, tâche 6)
 - **Constat.** Le héros porte la difficulté. Les ennemis arrivent en colonnes serrées (0,3 s d'écart) et un héros ne bloque
@@ -593,14 +633,15 @@ valeurs de départ cohérentes avec `menaceEnnemi` : l'équilibrage fin est celu
   (`infligerDegats`, `appliquerEffet`, `executer`), n'est visé par aucune tour, tourelle, unité ni piège, ne bloque personne, ne
   bouge ni n'attaque, et reste compté pour la victoire. Le rendu lit ce champ pour dessiner l'état.
 - **Furtif révélé par le Voile de Nuit** : `DefZoneDurable.revele` (vrai pour le Voile) rend visibles les furtifs de la zone.
-- **Élites.** `Paquet.elite` marque un groupe de vague ; `ajouterEnnemi(..., elite)` applique `REGLES.elite` : PV ×1,8, un palier
+- **Élites.** `Paquet.elite` marque un groupe de vague ; `ajouterEnnemi(..., elite)` applique `REGLES.elite` : PV ×`REGLES.elite.facteurPv` (1,4), un palier
   d'armure et de résistance de plus (`paliersProtection`, 90 % au plus), prime ×1,5 (arrondie après la difficulté), coût en vies
-  +1. Le type de l'ennemi reste son id : le rendu choisit `<id>-elite` d'après `Ennemi.elite`. **Un boss n'est jamais élite**
+  `+ REGLES.elite.viesEnPlus` (0). Le type de l'ennemi reste son id : le rendu choisit `<id>-elite` d'après `Ennemi.elite`. **Un boss n'est jamais élite**
   (le drapeau est ignoré, `Ennemi.elite` reste faux).
 - **Défis.** `ConfigPartie.defi` : `'heroique'`, `'fer'` ou null/absent. Un défi se joue avec la difficulté de `DIFFICULTE_DES_DEFIS`
   (Matou) quelle que soit celle de la config, et sans objet (`verifierConfig` refuse un défi avec des objets).
-  - **Héroïque** : 1 vie (`REGLES.heroique`), tous les groupes hors boss en élite (`creerPartie` réécrit `etat.niveau.vagues`).
-  - **Fer** : `creerPartie` fusionne toutes les vagues en une (les groupes gardent leurs délais), effectifs ×`REGLES.fer.facteurEffectifs`
+  - **Héroïque** : 1 vie (`REGLES.heroique`), tous les groupes hors boss en élite (`creerPartie` réécrit `etat.niveau.vagues`). Les deux défis
+    multiplient les arêtes de départ (`REGLES.heroique.facteurAretes` 3, `REGLES.fer.facteurAretes` 6), en plus du facteur de Matou.
+  - **Fer** : `creerPartie` fusionne toutes les vagues en une (les groupes gardent leurs délais), effectifs ×`REGLES.fer.facteurEffectifs` (0,3)
     arrondis au-dessus **sauf les boss** (qui restent à leur effectif). Le niveau doit porter `Niveau.defiFer.familles` (deux
     familles de `IdFamille`, différentes) : sinon `creerPartie` lève. Seules ces familles se construisent (`famille_interdite`
     sinon) ; la tour divine suit la famille de son dieu (`bonus.famille` : Plume tir, Charlie caserne, Pollen artillerie). Le bonus

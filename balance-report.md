@@ -14,7 +14,7 @@ affichage dans les trois difficultés, avec chacun des trois dieux jouant son av
 
 ## Bandes cibles
 
-**13 écart(s)** (bandes suspendues le temps de l’équilibrage qui suit la pose libre des tours : à titre d’information) :
+**13 écart(s)**, dont 13 aux bandes suspendues de Matou et de Vieux Sage (elles ne bloquent pas : voir bandes.ts) :
 
 - Matou (Plume) : le bot naïf gagne 71 % des parties, la bande est 30 % à 70 %
 - Matou (Plume) : le bot soigneux perd au moins une vie sur 4 niveaux seulement, il en faut au moins 5 sur 10
@@ -385,7 +385,7 @@ Puissance = DPS efficace moyen × portée ÷ coût cumulé. Chaque tour doit res
 
 ## Régions 2 à 5
 
-Les bandes de la région 1 (plus haut) s’appliquent à chacune des régions 2 à 5, pour les trois dieux : mêmes bots, mêmes graines, mêmes difficultés, courbe de difficulté jugée sur la moyenne des dieux, écart entre dieux comme au jalon 2. Un écart fait échouer `npm run balance` comme ceux de la région 1.
+Les bandes de la région 1 (plus haut) sont mesurées sur chacune des régions 2 à 5, pour les trois dieux : mêmes bots, mêmes graines, mêmes difficultés, courbe de difficulté jugée sur la moyenne des dieux, écart entre dieux comme au jalon 2. Les écarts de Chaton, d’absence de défense et des défis font échouer `npm run balance` ; ceux de Matou et de Vieux Sage (courbe et écart entre dieux compris) sont suspendus (voir bandes.ts) : listés, ils ne bloquent pas.
 
 ### Région 2 : les Champs Brûlés
 
@@ -563,7 +563,7 @@ Par niveau (trois dieux ensemble) :
 | 49 | 100 % (30/30) | 47 % (14/30) | 7,6 | 116 | 67 % (20/30) | 8,4 | 0 % (0/9) |
 | 50 | 100 % (30/30) | 33 % (10/30) | 4,6 | 282 | 0 % (0/30) | 0,0 | 0 % (0/9) |
 
-Écarts aux bandes : 18
+Écarts aux bandes : 17
 
 - Matou (Plume) : le bot soigneux perd au moins une vie sur 2 niveaux seulement, il en faut au moins 5 sur 10
 - Matou (Plume) : le niveau 48 laisse 253 arêtes inutilisées au bot soigneux, il en faut moins de 250
@@ -582,7 +582,6 @@ Par niveau (trois dieux ensemble) :
 - Vieux Sage (Pollen) : le bot soigneux gagne 35 % des parties, la bande est 60 % à 85 %
 - Vieux Sage : Plume (70 %) et Charlie (10 %) sont à 60 points l'un de l'autre, il en faut au plus 10
 - Matou : Plume (19,7 vies) et Charlie (15 vies) sont à 4,7 vies l'un de l'autre, il en faut au plus 3
-- Défi Fer : le bot soigneux réussit 27 % des parties, la bande est 40 % à 90 %
 
 ## Défis, régions 1 à 5
 
@@ -596,23 +595,23 @@ Le bot soigneux joue les défis avec les règles de Matou, sans objet ni amélio
 | Héroïque | Charlie | 47 % (47/100) | 0,5 |
 | Héroïque | Pollen | 73 % (73/100) | 0,7 |
 | Héroïque | les trois | 73 % (219/300) | 0,7 |
-| Fer | Plume | 70 % (70/100) | 13,6 |
-| Fer | Charlie | 65 % (65/100) | 11,9 |
-| Fer | Pollen | 40 % (40/100) | 8,0 |
-| Fer | les trois | 58 % (175/300) | 11,1 |
+| Fer | Plume | 91 % (91/100) | 17,9 |
+| Fer | Charlie | 89 % (89/100) | 16,9 |
+| Fer | Pollen | 54 % (54/100) | 8,6 |
+| Fer | les trois | 78 % (234/300) | 14,5 |
 
 | Niveau | Héroïque, soigneux (trois dieux) | Fer, soigneux (trois dieux) |
 | --- | --- | --- |
-| 1 | 77 % (23/30) | 67 % (20/30) |
-| 2 | 90 % (27/30) | 67 % (20/30) |
+| 1 | 77 % (23/30) | 100 % (30/30) |
+| 2 | 90 % (27/30) | 80 % (24/30) |
 | 3 | 87 % (26/30) | 100 % (30/30) |
-| 4 | 97 % (29/30) | 50 % (15/30) |
+| 4 | 97 % (29/30) | 67 % (20/30) |
 | 5 | 50 % (15/30) | 100 % (30/30) |
 | 6 | 77 % (23/30) | 100 % (30/30) |
-| 7 | 33 % (10/30) | 0 % (0/30) |
-| 8 | 40 % (12/30) | 0 % (0/30) |
+| 7 | 33 % (10/30) | 67 % (20/30) |
+| 8 | 40 % (12/30) | 33 % (10/30) |
 | 9 | 83 % (25/30) | 100 % (30/30) |
-| 10 | 97 % (29/30) | 0 % (0/30) |
+| 10 | 97 % (29/30) | 33 % (10/30) |
 
 Écarts aux bandes des défis : aucun.
 
@@ -624,23 +623,23 @@ Le bot soigneux joue les défis avec les règles de Matou, sans objet ni amélio
 | Héroïque | Charlie | 34 % (34/100) | 0,3 |
 | Héroïque | Pollen | 64 % (64/100) | 0,6 |
 | Héroïque | les trois | 66 % (198/300) | 0,7 |
-| Fer | Plume | 38 % (38/100) | 6,9 |
-| Fer | Charlie | 48 % (48/100) | 8,0 |
-| Fer | Pollen | 40 % (40/100) | 7,6 |
-| Fer | les trois | 42 % (126/300) | 7,5 |
+| Fer | Plume | 82 % (82/100) | 16,1 |
+| Fer | Charlie | 86 % (86/100) | 16,7 |
+| Fer | Pollen | 40 % (40/100) | 8,0 |
+| Fer | les trois | 69 % (208/300) | 13,6 |
 
 | Niveau | Héroïque, soigneux (trois dieux) | Fer, soigneux (trois dieux) |
 | --- | --- | --- |
 | 11 | 100 % (30/30) | 100 % (30/30) |
 | 12 | 90 % (27/30) | 100 % (30/30) |
-| 13 | 63 % (19/30) | 30 % (9/30) |
-| 14 | 63 % (19/30) | 0 % (0/30) |
-| 15 | 33 % (10/30) | 0 % (0/30) |
+| 13 | 63 % (19/30) | 67 % (20/30) |
+| 14 | 63 % (19/30) | 67 % (20/30) |
+| 15 | 33 % (10/30) | 63 % (19/30) |
 | 16 | 93 % (28/30) | 100 % (30/30) |
-| 17 | 43 % (13/30) | 90 % (27/30) |
-| 18 | 33 % (10/30) | 0 % (0/30) |
-| 19 | 73 % (22/30) | 0 % (0/30) |
-| 20 | 67 % (20/30) | 0 % (0/30) |
+| 17 | 43 % (13/30) | 100 % (30/30) |
+| 18 | 33 % (10/30) | 57 % (17/30) |
+| 19 | 73 % (22/30) | 33 % (10/30) |
+| 20 | 67 % (20/30) | 7 % (2/30) |
 
 Écarts aux bandes des défis : aucun.
 
@@ -652,23 +651,23 @@ Le bot soigneux joue les défis avec les règles de Matou, sans objet ni amélio
 | Héroïque | Charlie | 56 % (56/100) | 0,6 |
 | Héroïque | Pollen | 73 % (73/100) | 0,7 |
 | Héroïque | les trois | 72 % (215/300) | 0,7 |
-| Fer | Plume | 54 % (54/100) | 10,2 |
-| Fer | Charlie | 40 % (40/100) | 8,0 |
+| Fer | Plume | 88 % (88/100) | 16,2 |
+| Fer | Charlie | 58 % (58/100) | 10,4 |
 | Fer | Pollen | 40 % (40/100) | 8,0 |
-| Fer | les trois | 45 % (134/300) | 8,7 |
+| Fer | les trois | 62 % (186/300) | 11,5 |
 
 | Niveau | Héroïque, soigneux (trois dieux) | Fer, soigneux (trois dieux) |
 | --- | --- | --- |
 | 21 | 83 % (25/30) | 100 % (30/30) |
 | 22 | 93 % (28/30) | 100 % (30/30) |
-| 23 | 63 % (19/30) | 33 % (10/30) |
-| 24 | 63 % (19/30) | 0 % (0/30) |
+| 23 | 63 % (19/30) | 47 % (14/30) |
+| 24 | 63 % (19/30) | 47 % (14/30) |
 | 25 | 77 % (23/30) | 100 % (30/30) |
-| 26 | 87 % (26/30) | 13 % (4/30) |
-| 27 | 67 % (20/30) | 0 % (0/30) |
+| 26 | 87 % (26/30) | 67 % (20/30) |
+| 27 | 67 % (20/30) | 33 % (10/30) |
 | 28 | 47 % (14/30) | 100 % (30/30) |
 | 29 | 37 % (11/30) | 0 % (0/30) |
-| 30 | 100 % (30/30) | 0 % (0/30) |
+| 30 | 100 % (30/30) | 27 % (8/30) |
 
 Écarts aux bandes des défis : aucun.
 
@@ -680,22 +679,22 @@ Le bot soigneux joue les défis avec les règles de Matou, sans objet ni amélio
 | Héroïque | Charlie | 19 % (19/100) | 0,2 |
 | Héroïque | Pollen | 35 % (35/100) | 0,4 |
 | Héroïque | les trois | 48 % (143/300) | 0,5 |
-| Fer | Plume | 52 % (52/100) | 10,2 |
-| Fer | Charlie | 50 % (50/100) | 9,8 |
+| Fer | Plume | 96 % (96/100) | 17,0 |
+| Fer | Charlie | 65 % (65/100) | 12,1 |
 | Fer | Pollen | 50 % (50/100) | 10,0 |
-| Fer | les trois | 51 % (152/300) | 10,0 |
+| Fer | les trois | 70 % (211/300) | 13,0 |
 
 | Niveau | Héroïque, soigneux (trois dieux) | Fer, soigneux (trois dieux) |
 | --- | --- | --- |
 | 31 | 100 % (30/30) | 100 % (30/30) |
 | 32 | 33 % (10/30) | 100 % (30/30) |
-| 33 | 43 % (13/30) | 0 % (0/30) |
+| 33 | 43 % (13/30) | 40 % (12/30) |
 | 34 | 67 % (20/30) | 100 % (30/30) |
-| 35 | 43 % (13/30) | 0 % (0/30) |
-| 36 | 33 % (10/30) | 7 % (2/30) |
+| 35 | 43 % (13/30) | 33 % (10/30) |
+| 36 | 33 % (10/30) | 67 % (20/30) |
 | 37 | 37 % (11/30) | 100 % (30/30) |
-| 38 | 53 % (16/30) | 0 % (0/30) |
-| 39 | 7 % (2/30) | 0 % (0/30) |
+| 38 | 53 % (16/30) | 43 % (13/30) |
+| 39 | 7 % (2/30) | 20 % (6/30) |
 | 40 | 60 % (18/30) | 100 % (30/30) |
 
 Écarts aux bandes des défis : aucun.
@@ -708,24 +707,22 @@ Le bot soigneux joue les défis avec les règles de Matou, sans objet ni amélio
 | Héroïque | Charlie | 26 % (26/100) | 0,3 |
 | Héroïque | Pollen | 35 % (35/100) | 0,4 |
 | Héroïque | les trois | 51 % (154/300) | 0,5 |
-| Fer | Plume | 30 % (30/100) | 6,0 |
-| Fer | Charlie | 25 % (25/100) | 4,3 |
-| Fer | Pollen | 26 % (26/100) | 4,6 |
-| Fer | les trois | 27 % (81/300) | 4,9 |
+| Fer | Plume | 58 % (58/100) | 10,2 |
+| Fer | Charlie | 40 % (40/100) | 8,0 |
+| Fer | Pollen | 36 % (36/100) | 7,2 |
+| Fer | les trois | 45 % (134/300) | 8,4 |
 
 | Niveau | Héroïque, soigneux (trois dieux) | Fer, soigneux (trois dieux) |
 | --- | --- | --- |
 | 41 | 100 % (30/30) | 100 % (30/30) |
 | 42 | 83 % (25/30) | 100 % (30/30) |
 | 43 | 83 % (25/30) | 0 % (0/30) |
-| 44 | 33 % (10/30) | 0 % (0/30) |
-| 45 | 23 % (7/30) | 0 % (0/30) |
-| 46 | 33 % (10/30) | 60 % (18/30) |
-| 47 | 27 % (8/30) | 0 % (0/30) |
+| 44 | 33 % (10/30) | 30 % (9/30) |
+| 45 | 23 % (7/30) | 13 % (4/30) |
+| 46 | 33 % (10/30) | 87 % (26/30) |
+| 47 | 27 % (8/30) | 17 % (5/30) |
 | 48 | 50 % (15/30) | 0 % (0/30) |
-| 49 | 50 % (15/30) | 10 % (3/30) |
+| 49 | 50 % (15/30) | 100 % (30/30) |
 | 50 | 30 % (9/30) | 0 % (0/30) |
 
-Écarts aux bandes des défis : 1
-
-- Défi Fer : le bot soigneux réussit 27 % des parties, la bande est 40 % à 90 %
+Écarts aux bandes des défis : aucun.

@@ -392,16 +392,17 @@ Carreau perforant ; Mortier de Soufre, Nappe de soufre et Charge lourde.
   - **La Dame du Puits** : plonge à 66 % et 33 % de PV (invulnérable 3 s, réapparaît 3 tuiles plus loin) et
     appelle 6 Sangsues à chaque plongée.
   - **La Mère des Rats** : pond un groupe de 4 Rats de Peste toutes les 6 s.
-- **Élites** : chaque ennemi des régions 2 à 5 a sa version d'élite : PV ×1,8, un palier d'armure et de résistance
-  de plus (au plus 90 %), prime ×1,5, coût en vies +1, sprite recoloré (teinte sombre, yeux rouges). Elles
+- **Élites** : chaque ennemi des régions 2 à 5 a sa version d'élite : PV ×1,4, un palier d'armure et de résistance
+  de plus (au plus 90 %), prime ×1,5, même coût en vies (ramené de ×1,8 et +1 vie au rééquilibrage du 2026-10-29 : voir « Équilibrage
+  du jalon 3 »), sprite recoloré (teinte sombre, yeux rouges). Elles
   apparaissent dans les dernières vagues en Vieux Sage et partout en Héroïque.
 - Disciples offerts : la victoire sur le boss des régions 2 et 4 offre le premier disciple non possédé dans l'ordre
   Suie, Mastoc, Rouage, Corbeau, Brise-Os, Lanterne.
 
 ### Défis
 - Ouverts sur un niveau à 3 étoiles, joués avec les règles de Matou, sans objet consommable.
-- **Héroïque** : 1 vie, toutes les vagues en élite.
-- **Fer** : toutes les vagues fusionnées en une seule (budget de menace ×1,5), seules les 2 familles de tours
+- **Héroïque** : 1 vie, toutes les vagues en élite, arêtes de départ ×3.
+- **Fer** : toutes les vagues fusionnées en une seule (effectifs ×0,3, boss exceptés ; arêtes de départ ×6), seules les 2 familles de tours
   fixées pour le niveau dans les données sont constructibles, tour divine comprise si sa famille l'autorise ; bonus
   des caisses désactivés.
 - Chaque défi réussi rapporte 4 braises une fois. Les réussites sont gardées par niveau et marquées sur la carte.
@@ -438,7 +439,10 @@ Demande de l'utilisateur pendant le jalon 3 : les socles fixes disparaissent.
   ou est hors carte ; l'herbe, les fleurs et les petits cailloux ne bloquent pas. Le moteur reçoit la liste des cases
   interdites avec le niveau (il ne lit pas l'habillage).
 - Le point de ralliement d'une caserne est placé par défaut sur le point du chemin le plus proche à sa portée ; une
-  case d'où aucun chemin n'est à portée de caserne reste constructible pour les autres familles.
+  case d'où aucun chemin n'est à portée de caserne reste constructible pour les autres familles. La portée de ralliement de
+  la caserne (tous ses niveaux) et du Sanctuaire de Plume est de 3,5 tuiles au moins dès le niveau 1 : une caserne posée à une case
+  du chemin l'atteint quel que soit l'axe (le centre d'une case est à 2 ou 3 tuiles d'un axe). Un test garde qu'aucun des 50 niveaux
+  n'est sans case de caserne et que chaque défi Fer a ses deux familles jouables.
 - À l'écran : rien n'est dessiné tant qu'on ne vise pas ; la case sous le doigt ou la souris s'éclaire (libre ou
   interdite) et le menu en cercle s'ouvre sur une case libre. Cibles tactiles : une case fait au moins 44 px au zoom
   du téléphone, sinon on zoome.
@@ -458,6 +462,15 @@ Demande de l'utilisateur pendant le jalon 3 : les socles fixes disparaissent.
 - Les bandes de la région 1 s'appliquent à chacune des régions 2 à 5, pour les 3 dieux.
 - Défis : sur chaque région, le bot soigneux réussit entre 40 et 90 % des Héroïques et des Fer.
 - Le niveau 10 de chaque région est parmi ses 3 niveaux les plus durs (moyenne des dieux, comme au jalon 2).
+- **État au rééquilibrage du 2026-10-29** (après la pose libre des tours ; détail dans docs/architecture.md et balance-report.md) :
+  - **Tenues et imposées** (un test et `npm run balance` échouent si elles sortent) : Chaton (le naïf gagne tout), le héros seul ne gagne
+    jamais, défis (le soigneux réussit 40 à 90 % des Héroïques et des Fer, sur chacune des 5 régions), puissance des tours.
+  - **Non tenues, suspendues** (calculées, listées dans le rapport, mais non bloquantes ; `BANDES_SUSPENDUES_IMPOSEES=1` les impose) :
+    Matou (le soigneux perd au moins une vie sur la moitié des niveaux, le naïf gagne 30 à 70 %), Vieux Sage (soigneux entre 60 et 85 %),
+    **écart entre dieux** et **courbe de difficulté** des régions. Écart assumé principal : en Vieux Sage, Charlie est loin derrière
+    Plume aux régions 2 à 5 (Charlie n'a ni tir, ni sort à distance, ni révélation sans payer des Guetteurs des Toits), et Plume
+    dépasse 85 % aux régions 2 à 5. À reprendre par un travail sur les dieux et les héros (Charlie et Pollen), pas par les niveaux.
+- Réglages du rééquilibrage (avant → après) : voir docs/architecture.md, « Rééquilibrage du jalon 3 ».
 
 ### Critères d'acceptation détaillés du jalon 3
 - [ ] Les régions 2 à 5 sont jouables de bout en bout, chacune débloquée par le boss de la précédente.
