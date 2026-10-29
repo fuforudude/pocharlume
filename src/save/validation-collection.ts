@@ -156,11 +156,14 @@ function validerBonus(x: unknown): Resultat<BonusCollection> {
   return ok({ tours, heros: heros.valeur });
 }
 
-/** Les champs `defi` et `bonus` d'une config (tous deux présents, déjà vérifié par l'appelant). Aucun bonus en défi Fer. */
+/**
+ * Les champs `defi` et `bonus` d'une config, chacun facultatif et indépendant de l'autre (le moteur ne range `defi` que
+ * s'il est non nul et `bonus` que s'il est non vide). Absent : null et aucun bonus. Aucun bonus en défi Fer.
+ */
 export function validerExtensionConfigV4(brute: Record<string, unknown>): Resultat<ExtensionConfigV4> {
-  const defi = valeur(brute, 'defi');
+  const defi = Object.hasOwn(brute, 'defi') ? valeur(brute, 'defi') : null;
   if (defi !== null && !parmi(IDS_DEFIS, defi)) return echec('partie.config.defi inconnu');
-  const bonus = validerBonus(valeur(brute, 'bonus'));
+  const bonus = Object.hasOwn(brute, 'bonus') ? validerBonus(valeur(brute, 'bonus')) : ok<BonusCollection>({ tours: {}, heros: {} });
   if (!bonus.ok) return bonus;
   if (defi === 'fer' && (Object.keys(bonus.valeur.tours).length > 0 || Object.keys(bonus.valeur.heros).length > 0)) {
     return echec('partie.config.bonus : aucun bonus de collection en défi Fer');

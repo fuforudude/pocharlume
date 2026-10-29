@@ -176,9 +176,12 @@ describe('sauvegarde v4 : config d’une partie en cours avec défi et bonus', (
     for (const bonus of mal) refusee(avec({ defi: null, bonus }));
   });
 
-  it('défi et bonus vont ensemble : l’un sans l’autre est refusé', () => {
-    refusee(avec({ defi: null }));
-    refusee(avec({ bonus: { tours: {}, heros: {} } }));
+  it('défi et bonus sont facultatifs et indépendants (le moteur ne range que ceux qui ne sont pas vides)', () => {
+    acceptee(avec({ defi: null }));
+    acceptee(avec({ bonus: { tours: {}, heros: {} } }));
+    acceptee(avec({ defi: 'fer' }));
+    acceptee(avec({ bonus: { tours: { tir: { degats: 0.05 } }, heros: {} } }));
+    refusee(avec({ defi: 'inconnu' }));
   });
 
   it('le défi Fer n’admet aucun bonus', () => {

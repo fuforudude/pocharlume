@@ -257,11 +257,12 @@ function validerExtensionConfig(brute: Record<string, unknown>, dieu: string): R
 
 function validerConfig(x: unknown): Resultat<ConfigPartie> {
   if (!estEnregistrement(x)) return echec('partie.config : objet attendu');
-  // `defi` et `bonus` (jalon 3) vont ensemble, et sont facultatifs (une partie enregistrée avant le jalon 3 n'en a pas).
+  // `defi` et `bonus` (jalon 3) sont facultatifs et indépendants (le moteur ne range que ceux qui ne sont pas vides).
   const avecDefiEtBonus = Object.hasOwn(x, 'defi') || Object.hasOwn(x, 'bonus');
+  const clesDefiBonus = CLES_DEFI_BONUS.filter((cle) => Object.hasOwn(x, cle));
   // `infini` (jalon 4) est facultatif : absent hors mode infini.
   const avecInfini = Object.hasOwn(x, 'infini');
-  const base = avecCles(x, [...CLES_CONFIG, ...CLES_EXTENSION_CONFIG, ...(avecDefiEtBonus ? CLES_DEFI_BONUS : []), ...(avecInfini ? ['infini'] : [])], 'partie.config');
+  const base = avecCles(x, [...CLES_CONFIG, ...CLES_EXTENSION_CONFIG, ...clesDefiBonus, ...(avecInfini ? ['infini'] : [])], 'partie.config');
   if (!base.ok) return base;
   const graine = valeur(base.valeur, 'graine');
   const difficulte = valeur(base.valeur, 'difficulte');

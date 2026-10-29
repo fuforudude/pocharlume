@@ -42,6 +42,7 @@ import type { Chargement, Depot, OrigineChargement } from './depot';
 import { DIFFICULTES_SAUVEGARDE, type DifficulteSauvegarde, type Reglages, type Sauvegarde } from './format';
 import { avecPartieEnCours, partieEnCours, reprendrePartie } from './partie';
 import { changerReglages } from './progression';
+import { validerSauvegarde } from './validation';
 import {
   acheterDisciple,
   acheterObjet,
@@ -346,6 +347,14 @@ export class Session {
         etat = r.sauvegarde;
         retenues.push(suivante);
       }
+    }
+
+    // Une opération dont le résultat n'est pas une sauvegarde valide ne le deviendra jamais : le dépôt la refuserait à
+    // chaque passage et bloquerait toutes les écritures suivantes. On l'abandonne et on le signale.
+    if (propre?.ok && !validerSauvegarde(etat).ok) {
+      this.enAttente = this.enAttente.filter((e) => e !== entree);
+      this.definirCourante(this.rejouer(this.base));
+      return { ok: false, raison: 'sauvegarde_invalide' as R };
     }
 
     const rien = etat === base && !vide;
