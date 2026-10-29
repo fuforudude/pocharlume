@@ -98,6 +98,35 @@ describe('budget de menace de la vague n', () => {
   });
 });
 
+describe('plafond du nombre d’ennemis par vague', () => {
+  const ennemisDe = (vague: Vague, region: number): number => ordinaires(vague, region).reduce((somme, p) => somme + p.nombre, 0);
+
+  it('aucune vague, jusqu’à la 150, ne dépasse le plafond, dans toutes les régions', () => {
+    for (const region of [1, 4, 6, 10]) {
+      for (let n = 1; n <= 150; n += 7) {
+        expect(ennemisDe(genererVagueInfinie(configInfinie(region), CHEMINS, n), region), `région ${String(region)} vague ${String(n)}`).toBeLessThanOrEqual(INFINI.ennemisMaxParVague);
+      }
+    }
+  });
+
+  it('au-delà du plafond, le surplus de budget devient un facteur de PV : la menace totale (nombre × PV) reste celle du budget', () => {
+    for (const region of [1, 10]) {
+      for (const n of [60, 100, 150]) {
+        const vague = genererVagueInfinie(configInfinie(region), CHEMINS, n);
+        const totalPv = ordinaires(vague, region).reduce((somme, p) => somme + p.nombre * menaceEnnemi(ENNEMIS[p.ennemi as keyof typeof ENNEMIS] as DefEnnemi) * (p.facteurPv ?? 1), 0);
+        expect(totalPv, `région ${String(region)} vague ${String(n)}`).toBeLessThanOrEqual(budgetInfini(n) * 1.0001);
+        expect(totalPv, `région ${String(region)} vague ${String(n)}`).toBeGreaterThan(budgetInfini(n) * 0.8);
+        expect(ordinaires(vague, region).every((p) => (p.facteurPv ?? 1) > 1)).toBe(true);
+      }
+    }
+  });
+
+  it('les vagues qui tiennent dans le plafond restent celles du budget, sans facteur de PV', () => {
+    const vague = genererVagueInfinie(configInfinie(1), CHEMINS, 25);
+    expect(ordinaires(vague, 1).every((p) => p.facteurPv === undefined)).toBe(true);
+  });
+});
+
 describe('déterminisme de la génération', () => {
   it('même graine, même région, même vague : même vague', () => {
     for (const n of [1, 7, 20, 33]) {
@@ -213,8 +242,8 @@ describe('élites : à partir de la vague 20', () => {
     expect(partMesuree(5, [30, 31, 32, 33, 34], 20)).toBeLessThan(0.175);
     expect(partMesuree(8, [40, 41, 42], 12)).toBeGreaterThan(0.17);
     expect(partMesuree(8, [40, 41, 42], 12)).toBeLessThan(0.23);
-    expect(partMesuree(10, [70], 4)).toBeGreaterThan(0.33);
-    expect(partMesuree(10, [70], 4)).toBeLessThan(0.37);
+    expect(partMesuree(10, [70], 4)).toBeGreaterThan(0.3);
+    expect(partMesuree(10, [70], 4)).toBeLessThan(0.4);
   });
 
   it('couper les groupes en élites et ordinaires garde l’effectif, les chemins et le rythme de la vague de base', () => {

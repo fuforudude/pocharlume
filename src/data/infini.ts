@@ -7,6 +7,8 @@ export const INFINI: ParametresInfini = {
   niveauBase: 1,
   // Budget de la vague n = budget de la vague 1 × 1,08^(n−1).
   croissance: 1.08,
+  // Au plus 200 ennemis par vague (mini-boss à part) : au-delà, le surplus de budget gonfle les PV de la vague (voir engine/infini.ts).
+  ennemisMaxParVague: 200,
   regions: [
     { ennemis: ['paysan_affame', 'mendiant', 'chien_errant'], boss: 'boucher_vaudrelle' },
     { ennemis: ['glaneur', 'corbeau_noir', 'epouvantail'], boss: 'la_faim' },

@@ -62,6 +62,28 @@ function avecElites(paquets: readonly Paquet[], part: number, graine: number, va
   return sortie;
 }
 
+function total(paquets: readonly Paquet[]): number {
+  return paquets.reduce((somme, p) => somme + p.nombre, 0);
+}
+
+/**
+ * Les paquets de la vague et le facteur de PV qui porte le surplus de budget. Tant que la vague tient dans `ennemisMaxParVague`, elle
+ * remplit son budget en ennemis (facteur 1). Sinon le budget est réduit (par approches successives, déterministes) jusqu'à ce que le
+ * nombre d'ennemis tienne, et le facteur vaut budget ÷ budget réduit : la menace totale (nombre × PV) reste celle du budget.
+ */
+function remplirBudget(config: ConfigPartie, region: number, chemins: number, vague: number): { paquets: Paquet[]; facteurPv: number } {
+  const ennemis = ennemisInfini(region);
+  const budget = budgetInfini(vague);
+  const generer = (b: number): Paquet[] => [...genererVague({ niveau: region, vague, ennemis, graine: config.graine, chemins, budget: b }).paquets];
+  let reduit = budget;
+  let paquets = generer(reduit);
+  for (let essai = 0; essai < 8 && total(paquets) > INFINI.ennemisMaxParVague; essai++) {
+    reduit *= (INFINI.ennemisMaxParVague / total(paquets)) * 0.95;
+    paquets = generer(reduit);
+  }
+  return { paquets, facteurPv: budget / reduit };
+}
+
 /**
  * La vague `vague` (1, 2…) d'une partie infinie sur une carte de `chemins` chemins : un budget de menace rempli par des
  * ennemis de la région et des précédentes, des élites à partir de la vague 20, un mini-boss (le boss de la région, à une part
@@ -69,15 +91,9 @@ function avecElites(paquets: readonly Paquet[], part: number, graine: number, va
  */
 export function genererVagueInfinie(config: ConfigPartie, chemins: number, vague: number): Vague {
   const region = config.infini?.region ?? 1;
-  const base = genererVague({
-    niveau: region,
-    vague,
-    ennemis: ennemisInfini(region),
-    graine: config.graine,
-    chemins,
-    budget: budgetInfini(vague),
-  });
-  const paquets = avecElites(base.paquets, partElites(vague), config.graine, vague);
+  const { paquets: ordinaires, facteurPv: facteurVague } = remplirBudget(config, region, chemins, vague);
+  const paquets = avecElites(ordinaires, partElites(vague), config.graine, vague);
+  if (facteurVague > 1) for (let i = 0; i < paquets.length; i++) paquets[i] = { ...(paquets[i] as Paquet), facteurPv: facteurVague };
   const facteurPv = pvMiniBoss(vague);
   const boss = INFINI.regions[region - 1]?.boss;
   if (facteurPv > 0 && boss) {

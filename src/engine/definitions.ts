@@ -746,6 +746,11 @@ export interface ParametresInfini {
   readonly niveauBase: number;
   /** Multiplicateur du budget d'une vague à la suivante (1,08). */
   readonly croissance: number;
+  /**
+   * Nombre maximal d'ennemis (mini-boss non compris) dans une vague. Au-delà, le budget de menace est rempli avec moins d'ennemis, et
+   * le surplus devient un facteur de PV (et de prime) de la vague : l'état reste sérialisable et le jeu fluide à la vague 100.
+   */
+  readonly ennemisMaxParVague: number;
   /** Régions 1 à 10, dans l'ordre : une carte de la région r tire parmi les ennemis des régions 1 à r. */
   readonly regions: readonly RegionInfini[];
   readonly elites: {

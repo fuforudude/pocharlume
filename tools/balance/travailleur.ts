@@ -12,6 +12,7 @@ import {
   type EvaluationProfil,
   type Profil,
 } from '../../src/equilibrage/campagne.ts';
+import { mesurerInfini, type CarteInfini, type MesureInfini } from '../../src/equilibrage/infini.ts';
 
 export interface TacheBandes {
   readonly type: 'bandes';
@@ -32,7 +33,20 @@ export interface TacheProfil {
   readonly bots: readonly ('naif' | 'soigneux')[];
 }
 
-function calculer(tache: TacheBandes | TacheProfil): (Evaluation | EvaluationProfil)[] {
+/** Une mesure du mode infini : un bot, un dieu, une carte, sur `graines` graines. */
+export interface TacheInfini {
+  readonly type: 'infini';
+  readonly bot: 'naif' | 'soigneux';
+  readonly dieu: string;
+  readonly carte: CarteInfini;
+  readonly graines: number;
+}
+
+function calculer(tache: TacheBandes | TacheProfil | TacheInfini): (Evaluation | EvaluationProfil)[] | MesureInfini[] {
+  if (tache.type === 'infini') {
+    const graines = tache.graines <= GRAINES_EVALUATION.length ? GRAINES_EVALUATION.slice(0, tache.graines) : Array.from({ length: tache.graines }, (_, i) => 101 + i);
+    return [mesurerInfini(tache.bot, tache.dieu, tache.carte, graines)];
+  }
   const campagne = niveauDeCampagne(tache.numero);
   if (!campagne) throw new Error(`Niveau ${String(tache.numero)} introuvable`);
   const graines =
@@ -42,6 +56,6 @@ function calculer(tache: TacheBandes | TacheProfil): (Evaluation | EvaluationPro
     : evaluerProfil(campagne, tache.difficulte, tache.profil, { graines, bots: tache.bots });
 }
 
-parentPort?.on('message', (tache: TacheBandes | TacheProfil) => {
+parentPort?.on('message', (tache: TacheBandes | TacheProfil | TacheInfini) => {
   parentPort?.postMessage(calculer(tache));
 });

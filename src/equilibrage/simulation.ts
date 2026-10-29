@@ -1,7 +1,7 @@
 // Simulation sans affichage d'une partie complète jouée par un bot. Le bot ne passe que par l'API publique du
 // moteur (`avancer` avec des actions), exactement comme l'interface : il lit l'état mais ne le modifie jamais
 // directement.
-import { avancer, creerPartie, PAS_PAR_SECONDE } from '../engine';
+import { avancer, creerPartie, derniereVagueTerminee, PAS_PAR_SECONDE } from '../engine';
 import type { Action, ConfigPartie, DefiPartie, EtatPartie, IdFamille, Niveau, Statut, Voie } from '../engine';
 import { VERSION_DONNEES } from '../data/version';
 
@@ -37,6 +37,8 @@ export interface ResultatPartie {
   readonly sorts: readonly number[];
   /** La tour divine du dieu a été construite au moins une fois. */
   readonly tourDivine: boolean;
+  /** Dernière vague terminée à la fin de la partie (l'infini : le « record » de la partie). */
+  readonly vagueTerminee?: number;
 }
 
 /** Ce qu'apporte le joueur à une partie : son dieu, son héros et ce que la méta-progression lui a donné. */
@@ -50,6 +52,8 @@ export interface Joueur {
   readonly objets?: readonly string[];
   /** Défi joué (Héroïque ou Fer) : le moteur le joue avec les règles de Matou, quelle que soit la difficulté demandée. */
   readonly defi?: DefiPartie;
+  /** Mode infini (jalon 4) sur une carte de cette région : les vagues sont générées par le moteur et la partie ne se gagne pas. */
+  readonly infini?: { readonly region: number };
 }
 
 export interface OptionsPartie extends Joueur {
@@ -57,6 +61,8 @@ export interface OptionsPartie extends Joueur {
   readonly difficulte: string;
   /** Temps de jeu au-delà duquel on abandonne la partie (jamais atteint en pratique). */
   readonly secondesMax?: number;
+  /** Infini : on arrête la partie quand cette vague est terminée (le coût des vagues croît de 8 % par vague). */
+  readonly vagueMax?: number;
   /** Pas entre deux décisions du bot (15 = deux fois par seconde). */
   readonly periodeDecision?: number;
 }
@@ -74,6 +80,7 @@ export function configPartie(o: OptionsPartie): ConfigPartie {
     objets: [...(o.objets ?? [])],
     versionDonnees: VERSION_DONNEES,
     ...(o.defi ? { defi: o.defi } : {}),
+    ...(o.infini ? { infini: { region: o.infini.region } } : {}),
   };
 }
 
@@ -96,7 +103,8 @@ export function jouerPartie(niveau: Niveau, bot: Bot, options: OptionsPartie): R
   let tourDivine = false;
   let actions = 0;
 
-  while (etat.statut === 'en_cours' && etat.pas < limite) {
+  const vagueMax = options.vagueMax ?? Infinity;
+  while (etat.statut === 'en_cours' && etat.pas < limite && !(vagueMax < Infinity && etat.pas % periode === 0 && derniereVagueTerminee(etat) >= vagueMax)) {
     const aJouer = etat.pas % periode === 0 ? bot.decider(etat) : [];
     const resultats = avancer(etat, aJouer);
     aJouer.forEach((a, i) => {
@@ -134,5 +142,6 @@ export function jouerPartie(niveau: Niveau, bot: Bot, options: OptionsPartie): R
     actions,
     sorts,
     tourDivine,
+    vagueTerminee: derniereVagueTerminee(etat),
   };
 }

@@ -24,7 +24,7 @@ import { DIEUX } from '../data/dieux';
 import { dpsEfficace } from '../data/equilibrage';
 import { REGLES } from '../data/regles';
 import { FAMILLES, TOURS } from '../data/tours';
-import { distance, echantillonner, longueurVue, PAS_ECHANTILLON, partsSpeciales, poidsDesChemins, premiereVagueFurtifs, type Echantillon } from './geometrie';
+import { distance, echantillonner, longueurVue, niveauLu, PAS_ECHANTILLON, partsSpeciales, poidsDesChemins, premiereVagueFurtifs, type Echantillon } from './geometrie';
 import { jouerPartie, type Bot, type Joueur, type ResultatPartie } from './simulation';
 
 /** Une préférence de famille : le poids multiplie la valeur d'une tour de cette famille. */
@@ -550,9 +550,10 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     decider(etat) {
       if (echantillons.length === 0) {
         echantillons = echantillonner(etat);
-        poids = poidsDesChemins(etat.niveau);
-        parts = partsSpeciales(etat.niveau);
-        vagueFurtifs = premiereVagueFurtifs(etat.niveau);
+        const lu = niveauLu(etat);
+        poids = poidsDesChemins(lu);
+        parts = partsSpeciales(lu);
+        vagueFurtifs = premiereVagueFurtifs(lu);
       }
       const actions: Action[] = [];
       const achat = acheter(etat);

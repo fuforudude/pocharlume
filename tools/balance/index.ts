@@ -29,15 +29,16 @@ import {
   type EvaluationProfil,
 } from '../../src/equilibrage/campagne.ts';
 import { profilProgression, profilsDisciples, profilSansTourDivine } from '../../src/equilibrage/profils.ts';
+import { CARTES_INFINI_AUTRES, CARTES_INFINI_REGION1, ecartsInfini, mediane, redigerInfini, type MesureInfini } from '../../src/equilibrage/infini.ts';
 import { redigerRapport } from '../../src/equilibrage/rapport.ts';
 import { ecartsDeLaRegion, evaluationsDeRegion, redigerDefis, redigerRegions } from '../../src/equilibrage/rapport-regions.ts';
-import type { TacheBandes, TacheProfil } from './travailleur.ts';
+import type { TacheBandes, TacheInfini, TacheProfil } from './travailleur.ts';
 
 const SORTIE = fileURLToPath(new URL('../../balance-report.md', import.meta.url));
 const TRAVAILLEUR = new URL('./travailleur.ts', import.meta.url);
 const CROCHET = pathToFileURL(fileURLToPath(new URL('../niveaux/enregistrer.ts', import.meta.url))).href;
 
-type Tache = TacheBandes | TacheProfil;
+type Tache = TacheBandes | TacheProfil | TacheInfini;
 
 const options = new Map<string, string>();
 for (const argument of process.argv.slice(2)) {
@@ -50,7 +51,7 @@ const difficultesVoulues = liste('difficultes', [...DIFFICULTES_EVALUEES, ...DEF
 const graines = Number(options.get('graines') ?? GRAINES_EVALUATION.length);
 const entrainement = Number(options.get('entrainement') ?? GRAINES_ENTRAINEMENT.length);
 const profilsVoulus = (options.get('profils') ?? '').split(',').filter((x) => x !== '');
-const miseAuPoint = ['dieux', 'difficultes', 'graines', 'entrainement', 'profils', 'niveaux'].some((cle) => options.has(cle));
+const miseAuPoint = ['dieux', 'difficultes', 'graines', 'entrainement', 'profils', 'niveaux', 'infini'].some((cle) => options.has(cle));
 /** `11-20` ou `3,12,40-42` : la liste des numéros de campagne voulus. */
 function lireNiveaux(texte: string): number[] {
   return texte.split(',').flatMap((morceau) => {
@@ -59,7 +60,9 @@ function lireNiveaux(texte: string): number[] {
   });
 }
 const NIVEAUX_REGION1 = CAMPAGNE.slice(0, 10).map((n) => n.numero);
-const numeros = options.has('niveaux')
+const numeros = options.has('infini') && !options.has('niveaux')
+  ? []
+  : options.has('niveaux')
   ? lireNiveaux(options.get('niveaux') ?? '').filter((n) => CAMPAGNE.some((c) => c.numero === n))
   : miseAuPoint
     ? NIVEAUX_REGION1
@@ -95,7 +98,17 @@ for (const numero of numeros.filter((n) => NIVEAUX_REGION1.includes(n))) {
   }
 }
 
-const resultats = new Map<number, (Evaluation | EvaluationProfil)[]>();
+// Mode infini : tout dans le rapport complet ; en mise au point seulement sur demande (`--infini` ou `--infini=chaumes,gue`, avec
+// `--dieux=` et `--graines=`), sans les bandes de la campagne (`--difficultes=` vide ne joue rien d'autre : `--niveaux=0`).
+const cartesInfini = [...CARTES_INFINI_REGION1, ...CARTES_INFINI_AUTRES];
+if (!miseAuPoint || options.has('infini')) {
+  const voulues = options.get('infini') ? (options.get('infini') ?? '').split(',') : cartesInfini.map((c) => c.id);
+  for (const carte of cartesInfini.filter((c) => voulues.includes(c.id))) {
+    for (const dieu of dieuxVoulus) for (const bot of deuxBots) taches.push({ type: 'infini', bot, dieu, carte, graines });
+  }
+}
+
+const resultats = new Map<number, (Evaluation | EvaluationProfil | MesureInfini)[]>();
 let suivante = 0;
 let terminees = 0;
 
@@ -115,7 +128,7 @@ function boucle(): Promise<void> {
       courante = i;
       fil.postMessage(taches[i]);
     };
-    fil.on('message', (evaluations: (Evaluation | EvaluationProfil)[]) => {
+    fil.on('message', (evaluations: (Evaluation | EvaluationProfil | MesureInfini)[]) => {
       resultats.set(courante, evaluations);
       terminees++;
       process.stdout.write(`\r${String(terminees)}/${String(taches.length)} tâches calculées`);
@@ -131,9 +144,11 @@ process.stdout.write('\r' + ' '.repeat(50) + '\r');
 
 const evaluations: Evaluation[] = [];
 const profils: EvaluationProfil[] = [];
+const mesuresInfini: MesureInfini[] = [];
 taches.forEach((tache, i) => {
   for (const e of resultats.get(i) ?? []) {
-    if (tache.type === 'bandes') evaluations.push(e);
+    if (tache.type === 'bandes') evaluations.push(e as Evaluation);
+    else if (tache.type === 'infini') mesuresInfini.push(e as MesureInfini);
     else profils.push(e as EvaluationProfil);
   }
 });
@@ -141,7 +156,10 @@ taches.forEach((tache, i) => {
 /** Les écarts aux bandes de toutes les régions évaluées (1 à 10), ceux de la région 1 avec la puissance des tours. */
 function ecartsDeTout(): string[] {
   const regions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].filter((r) => evaluationsDeRegion(evaluations, r).length > 0);
-  return regions.flatMap((r) => (r === 1 ? verifierBandes(evaluationsDeRegion(evaluations, 1)) : ecartsDeLaRegion(evaluations, r)));
+  return [
+    ...regions.flatMap((r) => (r === 1 ? verifierBandes(evaluationsDeRegion(evaluations, 1)) : ecartsDeLaRegion(evaluations, r))),
+    ...ecartsInfini(mesuresInfini),
+  ];
 }
 
 if (miseAuPoint) {
@@ -182,6 +200,7 @@ if (miseAuPoint) {
     const ecarts = ecartsDeTout().filter((e) => complets || dieuxVoulus.some((d) => e.includes(`(${nomDuDieu(d)})`)));
     console.log(ecarts.length === 0 ? 'Toutes les bandes sont respectées.' : [`${String(ecarts.length)} écart(s) aux bandes :`, ...ecarts.map((e) => `- ${e}`)].join('\n'));
   }
+  for (const m of mesuresInfini) console.log(`infini ${m.bot.padEnd(8)} ${m.dieu.padEnd(8)} ${m.carte.id.padEnd(10)} médiane ${String(mediane(m.vagues)).padStart(3)} : ${m.vagues.join(' ')}`);
   const groupes = new Map<string, EvaluationProfil[]>();
   for (const e of profils) groupes.set(`${e.profil}|${e.dieu}|${e.difficulte}|${e.bot}`, [...(groupes.get(`${e.profil}|${e.dieu}|${e.difficulte}|${e.bot}`) ?? []), e]);
   for (const [clef, liste] of groupes) {
@@ -202,6 +221,8 @@ if (miseAuPoint) {
 ${redigerRegions(evaluations, [2, 3, 4, 5, 6, 7, 8, 9, 10]).trimEnd()}
 
 ${redigerDefis(evaluations, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).trimEnd()}
+
+${redigerInfini(mesuresInfini).trimEnd()}
 `,
   );
   const ecarts = ecartsDeTout();

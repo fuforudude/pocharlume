@@ -1,6 +1,6 @@
 // Géométrie des cartes pour les bots : points d'échantillonnage le long des chemins, longueur de chemin vue
 // depuis une case de la grille, poids de chaque chemin dans les vagues du niveau.
-import { creerPartie, pointSurChemin } from '../engine';
+import { creerPartie, genererVagueInfinie, pointSurChemin } from '../engine';
 import type { DefEnnemi, EtatPartie, Niveau, Point } from '../engine';
 import { ENNEMIS } from '../data/ennemis';
 import { menaceEnnemi } from '../data/equilibrage';
@@ -86,4 +86,18 @@ export function longueurVue(echantillons: readonly Echantillon[], poids: readonl
 /** Partie neuve du niveau, pour lire ses chemins calculés. */
 export function etatInitial(niveau: Niveau): EtatPartie {
   return creerPartie(niveau, { graine: 0, difficulte: 'matou', dieu: 'charlie', heros: 'charlie', niveauHeros: 1, competencesHeros: {}, ameliorations: {}, objets: [], versionDonnees: VERSION_DONNEES });
+}
+
+/** Nombre de vagues de l'infini que le bot soigneux « lit à l'avance » pour peser les chemins et repérer volants et furtifs. */
+export const VAGUES_LUES_INFINI = 30;
+
+/**
+ * Le niveau tel que le bot soigneux le lit : celui de la partie, ou, en infini (où le moteur génère ses vagues et le niveau n'en porte
+ * aucune), un niveau portant les `VAGUES_LUES_INFINI` premières vagues générées avec la graine de la partie. Comme en campagne, le
+ * soigneux voit donc l'avenir : il est un peu optimiste.
+ */
+export function niveauLu(etat: EtatPartie): Niveau {
+  if (!etat.config.infini) return etat.niveau;
+  const vagues = Array.from({ length: VAGUES_LUES_INFINI }, (_, i) => genererVagueInfinie(etat.config, etat.chemins.length, i + 1));
+  return { ...etat.niveau, vagues };
 }
