@@ -61,13 +61,15 @@ export interface OptionsCarteMonde {
   surHeros: () => void;
   /** « Boutique » : idem pour la boutique (arbre et objets). */
   surBoutique: () => void;
+  /** « Revoir la fin » (campagne terminée) : l'écran est déjà arrêté. Absent : pas de bouton. */
+  surRevoirFin?: () => void;
   /** « Retour » ou Échap sans fiche ouverte : l'écran est déjà arrêté. */
   surRetour: () => void;
   /**
    * Une partie en cours qu'on peut reprendre : lancer un niveau la remplacerait, donc « Lancer » demande d'abord
    * confirmation.
    */
-  readonly partieEnCours?: { readonly niveau: number; readonly vague: number } | null;
+  readonly partieEnCours?: { readonly niveau: number; readonly vague: number; readonly infini?: true } | null;
   /** Les régions montrées ; par défaut celles du jeu (`REGIONS_MONDE`). */
   readonly regions?: readonly RegionMonde[];
   /** Numéro de la région montrée à l'ouverture si elle est ouverte ; par défaut la plus haute région ouverte. */
@@ -174,7 +176,15 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   boutique.textContent = t('carte.boutique');
   const reglages = bouton('bouton', t('carte.options'), options.surOptions, signal);
   reglages.textContent = t('carte.options');
-  barre.append(retour, titre, monnaies, heros, boutique, reglages);
+  const revoirFin = options.surRevoirFin;
+  const revoir = revoirFin
+    ? bouton('bouton', t('carte.revoir_fin'), () => {
+        arreter();
+        revoirFin();
+      }, signal)
+    : null;
+  if (revoir) revoir.textContent = t('carte.revoir_fin');
+  barre.append(retour, titre, monnaies, heros, boutique, ...(revoir ? [revoir] : []), reglages);
   racine.append(barre);
 
   const textesDe = (numero: number): { nom: string; ambiance: string } | null => {
@@ -445,7 +455,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
       avertissement?.remove();
       avertissement = afficherConfirmation(racine, {
         titre: t('lancer.perte_titre'),
-        detail: t('lancer.perte_detail', { n: enCours.niveau, m: enCours.vague }),
+        detail: t(enCours.infini ? 'lancer.perte_detail_infini' : 'lancer.perte_detail', { n: enCours.niveau, m: enCours.vague }),
         confirmer: t('lancer.confirmer'),
         annuler: t('lancer.annuler'),
         surConfirmer: () => {

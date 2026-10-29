@@ -156,4 +156,59 @@ describe("session : reprise et fin d'une partie infinie", () => {
     await session.enregistrerFinInfini({ carte: 'chaumes', vague: 2 }, CONFIG.graine);
     expect(session.sauvegarde.partie?.niveau).toBe(2);
   });
+
+  /** Une partie infinie arrivée à la vague 35 (rien d'ouvert : la dernière vague terminée est la 35e). */
+  function vague35(): EtatPartie {
+    const etat = infinie();
+    etat.vagues.lancees = 35;
+    etat.vagues.paquets = [];
+    etat.ennemis = [];
+    return etat;
+  }
+
+  it('range le record et les paliers atteints dès le rangement, payés une seule fois', async () => {
+    const session = await ouvrirSession(ouverte());
+    expect(await session.rangerPartie(vague35(), 1, 'chaumes')).toBe(true);
+    expect(session.sauvegarde.meta.infini).toEqual({ records: { chaumes: 35 }, paliers: [10, 20, 30] });
+    const aretes = session.sauvegarde.meta.monnaies.aretes;
+    expect(aretes).toBeGreaterThan(0);
+    await session.rangerPartie(vague35(), 1, 'chaumes');
+    expect(session.sauvegarde.meta.monnaies.aretes).toBe(aretes);
+  });
+
+  it("un niveau de campagne lancé par-dessus une partie infinie fermée à la vague 35 garde le record", async () => {
+    const session = await ouvrirSession(ouverte());
+    await session.rangerPartie(vague35(), 1, 'chaumes');
+    await session.rangerPartie(jusquaVague({ ...CONFIG, infini: null }, 1), 2);
+    expect(session.sauvegarde.partie?.carte).toBeUndefined();
+    expect(session.sauvegarde.meta.infini.records).toEqual({ chaumes: 35 });
+    expect(session.sauvegarde.meta.infini.paliers).toEqual([10, 20, 30]);
+  });
+
+  it('une partie infinie oubliée (autres données de jeu) garde son record', async () => {
+    const session = await ouvrirSession(ouverte());
+    await session.rangerPartie(vague35(), 1, 'chaumes');
+    const examen = session.examinerPartie();
+    expect(examen.reprise).not.toBeNull();
+    // Les données de jeu ont changé : l'état ne se relit plus, la partie est oubliée.
+    const stockage = new StockageMemoire();
+    const depot = new Depot(stockage);
+    const sauve = session.sauvegarde;
+    const partie = sauve.partie;
+    if (!partie) throw new Error('pas de partie');
+    await depot.enregistrer({ ...sauve, partie: { ...partie, config: { ...partie.config, versionDonnees: partie.config.versionDonnees + 1 } } });
+    const autre = await Session.ouvrir(depot, null, { verrou: null });
+    expect(autre.examinerPartie().oubliee).toBe(true);
+    await autre.effacerPartie();
+    expect(autre.sauvegarde.meta.infini.records).toEqual({ chaumes: 35 });
+  });
+
+  it("le bilan de fin compte ce que le rangement a déjà payé", async () => {
+    const session = await ouvrirSession(ouverte());
+    await session.rangerPartie(vague35(), 1, 'chaumes');
+    const fin = await session.enregistrerFinInfini({ carte: 'chaumes', vague: 36 }, CONFIG.graine);
+    if (!fin.ok) throw new Error('fin refusée');
+    expect(fin.detail).toMatchObject({ record: 36, recordPrecedent: 0, nouveauRecord: true, paliersPayes: [10, 20, 30] });
+    expect(fin.detail.aretes).toBe(session.sauvegarde.meta.monnaies.aretes);
+  });
 });

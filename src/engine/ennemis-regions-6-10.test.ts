@@ -5,8 +5,8 @@ import { TOURS } from '../data/tours';
 import { avancerSecondes, compter, construireTour, ennemiDonnees, ennemiEssai, ennemisDe, evenementsPendant, heros, partieEssai } from './aides.test-utils';
 import { infligerDegats } from './degats';
 import { genererVague } from '../data/equilibrage';
-import { ajouterEnnemi } from './ennemis';
-import type { Ennemi, EtatPartie, Unite } from './etat';
+import { ajouterEnnemi, mettreAJourEnnemis } from './ennemis';
+import { EFFET, type Ennemi, type EtatPartie, type Unite } from './etat';
 import { step } from './partie';
 import { enPas } from './temps';
 import { creerUnite, mourir } from './unites';
@@ -116,6 +116,19 @@ describe('Creux : se relève une fois avec 50 % de ses PV, sauf s’il meurt de 
     const c = ennemiDonnees(etat, 'creux', 10);
     infligerDegats(etat, c, 1e6, 'pur');
     expect(c.vivant).toBe(true);
+  });
+
+  it('un dégât sur la durée (poison, brûlure, saignement) qui l’achève ne l’empêche pas de se relever', () => {
+    // Aucune tour ni aucun sort magique ne pose d'effet sur la durée (les effets viennent de tours physiques et de
+    // l'Oracle, dont les dégâts sont purs) : les dégâts sur la durée restent donc purs et le Creux se relève.
+    const etat = partieEssai();
+    const c = ennemiDonnees(etat, 'creux', 10);
+    c.pv = 0.001;
+    c.effetsPas[EFFET.poison] = 30;
+    c.effetsValeur[EFFET.poison] = 50;
+    mettreAJourEnnemis(etat);
+    expect(c.vivant).toBe(true);
+    expect(c.releves).toBe(0);
   });
 
   it('un Creux déjà relevé meurt pour de bon même sous un coup physique', () => {

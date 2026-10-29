@@ -10,7 +10,7 @@ import type { NiveauCampagne } from './data/visuel';
 import type { DefiPartie, EtatPartie } from './engine';
 import { t } from './i18n';
 import { chargerAtlas, type AtlasRendu } from './render/atlas';
-import { Depot, difficulteDe, infiniOuvert, ouvrirCanalNavigateur, ouvrirStockage, recordDeLaCarte, Session, type ChoixPartie, type DifficulteSauvegarde } from './save';
+import { campagneTerminee, Depot, difficulteDe, infiniOuvert, ouvrirCanalNavigateur, ouvrirStockage, recordDeLaCarte, Session, type ChoixPartie, type DifficulteSauvegarde } from './save';
 import { afficherBoutique } from './ui/boutique';
 import { afficherCaisses } from './ui/caisses';
 import { afficherCarteMonde, type EcranCarteMonde } from './ui/carte-monde';
@@ -229,6 +229,8 @@ function carte(): void {
         session,
         difficulte: derniereDifficulte,
         partieEnCours: partieEnCours(),
+        // La campagne finie : l'écran de fin ne se perd pas si le joueur a cliqué « Rejouer » ou fermé l'onglet.
+        ...(campagneTerminee(session.sauvegarde) ? { surRevoirFin: finDeCampagne } : {}),
         ...(derniereRegion === undefined ? {} : { region: derniereRegion }),
         surRegion: (numero) => {
           derniereRegion = numero;
