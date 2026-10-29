@@ -5,4 +5,63 @@ export const frEcrans4 = {
   'region.8': 'Le Tribunal des Cendres',
   'region.9': 'Le Palais des Rois Fous',
   'region.10': 'La Cathédrale du Soleil Blême',
+
+  // Noms des cartes (clé `carte.nom.<id>`) : une carte sans nom ici s'affiche avec son identifiant mis en forme.
+  'carte.nom.chaumes': 'Les Chaumes',
+  'carte.nom.gue': 'Le Gué',
+  'carte.nom.pendus': 'Les Pendus',
+  'carte.nom.carrefour': 'Le Carrefour',
+  'carte.nom.sillons': 'Les Sillons',
+  'carte.nom.meules': 'Les Meules',
+  'carte.nom.aire': 'L’Aire',
+  'carte.nom.ruelles': 'Les Ruelles',
+  'carte.nom.place': 'La Place',
+  'carte.nom.beffroi': 'Le Beffroi',
+  'carte.nom.ponton': 'Le Ponton',
+  'carte.nom.etang': 'L’Étang',
+  'carte.nom.saules': 'Les Saules',
+  'carte.nom.quarantaine': 'La Quarantaine',
+  'carte.nom.faubourg': 'Le Faubourg',
+  'carte.nom.marche': 'Le Marché',
+
+  // Mode infini : accueil, choix de la carte, record, paliers
+  'accueil.infini': 'Mode infini',
+  'infini.titre': 'Mode infini',
+  'infini.retour': 'Retour',
+  'infini.cartes': 'Cartes',
+  'infini.cartes_aucune': 'Gagne un niveau pour ouvrir sa carte.',
+  'infini.carte_aller': 'Jouer sur la carte {nom} ({region}), {record}',
+  'infini.record': 'Record : vague {n}',
+  'infini.sans_record': 'Jamais jouée',
+  'infini.paliers': 'Paliers',
+  'infini.palier': 'Vague {n}',
+  'infini.palier_gain': '+{aretes} arêtes, +{braises} braises',
+  'infini.palier_paye': 'Payé',
+  'infini.palier_attendu': 'À gagner',
+  'infini.regles': 'Règles de Matou, 20 vies. Les vagues ne s’arrêtent qu’à la dernière vie ; un mini-boss tous les 10 vagues.',
+  'infini.lancer': 'Lancer',
+  'infini.lancement_refuse': 'Impossible de lancer le mode infini : {raison}',
+
+  // Partie infinie : barre du haut et fin de partie
+  'hud.vague_infini': 'Vague {n}',
+  'hud.vague_infini_record': 'Vague {n} · Record {r}',
+  'fin.infini_titre': 'La nuit t’a rattrapé',
+  'fin.infini_detail': 'Les vagues ne finissent jamais, seuls les veilleurs s’arrêtent.',
+  'fin.infini_vague': 'Dernière vague terminée : {n}',
+  'fin.infini_nouveau_record': 'Nouveau record sur {carte} !',
+  'fin.infini_record': 'Record de {carte} : vague {n}',
+  'fin.infini_palier': 'Palier {n} atteint : +{aretes} arêtes, +{braises} braises',
+  'fin.infini_aucun_palier': 'Aucun palier de plus cette fois.',
+
+  // Bilan de campagne : déblocage du mode infini, fin de campagne
+  'fin.bilan_infini_debloque': 'Mode infini débloqué : il t’attend sur l’accueil.',
+  'fin.bilan_campagne': 'Campagne terminée.',
+
+  // Écran de fin de campagne (victoire sur le Soleil Blême)
+  'campagne.fin_titre': 'Les Cendres Retombent',
+  'campagne.fin_illustration': 'Le Dernier Veilleur sur les marches de la cathédrale, devant le Soleil Blême éteint.',
+  'campagne.fin_p1': 'Le Soleil Blême s’éteint sur la cathédrale. Ni cri ni triomphe : de la cendre qui retombe sur les dalles, et au loin les cloches qui se taisent une à une.',
+  'campagne.fin_p2': 'Les bûchers ne sont plus que des braises. Dans les granges, dans les cryptes, des pas feutrés reviennent. Les Chats Suprêmes ne sont pas ressuscités : le Dernier Veilleur a seulement refusé de laisser mourir ce qu’ils avaient allumé.',
+  'campagne.fin_p3': 'Les hommes oublieront. Les rats reviendront. Mais tant qu’une braise veille quelque part, la nuit n’est pas finie.',
+  'campagne.fin_continuer': 'Continuer',
 } as const;

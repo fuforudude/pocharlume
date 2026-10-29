@@ -63,6 +63,15 @@ export function configDuChoix(s: Sauvegarde, choix: ChoixPartie, difficulte: str
   };
 }
 
+/**
+ * La config d'une partie du mode infini sur une carte de la région `region` : le choix (dieu, héros, objets) de la fiche, les
+ * règles de Matou (le moteur les impose), aucun défi. Mêmes refus que `configDuChoix`.
+ */
+export function configInfini(s: Sauvegarde, choix: ChoixPartie, graine: number, region: number): ResultatLancement {
+  const r = configDuChoix(s, choix, 'matou', graine);
+  return r.ok ? { ok: true, config: { ...r.config, infini: { region } } } : r;
+}
+
 /** Graine d'une nouvelle partie, tirée de l'horloge (hors moteur : c'est ici qu'on choisit la graine). */
 export function nouvelleGraine(): number {
   return Date.now() & 0x7fffffff;
