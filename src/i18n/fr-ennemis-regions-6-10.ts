@@ -18,5 +18,5 @@ export const frEnnemisRegions6a10 = {
   'ennemi.roi_fou': 'Le Roi Fou',
   'ennemi.acolyte_cendre': 'Acolyte de Cendre',
   'ennemi.ange_cendre': 'Ange de Cendre',
-  'ennemi.soleil_pale': 'Le Soleil Blême',
+  'ennemi.soleil_bleme': 'Le Soleil Blême',
 } as const;

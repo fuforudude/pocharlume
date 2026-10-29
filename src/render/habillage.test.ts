@@ -46,13 +46,7 @@ function niveauxDeTours(): { famille: 'caserne' | 'tir' | 'magie' | 'artillerie'
 
 describe('habillage : chaque sprite demandé existe dans l’atlas', () => {
   // Ennemis des régions 6 à 10 (jalon 4) dont les sprites arrivent avec la tâche « Sprites » : vider cette liste à la fusion.
-  const SPRITES_A_VENIR = new Set<string>([
-    'fossoyeur', 'creux', 'chauve_souris', 'roi_fosses',
-    'fantassin', 'porte_banniere', 'cavalier', 'prince_croise',
-    'flagellant', 'inquisiteur', 'exorciste', 'grand_inquisiteur',
-    'garde_royal', 'arbaletrier_elite', 'chevalier', 'roi_fou',
-    'acolyte_cendre', 'ange_cendre', 'soleil_pale',
-  ]);
+  const SPRITES_A_VENIR = new Set<string>();
 
   it('ennemis', () => {
     for (const type of Object.keys(ENNEMIS)) {

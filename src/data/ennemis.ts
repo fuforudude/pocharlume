@@ -520,8 +520,8 @@ export const ENNEMIS = {
    * Trois phases. Jusqu'à 66 % de PV, aveugle les tours à 4 tuiles (portée −30 % pendant 4 s, toutes les 12 s) ; jusqu'à 33 %,
    * appelle 2 Anges de Cendre toutes les 10 s ; ensuite, cadence −30 % aux tours à 4 tuiles tant qu'il vit (renouvelée chaque seconde).
    */
-  soleil_pale: ennemi({
-    nom: 'ennemi.soleil_pale',
+  soleil_bleme: ennemi({
+    nom: 'ennemi.soleil_bleme',
     pv: 16000,
     vitesse: 0.35,
     armure: 0.3,

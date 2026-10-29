@@ -17,7 +17,7 @@ export const INFINI: ParametresInfini = {
     { ennemis: ['fantassin', 'porte_banniere', 'cavalier'], boss: 'prince_croise' },
     { ennemis: ['flagellant', 'inquisiteur', 'exorciste'], boss: 'grand_inquisiteur' },
     { ennemis: ['garde_royal', 'arbaletrier_elite', 'chevalier'], boss: 'roi_fou' },
-    { ennemis: ['acolyte_cendre', 'ange_cendre'], boss: 'soleil_pale' },
+    { ennemis: ['acolyte_cendre', 'ange_cendre'], boss: 'soleil_bleme' },
   ],
   // Élites à partir de la vague 20 : 10 % des ennemis, 5 points de plus toutes les 10 vagues, au plus 60 %.
   elites: { premiereVague: 20, partDepart: 0.1, partParPalier: 0.05, intervalle: 10, partMax: 0.6 },

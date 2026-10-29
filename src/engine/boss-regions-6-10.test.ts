@@ -280,7 +280,7 @@ describe('Le Soleil Blême : trois phases', () => {
     const etat = partieEssai();
     construireTour(etat, 1, 'tir');
     construireTour(etat, 3, 'tir');
-    const soleil = ennemiDonnees(etat, 'soleil_pale', 13, { pv: 1e9, degats: [0, 0], furtif: true });
+    const soleil = ennemiDonnees(etat, 'soleil_bleme', 13, { pv: 1e9, degats: [0, 0], furtif: true });
     soleil.pv = soleil.pvMax * part;
     return { etat, soleil, tour: tourDeLaCase(etat, 1), loin: tourDeLaCase(etat, 3) };
   }

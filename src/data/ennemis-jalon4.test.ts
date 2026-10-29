@@ -12,7 +12,7 @@ const REGIONS: Readonly<Record<number, { ennemis: readonly string[]; boss: strin
   7: { ennemis: ['fantassin', 'porte_banniere', 'cavalier'], boss: 'prince_croise' },
   8: { ennemis: ['flagellant', 'inquisiteur', 'exorciste'], boss: 'grand_inquisiteur' },
   9: { ennemis: ['garde_royal', 'arbaletrier_elite', 'chevalier'], boss: 'roi_fou' },
-  10: { ennemis: ['acolyte_cendre', 'ange_cendre'], boss: 'soleil_pale' },
+  10: { ennemis: ['acolyte_cendre', 'ange_cendre'], boss: 'soleil_bleme' },
 };
 
 describe('ennemis des régions 6 à 10', () => {
@@ -68,7 +68,7 @@ describe('ennemis des régions 6 à 10', () => {
         { type: 'invulnerabilite', duree: 3 },
       ]);
     }
-    const phases = ENNEMIS.soleil_pale.pouvoirs?.periodiques ?? [];
+    const phases = ENNEMIS.soleil_bleme.pouvoirs?.periodiques ?? [];
     expect(phases.map((p) => p.phase)).toEqual([[1, 0.66], [0.66, 0.33], [0.33, 0]]);
     expect(phases[0]).toMatchObject({ cadence: 12, actions: [{ type: 'aveugler', rayon: 4, portee: 0.3, duree: 4 }] });
     expect(phases[1]).toMatchObject({ cadence: 10, actions: [{ type: 'invoquer', ennemi: 'ange_cendre', nombre: 2 }] });
@@ -99,7 +99,7 @@ describe('ennemis des régions 6 à 10', () => {
 describe('paramètres de l’infini', () => {
   it('chaque région liste ses ennemis propres et son boss, dans l’ordre de la spec', () => {
     expect(INFINI.regions).toHaveLength(10);
-    expect(INFINI.regions.slice(5).map((r) => r.boss)).toEqual(['roi_fosses', 'prince_croise', 'grand_inquisiteur', 'roi_fou', 'soleil_pale']);
+    expect(INFINI.regions.slice(5).map((r) => r.boss)).toEqual(['roi_fosses', 'prince_croise', 'grand_inquisiteur', 'roi_fou', 'soleil_bleme']);
     for (const [region, { ennemis, boss }] of Object.entries(REGIONS)) {
       expect(INFINI.regions[Number(region) - 1]).toEqual({ ennemis, boss });
     }
