@@ -72,7 +72,7 @@ export function ecartsBloquants(ecarts: readonly string[]): string[] {
 
 /** Vrai si un écart (phrase de `verifierBandes`) relève d'une famille suspendue. */
 export function estSuspendu(ecart: string): boolean {
-  const phrase = ecart.replace(/^Région \d : /, '');
+  const phrase = ecart.replace(/^Région \d+ : /, '');
   return FAMILLES_SUSPENDUES.some((f) => phrase.startsWith(f));
 }
 

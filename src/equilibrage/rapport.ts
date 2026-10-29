@@ -125,7 +125,7 @@ export function redigerRapport(evaluations: readonly Evaluation[], graines: numb
   sortie.push(
     '# Rapport d’équilibrage',
     '',
-    'Généré par `npm run balance` (tools/balance/) : ne pas modifier à la main. Chaque niveau de la région 1 est rejoué sans',
+    'Généré par `npm run balance` (tools/balance/) : ne pas modifier à la main. Chaque niveau des régions 1 à 10 (la région 1 en détail dans cette partie, les régions 2 à 10, les défis et le mode infini plus bas) est rejoué sans',
     `affichage dans les trois difficultés, avec chacun des trois dieux jouant son avatar (sans amélioration ni objet), par deux bots, sur ${String(graines)} graines chacun (version des données ${String(VERSION_DONNEES)}).`,
     '',
     '- **Soigneux** : achète à chaque fois ce qui apporte le plus de puissance par arête dépensée (case de la grille, famille, niveau,',

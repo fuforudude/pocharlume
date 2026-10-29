@@ -1,7 +1,7 @@
 # Rapport d’équilibrage
 
-Généré par `npm run balance` (tools/balance/) : ne pas modifier à la main. Chaque niveau de la région 1 est rejoué sans
-affichage dans les trois difficultés, avec chacun des trois dieux jouant son avatar (sans amélioration ni objet), par deux bots, sur 10 graines chacun (version des données 9).
+Généré par `npm run balance` (tools/balance/) : ne pas modifier à la main. Chaque niveau des régions 1 à 10 (la région 1 en détail dans cette partie, les régions 2 à 10, les défis et le mode infini plus bas) est rejoué sans
+affichage dans les trois difficultés, avec chacun des trois dieux jouant son avatar (sans amélioration ni objet), par deux bots, sur 10 graines chacun (version des données 11).
 
 - **Soigneux** : achète à chaque fois ce qui apporte le plus de puissance par arête dépensée (case de la grille, famille, niveau,
   spécialisation, bonus et remise de famille du dieu compris), après une petite recherche entre dix variantes (5 préférences × 2 diversités) jouées sur des graines d’entraînement ;
@@ -383,9 +383,9 @@ Puissance = DPS efficace moyen × portée ÷ coût cumulé. Chaque tour doit res
 | 4 | Mortier de Soufre | 985 | 0,2 | −0,4 % |
 | 4 | Baliste à Chaînes | 985 | 0,2 | −0,6 % |
 
-## Régions 2 à 5
+## Régions 2 à 10
 
-Les bandes de la région 1 (plus haut) sont mesurées sur chacune des régions 2 à 5, pour les trois dieux : mêmes bots, mêmes graines, mêmes difficultés, courbe de difficulté jugée sur la moyenne des dieux, écart entre dieux comme au jalon 2. Les écarts de Chaton, d’absence de défense et des défis font échouer `npm run balance` ; ceux de Matou et de Vieux Sage (courbe et écart entre dieux compris) sont suspendus (voir bandes.ts) : listés, ils ne bloquent pas.
+Les bandes de la région 1 (plus haut) sont mesurées sur chacune des régions 2 à 10, pour les trois dieux : mêmes bots, mêmes graines, mêmes difficultés, courbe de difficulté jugée sur la moyenne des dieux, écart entre dieux comme au jalon 2. Les écarts de Chaton, d’absence de défense et des défis font échouer `npm run balance` ; ceux de Matou et de Vieux Sage (courbe et écart entre dieux compris) sont suspendus (voir bandes.ts) : listés, ils ne bloquent pas.
 
 ### Région 2 : les Champs Brûlés
 
@@ -583,7 +583,250 @@ Par niveau (trois dieux ensemble) :
 - Vieux Sage : Plume (70 %) et Charlie (10 %) sont à 60 points l'un de l'autre, il en faut au plus 10
 - Matou : Plume (19,7 vies) et Charlie (15 vies) sont à 4,7 vies l'un de l'autre, il en faut au plus 3
 
-## Défis, régions 1 à 5
+### Région 6 : le Charnier
+
+Par difficulté et par dieu (tous les niveaux de la région) :
+
+| Difficulté | Dieu | Soigneux : victoires | Naïf : victoires | Soigneux : vies restantes | Soigneux : arêtes en fin | Sans défense : victoires |
+| --- | --- | --- | --- | --- | --- | --- |
+| Chaton | Plume | 100 % (100/100) | 100 % (100/100) | 25,0 | 335 | 0 % (0/30) |
+| Chaton | Charlie | 100 % (100/100) | 100 % (100/100) | 25,0 | 271 | 0 % (0/30) |
+| Chaton | Pollen | 100 % (100/100) | 100 % (100/100) | 25,0 | 411 | 0 % (0/30) |
+| Matou | Plume | 90 % (90/100) | 72 % (72/100) | 17,9 | 120 | 0 % (0/30) |
+| Matou | Charlie | 87 % (87/100) | 14 % (14/100) | 13,0 | 112 | 0 % (0/30) |
+| Matou | Pollen | 100 % (100/100) | 69 % (69/100) | 19,1 | 133 | 0 % (0/30) |
+| Vieux Sage | Plume | 70 % (70/100) | 2 % (2/100) | 8,4 | 99 | 0 % (0/30) |
+| Vieux Sage | Charlie | 10 % (10/100) | 1 % (1/100) | 1,5 | 82 | 0 % (0/30) |
+| Vieux Sage | Pollen | 20 % (20/100) | 5 % (5/100) | 2,9 | 101 | 0 % (0/30) |
+
+Par niveau (trois dieux ensemble) :
+
+| Niveau | Matou, soigneux | Matou, naïf | Matou, naïf : vies restantes | Matou, soigneux : arêtes en fin | Vieux Sage, soigneux | Vieux Sage, soigneux : vies restantes | Matou, sans défense |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 51 | 100 % (30/30) | 70 % (21/30) | 12,7 | 100 | 100 % (30/30) | 14,4 | 0 % (0/9) |
+| 52 | 100 % (30/30) | 37 % (11/30) | 5,0 | 92 | 30 % (9/30) | 2,4 | 0 % (0/9) |
+| 53 | 93 % (28/30) | 40 % (12/30) | 5,6 | 129 | 3 % (1/30) | 0,2 | 0 % (0/9) |
+| 54 | 100 % (30/30) | 53 % (16/30) | 7,6 | 131 | 27 % (8/30) | 2,7 | 0 % (0/9) |
+| 55 | 80 % (24/30) | 70 % (21/30) | 9,8 | 158 | 27 % (8/30) | 3,9 | 0 % (0/9) |
+| 56 | 100 % (30/30) | 43 % (13/30) | 5,3 | 104 | 33 % (10/30) | 5,0 | 0 % (0/9) |
+| 57 | 100 % (30/30) | 40 % (12/30) | 5,6 | 72 | 33 % (10/30) | 3,8 | 0 % (0/9) |
+| 58 | 93 % (28/30) | 63 % (19/30) | 10,4 | 144 | 13 % (4/30) | 0,5 | 0 % (0/9) |
+| 59 | 100 % (30/30) | 43 % (13/30) | 3,2 | 71 | 67 % (20/30) | 9,9 | 0 % (0/9) |
+| 60 | 57 % (17/30) | 57 % (17/30) | 7,7 | 217 | 0 % (0/30) | 0,0 | 0 % (0/9) |
+
+Écarts aux bandes : 14
+
+- Matou (Plume) : le bot soigneux gagne 90 % des parties, il doit tout gagner
+- Matou (Plume) : le bot naïf gagne 72 % des parties, la bande est 30 % à 70 %
+- Matou (Plume) : le bot soigneux perd au moins une vie sur 2 niveaux seulement, il en faut au moins 5 sur 10
+- Matou (Charlie) : le bot soigneux gagne 87 % des parties, il doit tout gagner
+- Matou (Charlie) : le bot naïf gagne 14 % des parties, la bande est 30 % à 70 %
+- Matou (Pollen) : le bot soigneux perd au moins une vie sur 3 niveaux seulement, il en faut au moins 5 sur 10
+- Matou (Pollen) : le niveau 60 laisse 273 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou : la courbe de difficulté du bot naïf (moyenne des dieux) a une corrélation de rang de -0,1, elle doit être d'au plus -0,6
+- Matou : le niveau 60 (7,7 vies restantes au bot naïf, moyenne des dieux) n'est pas parmi les 3 plus durs
+- Matou (Plume) : la courbe de difficulté du bot naïf a une corrélation de rang de 0,5, elle doit être d'au plus -0,3
+- Vieux Sage (Charlie) : le bot soigneux gagne 10 % des parties, la bande est 60 % à 85 %
+- Vieux Sage (Pollen) : le bot soigneux gagne 20 % des parties, la bande est 60 % à 85 %
+- Vieux Sage : Plume (70 %) et Charlie (10 %) sont à 60 points l'un de l'autre, il en faut au plus 10
+- Matou : Pollen (19,1 vies) et Charlie (13 vies) sont à 6,1 vies l'un de l'autre, il en faut au plus 3
+
+### Région 7 : la Croisade
+
+Par difficulté et par dieu (tous les niveaux de la région) :
+
+| Difficulté | Dieu | Soigneux : victoires | Naïf : victoires | Soigneux : vies restantes | Soigneux : arêtes en fin | Sans défense : victoires |
+| --- | --- | --- | --- | --- | --- | --- |
+| Chaton | Plume | 100 % (100/100) | 100 % (100/100) | 25,0 | 233 | 0 % (0/30) |
+| Chaton | Charlie | 100 % (100/100) | 100 % (100/100) | 25,0 | 192 | 0 % (0/30) |
+| Chaton | Pollen | 100 % (100/100) | 100 % (100/100) | 25,0 | 190 | 0 % (0/30) |
+| Matou | Plume | 99 % (99/100) | 64 % (64/100) | 18,6 | 179 | 0 % (0/30) |
+| Matou | Charlie | 92 % (92/100) | 27 % (27/100) | 14,8 | 91 | 0 % (0/30) |
+| Matou | Pollen | 94 % (94/100) | 82 % (82/100) | 17,5 | 93 | 0 % (0/30) |
+| Vieux Sage | Plume | 81 % (81/100) | 0 % (0/100) | 9,4 | 112 | 0 % (0/30) |
+| Vieux Sage | Charlie | 6 % (6/100) | 0 % (0/100) | 0,2 | 72 | 0 % (0/30) |
+| Vieux Sage | Pollen | 7 % (7/100) | 0 % (0/100) | 0,3 | 117 | 0 % (0/30) |
+
+Par niveau (trois dieux ensemble) :
+
+| Niveau | Matou, soigneux | Matou, naïf | Matou, naïf : vies restantes | Matou, soigneux : arêtes en fin | Vieux Sage, soigneux | Vieux Sage, soigneux : vies restantes | Matou, sans défense |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 61 | 100 % (30/30) | 60 % (18/30) | 5,9 | 133 | 33 % (10/30) | 4,9 | 0 % (0/9) |
+| 62 | 100 % (30/30) | 50 % (15/30) | 5,7 | 103 | 30 % (9/30) | 2,3 | 0 % (0/9) |
+| 63 | 100 % (30/30) | 43 % (13/30) | 4,4 | 70 | 33 % (10/30) | 2,6 | 0 % (0/9) |
+| 64 | 100 % (30/30) | 50 % (15/30) | 5,0 | 153 | 3 % (1/30) | 0,1 | 0 % (0/9) |
+| 65 | 100 % (30/30) | 80 % (24/30) | 11,6 | 98 | 33 % (10/30) | 3,2 | 0 % (0/9) |
+| 66 | 100 % (30/30) | 77 % (23/30) | 10,1 | 87 | 57 % (17/30) | 5,8 | 0 % (0/9) |
+| 67 | 100 % (30/30) | 70 % (21/30) | 7,9 | 185 | 33 % (10/30) | 5,0 | 0 % (0/9) |
+| 68 | 100 % (30/30) | 40 % (12/30) | 4,6 | 99 | 33 % (10/30) | 3,4 | 0 % (0/9) |
+| 69 | 100 % (30/30) | 63 % (19/30) | 5,0 | 175 | 53 % (16/30) | 5,6 | 0 % (0/9) |
+| 70 | 50 % (15/30) | 43 % (13/30) | 2,4 | 103 | 3 % (1/30) | 0,1 | 0 % (0/9) |
+
+Écarts aux bandes : 16
+
+- Matou (Plume) : le bot soigneux gagne 99 % des parties, il doit tout gagner
+- Matou (Plume) : le bot soigneux perd au moins une vie sur 2 niveaux seulement, il en faut au moins 5 sur 10
+- Matou (Plume) : le niveau 64 laisse 292 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 67 laisse 262 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le bot soigneux gagne 92 % des parties, il doit tout gagner
+- Matou (Charlie) : le bot naïf gagne 27 % des parties, la bande est 30 % à 70 %
+- Matou (Pollen) : le bot soigneux gagne 94 % des parties, il doit tout gagner
+- Matou (Pollen) : le bot naïf gagne 82 % des parties, la bande est 30 % à 70 %
+- Matou (Pollen) : le bot soigneux perd au moins une vie sur 3 niveaux seulement, il en faut au moins 5 sur 10
+- Matou : la courbe de difficulté du bot naïf (moyenne des dieux) a une corrélation de rang de -0,3, elle doit être d'au plus -0,6
+- Matou (Plume) : la courbe de difficulté du bot naïf a une corrélation de rang de 0, elle doit être d'au plus -0,3
+- Matou (Charlie) : la courbe de difficulté du bot naïf a une corrélation de rang de 0,3, elle doit être d'au plus -0,3
+- Vieux Sage (Charlie) : le bot soigneux gagne 6 % des parties, la bande est 60 % à 85 %
+- Vieux Sage (Pollen) : le bot soigneux gagne 7 % des parties, la bande est 60 % à 85 %
+- Vieux Sage : Plume (81 %) et Charlie (6 %) sont à 75 points l'un de l'autre, il en faut au plus 10
+- Matou : Plume (18,6 vies) et Charlie (14,8 vies) sont à 3,8 vies l'un de l'autre, il en faut au plus 3
+
+### Région 8 : le Monastère Noir
+
+Par difficulté et par dieu (tous les niveaux de la région) :
+
+| Difficulté | Dieu | Soigneux : victoires | Naïf : victoires | Soigneux : vies restantes | Soigneux : arêtes en fin | Sans défense : victoires |
+| --- | --- | --- | --- | --- | --- | --- |
+| Chaton | Plume | 100 % (100/100) | 100 % (100/100) | 25,0 | 203 | 0 % (0/30) |
+| Chaton | Charlie | 100 % (100/100) | 100 % (100/100) | 25,0 | 163 | 0 % (0/30) |
+| Chaton | Pollen | 100 % (100/100) | 100 % (100/100) | 25,0 | 184 | 0 % (0/30) |
+| Matou | Plume | 100 % (100/100) | 65 % (65/100) | 20,0 | 165 | 0 % (0/30) |
+| Matou | Charlie | 100 % (100/100) | 28 % (28/100) | 17,6 | 120 | 0 % (0/30) |
+| Matou | Pollen | 100 % (100/100) | 84 % (84/100) | 19,0 | 140 | 0 % (0/30) |
+| Vieux Sage | Plume | 95 % (95/100) | 0 % (0/100) | 11,6 | 132 | 0 % (0/30) |
+| Vieux Sage | Charlie | 3 % (3/100) | 0 % (0/100) | 0,1 | 74 | 0 % (0/30) |
+| Vieux Sage | Pollen | 30 % (30/100) | 2 % (2/100) | 3,0 | 99 | 0 % (0/30) |
+
+Par niveau (trois dieux ensemble) :
+
+| Niveau | Matou, soigneux | Matou, naïf | Matou, naïf : vies restantes | Matou, soigneux : arêtes en fin | Vieux Sage, soigneux | Vieux Sage, soigneux : vies restantes | Matou, sans défense |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 71 | 100 % (30/30) | 40 % (12/30) | 5,8 | 88 | 33 % (10/30) | 5,0 | 0 % (0/9) |
+| 72 | 100 % (30/30) | 80 % (24/30) | 12,5 | 124 | 50 % (15/30) | 5,3 | 0 % (0/9) |
+| 73 | 100 % (30/30) | 73 % (22/30) | 12,8 | 181 | 70 % (21/30) | 9,9 | 0 % (0/9) |
+| 74 | 100 % (30/30) | 60 % (18/30) | 6,8 | 119 | 27 % (8/30) | 1,6 | 0 % (0/9) |
+| 75 | 100 % (30/30) | 77 % (23/30) | 11,0 | 124 | 63 % (19/30) | 7,5 | 0 % (0/9) |
+| 76 | 100 % (30/30) | 43 % (13/30) | 5,4 | 89 | 33 % (10/30) | 5,0 | 0 % (0/9) |
+| 77 | 100 % (30/30) | 50 % (15/30) | 6,6 | 115 | 33 % (10/30) | 2,3 | 0 % (0/9) |
+| 78 | 100 % (30/30) | 80 % (24/30) | 12,5 | 142 | 57 % (17/30) | 6,7 | 0 % (0/9) |
+| 79 | 100 % (30/30) | 37 % (11/30) | 4,2 | 128 | 27 % (8/30) | 0,5 | 0 % (0/9) |
+| 80 | 100 % (30/30) | 50 % (15/30) | 6,8 | 307 | 33 % (10/30) | 5,0 | 0 % (0/9) |
+
+Écarts aux bandes : 15
+
+- Matou (Plume) : le bot soigneux perd au moins une vie sur 0 niveaux seulement, il en faut au moins 5 sur 10
+- Matou (Plume) : le niveau 73 laisse 364 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 80 laisse 292 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le bot naïf gagne 28 % des parties, la bande est 30 % à 70 %
+- Matou (Charlie) : le niveau 80 laisse 329 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le bot naïf gagne 84 % des parties, la bande est 30 % à 70 %
+- Matou (Pollen) : le bot soigneux perd au moins une vie sur 2 niveaux seulement, il en faut au moins 5 sur 10
+- Matou (Pollen) : le niveau 80 laisse 299 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou : la courbe de difficulté du bot naïf (moyenne des dieux) a une corrélation de rang de -0,3, elle doit être d'au plus -0,6
+- Matou : le niveau 80 (6,8 vies restantes au bot naïf, moyenne des dieux) n'est pas parmi les 3 plus durs
+- Matou (Plume) : la courbe de difficulté du bot naïf a une corrélation de rang de -0,1, elle doit être d'au plus -0,3
+- Vieux Sage (Plume) : le bot soigneux gagne 95 % des parties, la bande est 60 % à 85 %
+- Vieux Sage (Charlie) : le bot soigneux gagne 3 % des parties, la bande est 60 % à 85 %
+- Vieux Sage (Pollen) : le bot soigneux gagne 30 % des parties, la bande est 60 % à 85 %
+- Vieux Sage : Plume (95 %) et Charlie (3 %) sont à 92 points l'un de l'autre, il en faut au plus 10
+
+### Région 9 : la Cité du Roi
+
+Par difficulté et par dieu (tous les niveaux de la région) :
+
+| Difficulté | Dieu | Soigneux : victoires | Naïf : victoires | Soigneux : vies restantes | Soigneux : arêtes en fin | Sans défense : victoires |
+| --- | --- | --- | --- | --- | --- | --- |
+| Chaton | Plume | 100 % (100/100) | 100 % (100/100) | 25,0 | 213 | 0 % (0/30) |
+| Chaton | Charlie | 100 % (100/100) | 100 % (100/100) | 24,9 | 189 | 0 % (0/30) |
+| Chaton | Pollen | 100 % (100/100) | 100 % (100/100) | 25,0 | 180 | 0 % (0/30) |
+| Matou | Plume | 100 % (100/100) | 51 % (51/100) | 18,3 | 148 | 0 % (0/30) |
+| Matou | Charlie | 93 % (93/100) | 21 % (21/100) | 13,0 | 89 | 0 % (0/30) |
+| Matou | Pollen | 90 % (90/100) | 63 % (63/100) | 15,6 | 100 | 0 % (0/30) |
+| Vieux Sage | Plume | 86 % (86/100) | 0 % (0/100) | 8,9 | 102 | 0 % (0/30) |
+| Vieux Sage | Charlie | 0 % (0/100) | 0 % (0/100) | 0,0 | 77 | 0 % (0/30) |
+| Vieux Sage | Pollen | 6 % (6/100) | 0 % (0/100) | 0,2 | 74 | 0 % (0/30) |
+
+Par niveau (trois dieux ensemble) :
+
+| Niveau | Matou, soigneux | Matou, naïf | Matou, naïf : vies restantes | Matou, soigneux : arêtes en fin | Vieux Sage, soigneux | Vieux Sage, soigneux : vies restantes | Matou, sans défense |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 81 | 100 % (30/30) | 40 % (12/30) | 3,5 | 76 | 33 % (10/30) | 4,6 | 0 % (0/9) |
+| 82 | 100 % (30/30) | 27 % (8/30) | 1,2 | 140 | 33 % (10/30) | 4,2 | 0 % (0/9) |
+| 83 | 100 % (30/30) | 33 % (10/30) | 2,0 | 71 | 33 % (10/30) | 3,6 | 0 % (0/9) |
+| 84 | 100 % (30/30) | 30 % (9/30) | 3,2 | 108 | 33 % (10/30) | 4,4 | 0 % (0/9) |
+| 85 | 100 % (30/30) | 67 % (20/30) | 7,0 | 161 | 33 % (10/30) | 3,5 | 0 % (0/9) |
+| 86 | 100 % (30/30) | 70 % (21/30) | 9,2 | 152 | 17 % (5/30) | 1,8 | 0 % (0/9) |
+| 87 | 100 % (30/30) | 53 % (16/30) | 3,5 | 107 | 53 % (16/30) | 4,1 | 0 % (0/9) |
+| 88 | 100 % (30/30) | 43 % (13/30) | 2,9 | 67 | 33 % (10/30) | 1,3 | 0 % (0/9) |
+| 89 | 100 % (30/30) | 40 % (12/30) | 2,9 | 129 | 33 % (10/30) | 2,6 | 0 % (0/9) |
+| 90 | 43 % (13/30) | 47 % (14/30) | 1,5 | 114 | 3 % (1/30) | 0,1 | 0 % (0/9) |
+
+Écarts aux bandes : 13
+
+- Matou (Plume) : le bot soigneux perd au moins une vie sur 2 niveaux seulement, il en faut au moins 5 sur 10
+- Matou (Charlie) : le bot soigneux gagne 93 % des parties, il doit tout gagner
+- Matou (Charlie) : le bot naïf gagne 21 % des parties, la bande est 30 % à 70 %
+- Matou (Pollen) : le bot soigneux gagne 90 % des parties, il doit tout gagner
+- Matou : la courbe de difficulté du bot naïf (moyenne des dieux) a une corrélation de rang de -0,1, elle doit être d'au plus -0,6
+- Matou (Plume) : la courbe de difficulté du bot naïf a une corrélation de rang de 0,3, elle doit être d'au plus -0,3
+- Matou (Charlie) : la courbe de difficulté du bot naïf a une corrélation de rang de -0,3, elle doit être d'au plus -0,3
+- Matou (Pollen) : la courbe de difficulté du bot naïf a une corrélation de rang de -0,1, elle doit être d'au plus -0,3
+- Vieux Sage (Plume) : le bot soigneux gagne 86 % des parties, la bande est 60 % à 85 %
+- Vieux Sage (Charlie) : le bot soigneux gagne 0 % des parties, la bande est 60 % à 85 %
+- Vieux Sage (Pollen) : le bot soigneux gagne 6 % des parties, la bande est 60 % à 85 %
+- Vieux Sage : Plume (86 %) et Charlie (0 %) sont à 86 points l'un de l'autre, il en faut au plus 10
+- Matou : Plume (18,3 vies) et Charlie (13 vies) sont à 5,3 vies l'un de l'autre, il en faut au plus 3
+
+### Région 10 : la Cathédrale du Soleil Blême
+
+Par difficulté et par dieu (tous les niveaux de la région) :
+
+| Difficulté | Dieu | Soigneux : victoires | Naïf : victoires | Soigneux : vies restantes | Soigneux : arêtes en fin | Sans défense : victoires |
+| --- | --- | --- | --- | --- | --- | --- |
+| Chaton | Plume | 100 % (100/100) | 100 % (100/100) | 24,8 | 218 | 0 % (0/30) |
+| Chaton | Charlie | 100 % (100/100) | 100 % (100/100) | 24,8 | 185 | 0 % (0/30) |
+| Chaton | Pollen | 100 % (100/100) | 100 % (100/100) | 25,0 | 174 | 0 % (0/30) |
+| Matou | Plume | 100 % (100/100) | 48 % (48/100) | 19,8 | 173 | 0 % (0/30) |
+| Matou | Charlie | 100 % (100/100) | 23 % (23/100) | 17,9 | 146 | 0 % (0/30) |
+| Matou | Pollen | 100 % (100/100) | 63 % (63/100) | 19,6 | 161 | 0 % (0/30) |
+| Vieux Sage | Plume | 99 % (99/100) | 0 % (0/100) | 13,0 | 146 | 0 % (0/30) |
+| Vieux Sage | Charlie | 15 % (15/100) | 0 % (0/100) | 1,1 | 115 | 0 % (0/30) |
+| Vieux Sage | Pollen | 36 % (36/100) | 5 % (5/100) | 3,1 | 89 | 0 % (0/30) |
+
+Par niveau (trois dieux ensemble) :
+
+| Niveau | Matou, soigneux | Matou, naïf | Matou, naïf : vies restantes | Matou, soigneux : arêtes en fin | Vieux Sage, soigneux | Vieux Sage, soigneux : vies restantes | Matou, sans défense |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 91 | 100 % (30/30) | 63 % (19/30) | 10,1 | 68 | 53 % (16/30) | 6,5 | 0 % (0/9) |
+| 92 | 100 % (30/30) | 37 % (11/30) | 5,9 | 163 | 33 % (10/30) | 5,0 | 0 % (0/9) |
+| 93 | 100 % (30/30) | 43 % (13/30) | 6,8 | 130 | 80 % (24/30) | 10,7 | 0 % (0/9) |
+| 94 | 100 % (30/30) | 77 % (23/30) | 11,0 | 89 | 57 % (17/30) | 4,9 | 0 % (0/9) |
+| 95 | 100 % (30/30) | 17 % (5/30) | 1,5 | 231 | 67 % (20/30) | 8,3 | 0 % (0/9) |
+| 96 | 100 % (30/30) | 27 % (8/30) | 3,1 | 163 | 33 % (10/30) | 4,9 | 0 % (0/9) |
+| 97 | 100 % (30/30) | 50 % (15/30) | 6,1 | 91 | 33 % (10/30) | 3,9 | 0 % (0/9) |
+| 98 | 100 % (30/30) | 50 % (15/30) | 4,8 | 165 | 30 % (9/30) | 2,0 | 0 % (0/9) |
+| 99 | 100 % (30/30) | 37 % (11/30) | 3,6 | 124 | 60 % (18/30) | 6,1 | 0 % (0/9) |
+| 100 | 100 % (30/30) | 47 % (14/30) | 4,3 | 380 | 53 % (16/30) | 4,6 | 0 % (0/9) |
+
+Écarts aux bandes : 15
+
+- Matou (Plume) : le bot soigneux perd au moins une vie sur 1 niveaux seulement, il en faut au moins 5 sur 10
+- Matou (Plume) : le niveau 92 laisse 292 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Plume) : le niveau 100 laisse 359 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le bot naïf gagne 23 % des parties, la bande est 30 % à 70 %
+- Matou (Charlie) : le niveau 95 laisse 318 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Charlie) : le niveau 100 laisse 420 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le bot soigneux perd au moins une vie sur 3 niveaux seulement, il en faut au moins 5 sur 10
+- Matou (Pollen) : le niveau 96 laisse 256 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou (Pollen) : le niveau 100 laisse 361 arêtes inutilisées au bot soigneux, il en faut moins de 250
+- Matou : la courbe de difficulté du bot naïf (moyenne des dieux) a une corrélation de rang de -0,5, elle doit être d'au plus -0,6
+- Matou : le niveau 100 (4,3 vies restantes au bot naïf, moyenne des dieux) n'est pas parmi les 3 plus durs
+- Vieux Sage (Plume) : le bot soigneux gagne 99 % des parties, la bande est 60 % à 85 %
+- Vieux Sage (Charlie) : le bot soigneux gagne 15 % des parties, la bande est 60 % à 85 %
+- Vieux Sage (Pollen) : le bot soigneux gagne 36 % des parties, la bande est 60 % à 85 %
+- Vieux Sage : Plume (99 %) et Charlie (15 %) sont à 84 points l'un de l'autre, il en faut au plus 10
+
+## Défis, régions 1 à 10
 
 Le bot soigneux joue les défis avec les règles de Matou, sans objet ni amélioration : Héroïque (1 vie, groupes d’élite) et Fer (toutes les vagues en une, deux familles de tours). Il cherche sa variante sur les graines d’entraînement du défi lui-même, puis joue les dix graines d’évaluation. Bande : entre 40 et 90 % de réussites pour chaque défi de chaque région, trois dieux confondus.
 
@@ -726,3 +969,194 @@ Le bot soigneux joue les défis avec les règles de Matou, sans objet ni amélio
 | 50 | 30 % (9/30) | 0 % (0/30) |
 
 Écarts aux bandes des défis : aucun.
+
+### Région 6 : le Charnier
+
+| Défi | Dieu | Soigneux : réussites | Soigneux : vies restantes |
+| --- | --- | --- | --- |
+| Héroïque | Plume | 90 % (90/100) | 0,9 |
+| Héroïque | Charlie | 13 % (13/100) | 0,1 |
+| Héroïque | Pollen | 62 % (62/100) | 0,6 |
+| Héroïque | les trois | 55 % (165/300) | 0,6 |
+| Fer | Plume | 91 % (91/100) | 16,9 |
+| Fer | Charlie | 53 % (53/100) | 10,3 |
+| Fer | Pollen | 41 % (41/100) | 8,0 |
+| Fer | les trois | 62 % (185/300) | 11,8 |
+
+| Niveau | Héroïque, soigneux (trois dieux) | Fer, soigneux (trois dieux) |
+| --- | --- | --- |
+| 51 | 100 % (30/30) | 100 % (30/30) |
+| 52 | 53 % (16/30) | 100 % (30/30) |
+| 53 | 53 % (16/30) | 67 % (20/30) |
+| 54 | 73 % (22/30) | 100 % (30/30) |
+| 55 | 33 % (10/30) | 13 % (4/30) |
+| 56 | 33 % (10/30) | 43 % (13/30) |
+| 57 | 63 % (19/30) | 100 % (30/30) |
+| 58 | 67 % (20/30) | 23 % (7/30) |
+| 59 | 67 % (20/30) | 33 % (10/30) |
+| 60 | 7 % (2/30) | 37 % (11/30) |
+
+Écarts aux bandes des défis : aucun.
+
+### Région 7 : la Croisade
+
+| Défi | Dieu | Soigneux : réussites | Soigneux : vies restantes |
+| --- | --- | --- | --- |
+| Héroïque | Plume | 87 % (87/100) | 0,9 |
+| Héroïque | Charlie | 9 % (9/100) | 0,1 |
+| Héroïque | Pollen | 55 % (55/100) | 0,6 |
+| Héroïque | les trois | 50 % (151/300) | 0,5 |
+| Fer | Plume | 100 % (100/100) | 19,9 |
+| Fer | Charlie | 97 % (97/100) | 16,4 |
+| Fer | Pollen | 63 % (63/100) | 11,3 |
+| Fer | les trois | 87 % (260/300) | 15,9 |
+
+| Niveau | Héroïque, soigneux (trois dieux) | Fer, soigneux (trois dieux) |
+| --- | --- | --- |
+| 61 | 23 % (7/30) | 100 % (30/30) |
+| 62 | 37 % (11/30) | 100 % (30/30) |
+| 63 | 10 % (3/30) | 100 % (30/30) |
+| 64 | 50 % (15/30) | 57 % (17/30) |
+| 65 | 70 % (21/30) | 67 % (20/30) |
+| 66 | 77 % (23/30) | 100 % (30/30) |
+| 67 | 47 % (14/30) | 100 % (30/30) |
+| 68 | 63 % (19/30) | 77 % (23/30) |
+| 69 | 67 % (20/30) | 100 % (30/30) |
+| 70 | 60 % (18/30) | 67 % (20/30) |
+
+Écarts aux bandes des défis : aucun.
+
+### Région 8 : le Monastère Noir
+
+| Défi | Dieu | Soigneux : réussites | Soigneux : vies restantes |
+| --- | --- | --- | --- |
+| Héroïque | Plume | 87 % (87/100) | 0,9 |
+| Héroïque | Charlie | 57 % (57/100) | 0,6 |
+| Héroïque | Pollen | 61 % (61/100) | 0,6 |
+| Héroïque | les trois | 68 % (205/300) | 0,7 |
+| Fer | Plume | 100 % (100/100) | 20,0 |
+| Fer | Charlie | 78 % (78/100) | 14,7 |
+| Fer | Pollen | 60 % (60/100) | 10,5 |
+| Fer | les trois | 79 % (238/300) | 15,1 |
+
+| Niveau | Héroïque, soigneux (trois dieux) | Fer, soigneux (trois dieux) |
+| --- | --- | --- |
+| 71 | 97 % (29/30) | 100 % (30/30) |
+| 72 | 87 % (26/30) | 100 % (30/30) |
+| 73 | 100 % (30/30) | 100 % (30/30) |
+| 74 | 97 % (29/30) | 100 % (30/30) |
+| 75 | 100 % (30/30) | 100 % (30/30) |
+| 76 | 57 % (17/30) | 67 % (20/30) |
+| 77 | 30 % (9/30) | 57 % (17/30) |
+| 78 | 53 % (16/30) | 100 % (30/30) |
+| 79 | 20 % (6/30) | 33 % (10/30) |
+| 80 | 43 % (13/30) | 37 % (11/30) |
+
+Écarts aux bandes des défis : aucun.
+
+### Région 9 : la Cité du Roi
+
+| Défi | Dieu | Soigneux : réussites | Soigneux : vies restantes |
+| --- | --- | --- | --- |
+| Héroïque | Plume | 91 % (91/100) | 0,9 |
+| Héroïque | Charlie | 13 % (13/100) | 0,1 |
+| Héroïque | Pollen | 54 % (54/100) | 0,5 |
+| Héroïque | les trois | 53 % (158/300) | 0,5 |
+| Fer | Plume | 100 % (100/100) | 20,0 |
+| Fer | Charlie | 89 % (89/100) | 14,9 |
+| Fer | Pollen | 80 % (80/100) | 14,2 |
+| Fer | les trois | 90 % (269/300) | 16,4 |
+
+| Niveau | Héroïque, soigneux (trois dieux) | Fer, soigneux (trois dieux) |
+| --- | --- | --- |
+| 81 | 100 % (30/30) | 100 % (30/30) |
+| 82 | 67 % (20/30) | 100 % (30/30) |
+| 83 | 33 % (10/30) | 100 % (30/30) |
+| 84 | 53 % (16/30) | 100 % (30/30) |
+| 85 | 30 % (9/30) | 50 % (15/30) |
+| 86 | 67 % (20/30) | 47 % (14/30) |
+| 87 | 27 % (8/30) | 100 % (30/30) |
+| 88 | 53 % (16/30) | 100 % (30/30) |
+| 89 | 67 % (20/30) | 100 % (30/30) |
+| 90 | 30 % (9/30) | 100 % (30/30) |
+
+Écarts aux bandes des défis : aucun.
+
+### Région 10 : la Cathédrale du Soleil Blême
+
+| Défi | Dieu | Soigneux : réussites | Soigneux : vies restantes |
+| --- | --- | --- | --- |
+| Héroïque | Plume | 80 % (80/100) | 0,8 |
+| Héroïque | Charlie | 46 % (46/100) | 0,5 |
+| Héroïque | Pollen | 75 % (75/100) | 0,8 |
+| Héroïque | les trois | 67 % (201/300) | 0,7 |
+| Fer | Plume | 100 % (100/100) | 20,0 |
+| Fer | Charlie | 95 % (95/100) | 18,2 |
+| Fer | Pollen | 70 % (70/100) | 12,6 |
+| Fer | les trois | 88 % (265/300) | 16,9 |
+
+| Niveau | Héroïque, soigneux (trois dieux) | Fer, soigneux (trois dieux) |
+| --- | --- | --- |
+| 91 | 100 % (30/30) | 100 % (30/30) |
+| 92 | 80 % (24/30) | 100 % (30/30) |
+| 93 | 63 % (19/30) | 67 % (20/30) |
+| 94 | 43 % (13/30) | 67 % (20/30) |
+| 95 | 100 % (30/30) | 100 % (30/30) |
+| 96 | 57 % (17/30) | 100 % (30/30) |
+| 97 | 30 % (9/30) | 50 % (15/30) |
+| 98 | 93 % (28/30) | 100 % (30/30) |
+| 99 | 73 % (22/30) | 100 % (30/30) |
+| 100 | 30 % (9/30) | 100 % (30/30) |
+
+Écarts aux bandes des défis : aucun.
+
+## Mode infini
+
+Matou, 20 vies, sans amélioration ni objet, chaque dieu avec son avatar, 10 graines par ligne. Résultat d’une partie : la dernière vague terminée (le record). On arrête une partie à la vague 100. Bandes, sur les cartes de la région 1 : la médiane du soigneux est entre la vague 25 et la vague 45 ; le naïf ne passe pas la vague 30 (aucune de ses parties). Les autres cartes sont données à titre d’information. Le soigneux joue une seule variante (équilibrée, diversité 0,4) et lit les 30 premières vagues générées.
+
+| Bot | Dieu | Carte | Médiane | Min à max | Vagues par graine |
+| --- | --- | --- | --- | --- | --- |
+| Naïf | plume | chaumes (région 1) | 26 | 5 à 27 | 5 9 24 25 26 26 26 27 27 27 |
+| Soigneux | plume | chaumes (région 1) | 32 | 31 à 34 | 31 32 32 32 32 32 32 33 33 34 |
+| Naïf | charlie | chaumes (région 1) | 25 | 6 à 27 | 6 8 9 19 25 25 25 26 26 27 |
+| Soigneux | charlie | chaumes (région 1) | 31 | 9 à 32 | 9 31 31 31 31 31 31 31 32 32 |
+| Naïf | pollen | chaumes (région 1) | 26 | 9 à 27 | 9 25 26 26 26 26 27 27 27 27 |
+| Soigneux | pollen | chaumes (région 1) | 32 | 32 à 33 | 32 32 32 32 32 32 32 33 33 33 |
+| Naïf | plume | gue (région 1) | 13 | 8 à 27 | 8 9 9 9 13 13 25 25 27 27 |
+| Soigneux | plume | gue (région 1) | 29.5 | 28 à 30 | 28 29 29 29 29 30 30 30 30 30 |
+| Naïf | charlie | gue (région 1) | 9 | 6 à 27 | 6 7 8 8 9 9 13 15 26 27 |
+| Soigneux | charlie | gue (région 1) | 29 | 28 à 30 | 28 28 28 28 29 29 29 29 29 30 |
+| Naïf | pollen | gue (région 1) | 25.5 | 23 à 27 | 23 25 25 25 25 26 26 26 27 27 |
+| Soigneux | pollen | gue (région 1) | 29.5 | 28 à 31 | 28 28 28 29 29 30 30 30 30 31 |
+| Naïf | plume | pendus (région 1) | 25 | 9 à 28 | 9 9 13 14 24 26 26 26 27 28 |
+| Soigneux | plume | pendus (région 1) | 33 | 31 à 34 | 31 32 33 33 33 33 33 33 33 34 |
+| Naïf | charlie | pendus (région 1) | 22 | 8 à 27 | 8 9 9 14 19 25 25 26 26 27 |
+| Soigneux | charlie | pendus (région 1) | 32 | 31 à 33 | 31 31 32 32 32 32 32 32 32 33 |
+| Naïf | pollen | pendus (région 1) | 25 | 13 à 28 | 13 18 24 25 25 25 26 26 27 28 |
+| Soigneux | pollen | pendus (région 1) | 33 | 33 à 34 | 33 33 33 33 33 33 33 34 34 34 |
+| Naïf | plume | carrefour (région 1) | 25 | 9 à 26 | 9 9 13 20 25 25 25 25 26 26 |
+| Soigneux | plume | carrefour (région 1) | 29 | 28 à 30 | 28 29 29 29 29 29 30 30 30 30 |
+| Naïf | charlie | carrefour (région 1) | 21.5 | 8 à 27 | 8 9 14 18 19 24 25 26 26 27 |
+| Soigneux | charlie | carrefour (région 1) | 27.5 | 27 à 28 | 27 27 27 27 27 28 28 28 28 28 |
+| Naïf | pollen | carrefour (région 1) | 25 | 19 à 27 | 19 24 24 25 25 25 26 26 26 27 |
+| Soigneux | pollen | carrefour (région 1) | 28 | 27 à 29 | 27 28 28 28 28 28 29 29 29 29 |
+| Naïf | plume | region3 (région 3) | 8 | 6 à 9 | 6 6 7 7 8 8 9 9 9 9 |
+| Soigneux | plume | region3 (région 3) | 29 | 16 à 29 | 16 27 27 28 29 29 29 29 29 29 |
+| Naïf | charlie | region3 (région 3) | 7 | 6 à 9 | 6 6 6 6 7 7 8 8 9 9 |
+| Soigneux | charlie | region3 (région 3) | 9 | 8 à 19 | 8 9 9 9 9 9 16 19 19 19 |
+| Naïf | pollen | region3 (région 3) | 9 | 9 à 17 | 9 9 9 9 9 9 13 13 14 17 |
+| Soigneux | pollen | region3 (région 3) | 22.5 | 9 à 28 | 9 15 17 19 19 26 27 27 27 28 |
+| Naïf | plume | region6 (région 6) | 9 | 9 à 9 | 9 9 9 9 9 9 9 9 9 9 |
+| Soigneux | plume | region6 (région 6) | 28 | 25 à 29 | 25 26 26 28 28 28 28 28 29 29 |
+| Naïf | charlie | region6 (région 6) | 9 | 8 à 9 | 8 9 9 9 9 9 9 9 9 9 |
+| Soigneux | charlie | region6 (région 6) | 19 | 9 à 24 | 9 15 19 19 19 19 19 19 22 24 |
+| Naïf | pollen | region6 (région 6) | 12 | 9 à 24 | 9 9 9 9 9 15 16 16 24 24 |
+| Soigneux | pollen | region6 (région 6) | 23 | 19 à 25 | 19 19 19 22 23 23 24 24 24 25 |
+| Naïf | plume | region10 (région 10) | 9 | 8 à 9 | 8 8 9 9 9 9 9 9 9 9 |
+| Soigneux | plume | region10 (région 10) | 22.5 | 9 à 29 | 9 16 17 19 19 26 26 26 28 29 |
+| Naïf | charlie | region10 (région 10) | 9 | 6 à 9 | 6 8 8 9 9 9 9 9 9 9 |
+| Soigneux | charlie | region10 (région 10) | 9 | 4 à 14 | 4 6 8 9 9 9 9 9 9 14 |
+| Naïf | pollen | region10 (région 10) | 9 | 4 à 16 | 4 9 9 9 9 9 9 13 16 16 |
+| Soigneux | pollen | region10 (région 10) | 9 | 9 à 19 | 9 9 9 9 9 9 9 16 16 19 |
+
+Écarts aux bandes de l’infini : aucun.

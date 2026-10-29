@@ -1,4 +1,8 @@
-// Affine facteurBudget par niveau : le naïf doit gagner 30 à 80 % en Matou et 100 % en Chaton (3 dieux x 10 graines).
+// `node --import ./tools/niveaux/enregistrer.ts tools/balance/affiner.ts 61-70` : affine le `facteurBudget` des plans (régions 6 à 10) niveau par niveau.
+// Pour chaque niveau, le bot naïf (3 dieux x 10 graines) doit gagner de 35 à 80 % des parties en Matou et 100 % en Chaton ; sinon le facteur est
+// multiplié (x0,78 ou x0,88 s'il est trop dur, x1,28 s'il est trop facile), 8 essais au plus, sans descendre sous le plancher qui garde un
+// ennemi dans la première vague. Écrit le résultat en JSON sur la sortie standard (`{ "61": 0.273, ... }`) à reporter dans les plans, puis
+// `npm run niveaux`. Un niveau qui n'aboutit pas se règle par sa graine de vagues ou ses arêtes de départ. Mise au point seulement.
 import { CAMPAGNE } from '../../src/data/niveaux/campagne.ts';
 import { vaguesDuPlan } from '../../src/data/niveaux/generation.ts';
 import { PLANS_REGIONS } from '../../src/data/niveaux/plans.ts';
