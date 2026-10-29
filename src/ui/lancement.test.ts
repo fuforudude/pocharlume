@@ -8,7 +8,7 @@ import { niveauEssai } from '../engine/aides.test-utils';
 import { t } from '../i18n';
 import { Depot, sauvegardeVide, Session, StockageMemoire, type ChoixPartie, type Sauvegarde } from '../save';
 import { creerVerrouMemoire } from '../save/verrou';
-import { configDeRelance, configDuChoix, debiterAuLancement, relancerAvecDebit } from './lancement';
+import { configDeRelance, configDuChoix, configInfini, debiterAuLancement, relancerAvecDebit } from './lancement';
 
 function avecStock(objets: Partial<Sauvegarde['meta']['objets']>): Sauvegarde {
   const s = sauvegardeVide();
@@ -78,6 +78,16 @@ describe('configDuChoix : défi et bonus de la collection', () => {
 });
 
 describe('configDeRelance : « Rejouer » garde le défi et les bonus', () => {
+  it('une partie infinie reste infinie (même région), avec la nouvelle graine', () => {
+    const s = avecDefisOuverts();
+    const precedente = configInfini(s, CHOIX_CHARLIE, 1, 4);
+    if (!precedente.ok) throw new Error(precedente.raison);
+    const relance = configDeRelance(s, precedente.config, 99);
+    expect(relance).toMatchObject({ graine: 99, difficulte: 'matou', infini: { region: 4 } });
+    // La config relancée est acceptée par le moteur.
+    expect(verifierConfig(relance)).toBeNull();
+  });
+
   it('Héroïque : même défi, nouvelle graine, mêmes bonus', () => {
     const s = avecDefisOuverts();
     const precedente = configDuChoix(s, CHOIX_CHARLIE, 'matou', 1, { niveau: 1, defi: 'heroique' });

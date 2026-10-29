@@ -1319,3 +1319,176 @@
     gap: 6px;
   }
 }
+
+/* --- Mode infini (jalon 4) : cartes, paliers, choix du dieu, du héros et des objets --- */
+
+.infini-colonnes {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.9fr) minmax(170px, 1fr) minmax(220px, 1.3fr);
+  gap: 12px;
+  align-items: start;
+  width: 100%;
+}
+
+.infini-colonne {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.infini-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bouton.infini-carte {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px 8px;
+  text-align: left;
+}
+
+.infini-carte-nom {
+  font-size: 14px;
+}
+
+.infini-carte-region {
+  font-size: 10px;
+  font-weight: normal;
+  color: var(--texte-doux);
+}
+
+.infini-carte-record {
+  font-size: 12px;
+  color: var(--or);
+}
+
+.infini-liste-paliers {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.palier {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas: 'vague etat' 'gain gain';
+  column-gap: 8px;
+  padding: 3px 8px;
+  border: 2px solid var(--bord);
+  border-radius: 6px;
+  background: var(--panneau);
+  font-size: 12px;
+}
+
+.palier.paye {
+  border-color: #4a4036;
+  color: var(--texte-doux);
+}
+
+.palier-vague {
+  grid-area: vague;
+  font-weight: bold;
+}
+
+.palier-etat {
+  grid-area: etat;
+  text-align: right;
+  color: var(--texte-doux);
+}
+
+.palier.paye .palier-etat {
+  color: var(--or);
+}
+
+.palier-gain {
+  grid-area: gain;
+  color: var(--or);
+}
+
+.palier.paye .palier-gain {
+  color: var(--texte-doux);
+}
+
+.infini-choix .bouton.grand {
+  align-self: stretch;
+}
+
+@media (max-width: 640px) {
+  .infini-colonnes {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-height: 460px) {
+  .ecran.infini .bouton.grand {
+    min-height: 44px;
+    font-size: 16px;
+  }
+}
+
+/* --- Fin de campagne : l'illustration à gauche, le texte à droite --- */
+
+.ecran.fin-campagne {
+  position: fixed;
+  z-index: 20;
+  background: rgba(8, 6, 8, 0.94);
+}
+
+.ecran.fin-campagne .carte {
+  box-sizing: border-box;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  width: min(780px, calc(100% - 16px));
+  max-height: calc(100% - 16px);
+  padding: 10px 16px;
+  text-align: left;
+}
+
+.illustration-fin {
+  flex: none;
+  width: 320px;
+  height: 180px;
+  max-width: 45%;
+  object-fit: contain;
+  border: 3px solid var(--bord);
+  border-radius: 4px;
+}
+
+.texte-fin {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  touch-action: pan-y;
+}
+
+.texte-fin .lore {
+  margin: 0;
+  font-style: italic;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--texte);
+}
+
+@media (max-width: 640px) {
+  .ecran.fin-campagne .carte {
+    flex-direction: column;
+  }
+
+  .illustration-fin {
+    max-width: 100%;
+    height: auto;
+  }
+}

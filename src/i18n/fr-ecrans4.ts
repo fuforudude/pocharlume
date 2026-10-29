@@ -40,6 +40,7 @@ export const frEcrans4 = {
   'infini.palier_attendu': 'À gagner',
   'infini.regles': 'Règles de Matou, 20 vies. Les vagues ne s’arrêtent qu’à la dernière vie ; un mini-boss tous les 10 vagues.',
   'infini.lancer': 'Lancer',
+  'lancer.perte_detail_infini': 'Ta partie infinie, à la vague {m}, sera remplacée si tu en lances une autre.',
   'infini.lancement_refuse': 'Impossible de lancer le mode infini : {raison}',
 
   // Partie infinie : barre du haut et fin de partie

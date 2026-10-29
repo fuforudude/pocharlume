@@ -10,18 +10,20 @@ import type { NiveauCampagne } from './data/visuel';
 import type { DefiPartie, EtatPartie } from './engine';
 import { t } from './i18n';
 import { chargerAtlas, type AtlasRendu } from './render/atlas';
-import { Depot, difficulteDe, ouvrirCanalNavigateur, ouvrirStockage, Session, type ChoixPartie, type DifficulteSauvegarde } from './save';
+import { Depot, difficulteDe, infiniOuvert, ouvrirCanalNavigateur, ouvrirStockage, recordDeLaCarte, Session, type ChoixPartie, type DifficulteSauvegarde } from './save';
 import { afficherBoutique } from './ui/boutique';
 import { afficherCaisses } from './ui/caisses';
 import { afficherCarteMonde, type EcranCarteMonde } from './ui/carte-monde';
 import { afficherCollection } from './ui/collection';
 import { afficherEcranHeros } from './ui/ecran-heros';
-import { afficherAccueil, afficherAvis, type ChoixNiveau } from './ui/ecrans';
-import { configDeRelance, configDuChoix, debiterAuLancement, nouvelleGraine, relancerAvecDebit } from './ui/lancement';
+import { afficherEcranInfini } from './ui/ecran-infini';
+import { afficherAccueil, afficherAvis, afficherConfirmation, afficherFinCampagne, type ChoixNiveau } from './ui/ecrans';
+import { lignesBilanInfini, vueCartesInfini } from './ui/infini-vues';
+import { configDeRelance, configDuChoix, configInfini, debiterAuLancement, nouvelleGraine, relancerAvecDebit } from './ui/lancement';
 import { choixJouable } from './ui/meta-vues';
 import { NIVEAU_CAMPAGNE_TEST } from './ui/niveau-test';
 import { afficherOptions } from './ui/options';
-import { lancerNiveau, graineSuivante, type PartieEnCours } from './ui/partie';
+import { lancerNiveau, graineSuivante, type PartieEnCours, type ResultatPartie, type RetourFin } from './ui/partie';
 import { texteRefusMeta } from './ui/raisons-meta';
 import { niveauDeCampagne } from './ui/regions-monde';
 
@@ -35,6 +37,8 @@ let carteOuverte: EcranCarteMonde | null = null;
 let derniereDifficulte: DifficulteSauvegarde = 'matou';
 /** Région montrée sur la carte du monde : la dernière regardée (absente : la plus haute région ouverte). */
 let derniereRegion: number | undefined;
+/** Carte cochée dans l'écran du mode infini : la dernière jouée. */
+let derniereCarteInfini: string | undefined;
 
 interface OptionsLancement {
   /** Défi joué (Héroïque, Fer) ; absent : partie ordinaire. */
@@ -45,21 +49,27 @@ interface OptionsLancement {
   readonly reprise?: EtatPartie;
   /** Raccourci de développement : la partie ne touche pas à la sauvegarde. */
   readonly horsSauvegarde?: boolean;
+  /** Partie du mode infini : la carte jouée et sa région. Le niveau passé à `jouer` fournit la carte et ses entrées. */
+  readonly infini?: { readonly carte: string; readonly region: number };
 }
 
 async function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, lancement: OptionsLancement = {}): Promise<void> {
   carteOuverte?.arreter();
   carteOuverte = null;
   app.replaceChildren();
-  const { reprise, horsSauvegarde } = lancement;
+  const { reprise, horsSauvegarde, infini } = lancement;
   let config = reprise?.config;
   if (!config) {
     // Tout ce qui entre dans la partie (dieu, héros et son niveau, compétences, arbre, objets) est figé ici.
     const demande = lancement.defi ? { niveau: niveau.numero, defi: lancement.defi } : undefined;
-    const composee = configDuChoix(session.sauvegarde, lancement.choix ?? choixJouable(session.sauvegarde), difficulte, nouvelleGraine(), demande);
+    const choix = lancement.choix ?? choixJouable(session.sauvegarde);
+    const composee = infini
+      ? configInfini(session.sauvegarde, choix, nouvelleGraine(), infini.region)
+      : configDuChoix(session.sauvegarde, choix, difficulte, nouvelleGraine(), demande);
     if (!composee.ok) {
       afficherAvis(document.body, t('fiche.lancement_refuse', { raison: texteRefusMeta(composee.raison) }));
-      carte();
+      if (infini) accueil();
+      else carte();
       return;
     }
     config = composee.config;
@@ -68,7 +78,8 @@ async function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, l
       const debit = await debiterAuLancement(session, config);
       if (!debit.ok) {
         afficherAvis(document.body, debit.refus);
-        carte();
+        if (infini) accueil();
+        else carte();
         return;
       }
     }
@@ -81,11 +92,20 @@ async function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, l
         (window as unknown as { __partie?: PartieEnCours }).__partie = partie;
       }
     : undefined;
+  // Le bilan de la victoire en cours d'enregistrement : « Continuer » attend de savoir si c'était la fin de la campagne.
+  let bilanVictoire: Promise<{ readonly bilan: { readonly campagneTerminee?: true } | null }> | null = null;
   lancerNiveau(
     niveau,
     config,
     // Victoire ou défaite : méta-progression et progression enregistrées ; le bilan (gains, niveau du héros) revient à l'écran de fin.
-    (resultat) => (horsSauvegarde ? Promise.resolve(null) : session.enregistrerFin(resultat)),
+    // Mode infini : record de la carte et paliers.
+    (resultat) => {
+      if (horsSauvegarde) return Promise.resolve(null);
+      if (infini) return enregistrerInfini(infini.carte, resultat);
+      const enregistre = session.enregistrerFin(resultat);
+      bilanVictoire = enregistre;
+      return enregistre;
+    },
     {
       parent: app,
       vitesse: session.sauvegarde.reglages.vitesse,
@@ -104,23 +124,32 @@ async function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, l
       surQuitter: (abandon) => {
         // Abandon d'une partie en cours : ni expérience ni récompense, les objets non utilisés sont rendus, et la
         // partie sauvegardée qui était la sienne est effacée. Une partie déjà finie a déjà été enregistrée.
+        // Mode infini : l'abandon garde le record atteint (et paie les paliers), et efface sa partie sauvegardée.
         if (!horsSauvegarde) {
-          if (abandon) session.enregistrerFin(abandon).catch(console.error);
+          if (abandon && infini) enregistrerInfini(infini.carte, abandon).catch(console.error);
+          else if (abandon) session.enregistrerFin(abandon).catch(console.error);
           else if (enSauvegarde) session.effacerPartie().catch(console.error);
         }
-        carte();
+        if (infini) accueil();
+        else carte();
       },
-      surContinuer: carte,
+      surContinuer: () => {
+        // La première victoire sur le Soleil Blême finit la campagne : l'écran de fin passe avant le retour à la carte.
+        (bilanVictoire ?? Promise.resolve(null))
+          .then((r) => { if (r?.bilan?.campagneTerminee === true) finDeCampagne(); else carte(); })
+          .catch((erreur: unknown) => { console.error(erreur); carte(); });
+      },
+      ...(infini ? { infini: { record: () => recordDeLaCarte(session.sauvegarde, infini.carte) } } : {}),
       ...(horsSauvegarde
         ? {}
         : {
             surVague: (etat: EtatPartie) => {
               enSauvegarde = true;
-              session.rangerPartie(etat, niveau.numero).catch(console.error);
+              session.rangerPartie(etat, niveau.numero, infini?.carte).catch(console.error);
             },
             // Un objet utilisé est rangé aussitôt : une reprise ne doit pas le rendre de nouveau disponible.
             surObjet: (etat: EtatPartie) => {
-              session.rangerPartie(etat, niveau.numero).then((rangee) => { if (rangee) enSauvegarde = true; }).catch(console.error);
+              session.rangerPartie(etat, niveau.numero, infini?.carte).then((rangee) => { if (rangee) enSauvegarde = true; }).catch(console.error);
             },
           }),
       ...(reprise ? { reprise } : {}),
@@ -133,9 +162,60 @@ async function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, l
     app.replaceChildren();
     afficherAvis(document.body, t('erreur.chargement'));
     if (reprise && !horsSauvegarde) void session.effacerPartie();
-    if (reprise || horsSauvegarde) accueil();
+    if (reprise || horsSauvegarde || infini) accueil();
     else carte();
   });
+}
+
+/** La fin d'une partie infinie : record de la carte, paliers payés une seule fois, objets rendus ; le bilan pour l'écran de fin. */
+async function enregistrerInfini(carte: string, resultat: ResultatPartie): Promise<RetourFin> {
+  const r = await session.enregistrerFinInfini(
+    { carte, vague: resultat.vagueTerminee, objetsEquipes: resultat.config.objets, objetsUtilises: resultat.objetsUtilises },
+    resultat.config.graine,
+  );
+  return { bilan: null, refus: null, lignesInfini: r.ok ? lignesBilanInfini(r.detail, carte) : null };
+}
+
+/** L'écran de fin de campagne, puis la carte du monde. */
+function finDeCampagne(): void {
+  afficherFinCampagne(app, { illustration: `${import.meta.env.BASE_URL}illustrations/fin-campagne.png`, surContinuer: carte });
+}
+
+/** L'écran du mode infini : choix de la carte, du dieu, du héros et des objets. */
+function ecranInfini(): void {
+  chargerAtlas()
+    .then((atlas) => {
+      afficherEcranInfini(app, {
+        atlas,
+        session,
+        ...(derniereCarteInfini === undefined ? {} : { carte: derniereCarteInfini }),
+        surRetour: accueil,
+        surLancer: (choisie, choix) => {
+          derniereCarteInfini = choisie.id;
+          const lancer = (): void => {
+            jouer(choisie.niveau, 'matou', { choix, infini: { carte: choisie.id, region: choisie.region } }).catch(console.error);
+          };
+          // Lancer une nouvelle partie remplace celle qu'on pourrait reprendre : on le dit d'abord.
+          const enCours = partieEnCours();
+          if (!enCours) {
+            lancer();
+            return;
+          }
+          afficherConfirmation(app, {
+            titre: t('lancer.perte_titre'),
+            detail: t(enCours.infini ? 'lancer.perte_detail_infini' : 'lancer.perte_detail', { n: enCours.niveau, m: enCours.vague }),
+            confirmer: t('lancer.confirmer'),
+            annuler: t('lancer.annuler'),
+            surConfirmer: lancer,
+            surAnnuler: ecranInfini,
+          });
+        },
+      });
+    })
+    .catch((erreur: unknown) => {
+      console.error(erreur);
+      afficherAvis(document.body, t('erreur.chargement'));
+    });
 }
 
 function carte(): void {
@@ -213,9 +293,9 @@ function ouvrirCollection(atlas: AtlasRendu): void {
 }
 
 /** La partie en cours qu'un nouveau lancement remplacerait, ou null. */
-function partieEnCours(): { niveau: number; vague: number } | null {
+function partieEnCours(): { niveau: number; vague: number; infini?: true } | null {
   const reprise = session.partieAReprendre();
-  return reprise ? { niveau: reprise.niveau, vague: reprise.vague } : null;
+  return reprise ? { niveau: reprise.niveau, vague: reprise.vague, ...(reprise.carte === undefined ? {} : { infini: true as const }) } : null;
 }
 
 /** Les raccourcis de test de l'accueil : jamais sur le site public. */
@@ -242,12 +322,16 @@ function accueil(): void {
       afficherOptions(app, session, accueil);
     },
     autres: raccourcisDeveloppement(),
+    // Le mode infini s'ouvre avec le boss de la région 1, et n'est proposé que s'il a une carte à jouer.
+    ...(infiniOuvert(session.sauvegarde) && vueCartesInfini(session.sauvegarde).length > 0 ? { surInfini: ecranInfini } : {}),
     ...(reprise && niveauRepris
       ? {
           reprise: {
             vague: reprise.vague,
             surReprendre: () => {
-              jouer(niveauRepris, difficulteDe(reprise.etat.config) ?? derniereDifficulte, { reprise: reprise.etat }).catch(console.error);
+              const region = reprise.etat.config.infini?.region;
+              const infini = reprise.carte !== undefined && region !== undefined ? { infini: { carte: reprise.carte, region } } : {};
+              jouer(niveauRepris, difficulteDe(reprise.etat.config) ?? derniereDifficulte, { reprise: reprise.etat, ...infini }).catch(console.error);
             },
           },
         }

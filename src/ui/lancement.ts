@@ -101,7 +101,9 @@ export function configDeRelance(s: Sauvegarde, precedente: ConfigPartie, graine:
   if (defi !== null && niveau === undefined) return { ...precedente, graine };
   const demande = defi !== null && niveau !== undefined ? { niveau, defi } : undefined;
   const r = configDuChoix(s, choixDeLaConfig(s, precedente), precedente.difficulte, graine, demande);
-  return r.ok ? r.config : { ...precedente, graine };
+  if (!r.ok) return { ...precedente, graine };
+  // Le mode infini ne tient pas à la fiche : la relance garde la région de la partie précédente.
+  return precedente.infini ? { ...r.config, infini: { ...precedente.infini } } : r.config;
 }
 
 /** Ce que le lancement demande à la session : le stock pour composer la config, le débit des objets pour la lancer. */
