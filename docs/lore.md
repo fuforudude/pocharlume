@@ -32,11 +32,11 @@ Personne ne sait plus à quoi ils ressemblaient. Il reste des épithètes, qui c
   chasseurs ne la voient plus. Ombre, silence, absence, furtivité.
 - **Le Colosse**, Celui qui tient la porte, l'Obstiné : on dit qu'il a tenu seul une porte neuf nuits contre les
   torches, sans comprendre pourquoi il devait s'arrêter. Masse, poids, obstination.
-- **Trois-Pattes**, Celui qui a laissé sa patte, le Boiteux : on dit qu'un piège à loup a gardé sa patte, et que ses
-  pièges à lui ont mieux marché. Ingéniosité, ressorts, mécanismes.
+- **Trois-Pattes**, Celle qui a laissé sa patte, la Boiteuse : on dit qu'un piège à loup a gardé sa patte, mais que ses
+  pièges à elle ont prit des vies. Ingéniosité, ressorts, mécanismes.
 
 Trois fidèles portent encore leur souvenir : **Nielle**, qui voile les miroirs pour l'Ombre ; **Gond**, qui dort
-contre les portes pour le Colosse ; **Clopin**, qui boite exprès pour Trois-Pattes.
+contre les portes pour le Colosse ; **Clopin**, qui boite en mémoire de Trois-Pattes.
 
 Les textes sont courts et cryptiques : descriptions d'objets, inscriptions des statues, murmures avant chaque
 boss. Rien n'est drôle. La violence est suggérée (fumée, silhouettes, cendres) et jamais montrée en gros plan, pour
@@ -47,23 +47,23 @@ rester publiable sur le Play Store (classement PEGI 12 visé).
 Ce qu'on voit au choix avant un niveau : un symbole, une épithète, une phrase. Jamais de visage.
 
 - `dieu.plume` : L’Ombre
-- `dieu.plume.desc` : Celle qui n’a pas de reflet. Ce qu’elle regarde ne la voit pas.
+- `dieu.plume.desc` : Celle qui n’a pas de reflet. Ceux qu’elle regarde ne la voit pas.
 - `dieu.charlie` : Le Colosse
-- `dieu.charlie.desc` : Celui qui tient la porte. Personne ne lui a dit de lâcher.
+- `dieu.charlie.desc` : Celui qui tient la porte. Il tiendra. Toujours.
 - `dieu.pollen` : Trois-Pattes
-- `dieu.pollen.desc` : Celui qui a laissé sa patte. Le piège l’a gardée ; il a gardé le piège.
+- `dieu.pollen.desc` : La doyenne, plus rusée que tous. Un piège a gardé sa patte, elle a gardé leurs pièges.
 
 ## Héros
 
 - `heros.plume` : Nielle, Voile-Miroirs
 - `heros.plume.role` : Duelliste, esquive et critiques
-- `heros.plume.desc` : Elle a voilé tous les miroirs du hameau. Depuis, on la croit toujours déjà passée.
+- `heros.plume.desc` : Elle a voilé tous les miroirs du hameau. Une façon de prier une ancienne divinité parait-il.
 - `heros.suie` : Suie
 - `heros.suie.role` : Assassin, exécute les blessés
 - `heros.suie.desc` : Elle sent le brûlé. Ce qu’elle touche ne repart pas.
 - `heros.corbeau` : Corbeau
 - `heros.corbeau.role` : Tireur, perce l’armure
-- `heros.corbeau.desc` : Il attend sur les toits que le bûcher s’éteigne.
+- `heros.corbeau.desc` : Il attend sur les toits que les cris s’éteignent.
 - `heros.charlie` : Gond, le Portier
 - `heros.charlie.role` : Tank, frappe de zone qui étourdit
 - `heros.charlie.desc` : Il dort adossé aux portes. Aucune ne s’est encore ouverte derrière lui.
@@ -72,16 +72,16 @@ Ce qu'on voit au choix avant un niveau : un symbole, une épithète, une phrase.
 - `heros.mastoc.desc` : Il a mangé tant de coups qu’ils lui reviennent par habitude.
 - `heros.brise_os` : Brise-Os
 - `heros.brise_os.role` : Berserker, plus fort blessé
-- `heros.brise_os.desc` : Il ne sait plus à qui est le sang. Cela l’aide.
+- `heros.brise_os.desc` : Il ne sait plus à qui est le sang. Cela aide.
 - `heros.pollen` : Clopin, le Tendeur
 - `heros.pollen.role` : Pose des pièges, tire à la fronde
 - `heros.pollen.desc` : Il boite comme on prie. Là où il passe, la terre apprend à mordre.
 - `heros.rouage` : Rouage
 - `heros.rouage.role` : Ingénieur, construit une tourelle
-- `heros.rouage.desc` : Il parle aux ressorts. Ils lui répondent par des clous.
+- `heros.rouage.desc` : Le chat qui parlait aux oreilles des ressorts.
 - `heros.lanterne` : Lanterne
 - `heros.lanterne.role` : Soigneur, magie à distance
-- `heros.lanterne.desc` : Une flamme sans mèche. Elle éclaire ce qui doit rester debout.
+- `heros.lanterne.desc` : Une flamme sans mèche. Elle éclaire ceux qui doivent rester debout.
 - `heros.titre` : Héros
 - `heros.fermer` : Fermer
 - `heros.reinitialiser` : Reprendre les points
@@ -102,9 +102,9 @@ Ce qu'on voit au choix avant un niveau : un symbole, une épithète, une phrase.
 - `sort.renforts` : Renforts
 - `sort.renforts.desc` : Deux gros matous sortent de la grange, dos à la porte. Aucun ne dit pour qui.
 - `sort.pieges_a_ressort` : Pièges à Ressort
-- `sort.pieges_a_ressort.desc` : Trois mâchoires dans la poussière. La quatrième a déjà mangé, il y a longtemps.
+- `sort.pieges_a_ressort.desc` : Trois mâchoires dans la poussière. 
 - `sort.ingeniosite` : Ingéniosité
-- `sort.ingeniosite.desc` : Un peu d’os, beaucoup de ruse. Les machines voisines tournent comme le Boiteux l’aurait voulu.
+- `sort.ingeniosite.desc` : Un peu d’os, beaucoup de ruse. Les machines voisines tournent comme la Boiteuse l’aurait voulu.
 
 ## Compétences des héros
 
@@ -139,7 +139,7 @@ Ce qu'on voit au choix avant un niveau : un symbole, une épithète, une phrase.
 - `comp.onde_de_choc` : Onde de choc
 - `comp.onde_de_choc.desc` : Le coup continue après le coup.
 - `comp.neuf_nuits` : Dixième nuit
-- `comp.neuf_nuits.desc` : Un autre a tenu neuf nuits. Lui compte la dixième.
+- `comp.neuf_nuits.desc` : Un autre a tenu neuf nuits. Il tiendra la dixième.
 - `comp.mur_de_chair` : Mur de chair
 - `comp.mur_de_chair.desc` : Un mur qui respire.
 - `comp.cri_de_defi` : Cri de défi
@@ -163,7 +163,7 @@ Ce qu'on voit au choix avant un niveau : un symbole, une épithète, une phrase.
 - `comp.trois_pattes` : Pas boiteux
 - `comp.trois_pattes.desc` : Il boite par respect. Les coups ne savent plus où viser.
 - `comp.maitre_des_pieges` : Maître des pièges
-- `comp.maitre_des_pieges.desc` : Il tend les mâchoires comme un autre, avant lui. Le geste est resté.
+- `comp.maitre_des_pieges.desc` : Il tend les mâchoires comme une autre, avant lui. Le geste est resté.
 - `comp.boulons_neufs` : Boulons neufs
 - `comp.boulons_neufs.desc` : Les carreaux sont plus lourds que les remords.
 - `comp.deuxieme_servant` : Deuxième servant
@@ -290,11 +290,11 @@ Ce qu'on voit au choix avant un niveau : un symbole, une épithète, une phrase.
 - `ennemi.paysan_affame.desc` : Il a mangé ses bêtes, puis ses semences. Il cherche ce qui reste.
 - `ennemi.mendiant.desc` : Il tend une main vide. L’autre est derrière son dos.
 - `ennemi.chien_errant.desc` : Son maître est sur un bûcher. Il a appris à chasser seul.
-- `ennemi.boucher_vaudrelle.desc` : Son étal ne désemplit pas. Personne ne demande d’où vient la viande.
+- `ennemi.boucher_vaudrelle.desc` : Son étal reste pleine. Personne ne demande d’où vient la viande.
 - `ennemi.glaneur.desc` : Il ramasse ce que les autres laissent tomber. Parfois, ce sont des chats.
 - `ennemi.corbeau_noir.desc` : Il suit les fourches à distance. Il sait toujours où elles vont.
 - `ennemi.epouvantail.desc` : Personne ne l’a planté là. Il avance quand on ne le regarde pas.
-- `ennemi.la_faim.desc` : Elle n’a pas de ventre. Elle a seulement des champs à vider.
+- `ennemi.la_faim.desc` : Elle n’a pas de ventre, seulement des champs à vider.
 - `ennemi.porteur_torche.desc` : Il ne sait pas ce qu’il brûle. On le lui a dit, ça suffit.
 - `ennemi.chasseur_sorcieres.desc` : Il porte des mâchoires de fer à la ceinture. L’une a déjà servi.
 - `ennemi.delateur.desc` : Il ne frappe personne. Il donne des noms.
@@ -401,13 +401,13 @@ l’Avenue porte les vrais noms.
 - `inscription.gue` : Ne cherche pas son visage dans l’eau. Elle n’y est pas. Elle n’y a jamais été.
 - `inscription.pendus` : Par ordre du Soleil Blême : qui nourrit un chat nourrit la sorcière. Les cordes sont prêtes.
 - `inscription.carrefour` : Trois chemins, trois pattes. Prends celui qui boite : c’est le seul sans piège.
-- `inscription.sillons` : Il a semé des ressorts sous les sillons. Les rats n’ont pas passé l’hiver. Les hommes ont oublié pourquoi.
+- `inscription.sillons` : Elle a semé des ressorts sous les sillons. Les rats n’ont pas passé l’hiver. Les hommes ont oublié pourquoi.
 - `inscription.meules` : Neuf nuits. À la dixième, on n’a plus frappé à la porte. On a apporté le feu.
 - `inscription.aire` : Pour la Silencieuse : un bol de lait, posé dans le noir. Ne pas regarder qui le boit.
 - `inscription.ruelles` : Elle a donné son reflet contre un passage. Le passage… nous… le reste.
 - `inscription.place` : Ici fut dressé le Premier Bûcher. Trois bêtes y furent rendues à la cendre. Le ciel pâlit trois jours.
 - `inscription.beffroi` : On ne lui a jamais appris l’ordre de reculer. Personne n’a osé l’écrire.
-- `inscription.ponton` : La patte est restée dans la mâchoire. Il est revenu chercher la mâchoire.
+- `inscription.ponton` : La patte est restée dans la mâchoire. Elle est revenu chercher la mâchoire.
 - `inscription.etang` : On a sondé l’étang pour trouver son corps. Les cordes sont revenues sèches.
 - `inscription.saules` : Que toute bête noire soit noyée avant le premier gel. Ainsi purifiés, nous serons épargnés.
 - `inscription.quarantaine` : Le mal venait des chats. Les chats sont morts. Le mal…
@@ -417,7 +417,7 @@ l’Avenue porte les vrais noms.
 - `inscription.tertres` : Ici repose une patte. Le reste ne repose pas.
 - `inscription.ossuaire` : On a compté les crânes. Il en manque toujours un : celui qui ne laissait pas d’ombre.
 - `inscription.bivouac` : Ils ont brûlé la porte. Pas ce qui la tenait.
-- `inscription.palissade` : Les pieux sont taillés à sa manière. Ceux qui les plantent ne savent pas de qui ils tiennent le geste.
+- `inscription.palissade` : Les pieux sont taillés à sa manière. Ceux qui les plantent ne savent plus de qui vient ce geste.
 - `inscription.baliste` : Frappez la bête où qu’elle se cache. Le Soleil Blême ne compte pas les…
 - `inscription.cloitre` : Les moines ont fait vœu de silence. Ils croyaient l’avoir inventé.
 - `inscription.refectoire` : Les frères mangent debout, dos à la porte. Une vieille règle. Nul ne sait plus qui la gardait.
