@@ -182,9 +182,15 @@ function anticiper(etat: EtatPartie, t: Tour, e: Ennemi, vitesse: number): void 
   placerSurChemin(c, distance, segmentPour(c, distance, e.segment), e.decalage, visee);
 }
 
+/** Portée de tir de la tour : celle de ses stats, réduite tant qu'elle est aveuglée (Soleil Blême). */
+function porteeDe(t: Tour): number {
+  return t.aveuglePas > 0 ? t.stats.portee * (1 - t.aveugleFacteur) : t.stats.portee;
+}
+
 function ondeDeChoc(etat: EtatPartie, t: Tour): boolean {
   const s = t.stats;
-  const portee2 = s.portee * s.portee;
+  const portee = porteeDe(t);
+  const portee2 = portee * portee;
   let present = false;
   for (const e of etat.ennemis) {
     if (e.vivant && !e.volant && estVisible(e, s.revele) && distance2(e.x, e.y, t.x, t.y) <= portee2) {
@@ -193,7 +199,7 @@ function ondeDeChoc(etat: EtatPartie, t: Tour): boolean {
     }
   }
   if (!present) return false;
-  etat.evenements.push({ type: 'onde', tour: t.id, x: t.x, y: t.y, rayon: s.portee });
+  etat.evenements.push({ type: 'onde', tour: t.id, x: t.x, y: t.y, rayon: portee });
   for (const e of etat.ennemis) {
     if (!e.vivant || e.volant || !estVisible(e, s.revele) || distance2(e.x, e.y, t.x, t.y) > portee2) continue;
     infligerDegats(etat, e, tirerEntre(etat, s.degats[0], s.degats[1]), s.typeDegats);
@@ -236,7 +242,8 @@ function tirerSur(etat: EtatPartie, t: Tour, cible: Ennemi): void {
 
 /** Une tour qui révèle rend visibles de tous les furtifs de sa portée (le temps de quelques pas). */
 function reveler(etat: EtatPartie, t: Tour): void {
-  const portee2 = t.stats.portee * t.stats.portee;
+  const portee = porteeDe(t);
+  const portee2 = portee * portee;
   const duree = Math.max(1, enPas(REGLES.dureeRevelation));
   for (const e of etat.ennemis) {
     if (e.vivant && e.furtif && distance2(e.x, e.y, t.x, t.y) <= portee2) e.revele = duree;
@@ -259,11 +266,15 @@ export function mettreAJourTours(etat: EtatPartie): void {
       t.affamePas--;
       if (t.affamePas === 0) t.affameCadence = 0;
     }
-    // En feu : la tour ne tire pas, ne révèle pas, ne construit pas (ses soldats, eux, restent là).
-    if (t.desactivee > 0) {
-      t.desactivee--;
-      continue;
+    if (t.aveuglePas > 0) {
+      t.aveuglePas--;
+      if (t.aveuglePas === 0) t.aveugleFacteur = 0;
     }
+    // En feu ou gelée : la tour ne tire pas, ne révèle pas, ne construit pas (ses soldats, eux, restent là).
+    const figee = t.gel > 0 || t.desactivee > 0;
+    if (t.gel > 0) t.gel--;
+    if (t.desactivee > 0) t.desactivee--;
+    if (figee) continue;
     const s = t.stats;
     if (s.revele) reveler(etat, t);
     if (s.atelier) {
@@ -275,7 +286,7 @@ export function mettreAJourTours(etat: EtatPartie): void {
       if (ondeDeChoc(etat, t)) t.recharge = periodeDeTir(t);
       continue;
     }
-    const cible = premierEnnemi(etat, t.x, t.y, s.portee, s.volants, s.revele);
+    const cible = premierEnnemi(etat, t.x, t.y, porteeDe(t), s.volants, s.revele);
     if (!cible) continue;
     tirerSur(etat, t, cible);
     t.recharge = periodeDeTir(t);

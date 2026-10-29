@@ -45,8 +45,14 @@ function niveauxDeTours(): { famille: 'caserne' | 'tir' | 'magie' | 'artillerie'
 }
 
 describe('habillage : chaque sprite demandé existe dans l’atlas', () => {
-  // Ennemis des régions 2 à 5 (jalon 3) dont les sprites arrivent avec la tâche « Sprites » : vider cette liste à la fusion.
-  const SPRITES_A_VENIR = new Set<string>();
+  // Ennemis des régions 6 à 10 (jalon 4) dont les sprites arrivent avec la tâche « Sprites » : vider cette liste à la fusion.
+  const SPRITES_A_VENIR = new Set<string>([
+    'fossoyeur', 'creux', 'chauve_souris', 'roi_fosses',
+    'fantassin', 'porte_banniere', 'cavalier', 'prince_croise',
+    'flagellant', 'inquisiteur', 'exorciste', 'grand_inquisiteur',
+    'garde_royal', 'arbaletrier_elite', 'chevalier', 'roi_fou',
+    'acolyte_cendre', 'ange_cendre', 'soleil_pale',
+  ]);
 
   it('ennemis', () => {
     for (const type of Object.keys(ENNEMIS)) {
@@ -57,7 +63,7 @@ describe('habillage : chaque sprite demandé existe dans l’atlas', () => {
 
   it('chaque ennemi ordinaire a sa version d’élite (les boss ne sont jamais élites)', () => {
     for (const [type, def] of Object.entries(ENNEMIS)) {
-      if ((def as { boss: boolean }).boss) continue;
+      if ((def as { boss: boolean }).boss || SPRITES_A_VENIR.has(type)) continue;
       expect(existe(spriteEnnemiElite(type)), type).toBe(true);
     }
   });

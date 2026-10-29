@@ -1,5 +1,6 @@
 // Validation de la config d'une partie. Elle vient de l'interface, d'une sauvegarde ou d'un journal relu : rien
 // n'est fiable. Les tables de données ne sont lues que par propriétés propres (voir contenu.ts).
+import { INFINI } from '../data/infini';
 import { EMPLACEMENTS_OBJETS } from '../data/meta';
 import { REGLES } from '../data/regles';
 import { FAMILLES } from '../data/tours';
@@ -74,6 +75,16 @@ function verifierDefi(defi: unknown, objets: unknown): string | null {
   return Array.isArray(objets) && objets.length > 0 ? 'Défi : aucun objet consommable permis' : null;
 }
 
+/** Mode infini absent, null ou `{ region }` (entier de 1 au nombre de régions) ; il exclut les défis. */
+function verifierInfini(infini: unknown, defi: unknown): string | null {
+  if (infini === undefined || infini === null) return null;
+  if (!estDictionnaire(infini)) return 'Infini : un objet est attendu';
+  for (const cle of Object.keys(infini)) if (cle !== 'region') return `Infini : ${cle} inconnu`;
+  const region = infini.region;
+  if (!estEntier(region) || region < 1 || region > INFINI.regions.length) return `Infini : région invalide ${String(region)}`;
+  return defi === undefined || defi === null ? null : 'Infini : aucun défi permis';
+}
+
 /** Les stats d'un bonus : noms connus, fractions finies et positives. Renvoie leur total, ou la raison du refus. */
 function totalBonus(stats: unknown, noms: readonly string[], nom: string): number | string {
   if (!estDictionnaire(stats)) return `Bonus ${nom} : un objet est attendu`;
@@ -114,6 +125,7 @@ function verifierBonus(bonus: unknown): string | null {
  * de l'arbre connues (rang de 0 à 5), objets connus (un même objet peut occuper plusieurs emplacements), trois au plus.
  * Jalon 3 : `defi` absent ou null (partie ordinaire), `heroique` ou `fer`, sans objet ; `bonus` absent (aucun) ou des
  * fractions par famille de tours et pour le héros, au plus +10 % au total chacun.
+ * Jalon 4 : `infini` absent ou null (campagne) ou `{ region }` de 1 à 10 (vagues générées, règles de Matou, pas de défi).
  */
 export function verifierConfig(config: unknown): string | null {
   if (!estDictionnaire(config)) return 'Config de partie : un objet est attendu';
@@ -136,6 +148,7 @@ export function verifierConfig(config: unknown): string | null {
     verifierRangs(config.ameliorations, 'Améliorations', (id) => defBranche(id)?.rangMax) ??
     verifierObjets(config.objets) ??
     verifierDefi(config.defi, config.objets) ??
+    verifierInfini(config.infini, config.defi) ??
     verifierBonus(config.bonus)
   );
 }
@@ -158,6 +171,7 @@ export function copierConfig(config: ConfigPartie): ConfigPartie {
     versionDonnees: config.versionDonnees,
   };
   if (config.defi) copie.defi = config.defi;
+  if (config.infini) copie.infini = { region: config.infini.region };
   const bonus = copierBonus(config.bonus);
   if (Object.keys(bonus.tours).length > 0 || Object.keys(bonus.heros).length > 0) copie.bonus = bonus;
   return copie;

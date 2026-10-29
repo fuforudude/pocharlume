@@ -3,6 +3,7 @@ import { frCollection } from './fr-collection';
 import { frDieux } from './fr-dieux';
 import { frEcrans3 } from './fr-ecrans3';
 import { frEnnemis } from './fr-ennemis';
+import { frEnnemisRegions6a10 } from './fr-ennemis-regions-6-10';
 import { frMeta } from './fr-meta';
 import { frNiveaux } from './fr-niveaux';
 
@@ -22,6 +23,9 @@ export const fr = {
 
   // Ennemis et boss des régions 2 à 5 (fr-ennemis.ts)
   ...frEnnemis,
+
+  // Ennemis et boss des régions 6 à 10 (fr-ennemis-regions-6-10.ts)
+  ...frEnnemisRegions6a10,
 
   // Tours communes
   'tour.grenier_des_griffes': 'Grenier des Griffes',

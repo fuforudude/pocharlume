@@ -8,6 +8,12 @@ import { REGLES } from './regles';
 
 const table: Readonly<Record<string, DefEnnemi>> = ENNEMIS;
 
+/** Ennemis ordinaires des régions 6 à 10 (voir ennemis-jalon4.test.ts). */
+const ID_REGIONS_6_A_10: ReadonlySet<string> = new Set([
+  'fossoyeur', 'creux', 'chauve_souris', 'fantassin', 'porte_banniere', 'cavalier', 'flagellant', 'inquisiteur', 'exorciste',
+  'garde_royal', 'arbaletrier_elite', 'chevalier', 'acolyte_cendre', 'ange_cendre',
+]);
+
 const REGIONS: Readonly<Record<number, { ennemis: readonly string[]; boss: string }>> = {
   2: { ennemis: ['glaneur', 'corbeau_noir', 'epouvantail'], boss: 'la_faim' },
   3: { ennemis: ['porteur_torche', 'chasseur_sorcieres', 'delateur'], boss: 'juge_flammes' },
@@ -26,8 +32,8 @@ describe('ennemis des régions 2 à 5', () => {
       for (const id of ennemis) expect(Object.hasOwn(ENNEMIS, id), id).toBe(true);
       expect(table[boss]?.boss, boss).toBe(true);
     }
-    expect(Object.keys(ENNEMIS)).toHaveLength(4 + 12 + 4);
-    expect(Object.values(ENNEMIS).filter((e) => e.boss)).toHaveLength(5);
+    expect(Object.keys(ENNEMIS)).toHaveLength(4 + 12 + 4 + 14 + 5);
+    expect(Object.values(ENNEMIS).filter((e) => e.boss)).toHaveLength(5 + 5);
   });
 
   it('chaque ennemi a un nom traduit, des valeurs saines et une prime', () => {
@@ -125,7 +131,8 @@ describe('ennemis des régions 2 à 5', () => {
       if (def.boss) continue;
       const menace = menaceEnnemi(def);
       expect(menace, id).toBeGreaterThan(reference / 4);
-      expect(menace, id).toBeLessThan(reference * 5);
+      // Les régions 6 à 10 (jalon 4) montent plus haut : blindés, rapides, invocateurs.
+      expect(menace, id).toBeLessThan(reference * (ID_REGIONS_6_A_10.has(id) ? 12 : 5));
     }
   });
 

@@ -17,7 +17,7 @@ import type {
 } from './definitions';
 import type { Evenement } from './evenements';
 
-export const VERSION_ETAT = 5;
+export const VERSION_ETAT = 6;
 
 export type Statut = 'en_cours' | 'victoire' | 'defaite';
 export type FamilleTour = IdFamille | 'divine';
@@ -66,6 +66,12 @@ export interface ConfigPartie {
   defi?: DefiPartie | null;
   /** Bonus de collection ; absent = aucun. */
   bonus?: BonusCollection;
+  /**
+   * Mode infini (jalon 4) : absent ou null = partie de campagne. `region` (1 à 10) est celle de la carte : les vagues sont
+   * générées par le moteur à partir de la graine, parmi les ennemis des régions 1 à `region`, et les vagues du niveau sont
+   * ignorées. Se joue avec les règles de Matou.
+   */
+  infini?: { region: number } | null;
 }
 
 /** Chemin précalculé : longueurs cumulées et directions unitaires de chaque segment. */
@@ -118,6 +124,15 @@ export interface Ennemi {
   pouvoirs: PouvoirsEnnemi | null;
   /** Relèvements encore possibles. */
   releves: number;
+  /** Index (de 0) de la vague d'où il vient : les ennemis appelés ou relevés gardent celle de leur source. */
+  vague: number;
+  /** Bonus de vitesse de l'aura d'un autre ennemi ce pas-ci (0,25 = +25 %), recalculé à chaque pas. */
+  bonusVitesse: number;
+  /** Pas de charge restants et facteur de vitesse de la charge (Prince Croisé). */
+  charge: number;
+  chargeVitesse: number;
+  /** Renversements de soldats encore possibles (Cavalier). */
+  renversements: number;
   /** Pas restants pendant lesquels il est intouchable (à terre, plongé) : ni ciblé, ni blessé, ni affecté, il ne bouge pas. */
   invulnerable: number;
   /** Tuiles dont il avance sur son chemin en réapparaissant (plongée). */
@@ -174,6 +189,8 @@ export interface Unite {
   /** Pas restants avant de se noyer (0 = pas entraînée sous l'eau) et id du noyeur qui la tient (-1 sinon). */
   noyade: number;
   noyeur: number;
+  /** Pas restants d'étourdissement (renversée par un Cavalier, étourdie par un Exorciste) : elle ne fait rien. */
+  etourdi: number;
 }
 
 export interface Tour {
@@ -202,6 +219,11 @@ export interface Tour {
   /** Pas restants de famine et fraction de cadence perdue (0,3 = −30 %). */
   affamePas: number;
   affameCadence: number;
+  /** Pas restants de gel (Inquisiteur) : même effet que la désactivation, sans le feu. */
+  gel: number;
+  /** Pas restants d'aveuglement et fraction de portée perdue (0,3 = −30 %). */
+  aveuglePas: number;
+  aveugleFacteur: number;
   /** Pas restants avant la prochaine tourelle et le prochain piège de l'Atelier (indices de MINUTEUR). */
   minuteurs: number[];
 }
@@ -267,6 +289,17 @@ export interface PaquetActif {
   intervalle: number;
   prochain: number;
   elite: boolean;
+  /** Part des PV de l'ennemi (1 = tous). */
+  facteurPv: number;
+}
+
+/** Un ennemi mort (pas échappé), gardé en mémoire pour le Roi des Fosses. */
+export interface MortRecente {
+  type: string;
+  chemin: number;
+  distance: number;
+  elite: boolean;
+  vague: number;
 }
 
 export interface EtatVagues {
@@ -310,6 +343,8 @@ export interface EtatPartie {
   zones: ZoneDurable[];
   structures: Structure[];
   heros: number;
+  /** Les derniers ennemis morts (au plus `REGLES.memoireMorts`, les plus récents en fin), boss exceptés. */
+  morts: MortRecente[];
   sorts: EtatSort[];
   /** Pour chaque emplacement d'objet de la config : déjà utilisé dans cette partie. */
   objetsUtilises: boolean[];

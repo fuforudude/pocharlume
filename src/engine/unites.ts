@@ -54,6 +54,7 @@ export function creerUnite(etat: EtatPartie, n: NouvelleUnite): Unite {
     brulureDegats: 0,
     noyade: 0,
     noyeur: -1,
+    etourdi: 0,
   };
   etat.unites.push(u);
   return u;
@@ -100,6 +101,21 @@ function releverEnSpectre(etat: EtatPartie, x: number, y: number): void {
   }
 }
 
+/**
+ * Un soldat tombé à portée d'un enterreur (Fossoyeur) met plus longtemps à réapparaître : le plus grand facteur des enterreurs
+ * vivants à portée (1 s'il n'y en a pas), et un événement pour chacun.
+ */
+function facteurEnterrement(etat: EtatPartie, u: Unite): number {
+  let facteur = 1;
+  for (const e of etat.ennemis) {
+    const enterrement = e.pouvoirs?.enterrement;
+    if (!enterrement || !e.vivant || distance2(e.x, e.y, u.x, u.y) > enterrement.rayon * enterrement.rayon) continue;
+    facteur = Math.max(facteur, enterrement.facteur);
+    etat.evenements.push({ type: 'enterre', ennemi: e.id, unite: u.id });
+  }
+  return facteur;
+}
+
 export function mourir(etat: EtatPartie, u: Unite): void {
   if (u.mort) return;
   u.mort = true;
@@ -109,8 +125,9 @@ export function mourir(etat: EtatPartie, u: Unite): void {
   u.brulureDegats = 0;
   u.noyade = 0;
   u.noyeur = -1;
+  u.etourdi = 0;
   libererBloques(etat, u);
-  u.reapparition = u.delaiReapparition;
+  u.reapparition = u.delaiReapparition > 0 && u.genre === 'soldat' ? u.delaiReapparition * facteurEnterrement(etat, u) : u.delaiReapparition;
   etat.evenements.push({ type: 'mort_unite', unite: u.id, genre: u.genre, x: u.x, y: u.y });
   if (u.genre !== 'spectre') releverEnSpectre(etat, u.x, u.y);
 }
@@ -173,7 +190,8 @@ function avancerVers(u: Unite, x: number, y: number, arret: number): boolean {
 }
 
 function engageable(e: Ennemi): boolean {
-  return e.vivant && !e.volant && e.invulnerable === 0 && estVisible(e, false);
+  // Un ennemi en pleine charge passe sans que personne l'arrête.
+  return e.vivant && !e.volant && e.invulnerable === 0 && e.charge === 0 && estVisible(e, false);
 }
 
 /** Brûlure en cours : dégâts purs de ce pas. Vrai si l'unité en est morte. */
@@ -331,6 +349,11 @@ function mettreAJourUnite(etat: EtatPartie, u: Unite): void {
   if (u.noyade > 0 && noyer(etat, u)) return;
   if (u.recharge > 0) u.recharge--;
   mettreAJourPouvoirs(etat, u);
+  // Étourdie (renversée, bannie) : elle ne bouge ni ne frappe, et ne bloque personne.
+  if (u.etourdi > 0) {
+    u.etourdi--;
+    return;
+  }
 
   if (u.enDeplacement) {
     if (avancerVers(u, u.ancreX, u.ancreY, 0)) u.enDeplacement = false;

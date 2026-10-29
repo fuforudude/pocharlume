@@ -70,9 +70,9 @@ export function herosDe(etat: EtatPartie): DefHeros {
   return h;
 }
 
-/** Difficulté qui s'applique à une config : celle de Matou en défi (Héroïque, Fer), sinon celle de la config. */
+/** Difficulté qui s'applique à une config : celle de Matou en défi (Héroïque, Fer) et en mode infini, sinon celle de la config. */
 export function difficulteDeConfig(config: ConfigPartie): Difficulte | undefined {
-  return defDifficulte(config.defi ? DIFFICULTE_DES_DEFIS : config.difficulte);
+  return defDifficulte(config.defi || config.infini ? DIFFICULTE_DES_DEFIS : config.difficulte);
 }
 
 export function difficulteDe(etat: EtatPartie): Difficulte {

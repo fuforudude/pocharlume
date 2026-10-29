@@ -8,6 +8,7 @@ export type {
   DefiPartie,
   Ennemi,
   EntreeJournal,
+  MortRecente,
   EtatPartie,
   EtatSort,
   EtatVagues,
@@ -58,3 +59,5 @@ export {
   valeurRevente,
 } from './partie';
 export { enPas, PAS_PAR_SECONDE } from './temps';
+export { derniereVagueTerminee, vagueAtteinte } from './vagues';
+export { budgetInfini, ennemisInfini, genererVagueInfinie, partElites, pvMiniBoss } from './infini';

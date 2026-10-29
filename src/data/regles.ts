@@ -30,6 +30,7 @@ export const REGLES: Regles = {
   elite: { facteurPv: 1.8, facteurPrime: 1.5, viesEnPlus: 1 },
   heroique: { vies: 1 },
   fer: { facteurEffectifs: 1.5 },
+  memoireMorts: 8,
   plafondBonus: 0.1,
   regenerationBonusHeros: 20,
 };

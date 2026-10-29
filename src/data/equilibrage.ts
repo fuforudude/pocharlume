@@ -167,6 +167,8 @@ export interface OptionsGeneration {
   chemins: number;
   /** Autorise les boss dans le tirage. */
   boss?: boolean;
+  /** Budget de menace imposé, à la place de `budgetVague(niveau, vague)` (mode infini). */
+  budget?: number;
 }
 
 /**
@@ -179,7 +181,7 @@ export function genererVague(o: OptionsGeneration): Vague {
     .filter(([, def]) => o.boss === true || !def.boss)
     // `groupe` : un essaim n'arrive que par groupes de cette taille (1 = un ennemi ordinaire).
     .map(([id, def]) => ({ id, def, menace: menaceEnnemi(def), groupe: def.pouvoirs?.essaim ?? 1 }));
-  let restant = budgetVague(o.niveau, o.vague);
+  let restant = o.budget ?? budgetVague(o.niveau, o.vague);
   let delai = 0;
   const paquets: Paquet[] = [];
   for (;;) {

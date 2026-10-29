@@ -188,6 +188,23 @@ export const SON_DES_EVENEMENTS: TableEvenements = {
   tour_desactivee: lecture('explosion', 0.6, 1.3),
   /** La Mère des Rats ou le Juge appelle du renfort : le souffle du sort, grave, une fois à la fois. */
   appel: lecture('sort', 0.7, 0.75, 'appel', 1),
+  // Mécaniques des régions 6 à 10 : sons existants réglés par événement, en attendant des fichiers dédiés.
+  /** Un soldat est enterré : un choc sourd, une fois à la fois. */
+  enterre: lecture('impact_physique', 1, 0.5, 'enterre', 1),
+  /** Le Cavalier renverse un soldat : un choc lourd. */
+  renversement: lecture('impact_physique', 1.3, 0.7),
+  /** Une tour gèle : l'éclat de verre, aigu. */
+  tour_gelee: lecture('impact_magique', 0.7, 1.4, 'tour_gelee', 1),
+  /** Le Soleil Blême aveugle les tours : le souffle du sort, très aigu. */
+  aveuglement: lecture('sort', 0.8, 1.6),
+  /** Un Exorciste bannit : le souffle du sort, aigu. */
+  bannissement: lecture('sort', 0.7, 1.3, 'bannissement', 1),
+  /** Le Roi des Fosses relève ses morts : le souffle du sort, très grave. */
+  resurrection: lecture('sort', 0.9, 0.5),
+  /** La charge du Prince Croisé : l'onde de choc, grave. */
+  charge: lecture('onde_choc', 0.7, 0.8),
+  /** Un boss devient intouchable : l'éclat de verre, aigu et fort. */
+  invulnerabilite: lecture('impact_magique', 0.9, 1.6),
   fin: (e) => (e.statut === 'victoire' ? 'victoire' : e.statut === 'defaite' ? 'defaite' : null),
 };
 

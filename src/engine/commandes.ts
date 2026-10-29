@@ -219,6 +219,9 @@ function construire(etat: EtatPartie, cx: number, cy: number, famille: FamilleTo
     desactivee: 0,
     affamePas: 0,
     affameCadence: 0,
+    gel: 0,
+    aveuglePas: 0,
+    aveugleFacteur: 0,
     minuteurs: minuteursInitiaux(def.atelier, 0),
   };
   etat.tours.push(t);

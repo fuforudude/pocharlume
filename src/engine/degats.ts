@@ -1,4 +1,5 @@
 // Dégâts infligés aux ennemis, protections et effets (ralentissement, étourdissement, dégâts sur la durée).
+import { REGLES } from '../data/regles';
 import { tirer } from './aleatoire';
 import type { EffetCoup, Relevement, TypeDegats } from './definitions';
 import { EFFET, type Ennemi, type EtatPartie } from './etat';
@@ -28,6 +29,10 @@ function tuer(etat: EtatPartie, e: Ennemi): void {
   e.pv = 0;
   etat.aretes += e.prime;
   libererEnnemi(etat, e);
+  if (!e.boss) {
+    etat.morts.push({ type: e.type, chemin: e.chemin, distance: e.distance, elite: e.elite, vague: e.vague });
+    if (etat.morts.length > REGLES.memoireMorts) etat.morts.shift();
+  }
   etat.evenements.push({ type: 'mort', ennemi: e.id, typeEnnemi: e.type, x: e.x, y: e.y, prime: e.prime });
 }
 
@@ -54,7 +59,7 @@ export function infligerDegats(etat: EtatPartie, e: Ennemi, montant: number, typ
   e.pv -= subis;
   if (e.pv <= 0) {
     const relevement = e.pouvoirs?.relevement;
-    if (relevement && e.releves > 0) relever(etat, e, relevement);
+    if (relevement && e.releves > 0 && type !== relevement.sauf) relever(etat, e, relevement);
     else tuer(etat, e);
   }
   return subis;
@@ -75,6 +80,7 @@ export function appliquerEffet(etat: EtatPartie, e: Ennemi, effet: EffetCoup): v
   if (!e.vivant || e.invulnerable > 0) return;
   const k = EFFET[effet.type];
   if (k === EFFET.etourdissement && e.insensibleEtourdissement) return;
+  if (k === EFFET.ralentissement && e.pouvoirs?.insensibleRalentissement) return;
   if (effet.chance < 1 && tirer(etat) >= effet.chance) return;
   const actif = (e.effetsPas[k] ?? 0) > 0;
   const valeur = e.effetsValeur[k] ?? 0;

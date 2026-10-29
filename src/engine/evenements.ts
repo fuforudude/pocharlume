@@ -66,6 +66,23 @@ export type Evenement =
   | { type: 'tour_desactivee'; ennemi: number; tour: number; duree: number }
   /** Un ennemi en appelle d'autres (leurs `apparition` suivent). */
   | { type: 'appel'; ennemi: number; typeEnnemi: string; nombre: number }
+  // --- Mécaniques des ennemis (régions 6 à 10) ---
+  /** Un soldat tombe près d'un Fossoyeur : il mettra plus longtemps à réapparaître. */
+  | { type: 'enterre'; ennemi: number; unite: number }
+  /** Un Cavalier renverse l'unité qui le bloquait (étourdie `duree` s) et passe. */
+  | { type: 'renversement'; ennemi: number; unite: number; duree: number }
+  /** Une tour est gelée pendant `duree` s. */
+  | { type: 'tour_gelee'; ennemi: number; tour: number; duree: number }
+  /** Un boss aveugle les tours à portée : portée réduite pendant `duree` s. */
+  | { type: 'aveuglement'; ennemi: number; x: number; y: number; rayon: number; duree: number }
+  /** Un Exorciste bannit une invocation (tuée) ou étourdit le héros `duree` s (`unite` : l'unité visée). */
+  | { type: 'bannissement'; ennemi: number; unite: number; genre: GenreUnite; duree: number }
+  /** Un boss relève les derniers ennemis morts (leurs `apparition` suivent). */
+  | { type: 'resurrection'; ennemi: number; nombre: number }
+  /** Un boss charge : vitesse multipliée pendant `duree` s. */
+  | { type: 'charge'; ennemi: number; x: number; y: number; duree: number }
+  /** Un boss devient intouchable `duree` s. */
+  | { type: 'invulnerabilite'; ennemi: number; x: number; y: number; duree: number }
   | { type: 'fin'; statut: Statut; etoiles: number };
 
 /** Ouvre la liste d'événements du pas courant : celle d'un pas précédent est remplacée. */

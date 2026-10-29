@@ -97,7 +97,11 @@ export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
   const defi = config.defi ?? null;
   if (defi === 'fer' && !niveau.defiFer) throw new Error(`Défi Fer : le niveau ${niveau.id} n’a pas de familles imposées`);
   const copieBrute = JSON.parse(JSON.stringify(niveau)) as Niveau;
-  const copie: Niveau = { ...copieBrute, vagues: vaguesAvecElites(vaguesDuDefi(copieBrute.vagues, defi), niveau.sansElites === true ? 0 : difficulte.vaguesElites) };
+  const infini = config.infini ?? null;
+  // Infini : les vagues du niveau sont ignorées, le moteur génère les siennes (voir infini.ts) et la partie ne se gagne pas.
+  const copie: Niveau = infini
+    ? { ...copieBrute, vagues: [] }
+    : { ...copieBrute, vagues: vaguesAvecElites(vaguesDuDefi(copieBrute.vagues, defi), niveau.sansElites === true ? 0 : difficulte.vaguesElites) };
   const vies = defi === 'heroique' ? REGLES.heroique.vies : difficulte.vies;
   const etat: EtatPartie = {
     version: VERSION_ETAT,
@@ -113,7 +117,7 @@ export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
     viesDepart: vies,
     viePerdue: false,
     aretes: ajusterMontant(niveau.aretesDepart, difficulte.aretesDepart),
-    vagues: { lancees: 0, prochaine: copie.vagues.length > 0 ? enPas(REGLES.delaiPremiereVague) : -1, paquets: [] },
+    vagues: { lancees: 0, prochaine: infini || copie.vagues.length > 0 ? enPas(REGLES.delaiPremiereVague) : -1, paquets: [] },
     ennemis: [],
     unites: [],
     tours: [],
@@ -122,6 +126,7 @@ export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
     zones: [],
     structures: [],
     heros: -1,
+    morts: [],
     sorts: [],
     objetsUtilises: config.objets.map(() => false),
     prochainId: 1,
@@ -162,6 +167,9 @@ function verifierFin(etat: EtatPartie): void {
   if (etat.vies <= 0) {
     etat.statut = 'defaite';
     etat.etoiles = 0;
+  } else if (etat.config.infini) {
+    // Infini : jamais de victoire, la partie finit à la dernière vie perdue.
+    return;
   } else if (etat.vagues.lancees >= etat.niveau.vagues.length && etat.vagues.paquets.length === 0 && etat.ennemis.length === 0) {
     etat.statut = 'victoire';
     etat.etoiles = etoilesPour(etat.vies, etat.viesDepart, etat.viePerdue);

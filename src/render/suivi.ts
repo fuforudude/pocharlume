@@ -690,6 +690,15 @@ export class Suivi {
       case 'releve':
       case 'brulure':
       case 'tour_desactivee':
+      case 'enterre':
+      case 'renversement':
+      case 'tour_gelee':
+      case 'aveuglement':
+      case 'bannissement':
+      case 'resurrection':
+      case 'charge':
+      case 'invulnerabilite':
+        // Mécaniques des régions 6 à 10 : leurs effets visuels viennent avec la tâche d'interface (rien à dessiner pour l'instant).
         // La zone, les structures, les tours boostées ou en feu, les unités qui brûlent et l'ennemi à terre se dessinent d'après
         // l'état, tant qu'ils durent.
         return;

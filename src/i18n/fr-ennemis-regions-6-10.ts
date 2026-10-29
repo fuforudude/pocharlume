@@ -1,0 +1,22 @@
+// Noms des ennemis et des boss des régions 6 à 10. Clé `ennemi.<id>`.
+export const frEnnemisRegions6a10 = {
+  'ennemi.fossoyeur': 'Fossoyeur',
+  'ennemi.creux': 'Creux',
+  'ennemi.chauve_souris': 'Chauve-Souris',
+  'ennemi.roi_fosses': 'Le Roi des Fosses',
+  'ennemi.fantassin': 'Fantassin',
+  'ennemi.porte_banniere': 'Porte-Bannière',
+  'ennemi.cavalier': 'Cavalier',
+  'ennemi.prince_croise': 'Le Prince Croisé',
+  'ennemi.flagellant': 'Flagellant',
+  'ennemi.inquisiteur': 'Inquisiteur',
+  'ennemi.exorciste': 'Exorciste',
+  'ennemi.grand_inquisiteur': 'Le Grand Inquisiteur',
+  'ennemi.garde_royal': 'Garde Royal',
+  'ennemi.arbaletrier_elite': 'Arbalétrier d’Élite',
+  'ennemi.chevalier': 'Chevalier',
+  'ennemi.roi_fou': 'Le Roi Fou',
+  'ennemi.acolyte_cendre': 'Acolyte de Cendre',
+  'ennemi.ange_cendre': 'Ange de Cendre',
+  'ennemi.soleil_pale': 'Le Soleil Blême',
+} as const;

@@ -105,6 +105,32 @@ export interface Relevement {
   readonly pv: number;
   /** Secondes à terre (intouchable) avant de repartir. */
   readonly delai: number;
+  /** Type de dégâts du coup mortel après lequel il ne se relève pas (le Creux : `magique`) ; absent = tous le relèvent. */
+  readonly sauf?: TypeDegats;
+}
+
+/** Les soldats tombés à moins de `rayon` tuiles de lui mettent `facteur` fois plus de temps à réapparaître (Fossoyeur). */
+export interface Enterrement {
+  readonly rayon: number;
+  readonly facteur: number;
+}
+
+/** Aura : les autres ennemis à moins de `rayon` tuiles vont `vitesse` (0,25 = +25 %) plus vite. Plusieurs auras ne se cumulent pas. */
+export interface AuraVitesse {
+  readonly rayon: number;
+  readonly vitesse: number;
+}
+
+/** Le premier soldat (ou autre unité, hors héros) qui le bloque est renversé (étourdi `etourdissement` s) et il passe (Cavalier). */
+export interface Renversement {
+  readonly etourdissement: number;
+}
+
+/** Sous `pv` (fraction des PV maximaux), il va plus vite (`vitesse`, 0,5 = +50 %) et frappe plus fort (`degats`) (Flagellant). */
+export interface Rage {
+  readonly pv: number;
+  readonly vitesse: number;
+  readonly degats: number;
 }
 
 /** Action déclenchée par un palier de PV ou par une cadence (boss). */
@@ -116,7 +142,19 @@ export type ActionEnnemi =
   /** Appelle `nombre` ennemis sur son chemin, à sa hauteur, espacés de `ecart` tuiles vers l'entrée. */
   | { readonly type: 'invoquer'; readonly ennemi: string; readonly nombre: number; readonly ecart: number }
   /** Plonge : intouchable `duree` s, puis réapparaît `saut` tuiles plus loin sur son chemin. */
-  | { readonly type: 'plonger'; readonly duree: number; readonly saut: number };
+  | { readonly type: 'plonger'; readonly duree: number; readonly saut: number }
+  /** Les `nombre` tours les plus proches (à moins de `rayon` tuiles s'il est donné) sont gelées `duree` s : elles ne tirent plus. */
+  | { readonly type: 'figer_tour'; readonly nombre: number; readonly duree: number; readonly rayon?: number }
+  /** Les tours à `rayon` tuiles perdent `portee` (0,3 = −30 %) de portée de tir pendant `duree` s. */
+  | { readonly type: 'aveugler'; readonly rayon: number; readonly portee: number; readonly duree: number }
+  /** Tue l'invocation (spectre, renfort) la plus proche à `rayon` tuiles, sinon étourdit le héros s'il est à `rayon` tuiles. */
+  | { readonly type: 'bannir'; readonly rayon: number; readonly etourdissement: number }
+  /** Relève les `nombre` derniers ennemis morts (boss exceptés) avec la part `pv` de leurs PV maximaux. */
+  | { readonly type: 'relever_morts'; readonly nombre: number; readonly pv: number }
+  /** Charge : vitesse multipliée par `vitesse` pendant `duree` s, sans s'arrêter aux soldats. */
+  | { readonly type: 'charger'; readonly duree: number; readonly vitesse: number }
+  /** Intouchable `duree` s, sans bouger. */
+  | { readonly type: 'invulnerabilite'; readonly duree: number };
 
 /** Se déclenche une fois quand ses PV passent sous `pv` (fraction des PV maximaux). Paliers par `pv` décroissant. */
 export interface PalierEnnemi {
@@ -124,10 +162,15 @@ export interface PalierEnnemi {
   readonly actions: readonly ActionEnnemi[];
 }
 
-/** Se déclenche toutes les `cadence` secondes (la première fois après un délai égal). */
+/**
+ * Se déclenche toutes les `cadence` secondes (la première fois après un délai égal). Avec `phase`, seulement tant que la
+ * part de PV restants est au plus `phase[0]` et au-dessus de `phase[1]` (le Soleil Blême) ; hors phase, le délai repart de zéro.
+ * Une action sans effet (`figer_tour` sans tour à portée, `bannir` sans cible) est retentée au pas suivant.
+ */
 export interface ActionPeriodique {
   readonly cadence: number;
   readonly actions: readonly ActionEnnemi[];
+  readonly phase?: readonly [number, number];
 }
 
 export interface PouvoirsEnnemi {
@@ -137,6 +180,12 @@ export interface PouvoirsEnnemi {
   readonly soin?: SoinEnnemis;
   readonly nuage?: NuageMortel;
   readonly relevement?: Relevement;
+  readonly enterrement?: Enterrement;
+  readonly aura?: AuraVitesse;
+  readonly renversement?: Renversement;
+  readonly rage?: Rage;
+  /** Aucun ralentissement ne le touche (Grand Inquisiteur). */
+  readonly insensibleRalentissement?: boolean;
   /** Multiplicateur de ses dégâts contre un héros (2 = double). */
   readonly degatsHeros?: number;
   /** Arrive par groupes de cette taille : le générateur de vagues crée des paquets de multiples de ce nombre. */
@@ -613,6 +662,8 @@ export interface Regles {
   readonly heroique: { readonly vies: number };
   /** Défi Fer : toutes les vagues en une, effectifs multipliés (arrondi au-dessus), boss exceptés. */
   readonly fer: { readonly facteurEffectifs: number };
+  /** Nombre de morts récentes gardées en mémoire (le Roi des Fosses en relève les plus récentes). */
+  readonly memoireMorts: number;
   /** Bonus de collection : total maximal (0,1 = +10 %) par tour de base ou pour le héros. */
   readonly plafondBonus: number;
   /** PV régénérés par seconde pour un bonus de régénération de 100 % (1 = +100 %) du héros. */
@@ -629,6 +680,8 @@ export interface Paquet {
   readonly delai: number;
   /** Les ennemis de ce groupe sont des élites (PV, protections et prime en hausse). Ignoré pour un boss. */
   readonly elite?: boolean;
+  /** Part des PV (et de la prime) de l'ennemi, 1 par défaut : un mini-boss de l'infini est un boss à 30 % de ses PV. */
+  readonly facteurPv?: number;
 }
 
 export interface Vague {
@@ -678,4 +731,41 @@ export interface Niveau {
   readonly defiFer?: DefiFer;
   /** Vrai : la difficulté Vieux Sage n'y joue pas ses dernières vagues en élite (le défi Héroïque, lui, les joue toutes en élite). */
   readonly sansElites?: boolean;
+}
+
+/** Une région du mode infini : ses ennemis propres, et le boss dont les mini-boss sont tirés. */
+export interface RegionInfini {
+  /** Ennemis ordinaires propres à la région, dans un ordre fixe (l'ordre compte pour le déterminisme). */
+  readonly ennemis: readonly string[];
+  readonly boss: string;
+}
+
+/** Règles du mode infini (src/data/infini.ts). */
+export interface ParametresInfini {
+  /** Numéro de campagne dont le budget de la première vague sert de base : le budget de la vague n est ce budget × croissance^(n−1). */
+  readonly niveauBase: number;
+  /** Multiplicateur du budget d'une vague à la suivante (1,08). */
+  readonly croissance: number;
+  /** Régions 1 à 10, dans l'ordre : une carte de la région r tire parmi les ennemis des régions 1 à r. */
+  readonly regions: readonly RegionInfini[];
+  readonly elites: {
+    /** Première vague qui compte des élites. */
+    readonly premiereVague: number;
+    /** Part des ennemis d'élite à la première vague d'élites (0,1 = 10 %). */
+    readonly partDepart: number;
+    /** Part ajoutée tous les `intervalle` vagues. */
+    readonly partParPalier: number;
+    readonly intervalle: number;
+    readonly partMax: number;
+  };
+  readonly miniBoss: {
+    /** Un mini-boss toutes les `intervalle` vagues (10, 20, 30…). */
+    readonly intervalle: number;
+    /** Part des PV du boss pour le premier mini-boss. */
+    readonly pvDepart: number;
+    /** Part de PV ajoutée par mini-boss déjà passé. */
+    readonly pvParMiniBoss: number;
+    /** Secondes entre le lancement de la vague et l'arrivée du mini-boss. */
+    readonly delai: number;
+  };
 }

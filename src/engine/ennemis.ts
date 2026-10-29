@@ -5,16 +5,24 @@ import { ajusterMontant } from './argent';
 import { placerSurChemin, segmentPour } from './chemins';
 import { difficulteDe } from './contenu';
 import { infligerDegats, libererEnnemi } from './degats';
-import type { BrulureContact, DefEnnemi, Drain, Noyade } from './definitions';
+import type { BrulureContact, DefEnnemi, Drain, Noyade, Rage, Renversement } from './definitions';
 import { EFFET, type Ennemi, type EtatPartie, type Unite } from './etat';
 import { chercherParId, distance2 } from './recherche';
 import { enPas, PAS_PAR_SECONDE } from './temps';
-import { blesserUnite, mourir } from './unites';
+import { blesserUnite, libererBloques, mourir } from './unites';
 
 /** Le palier de protection au-dessus de `valeur` (le dernier si elle y est déjà) : 0 → 30 %, 30 → 60 %, 60 → 90 %, 90 → 90 %. */
 function palierSuperieur(valeur: number): number {
   for (const palier of REGLES.paliersProtection) if (palier > valeur) return palier;
   return REGLES.paliersProtection[REGLES.paliersProtection.length - 1] ?? valeur;
+}
+
+/** Réglages facultatifs de l'apparition d'un ennemi. */
+export interface OptionsApparition {
+  /** Part de ses PV et de sa prime (1 par défaut) : un mini-boss de l'infini est un boss à 30 % de ses PV. */
+  facteurPv?: number;
+  /** Index (de 0) de la vague dont il fait partie ; par défaut la dernière vague lancée. */
+  vague?: number;
 }
 
 /**
@@ -23,13 +31,14 @@ function palierSuperieur(valeur: number): number {
  * `elite` : version d'élite (PV, un palier d'armure et de résistance de plus, prime, une vie de plus) ; sans effet
  * sur un boss.
  */
-export function ajouterEnnemi(etat: EtatPartie, def: DefEnnemi, type: string, chemin: number, distance = 0, elite = false): Ennemi {
+export function ajouterEnnemi(etat: EtatPartie, def: DefEnnemi, type: string, chemin: number, distance = 0, elite = false, options: OptionsApparition = {}): Ennemi {
   const c = etat.chemins[chemin];
   if (!c) throw new Error(`Chemin inconnu : ${String(chemin)}`);
   const difficulte = difficulteDe(etat);
   const estElite = elite && !def.boss;
-  const prime = ajusterMontant(def.prime, difficulte.primes);
-  const pv = def.pv * difficulte.pvEnnemis * (estElite ? REGLES.elite.facteurPv : 1);
+  const facteurPv = options.facteurPv ?? 1;
+  const prime = ajusterMontant(def.prime, difficulte.primes * facteurPv);
+  const pv = def.pv * difficulte.pvEnnemis * facteurPv * (estElite ? REGLES.elite.facteurPv : 1);
   const e: Ennemi = {
     id: etat.prochainId++,
     type,
@@ -62,6 +71,11 @@ export function ajouterEnnemi(etat: EtatPartie, def: DefEnnemi, type: string, ch
     elite: estElite,
     pouvoirs: def.pouvoirs ?? null,
     releves: def.pouvoirs?.relevement?.fois ?? 0,
+    vague: options.vague ?? Math.max(0, etat.vagues.lancees - 1),
+    bonusVitesse: 0,
+    charge: 0,
+    chargeVitesse: 1,
+    renversements: def.pouvoirs?.renversement ? 1 : 0,
     invulnerable: 0,
     saut: 0,
     palier: 0,
@@ -78,10 +92,26 @@ export function ajouterEnnemi(etat: EtatPartie, def: DefEnnemi, type: string, ch
   return e;
 }
 
-/** Facteur de vitesse courant (0 si étourdi). */
+/** La rage de l'ennemi, s'il en a une et que ses PV sont assez bas (Flagellant) ; sinon null. */
+function rageActive(e: Ennemi): Rage | null {
+  const rage = e.pouvoirs?.rage;
+  return rage && e.pv <= e.pvMax * rage.pv ? rage : null;
+}
+
+/** Facteur de vitesse courant (0 si étourdi) : ralentissement, charge, aura d'un autre ennemi et rage. */
 export function facteurVitesse(e: Ennemi): number {
   if ((e.effetsPas[EFFET.etourdissement] ?? 0) > 0) return 0;
-  return (e.effetsPas[EFFET.ralentissement] ?? 0) > 0 ? (e.effetsValeur[EFFET.ralentissement] ?? 1) : 1;
+  let facteur = (e.effetsPas[EFFET.ralentissement] ?? 0) > 0 ? (e.effetsValeur[EFFET.ralentissement] ?? 1) : 1;
+  if (e.charge > 0) facteur *= e.chargeVitesse;
+  facteur *= 1 + e.bonusVitesse;
+  const rage = rageActive(e);
+  return rage ? facteur * (1 + rage.vitesse) : facteur;
+}
+
+/** Facteur de ses dégâts (rage). */
+function facteurDegats(e: Ennemi): number {
+  const rage = rageActive(e);
+  return rage ? 1 + rage.degats : 1;
 }
 
 /**
@@ -152,6 +182,14 @@ function enflammer(etat: EtatPartie, e: Ennemi, u: Unite, brulure: BrulureContac
   u.brulureDegats = Math.max(u.brulureDegats, brulure.degats);
 }
 
+/** Le Cavalier renverse l'unité qui le bloque (étourdie, elle lâche tous ceux qu'elle bloque) et passe : une seule fois. */
+function renverser(etat: EtatPartie, e: Ennemi, u: Unite, renversement: Renversement): void {
+  e.renversements--;
+  u.etourdi = Math.max(u.etourdi, Math.max(1, enPas(renversement.etourdissement)));
+  libererBloques(etat, u);
+  etat.evenements.push({ type: 'renversement', ennemi: e.id, unite: u.id, duree: renversement.etourdissement });
+}
+
 function attaquerAuContact(etat: EtatPartie, e: Ennemi, u: Unite): void {
   const pouvoirs = e.pouvoirs;
   if (pouvoirs?.drain) {
@@ -172,7 +210,7 @@ function attaquerAuContact(etat: EtatPartie, e: Ennemi, u: Unite): void {
   e.recharge = e.cadence;
   if (e.degatsMax <= 0) return;
   etat.evenements.push({ type: 'coup_ennemi', ennemi: e.id, unite: u.id, distance: false });
-  blesserUnite(etat, u, degatsContre(e, u, tirerEntre(etat, e.degatsMin, e.degatsMax)), 'physique', e.id);
+  blesserUnite(etat, u, degatsContre(e, u, tirerEntre(etat, e.degatsMin, e.degatsMax) * facteurDegats(e)), 'physique', e.id);
   if (pouvoirs?.brulure) enflammer(etat, e, u, pouvoirs.brulure);
 }
 
@@ -183,7 +221,7 @@ function attaquerADistance(etat: EtatPartie, e: Ennemi): void {
   if (!u) return;
   e.rechargeDistance = Math.max(1, enPas(attaque.cadence));
   etat.evenements.push({ type: 'coup_ennemi', ennemi: e.id, unite: u.id, distance: true });
-  blesserUnite(etat, u, degatsContre(e, u, tirerEntre(etat, attaque.degats[0], attaque.degats[1])), attaque.typeDegats, e.id);
+  blesserUnite(etat, u, degatsContre(e, u, tirerEntre(etat, attaque.degats[0], attaque.degats[1]) * facteurDegats(e)), attaque.typeDegats, e.id);
 }
 
 export function mettreAJourEnnemis(etat: EtatPartie): void {
@@ -202,14 +240,22 @@ export function mettreAJourEnnemis(etat: EtatPartie): void {
     }
     if (e.pv <= 0 || e.invulnerable > 0) continue;
     const facteur = facteurVitesse(e);
+    const enCharge = e.charge > 0;
     if ((pas[EFFET.etourdissement] ?? 0) > 0) pas[EFFET.etourdissement] = (pas[EFFET.etourdissement] ?? 0) - 1;
     if ((pas[EFFET.ralentissement] ?? 0) > 0) pas[EFFET.ralentissement] = (pas[EFFET.ralentissement] ?? 0) - 1;
     if (e.revele > 0) e.revele--;
     if (e.recharge > 0) e.recharge--;
     if (e.rechargeDistance > 0) e.rechargeDistance--;
+    if (e.charge > 0) e.charge--;
     if (facteur === 0) continue;
 
-    const bloqueur = e.volant ? undefined : bloqueurAuContact(etat, e);
+    // Un volant, ou un ennemi en pleine charge, ne s'arrête pas aux soldats.
+    let bloqueur = e.volant || enCharge ? undefined : bloqueurAuContact(etat, e);
+    const renversement = e.pouvoirs?.renversement;
+    if (bloqueur && renversement && e.renversements > 0 && bloqueur.genre !== 'heros') {
+      renverser(etat, e, bloqueur, renversement);
+      bloqueur = undefined;
+    }
     if (bloqueur) {
       attaquerAuContact(etat, e, bloqueur);
       continue;
