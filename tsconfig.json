@@ -20,5 +20,5 @@
     "noEmit": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["src", "tools", "vite.config.ts"]
+  "include": ["src", "tools", "vite.config.ts", "atelier.config.ts"]
 }

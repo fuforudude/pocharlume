@@ -1,0 +1,54 @@
+:root { color-scheme: dark; --fond: #1c1d21; --panneau: #25272c; --bord: #3a3d45; --texte: #e4e6eb; --doux: #9aa0ac; --accent: #e0a63c; --danger: #e5584f; --ok: #5cb85c; }
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--fond); color: var(--texte); font: 13px/1.35 system-ui, sans-serif; display: flex; flex-direction: column; }
+button, input, select { font: inherit; color: inherit; background: #30333a; border: 1px solid var(--bord); border-radius: 4px; padding: 3px 8px; }
+button { cursor: pointer; }
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:disabled { opacity: .45; cursor: default; }
+button[aria-pressed="true"], button[aria-selected="true"] { background: var(--accent); color: #1b1b1b; border-color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+#barre { display: flex; align-items: center; gap: 12px; padding: 6px 12px; background: var(--panneau); border-bottom: 1px solid var(--bord); }
+#onglets { display: flex; gap: 4px; }
+#etat { flex: 1; color: var(--doux); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#etat.erreur { color: var(--danger); }
+#etat.ok { color: var(--ok); }
+#vue { flex: 1; min-height: 0; display: flex; }
+.colonne { display: flex; flex-direction: column; gap: 8px; padding: 8px; min-height: 0; min-width: 0; }
+.liste { width: 210px; flex: none; border-right: 1px solid var(--bord); }
+.liste input { width: 100%; }
+.liste ul { list-style: none; margin: 0; padding: 0; overflow: auto; flex: 1; }
+.liste li { padding: 2px 6px; cursor: pointer; border-radius: 3px; }
+.liste li:hover { background: #30333a; }
+.liste li.actif { background: var(--accent); color: #1b1b1b; }
+.liste li.groupe { color: var(--doux); font-size: 11px; text-transform: uppercase; margin-top: 6px; cursor: default; }
+.liste li.groupe:hover { background: none; }
+.centre { flex: 1; overflow: auto; }
+.droite > *, .centre > * { flex: none; }
+#toile, #toile-carte { align-self: flex-start; }
+.droite { width: 330px; flex: none; border-left: 1px solid var(--bord); overflow: auto; }
+.rangee { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.rangee label { color: var(--doux); }
+canvas { image-rendering: pixelated; }
+#toile, #toile-carte { border: 1px solid var(--bord); touch-action: none; cursor: crosshair; background: #111; }
+.nuancier { display: grid; grid-template-columns: repeat(auto-fill, 22px); gap: 3px; max-height: 110px; overflow: auto; }
+.nuancier button { width: 22px; height: 22px; padding: 0; border-radius: 3px; font-size: 10px; line-height: 20px; }
+.nuancier button[aria-pressed="true"] { outline: 2px solid var(--accent); border-color: #fff; }
+.anim { background: var(--panneau); border: 1px solid var(--bord); border-radius: 4px; padding: 6px; }
+.anim h4 { margin: 0 0 4px; font-size: 12px; color: var(--doux); font-weight: 600; }
+.anim .vues { display: flex; gap: 8px; align-items: flex-end; }
+.derives { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 6px; }
+.derives figure { margin: 0; text-align: center; background: var(--panneau); border: 1px solid var(--bord); border-radius: 4px; padding: 4px; font-size: 11px; color: var(--doux); }
+.avert { background: #4a3a14; border: 1px solid var(--accent); border-radius: 4px; padding: 6px 8px; }
+.erreur-boite { background: #4a1f1c; border: 1px solid var(--danger); border-radius: 4px; padding: 6px 8px; }
+.tableau { width: 100%; border-collapse: collapse; }
+.tableau td, .tableau th { padding: 2px 6px; text-align: left; border-bottom: 1px solid var(--bord); }
+.ligne-couleur { display: grid; grid-template-columns: 34px 24px 90px 1fr 70px; gap: 6px; align-items: center; padding: 1px 0; }
+.ligne-couleur input[type=color] { width: 34px; height: 22px; padding: 0; }
+.ligne-couleur input[type=text] { width: 90px; }
+.ligne-couleur .nb.fort { color: var(--accent); font-weight: 700; }
+.vignettes { display: flex; flex-wrap: wrap; gap: 6px; }
+.vignettes figure { margin: 0; width: 76px; text-align: center; font-size: 10px; color: var(--doux); }
+.vignettes canvas { background: #2d3a24; border: 1px solid var(--bord); }
+.aide { color: var(--doux); font-size: 12px; }
+kbd { background: #30333a; border: 1px solid var(--bord); border-radius: 3px; padding: 0 4px; font-size: 11px; }

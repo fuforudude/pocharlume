@@ -1,0 +1,28 @@
+# Un slime qui respire : un cadre par image, séparés par « cadre ».
+taille 8 8
+duree 250
+fond 2d3a24
+couleur G 40c040
+couleur g 2a8a2a
+couleur K 202020
+couleur W ffffff
+
+cadre
+........
+........
+..GGGG..
+.GGGGGG.
+.GWKGWKG
+.GGGGGG.
+.gGGGGg.
+..gggg..
+
+cadre
+........
+........
+........
+..GGGG..
+.GWKGWKG
+GGGGGGGG
+gGGGGGGg
+.gggggg.
