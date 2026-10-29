@@ -8,7 +8,14 @@ import type { Carte } from '../engine/definitions';
 import { bruit, construireSol, masqueChemin, nomTuile, SEUILS_DEUX_VARIANTES, SEUILS_HERBE, type GrilleSol } from './sol';
 
 const SANS_ZONE: VisuelCarte = { region: 1, zones: [], decor: [] };
-const carte = NIVEAU_TEST.carte;
+// Carte aux chemins à cheval sur deux rangées de cases (axe sur les arêtes) : le sol sait dessiner les deux cas ; les cartes de la campagne,
+// elles, suivent la grille (sol-chemin-grille.test.ts).
+const carte: Carte = {
+  largeur: 32,
+  hauteur: 18,
+  chemins: [{ points: [{ x: -1, y: 4 }, { x: 12, y: 4 }, { x: 12, y: 13 }, { x: 24, y: 13 }, { x: 24, y: 7 }, { x: 33, y: 7 }] }],
+  departHeros: { x: 16, y: 13 },
+};
 
 function tuile(grille: GrilleSol, x: number, y: number): string {
   return grille.tuiles[y * grille.largeur + x] ?? '';

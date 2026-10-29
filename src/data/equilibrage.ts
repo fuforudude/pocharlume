@@ -219,15 +219,17 @@ export interface OptionsGeneration {
   budget?: number;
   /** Niveau de horde : la densité d'avant le jalon 5 (ennemis ordinaires non renforcés, serrés à `intervalleReference`). */
   horde?: boolean;
+  /** Écart minimal en tuiles entre deux ennemis d'un paquet, à la place de `EQUILIBRAGE.ecartMinimalTuiles` (jamais sous 0,8). */
+  ecart?: number;
 }
 
 /**
  * Secondes entre deux ennemis d'un paquet. Un essaim ou un niveau de horde garde des colonnes serrées (`intervalleReference`, à la
  * vitesse de référence) ; sinon l'écart à l'entrée est d'au moins `ecartMinimalTuiles` (arrondi à la hausse au dixième de seconde).
  */
-export function intervallePaquet(def: DefEnnemi, essaim: boolean, horde: boolean): number {
+export function intervallePaquet(def: DefEnnemi, essaim: boolean, horde: boolean, ecart: number = EQUILIBRAGE.ecartMinimalTuiles): number {
   if (essaim || horde) return arrondiDixieme(EQUILIBRAGE.intervalleReference / facteurVitesse(def.vitesse));
-  return Math.ceil((EQUILIBRAGE.ecartMinimalTuiles / def.vitesse) * 10 - 1e-9) / 10;
+  return Math.ceil((ecart / def.vitesse) * 10 - 1e-9) / 10;
 }
 
 /**
@@ -250,15 +252,15 @@ export function genererVague(o: OptionsGeneration): Vague {
     if (!choix) break;
     // Un ennemi renforcé qui ne tient plus dans le budget restant l'est moins (jamais en dessous de sa force normale) : sinon les vagues
     // au petit budget (régions 7 à 10, facteurBudget bas) n'auraient aucun ennemi cher à tirer.
-    const robustesse = Math.max(1, Math.min(robustesseVoulue, Math.floor((restant / (choix.menace * choix.groupe)) * 100) / 100));
+    const robustesse = choix.def.boss ? 1 : Math.max(1, Math.min(robustesseVoulue, Math.floor((restant / (choix.menace * choix.groupe)) * 100) / 100));
     const max = Math.min(Math.floor(restant / (choix.menace * robustesse)), EQUILIBRAGE.tailleMaxPaquet);
     const nombre =
       choix.groupe === 1
         ? 1 + Math.floor(tirer(g) * max)
         : choix.groupe * (1 + Math.floor(tirer(g) * Math.max(1, Math.floor(max / choix.groupe))));
-    const intervalle = intervallePaquet(choix.def, choix.groupe > 1, o.horde === true);
+    const intervalle = intervallePaquet(choix.def, choix.groupe > 1, o.horde === true, o.ecart);
     const paquet = { ennemi: choix.id, nombre, intervalle, chemin: Math.floor(tirer(g) * o.chemins), delai };
-    paquets.push(robustesse > 1 && !choix.def.boss ? { ...paquet, facteurPv: robustesse } : paquet);
+    paquets.push(robustesse > 1 ? { ...paquet, facteurPv: robustesse } : paquet);
     restant -= nombre * choix.menace * robustesse;
     delai = arrondiDixieme(delai + (nombre * intervalle) / 2);
   }

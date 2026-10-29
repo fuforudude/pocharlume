@@ -34,7 +34,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     defiFer: { familles: ['caserne', 'magie'] },
     nom: 'niveau.r1.02.nom',
     ambiance: 'niveau.r1.02.ambiance',
-    vagues: { nombre: 7, ennemis: PAYSAN, graine: 1102, facteurBudget: 3.2 },
+    vagues: { nombre: 7, ennemis: PAYSAN, graine: 1102, facteurBudget: 1.25, ecart: 0.8 },
   },
   {
     numero: 3,
@@ -54,7 +54,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     defiFer: { familles: ['tir', 'magie'] },
     nom: 'niveau.r1.04.nom',
     ambiance: 'niveau.r1.04.ambiance',
-    vagues: { nombre: 8, ennemis: PAYSAN_MENDIANT, graine: 1104, facteurBudget: 1.5 },
+    vagues: { nombre: 8, ennemis: PAYSAN_MENDIANT, graine: 1104, ecart: 0.8 },
   },
   {
     numero: 5,

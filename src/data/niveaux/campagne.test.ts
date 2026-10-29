@@ -204,6 +204,19 @@ describe('vagues', () => {
     }
   });
 
+  it('aucun pic de menace : la vague 6 d’un niveau ordinaire ne dépasse pas 1,5 fois (régions 1 à 5) ou 2,2 fois (régions 6 à 10) celle du niveau ordinaire suivant', () => {
+    // Les niveaux de horde et de boss sont laissés de côté. Les régions 6 à 10 ont un `facteurBudget` réglé niveau par niveau sur le simulateur
+    // (donc pas monotone) : tolérance plus large. La mesure est la menace réelle des paquets, facteur de PV compris.
+    REGIONS.forEach((region, r) => {
+      const ordinaires = region.filter((n) => !n.horde && !n.boss).map((n) => ({ numero: n.numero, menace: menaceVague({ paquets: (n.niveau.vagues[5]?.paquets ?? []).filter((p) => !definition(p.ennemi).boss) }, ENNEMIS) }));
+      const tolerance = r < 5 ? 1.5 : 2.2;
+      ordinaires.forEach((n, i) => {
+        const suivant = ordinaires[i + 1];
+        if (suivant) expect(n.menace / suivant.menace, `niveau ${String(n.numero)} contre ${String(suivant.numero)}`).toBeLessThanOrEqual(tolerance);
+      });
+    });
+  });
+
   it('la menace de la dernière vague croît d’un niveau à l’autre dans une région', () => {
     for (const r of REGIONS_NOUVELLES) {
       const menaces = (REGIONS[r - 1] ?? []).map((n) => menaceVague(n.niveau.vagues.at(-1) ?? { paquets: [] }, ENNEMIS));

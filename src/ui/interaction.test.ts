@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { CAMPAGNE } from '../data/niveaux/campagne';
 import { NIVEAU_TEST } from '../data/niveaux/region1';
-import { avancer, centreCase, creerPartie, type Action, type EtatPartie } from '../engine';
+import { avancer, centreCase, creerPartie, estCaseDeChemin, estCaseInterdite, type Action, type CaseGrille, type EtatPartie } from '../engine';
 import { ct, avancerPas, CONFIG } from '../engine/aides.test-utils';
 import { Surbrillance } from '../render/rendu';
 import { cibleTouchee, Interaction, rayonObjet, rayonSort } from './interaction';
@@ -38,8 +38,8 @@ describe('cibleTouchee', () => {
   it('trouve aussi une case interdite (le refus se dit au toucher), mais le héros passe avant dans son rayon', () => {
     const etat = partie();
     // Le héros attend sur le chemin, dans la case (8, 6) : interdite.
-    expect(cibleTouchee(etat, 16, 12.5, RAYON)).toEqual({ type: 'heros' });
-    expect(cibleTouchee(etat, 16, 12.9, 0.1)).toEqual({ type: 'case', cx: 8, cy: 6 });
+    expect(cibleTouchee(etat, 17, 12.5, RAYON)).toEqual({ type: 'heros' });
+    expect(cibleTouchee(etat, 17, 12.9, 0.1)).toEqual({ type: 'case', cx: 8, cy: 6 });
   });
 
   it('ne trouve rien hors de la carte', () => {
@@ -54,7 +54,7 @@ describe('cibleTouchee', () => {
     const etat = partie();
     const heros = etat.unites.find((u) => u.id === etat.heros);
     if (heros) heros.mort = true;
-    expect(cibleTouchee(etat, 16, 12.5, RAYON)).toEqual({ type: 'case', cx: 8, cy: 6 });
+    expect(cibleTouchee(etat, 17, 12.5, RAYON)).toEqual({ type: 'case', cx: 8, cy: 6 });
   });
 });
 
@@ -78,14 +78,15 @@ describe('cases et menu', () => {
     expect(ui.mode).toEqual({ type: 'libre' });
   });
 
-  it('toucher une case interdite (le chemin) dit pourquoi et n’ouvre rien', () => {
+  it('toucher le chemin n’ouvre rien et ne dit rien ; un menu ouvert se referme', () => {
     const etat = partie();
     const ui = new Interaction();
-    expect(ui.toucher(etat, 6, 4, RAYON)).toEqual({ action: null, refus: 'case_interdite' });
+    expect(ui.toucher(etat, 6, 4, RAYON)).toEqual({ action: null, refus: null });
     expect(ui.mode).toEqual({ type: 'libre' });
     ui.toucher(etat, ...pt(0), RAYON);
-    expect(ui.toucher(etat, 6, 4, RAYON)).toEqual({ action: null, refus: 'case_interdite' });
     expect(ui.mode).toEqual({ type: 'menu', ...ct(0) });
+    expect(ui.toucher(etat, 6, 4, RAYON)).toEqual({ action: null, refus: null });
+    expect(ui.mode).toEqual({ type: 'libre' });
   });
 
   it('choisir une tour dans le menu renvoie l’action de construction et ferme le menu', () => {
@@ -176,7 +177,7 @@ describe('héros', () => {
   it('toucher le héros puis un point du chemin envoie l’ordre de déplacement', () => {
     const etat = partie();
     const ui = new Interaction();
-    ui.toucher(etat, 16, 12.5, RAYON);
+    ui.toucher(etat, 17, 12.5, RAYON);
     expect(ui.mode).toEqual({ type: 'heros' });
     const issue = ui.toucher(etat, 20, 13, RAYON);
     expect(issue).toEqual({ action: { type: 'deplacerHeros', x: 20, y: 13 }, refus: null });
@@ -197,8 +198,8 @@ describe('héros', () => {
   it('retoucher le héros annule la sélection, comme la touche E', () => {
     const etat = partie();
     const ui = new Interaction();
-    ui.toucher(etat, 16, 12.5, RAYON);
-    ui.toucher(etat, 16, 12.5, RAYON);
+    ui.toucher(etat, 17, 12.5, RAYON);
+    ui.toucher(etat, 17, 12.5, RAYON);
     expect(ui.mode.type).toBe('libre');
     ui.basculerHeros(etat);
     expect(ui.mode.type).toBe('heros');
@@ -432,7 +433,7 @@ describe('objets emportés', () => {
 });
 
 describe('visée de case', () => {
-  it('éclaire la case sous le pointeur, libre ou interdite, et rien hors de la carte', () => {
+  it('éclaire la case libre sous le pointeur, ni le chemin ni rien hors de la carte', () => {
     const etat = partie();
     const ui = new Interaction();
     const surb = new Surbrillance();
@@ -441,9 +442,10 @@ describe('visée de case', () => {
     ui.viser(etat, ...pt(0, 0.4, -0.3));
     ui.surbrillance(etat, surb);
     expect([surb.viseeCx, surb.viseeCy, surb.viseeInterdite]).toEqual([ct(0).cx, ct(0).cy, false]);
+    // Le chemin ne s'éclaire pas (jalon 5) : on n'y construit rien.
     ui.viser(etat, 6, 4);
     ui.surbrillance(etat, surb);
-    expect([surb.viseeCx, surb.viseeCy, surb.viseeInterdite]).toEqual([3, 2, true]);
+    expect(surb.viseeCx).toBe(-1);
     ui.viser(etat, -1, 5);
     ui.surbrillance(etat, surb);
     expect(surb.viseeCx).toBe(-1);
@@ -474,11 +476,11 @@ describe('visée de case', () => {
     expect(surb.viseeCx).toBe(-1);
   });
 
-  it('toucher une case interdite donne case_interdite sans ouvrir de menu, même quand on la visait', () => {
+  it('toucher le chemin n’ouvre pas de menu, même quand on le visait', () => {
     const etat = partie();
     const ui = new Interaction();
     ui.viser(etat, 6, 4);
-    expect(ui.toucher(etat, 6, 4, RAYON)).toEqual({ action: null, refus: 'case_interdite' });
+    expect(ui.toucher(etat, 6, 4, RAYON)).toEqual({ action: null, refus: null });
     expect(ui.mode).toEqual({ type: 'libre' });
   });
 
@@ -490,7 +492,7 @@ describe('visée de case', () => {
     expect(issue).toEqual({ action: { type: 'construire', ...ct(2), tour: 'tir' }, refus: null });
   });
 
-  it('la case survolée passe avant celle du menu ; sur une case interdite, la touche dit pourquoi', () => {
+  it('la case survolée passe avant celle du menu ; sur le chemin, la touche dit pourquoi et ne construit pas sur la case du menu', () => {
     const etat = partie();
     const ui = new Interaction();
     ui.toucher(etat, ...pt(0), RAYON);
@@ -550,21 +552,70 @@ describe('aperçu de la tour au survol du menu', () => {
   });
 });
 
-describe('le chemin n’offre aucune pose (jalon 5)', () => {
+describe('le chemin n’offre aucune pose (jalon 5), sur une carte de campagne alignée', () => {
+  const niveau = CAMPAGNE[0]?.niveau;
+  if (!niveau) throw new Error('niveau 1 absent');
+  const carte = niveau.carte;
+  const partieCampagne = (): EtatPartie => creerPartie(niveau, CONFIG);
+  /** Une case du chemin et une case libre voisine (ni chemin ni décor), pour viser des deux côtés de la même bordure. */
+  const cases = ((): { chemin: CaseGrille; libre: CaseGrille } => {
+    for (let cy = 0; cy < 9; cy++) {
+      for (let cx = 0; cx < 16; cx++) {
+        if (!estCaseDeChemin(carte, cx, cy)) continue;
+        for (const [dx, dy] of [[0, 1], [1, 0], [0, -1], [-1, 0]] as const) {
+          const v = { cx: cx + dx, cy: cy + dy };
+          if (v.cx >= 0 && v.cy >= 0 && v.cx < 16 && v.cy < 9 && !estCaseDeChemin(carte, v.cx, v.cy) && !estCaseInterdite(niveau, v.cx, v.cy)) return { chemin: { cx, cy }, libre: v };
+        }
+      }
+    }
+    throw new Error('aucune case libre voisine du chemin');
+  })();
+  const centre = (c: CaseGrille): [number, number] => {
+    const p = centreCase(c.cx, c.cy);
+    return [p.x, p.y];
+  };
+
   it('toucher une case du chemin n’ouvre pas le menu et ne dit rien ; la case n’est pas éclairée', () => {
-    const niveau = CAMPAGNE[0]?.niveau;
-    if (!niveau) throw new Error('niveau 1 absent');
-    const etat = creerPartie(niveau, CONFIG);
-    // Le chemin du niveau 1 part du bord ouest par le centre d'une case : sa première case est une case de chemin.
-    const premier = niveau.carte.chemins[0]?.points[1];
-    if (!premier) throw new Error('chemin absent');
-    const interaction = new Interaction();
-    expect(interaction.toucher(etat, premier.x - 0.5, premier.y - 0.5, RAYON)).toEqual({ action: null, refus: null });
-    expect(interaction.mode.type).toBe('libre');
-    interaction.viser(etat, premier.x - 0.5, premier.y - 0.5);
-    expect(interaction.visee).toBeNull();
-    // Une case libre voisine, elle, s'ouvre et s'éclaire.
-    interaction.toucher(etat, premier.x + 2.5, premier.y + 2.5, RAYON);
-    expect(interaction.mode.type).toBe('menu');
+    const etat = partieCampagne();
+    const ui = new Interaction();
+    expect(ui.toucher(etat, ...centre(cases.chemin), RAYON)).toEqual({ action: null, refus: null });
+    expect(ui.mode.type).toBe('libre');
+    const surb = new Surbrillance();
+    ui.viser(etat, ...centre(cases.chemin));
+    ui.surbrillance(etat, surb);
+    expect(ui.visee).toBeNull();
+    expect(surb.viseeCx).toBe(-1);
+  });
+
+  it('la case libre voisine s’éclaire (claire, pas rouge) et s’ouvre au toucher', () => {
+    const etat = partieCampagne();
+    const ui = new Interaction();
+    const surb = new Surbrillance();
+    ui.viser(etat, ...centre(cases.libre));
+    ui.surbrillance(etat, surb);
+    expect([surb.viseeCx, surb.viseeCy, surb.viseeInterdite]).toEqual([cases.libre.cx, cases.libre.cy, false]);
+    ui.toucher(etat, ...centre(cases.libre), RAYON);
+    expect(ui.mode).toEqual({ type: 'menu', ...cases.libre });
+  });
+
+  it('toucher le chemin referme un menu ouvert', () => {
+    const etat = partieCampagne();
+    const ui = new Interaction();
+    ui.toucher(etat, ...centre(cases.libre), RAYON);
+    expect(ui.mode.type).toBe('menu');
+    expect(ui.toucher(etat, ...centre(cases.chemin), RAYON)).toEqual({ action: null, refus: null });
+    expect(ui.mode.type).toBe('libre');
+  });
+
+  it('une touche de construction, souris sur le chemin et menu ouvert ailleurs, ne construit nulle part et dit « case interdite »', () => {
+    const etat = partieCampagne();
+    const ui = new Interaction();
+    ui.toucher(etat, ...centre(cases.libre), RAYON);
+    ui.viser(etat, ...centre(cases.chemin));
+    expect(ui.construireSurSelection(etat, 'tir')).toEqual({ action: null, refus: 'case_interdite' });
+    expect(etat.tours).toHaveLength(0);
+    // La souris quitte la carte : la touche retrouve la case du menu.
+    ui.cesserDeViser();
+    expect(ui.construireSurSelection(etat, 'tir').action).toEqual({ type: 'construire', ...cases.libre, tour: 'tir' });
   });
 });

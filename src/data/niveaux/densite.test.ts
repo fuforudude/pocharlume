@@ -54,7 +54,10 @@ describe('densité des ennemis', () => {
         for (const p of vague.paquets) {
           const def: DefEnnemi = ENNEMIS[p.ennemi as keyof typeof ENNEMIS];
           if (def.boss || (def.pouvoirs?.essaim ?? 1) > 1 || p.nombre < 2) continue;
-          expect(p.intervalle * def.vitesse, `niveau ${String(niveau.numero)} : ${p.ennemi}`).toBeGreaterThanOrEqual(EQUILIBRAGE.ecartMinimalTuiles - 1e-9);
+          // Au moins 0,8 tuile partout ; la valeur commune, sauf pour un niveau qui règle son écart à la main (`ecart` du plan, 0,8 au plus bas).
+          const ecart = PLANS_REGIONS.flat().find((q) => q.numero === niveau.numero)?.vagues.ecart ?? EQUILIBRAGE.ecartMinimalTuiles;
+          expect(ecart, `niveau ${String(niveau.numero)}`).toBeGreaterThanOrEqual(0.8);
+          expect(p.intervalle * def.vitesse, `niveau ${String(niveau.numero)} : ${p.ennemi}`).toBeGreaterThanOrEqual(ecart - 1e-9);
           verifies++;
         }
       }
@@ -64,7 +67,18 @@ describe('densité des ennemis', () => {
 
   it('une horde garde la densité d’avant : effectifs complets, colonnes serrées, aucun facteur de PV', () => {
     for (const plan of plans.filter((p) => p.vagues.horde === true)) {
-      for (const vague of vaguesDuPlan(plan)) for (const p of vague.paquets) expect(p.facteurPv).toBeUndefined();
+      for (const vague of vaguesDuPlan(plan)) {
+        for (const p of vague.paquets) {
+          expect(p.facteurPv).toBeUndefined();
+          // Colonnes serrées : 0,3 s à la vitesse de référence (`intervallePaquet`), très en dessous de 0,8 tuile.
+          const def: DefEnnemi = ENNEMIS[p.ennemi as keyof typeof ENNEMIS];
+          if (!def.boss && p.nombre > 1) expect(p.intervalle * def.vitesse, `niveau ${String(plan.numero)} : ${p.ennemi}`).toBeLessThan(0.8);
+        }
+      }
+      // L'effectif de la horde est celui d'avant : au moins un tiers de plus que le même niveau en profil ordinaire.
+      const horde = nombreOrdinaires(vaguesDuPlan(plan));
+      const ordinaire = nombreOrdinaires(vaguesDuPlan({ ...plan, vagues: { ...plan.vagues, horde: false } }));
+      expect(horde / ordinaire, `niveau ${String(plan.numero)}`).toBeGreaterThanOrEqual(1.5);
     }
   });
 });

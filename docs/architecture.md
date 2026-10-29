@@ -578,7 +578,7 @@ Mécanique (`src/data/equilibrage.ts`, `generation.ts`, `plan-niveau.ts`) :
   inchangée, l'effectif est divisé par 2 (de 79 à 41 ennemis par vague en moyenne sur les 90 niveaux ordinaires, 44 à 51 % de moins selon la région).
   Quand le budget restant ne paie plus un ennemi renforcé entier, le facteur baisse (jamais sous 1) : sans cela les premières vagues des
   régions 7 à 10, au petit budget, n'auraient aucun ennemi cher. `menaceVague` compte le facteur. Les boss ne sont jamais renforcés.
-- **Espacement** : `EQUILIBRAGE.ecartMinimalTuiles` = 1,3 (la spec demande au moins 0,8). L'intervalle d'un paquet vaut `ceil(1,3 / vitesse)` au
+- **Espacement** : `EQUILIBRAGE.ecartMinimalTuiles` = 1,3 (la spec demande au moins 0,8 ; un plan peut régler son `ecart`, 0,8 au plus bas). L'intervalle d'un paquet vaut `ceil(1,3 / vitesse)` au
   dixième de seconde supérieur (`intervallePaquet`), hors essaims, qui gardent leurs colonnes serrées (0,3 s). Avec 0,8 la zone sans caserne gagnait
   9 points de plus que sans zone dans les niveaux ordinaires, 7 avec 1,25, 2 avec 1,3 ; avec 1,4 ni la caserne ni la zone n'ont plus d'effet
   (mesures de `zone.ts`, voir plus bas).
@@ -612,9 +612,16 @@ Rééquilibrage (avant → après) :
 - **Régions 6 à 10** : `facteurBudget` refait par `affiner.ts` (naïf entre 35 et 80 % en Matou, 100 % en Chaton) : par exemple niveau 78 : 0,477 → 1,001, niveau 80 : 0,393 → 1,055
   (les ennemis renforcés et espacés rendaient ces niveaux trop faciles), niveau 100 : 0,042 → 0,15 (le héros de Pollen seul le gagnait). Niveau 85 : graine 2085 → 2086
   (le Garde Royal n'y apparaissait plus). Arêtes de départ de la région 10 ×0,92 et de la région 9 ×0,92 puis ×0,9 : le Fer y dépassait 90 %.
-- **Régions 1 à 5** : niveaux 2 et 4 de la région 1 : `facteurBudget` 3,2 et 1,5 (le héros de Pollen seul les gagnait en Chaton : ses tirs à distance tuent des ennemis espacés
-  un à un) ; niveau 5 : 220 → 280 arêtes (le soigneux le perdait en Matou à la graine 8) ; niveau 13 (horde) : 975 → 1250 arêtes (le naïf de Charlie perdait en Chaton).
-- Tests adaptés : les tests de budget de la région 1 tiennent compte du `facteurBudget` des niveaux 2 et 4 ; le test de rejeu joue le niveau 3 (le plan de construction
+- **Régions 1 à 5** : le héros de Pollen seul gagnait en Chaton les niveaux 2 et 4 de la région 1 (ses tirs à distance tuent un à un des ennemis espacés ; aucun ennemi de la
+  région n'est volant ni blindé, ajouter le mendiant ou le chien errant au niveau 2 n'y change rien, ni plus de vagues, ni un autre chemin). Premier essai, écarté : un `facteurBudget`
+  de 3,2 au niveau 2 (406 ennemis, menace de la vague 6 à 6679 contre 2360 au niveau 3 : un mur au deuxième niveau). Réglage retenu : `PlanVagues.ecart` (écart minimal par niveau,
+  jamais sous 0,8) à 0,8 aux niveaux 2 et 4, et `facteurBudget` 1,25 au niveau 2 : niveau 2, 159 ennemis (avant 406) et menace de la vague 6 à 2580 (avant 6679) ; niveau 4, 241 ennemis
+  (avant 364, facteur 1,5) et menace 2617 (avant 3958). Le test de croissance mesure la menace réelle (voir plus bas). Niveau 5 : 220 → 280 arêtes (le soigneux le perdait en Matou à la
+  graine 8) ; niveau 13 (horde) : 975 → 1250 arêtes (le naïf de Charlie perdait en Chaton).
+- **Niveau 100** : `facteurBudget` 0,042 → 0,09 avec `ecart` 0,8 (le héros de Pollen seul le gagnait à 0,042) : 102 ennemis (0,15 en donnait 147, menace de la vague 6 à 1010 ; maintenant 606).
+- **Pic de menace** : `campagne.test.ts` vérifie que la vague 6 d'un niveau ordinaire ne dépasse pas 1,5 fois (régions 1 à 5) ou 2,2 fois (régions 6 à 10, dont le `facteurBudget` est réglé niveau par
+  niveau sur le naïf, donc non monotone : écarts réels jusqu'à 2,03) celle du niveau ordinaire suivant ; hordes et boss exclus.
+- Tests adaptés : les tests de budget de la région 1 tiennent compte du `facteurBudget` du niveau 2 ; le test de rejeu joue le niveau 3 (le plan de construction
   fixe de `bot.test-utils.ts` perd les autres niveaux, sans que le moteur soit en cause) ; les tests de sorts du bot jouent le niveau 10.
 
 Résultats (10 graines, comme les bandes) : voir `balance-report.md`. **Bandes imposées : toutes tenues** (Chaton, le héros seul perd, défis, infini, puissance).
@@ -624,15 +631,15 @@ Soigneux / naïf en Matou par région, Plume / Charlie / Pollen : région 1 100 
 région 10 100 / 100 / 100 et 80 / 40 / 89 %. Toujours suspendues (Matou et Vieux Sage, comme aux jalons 3 et 4) : Charlie et Pollen très en dessous de Plume en Vieux Sage,
 Pollen trop fort pour le naïf en Matou, courbe de difficulté non monotone.
 
-Outils : `tools/cartes/densite.ts` (effectifs par vague avec et sans robustesse), `tools/cartes/aligner.py` (alignement des chemins sur la grille), `tools/cartes/avant-apres.ts`.
+Outils : `tools/cartes/avant-apres.ts` (planche avant/après des chemins). Les effectifs avec et sans robustesse sont comparés par `densite.test.ts`.
 
 ### Chemins sur la grille des cases (jalon 5)
 Les chemins des 31 cartes (`cartes*.ts`) passent par le centre des cases : coordonnées de tuile impaires (la case `i` couvre les tuiles `2i` et `2i+1`), segments
 horizontaux ou verticaux, entrée et sortie par le bord de la carte. Le chemin dessiné (2 tuiles de large) et les cases interdites par le chemin (`tuilesDeChemin`) sont
 alors exactement les cases traversées par l'axe : plus aucune case à moitié chemin. `estCaseDeChemin` (engine/grille.ts) le dit ; l'interface n'ouvre ni menu ni
-surbrillance de pose sur une case de chemin (le toucher referme seulement le menu ouvert). Conversion : `tools/cartes/aligner.py` (chaque coordonnée paire passe
-à l'impair voisin, en gardant l'ordre des coordonnées ; il refuse de fusionner deux files). Tests : `chemins-grille.test.ts` (règle sur les 31 cartes) et
-`sol-chemin-grille.test.ts` (sol dessiné et cases interdites identiques). Planche : `docs/cartes/chemins-avant-apres.png`. La carte de test (`NIVEAU_TEST`) n'a pas été alignée.
+surbrillance de pose sur une case de chemin (le toucher referme seulement le menu ouvert ; une touche de construction, souris sur le chemin, ne construit nulle part). `estCaseDeChemin` repose sur les tuiles du chemin (`tuilesDeChemin`), pas sur l'axe. Conversion faite une fois (chaque coordonnée paire est passée
+à l'impair voisin, en gardant l'ordre des coordonnées et sans fusionner deux files ; le script n'est pas conservé : la règle est gardée par les tests). Tests : `chemins-grille.test.ts` (règle sur les 31 cartes) et
+`sol-chemin-grille.test.ts` (sol dessiné et cases interdites identiques). Planche : `docs/cartes/chemins-avant-apres.png`. La carte de test (`NIVEAU_TEST`) est alignée aussi (c'est le chemin 0 des Chaumes).
 
 ### Équilibrage des trois dieux (jalon 2, tâche 6)
 - **Constat.** Le héros porte la difficulté. Les ennemis arrivent en colonnes serrées (0,3 s d'écart) et un héros ne bloque

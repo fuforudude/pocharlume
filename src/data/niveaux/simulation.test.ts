@@ -10,7 +10,7 @@ import { jouerPartie } from '../../equilibrage/simulation';
 import { CONFIG_MATOU, jouer, planDeConstruction } from './bot.test-utils';
 import { REGION1 } from './region1';
 
-const DELAI_PARTIE_LONGUE = 400_000;
+const DELAI_PARTIE_LONGUE = 180_000;
 
 describe('les niveaux de la région 1 se jouent', () => {
   for (const campagne of REGION1) {
@@ -29,11 +29,22 @@ describe('les niveaux de la région 1 se jouent', () => {
     });
   }
 
-  it('la partie est rejouable à l’identique à partir de son journal', () => {
+  it('la partie est rejouable à l’identique à partir de son journal (niveau 3, une horde)', () => {
     const campagne = REGION1[2];
     if (!campagne) throw new Error('niveau 3 absent');
     const bilan = jouer(campagne.niveau, planDeConstruction(campagne.niveau));
     expect(bilan.etat.journal.length).toBeGreaterThan(8);
+    const rejoue = rejouer(campagne.niveau, CONFIG_MATOU, bilan.etat.journal);
+    expect(serialiser(rejoue)).toBe(serialiser(bilan.etat));
+  });
+
+  it('la partie est rejouable à l’identique sur un niveau à ennemis renforcés (niveau 5, facteur de PV dans les paquets)', () => {
+    const campagne = REGION1[4];
+    if (!campagne) throw new Error('niveau 5 absent');
+    expect(campagne.niveau.vagues.some((v) => v.paquets.some((p) => (p.facteurPv ?? 1) > 1))).toBe(true);
+    // Le plan de construction fixe perd ce niveau : peu d'actions suffisent, le rejeu doit tout de même être exact.
+    const bilan = jouer(campagne.niveau, planDeConstruction(campagne.niveau));
+    expect(bilan.etat.journal.length).toBeGreaterThan(3);
     const rejoue = rejouer(campagne.niveau, CONFIG_MATOU, bilan.etat.journal);
     expect(serialiser(rejoue)).toBe(serialiser(bilan.etat));
   });

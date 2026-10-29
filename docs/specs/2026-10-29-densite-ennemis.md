@@ -58,8 +58,8 @@ par exemple bloquer les ennemis avec beaucoup de soldats puis les écraser en zo
 2. Estimation de puissance des tours de zone et bot soigneux « bloquer puis zone ». Tests du simulateur.
 3. Choix des niveaux de horde (1 ou 2 par région, sur des cartes à virages serrés ou à long tronc commun).
 4. Rééquilibrage des régions 1 à 10, des défis et de l'infini (`npm run balance`).
-4bis. Chemins alignés sur la grille des cases (ajout de l'utilisateur, fait avant la tâche 4 car il change la géométrie des niveaux) : script
-   `tools/cartes/aligner.py`, tests `chemins-grille.test.ts` et `sol-chemin-grille.test.ts`, case de chemin non cliquable
+4bis. Chemins alignés sur la grille des cases (ajout de l'utilisateur, fait avant la tâche 4 car il change la géométrie des niveaux) : conversion
+   faite une fois (script non conservé), tests `chemins-grille.test.ts` et `sol-chemin-grille.test.ts`, case de chemin non cliquable
    (`estCaseDeChemin`, `interaction.ts`), planche avant/après `docs/cartes/chemins-avant-apres.png`.
 5. Relecture, QA au navigateur : nombre d'ennemis à l'écran, fiche de niveau de horde.
 
@@ -87,5 +87,5 @@ par exemple bloquer les ennemis avec beaucoup de soldats puis les écraser en zo
   Vieux Sage restent suspendues comme au jalon 4.
 - **Infini** : plafond (200 ennemis) et croissance (×1,22) inchangés : médiane du soigneux 32 à 36 sur la région 1, naïf au plus 29.
 - **Non vérifié** : la tâche 5 (QA au navigateur : nombre d'ennemis à l'écran, fiche de niveau de horde, sensation de jeu de la zone) n'est pas faite ; la sensation des niveaux 2
-  et 4 de la région 1 (`facteurBudget` 3,2 et 1,5) est à confirmer en jouant.
+  et 4 de la région 1 (réglés par `ecart` 0,8, et `facteurBudget` 1,25 au niveau 2) est à confirmer en jouant.
 
