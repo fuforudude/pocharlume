@@ -40,7 +40,7 @@ export function poidsDesChemins(niveau: Niveau): number[] {
   for (const vague of niveau.vagues) {
     for (const p of vague.paquets) {
       const def = table[p.ennemi];
-      if (def) menaces[p.chemin] = (menaces[p.chemin] ?? 0) + p.nombre * menaceEnnemi(def);
+      if (def) menaces[p.chemin] = (menaces[p.chemin] ?? 0) + p.nombre * menaceEnnemi(def) * (p.facteurPv ?? 1);
     }
   }
   const total = menaces.reduce((a, b) => a + b, 0);
@@ -59,7 +59,7 @@ export function partsSpeciales(niveau: Niveau): { volants: number; furtifs: numb
     for (const p of vague.paquets) {
       const def = table[p.ennemi];
       if (!def) continue;
-      const menace = p.nombre * menaceEnnemi(def);
+      const menace = p.nombre * menaceEnnemi(def) * (p.facteurPv ?? 1);
       total += menace;
       if (def.volant) volants += menace;
       if (def.furtif) furtifs += menace;

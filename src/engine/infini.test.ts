@@ -123,7 +123,10 @@ describe('plafond du nombre d’ennemis par vague', () => {
 
   it('les vagues qui tiennent dans le plafond restent celles du budget, avec la seule robustesse des ennemis ordinaires', () => {
     const vague = genererVagueInfinie(configInfinie(1), CHEMINS, 12);
-    expect(ordinaires(vague, 1).every((p) => p.facteurPv === EQUILIBRAGE.robustesseOrdinaires)).toBe(true);
+    const paquets = ordinaires(vague, 1);
+    // Le dernier paquet peut être moins renforcé : le budget restant ne paie plus un ennemi à la robustesse pleine.
+    expect(paquets.slice(0, -1).every((p) => p.facteurPv === EQUILIBRAGE.robustesseOrdinaires)).toBe(true);
+    expect(paquets.every((p) => (p.facteurPv ?? 1) >= 1 && (p.facteurPv ?? 1) <= EQUILIBRAGE.robustesseOrdinaires)).toBe(true);
   });
 });
 

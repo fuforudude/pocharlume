@@ -3,7 +3,9 @@
 import { describe, expect, it } from 'vitest';
 import { REGLES } from '../data/regles';
 import { CARTES } from '../data/niveaux/cartes-toutes';
+import { decorVisible } from '../data/niveaux/assemblage';
 import { casesInterditesDuNiveau } from '../data/niveaux/grille-niveau';
+import { empriseDecor, GRANDS_DECORS } from '../data/niveaux/habillage';
 import { construireSol } from './sol';
 
 const T = REGLES.tailleCase;
@@ -27,14 +29,19 @@ describe.each(Object.entries(CARTES))('sol et cases interdites, carte %s', (_id,
     expect([...dessinees].sort()).toEqual([...interdites].sort());
   });
 
-  it('toute case voisine du chemin, sans grand décor, est constructible', () => {
-    // Sans décor : seules les cases du chemin sont interdites, donc toutes les voisines sont libres.
+  it('toute case voisine du chemin est constructible, sauf si un grand décor visible la recouvre (décor réel de la carte)', () => {
+    const decor = decorVisible(modele, carte);
+    const reelles = new Set(casesInterditesDuNiveau(carte, decor).map((c) => `${String(c.cx)},${String(c.cy)}`));
+    const grands = decor.filter((d) => GRANDS_DECORS.has(d.sprite)).map((d) => empriseDecor(d));
+    const recouverte = (cx: number, cy: number): boolean => grands.some((e) => e.x0 < (cx + 1) * T && e.x1 > cx * T && e.y0 < (cy + 1) * T && e.y1 > cy * T);
     for (const clef of interdites) {
       const [cx = 0, cy = 0] = clef.split(',').map(Number);
       for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
         const voisine = `${String(cx + dx)},${String(cy + dy)}`;
         const existe = cx + dx >= 0 && cy + dy >= 0 && cx + dx < modele.largeur / T && cy + dy < modele.hauteur / T;
-        if (existe && !interdites.has(voisine)) expect(casesInterditesDuNiveau(carte, []).some((c) => `${String(c.cx)},${String(c.cy)}` === voisine)).toBe(false);
+        if (!existe || interdites.has(voisine)) continue;
+        // Interdite avec le décor réel : un grand décor visible la recouvre vraiment (sinon la case est libre).
+        if (reelles.has(voisine)) expect(recouverte(cx + dx, cy + dy), `case ${voisine} interdite sans grand décor dessus`).toBe(true);
       }
     }
   });

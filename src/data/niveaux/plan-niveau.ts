@@ -32,9 +32,11 @@ export interface PlanNiveau {
     readonly boss?: BossDeVague;
     /**
      * Niveau de horde (jalon 5) : nombreux ennemis faibles et serrés (la densité d'avant), là où les tours de zone doivent briller.
-     * Absent = niveau ordinaire : environ deux fois moins d'ennemis, deux fois plus solides, espacés d'au moins 0,8 tuile.
+     * Absent = niveau ordinaire : environ deux fois moins d'ennemis, deux fois plus solides, espacés de `EQUILIBRAGE.ecartMinimalTuiles` (1,3 tuile ; au moins 0,8).
      */
     readonly horde?: boolean;
+    /** Écart minimal entre deux ennemis d'un paquet (tuiles, au moins 0,8) à la place de la valeur commune `EQUILIBRAGE.ecartMinimalTuiles` : réglage fin d'un niveau. */
+    readonly ecart?: number;
     /** Vagues retouchées à la main : le test de cohérence avec le générateur les laisse de côté. */
     readonly retouchees?: boolean;
   };

@@ -186,7 +186,8 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
       nombre: 15,
       ennemis: ennemisDuNiveau(10, 10),
       graine: 1100,
-      facteurBudget: 0.15,
+      facteurBudget: 0.09,
+      ecart: 0.8,
 
 
 

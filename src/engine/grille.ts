@@ -1,6 +1,7 @@
 // Grille de construction : la carte est découpée en cases de `REGLES.tailleCase` tuiles de côté (2×2 : 16×9 cases sur une
 // carte 32×18). Une tour se pose sur n'importe quelle case libre, centrée dedans. Le niveau fournit la liste des cases
 // interdites (chemin, grands décors) ; le moteur ne lit pas l'habillage. Tout est pur, sans hasard ni horloge.
+import { tuilesDeChemin } from '../data/niveaux/grille-niveau';
 import { REGLES } from '../data/regles';
 import { pointSurChemin, projeterSurChemin } from './chemins';
 import type { Carte, CaseGrille, Niveau, Point } from './definitions';
@@ -52,20 +53,23 @@ export function estCaseInterdite(niveau: Pick<Niveau, 'carte' | 'casesInterdites
   return ensembleInterdit(niveau).has(cy * colonnes(niveau.carte) + cx);
 }
 
+/** Tuiles du chemin de chaque carte (mémorisées) : celles dont le centre est à `DEMI_LARGEUR_CHEMIN` de l'axe, comme le sol dessiné. */
+const TUILES_CHEMIN = new WeakMap<Pick<Carte, 'chemins'>, Uint8Array>();
+
 /**
- * Vrai si l'axe d'un chemin de la carte traverse la case (jalon 5 : les chemins suivent la grille, donc une case est entièrement
- * du chemin ou pas du tout). Les segments sont horizontaux ou verticaux ; un segment en diagonale est testé par sa boîte englobante.
+ * Vrai si une tuile de la case est du chemin (la règle du sol dessiné et des cases interdites par le chemin : `tuilesDeChemin`). Sur une
+ * carte dont les chemins suivent la grille (jalon 5), une case est entièrement du chemin ou pas du tout ; sur une carte dont l'axe passe
+ * entre deux rangées, toute case que le chemin effleure en est une.
  */
-export function estCaseDeChemin(carte: Pick<Carte, 'chemins'>, cx: number, cy: number): boolean {
+export function estCaseDeChemin(carte: Pick<Carte, 'largeur' | 'hauteur' | 'chemins'>, cx: number, cy: number): boolean {
+  let masque = TUILES_CHEMIN.get(carte);
+  if (!masque) {
+    masque = tuilesDeChemin(carte);
+    TUILES_CHEMIN.set(carte, masque);
+  }
   const t = REGLES.tailleCase;
-  const x0 = cx * t;
-  const y0 = cy * t;
-  return carte.chemins.some((chemin) =>
-    chemin.points.some((b, i) => {
-      const a = chemin.points[i - 1];
-      return a !== undefined && Math.max(a.x, b.x) > x0 && Math.min(a.x, b.x) < x0 + t && Math.max(a.y, b.y) > y0 && Math.min(a.y, b.y) < y0 + t;
-    }),
-  );
+  for (let dy = 0; dy < t; dy++) for (let dx = 0; dx < t; dx++) if (masque[(cy * t + dy) * carte.largeur + cx * t + dx] === 1) return true;
+  return false;
 }
 
 /** La tour posée sur la case, si elle existe. */

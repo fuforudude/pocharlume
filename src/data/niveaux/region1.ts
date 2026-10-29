@@ -15,16 +15,16 @@ const CARTE_TEST: Carte = {
   chemins: [
     {
       points: [
-        { x: -1, y: 4 },
-        { x: 12, y: 4 },
-        { x: 12, y: 13 },
-        { x: 24, y: 13 },
-        { x: 24, y: 7 },
+        { x: -1, y: 5 },
+        { x: 13, y: 5 },
+        { x: 13, y: 13 },
+        { x: 25, y: 13 },
+        { x: 25, y: 7 },
         { x: 33, y: 7 },
       ],
     },
   ],
-  departHeros: { x: 16, y: 13 },
+  departHeros: { x: 17, y: 13 },
 };
 
 export const NIVEAU_TEST: Niveau = {

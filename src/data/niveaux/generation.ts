@@ -30,6 +30,8 @@ export interface PlanVagues {
   readonly boss?: BossDeVague;
   /** Niveau de horde (jalon 5) : la densité d'avant, ennemis non renforcés et serrés (voir `genererVague`). */
   readonly horde?: boolean;
+  /** Écart minimal entre deux ennemis d'un paquet (tuiles), à la place de `EQUILIBRAGE.ecartMinimalTuiles` : réglage fin d'un niveau. */
+  readonly ecart?: number;
 }
 
 /** Les vagues d'un niveau, telles que son plan les demande. */
@@ -55,6 +57,7 @@ export function genererVaguesNiveau(plan: PlanVagues): Vague[] {
         chemins: plan.chemins,
         ...(plan.facteurBudget === undefined ? {} : { budget: budgetVague(plan.niveau, w) * plan.facteurBudget }),
         ...(plan.horde === true ? { horde: true } : {}),
+        ...(plan.ecart === undefined ? {} : { ecart: plan.ecart }),
       }).paquets];
     const boss = plan.boss;
     if (boss && boss.vague === w) {

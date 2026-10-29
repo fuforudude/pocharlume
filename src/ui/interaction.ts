@@ -69,6 +69,8 @@ export class Interaction {
   mode: Mode = LIBRE;
   /** La case sous le pointeur (survol de la souris, ou doigt posé), null si on ne vise rien. */
   visee: CaseGrille | null = null;
+  /** Le pointeur survole une case du chemin (qui ne s'éclaire pas) : une touche de construction ne doit pas se rabattre sur le menu ouvert. */
+  private surChemin = false;
   /** Le bouton « construire » du menu survolé : sa portée et son ralliement sont montrés sur la carte. */
   private apercu: ApercuConstruction | null = null;
   /** Dernier mode dont on a rédigé l'invite : l'invite est appelée à chaque image, le texte n'est refait que si le mode change. */
@@ -110,12 +112,14 @@ export class Interaction {
     const mode = this.mode.type;
     const sous = mode === 'libre' || mode === 'menu' ? caseSousPoint(etat.niveau.carte, x, y) : null;
     // Le chemin ne s'éclaire pas : on n'y construit rien.
-    this.visee = sous && estCaseDeChemin(etat.niveau.carte, sous.cx, sous.cy) ? null : sous;
+    this.surChemin = sous !== null && estCaseDeChemin(etat.niveau.carte, sous.cx, sous.cy);
+    this.visee = this.surChemin ? null : sous;
   }
 
   /** Le pointeur a quitté la carte, ou le doigt s'est levé : plus aucune case n'est éclairée. */
   cesserDeViser(): void {
     this.visee = null;
+    this.surChemin = false;
   }
 
   /** Un bouton du menu en cercle est survolé (ou rendu actif au clavier) ; null quand le pointeur le quitte. */
@@ -189,6 +193,8 @@ export class Interaction {
    */
   construireSurSelection(etat: EtatPartie, famille: FamilleTour): Issue {
     const mode = this.mode;
+    // Souris sur le chemin : rien ne se construit, ni là ni sur la case du menu ouvert ailleurs.
+    if (this.surChemin) return { action: null, refus: 'case_interdite' };
     const cible = this.visee ?? (mode.type === 'menu' ? mode : null);
     if (!cible || tourSurCase(etat, cible.cx, cible.cy)) return RIEN;
     return this.ordonner(etat, { type: 'construire', cx: cible.cx, cy: cible.cy, tour: famille });
@@ -242,7 +248,7 @@ export class Interaction {
     if (visee && etat.statut === 'en_cours') {
       surb.viseeCx = visee.cx;
       surb.viseeCy = visee.cy;
-      // Rouge : le chemin, un grand décor. Une case qui porte une tour s'ouvre (améliorer, vendre) : elle reste claire.
+      // Rouge : un grand décor (le chemin, lui, ne s'éclaire pas). Une case qui porte une tour s'ouvre (améliorer, vendre) : elle reste claire.
       surb.viseeInterdite = estCaseInterdite(etat.niveau, visee.cx, visee.cy) && !tourSurCase(etat, visee.cx, visee.cy);
     }
     // La portée d'une tour qu'on s'apprête à construire se mesure depuis la case du menu, qui l'accueillerait.

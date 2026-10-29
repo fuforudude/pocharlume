@@ -58,8 +58,8 @@ par exemple bloquer les ennemis avec beaucoup de soldats puis les écraser en zo
 2. Estimation de puissance des tours de zone et bot soigneux « bloquer puis zone ». Tests du simulateur.
 3. Choix des niveaux de horde (1 ou 2 par région, sur des cartes à virages serrés ou à long tronc commun).
 4. Rééquilibrage des régions 1 à 10, des défis et de l'infini (`npm run balance`).
-4bis. Chemins alignés sur la grille des cases (ajout de l'utilisateur, fait avant la tâche 4 car il change la géométrie des niveaux) : script
-   `tools/cartes/aligner.py`, tests `chemins-grille.test.ts` et `sol-chemin-grille.test.ts`, case de chemin non cliquable
+4bis. Chemins alignés sur la grille des cases (ajout de l'utilisateur, fait avant la tâche 4 car il change la géométrie des niveaux) : conversion
+   faite une fois (script non conservé), tests `chemins-grille.test.ts` et `sol-chemin-grille.test.ts`, case de chemin non cliquable
    (`estCaseDeChemin`, `interaction.ts`), planche avant/après `docs/cartes/chemins-avant-apres.png`.
 5. Relecture, QA au navigateur : nombre d'ennemis à l'écran, fiche de niveau de horde.
 
@@ -78,8 +78,8 @@ par exemple bloquer les ennemis avec beaucoup de soldats puis les écraser en zo
 - **Robustesse** : 2, avec un facteur plus bas (jamais sous 1) quand le budget restant ne paie pas un ennemi renforcé entier (régions 7 à 10). Effectif moyen par vague
   hors horde : 79 → 41 (−48 %), de −44 % (région 7) à −51 % (région 4).
 - **Horde** : les niveaux 3 et 7 de chaque région (20 niveaux), jamais le boss.
-- **Zone** (mesures de `zone.ts`, tolérances documentées dans `zone-ordinaires.test.ts`) : niveaux ordinaires sans caserne, zone −1 point par rapport à sans zone (au plus +6
-  toléré) ; avec caserne, la zone gagne +12 points (au moins +10) ; horde, +43 points (au moins +20). Les compositions se mesurent à 45 % des arêtes de départ en Vieux Sage
+- **Zone** (mesures de `zone.ts`, tolérances documentées dans `zone-ordinaires.test.ts`) : niveaux ordinaires sans caserne, zone +2 points par rapport à sans zone (au plus +6
+  toléré) ; avec caserne, la zone gagne +15 points (au moins +10) ; horde, +42 points (au moins +20). Les compositions se mesurent à 45 % des arêtes de départ en Vieux Sage
   (sinon le soigneux gagne tout) et sans tour divine.
 - **Estimation de puissance** : `ciblesParRayonDeZone` 1,5 → 1,2 seulement (1 sortait la catapulte et le mortier de la tolérance de ±15 %, et les chiffres des tours ne bougent pas) ;
   les cibles « arrêtées » et « horde » (3,5 et 4,5) ne servent qu'au bot soigneux.
@@ -87,5 +87,5 @@ par exemple bloquer les ennemis avec beaucoup de soldats puis les écraser en zo
   Vieux Sage restent suspendues comme au jalon 4.
 - **Infini** : plafond (200 ennemis) et croissance (×1,22) inchangés : médiane du soigneux 32 à 36 sur la région 1, naïf au plus 29.
 - **Non vérifié** : la tâche 5 (QA au navigateur : nombre d'ennemis à l'écran, fiche de niveau de horde, sensation de jeu de la zone) n'est pas faite ; la sensation des niveaux 2
-  et 4 de la région 1 (`facteurBudget` 3,2 et 1,5) est à confirmer en jouant.
+  et 4 de la région 1 (réglés par `ecart` 0,8, et `facteurBudget` 1,25 au niveau 2) est à confirmer en jouant.
 

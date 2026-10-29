@@ -7,8 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { CARTES, type IdCarte } from '../../src/data/niveaux/cartes-toutes.ts';
 import type { CarteModele } from '../../src/data/niveaux/modele-carte.ts';
 import { TUILE } from '../../src/render/camera.ts';
-import { encoderPng } from '../art/png.ts';
-import { nouvelleImage } from '../art/png.ts';
+import { encoderPng, nouvelleImage } from '../art/png.ts';
 import { poser } from '../art/apercu.ts';
 import { dessinerCarte } from '../niveaux/planche.ts';
 
