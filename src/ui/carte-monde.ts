@@ -190,7 +190,11 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     : null;
   if (revoir) revoir.textContent = t('carte.revoir_fin');
   barre.append(retour, titre, monnaies, heros, boutique, ...(inscriptions ? [inscriptions] : []), ...(revoir ? [revoir] : []), reglages);
-  racine.append(barre);
+  // La barre et la rangée des régions s'empilent dans un même bloc : si la barre passe sur deux lignes (écran étroit, bouton en
+  // plus), la rangée descend avec elle au lieu de la recouvrir.
+  const haut = el('div', 'carte-haut');
+  haut.append(barre);
+  racine.append(haut);
 
   const textesDe = (numero: number): { nom: string; ambiance: string } | null => {
     const textes = regionCourante()?.contenu?.textes.find((x) => x.numero === numero);
@@ -222,7 +226,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   const nomRegion = el('div', 'region-nom');
   nomRegion.setAttribute('role', 'status');
   rangeeRegions.append(flechePrecedente, ...puces, flecheSuivante, nomRegion);
-  racine.append(rangeeRegions);
+  haut.append(rangeeRegions);
 
   /** Texte à côté des pastilles : le nom de la région montrée, ou pourquoi une région touchée reste fermée. */
   const direRegion = (texte: string, refus: boolean): void => {

@@ -1,6 +1,6 @@
 # Les dieux sans visage
 
-Statut : validée le 2026-10-29 (jalon 5)
+Statut : livrée le 2026-10-30 (jalon 5)
 Date : 2026-10-29
 
 ## Besoin
@@ -39,9 +39,9 @@ dans des inscriptions sur de vieilles statues cachées dans les cartes.
   Charlie et Pollen reste à part).
 
 ## Critères d'acceptation
-- [ ] Les noms « Plume », « Charlie » et « Pollen » n'apparaissent que dans des clés `inscription.*` (test sur `fr`).
-- [ ] Aucun écran n'affiche de portrait de dieu ; le choix avant un niveau montre symbole, épithète, phrase.
-- [ ] Les trois fidèles ont les mêmes statistiques et compétences que les anciens héros-dieux (test sur les données).
+- [x] Les noms « Plume », « Charlie » et « Pollen » n'apparaissent que dans des clés `inscription.*` (test sur `fr`, `tools/lore/lore.test.ts`).
+- [x] Aucun écran n'affiche de portrait de dieu ; le choix avant un niveau montre symbole, épithète, phrase.
+- [x] Les trois fidèles ont les mêmes statistiques et compétences que les anciens héros-dieux (test sur les données ; les données des héros n'ont pas changé au jalon 5).
 - [x] Chacune des 31 cartes a une statue sur une case de décor, hors chemin et hors case de tour (test : `src/data/niveaux/statues.test.ts`).
 - [x] Toucher une statue en partie révèle son inscription (fenêtre courte, la partie se met en pause) ; une seconde
   fois, rien de nouveau n'est gagné (tests : `partie-boucle.test.ts`, `inscriptions.test.ts` ; vérifié au navigateur).

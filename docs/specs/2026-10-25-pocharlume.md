@@ -251,14 +251,19 @@ Charlie et Pollen en Vieux Sage (0 à 36 % aux régions 6 à 10, contre 70 à 99
 `npm run balance` après la dernière correction du classement des écarts. L'écran de fin d'une partie infinie n'a pas
 été vu au navigateur.
 
-### Jalon 5 : dieux sans visage, moins d'ennemis (décidé le 2026-10-29)
-- [ ] Les dieux sans visage : lore réécrit et reporté, trois fidèles, choix du dieu sans portrait, statues et recueil
+### Jalon 5 : dieux sans visage, moins d'ennemis (décidé le 2026-10-29, livré le 2026-10-30)
+- [x] Les dieux sans visage : lore réécrit et reporté, trois fidèles, choix du dieu sans portrait, statues et recueil
   d'inscriptions. Spec : `docs/specs/2026-10-29-dieux-sans-visage.md`.
-- [ ] Moins d'ennemis, plus solides, niveaux de horde, rééquilibrage des 100 niveaux. Spec :
+- [x] Moins d'ennemis, plus solides, niveaux de horde, rééquilibrage des 100 niveaux. Spec :
   `docs/specs/2026-10-29-densite-ennemis.md`.
-- [ ] Sur mobile (appareil tactile sans clavier : `(hover: none) and (pointer: coarse)`), aucune indication de touche
+- [x] Sur mobile (appareil tactile sans clavier : `(hover: none) and (pointer: coarse)`), aucune indication de touche
   clavier (« E », « Q », « W », « ␣ » sur les boutons du HUD) ; elles reviennent dès qu'une touche est pressée. Les
   raccourcis restent fonctionnels (`src/ui/indications-clavier.ts`).
+
+Écarts : la carte du monde empile sa barre et la rangée des régions (le bouton « Inscriptions » faisait déborder la barre sur
+les régions en 740×360) ; la QA au navigateur a porté sur l'affichage (PC, téléphone en paysage et en portrait), le toucher
+de la statue et le clic sur le chemin sont couverts par les tests ; la sensation des niveaux 2 et 4 de la région 1 reste à
+confirmer en jouant.
 
 ### Jalon 6 : roguelike, finitions, Android
 - [ ] Mode roguelike complet (carte à embranchements, bénédictions, marchand, repos, reliques à débloquer).

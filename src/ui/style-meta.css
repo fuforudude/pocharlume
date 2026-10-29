@@ -629,10 +629,6 @@
 /* --- Carte du monde : régions (jalon 3) --- */
 
 .carte-regions {
-  position: absolute;
-  top: calc(max(6px, env(safe-area-inset-top)) + 50px);
-  left: max(6px, env(safe-area-inset-left));
-  right: max(6px, env(safe-area-inset-right));
   display: flex;
   align-items: center;
   gap: 4px;

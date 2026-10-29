@@ -657,11 +657,18 @@ html[data-sans-clavier] .touche {
   touch-action: none;
 }
 
-.carte-barre {
+.carte-haut {
   position: absolute;
   top: max(6px, env(safe-area-inset-top));
   left: max(6px, env(safe-area-inset-left));
   right: max(6px, env(safe-area-inset-right));
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: none;
+}
+
+.carte-barre {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -924,13 +931,20 @@ html[data-sans-clavier] .touche {
     grid-template-columns: 1fr;
   }
 
-  /* Écran étroit (portrait) : le nom du niveau passe sur une deuxième ligne. */
-  .carte-barre {
+  .carte-regions {
     flex-wrap: wrap;
   }
 
   .carte-barre .puce.total {
     margin-left: auto;
+  }
+
+}
+
+/* Écran étroit (téléphone en paysage, portrait) : le nom du niveau passe sur sa propre ligne, sous les boutons. */
+@media (max-width: 960px) {
+  .carte-barre {
+    flex-wrap: wrap;
   }
 
   .carte-titre {

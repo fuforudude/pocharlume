@@ -1,6 +1,6 @@
 # Moins d'ennemis, plus solides : la zone redevient une stratégie
 
-Statut : validée le 2026-10-29 (jalon 5)
+Statut : livrée le 2026-10-30 (jalon 5)
 Date : 2026-10-29
 
 ## Besoin
