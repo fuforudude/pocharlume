@@ -1,0 +1,644 @@
+# Lore de Pocharlume
+
+Tous les textes narratifs du jeu, regroupés. Modifie librement le texte après les deux-points ; garde la clé
+entre accents graves (`…`) intacte, c'est elle qui dit où va le texte dans le jeu. Tu peux aussi ajouter des
+paragraphes libres (idées, corrections d'univers) : ils seront reportés dans la spec et dans les textes concernés.
+
+Ton voulu (spec) : entièrement sombre, textes courts et cryptiques, violence suggérée, jamais drôle, PEGI 12.
+
+Pas encore dans le jeu : les paroles des dieux avant chaque boss (prévues par la spec) et une description des
+ennemis (ils n'ont qu'un nom). Tu peux les écrire ici.
+
+## Univers (source : la spec)
+C'est l'**An de la Grande Mort**. L'Église du **Soleil Blême** a déclaré les chats serviteurs des sorcières :
+on les brûle avec elles sur les bûchers, on les mange quand la famine vient, on les jette au puits pour conjurer la
+peste. Et plus les chats meurent, plus les rats prolifèrent, et plus la peste tue. Personne ne fait le lien.
+
+Bien avant l'Église, trois **Chats Suprêmes** étaient priés dans les granges et les cryptes. Ils ont brûlé sur le
+**Premier Bûcher**, et il ne reste d'eux que des braises. Le joueur est **le Dernier Veilleur**, un chat sans nom
+qui ranime ces braises et rassemble les survivants, région après région, jusqu'à la cathédrale où le Soleil Blême
+attend.
+
+- **Plume**, la Dame des Ombres : chat noire, rapide et furtive. Elle a vendu son reflet pour que les chasseurs ne
+  la voient plus jamais.
+- **Charlie**, le Colosse : bête et puissant. Il a tenu seul la porte du dernier refuge pendant neuf nuits contre
+  les torches, et n'a jamais compris pourquoi il devait s'arrêter.
+- **Pollen**, Trois-Pattes : chat tigré ingénieux. Il a laissé sa patte dans un piège à loup des chasseurs de
+  sorcières. Les pièges qu'il a construits ensuite ont mieux marché.
+
+Les textes sont courts et cryptiques : descriptions d'objets, inscriptions sur les autels, paroles des dieux avant
+chaque boss. Rien n'est drôle. La violence est suggérée (fumée, silhouettes, cendres) et jamais montrée en gros
+plan, pour rester publiable sur le Play Store (classement PEGI 12 visé).
+
+## Les trois dieux
+
+- `dieu.plume` : Plume
+- `dieu.plume.desc` : La Dame des Ombres. Elle a vendu son reflet : les chasseurs ne la voient plus.
+- `dieu.charlie` : Charlie
+- `dieu.charlie.desc` : Le Colosse. Il a tenu la porte neuf nuits, et n’a pas compris pourquoi s’arrêter.
+- `dieu.pollen` : Pollen
+- `dieu.pollen.desc` : Trois-Pattes. Le piège à loup a gardé sa patte, ses pièges ont gardé le reste.
+
+## Héros
+
+- `heros.plume` : Plume, l’Ombre Première
+- `heros.plume.role` : Duelliste, esquive et critiques
+- `heros.plume.desc` : On ne la frappe pas. On la croit déjà passée.
+- `heros.suie` : Suie
+- `heros.suie.role` : Assassin, exécute les blessés
+- `heros.suie.desc` : Elle sent le brûlé. Ce qu’elle touche ne repart pas.
+- `heros.corbeau` : Corbeau
+- `heros.corbeau.role` : Tireur, perce l’armure
+- `heros.corbeau.desc` : Il attend sur les toits que le bûcher s’éteigne.
+- `heros.charlie` : Charlie, le Colosse
+- `heros.charlie.role` : Tank, frappe de zone qui étourdit
+- `heros.charlie.desc` : Gros, lent, têtu. La porte tient encore.
+- `heros.mastoc` : Mastoc
+- `heros.mastoc.role` : Provocation, bloque trois ennemis
+- `heros.mastoc.desc` : Il a mangé tant de coups qu’ils lui reviennent par habitude.
+- `heros.brise_os` : Brise-Os
+- `heros.brise_os.role` : Berserker, plus fort blessé
+- `heros.brise_os.desc` : Il ne sait plus à qui est le sang. Cela l’aide.
+- `heros.pollen` : Pollen, Trois-Pattes
+- `heros.pollen.role` : Pose des pièges, tire à la fronde
+- `heros.pollen.desc` : Là où il a boité, la terre se referme sur quelqu’un.
+- `heros.rouage` : Rouage
+- `heros.rouage.role` : Ingénieur, construit une tourelle
+- `heros.rouage.desc` : Il parle aux ressorts. Ils lui répondent par des clous.
+- `heros.lanterne` : Lanterne
+- `heros.lanterne.role` : Soigneur, magie à distance
+- `heros.lanterne.desc` : Une flamme sans mèche. Elle éclaire ce qui doit rester debout.
+- `heros.titre` : Héros
+- `heros.fermer` : Fermer
+- `heros.reinitialiser` : Reprendre les points
+- `heros.verrouille` : Pas encore recruté
+- `heros.ultime` : Ultime
+- `heros.plus` : +
+- `heros.confirmer` : Recruter
+- `heros.annuler` : Annuler
+
+## Sorts des dieux
+
+- `sort.voile_de_nuit` : Voile de Nuit
+- `sort.voile_de_nuit.desc` : La nuit tombe en plein jour. Les pas s’alourdissent, les flèches trouvent la gorge.
+- `sort.griffes_d_ombre` : Griffes d’Ombre
+- `sort.griffes_d_ombre.desc` : Ce qui est de chair ne se relève pas. Ce qui est plus que chair s’en souvient.
+- `sort.chute_du_colosse` : Chute du Colosse
+- `sort.chute_du_colosse.desc` : Le sol se souvient de son poids.
+- `sort.renforts` : Renforts
+- `sort.renforts.desc` : Deux gros matous sortent de la grange. Aucun ne dit pourquoi.
+- `sort.pieges_a_ressort` : Pièges à Ressort
+- `sort.pieges_a_ressort.desc` : Trois mâchoires dans la poussière. La quatrième, c’est vous.
+- `sort.ingeniosite` : Ingéniosité
+- `sort.ingeniosite.desc` : Un peu d’os, beaucoup de ruse. Les machines voisines tournent plus vite.
+
+## Compétences des héros
+
+- `comp.pas_de_velours` : Pas de velours
+- `comp.pas_de_velours.desc` : Un coup raté vaut mieux qu’un cri.
+- `comp.griffe_fantome` : Griffe fantôme
+- `comp.griffe_fantome.desc` : Elle frappe là où l’on ne regardait pas.
+- `comp.reflet_vendu` : Reflet vendu
+- `comp.reflet_vendu.desc` : Sans reflet, on va plus vite.
+- `comp.ombre_premiere` : Ombre première
+- `comp.ombre_premiere.desc` : Avant la lumière, il y avait elle.
+- `comp.lame_courte` : Lame courte
+- `comp.lame_courte.desc` : Courte, donc proche. Proche, donc fatale.
+- `comp.soif_de_sang` : Soif
+- `comp.soif_de_sang.desc` : Elle achève ce qui hésite à tomber.
+- `comp.fumee` : Fumée
+- `comp.fumee.desc` : On ne tient pas la fumée.
+- `comp.cendre_et_silence` : Cendre et silence
+- `comp.cendre_et_silence.desc` : Rien ne reste, pas même le bruit.
+- `comp.oeil_noir` : Œil noir
+- `comp.oeil_noir.desc` : Il voit plus loin que le dernier bûcher.
+- `comp.bec_aiguise` : Bec aiguisé
+- `comp.bec_aiguise.desc` : La cotte de mailles n’est qu’une promesse.
+- `comp.plumes_de_nuit` : Plumes de nuit
+- `comp.plumes_de_nuit.desc` : Les ailes battent, les flèches suivent.
+- `comp.festin` : Festin
+- `comp.festin.desc` : Les charognards ne perdent jamais.
+- `comp.poigne_de_fer` : Poigne de fer
+- `comp.poigne_de_fer.desc` : Ce qu’il tient ne se rend pas.
+- `comp.peau_epaisse` : Peau épaisse
+- `comp.peau_epaisse.desc` : Neuf nuits de torches ont laissé leur croûte.
+- `comp.onde_de_choc` : Onde de choc
+- `comp.onde_de_choc.desc` : Le coup continue après le coup.
+- `comp.neuf_nuits` : Neuf nuits
+- `comp.neuf_nuits.desc` : Il tient. Il tiendra encore.
+- `comp.mur_de_chair` : Mur de chair
+- `comp.mur_de_chair.desc` : Un mur qui respire.
+- `comp.cri_de_defi` : Cri de défi
+- `comp.cri_de_defi.desc` : Tous les regards, et tous les coups.
+- `comp.cuirasse_de_clous` : Cuirasse de clous
+- `comp.cuirasse_de_clous.desc` : Chaque coup en laisse un autre.
+- `comp.rempart_vivant` : Rempart vivant
+- `comp.rempart_vivant.desc` : Ce qu’on abat se relève.
+- `comp.colere` : Colère
+- `comp.colere.desc` : Plus il saigne, moins il compte.
+- `comp.broyeur` : Broyeur
+- `comp.broyeur.desc` : Les os parlent avant lui.
+- `comp.faim_de_loup` : Faim de loup
+- `comp.faim_de_loup.desc` : Il se nourrit de ce qu’il casse.
+- `comp.os_brises` : Os brisés
+- `comp.os_brises.desc` : Il ne reste que le bruit.
+- `comp.ressorts_rouilles` : Ressorts rouillés
+- `comp.ressorts_rouilles.desc` : Un piège vieux est un piège patient.
+- `comp.fronde_tordue` : Fronde tordue
+- `comp.fronde_tordue.desc` : Elle vise mal, et touche quand même.
+- `comp.trois_pattes` : Trois pattes
+- `comp.trois_pattes.desc` : On évite mieux ce qu’on a déjà perdu.
+- `comp.maitre_des_pieges` : Maître des pièges
+- `comp.maitre_des_pieges.desc` : Chaque pas est un choix, le leur est déjà fait.
+- `comp.boulons_neufs` : Boulons neufs
+- `comp.boulons_neufs.desc` : Les carreaux sont plus lourds que les remords.
+- `comp.deuxieme_servant` : Deuxième servant
+- `comp.deuxieme_servant.desc` : Une tourelle seule s’ennuie.
+- `comp.huile_noire` : Huile noire
+- `comp.huile_noire.desc` : Les engrenages ne dorment plus.
+- `comp.automate` : Automate
+- `comp.automate.desc` : Il construit sans lui. Il pense sans lui.
+- `comp.flamme_douce` : Flamme douce
+- `comp.flamme_douce.desc` : Une chaleur qui ne demande rien.
+- `comp.halo_de_cire` : Halo de cire
+- `comp.halo_de_cire.desc` : La lumière s’étale, les ombres reculent.
+- `comp.cire_et_cendre` : Cire et cendre
+- `comp.cire_et_cendre.desc` : Ce qui fond protège ce qui brûle.
+- `comp.derniere_lueur` : Dernière lueur
+- `comp.derniere_lueur.desc` : Elle s’éteint en dernier.
+
+## Tours
+
+- `tour.grenier_des_griffes` : Grenier des Griffes
+- `tour.garde_du_cloitre` : Garde du Cloître
+- `tour.ecorcheurs` : Écorcheurs
+- `tour.clocher_des_archers` : Clocher des Archers
+- `tour.guetteurs_des_toits` : Guetteurs des Toits
+- `tour.arbaletriers_du_beffroi` : Arbalétriers du Beffroi
+- `tour.autel_des_cendres` : Autel des Cendres
+- `tour.oracle_de_la_braise` : Oracle de la Braise
+- `tour.necromancien_des_neuf_vies` : Nécromancien des Neuf Vies
+- `tour.catapulte_du_rempart` : Catapulte du Rempart
+- `tour.mortier_de_soufre` : Mortier de Soufre
+- `tour.baliste_a_chaines` : Baliste à Chaînes
+- `unite.chat_de_grange` : Chat de grange
+- `unite.garde_du_cloitre` : Chat en cotte de mailles
+- `unite.ecorcheur` : Écorcheur
+- `unite.spectre` : Spectre
+- `unite.gros_matou` : Gros matou
+- `tour.totem_du_colosse` : Totem du Colosse
+- `tour.sanctuaire_de_l_ombre` : Sanctuaire de l’Ombre
+- `tour.atelier_boiteux` : Atelier Boiteux
+- `unite.assassin_du_sanctuaire` : Assassin de l’ombre
+- `unite.tourelle_de_l_atelier` : Tourelle de l’Atelier
+- `unite.tourelle_de_rouage` : Tourelle de Rouage
+- `unite.chat_de_renfort` : Chat de renfort
+
+## Compétences des tours
+
+- `comptour.benediction` : Bénédiction
+- `comptour.benediction.desc` : Les plaies se ferment, sans prière.
+- `comptour.mur` : Mur
+- `comptour.mur.desc` : Les cottes tiennent debout après la mort.
+- `comptour.entailles_profondes` : Entailles profondes
+- `comptour.entailles_profondes.desc` : Le sang coule longtemps, et ne s’arrête pas seul.
+- `comptour.frenesie` : Frénésie
+- `comptour.frenesie.desc` : Les lames ne retombent plus.
+- `comptour.venin_noir` : Venin noir
+- `comptour.venin_noir.desc` : Une pointe suffit. Le reste est patience.
+- `comptour.oeil_de_lynx` : Œil de lynx
+- `comptour.oeil_de_lynx.desc` : Le toit regarde plus loin que la rue.
+- `comptour.tir_a_la_tete` : Tir à la tête
+- `comptour.tir_a_la_tete.desc` : Un carreau, un nom barré.
+- `comptour.carreau_perforant` : Carreau perforant
+- `comptour.carreau_perforant.desc` : Le fer cède, la chair suit.
+- `comptour.rayon_concentre` : Rayon concentré
+- `comptour.rayon_concentre.desc` : La braise se resserre sur une seule âme.
+- `comptour.braise_tenace` : Braise tenace
+- `comptour.braise_tenace.desc` : Elle couve sous la peau.
+- `comptour.legion` : Légion
+- `comptour.legion.desc` : Les morts répondent plus nombreux.
+- `comptour.os_durcis` : Os durcis
+- `comptour.os_durcis.desc` : Ils sont revenus plus durs que vivants.
+- `comptour.nappe_de_soufre` : Nappe de soufre
+- `comptour.nappe_de_soufre.desc` : Le sol brûle après le coup.
+- `comptour.charge_lourde` : Charge lourde
+- `comptour.charge_lourde.desc` : Plus de poudre, moins de questions.
+- `comptour.chaines_longues` : Chaînes longues
+- `comptour.chaines_longues.desc` : Un maillon de plus, un voisin de plus.
+- `comptour.entraves` : Entraves
+- `comptour.entraves.desc` : Marcher devient un travail.
+
+## Ennemis et boss
+
+- `ennemi.paysan_affame` : Paysan Affamé
+- `ennemi.mendiant` : Mendiant
+- `ennemi.chien_errant` : Chien Errant
+- `ennemi.boucher_vaudrelle` : Le Boucher de Vaudrelle
+- `ennemi.glaneur` : Glaneur
+- `ennemi.corbeau_noir` : Corbeau Noir
+- `ennemi.epouvantail` : Épouvantail
+- `ennemi.la_faim` : La Faim
+- `ennemi.porteur_torche` : Porteur de Torche
+- `ennemi.chasseur_sorcieres` : Chasseur de Sorcières
+- `ennemi.delateur` : Délateur
+- `ennemi.juge_flammes` : Le Juge des Flammes
+- `ennemi.noyeur` : Noyeur
+- `ennemi.pelerin_voile` : Pèlerin Voilé
+- `ennemi.sangsue` : Sangsue
+- `ennemi.dame_puits` : La Dame du Puits
+- `ennemi.rat_peste` : Rat de Peste
+- `ennemi.pestifere` : Pestiféré
+- `ennemi.medecin_peste` : Médecin de Peste
+- `ennemi.mere_rats` : La Mère des Rats
+- `ennemi.fossoyeur` : Fossoyeur
+- `ennemi.creux` : Creux
+- `ennemi.chauve_souris` : Chauve-Souris
+- `ennemi.roi_fosses` : Le Roi des Fosses
+- `ennemi.fantassin` : Fantassin
+- `ennemi.porte_banniere` : Porte-Bannière
+- `ennemi.cavalier` : Cavalier
+- `ennemi.prince_croise` : Le Prince Croisé
+- `ennemi.flagellant` : Flagellant
+- `ennemi.inquisiteur` : Inquisiteur
+- `ennemi.exorciste` : Exorciste
+- `ennemi.grand_inquisiteur` : Le Grand Inquisiteur
+- `ennemi.garde_royal` : Garde Royal
+- `ennemi.arbaletrier_elite` : Arbalétrier d’Élite
+- `ennemi.chevalier` : Chevalier
+- `ennemi.roi_fou` : Le Roi Fou
+- `ennemi.acolyte_cendre` : Acolyte de Cendre
+- `ennemi.ange_cendre` : Ange de Cendre
+- `ennemi.soleil_bleme` : Le Soleil Blême
+
+## Régions
+
+- `region.1` : Le Village Affamé
+- `region.2` : Les Champs Brûlés
+- `region.3` : Le Bourg des Bûchers
+- `region.4` : Les Marais de l’Ordalie
+- `region.5` : La Ville Pestiférée
+- `region.6` : Le Charnier
+- `region.7` : La Croisade
+- `region.8` : Le Monastère Noir
+- `region.9` : La Cité du Roi
+- `region.10` : La Cathédrale du Soleil Blême
+
+## Cartes
+
+- `carte.nom.chaumes` : Les Chaumes
+- `carte.nom.gue` : Le Gué
+- `carte.nom.pendus` : Les Pendus
+- `carte.nom.carrefour` : Le Carrefour
+- `carte.nom.sillons` : Les Sillons
+- `carte.nom.meules` : Les Meules
+- `carte.nom.aire` : L’Aire
+- `carte.nom.ruelles` : Les Ruelles
+- `carte.nom.place` : La Place
+- `carte.nom.beffroi` : Le Beffroi
+- `carte.nom.ponton` : Le Ponton
+- `carte.nom.etang` : L’Étang
+- `carte.nom.saules` : Les Saules
+- `carte.nom.quarantaine` : La Quarantaine
+- `carte.nom.faubourg` : Le Faubourg
+- `carte.nom.marche` : Le Marché
+- `carte.nom.fossoyage` : Le Fossoyage
+- `carte.nom.tertres` : Les Tertres
+- `carte.nom.ossuaire` : L’Ossuaire
+- `carte.nom.bivouac` : Le Bivouac
+- `carte.nom.palissade` : La Palissade
+- `carte.nom.baliste` : La Baliste
+- `carte.nom.cloitre` : Le Cloître
+- `carte.nom.refectoire` : Le Réfectoire
+- `carte.nom.scriptorium` : Le Scriptorium
+- `carte.nom.avenue` : L’Avenue
+- `carte.nom.douves` : Les Douves
+- `carte.nom.pont_levis` : Le Pont-Levis
+- `carte.nom.nef` : La Nef
+- `carte.nom.transept` : Le Transept
+- `carte.nom.choeur` : Le Chœur
+
+## Niveaux, région 1 : Le Village Affamé
+
+- `niveau.r1.01.nom` : La Porte Ouverte
+- `niveau.r1.01.ambiance` : Les cheminées ne fument plus. Quelqu’un a laissé la porte ouverte.
+- `niveau.r1.02.nom` : Le Puits Muet
+- `niveau.r1.02.ambiance` : On y jetait les chats pour chasser la peste. Le puits ne rend plus d’écho.
+- `niveau.r1.03.nom` : La Route des Pendus
+- `niveau.r1.03.ambiance` : Sept cordes, six corps. La septième attend celui qui doutera.
+- `niveau.r1.04.nom` : Le Carrefour du Bûcher
+- `niveau.r1.04.ambiance` : Le bûcher est éteint depuis l’hiver. La cendre est encore tiède.
+- `niveau.r1.05.nom` : Les Chaumes Vides
+- `niveau.r1.05.ambiance` : Le grain est mangé, les bêtes aussi. Il reste ce qui bouge encore.
+- `niveau.r1.06.nom` : Le Gué des Corbeaux
+- `niveau.r1.06.ambiance` : Les corbeaux ne crient plus. Ils attendent, comme nous.
+- `niveau.r1.07.nom` : La Colline des Croix
+- `niveau.r1.07.ambiance` : On a cessé de graver les noms. Il y en avait trop.
+- `niveau.r1.08.nom` : La Dernière Veillée
+- `niveau.r1.08.ambiance` : Un à un les feux s’éteignent. Celui du bûcher couve toujours.
+- `niveau.r1.09.nom` : Le Chemin des Torches
+- `niveau.r1.09.ambiance` : Ils viennent par trois routes, la fourche à la main et la faim au ventre.
+- `niveau.r1.10.nom` : Vaudrelle
+- `niveau.r1.10.ambiance` : L’étal est plein. Le Boucher a toujours faim.
+
+## Niveaux, région 2 : Les Champs Brûlés
+
+- `niveau.r2.01.nom` : Les Sillons Noirs
+- `niveau.r2.01.ambiance` : La charrue est restée au bout du sillon. Le laboureur aussi.
+- `niveau.r2.02.nom` : La Meule qui Fume
+- `niveau.r2.02.ambiance` : Le feu couve sous la paille depuis la Saint-Jean. Il attend le vent.
+- `niveau.r2.03.nom` : L’Aire de Battage
+- `niveau.r2.03.ambiance` : On y battait le blé. On y bat maintenant ce qui reste.
+- `niveau.r2.04.nom` : Le Chariot Brisé
+- `niveau.r2.04.ambiance` : Les roues se sont arrêtées en pleine fuite. Les chevaux, on les a mangés.
+- `niveau.r2.05.nom` : La Haie Calcinée
+- `niveau.r2.05.ambiance` : Même les haies ont brûlé. On ne se cache plus nulle part.
+- `niveau.r2.06.nom` : Le Champ des Gerbes
+- `niveau.r2.06.ambiance` : Les gerbes sont noires, les épis creux. La faim est la seule récolte qui ne manque pas.
+- `niveau.r2.07.nom` : Le Gué des Cendres
+- `niveau.r2.07.ambiance` : Le ruisseau charrie de la suie. Qui y boit ne chante plus.
+- `niveau.r2.08.nom` : L’Épouvantail du Sud
+- `niveau.r2.08.ambiance` : On l’a planté pour les corbeaux. Il regarde les chats, maintenant.
+- `niveau.r2.09.nom` : La Grange Rouge
+- `niveau.r2.09.ambiance` : Elle brûle depuis trois jours. Personne n’est venu l’éteindre.
+- `niveau.r2.10.nom` : La Faim
+- `niveau.r2.10.ambiance` : Elle marche sur les champs morts. Chacun de ses pas affame la terre.
+
+## Niveaux, région 3 : Le Bourg des Bûchers
+
+- `niveau.r3.01.nom` : La Porte du Bourg
+- `niveau.r3.01.ambiance` : La herse est levée. On n’entre pas ici sans être jugé.
+- `niveau.r3.02.nom` : Les Ruelles Étroites
+- `niveau.r3.02.ambiance` : Les maisons se penchent l’une vers l’autre pour ne pas voir.
+- `niveau.r3.03.nom` : La Place du Bûcher
+- `niveau.r3.03.ambiance` : Le bois est empilé depuis l’aube. Il ne manque qu’une sorcière.
+- `niveau.r3.04.nom` : Le Marché aux Fagots
+- `niveau.r3.04.ambiance` : Les fagots se vendent mieux que le pain. Tout le monde sait pourquoi.
+- `niveau.r3.05.nom` : La Rue des Délateurs
+- `niveau.r3.05.ambiance` : Un volet claque. On vous a vu. On vous a déjà dénoncé.
+- `niveau.r3.06.nom` : Le Beffroi Fendu
+- `niveau.r3.06.ambiance` : La cloche sonne les condamnations. Elle est fendue, mais elle sonne encore.
+- `niveau.r3.07.nom` : L’Échafaud du Juge
+- `niveau.r3.07.ambiance` : Le bois est neuf, les marches sont usées. Voilà qui en dit long.
+- `niveau.r3.08.nom` : La Cour des Torches
+- `niveau.r3.08.ambiance` : Chaque fenêtre a sa torche. Chaque torche attend un chat.
+- `niveau.r3.09.nom` : Le Quartier Brûlé
+- `niveau.r3.09.ambiance` : Ce qui n’a pas brûlé hier brûlera demain. Le bourg avance par le feu.
+- `niveau.r3.10.nom` : Le Juge des Flammes
+- `niveau.r3.10.ambiance` : Il lit la sentence avant le procès, et il allume avant la sentence.
+
+## Niveaux, région 4 : Les Marais de l’Ordalie
+
+- `niveau.r4.01.nom` : Le Ponton Pourri
+- `niveau.r4.01.ambiance` : Les planches cèdent une à une. Celle qui tient est celle qu’on ne voit pas.
+- `niveau.r4.02.nom` : L’Étang Noir
+- `niveau.r4.02.ambiance` : On y jette les accusées : si elles coulent, elles sont innocentes.
+- `niveau.r4.03.nom` : Les Saules Penchés
+- `niveau.r4.03.ambiance` : Les saules pleurent sur l’eau, mais l’eau ne rend rien.
+- `niveau.r4.04.nom` : La Barque Échouée
+- `niveau.r4.04.ambiance` : Le passeur est parti. La barque l’attend, la coque pleine d’eau.
+- `niveau.r4.05.nom` : Le Gué des Noyeurs
+- `niveau.r4.05.ambiance` : Une main sort de l’eau. Elle n’est pas là pour aider.
+- `niveau.r4.06.nom` : Les Roseaux Murmurants
+- `niveau.r4.06.ambiance` : Le vent y dit des noms : ceux qui n’ont pas flotté.
+- `niveau.r4.07.nom` : Le Marais des Feux Follets
+- `niveau.r4.07.ambiance` : Les lueurs guident les voyageurs. Surtout vers le fond.
+- `niveau.r4.08.nom` : La Chapelle Engloutie
+- `niveau.r4.08.ambiance` : Son clocher dépasse de l’eau. Sous la vase, on l’entend sonner parfois.
+- `niveau.r4.09.nom` : Le Pèlerinage
+- `niveau.r4.09.ambiance` : Voilés, ils marchent vers le puits sans lever la tête. Aucun n’en revient.
+- `niveau.r4.10.nom` : Le Puits Noir
+- `niveau.r4.10.ambiance` : Elle n’est plus tout à fait femme, ni tout à fait eau. Elle attend ses chats.
+
+## Niveaux, région 5 : La Ville Pestiférée
+
+- `niveau.r5.01.nom` : La Porte Murée
+- `niveau.r5.01.ambiance` : On a muré la porte de l’extérieur, pour que la peste ne sorte pas.
+- `niveau.r5.02.nom` : La Quarantaine
+- `niveau.r5.02.ambiance` : Une croix rouge sur chaque porte. Ce qui est derrière n’est plus compté.
+- `niveau.r5.03.nom` : Le Faubourg Vide
+- `niveau.r5.03.ambiance` : Les cloches ne sonnent plus les morts. Il y en a trop, et personne pour sonner.
+- `niveau.r5.04.nom` : La Rue des Rats
+- `niveau.r5.04.ambiance` : Ils courent en rangs serrés, comme s’ils avaient reçu un ordre. C’est le cas.
+- `niveau.r5.05.nom` : Le Marché Muet
+- `niveau.r5.05.ambiance` : Les étals sont couverts de linceuls. Plus personne n’achète, plus personne ne vend.
+- `niveau.r5.06.nom` : La Fosse Commune
+- `niveau.r5.06.ambiance` : Elle est pleine. On creuse la suivante avant d’avoir fini de remplir celle-ci.
+- `niveau.r5.07.nom` : L’Hôpital des Fous
+- `niveau.r5.07.ambiance` : Le médecin porte un masque à bec. Il soigne tout le monde, sauf nous.
+- `niveau.r5.08.nom` : La Place des Cadavres
+- `niveau.r5.08.ambiance` : Les charrettes passent chaque nuit. Elles repartent toujours pleines.
+- `niveau.r5.09.nom` : Le Dernier Quartier
+- `niveau.r5.09.ambiance` : Les derniers vivants ont barricadé leurs portes. Les rats passent par les murs.
+- `niveau.r5.10.nom` : La Mère des Rats
+- `niveau.r5.10.ambiance` : Sous la ville, elle pond. La peste n’a jamais été un accident.
+
+## Niveaux, région 6 : Le Charnier
+
+- `niveau.r6.01.nom` : Le Fossoyage
+- `niveau.r6.01.ambiance` : On creuse plus vite qu’on ne prie. Les pelles ne se reposent jamais.
+- `niveau.r6.02.nom` : Les Tertres Frais
+- `niveau.r6.02.ambiance` : La terre est encore meuble. Quelque chose a poussé dedans, et ce n’est pas du blé.
+- `niveau.r6.03.nom` : L’Ossuaire Ouvert
+- `niveau.r6.03.ambiance` : Les crânes sont rangés par ordre de taille. Quelqu’un a commencé à les compter.
+- `niveau.r6.04.nom` : Le Charnier des Pestiférés
+- `niveau.r6.04.ambiance` : Les premiers y dorment depuis longtemps. Les suivants n’ont pas fini de tomber.
+- `niveau.r6.05.nom` : La Veillée des Creux
+- `niveau.r6.05.ambiance` : Ils se relèvent sans rien demander. La terre n’a pas voulu d’eux.
+- `niveau.r6.06.nom` : Le Chant des Chauves-Souris
+- `niveau.r6.06.ambiance` : Elles nichent dans les côtes. Au crépuscule, tout le charnier se met à battre des ailes.
+- `niveau.r6.07.nom` : La Croix Penchée
+- `niveau.r6.07.ambiance` : Chaque croix penche vers le centre, comme pour entendre ce qu’on y murmure.
+- `niveau.r6.08.nom` : Les Arbres Pendus
+- `niveau.r6.08.ambiance` : Les branches portent des os en guise de fruits. Personne n’ose les cueillir.
+- `niveau.r6.09.nom` : Le Mausolée Fendu
+- `niveau.r6.09.ambiance` : Une fente dans la pierre, assez large pour laisser passer un roi.
+- `niveau.r6.10.nom` : Le Roi des Fosses
+- `niveau.r6.10.ambiance` : Il règne sur ceux qu’on a enterrés trop vite. Il compte ses sujets, et il en manque.
+
+## Niveaux, région 7 : La Croisade
+
+- `niveau.r7.01.nom` : Le Camp des Croisés
+- `niveau.r7.01.ambiance` : Les tentes sont encore dressées, les feux éteints, les armes à leur place. Les hommes, non.
+- `niveau.r7.02.nom` : La Route des Lances
+- `niveau.r7.02.ambiance` : Des lances plantées en bordure, à intervalles réguliers. Le vent y accroche des lambeaux de bannières.
+- `niveau.r7.03.nom` : La Charge Oubliée
+- `niveau.r7.03.ambiance` : Les sabots ont labouré la plaine. Les chevaux reviennent, parfois, sans leurs cavaliers.
+- `niveau.r7.04.nom` : Le Bivouac des Bannières
+- `niveau.r7.04.ambiance` : Chaque bannière porte une croix. Aucune ne dit au nom de qui.
+- `niveau.r7.05.nom` : La Palissade
+- `niveau.r7.05.ambiance` : On a taillé des pieux dans les églises voisines. Dieu a prêté son bois.
+- `niveau.r7.06.nom` : La Baliste Brisée
+- `niveau.r7.06.ambiance` : Elle a tiré une dernière fois, sur son propre camp.
+- `niveau.r7.07.nom` : Le Chariot d’Armes
+- `niveau.r7.07.ambiance` : Il roule seul vers le front. Plus personne ne le suit, mais il est toujours plein.
+- `niveau.r7.08.nom` : Le Serment sur l’Épée
+- `niveau.r7.08.ambiance` : Ils ont juré sur l’acier. L’acier, lui, n’a rien promis.
+- `niveau.r7.09.nom` : La Dernière Messe de Camp
+- `niveau.r7.09.ambiance` : Le prêtre a béni l’armée avant de la maudire. Les cloches de campagne sonnent encore.
+- `niveau.r7.10.nom` : Le Prince Croisé
+- `niveau.r7.10.ambiance` : Il a marché vers l’est pour sauver des âmes. Il en ramène une armée, et pas une à sauver.
+
+## Niveaux, région 8 : Le Monastère Noir
+
+- `niveau.r8.01.nom` : La Porte du Monastère
+- `niveau.r8.01.ambiance` : Elle est close de l’intérieur. Personne n’a su dire de quoi l’on se protégeait.
+- `niveau.r8.02.nom` : Le Cloître Silencieux
+- `niveau.r8.02.ambiance` : Quarante moines, un seul vœu : ne plus parler. Quelqu’un le tient encore.
+- `niveau.r8.03.nom` : Les Pénitents
+- `niveau.r8.03.ambiance` : Ils se frappent jusqu’à ne plus rien sentir. Puis ils frappent les autres.
+- `niveau.r8.04.nom` : Le Réfectoire Noir
+- `niveau.r8.04.ambiance` : Les tables sont dressées pour un banquet de jeûne. Les bols sont pleins de cendre.
+- `niveau.r8.05.nom` : La Fontaine Noire
+- `niveau.r8.05.ambiance` : L’eau de la vasque ne reflète plus le ciel. Elle reflète ceux qui s’y penchent, autrement.
+- `niveau.r8.06.nom` : Le Scriptorium
+- `niveau.r8.06.ambiance` : On y copiait la Parole. Maintenant, on y rature les noms.
+- `niveau.r8.07.nom` : La Cellule des Aveux
+- `niveau.r8.07.ambiance` : Les murs sont gravés de noms. Aucun n’a signé de plein gré.
+- `niveau.r8.08.nom` : Le Clocher Muet
+- `niveau.r8.08.ambiance` : La cloche a été fondue en chaînes. Le clocher sonne pourtant, sans rien pour le dire.
+- `niveau.r8.09.nom` : La Chambre d’Exorcisme
+- `niveau.r8.09.ambiance` : On y chasse les démons. Il faut bien que quelqu’un les y mette d’abord.
+- `niveau.r8.10.nom` : Le Grand Inquisiteur
+- `niveau.r8.10.ambiance` : Il a lu chaque confession, chaque pensée. Il connaît déjà la vôtre.
+
+## Niveaux, région 9 : La Cité du Roi
+
+- `niveau.r9.01.nom` : La Porte de la Cité
+- `niveau.r9.01.ambiance` : Les gardes saluent ceux qui entrent. Ils ne disent rien à ceux qui voudraient sortir.
+- `niveau.r9.02.nom` : L’Avenue des Statues
+- `niveau.r9.02.ambiance` : Le roi s’est fait sculpter cent fois. Chaque statue regarde ailleurs.
+- `niveau.r9.03.nom` : Les Douves Sombres
+- `niveau.r9.03.ambiance` : On y a jeté les dettes, les rivaux et les poètes. L’eau n’a rien oublié.
+- `niveau.r9.04.nom` : La Herse Brisée
+- `niveau.r9.04.ambiance` : Elle est tombée un jour de fête. Le roi a ri, paraît-il.
+- `niveau.r9.05.nom` : Le Pont-Levis
+- `niveau.r9.05.ambiance` : Il se baisse pour les amis du roi. Il n’en reste plus beaucoup.
+- `niveau.r9.06.nom` : La Fontaine Royale
+- `niveau.r9.06.ambiance` : Certains soirs, elle coule du vin. Ces soirs-là, le vin est trop rouge.
+- `niveau.r9.07.nom` : La Cour des Arbalétriers
+- `niveau.r9.07.ambiance` : Ils visent les fenêtres, par habitude. Ou par ordre.
+- `niveau.r9.08.nom` : La Galerie des Chevaliers
+- `niveau.r9.08.ambiance` : Les armures montent la garde, vides. Il y en a une de plus chaque nuit.
+- `niveau.r9.09.nom` : La Salle du Trône
+- `niveau.r9.09.ambiance` : Le trône est couvert de poussière. Le roi préfère rester debout.
+- `niveau.r9.10.nom` : Le Roi Fou
+- `niveau.r9.10.ambiance` : Il parle à sa couronne, et elle lui répond. Elle conseille toujours la guerre.
+
+## Niveaux, région 10 : La Cathédrale du Soleil Blême
+
+- `niveau.r10.01.nom` : Le Parvis de Cendre
+- `niveau.r10.01.ambiance` : Il neige de la cendre, sans qu’aucun feu n’ait brûlé. Le ciel est devenu pâle.
+- `niveau.r10.02.nom` : La Nef Brisée
+- `niveau.r10.02.ambiance` : Les piliers tiennent encore, par habitude. La voûte, elle, a renoncé.
+- `niveau.r10.03.nom` : Le Chemin des Acolytes
+- `niveau.r10.03.ambiance` : Ils marchent en procession vers un autel qu’ils n’ont jamais vu. Ils y croient pourtant.
+- `niveau.r10.04.nom` : Les Vitraux Pâles
+- `niveau.r10.04.ambiance` : Les saints ont perdu leurs couleurs. Ils regardent tous le même point du ciel.
+- `niveau.r10.05.nom` : Le Transept
+- `niveau.r10.05.ambiance` : Deux bras de pierre s’ouvrent en croix. Le sol, en dessous, sonne creux.
+- `niveau.r10.06.nom` : La Statue sans Tête
+- `niveau.r10.06.ambiance` : Un ange sans tête ouvre les ailes. On dit qu’il guette un visage à prendre.
+- `niveau.r10.07.nom` : L’Escalier des Anges
+- `niveau.r10.07.ambiance` : Les marches sont couvertes de plumes grises. Elles montent plus vite que ceux qui les gravissent.
+- `niveau.r10.08.nom` : Le Chœur Éteint
+- `niveau.r10.08.ambiance` : Les stalles sont vides. Un chant s’élève pourtant, très haut, très pâle.
+- `niveau.r10.09.nom` : L’Autel de Cendre
+- `niveau.r10.09.ambiance` : On n’y offre plus rien. Il prend ce qu’il veut, sans demander.
+- `niveau.r10.10.nom` : Le Soleil Blême
+- `niveau.r10.10.ambiance` : Il ne se lève plus, il pâlit. Sous sa lumière, tout ressemble déjà à de la cendre.
+
+## Objets
+
+- `objet.fiole_soufre` : Fiole de Soufre
+- `objet.fiole_soufre.desc` : Elle sent l’enfer des autres.
+- `objet.herbe_sabbat` : Herbe de Sabbat
+- `objet.herbe_sabbat.desc` : Cueillie la nuit sur une tombe fraîche. Elle rend cinq vies.
+- `objet.griffe_renfort` : Griffe de Renfort
+- `objet.griffe_renfort.desc` : Quelqu’un en a payé le prix. Un chat vient la réclamer.
+- `objet.sablier` : Sablier
+- `objet.sablier.desc` : Le temps s’arrête cinq souffles. Seuls les grands le traversent.
+
+## Collection : apparences et familiers
+
+- `collection.skin_caserne_1` : Grenier de Paille
+- `collection.skin_caserne_1.desc` : Le foin garde la chaleur des bêtes parties.
+- `collection.skin_caserne_2` : Grenier Calciné
+- `collection.skin_caserne_2.desc` : Il a brûlé deux fois. Les murs s’en souviennent.
+- `collection.skin_caserne_3` : Grenier des Veilleurs
+- `collection.skin_caserne_3.desc` : On y a veillé neuf nuits sans fermer l’œil.
+- `collection.skin_tir_1` : Clocher de Suie
+- `collection.skin_tir_1.desc` : La cloche est fêlée, le tir reste droit.
+- `collection.skin_tir_2` : Clocher Givré
+- `collection.skin_tir_2.desc` : Le froid d’hiver rend la vue plus claire.
+- `collection.skin_tir_3` : Clocher des Corbeaux
+- `collection.skin_tir_3.desc` : Les corbeaux guident la flèche. Ils ont l’habitude des corps.
+- `collection.skin_magie_1` : Autel de Cendre Grise
+- `collection.skin_magie_1.desc` : Il ne reste que la cendre, et elle écoute.
+- `collection.skin_magie_2` : Autel des Fiévreux
+- `collection.skin_magie_2.desc` : Les malades y ont prié. Quelque chose a répondu.
+- `collection.skin_magie_3` : Autel Sans Nom
+- `collection.skin_magie_3.desc` : Personne ne se souvient de qui on y priait.
+- `collection.skin_artillerie_1` : Rempart Rouillé
+- `collection.skin_artillerie_1.desc` : Le fer pleure sur la pierre.
+- `collection.skin_artillerie_2` : Rempart de Charbon
+- `collection.skin_artillerie_2.desc` : Noirci par les bûchers, il tient encore.
+- `collection.skin_artillerie_3` : Rempart du Dernier Siège
+- `collection.skin_artillerie_3.desc` : Il a vu tomber les autres. Pas celui-ci.
+- `collection.skin_plume` : Manteau d’Ombre
+- `collection.skin_plume.desc` : Plume l’a cousu avec son propre reflet.
+- `collection.skin_charlie` : Pelage de Braise
+- `collection.skin_charlie.desc` : Neuf nuits de torches ont laissé leur couleur.
+- `collection.skin_pollen` : Patte de Fer
+- `collection.skin_pollen.desc` : Là où manque la patte, le fer n’oublie pas le piège.
+- `collection.skin_suie` : Collier de Cendre
+- `collection.skin_suie.desc` : Chaque grain est un bûcher que Suie a vu.
+- `collection.skin_corbeau` : Plumes d’Encre
+- `collection.skin_corbeau.desc` : Elles servaient à écrire les condamnations.
+- `collection.skin_mastoc` : Peau de Loup
+- `collection.skin_mastoc.desc` : Le dernier loup du village s’est couché pour de bon.
+- `collection.skin_brise_os` : Crocs Rouges
+- `collection.skin_brise_os.desc` : Ils ne sont pas teints. Ils ont servi.
+- `collection.skin_rouage` : Cuir Huilé
+- `collection.skin_rouage.desc` : Chaque couture a sa petite machine.
+- `collection.skin_lanterne` : Lanterne Veuve
+- `collection.skin_lanterne.desc` : Sa flamme brûle pour quelqu’un qui n’est plus là.
+- `collection.familier_rat` : Rat Boiteux
+- `collection.familier_rat.desc` : Il suit le chat qui ne l’a pas mangé.
+- `collection.familier_crapaud` : Crapaud du Puits
+- `collection.familier_crapaud.desc` : Il est remonté seul. Il ne dit pas d’où.
+- `collection.familier_escargot` : Escargot Pèlerin
+- `collection.familier_escargot.desc` : Il arrivera. Il arrive toujours.
+- `collection.familier_chouette` : Chouette Aveugle
+- `collection.familier_chouette.desc` : Elle n’a pas besoin d’yeux pour voir venir le danger.
+- `collection.familier_luciole` : Luciole des Marais
+- `collection.familier_luciole.desc` : Une petite lueur qui refuse de s’éteindre.
+- `collection.familier_lezard` : Lézard de Cendre
+- `collection.familier_lezard.desc` : Il dort sur les braises et s’y réchauffe.
+- `collection.familier_chauve_souris` : Chauve-Souris du Charnier
+- `collection.familier_chauve_souris.desc` : Elle connaît le chemin des fosses.
+- `collection.familier_araignee` : Araignée Tisseuse
+- `collection.familier_araignee.desc` : Elle recoud ce que la peste a déchiré.
+- `collection.familier_furet` : Furet de la Dîme
+- `collection.familier_furet.desc` : Il prélève sa part sur tout ce qui passe.
+- `collection.familier_corneille` : Corneille Borgne
+- `collection.familier_corneille.desc` : L’œil qui manque voit de l’autre côté.
+- `collection.familier_papillon_nuit` : Papillon de Nuit
+- `collection.familier_papillon_nuit.desc` : Il vole vers les flammes que tout le monde fuit.
+- `collection.familier_salamandre` : Salamandre du Bûcher
+- `collection.familier_salamandre.desc` : Née du Premier Bûcher, elle n’a jamais connu le froid.
+
+## Fin de campagne
+
+- `campagne.fin_titre` : Les Cendres Retombent
+- `campagne.fin_illustration` : Le Dernier Veilleur sur les marches de la cathédrale, devant le Soleil Blême éteint.
+- `campagne.fin_p1` : Le Soleil Blême s’éteint sur la cathédrale. Ni cri ni triomphe : de la cendre qui retombe sur les dalles, et au loin les cloches qui se taisent une à une.
+- `campagne.fin_p2` : Les bûchers ne sont plus que des braises. Dans les granges, dans les cryptes, des pas feutrés reviennent. Les Chats Suprêmes ne sont pas ressuscités : le Dernier Veilleur a seulement refusé de laisser mourir ce qu’ils avaient allumé.
+- `campagne.fin_p3` : Les hommes oublieront. Les rats reviendront. Mais tant qu’une braise veille quelque part, la nuit n’est pas finie.
+
+## Phrases de fin de partie
+
+- `fin.victoire_detail` : Les braises tiennent encore.
+- `fin.defaite_detail` : Le Soleil Blême gagne cette nuit.
+- `fin.infini_titre` : La nuit t’a rattrapé
+- `fin.infini_detail` : Les vagues ne finissent jamais, seuls les veilleurs s’arrêtent.
