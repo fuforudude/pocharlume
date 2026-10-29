@@ -21,7 +21,7 @@
 import { ajusterMontant, casesLibres, centreCase, ralliementParDefaut, tourSurCase, validerAction } from '../engine';
 import type { Action, BonusFamille, CaseGrille, DefDieu, DefNiveauTour, DefSort, Ennemi, EtatPartie, IdFamille, Niveau, Point, Tour, Voie } from '../engine';
 import { DIEUX } from '../data/dieux';
-import { dpsEfficace } from '../data/equilibrage';
+import { dpsEfficace, EQUILIBRAGE, estTourDeZone } from '../data/equilibrage';
 import { REGLES } from '../data/regles';
 import { FAMILLES, TOURS } from '../data/tours';
 import { distance, echantillonner, longueurVue, niveauLu, PAS_ECHANTILLON, partsSpeciales, poidsDesChemins, premiereVagueFurtifs, type Echantillon } from './geometrie';
@@ -33,17 +33,23 @@ export interface VarianteSoigneux {
   readonly poids: Readonly<Record<IdFamille, number>>;
   /** Décote par tour de la même famille déjà posée : la valeur d'une tour est divisée par 1 + diversité × (autres tours de sa famille). */
   readonly diversite?: number;
+  /**
+   * « Bloquer puis écraser en zone » (jalon 5) : la caserne est valorisée comme si une tour de zone allait la suivre derrière elle, là
+   * où les soldats arrêtent les ennemis. 0 ou absent : la caserne ne compte que la zone déjà posée.
+   */
+  readonly blocage?: number;
 }
 
 const EQUILIBREE: VarianteSoigneux = { nom: 'équilibrée', poids: { caserne: 1, tir: 1, magie: 1, artillerie: 1 } };
 
 /** Préférences de famille essayées par la recherche : tout équilibré, ou une famille un peu plus aimée. */
-const PREFERENCES: readonly Pick<VarianteSoigneux, 'nom' | 'poids'>[] = [
+const PREFERENCES: readonly Pick<VarianteSoigneux, 'nom' | 'poids' | 'blocage'>[] = [
   EQUILIBREE,
   { nom: 'tir', poids: { caserne: 0.8, tir: 1.4, magie: 0.9, artillerie: 0.9 } },
   { nom: 'artillerie', poids: { caserne: 0.8, tir: 0.9, magie: 0.9, artillerie: 1.4 } },
   { nom: 'magie', poids: { caserne: 0.8, tir: 0.9, magie: 1.4, artillerie: 0.9 } },
   { nom: 'caserne', poids: { caserne: 1.5, tir: 0.9, magie: 0.9, artillerie: 0.9 } },
+  { nom: 'bloquer puis zone', poids: { caserne: 1.4, tir: 0.9, magie: 0.9, artillerie: 1.3 }, blocage: 1 },
 ];
 
 /** Diversités essayées : de peu à fortement décotée la famille déjà bien représentée. */
@@ -65,6 +71,8 @@ export interface OptionsSoigneux {
   readonly sorts?: boolean;
   /** Construit la tour divine du dieu (oui par défaut, pour les trois dieux). */
   readonly tourDivine?: boolean;
+  /** Familles de tours permises (toutes par défaut) : les compositions des mesures de la zone (`zone.ts`) en retirent. */
+  readonly familles?: readonly IdFamille[];
 }
 
 interface Candidat {
@@ -85,6 +93,9 @@ const CASES_PAR_FAMILLE = 30;
  */
 const SATURATION_DPS = 30;
 
+/** Distance (tuiles) au point de ralliement des soldats à laquelle les ennemis arrêtés sont groupés : la zone y touche beaucoup de cibles. */
+const RAYON_BLOCAGE = 1.5;
+
 function utilite(dps: number): number {
   return dps / (1 + dps / SATURATION_DPS);
 }
@@ -92,8 +103,8 @@ function utilite(dps: number): number {
 /** Part de menace furtive à partir de laquelle le bot se soucie des Guetteurs des Toits. */
 const PART_FURTIFS_MIN = 0.001;
 
-function dpsMoyen(def: DefNiveauTour): number {
-  const dps = dpsEfficace(def);
+function dpsMoyen(def: DefNiveauTour, cibles?: number, presenceChaine?: number): number {
+  const dps = dpsEfficace(def, cibles, presenceChaine);
   return dps.reduce((a, b) => a + b, 0) / dps.length;
 }
 
@@ -118,7 +129,8 @@ function prixDe(def: DefNiveauTour, famille: IdFamille, bonus: BonusFamille): nu
 }
 
 /** Le défi Fer n'autorise que deux familles de tours ; hors Fer, toutes. */
-function famillePermise(etat: EtatPartie, famille: IdFamille): boolean {
+function famillePermise(etat: EtatPartie, famille: IdFamille, permises?: readonly IdFamille[]): boolean {
+  if (permises && !permises.includes(famille)) return false;
   if (etat.config.defi !== 'fer') return true;
   return etat.niveau.defiFer?.familles.includes(famille) ?? true;
 }
@@ -146,8 +158,14 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
   /** Puissance des tours posées qui couvre chaque point d'échantillonnage, et la situation (tours, niveaux) pour laquelle elle est calculée. */
   let couverture = new Float32Array(0);
   let situationCouverture = Number.NaN;
+  /** 1 là où des soldats arrêtent les ennemis (à moins de `RAYON_BLOCAGE` d'un point de ralliement), pour chaque point d'échantillonnage. */
+  let bloque = new Uint8Array(0);
+  /** Gain de puissance que les tours de zone posées tirent du blocage, en chaque point (elles n'y comptent déjà que leur puissance libre). */
+  let gainBlocage = new Float32Array(0);
   const dpsParDef = new Map<DefNiveauTour, number>();
+  const dpsBloqueParDef = new Map<DefNiveauTour, number>();
   const dpsAvecBonusParDef = new Map<DefNiveauTour, number>();
+  const dpsAvecBonusBloqueParDef = new Map<DefNiveauTour, number>();
   /** Cases utiles de chaque famille (et de la tour divine), classées par longueur de chemin vue décroissante. */
   let classement: Readonly<Record<IdFamille | 'divine', readonly CaseGrille[]>> | null = null;
   let zones: (Echantillon | undefined)[] = [];
@@ -186,27 +204,62 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     if (situation === situationCouverture && couverture.length === echantillons.length) return;
     situationCouverture = situation;
     couverture = new Float32Array(echantillons.length);
-    for (const t of etat.tours) deplacerCouverture(t, 1);
+    gainBlocage = new Float32Array(echantillons.length);
+    bloque = new Uint8Array(echantillons.length);
+    for (const t of etat.tours) {
+      if (!t.stats.soldats || t.stats.soldats.nombre <= 0) continue;
+      const rallie = { x: t.ralliementX, y: t.ralliementY };
+      echantillons.forEach((e, i) => {
+        if (distance(e, rallie) <= RAYON_BLOCAGE) bloque[i] = 1;
+      });
+    }
+    for (const t of etat.tours) {
+      deplacerCouverture(t, 1);
+      if (estTourDeZone(t.stats)) {
+        const surplus = dpsBloque(t.stats) - dps(t.stats);
+        for (const i of alentoursDe(t.cx, t.cy, t.stats.portee)) gainBlocage[i] = (gainBlocage[i] ?? 0) + surplus;
+      }
+    }
   }
 
   /** Ajoute (+1) ou retire (-1) la puissance d'une tour posée, le temps d'évaluer son amélioration sans la compter deux fois. */
   function deplacerCouverture(t: Tour, signe: number): void {
-    const puissance = signe * dps(t.stats);
-    for (const i of alentoursDe(t.cx, t.cy, t.stats.portee)) couverture[i] = (couverture[i] ?? 0) + puissance;
+    const libre = signe * dps(t.stats);
+    const arrete = estTourDeZone(t.stats) ? signe * dpsBloque(t.stats) : libre;
+    for (const i of alentoursDe(t.cx, t.cy, t.stats.portee)) couverture[i] = (couverture[i] ?? 0) + (bloque[i] === 1 ? arrete : libre);
   }
 
   /**
    * Ce qu'une tour de cette portée et de cette puissance ajoute aux tours posées : sur chaque point du chemin à sa portée, le gain
-   * d'utilité (rendement décroissant), pesé par la menace du chemin et la longueur de chemin que le point représente.
+   * d'utilité (rendement décroissant), pesé par la menace du chemin et la longueur de chemin que le point représente. Une tour de
+   * zone a une puissance de plus là où des soldats arrêtent les ennemis (`puissanceBloquee`).
    */
-  function utiliteAjoutee(cx: number, cy: number, portee: number, puissance: number): number {
+  function utiliteAjoutee(cx: number, cy: number, portee: number, puissance: number, puissanceBloquee = puissance): number {
     let total = 0;
     for (const i of alentoursDe(cx, cy, portee)) {
       const e = echantillons[i];
       if (!e) continue;
       const deja = couverture[i] ?? 0;
-      total += (poids[e.chemin] ?? 0) * PAS_ECHANTILLON * (utilite(deja + puissance) - utilite(deja));
+      const p = bloque[i] === 1 ? puissanceBloquee : puissance;
+      total += (poids[e.chemin] ?? 0) * PAS_ECHANTILLON * (utilite(deja + p) - utilite(deja));
     }
+    return total;
+  }
+
+  /**
+   * Ce que des soldats rassemblés au point `rallie` apportent aux tours de zone : sur les points qu'ils arrêtent et qui ne le sont pas
+   * encore, le gain de puissance de la zone posée à portée (ou, pour une variante qui prépare le blocage, celui d'une tour de zone moyenne
+   * que le bot posera derrière eux, pondéré par `variante.blocage`).
+   */
+  function utiliteBlocage(rallie: Point, zoneAttendue: number): number {
+    let total = 0;
+    echantillons.forEach((e, i) => {
+      if (bloque[i] === 1 || distance(e, rallie) > RAYON_BLOCAGE) return;
+      const gain = Math.max(gainBlocage[i] ?? 0, zoneAttendue);
+      if (gain <= 0) return;
+      const deja = couverture[i] ?? 0;
+      total += (poids[e.chemin] ?? 0) * PAS_ECHANTILLON * (utilite(deja + gain) - utilite(deja));
+    });
     return total;
   }
 
@@ -249,11 +302,26 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     return libres;
   }
 
+  /** Niveau de horde : les ennemis y sont serrés, la zone y touche autant de cibles arrêtée ou non. */
+  let horde = false;
+
+  /** DPS d'un niveau de tour sur une colonne libre (ennemis espacés) ; en horde, celui d'une grappe. */
   function dps(def: DefNiveauTour): number {
     let v = dpsParDef.get(def);
     if (v === undefined) {
-      v = dpsMoyen(def);
+      v = horde && estTourDeZone(def) ? dpsMoyen(def, EQUILIBRAGE.ciblesParRayonDeZoneHorde, EQUILIBRAGE.presenceChaineGroupee) : dpsMoyen(def);
       dpsParDef.set(def, v);
+    }
+    return v;
+  }
+
+  /** DPS d'un niveau de tour de zone sur des ennemis arrêtés par des soldats (grappe au contact). */
+  function dpsBloque(def: DefNiveauTour): number {
+    let v = dpsBloqueParDef.get(def);
+    if (v === undefined) {
+      const cibles = horde ? EQUILIBRAGE.ciblesParRayonDeZoneHorde : EQUILIBRAGE.ciblesParRayonDeZoneBloquees;
+      v = estTourDeZone(def) ? dpsMoyen(def, cibles, EQUILIBRAGE.presenceChaineGroupee) : dps(def);
+      dpsBloqueParDef.set(def, v);
     }
     return v;
   }
@@ -263,15 +331,25 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
   }
 
   /** DPS d'un niveau de tour d'une famille, bonus de famille du dieu compris (les tours posées le portent déjà dans leurs stats). */
-  function dpsFamille(etat: EtatPartie, def: DefNiveauTour, famille: IdFamille): number {
+  function dpsFamille(etat: EtatPartie, def: DefNiveauTour, famille: IdFamille, arrete = false): number {
     const bonus = bonusDuDieu(etat);
-    if (!bonus || bonus.famille !== famille) return dps(def);
-    let v = dpsAvecBonusParDef.get(def);
+    if (!bonus || bonus.famille !== famille) return arrete ? dpsBloque(def) : dps(def);
+    const table = arrete ? dpsAvecBonusBloqueParDef : dpsAvecBonusParDef;
+    let v = table.get(def);
     if (v === undefined) {
-      v = dpsMoyen(avecBonus(def, famille, bonus));
-      dpsAvecBonusParDef.set(def, v);
+      const groupee = horde || arrete;
+      const cibles = horde ? EQUILIBRAGE.ciblesParRayonDeZoneHorde : arrete ? EQUILIBRAGE.ciblesParRayonDeZoneBloquees : undefined;
+      v = estTourDeZone(def) && groupee ? dpsMoyen(avecBonus(def, famille, bonus), cibles, EQUILIBRAGE.presenceChaineGroupee) : dpsMoyen(avecBonus(def, famille, bonus));
+      table.set(def, v);
     }
     return v;
+  }
+
+  /** Gain de puissance qu'une tour de zone moyenne (catapulte de niveau 2) tirerait de soldats qui arrêtent les ennemis devant elle. */
+  function zoneAttendue(etat: EtatPartie): number {
+    if (!famillePermise(etat, 'artillerie', options.familles)) return 0;
+    const def = TOURS.artillerie.niveaux[1];
+    return Math.max(0, dpsFamille(etat, def, 'artillerie', true) - dpsFamille(etat, def, 'artillerie'));
   }
 
   function cout(etat: EtatPartie, def: DefNiveauTour, famille: IdFamille): number {
@@ -298,14 +376,22 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     const memeFamille = etat.tours.filter((t) => t.famille === famille && (t.cx !== cx || t.cy !== cy)).length;
     // Une tour qui ne touche pas les volants perd la part de menace qu'ils représentent (rien à retrancher quand il n'y en a pas).
     const touchee = def.volants ? 1 : 1 - parts.volants;
-    return (utiliteAjoutee(cx, cy, def.portee, dpsFamille(etat, def, famille) * touchee) * variante.poids[famille]) / (1 + (variante.diversite ?? 0) * memeFamille);
+    const libre = dpsFamille(etat, def, famille) * touchee;
+    const arrete = estTourDeZone(def) ? dpsFamille(etat, def, famille, true) * touchee : libre;
+    let utilite_ = utiliteAjoutee(cx, cy, def.portee, libre, arrete);
+    // Des soldats qui arrêtent les ennemis valent aussi ce qu'ils apportent à la zone posée (ou à celle qu'on prépare).
+    if (def.soldats && def.soldats.nombre > 0) {
+      const rallie = ralliementParDefaut(etat.chemins, cx, cy, def.portee);
+      if (rallie) utilite_ += utiliteBlocage(rallie, (variante.blocage ?? 0) * zoneAttendue(etat));
+    }
+    return (utilite_ * variante.poids[famille]) / (1 + (variante.diversite ?? 0) * memeFamille);
   }
 
   /** Tous les achats possibles (construction, amélioration, spécialisation), classés par valeur gagnée par arête. */
   function candidats(etat: EtatPartie): Candidat[] {
     const liste: Candidat[] = [];
     majCouverture(etat);
-    for (const famille of FAMILLES.filter((f) => famillePermise(etat, f))) {
+    for (const famille of FAMILLES.filter((f) => famillePermise(etat, f, options.familles))) {
       const def = TOURS[famille].niveaux[0];
       for (const { cx, cy } of meilleuresCasesLibres(etat, famille, CASES_PAR_FAMILLE)) {
         liste.push({ action: { type: 'construire', cx, cy, tour: famille }, ratio: valeur(etat, cx, cy, def, famille) / cout(etat, def, famille) });
@@ -344,7 +430,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
    * chemin. Une valeur juste au-dessus du meilleur autre achat : le bot économise jusqu'à pouvoir la payer.
    */
   function candidatGuetteurs(etat: EtatPartie, meilleurRatio: number): Candidat | null {
-    if (parts.furtifs < PART_FURTIFS_MIN || !famillePermise(etat, 'tir')) return null;
+    if (parts.furtifs < PART_FURTIFS_MIN || !famillePermise(etat, 'tir', options.familles)) return null;
     // Pas avant que le premier furtif approche : les premières vagues se gagnent avec une défense ordinaire.
     if (etat.vagues.lancees < vagueFurtifs - 2) return null;
     const requis = etat.niveau.carte.chemins.length;
@@ -369,7 +455,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     const dieu = dieux[etat.config.dieu];
     if (!dieu || etat.tours.length < 3 || etat.tours.some((t) => t.famille === 'divine')) return null;
     // Au défi Fer, la tour divine suit la famille de son dieu : elle n'est permise que si cette famille l'est.
-    if (!famillePermise(etat, dieu.bonus.famille)) return null;
+    if (!famillePermise(etat, dieu.bonus.famille, options.familles)) return null;
     const meilleure = meilleureCase(etat, 'divine', dieu.tourDivine.portee);
     return meilleure ? { action: { type: 'construire', cx: meilleure.cx, cy: meilleure.cy, tour: 'divine' }, ratio: meilleurRatio * 1.01 } : null;
   }
@@ -551,6 +637,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
       if (echantillons.length === 0) {
         echantillons = echantillonner(etat);
         const lu = niveauLu(etat);
+        horde = etat.niveau.horde === true;
         poids = poidsDesChemins(lu);
         parts = partsSpeciales(lu);
         vagueFurtifs = premiereVagueFurtifs(lu);
@@ -591,7 +678,7 @@ export function optimiserBot(
   difficulte: string,
   graines: readonly number[],
   joueur: Joueur = {},
-  options: Pick<OptionsSoigneux, 'tourDivine'> = {},
+  options: Pick<OptionsSoigneux, 'tourDivine' | 'familles'> = {},
   variantes: readonly VarianteSoigneux[] = VARIANTES,
 ): ResultatRecherche {
   const notes = variantes.map((variante) => {

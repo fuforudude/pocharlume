@@ -18,6 +18,8 @@ export const EQUILIBRAGE = {
   ciblesParRayonDeZoneBloquees: 3.5,
   /** Cibles par rayon de zone dans un niveau de horde (ennemis serrés à 0,3 s : 1 + 4,5 × rayon, estimé au simulateur). */
   ciblesParRayonDeZoneHorde: 4.5,
+  /** Part des maillons d'une chaîne qui trouvent un ennemi quand ils sont arrêtés ou en horde (le bot soigneux). */
+  presenceChaineGroupee: 1,
   /** Part des maillons d'une chaîne qui trouvent en moyenne un ennemi. */
   presenceChaine: 0.6,
   /** Part du temps où un nécromancien a ses spectres sur le terrain. */
@@ -39,7 +41,7 @@ export const EQUILIBRAGE = {
    */
   robustesseOrdinaires: 2,
   /** Écart minimal, en tuiles, entre deux ennemis d'un même paquet à leur entrée (hors essaims et niveaux de horde). */
-  ecartMinimalTuiles: 0.8,
+  ecartMinimalTuiles: 1.1,
   /** Valeur d'un point de vie (effectif) de bloqueur, en DPS équivalent. */
   valeurBlocageParPv: 0.013,
   /** Vitesse (tuiles/s) dont le facteur de menace vaut 1. */
@@ -109,8 +111,17 @@ function valeurBlocage(s: StatsCombattant): number {
   return (s.pv / (1 - s.armure)) * s.capacite * EQUILIBRAGE.valeurBlocageParPv;
 }
 
-/** DPS efficace d'un niveau de tour pour chaque palier de protection (0 / 30 / 60 / 90 %). */
-export function dpsEfficace(def: DefNiveauTour): number[] {
+/** Une tour compte comme tour de zone si son coup touche plusieurs ennemis d'un coup (explosion ou chaîne). */
+export function estTourDeZone(def: DefNiveauTour): boolean {
+  return def.zone > 0 || def.chaine !== null;
+}
+
+/**
+ * DPS efficace d'un niveau de tour pour chaque palier de protection (0 / 30 / 60 / 90 %). `ciblesParRayon` et `presenceChaine`
+ * disent combien d'ennemis un coup de zone touche : colonne espacée par défaut, ennemis arrêtés par des soldats ou horde pour le
+ * bot soigneux (qui estime ce que vaut la zone là où il la pose).
+ */
+export function dpsEfficace(def: DefNiveauTour, ciblesParRayon: number = EQUILIBRAGE.ciblesParRayonDeZone, presenceChaine: number = EQUILIBRAGE.presenceChaine): number[] {
   return REGLES.paliersProtection.map((palier) => {
     let dps = 0;
     if (def.soldats) {
@@ -119,8 +130,8 @@ export function dpsEfficace(def: DefNiveauTour): number[] {
     }
     if (def.cadence > 0) {
       const critique = def.critique ? 1 + def.critique.chance * (def.critique.multiplicateur - 1) : 1;
-      let cibles = def.zone > 0 ? 1 + EQUILIBRAGE.ciblesParRayonDeZone * def.zone : 1;
-      if (def.chaine) cibles += def.chaine.nombre * def.chaine.facteur * EQUILIBRAGE.presenceChaine;
+      let cibles = def.zone > 0 ? 1 + ciblesParRayon * def.zone : 1;
+      if (def.chaine) cibles += def.chaine.nombre * def.chaine.facteur * presenceChaine;
       dps += ((moyenne(def.degats) * critique * partApresProtection(def.typeDegats, palier)) / def.cadence) * cibles;
       dps += dpsEffets(def.effets, def.cadence) * cibles;
     }
