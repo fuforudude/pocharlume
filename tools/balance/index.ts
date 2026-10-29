@@ -15,7 +15,7 @@ import { availableParallelism } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { Worker } from 'node:worker_threads';
 import { CAMPAGNE } from '../../src/data/niveaux/campagne.ts';
-import { BANDES_IMPOSEES, correlationDeRang, courbeDifficulte, nomDuDieu, verifierBandes } from '../../src/equilibrage/bandes.ts';
+import { correlationDeRang, courbeDifficulte, ecartsImposes, nomDuDieu, verifierBandes } from '../../src/equilibrage/bandes.ts';
 import {
   DEFIS_EVALUES,
   DIEUX_EVALUES,
@@ -205,12 +205,18 @@ ${redigerDefis(evaluations, [1, 2, 3, 4, 5]).trimEnd()}
 `,
   );
   const ecarts = ecartsDeTout();
+  const imposes = ecartsImposes(ecarts);
   console.log(`balance-report.md écrit en ${String(Math.round((performance.now() - debut) / 100) / 10)} s.`);
   if (ecarts.length === 0) {
     console.log('Toutes les bandes des régions 1 à 5 et des défis sont respectées.');
   } else {
-    console.log(`${String(ecarts.length)} écart(s) aux bandes :`);
-    for (const e of ecarts) console.log(`- ${e}`);
-    if (BANDES_IMPOSEES) process.exitCode = 1;
+    const suspendus = ecarts.filter((e) => !imposes.includes(e));
+    console.log(`${String(imposes.length)} écart(s) aux bandes imposées${imposes.length === 0 ? '' : ' :'}`);
+    for (const e of imposes) console.log(`- ${e}`);
+    if (suspendus.length > 0) {
+      console.log(`${String(suspendus.length)} écart(s) aux bandes suspendues (Matou, Vieux Sage : voir bandes.ts, ils ne bloquent pas) :`);
+      for (const e of suspendus) console.log(`- ${e}`);
+    }
+    if (imposes.length > 0) process.exitCode = 1;
   }
 }

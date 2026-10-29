@@ -49,6 +49,8 @@ export interface OptionsCampagne {
   readonly graines?: readonly number[];
   readonly grainesEntrainement?: readonly number[];
   readonly grainesSansDefense?: readonly number[];
+  /** Bots évalués (les trois par défaut ; un défi ne se joue qu'avec le soigneux). Les tests des bandes imposées n'évaluent que ce dont ils jugent. */
+  readonly bots?: readonly IdBot[];
   /** Rappel après chaque niveau et difficulté, pour afficher l'avancement. */
   readonly progression?: (niveau: number, difficulte: string, dieu: string) => void;
 }
@@ -58,6 +60,7 @@ export function evaluerCampagne(o: OptionsCampagne): Evaluation[] {
   const graines = o.graines ?? GRAINES_EVALUATION;
   const entrainement = o.grainesEntrainement ?? GRAINES_ENTRAINEMENT;
   const sansDefense = o.grainesSansDefense ?? GRAINES_SANS_DEFENSE;
+  const voulus = o.bots ?? ['naif', 'soigneux', 'inactif'];
   const evaluations: Evaluation[] = [];
   for (const campagne of o.niveaux) {
     for (const difficulte of o.difficultes ?? DIFFICULTES_EVALUEES) {
@@ -67,21 +70,23 @@ export function evaluerCampagne(o: OptionsCampagne): Evaluation[] {
         // Un défi se joue avec les règles de Matou et le seul bot soigneux (qui cherche sa variante pour ce défi).
         const defi = estDefi(difficulte) ? { defi: difficulte } : {};
         const regles = estDefi(difficulte) ? 'matou' : difficulte;
-        if (!estDefi(difficulte)) {
+        if (!estDefi(difficulte) && voulus.includes('naif')) {
           evaluations.push({
             ...base,
             bot: 'naif',
             parties: graines.map((graine) => jouerPartie(niveau, creerBotNaif({ graine: graine * 31 + 7 }), { graine, difficulte, dieu })),
           });
         }
-        const { variante } = optimiserBot(niveau, regles, entrainement, { dieu, ...defi });
-        evaluations.push({
-          ...base,
-          bot: 'soigneux',
-          variante,
-          parties: graines.map((graine) => jouerPartie(niveau, creerBotSoigneux({ variante }), { graine, difficulte: regles, dieu, ...defi })),
-        });
-        if (!estDefi(difficulte)) {
+        if (voulus.includes('soigneux')) {
+          const { variante } = optimiserBot(niveau, regles, entrainement, { dieu, ...defi });
+          evaluations.push({
+            ...base,
+            bot: 'soigneux',
+            variante,
+            parties: graines.map((graine) => jouerPartie(niveau, creerBotSoigneux({ variante }), { graine, difficulte: regles, dieu, ...defi })),
+          });
+        }
+        if (!estDefi(difficulte) && voulus.includes('inactif')) {
           evaluations.push({
             ...base,
             bot: 'inactif',

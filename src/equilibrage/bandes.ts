@@ -42,18 +42,43 @@ export const BANDES = {
 } as const;
 
 /**
- * Faux par défaut : les bandes ne bloquent ni `npm test` ni `npm run balance`. Le passage des socles fixes à la grille de
- * construction (spec du 2026-10-28, « Pose libre des tours ») a déplacé la difficulté des 50 niveaux ; l'équilibrage reprend après ce
- * changement. Les écarts restent calculés, affichés par les tests (`console.warn`) et écrits dans balance-report.md : seul leur
- * caractère bloquant est suspendu. `BANDES_IMPOSEES=1 npm test` (ou `npm run balance`) les impose ; à rendre permanent (constante
- * `true`) quand les niveaux sont rééquilibrés.
+ * Les bandes sont imposées (vrai). Depuis le rééquilibrage qui a suivi la pose libre des tours, celles qui sont tenues sur les 50
+ * niveaux le sont vraiment : Chaton (le naïf gagne tout), sans défense (on perd), défis (le soigneux réussit 40 à 90 % des Héroïques
+ * et des Fer de chaque région) et puissance des tours. Les autres familles (Matou, Vieux Sage, y compris l'écart entre dieux et la courbe de difficulté)
+ * ne sont pas tenues aux régions 2 à 5 ni tout à fait en région 1 : elles restent calculées, affichées (`console.warn` dans les tests,
+ * liste de `npm run balance`) et écrites dans balance-report.md, mais ne bloquent pas (`FAMILLES_SUSPENDUES`). C'est l'écart principal
+ * qui reste à reprendre : voir « Équilibrage du jalon 3 » dans la spec et docs/architecture.md. `BANDES_SUSPENDUES_IMPOSEES=1 npm test`
+ * (ou `npm run balance`) impose aussi les familles suspendues, pour mesurer ce qui reste.
  */
-export const BANDES_IMPOSEES: boolean = process.env.BANDES_IMPOSEES === '1';
+export const BANDES_IMPOSEES = true;
 
-/** Les écarts qui font échouer un test ou la commande : tous si les bandes sont imposées, sinon aucun (ils sont seulement affichés). */
+/**
+ * Les écarts suspendus sont ceux dont la phrase commence par ces mots (après « Région N : ») : les bandes de Matou et de Vieux Sage,
+ * courbe de difficulté et écart entre dieux compris (ces phrases commencent par la difficulté).
+ */
+export const FAMILLES_SUSPENDUES = ['Matou', 'Vieux Sage'] as const;
+
+/** Vrai si `BANDES_SUSPENDUES_IMPOSEES=1` : les familles suspendues bloquent aussi. */
+export const SUSPENDUES_IMPOSEES: boolean = process.env.BANDES_SUSPENDUES_IMPOSEES === '1';
+
+/**
+ * Les écarts d'une famille suspendue : affichés, jamais bloquants (sauf `BANDES_SUSPENDUES_IMPOSEES=1`). Les familles imposées
+ * (Chaton, sans défense, défis) se testent sans cette fonction.
+ */
 export function ecartsBloquants(ecarts: readonly string[]): string[] {
-  if (!BANDES_IMPOSEES && ecarts.length > 0) console.warn(`Bandes suspendues, ${String(ecarts.length)} écart(s) :\n${ecarts.map((e) => `- ${e}`).join('\n')}`);
-  return BANDES_IMPOSEES ? [...ecarts] : [];
+  if (!SUSPENDUES_IMPOSEES && ecarts.length > 0) console.warn(`Bandes suspendues, ${String(ecarts.length)} écart(s) :\n${ecarts.map((e) => `- ${e}`).join('\n')}`);
+  return SUSPENDUES_IMPOSEES ? [...ecarts] : [];
+}
+
+/** Vrai si un écart (phrase de `verifierBandes`) relève d'une famille suspendue. */
+export function estSuspendu(ecart: string): boolean {
+  const phrase = ecart.replace(/^Région \d : /, '');
+  return FAMILLES_SUSPENDUES.some((f) => phrase.startsWith(f));
+}
+
+/** Les écarts qui font échouer `npm run balance` : tous ceux qui ne relèvent pas d'une famille suspendue. */
+export function ecartsImposes(ecarts: readonly string[]): string[] {
+  return SUSPENDUES_IMPOSEES ? [...ecarts] : ecarts.filter((e) => !estSuspendu(e));
 }
 
 /** Tolérance sur les comparaisons à une valeur exacte (taux de victoire de 50 parties : multiples de 0,02). */

@@ -29,7 +29,7 @@ export const REGLES: Regles = {
   dureeRevelation: 0.1,
   elite: { facteurPv: 1.4, facteurPrime: 1.5, viesEnPlus: 0 },
   heroique: { vies: 1, facteurAretes: 3 },
-  fer: { facteurEffectifs: 1, facteurAretes: 10 },
+  fer: { facteurEffectifs: 0.3, facteurAretes: 6 },
   plafondBonus: 0.1,
   regenerationBonusHeros: 20,
 };
