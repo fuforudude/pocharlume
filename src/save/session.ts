@@ -99,6 +99,8 @@ export interface FinDePartie {
 /** Une partie sauvegardée qu'on peut relancer. */
 export interface Reprise {
   readonly niveau: number;
+  /** Mode infini : la carte jouée (`etat.config.infini` donne sa région). Absent pour une partie de campagne. */
+  readonly carte?: string;
   /** Numéro de la vague à laquelle la partie reprend. */
   readonly vague: number;
   readonly etat: EtatPartie;
@@ -428,12 +430,15 @@ export class Session {
    * Une partie infinie est finie (ou arrêtée) : le record de la carte est mis à jour s'il est battu et chaque palier atteint
    * qui n'a jamais été payé l'est, une seule fois au total. Comme toute transaction, l'opération est rejouée sous verrou
    * sur le contenu frais du stockage : deux onglets qui atteignent le même palier ne le paient pas deux fois. Rend le bilan
-   * de l'écriture, ou la raison du refus. La partie sauvegardée n'est pas touchée (elle ne peut pas être une partie infinie).
+   * de l'écriture, ou la raison du refus. `graine` (celle de la partie) efface la partie infinie sauvegardée qui est la sienne : une
+   * partie finie ou abandonnée n'a plus rien à reprendre ; une autre partie sauvegardée, plus ancienne, est gardée.
    */
-  async enregistrerFinInfini(fin: FinInfinie): Promise<ResultatTransactionAvecDetail<BilanInfini, RaisonFinInfinie>> {
+  async enregistrerFinInfini(fin: FinInfinie, graine?: number): Promise<ResultatTransactionAvecDetail<BilanInfini, RaisonFinInfinie>> {
     const issue = await this.lancer<BilanInfini, RaisonFinInfinie>((s) => {
       const r = enregistrerFinInfinie(s, fin);
-      return r.ok ? { ok: true, sauvegarde: r.sauvegarde, detail: r.bilan } : r;
+      if (!r.ok) return r;
+      const sienne = graine !== undefined && r.sauvegarde.partie?.carte !== undefined && r.sauvegarde.partie.config.graine === graine;
+      return { ok: true, sauvegarde: sienne ? avecPartieEnCours(r.sauvegarde, null) : r.sauvegarde, detail: r.bilan };
     });
     return issue.ok ? { ok: true, sauvegarde: issue.sauvegarde, ecrite: issue.ecrite, detail: issue.detail } : issue;
   }
@@ -453,8 +458,8 @@ export class Session {
    * quoi une reprise rendrait l'objet utilisable une seconde fois). Rien n'est écrit si la partie n'a pas d'instantané
    * valide (aucune vague lancée encore).
    */
-  async rangerPartie(etat: EtatPartie, numeroNiveau: number): Promise<boolean> {
-    const partie = partieEnCours(etat, numeroNiveau);
+  async rangerPartie(etat: EtatPartie, numeroNiveau: number, carte?: string): Promise<boolean> {
+    const partie = partieEnCours(etat, numeroNiveau, carte);
     if (!partie) return false;
     return ecrite(await this.lancer((s) => reussite(avecPartieEnCours(s, partie))));
   }
@@ -477,7 +482,7 @@ export class Session {
       void this.effacerPartie();
       return { reprise: null, oubliee: true };
     }
-    return { reprise: { niveau: partie.niveau, vague: partie.vague, etat }, oubliee: false };
+    return { reprise: { niveau: partie.niveau, vague: partie.vague, etat, ...(partie.carte === undefined ? {} : { carte: partie.carte }) }, oubliee: false };
   }
 
   /** La partie à reprendre, ou null (voir `examinerPartie`). */

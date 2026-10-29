@@ -21,17 +21,20 @@ import {
   IDS_DIEUX,
   IDS_HEROS,
   IDS_OBJETS,
+  NIVEAU_OUVERTURE_INFINI,
+  NOMBRE_REGIONS,
   PLAFOND_MONNAIE,
   PLAFOND_XP,
   RANG_MAX_ARBRE,
   RANG_MAX_COMPETENCE,
   STOCK_MAX_OBJET,
+  VAGUE_MAX_INFINI,
   type IdObjet,
 } from '../data/meta';
 import { REGLES } from '../data/regles';
 import type { ConfigPartie } from '../engine/etat';
 import { definitionDuHeros, niveauHerosDepuisXp, pointsDeCompetence, type DefsMeta } from './definitions';
-import { validerInfini } from './validation-infini';
+import { estIdCarteBienForme, validerInfini } from './validation-infini';
 import { validerCollection, validerDefis, validerExtensionConfigV4, validerRegionMax } from './validation-collection';
 import { avecCles, CLE_NIVEAU, echec, estEnregistrement, estEntierEntre, ok, parmi, poser, validerEntiersParCle, valeur, type Resultat } from './validation-base';
 import {
@@ -256,7 +259,9 @@ function validerConfig(x: unknown): Resultat<ConfigPartie> {
   if (!estEnregistrement(x)) return echec('partie.config : objet attendu');
   // `defi` et `bonus` (jalon 3) vont ensemble, et sont facultatifs (une partie enregistrée avant le jalon 3 n'en a pas).
   const avecDefiEtBonus = Object.hasOwn(x, 'defi') || Object.hasOwn(x, 'bonus');
-  const base = avecCles(x, [...CLES_CONFIG, ...CLES_EXTENSION_CONFIG, ...(avecDefiEtBonus ? CLES_DEFI_BONUS : [])], 'partie.config');
+  // `infini` (jalon 4) est facultatif : absent hors mode infini.
+  const avecInfini = Object.hasOwn(x, 'infini');
+  const base = avecCles(x, [...CLES_CONFIG, ...CLES_EXTENSION_CONFIG, ...(avecDefiEtBonus ? CLES_DEFI_BONUS : []), ...(avecInfini ? ['infini'] : [])], 'partie.config');
   if (!base.ok) return base;
   const graine = valeur(base.valeur, 'graine');
   const difficulte = valeur(base.valeur, 'difficulte');
@@ -271,26 +276,45 @@ function validerConfig(x: unknown): Resultat<ConfigPartie> {
   const config = { graine, difficulte, dieu, niveauHeros, versionDonnees };
   const extension = validerExtensionConfig(base.valeur, dieu);
   if (!extension.ok) return extension;
-  if (!avecDefiEtBonus) return ok({ ...config, ...extension.valeur });
+  let infini: { region: number } | undefined;
+  if (avecInfini) {
+    const brut = valeur(base.valeur, 'infini');
+    const region = estEnregistrement(brut) && Object.keys(brut).length === 1 ? valeur(brut, 'region') : null;
+    if (!estEntierEntre(region, 1, NOMBRE_REGIONS)) return echec('partie.config.infini : { region } de 1 à 10 attendu');
+    infini = { region };
+  }
+  if (!avecDefiEtBonus) return ok({ ...config, ...extension.valeur, ...(infini ? { infini } : {}) });
   const defiEtBonus = validerExtensionConfigV4(base.valeur);
   if (!defiEtBonus.ok) return defiEtBonus;
-  const complete: ConfigPartie = { ...config, ...extension.valeur, ...defiEtBonus.valeur };
+  if (infini && defiEtBonus.valeur.defi !== null) return echec('partie.config.infini : pas de défi en mode infini');
+  const complete: ConfigPartie = { ...config, ...extension.valeur, ...defiEtBonus.valeur, ...(infini ? { infini } : {}) };
   return ok(complete);
 }
 
 function validerPartie(x: unknown, niveauMax: number): Resultat<PartieEnCours | null> {
   if (x === null) return ok(null);
-  const base = avecCles(x, ['niveau', 'config', 'etat', 'vague'], 'partie');
+  // `carte` (mode infini, jalon 4) est facultative : une partie de campagne, ou enregistrée avant l'infini, n'en a pas.
+  const avecCarte = estEnregistrement(x) && Object.hasOwn(x, 'carte');
+  const base = avecCles(x, ['niveau', 'config', 'etat', 'vague', ...(avecCarte ? ['carte'] : [])], 'partie');
   if (!base.ok) return base;
   const niveau = valeur(base.valeur, 'niveau');
   const etat = valeur(base.valeur, 'etat');
   const vague = valeur(base.valeur, 'vague');
   if (!estEntierEntre(niveau, 1, NOMBRE_NIVEAUX) || niveau > niveauMax) return echec('partie.niveau : niveau débloqué attendu');
   if (typeof etat !== 'string' || etat.length < 2 || etat.length > TAILLE_MAX_ETAT || !etat.startsWith('{')) return echec('partie.etat : état sérialisé attendu');
-  if (!estEntierEntre(vague, 1, VAGUE_MAX)) return echec('partie.vague : entier de 1 à 1000 attendu');
   const config = validerConfig(valeur(base.valeur, 'config'));
   if (!config.ok) return config;
-  return ok({ niveau, config: config.valeur, etat, vague });
+  const infinie = config.valeur.infini !== undefined && config.valeur.infini !== null;
+  if (!estEntierEntre(vague, 1, infinie ? VAGUE_MAX_INFINI : VAGUE_MAX)) return echec(`partie.vague : entier de 1 à ${String(infinie ? VAGUE_MAX_INFINI : VAGUE_MAX)} attendu`);
+  if (infinie && niveauMax <= NIVEAU_OUVERTURE_INFINI) return echec("partie.config.infini : le mode infini n'est pas ouvert");
+  if (!avecCarte) {
+    if (infinie) return echec('partie.carte : la carte est attendue pour une partie infinie');
+    return ok({ niveau, config: config.valeur, etat, vague });
+  }
+  const carte = valeur(base.valeur, 'carte');
+  if (!infinie) return echec('partie.carte : seule une partie infinie a une carte');
+  if (typeof carte !== 'string' || !estIdCarteBienForme(carte)) return echec('partie.carte : identifiant de carte attendu');
+  return ok({ niveau, config: config.valeur, etat, vague, carte });
 }
 
 /**

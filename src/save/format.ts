@@ -57,6 +57,11 @@ export interface PartieEnCours {
   etat: string;
   /** Numéro (à partir de 1) de la vague qui vient de commencer. */
   vague: number;
+  /**
+   * Mode infini seulement : identifiant de la carte jouée (`config.infini` est alors présent, et `niveau` est le niveau de
+   * campagne gagné dont la carte et les entrées servent). Absent en campagne.
+   */
+  carte?: string;
 }
 
 export interface Monnaies {
