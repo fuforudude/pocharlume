@@ -41,7 +41,7 @@ export const EQUILIBRAGE = {
    */
   robustesseOrdinaires: 2,
   /** Écart minimal, en tuiles, entre deux ennemis d'un même paquet à leur entrée (hors essaims et niveaux de horde). */
-  ecartMinimalTuiles: 1.1,
+  ecartMinimalTuiles: 1.3,
   /** Valeur d'un point de vie (effectif) de bloqueur, en DPS équivalent. */
   valeurBlocageParPv: 0.013,
   /** Vitesse (tuiles/s) dont le facteur de menace vaut 1. */

@@ -274,13 +274,13 @@ describe('évaluation d’une région et rapport', () => {
     expect(rapport).toContain('Vague la plus meurtrière');
     expect(rapport).toContain('Arêtes inutilisées');
     expect(rapport).toContain('Soigneux : niveaux avec perte');
-    expect(rapport).toContain('dix variantes (5 préférences × 2 diversités)');
+    expect(rapport).toContain('douze variantes (6 préférences × 2 diversités, dont « bloquer puis zone »)');
     // Les sorts et les tours divines des trois dieux y sont.
     for (const nom of ['Voile de Nuit', 'Griffes d’Ombre', 'Chute du Colosse', 'Renforts', 'Pièges à Ressort', 'Ingéniosité', 'Sanctuaire de l’Ombre', 'Totem du Colosse', 'Atelier Boiteux']) {
       expect(rapport, nom).toContain(nom);
     }
     // Le texte annonce le vrai nombre de variantes de la recherche.
-    expect(VARIANTES).toHaveLength(10);
+    expect(VARIANTES).toHaveLength(12);
     expect(rapport).toBe(redigerRapport(evaluations, 2, profils));
   });
 

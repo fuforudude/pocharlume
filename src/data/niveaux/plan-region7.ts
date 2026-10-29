@@ -83,7 +83,7 @@ export const PLANS_REGION7: readonly PlanNiveau[] = [
       nombre: 12,
       ennemis: ennemisDuNiveau(7, 5),
       graine: 2065,
-      facteurBudget: 0.399,
+      facteurBudget: 0.654,
     },
   },
   {
@@ -98,7 +98,7 @@ export const PLANS_REGION7: readonly PlanNiveau[] = [
       nombre: 12,
       ennemis: ennemisDuNiveau(7, 6),
       graine: 3066,
-      facteurBudget: 0.25,
+      facteurBudget: 0.41,
     },
   },
   {
@@ -114,7 +114,7 @@ export const PLANS_REGION7: readonly PlanNiveau[] = [
       ennemis: ennemisDuNiveau(7, 7),
       graine: 4067,
       horde: true,
-      facteurBudget: 0.258,
+      facteurBudget: 0.33,
     },
   },
   {
@@ -144,7 +144,7 @@ export const PLANS_REGION7: readonly PlanNiveau[] = [
       nombre: 14,
       ennemis: ennemisDuNiveau(7, 9),
       graine: 2069,
-      facteurBudget: 0.273,
+      facteurBudget: 0.732,
     },
   },
   {
@@ -159,7 +159,7 @@ export const PLANS_REGION7: readonly PlanNiveau[] = [
       nombre: 15,
       ennemis: ennemisDuNiveau(7, 10),
       graine: 3847,
-      facteurBudget: 0.218,
+      facteurBudget: 0.457,
       boss: { vague: 15, ennemi: 'prince_croise', chemin: 0, delai: 12 },
     },
   },

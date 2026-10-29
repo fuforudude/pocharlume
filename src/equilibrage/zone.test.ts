@@ -5,32 +5,14 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { CAMPAGNE } from '../data/niveaux/campagne';
 import { DIEUX_EVALUES } from './campagne';
-import { COMPOSITIONS, mesurerZone, type Composition } from './zone';
-
-const PART_ARETES = 0.45;
-/** Niveaux ordinaires (1 à 3 : régions 1, 2 et 3) et niveaux de horde, un échantillon de la campagne. */
-const NIVEAUX_ORDINAIRES = [5, 8, 14, 18, 25];
-const NIVEAUX_HORDE = [7, 13, 17];
-const GRAINES = [101, 102, 103, 104, 105, 106];
-
-function moyennes(niveaux: readonly number[]): Record<Composition, number> {
-  const taux: Record<Composition, number[]> = { sansZone: [], zoneSeule: [], caserne: [], casernePlusZone: [] };
-  for (const numero of niveaux) {
-    const niveau = CAMPAGNE[numero - 1];
-    if (!niveau) throw new Error(`Niveau ${String(numero)} absent`);
-    for (const dieu of DIEUX_EVALUES) {
-      for (const m of mesurerZone(niveau.niveau, { dieu, difficulte: 'vieux_sage', partAretes: PART_ARETES, graines: GRAINES, grainesEntrainement: [9001] })) taux[m.composition].push(m.tauxVictoire);
-    }
-  }
-  const moyenne = (xs: readonly number[]): number => xs.reduce((a, b) => a + b, 0) / xs.length;
-  return Object.fromEntries(COMPOSITIONS.map((c) => [c, moyenne(taux[c])])) as Record<Composition, number>;
-}
+import { moyennesZone, NIVEAUX_ZONE_HORDE as NIVEAUX_HORDE, NIVEAUX_ZONE_ORDINAIRES as NIVEAUX_ORDINAIRES, type Composition } from './zone';
 
 let ordinaires: Record<Composition, number>;
 let hordes: Record<Composition, number>;
 beforeAll(() => {
-  ordinaires = moyennes(NIVEAUX_ORDINAIRES);
-  hordes = moyennes(NIVEAUX_HORDE);
+  const niveauDe = (n: number) => CAMPAGNE[n - 1]?.niveau;
+  ordinaires = moyennesZone(NIVEAUX_ORDINAIRES, niveauDe, DIEUX_EVALUES);
+  hordes = moyennesZone(NIVEAUX_HORDE, niveauDe, DIEUX_EVALUES);
 }, 600_000);
 
 describe('ce que vaut la zone', () => {

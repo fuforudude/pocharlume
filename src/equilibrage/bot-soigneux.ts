@@ -579,7 +579,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
       for (const e of ennemis) {
         if (e.chemin === chemin && e.distance >= zone.distance - 3 && e.distance <= zone.distance + 1.5) nombre++;
       }
-      if (nombre >= 3) return { type: 'lancerSort', emplacement, x: zone.x, y: zone.y };
+      if (nombre >= 2) return { type: 'lancerSort', emplacement, x: zone.x, y: zone.y };
     }
     return null;
   }
@@ -594,12 +594,12 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     if (sort.effets.some((e) => e.type === 'execution')) {
       // Griffes d'Ombre : tue net tout ce qui n'est pas un boss dans la grappe, donc la plus grosse grappe (ou le boss).
       const grappe = plusGrosseGrappe(ennemis, sort.rayon);
-      return grappe && (grappe.nombre >= 4 || grappe.boss) ? { type: 'lancerSort', emplacement, x: grappe.x, y: grappe.y } : null;
+      return grappe && (grappe.nombre >= 3 || grappe.boss) ? { type: 'lancerSort', emplacement, x: grappe.x, y: grappe.y } : null;
     }
     if (!sort.effets.some((e) => e.type === 'invoquer')) {
       // Dégâts de zone : centrer sur l'ennemi qui a le plus de voisins.
       const grappe = plusGrosseGrappe(ennemis, sort.rayon);
-      if (!grappe || (grappe.nombre < 3 && !grappe.boss)) return null;
+      if (!grappe || (grappe.nombre < 2 && !grappe.boss)) return null;
       return { type: 'lancerSort', emplacement, x: grappe.x, y: grappe.y };
     }
     // Renforts : devant la zone de feu de chaque chemin, quand des ennemis s'y présentent.

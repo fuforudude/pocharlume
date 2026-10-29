@@ -14,7 +14,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
     numero: 81,
     carte: 'avenue',
     chemins: [0],
-    aretesDepart: 2035,
+    aretesDepart: 1870,
     defiFer: { familles: ['caserne', 'magie'] },
     nom: 'niveau.r9.01.nom',
     ambiance: 'niveau.r9.01.ambiance',
@@ -22,7 +22,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
       nombre: 10,
       ennemis: ennemisDuNiveau(9, 1),
       graine: 2081,
-      facteurBudget: 0.217,
+      facteurBudget: 0.278,
 
 
     },
@@ -31,7 +31,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
     numero: 82,
     carte: 'douves',
     chemins: [0],
-    aretesDepart: 1220,
+    aretesDepart: 1120,
     defiFer: { familles: ['artillerie', 'magie'] },
     nom: 'niveau.r9.02.nom',
     ambiance: 'niveau.r9.02.ambiance',
@@ -48,7 +48,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
     numero: 83,
     carte: 'pont_levis',
     chemins: [0],
-    aretesDepart: 1315,
+    aretesDepart: 1210,
     defiFer: { familles: ['artillerie', 'caserne'] },
     nom: 'niveau.r9.03.nom',
     ambiance: 'niveau.r9.03.ambiance',
@@ -66,7 +66,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
     numero: 84,
     carte: 'douves',
     chemins: [1],
-    aretesDepart: 1395,
+    aretesDepart: 1285,
     defiFer: { familles: ['artillerie', 'tir'] },
     nom: 'niveau.r9.04.nom',
     ambiance: 'niveau.r9.04.ambiance',
@@ -74,7 +74,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
       nombre: 11,
       ennemis: ennemisDuNiveau(9, 4),
       graine: 1084,
-      facteurBudget: 0.366,
+      facteurBudget: 0.468,
 
 
     },
@@ -83,15 +83,15 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
     numero: 85,
     carte: 'pont_levis',
     chemins: [1],
-    aretesDepart: 1485,
+    aretesDepart: 1365,
     defiFer: { familles: ['magie', 'tir'] },
     nom: 'niveau.r9.05.nom',
     ambiance: 'niveau.r9.05.ambiance',
     vagues: {
       nombre: 12,
       ennemis: ennemisDuNiveau(9, 5),
-      graine: 2085,
-      facteurBudget: 0.294,
+      graine: 2086,
+      facteurBudget: 0.375,
 
 
     },
@@ -100,7 +100,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
     numero: 86,
     carte: 'avenue',
     chemins: [0],
-    aretesDepart: 1570,
+    aretesDepart: 1445,
     defiFer: { familles: ['caserne', 'tir'] },
     nom: 'niveau.r9.06.nom',
     ambiance: 'niveau.r9.06.ambiance',
@@ -117,7 +117,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
     numero: 87,
     carte: 'douves',
     chemins: [0, 1],
-    aretesDepart: 1660,
+    aretesDepart: 1525,
     defiFer: { familles: ['artillerie', 'tir'] },
     nom: 'niveau.r9.07.nom',
     ambiance: 'niveau.r9.07.ambiance',
@@ -126,7 +126,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
       ennemis: ennemisDuNiveau(9, 7),
       graine: 4087,
       horde: true,
-      facteurBudget: 0.245,
+      facteurBudget: 0.314,
 
 
     },
@@ -135,7 +135,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
     numero: 88,
     carte: 'pont_levis',
     chemins: [0, 1],
-    aretesDepart: 1745,
+    aretesDepart: 1605,
     defiFer: { familles: ['magie', 'tir'] },
     nom: 'niveau.r9.08.nom',
     ambiance: 'niveau.r9.08.ambiance',
@@ -143,7 +143,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
       nombre: 13,
       ennemis: ennemisDuNiveau(9, 8),
       graine: 1088,
-      facteurBudget: 0.252,
+      facteurBudget: 0.323,
 
 
     },
@@ -152,7 +152,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
     numero: 89,
     carte: 'douves',
     chemins: [0, 1],
-    aretesDepart: 1835,
+    aretesDepart: 1690,
     defiFer: { familles: ['caserne', 'tir'] },
     nom: 'niveau.r9.09.nom',
     ambiance: 'niveau.r9.09.ambiance',
@@ -160,7 +160,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
       nombre: 14,
       ennemis: ennemisDuNiveau(9, 9),
       graine: 2089,
-      facteurBudget: 0.258,
+      facteurBudget: 0.691,
 
 
     },
@@ -169,7 +169,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
     numero: 90,
     carte: 'pont_levis',
     chemins: [0, 1],
-    aretesDepart: 1920,
+    aretesDepart: 1765,
     defiFer: { familles: ['artillerie', 'tir'] },
     nom: 'niveau.r9.10.nom',
     ambiance: 'niveau.r9.10.ambiance',
@@ -177,7 +177,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
       nombre: 15,
       ennemis: ennemisDuNiveau(9, 10),
       graine: 3978,
-      facteurBudget: 0.207,
+      facteurBudget: 0.265,
 
 
       boss: { vague: 15, ennemi: 'roi_fou', chemin: 0, delai: 12 },

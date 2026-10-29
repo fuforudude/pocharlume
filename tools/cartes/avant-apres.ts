@@ -28,7 +28,7 @@ const E = 6;
 const image = nouvelleImage(2 * L + 3 * E, ids.length * (H + E) + E);
 for (let i = 0; i < image.pixels.length; i += 4) { image.pixels[i] = 20; image.pixels[i + 1] = 20; image.pixels[i + 2] = 24; image.pixels[i + 3] = 255; }
 ids.forEach((id, k) => {
-  const apres = CARTES[id] as CarteModele;
+  const apres: CarteModele = CARTES[id];
   const a = AVANT[id];
   if (!a) return;
   const avant: CarteModele = { ...apres, chemins: a.chemins.map((c) => ({ points: c.map(([x, y]) => ({ x, y })) })), departHeros: { x: a.hero[0], y: a.hero[1] } };

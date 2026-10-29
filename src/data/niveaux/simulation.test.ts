@@ -30,8 +30,8 @@ describe('les niveaux de la région 1 se jouent', () => {
   }
 
   it('la partie est rejouable à l’identique à partir de son journal', () => {
-    const campagne = REGION1[4];
-    if (!campagne) throw new Error('niveau 5 absent');
+    const campagne = REGION1[2];
+    if (!campagne) throw new Error('niveau 3 absent');
     const bilan = jouer(campagne.niveau, planDeConstruction(campagne.niveau));
     expect(bilan.etat.journal.length).toBeGreaterThan(8);
     const rejoue = rejouer(campagne.niveau, CONFIG_MATOU, bilan.etat.journal);
