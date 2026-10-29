@@ -130,7 +130,7 @@ describe('fiche de niveau : dieu, héros et objets', () => {
     expect(document.querySelectorAll('.choix-dieu')).toHaveLength(3);
     const heros = [...document.querySelectorAll('.choix-heros')];
     expect(heros).toHaveLength(3);
-    // Charlie est le choix de départ : son avatar est possédé, ses deux disciples sont verrouillés.
+    // Le Colosse est le choix de départ : son avatar est possédé, ses deux disciples sont verrouillés.
     expect(heros.map((h) => h.classList.contains('verrouille'))).toEqual([false, true, true]);
     expect(heros[0]?.classList.contains('actif')).toBe(true);
   });
@@ -138,11 +138,11 @@ describe('fiche de niveau : dieu, héros et objets', () => {
   it('choisir un autre dieu mémorise son avatar et montre ses héros', async () => {
     const { session } = monter();
     appuyer('Enter');
-    parTitre('Plume').click();
+    parTitre('L’Ombre').click();
     await attendre();
     expect(session.choisirHeros).toHaveBeenCalledWith('plume', 'plume');
     const noms = [...document.querySelectorAll('.choix-heros')].map((h) => h.getAttribute('aria-label'));
-    expect(noms).toEqual(['Plume, l’Ombre Première', 'Suie : 30 braises', 'Corbeau : 30 braises']);
+    expect(noms).toEqual(['Nielle, Souffle-Lampes', 'Suie : 30 braises', 'Corbeau : 30 braises']);
   });
 
   it('toucher un disciple pas recruté n’appelle pas la session et dit où l’acheter', () => {
@@ -156,7 +156,7 @@ describe('fiche de niveau : dieu, héros et objets', () => {
   it('un disciple recruté se choisit', () => {
     const { session } = monter(sauvegardeGarnie());
     appuyer('Enter');
-    parTitre('Plume').click();
+    parTitre('L’Ombre').click();
     parTitre('Suie').click();
     expect(session.choisirHeros).toHaveBeenLastCalledWith('plume', 'suie');
   });
@@ -199,7 +199,7 @@ describe('fiche de niveau : dieu, héros et objets', () => {
   it('« Lancer » transmet le dieu, le héros et les objets choisis', async () => {
     const { surLancer } = monter(sauvegardeGarnie());
     appuyer('Enter');
-    parTitre('Plume').click();
+    parTitre('L’Ombre').click();
     parTitre('Suie').click();
     parTitre(t('fiche.objet_ajouter', { nom: 'Sablier', n: 1 })).click();
     await attendre();
@@ -222,10 +222,10 @@ describe('fiche de niveau : dieu, héros et objets', () => {
       surRetour: vi.fn(),
     });
     appuyer('Enter');
-    parTitre('Plume').click();
+    parTitre('L’Ombre').click();
     await attendre();
     expect(message()).toBe(t('meta.refus.heros_non_possede'));
-    expect(document.querySelector('.choix-dieu.actif')?.getAttribute('aria-label')).toBe('Charlie');
+    expect(document.querySelector('.choix-dieu.actif')?.getAttribute('aria-label')).toBe('Le Colosse');
   });
 
   it('un choix mémorisé qui ne tient plus (objet épuisé) est corrigé à l’ouverture', () => {

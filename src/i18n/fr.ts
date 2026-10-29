@@ -6,6 +6,7 @@ import { frEcrans4 } from './fr-ecrans4';
 import { frEnnemis } from './fr-ennemis';
 import { frHorde } from './fr-horde';
 import { frEnnemisRegions6a10 } from './fr-ennemis-regions-6-10';
+import { frLore } from './fr-lore';
 import { frMeta } from './fr-meta';
 import { frNiveaux } from './fr-niveaux';
 
@@ -214,4 +215,7 @@ export const fr = {
 
   // Niveaux de horde du jalon 5 (fr-horde.ts)
   ...frHorde,
+
+  // Inscriptions, paroles des boss, descriptions des ennemis (fr-lore.ts, généré depuis docs/lore.md)
+  ...frLore,
 } as const;

@@ -290,7 +290,7 @@
   font-size: 12px;
 }
 
-/* Le nom passe à la ligne plutôt que d'être coupé (« Pollen, Trois-Pattes »), la ligne reste haute d'au moins 44 px. */
+/* Le nom passe à la ligne plutôt que d'être coupé (« Clopin, le Tendeur »), la ligne reste haute d'au moins 44 px. */
 .ligne-heros .nom {
   white-space: normal;
   overflow-wrap: anywhere;

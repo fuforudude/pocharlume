@@ -192,6 +192,10 @@ button:focus-visible {
   }
 }
 
+html[data-sans-clavier] .touche {
+  display: none;
+}
+
 .touche {
   position: absolute;
   top: 1px;
@@ -360,6 +364,25 @@ button:focus-visible {
   border-color: var(--sang);
 }
 
+.parole {
+  position: absolute;
+  left: 50%;
+  top: max(84px, calc(env(safe-area-inset-top) + 78px));
+  transform: translateX(-50%);
+  max-width: min(70vw, 520px);
+  padding: 8px 14px;
+  background: var(--panneau);
+  border: 2px solid var(--bord);
+  border-radius: 6px;
+  font-size: 13px;
+  font-style: italic;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.6s;
+}
+
+.parole.visible,
 .invite.visible,
 .message.visible {
   opacity: 1;

@@ -59,7 +59,7 @@ describe('écran des héros', () => {
   it('montre le héros du dernier choix, ses quatre compétences, son niveau, et verrouille l’ultime avant le niveau 6', async () => {
     const session = await ouvrir(sauvegardeVide());
     afficherEcranHeros(document.body, { atlas: ATLAS, session, surFermer: vi.fn() });
-    expect(document.querySelector('.heros-detail .nom')?.textContent).toBe('Charlie, le Colosse');
+    expect(document.querySelector('.heros-detail .nom')?.textContent).toBe('Gond, le Portier');
     expect(document.querySelector('.heros-detail .niveau')?.textContent).toBe(t('heros.niveau', { n: 1 }));
     const cartes = [...document.querySelectorAll('.competence')];
     expect(cartes).toHaveLength(4);
@@ -194,11 +194,11 @@ describe('écran des héros', () => {
   it('une compétence se place sur un héros d’un autre dieu, et l’ultime est ouverte au niveau 6', async () => {
     const session = await ouvrir(avec((s) => ({ ...s, meta: { ...s.meta, heros: { ...s.meta.heros, plume: { xp: 1800, competences: {} } } } })));
     afficherEcranHeros(document.body, { atlas: ATLAS, session, heros: 'plume', surFermer: vi.fn() });
-    expect(document.querySelector('.heros-detail .nom')?.textContent).toBe('Plume, l’Ombre Première');
+    expect(document.querySelector('.heros-detail .nom')?.textContent).toBe('Nielle, Souffle-Lampes');
     expect(document.querySelector('.heros-detail .niveau')?.textContent).toBe(t('heros.niveau', { n: 7 }));
     const ultime = document.querySelectorAll('.competence')[3];
     expect(ultime?.classList.contains('verrouillee')).toBe(false);
-    parTitre(t('heros.placer', { nom: 'Ombre première' })).click();
+    parTitre(t('heros.placer', { nom: 'Ombre prêtée' })).click();
     await attendre();
     expect(session.sauvegarde.meta.heros.plume?.competences).toEqual({ ombre_premiere: 1 });
   });

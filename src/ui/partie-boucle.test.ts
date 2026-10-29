@@ -523,8 +523,8 @@ describe('butin et abandon', () => {
     expect(lignes).toEqual([
       t('fin.bilan_aretes', { n: 48 }),
       t('fin.bilan_braises', { n: 2 }),
-      t('fin.bilan_xp', { n: 120, nom: 'Charlie, le Colosse' }),
-      t('fin.bilan_niveau', { nom: 'Charlie, le Colosse', n: 2 }),
+      t('fin.bilan_xp', { n: 120, nom: 'Gond, le Portier' }),
+      t('fin.bilan_niveau', { nom: 'Gond, le Portier', n: 2 }),
       t('fin.bilan_objets', { noms: 'Sablier' }),
     ]);
   });

@@ -105,7 +105,7 @@ export const PALETTES_SKINS = {
   }),
   // Héros : un pelage ou une tenue autre que celle d'origine.
   skin_plume: heros('plume', { '171412': 'd8d8e4', '45424c': 'f0f0f4', '67636f': 'a8a8b8', '948f9a': 'b8b4c0', 'e4f0f4': '6098e8' }),
-  skin_charlie: heros('charlie', { '45424c': 'b07040', '67636f': 'c88850', '948f9a': 'e8d0a0' }),
+  skin_charlie: heros('charlie', { '623f2a': 'b07040', '705030': 'c88850' }),
   skin_pollen: heros('pollen', { '623f2a': '24305a', 'b07040': '4058c0', '705030': '2a3a80', 'e8d0a0': 'b5d6de' }),
   skin_suie: heros('suie', { '3e3b39': '3b2a20', '45424c': '6e2c12', '67636f': 'c83018', '948f9a': 'e09128' }),
   skin_corbeau: heros('corbeau', { '171412': 'e5e9de', 'e5e9de': '171412', '45424c': 'aea696' }),

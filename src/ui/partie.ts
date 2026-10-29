@@ -10,6 +10,7 @@ import { audio, jouerInterface } from '../audio';
 import type { NiveauCampagne } from '../data/visuel';
 import { avancer, caseExiste, centreCase, creerPartie, derniereVagueTerminee, validerAction } from '../engine';
 import type { Action, ConfigPartie, EntreeJournal, EtatPartie, ResultatAction } from '../engine';
+import { t } from '../i18n';
 import { chargerAtlas } from '../render/atlas';
 import type { BilanPartie, RaisonFin } from '../save';
 import { ECART_MAX_MS, PasFixes } from '../render/pas-fixes';
@@ -22,6 +23,7 @@ import { Hud } from './hud';
 import { Interaction, type Issue, type Mode } from './interaction';
 import { mesurerMarges } from './marges';
 import { elementsMenu, type ElementMenu } from './menu-cercle';
+import { cleParoleBoss } from './parole-boss';
 import { texteRefus } from './refus';
 import { el } from './dom';
 
@@ -479,6 +481,11 @@ export async function lancerNiveau(
         actions.length = 0;
         rendu.apresPas(etat, temps);
         mesures.pasSimules++;
+        for (const evenement of etat.evenements) {
+          if (evenement.type !== 'vague') continue;
+          const cle = cleParoleBoss(etat.niveau.vagues, evenement.index, niveau.visuel.region, niveau.boss);
+          if (cle) hud.afficherParole(t(cle));
+        }
         if (etat.statut === 'en_cours' && (options.surVague || options.surObjet)) {
           let vague = false;
           let objet = false;

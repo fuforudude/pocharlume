@@ -256,6 +256,9 @@ Charlie et Pollen en Vieux Sage (0 à 36 % aux régions 6 à 10, contre 70 à 99
   d'inscriptions. Spec : `docs/specs/2026-10-29-dieux-sans-visage.md`.
 - [ ] Moins d'ennemis, plus solides, niveaux de horde, rééquilibrage des 100 niveaux. Spec :
   `docs/specs/2026-10-29-densite-ennemis.md`.
+- [ ] Sur mobile (appareil tactile sans clavier : `(hover: none) and (pointer: coarse)`), aucune indication de touche
+  clavier (« E », « Q », « W », « ␣ » sur les boutons du HUD) ; elles reviennent dès qu'une touche est pressée. Les
+  raccourcis restent fonctionnels (`src/ui/indications-clavier.ts`).
 
 ### Jalon 6 : roguelike, finitions, Android
 - [ ] Mode roguelike complet (carte à embranchements, bénédictions, marchand, repos, reliques à débloquer).

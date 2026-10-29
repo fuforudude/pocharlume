@@ -54,6 +54,7 @@ interface BoutonObjet {
   utilise: boolean;
 }
 const DUREE_MESSAGE = 2200;
+const DUREE_PAROLE = 7000;
 const MARGE_MENU = 30;
 
 export class Hud {
@@ -78,6 +79,8 @@ export class Hud {
   private readonly noeudMessage: HTMLElement;
   private readonly menu: HTMLElement;
   private minuteurMessage = 0;
+  private readonly noeudParole: HTMLElement;
+  private minuteurParole = 0;
   private viesPrecedentes = -1;
   private fractionPv = -1;
   private signatureMenu = '';
@@ -168,9 +171,11 @@ export class Hud {
     this.invite = new TexteSuivi(el('div', 'invite'));
     this.noeudMessage = el('div', 'message');
     this.message = new TexteSuivi(this.noeudMessage);
+    this.noeudParole = el('div', 'parole');
+    this.noeudParole.setAttribute('role', 'status');
     this.menu = el('div', 'menu-cercle');
 
-    this.racine.append(hautGauche, hautDroite, basGauche, basDroite, this.invite.noeud, this.noeudMessage, this.menu);
+    this.racine.append(hautGauche, hautDroite, basGauche, basDroite, this.invite.noeud, this.noeudMessage, this.noeudParole, this.menu);
     // Après un clic ou un toucher, le bouton ne garde pas le focus : Espace appelle la vague au lieu de
     // réactiver le dernier bouton touché. Une activation au clavier (detail = 0) garde son focus.
     this.racine.addEventListener('click', (e) => {
@@ -294,6 +299,16 @@ export class Hud {
     }, DUREE_MESSAGE);
   }
 
+  /** Affiche un bandeau de quelques secondes (parole d'un boss) : rien n'est bloqué, il ne reçoit aucun toucher. */
+  afficherParole(texte: string): void {
+    this.noeudParole.textContent = texte;
+    basculerClasse(this.noeudParole, 'visible', true);
+    window.clearTimeout(this.minuteurParole);
+    this.minuteurParole = window.setTimeout(() => {
+      basculerClasse(this.noeudParole, 'visible', false);
+    }, DUREE_PAROLE);
+  }
+
   /**
    * Montre le menu en cercle autour du point (cx, cy) en pixels CSS, ou le cache si `elements` est null.
    * Les boutons ne sont reconstruits que si leur contenu change (prix, grisé), et replacés que si le
@@ -375,6 +390,7 @@ export class Hud {
 
   detruire(): void {
     window.clearTimeout(this.minuteurMessage);
+    window.clearTimeout(this.minuteurParole);
     this.racine.remove();
   }
 }

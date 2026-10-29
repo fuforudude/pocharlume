@@ -7,6 +7,7 @@ import { construire, construireIllustrations, DOSSIER_SORTIE, RACINE } from './c
 import { encoderPng } from './png.ts';
 import { planScene } from './scene.ts';
 import { planHerosJ2 } from './scene-heros.ts';
+import { planFideles } from './scene-fideles.ts';
 import { planJalon4 } from './scene-jalon4.ts';
 
 const debut = performance.now();
@@ -34,6 +35,7 @@ if (!process.argv.includes('--sans-apercu')) {
   writeFileSync(join(dossier, '_tout.png'), encoderPng(plancheGenerale(resultat.sprites)));
   writeFileSync(join(dossier, '_scene.png'), encoderPng(planScene(resultat.sprites)));
   writeFileSync(join(dossier, '_heros.png'), encoderPng(planHerosJ2(resultat.sprites)));
+  writeFileSync(join(dossier, '_fideles.png'), encoderPng(planFideles(resultat.sprites)));
   writeFileSync(join(dossier, '_jalon4.png'), encoderPng(planJalon4(resultat.sprites, illustrations)));
   console.log(`Aperçus agrandis dans art/apercu/ (_tout.png, _scene.png, _heros.png, _jalon4.png et une planche par sprite).`);
 }

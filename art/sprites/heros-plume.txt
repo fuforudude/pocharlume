@@ -1,7 +1,7 @@
-# Plume, l'Ombre Première : héroïne du dieu Plume. Chat noir élancé (jambes longues, queue fine), yeux pâles,
-# liseré gris clair sur les oreilles, l'échine et les pattes pour rester lisible sur l'herbe sombre. Elle reprend
+# Nielle, Souffle-Lampes : fidèle de l'Ombre (id technique `plume`). Chatte noire élancée (jambes longues, queue fine), yeux
+# ambre, qui porte une lanterne éteinte au bout d'un fil et souffle les lampes avant d'entrer. Liseré gris clair sur les oreilles, l'échine et les pattes pour rester lisible sur l'herbe sombre. Elle reprend
 # le squelette du chat de grange (mêmes animations) mais d'un pixel plus haut : grilles posées à l'origine (6, 17),
-# pieds en y = 30. Griffes seulement : un éclat de lame au bout de la patte avant.
+# pieds en y = 30. Une chatte ordinaire : la lanterne éteinte se balance au bout de la patte avant (les griffes ne sont que des traces).
 categorie unite
 palette commune
 taille 32 32
@@ -16,7 +16,7 @@ calque tete 6 0
 v.....v.
 ku...uk.
 kkkkkkk.
-kkkk1k1.
+kkkkFkF.
 kkkuuUuu
 .kkuuuu.
 
@@ -67,23 +67,26 @@ calque jambes-c 6 11
 .ku.uk
 .UU.UU
 
-# Griffes : trois éclats au bout de la patte avant.
+# Lanterne éteinte, mèche qui fume (au repos, pendue au bout de la patte).
 calque arme 11 7
-..1
-.1.
-1U
+.v.
+ppp
+pkp
+ppp
 
 calque arme-haut 8 -1
-.1..1
-..1..
-...U.
-....k
-.....u
+..v..
+.v...
+.ppp.
+.pkp.
+.ppp.
 
+# Lanterne balancée devant elle.
 calque arme-frappe 11 6
-.....1
-kkkU1.
-.....1
+...v...
+kkkppp.
+...pkp.
+...ppp.
 
 # Les trois griffures du coup.
 calque trace 13 2
