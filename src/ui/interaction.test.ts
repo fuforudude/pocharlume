@@ -564,7 +564,7 @@ describe('le chemin n’offre aucune pose (jalon 5)', () => {
     interaction.viser(etat, premier.x - 0.5, premier.y - 0.5);
     expect(interaction.visee).toBeNull();
     // Une case libre voisine, elle, s'ouvre et s'éclaire.
-    interaction.toucher(etat, premier.x + 0.5, premier.y + 2.5, RAYON);
+    interaction.toucher(etat, premier.x + 2.5, premier.y + 2.5, RAYON);
     expect(interaction.mode.type).toBe('menu');
   });
 });

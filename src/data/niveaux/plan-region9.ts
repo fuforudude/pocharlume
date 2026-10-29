@@ -56,6 +56,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
       nombre: 11,
       ennemis: ennemisDuNiveau(9, 3),
       graine: 4194,
+      horde: true,
       facteurBudget: 0.217,
 
 
@@ -124,6 +125,7 @@ export const PLANS_REGION9: readonly PlanNiveau[] = [
       nombre: 13,
       ennemis: ennemisDuNiveau(9, 7),
       graine: 4087,
+      horde: true,
       facteurBudget: 0.245,
 
 

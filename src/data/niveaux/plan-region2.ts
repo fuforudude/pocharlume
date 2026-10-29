@@ -50,6 +50,7 @@ export const PLANS_REGION2: readonly PlanNiveau[] = [
       nombre: 9,
       ennemis: ennemisDuNiveau(2, 3),
       graine: 2113,
+      horde: true,
     },
   },
   {
@@ -106,6 +107,7 @@ export const PLANS_REGION2: readonly PlanNiveau[] = [
       nombre: 11,
       ennemis: ennemisDuNiveau(2, 7),
       graine: 3117,
+      horde: true,
     },
   },
   {

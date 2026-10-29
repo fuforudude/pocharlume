@@ -350,7 +350,9 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     const entete = el('div', 'fiche-entete');
     entete.append(el('span', 'fiche-numero', t('accueil.niveau', { n: vue.numero })));
     if (vue.boss) entete.append(el('span', 'etiquette-boss', t('fiche.boss')));
+    if (niveau.horde) entete.append(el('span', 'etiquette-horde', t('fiche.horde')));
     gauche.append(entete, el('h2', 'titre', textes.nom), el('p', 'ambiance', textes.ambiance));
+    if (niveau.horde) gauche.append(el('p', 'horde-aide', t('fiche.horde_aide')));
     controleurFiche = new AbortController();
     const signalFiche = AbortSignal.any([signal, controleurFiche.signal]);
     const choisir = creerChoixFiche(atlas, session, signalFiche);

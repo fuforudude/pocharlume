@@ -705,6 +705,20 @@ button:focus-visible {
   font-weight: bold;
 }
 
+.etiquette-horde {
+  padding: 1px 8px;
+  border: 2px solid var(--or);
+  border-radius: 4px;
+  color: var(--or);
+  font-weight: bold;
+}
+
+.ecran .horde-aide {
+  margin: 0;
+  font-size: 13px;
+  color: var(--texte-doux);
+}
+
 .ecran .ambiance {
   margin: 0;
   max-width: 460px;

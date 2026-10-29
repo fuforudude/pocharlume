@@ -22,7 +22,8 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
       nombre: 10,
       ennemis: ennemisDuNiveau(10, 1),
       graine: 4091,
-      facteurBudget: 0.096,
+      facteurBudget: 0.096,
+
 
 
     },
@@ -39,7 +40,8 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
       nombre: 10,
       ennemis: ennemisDuNiveau(10, 2),
       graine: 1092,
-      facteurBudget: 0.14,
+      facteurBudget: 0.14,
+
 
 
     },
@@ -56,7 +58,9 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
       nombre: 11,
       ennemis: ennemisDuNiveau(10, 3),
       graine: 2093,
-      facteurBudget: 0.095,
+      horde: true,
+      facteurBudget: 0.095,
+
 
 
     },
@@ -73,7 +77,8 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
       nombre: 11,
       ennemis: ennemisDuNiveau(10, 4),
       graine: 3094,
-      facteurBudget: 0.3,
+      facteurBudget: 0.3,
+
 
 
     },
@@ -90,7 +95,8 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
       nombre: 12,
       ennemis: ennemisDuNiveau(10, 5),
       graine: 4095,
-      facteurBudget: 0.2,
+      facteurBudget: 0.2,
+
 
 
     },
@@ -107,7 +113,8 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
       nombre: 12,
       ennemis: ennemisDuNiveau(10, 6),
       graine: 1096,
-      facteurBudget: 0.3,
+      facteurBudget: 0.3,
+
 
 
     },
@@ -124,7 +131,9 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
       nombre: 13,
       ennemis: ennemisDuNiveau(10, 7),
       graine: 2097,
-      facteurBudget: 0.25,
+      horde: true,
+      facteurBudget: 0.25,
+
 
 
     },
@@ -141,7 +150,8 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
       nombre: 13,
       ennemis: ennemisDuNiveau(10, 8),
       graine: 3653,
-      facteurBudget: 0.117,
+      facteurBudget: 0.117,
+
 
 
     },
@@ -158,7 +168,8 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
       nombre: 14,
       ennemis: ennemisDuNiveau(10, 9),
       graine: 4099,
-      facteurBudget: 0.2,
+      facteurBudget: 0.2,
+
 
 
     },
@@ -175,7 +186,8 @@ export const PLANS_REGION10: readonly PlanNiveau[] = [
       nombre: 15,
       ennemis: ennemisDuNiveau(10, 10),
       graine: 1100,
-      facteurBudget: 0.042,
+      facteurBudget: 0.042,
+
 
 
       boss: { vague: 15, ennemi: 'soleil_bleme', chemin: 0, delai: 12 },

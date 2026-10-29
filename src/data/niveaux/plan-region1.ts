@@ -44,7 +44,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     defiFer: { familles: ['caserne', 'artillerie'] },
     nom: 'niveau.r1.03.nom',
     ambiance: 'niveau.r1.03.ambiance',
-    vagues: { nombre: 7, ennemis: PAYSAN_MENDIANT, graine: 1103 },
+    vagues: { nombre: 7, ennemis: PAYSAN_MENDIANT, graine: 1103, horde: true },
   },
   {
     numero: 4,
@@ -84,7 +84,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     defiFer: { familles: ['caserne', 'tir'] },
     nom: 'niveau.r1.07.nom',
     ambiance: 'niveau.r1.07.ambiance',
-    vagues: { nombre: 10, ennemis: TOUS, graine: 1107 },
+    vagues: { nombre: 10, ennemis: TOUS, graine: 1107, horde: true },
   },
   {
     numero: 8,

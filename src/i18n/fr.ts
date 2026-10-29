@@ -4,6 +4,7 @@ import { frDieux } from './fr-dieux';
 import { frEcrans3 } from './fr-ecrans3';
 import { frEcrans4 } from './fr-ecrans4';
 import { frEnnemis } from './fr-ennemis';
+import { frHorde } from './fr-horde';
 import { frEnnemisRegions6a10 } from './fr-ennemis-regions-6-10';
 import { frMeta } from './fr-meta';
 import { frNiveaux } from './fr-niveaux';
@@ -210,4 +211,7 @@ export const fr = {
 
   // Niveaux de la campagne (fr-niveaux.ts)
   ...frNiveaux,
+
+  // Niveaux de horde du jalon 5 (fr-horde.ts)
+  ...frHorde,
 } as const;
