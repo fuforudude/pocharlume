@@ -529,13 +529,13 @@ Ce qui a été trouvé et réglé :
 - **Budget de menace et ennemis des régions 7 à 10.** À budget b(L, w) égal, le naïf perdait presque tout dès la région 7, même avec 6000 arêtes
   de départ : la menace de la spec ne chiffre ni l'armure de 60 à 90 % (la moyenne armure/résistance sous-estime un Garde Royal) ni les
   invocations. Plutôt que de toucher la formule (les vagues des régions 1 à 5 sont figées et doivent rester identiques), chaque plan des
-  régions 6 à 10 a un `facteurBudget` (`plan-niveau.ts`, `generation.ts`) : facteurs moyens de 0,8 (région 6) à 0,35 (région 7), 0,4 (région 8),
-  0,25 (région 9) et 0,1 à 0,3 (région 10). Il est affiné par niveau parce que la réponse du naïf à ce facteur est chaotique (la composition
+  régions 6 à 10 a un `facteurBudget` (`plan-niveau.ts`, `generation.ts`) : facteurs de 0,4 à 1,0 (région 6), 0,22 à 0,40 (région 7), 0,27 à 0,67 (région 8),
+  0,21 à 0,64 (région 9) et 0,04 à 0,30 (région 10). Il est affiné par niveau parce que la réponse du naïf à ce facteur est chaotique (la composition
   des vagues change à chaque valeur) ; les niveaux 64, 70, 82, 83, 90 et 98 ont changé de graine de vagues (injouables, ou sans leur premier ennemi).
 - **Acolyte de Cendre** (avant → après) : 140 PV → 80 PV, 2 Creux toutes les 8 s → 1 Creux toutes les 12 s (un groupe d'Acolytes se multipliait plus
   vite que toute défense dès la vague 3 de la région 10). **Garde Royal** : 200 → 130 PV (la première vague du niveau 81 ne tenait pas dans son budget).
 - **Arêtes de départ** (première estimation 1395 à 2795, croissante) : région 6 de 900 à 1530, région 7 de 1155 à 1910, région 8 de 1200 à 2010,
-  région 9 de 1135 à 1920, région 10 de 1050 à 1850 (niveau 91 : 1350, niveau 100 : 2870). Elles fixent surtout les défis : Héroïque ×3 et
+  région 9 de 1220 à 1920 (niveau 81 : 2035), région 10 de 1135 à 1710 (niveau 91 : 1350, niveau 100 : 2870). Elles fixent surtout les défis : Héroïque ×3 et
   Fer ×10 ; la réussite de ceux-ci tient à quelques niveaux qui basculent pour un dieu (Pollen), d'où des retouches de 3 à 25 % par région.
 - `VERSION_DONNEES` 10 → 11.
 - **Sorties du simulateur** : `ResultatPartie.vagueTerminee` (dernière vague terminée), option `infini` et `vagueMax` de `jouerPartie`.

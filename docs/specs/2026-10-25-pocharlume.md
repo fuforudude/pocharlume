@@ -590,7 +590,7 @@ jalon 4 ») : elles suivent la spec d'origine et les choix du jalon 3, et resten
   - Les régions 6 à 10 ont un `facteurBudget` par niveau (champ du plan, absent des régions 1 à 5) qui multiplie le budget de menace b(L, w) :
     la menace d'un ennemi (PV ÷ (1 − protection moyenne) × vitesse) ne chiffre ni une armure de 90 % contre des tours physiques, ni
     les invocations de l'Acolyte de Cendre ; à budget égal, les régions 7 à 10 étaient injouables pour le naïf à toute quantité d'arêtes
-    (facteurs de 0,02 à 0,98). Les vagues des régions 1 à 5 sont restées identiques octet pour octet.
+    (le facteur retenu va de 0,04 à 1,0 selon le niveau). Les vagues des régions 1 à 5 sont restées identiques octet pour octet.
   - Valeurs d'ennemis changées par rapport au tableau ci-dessus : l'Acolyte de Cendre invoque **1** Creux toutes les **12 s** (et non 2 toutes
     les 8 s) et a 80 PV (et non 140) ; le Garde Royal a 130 PV (et non 200), armure 90 % inchangée.
   - Mode infini : le budget croît de **22 %** par vague (et non 8 %) : à 8 %, le naïf (16 tours, tout amélioré) atteignait la vague 100 ; plafond
