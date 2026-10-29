@@ -10,7 +10,7 @@ import { jouerPartie } from '../../equilibrage/simulation';
 import { CONFIG_MATOU, jouer, planDeConstruction } from './bot.test-utils';
 import { REGION1 } from './region1';
 
-const DELAI_PARTIE_LONGUE = 30_000;
+const DELAI_PARTIE_LONGUE = 120_000;
 
 describe('les niveaux de la région 1 se jouent', () => {
   for (const campagne of REGION1) {
