@@ -251,7 +251,13 @@ Charlie et Pollen en Vieux Sage (0 à 36 % aux régions 6 à 10, contre 70 à 99
 `npm run balance` après la dernière correction du classement des écarts. L'écran de fin d'une partie infinie n'a pas
 été vu au navigateur.
 
-### Jalon 5 : roguelike, finitions, Android
+### Jalon 5 : dieux sans visage, moins d'ennemis (décidé le 2026-10-29)
+- [ ] Les dieux sans visage : lore réécrit et reporté, trois fidèles, choix du dieu sans portrait, statues et recueil
+  d'inscriptions. Spec : `docs/specs/2026-10-29-dieux-sans-visage.md`.
+- [ ] Moins d'ennemis, plus solides, niveaux de horde, rééquilibrage des 100 niveaux. Spec :
+  `docs/specs/2026-10-29-densite-ennemis.md`.
+
+### Jalon 6 : roguelike, finitions, Android
 - [ ] Mode roguelike complet (carte à embranchements, bénédictions, marchand, repos, reliques à débloquer).
 - [ ] Musique d'ambiance CC0 par région.
 - [ ] Appli Android (Capacitor) qui s'installe, tourne hors ligne et garde la sauvegarde entre deux lancements.

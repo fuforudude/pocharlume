@@ -1,6 +1,6 @@
 # Moins d'ennemis, plus solides : la zone redevient une stratégie
 
-Statut : brouillon (à valider le 2026-10-30, avec les autres modifications et la décision sur Charlie et Pollen)
+Statut : validée le 2026-10-29 (jalon 5)
 Date : 2026-10-29
 
 ## Besoin
@@ -60,4 +60,5 @@ par exemple bloquer les ennemis avec beaucoup de soldats puis les écraser en zo
 
 ## Questions ouvertes
 - Le facteur exact (2× ou un peu moins) se décide au simulateur ; à confirmer en jouant.
-- À regrouper avec la décision sur Charlie et Pollen, qui touche aussi l'équilibrage : un seul passage.
+- La faiblesse de Charlie et Pollen en Vieux Sage reste hors de ce chantier : les dieux, héros et sorts ne bougent pas, les
+  bandes Matou et Vieux Sage restent suspendues comme aux jalons 3 et 4.

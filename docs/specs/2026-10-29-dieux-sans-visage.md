@@ -1,6 +1,6 @@
 # Les dieux sans visage
 
-Statut : brouillon (à valider le 2026-10-30)
+Statut : validée le 2026-10-29 (jalon 5)
 Date : 2026-10-29
 
 ## Besoin
@@ -61,4 +61,4 @@ dans des inscriptions sur de vieilles statues cachées dans les cartes.
 - Écrans : choix du dieu, héros, partie (statue), nouveau recueil.
 
 ## Questions ouvertes
-- Où ouvrir le recueil : depuis la carte du monde (proposé) ou la collection ?
+- Aucune. Le recueil s'ouvre depuis la carte du monde (bouton à côté de Héros et Boutique).
