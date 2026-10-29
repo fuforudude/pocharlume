@@ -52,7 +52,7 @@ export const PLANS_REGION8: readonly PlanNiveau[] = [
       nombre: 11,
       ennemis: ennemisDuNiveau(8, 3),
       graine: 2073,
-      facteurBudget: 0.409,
+      facteurBudget: 0.671,
     },
   },
   {
@@ -82,7 +82,7 @@ export const PLANS_REGION8: readonly PlanNiveau[] = [
       nombre: 12,
       ennemis: ennemisDuNiveau(8, 5),
       graine: 4075,
-      facteurBudget: 0.436,
+      facteurBudget: 0.265,
     },
   },
   {
@@ -157,7 +157,7 @@ export const PLANS_REGION8: readonly PlanNiveau[] = [
       nombre: 15,
       ennemis: ennemisDuNiveau(8, 10),
       graine: 1080,
-      facteurBudget: 0.504,
+      facteurBudget: 0.393,
       boss: { vague: 15, ennemi: 'grand_inquisiteur', chemin: 0, delai: 12 },
     },
   },

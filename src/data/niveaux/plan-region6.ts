@@ -22,7 +22,7 @@ export const PLANS_REGION6: readonly PlanNiveau[] = [
       nombre: 10,
       ennemis: ennemisDuNiveau(6, 1),
       graine: 4051,
-      facteurBudget: 0.765,
+      facteurBudget: 0.979,
     },
   },
   {
@@ -37,7 +37,7 @@ export const PLANS_REGION6: readonly PlanNiveau[] = [
       nombre: 10,
       ennemis: ennemisDuNiveau(6, 2),
       graine: 1052,
-      facteurBudget: 0.792,
+      facteurBudget: 0.618,
     },
   },
   {
@@ -52,7 +52,7 @@ export const PLANS_REGION6: readonly PlanNiveau[] = [
       nombre: 11,
       ennemis: ennemisDuNiveau(6, 3),
       graine: 2053,
-      facteurBudget: 0.819,
+      facteurBudget: 0.639,
     },
   },
   {
@@ -67,7 +67,7 @@ export const PLANS_REGION6: readonly PlanNiveau[] = [
       nombre: 11,
       ennemis: ennemisDuNiveau(6, 4),
       graine: 3054,
-      facteurBudget: 0.846,
+      facteurBudget: 0.402,
     },
   },
   {
@@ -97,7 +97,7 @@ export const PLANS_REGION6: readonly PlanNiveau[] = [
       nombre: 12,
       ennemis: ennemisDuNiveau(6, 6),
       graine: 1056,
-      facteurBudget: 0.9,
+      facteurBudget: 0.702,
     },
   },
   {
@@ -142,7 +142,7 @@ export const PLANS_REGION6: readonly PlanNiveau[] = [
       nombre: 14,
       ennemis: ennemisDuNiveau(6, 9),
       graine: 4059,
-      facteurBudget: 0.981,
+      facteurBudget: 0.466,
     },
   },
   {
@@ -157,7 +157,7 @@ export const PLANS_REGION6: readonly PlanNiveau[] = [
       nombre: 15,
       ennemis: ennemisDuNiveau(6, 10),
       graine: 1060,
-      facteurBudget: 1.008,
+      facteurBudget: 0.786,
       boss: { vague: 15, ennemi: 'roi_fosses', chemin: 0, delai: 12 },
     },
   },
