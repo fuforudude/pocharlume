@@ -190,7 +190,7 @@ export const ENNEMIS = {
     cadence: 1.4,
     coutVies: 1,
     prime: 11,
-    pouvoirs: { noyade: { delai: 5 } },
+    pouvoirs: { noyade: { delai: 9 } },
   }),
   /** Résistance magique 60 %. */
   pelerin_voile: ennemi({
