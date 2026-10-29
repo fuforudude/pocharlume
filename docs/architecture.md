@@ -604,8 +604,8 @@ attendue derrière elle. Les variantes passent de dix à douze (6 préférences 
 Mesure de la zone (`src/equilibrage/zone.ts`, tests `zone-ordinaires.test.ts` et `zone-horde.test.ts`, section « La zone » de `balance-report.md`) : taux de
 victoire du soigneux (sans tour divine, 45 % des arêtes de départ en Vieux Sage, trois dieux, six graines) avec quatre compositions : sans zone (tir, magie),
 zone sans caserne (+ artillerie), caserne sans zone, caserne et zone. Tolérances (chaque taux porte sur 144 parties ordinaires ou 54 de horde) : « pas plus »
-= au plus 6 points de plus ; « plus » = au moins 10 points ; horde = au moins 20 points. Résultat du rapport : niveaux ordinaires 60 % sans zone, 58 % zone seule
-(−1 point), 57 % caserne seule, 69 % caserne et zone (+12) ; horde 17 %, 59 % (+43), 6 %, 63 %. Les mesures sont sensibles (un seuil de sort du bot, la graine d'un
+= au plus 6 points de plus ; « plus » = au moins 10 points ; horde = au moins 20 points. Résultat du rapport : niveaux ordinaires 59 % sans zone, 61 % zone seule
+(+2 points), 58 % caserne seule, 73 % caserne et zone (+15) ; horde 17 %, 59 % (+42), 6 %, 63 %. Les mesures sont sensibles (un seuil de sort du bot, la graine d'un
 niveau les déplacent de quelques points) : ne pas resserrer les tolérances sans agrandir l'échantillon.
 
 Rééquilibrage (avant → après) :
@@ -625,8 +625,8 @@ Rééquilibrage (avant → après) :
   fixe de `bot.test-utils.ts` perd les autres niveaux, sans que le moteur soit en cause) ; les tests de sorts du bot jouent le niveau 10.
 
 Résultats (10 graines, comme les bandes) : voir `balance-report.md`. **Bandes imposées : toutes tenues** (Chaton, le héros seul perd, défis, infini, puissance).
-Défis (soigneux, trois dieux), Héroïque / Fer par région : R1 87 / 85 %, R2 74 / 86, R3 83 / 77, R4 84 / 84, R5 83 / 58, R6 79 / 76, R7 63 / 86, R8 85 / 80,
-R9 55 / 88, R10 83 / 86 (jalon 4 : R1 73 / 78, R2 66 / 69, R3 72 / 62, R4 48 / 70, R5 51 / 45 pour les régions 1 à 5 ; R6 55 / 62, R7 50 / 87, R8 68 / 79, R9 53 / 90, R10 67 / 88).
+Défis (soigneux, trois dieux), Héroïque / Fer par région : R1 86 / 87 %, R2 77 / 87, R3 83 / 78, R4 85 / 84, R5 81 / 57, R6 80 / 75, R7 66 / 86, R8 89 / 80,
+R9 55 / 87, R10 84 / 86 (jalon 4 : R1 73 / 78, R2 66 / 69, R3 72 / 62, R4 48 / 70, R5 51 / 45 pour les régions 1 à 5 ; R6 55 / 62, R7 50 / 87, R8 68 / 79, R9 53 / 90, R10 67 / 88).
 Soigneux / naïf en Matou par région, Plume / Charlie / Pollen : région 1 100 / 100 / 100 et 75 / 51 / 98 % ; région 5 100 / 99 / 100 et 81 / 46 / 82 % ;
 région 10 100 / 100 / 100 et 80 / 40 / 89 %. Toujours suspendues (Matou et Vieux Sage, comme aux jalons 3 et 4) : Charlie et Pollen très en dessous de Plume en Vieux Sage,
 Pollen trop fort pour le naïf en Matou, courbe de difficulté non monotone.
