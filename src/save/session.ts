@@ -29,8 +29,9 @@
 // rejoué à l'identique à chaque passage de l'opération. Le résultat d'une caisse dépend donc seulement de l'état du joueur
 // au moment de l'écriture (compteur de garantie, objets déjà possédés, braises), jamais d'un second jet : une caisse
 // ouverte depuis une vue périmée est revalidée sous verrou, et ce qu'on rend est ce qui a vraiment été écrit.
-import { estIdBranche, estIdHeros } from '../data/meta';
+import { estIdBranche, estIdHeros, type PalierInfini } from '../data/meta';
 import type { ConfigPartie, EtatPartie } from '../engine/etat';
+import { derniereVagueTerminee } from '../engine/vagues';
 import { sourceCrypto, sourceRejouable, type SourceAleatoire } from '../meta/aleatoire';
 import { rangDe } from '../meta/collection';
 import { JETS_PAR_TIRAGE } from '../meta/tirage';
@@ -217,6 +218,8 @@ export class Session {
   private file: Promise<unknown> = Promise.resolve();
   private readonly verrou: VerrouSauvegarde | null;
   private readonly defs: DefsMeta | undefined;
+  /** Ce que les rangements de la partie infinie en cours ont déjà payé, pour que son bilan de fin soit complet. */
+  private avanceeInfini: { graine: number; recordPrecedent: number; paliers: PalierInfini[]; aretes: number; braises: number } | null = null;
   private readonly aleatoire: SourceAleatoire | null;
 
   private constructor(
@@ -449,7 +452,21 @@ export class Session {
       const sienne = graine !== undefined && r.sauvegarde.partie?.carte !== undefined && r.sauvegarde.partie.config.graine === graine;
       return { ok: true, sauvegarde: sienne ? avecPartieEnCours(r.sauvegarde, null) : r.sauvegarde, detail: r.bilan };
     });
-    return issue.ok ? { ok: true, sauvegarde: issue.sauvegarde, ecrite: issue.ecrite, detail: issue.detail } : issue;
+    if (!issue.ok) return issue;
+    // Ce que `rangerPartie` a déjà payé pour cette partie fait partie de son bilan (sinon l'écran de fin le passerait sous silence).
+    const avancee = graine !== undefined && this.avanceeInfini?.graine === graine ? this.avanceeInfini : null;
+    if (graine !== undefined && this.avanceeInfini?.graine === graine) this.avanceeInfini = null;
+    if (!avancee) return { ok: true, sauvegarde: issue.sauvegarde, ecrite: issue.ecrite, detail: issue.detail };
+    const b = issue.detail;
+    const detail: BilanInfini = {
+      ...b,
+      recordPrecedent: avancee.recordPrecedent,
+      nouveauRecord: b.record > avancee.recordPrecedent,
+      paliersPayes: [...avancee.paliers, ...b.paliersPayes],
+      aretes: b.aretes + avancee.aretes,
+      braises: b.braises + avancee.braises,
+    };
+    return { ok: true, sauvegarde: issue.sauvegarde, ecrite: issue.ecrite, detail };
   }
 
   /**
@@ -470,7 +487,25 @@ export class Session {
   async rangerPartie(etat: EtatPartie, numeroNiveau: number, carte?: string): Promise<boolean> {
     const partie = partieEnCours(etat, numeroNiveau, carte);
     if (!partie) return false;
-    return ecrite(await this.lancer((s) => reussite(avecPartieEnCours(s, partie))));
+    // Une partie infinie rangée garde le record atteint : la dernière vague terminée est enregistrée dans la même
+    // opération (record et paliers, payés une seule fois), même si la partie n'est jamais reprise ni terminée.
+    const fin: FinInfinie | null = carte === undefined ? null : { carte, vague: Math.max(0, derniereVagueTerminee(etat)) };
+    const issue = await this.lancer<BilanInfini | null, never>((s) => {
+      const rangee = avecPartieEnCours(s, partie);
+      const r = fin ? enregistrerFinInfinie(rangee, fin) : null;
+      return r?.ok ? { ok: true, sauvegarde: r.sauvegarde, detail: r.bilan } : { ok: true, sauvegarde: rangee, detail: null };
+    });
+    if (issue.ok && issue.detail && partie.carte !== undefined) {
+      const avant = this.avanceeInfini?.graine === partie.config.graine ? this.avanceeInfini : null;
+      this.avanceeInfini = {
+        graine: partie.config.graine,
+        recordPrecedent: avant ? avant.recordPrecedent : issue.detail.recordPrecedent,
+        paliers: [...(avant?.paliers ?? []), ...issue.detail.paliersPayes],
+        aretes: (avant?.aretes ?? 0) + issue.detail.aretes,
+        braises: (avant?.braises ?? 0) + issue.detail.braises,
+      };
+    }
+    return ecrite(issue);
   }
 
   /** Abandon : la partie en cours est oubliée. */
