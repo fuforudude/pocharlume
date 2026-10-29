@@ -110,7 +110,7 @@ const corbeau = heros('corbeau', 'plume', {
 const charlie = heros('charlie', 'charlie', {
   pv: 420,
   pvParNiveau: 4.0,
-  degats: [24, 36],
+  degats: [14, 22],
   degatsParNiveau: 0.2,
   cadence: 1.5,
   armure: 0.3,

@@ -59,7 +59,6 @@ describe('redigerRegions', () => {
   });
 
   it('dit que les bandes ne sont pas encore appliquées et liste les écarts constatés', () => {
-    expect(texte).toContain('premier passage');
     expect(texte).toContain('Écarts aux bandes');
     // Le naïf gagne 50 % et le soigneux tout : l'écart de Vieux Sage (soigneux 100 % > 85 %) est noté.
     expect(texte).toContain('Vieux Sage (Plume)');

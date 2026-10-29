@@ -2,6 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { DIFFICULTES } from '../data/difficultes';
 import { ENNEMIS } from '../data/ennemis';
+import { REGLES } from '../data/regles';
 import { ce, CONFIG, avancerSecondes, configDe, niveauEssai } from './aides.test-utils';
 import { verifierConfig } from './config';
 import type { Niveau, Vague } from './definitions';
@@ -59,15 +60,16 @@ describe('défi Héroïque', () => {
 });
 
 describe('défi Fer : une seule vague', () => {
-  it('fusionne toutes les vagues en une, effectifs ×1,5 arrondis au-dessus, boss à 1', () => {
+  it('fusionne toutes les vagues en une, effectifs multipliés (REGLES.fer) arrondis au-dessus, boss à 1', () => {
+    const eff = (n: number): number => Math.ceil(n * REGLES.fer.facteurEffectifs - 1e-9);
     const etat = creerPartie(niveauFer(), config({ defi: 'fer' }));
     expect(etat.niveau.vagues).toHaveLength(1);
     const paquets = etat.niveau.vagues[0]?.paquets ?? [];
     expect(paquets.map((p) => [p.ennemi, p.nombre])).toEqual([
-      ['paysan_affame', 6],
-      ['mendiant', 3],
-      ['chien_errant', 5],
-      ['paysan_affame', 11],
+      ['paysan_affame', eff(4)],
+      ['mendiant', eff(2)],
+      ['chien_errant', eff(3)],
+      ['paysan_affame', eff(7)],
       ['boucher_vaudrelle', 1],
     ]);
     // Les délais propres de chaque groupe sont gardés.
@@ -81,7 +83,7 @@ describe('défi Fer : une seule vague', () => {
     expect(etat.vagues.lancees).toBe(1);
     expect(etat.vagues.prochaine).toBe(-1);
     avancerSecondes(etat, 3);
-    expect(etat.ennemis).toHaveLength(6);
+    expect(etat.ennemis).toHaveLength(2 * Math.ceil(2 * REGLES.fer.facteurEffectifs - 1e-9));
   });
 
   it('seules les deux familles du niveau sont constructibles', () => {
@@ -126,12 +128,13 @@ describe('les défis se jouent avec les règles de Matou', () => {
     for (const defi of ['heroique', 'fer'] as const) {
       const niveau = defi === 'fer' ? niveauFer([{ paquets: [groupe('paysan_affame', 1)] }], ['caserne', 'tir'], 1000) : niveauEssai([{ paquets: [groupe('paysan_affame', 1)] }], 1000);
       const etat = creerPartie(niveau, config({ defi, difficulte }));
-      expect(etat.aretes).toBe(1000 * DIFFICULTES.matou.aretesDepart);
+      const facteurAretes = defi === 'fer' ? REGLES.fer.facteurAretes : REGLES.heroique.facteurAretes;
+      expect(etat.aretes).toBe(Math.round((1000 * Math.round(DIFFICULTES.matou.aretesDepart * facteurAretes * 100)) / 100));
       if (defi === 'fer') expect(etat.vies).toBe(DIFFICULTES.matou.vies);
       appliquerAction(etat, { type: 'appelerVague' });
       step(etat);
       const e = etat.ennemis[0];
-      const facteurElite = defi === 'heroique' ? 1.8 : 1;
+      const facteurElite = defi === 'heroique' ? REGLES.elite.facteurPv : 1;
       expect(e?.pvMax).toBeCloseTo(ENNEMIS.paysan_affame.pv * DIFFICULTES.matou.pvEnnemis * facteurElite, 6);
     }
   });

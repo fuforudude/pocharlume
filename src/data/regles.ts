@@ -28,8 +28,8 @@ export const REGLES: Regles = {
   piegesMax: 12,
   dureeRevelation: 0.1,
   elite: { facteurPv: 1.4, facteurPrime: 1.5, viesEnPlus: 0 },
-  heroique: { vies: 1 },
-  fer: { facteurEffectifs: 1.5 },
+  heroique: { vies: 1, facteurAretes: 3 },
+  fer: { facteurEffectifs: 1, facteurAretes: 10 },
   plafondBonus: 0.1,
   regenerationBonusHeros: 20,
 };

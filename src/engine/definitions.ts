@@ -609,10 +609,10 @@ export interface Regles {
     /** Vies de plus que coûte l'ennemi s'il s'échappe. */
     readonly viesEnPlus: number;
   };
-  /** Défi Héroïque : nombre de vies (tous les groupes non-boss en élite). */
-  readonly heroique: { readonly vies: number };
+  /** Défi Héroïque : nombre de vies (tous les groupes non-boss en élite) et facteur sur les arêtes de départ. */
+  readonly heroique: { readonly vies: number; readonly facteurAretes: number };
   /** Défi Fer : toutes les vagues en une, effectifs multipliés (arrondi au-dessus), boss exceptés. */
-  readonly fer: { readonly facteurEffectifs: number };
+  readonly fer: { readonly facteurEffectifs: number; readonly facteurAretes: number };
   /** Bonus de collection : total maximal (0,1 = +10 %) par tour de base ou pour le héros. */
   readonly plafondBonus: number;
   /** PV régénérés par seconde pour un bonus de régénération de 100 % (1 = +100 %) du héros. */

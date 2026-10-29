@@ -24,7 +24,7 @@ describe('élites', () => {
     expect(etat.ennemis.map((e) => e.elite)).toEqual([true, true, false]);
   });
 
-  it('PV ×1,8, un palier d’armure et de résistance de plus, prime ×1,5, une vie de plus', () => {
+  it('PV et prime majorés (REGLES.elite), un palier d’armure et de résistance de plus, et les vies en plus de la règle', () => {
     const etat = creerPartie(niveauEssai([VAGUE_MIXTE]), CONFIG);
     appliquerAction(etat, { type: 'appelerVague' });
     step(etat);
@@ -37,7 +37,7 @@ describe('élites', () => {
     expect(ordinaire.armure).toBe(0);
     expect(elite.prime).toBe(ajusterMontant(ordinaire.prime, REGLES.elite.facteurPrime));
     expect(elite.prime).toBeGreaterThan(ordinaire.prime);
-    expect(elite.coutVies).toBe(ordinaire.coutVies + 1);
+    expect(elite.coutVies).toBe(ordinaire.coutVies + REGLES.elite.viesEnPlus);
     // Le type reste celui de l'ennemi : le rendu choisit le sprite `<id>-elite` d'après `elite`.
     expect(elite.type).toBe('paysan_affame');
   });
@@ -54,12 +54,12 @@ describe('élites', () => {
     expect(paliers(0.9, 0.9)).toEqual([0.9, 0.9]);
   });
 
-  it('un élite qui s’échappe coûte une vie de plus', () => {
+  it('un élite qui s’échappe coûte les vies de la règle des élites (REGLES.elite.viesEnPlus) en plus de celles d’un ordinaire', () => {
     const etat = creerPartie(niveauEssai(), CONFIG);
     ajouterEnnemi(etat, ennemiEssai({ coutVies: 1 }), 'paysan_affame', 0, 29.99, true);
     const avant = etat.vies;
     step(etat);
-    expect(etat.vies).toBe(avant - 2);
+    expect(etat.vies).toBe(avant - (1 + REGLES.elite.viesEnPlus));
   });
 
   it('un élite tué verse sa prime majorée', () => {
@@ -91,7 +91,7 @@ describe('élites', () => {
   it('garde ses mécaniques d’élite : un Épouvantail élite se relève avec 40 % de ses PV élevés', () => {
     const etat = creerPartie(niveauEssai(), CONFIG);
     const e = ennemiDonnees(etat, 'epouvantail', 10, {}, 0, true);
-    expect(e.pvMax).toBeCloseTo(ENNEMIS.epouvantail.pv * 1.08 * 1.8, 6);
+    expect(e.pvMax).toBeCloseTo(ENNEMIS.epouvantail.pv * 1.08 * REGLES.elite.facteurPv, 6);
     infligerDegats(etat, e, 1e9, 'pur');
     expect(e.vivant).toBe(true);
     expect(e.pv).toBeCloseTo(e.pvMax * 0.4, 6);

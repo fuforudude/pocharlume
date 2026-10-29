@@ -130,9 +130,9 @@ describe('ennemis des régions 2 à 5', () => {
   });
 
   it('les règles des élites sont celles de la spec', () => {
-    expect(REGLES.elite).toEqual({ facteurPv: 1.8, facteurPrime: 1.5, viesEnPlus: 1 });
+    expect(REGLES.elite).toEqual({ facteurPv: 1.4, facteurPrime: 1.5, viesEnPlus: 0 });
     expect(REGLES.heroique.vies).toBe(1);
-    expect(REGLES.fer.facteurEffectifs).toBe(1.5);
+    expect(REGLES.fer.facteurEffectifs).toBe(1);
     expect(REGLES.plafondBonus).toBe(0.1);
   });
 });

@@ -396,7 +396,7 @@ describe('tour divine de Charlie : Totem du Colosse', () => {
     expect(appliquerAction(etat, { type: 'specialiser', ...ce(0), voie: 'A' })).toEqual({ ok: false, raison: 'specialisation_impossible' });
   });
 
-  it('lance une onde de choc qui étourdit les ennemis au sol autour de lui', () => {
+  it('lance une onde de choc qui étourdit les ennemis autour de lui, volants compris', () => {
     const etat = partie();
     construire(etat, 1, 'divine');
     const sol = cible(etat, 10);
@@ -407,6 +407,7 @@ describe('tour divine de Charlie : Totem du Colosse', () => {
     expect(sol.pv).toBeLessThan(sol.pvMax);
     expect(sol.effetsPas[EFFET.etourdissement]).toBeGreaterThan(0);
     expect(loin.pv).toBe(loin.pvMax);
-    expect(volant.pv).toBe(volant.pvMax);
+    expect(volant.pv).toBeLessThan(volant.pvMax);
+    expect(volant.effetsPas[EFFET.etourdissement]).toBeGreaterThan(0);
   });
 });

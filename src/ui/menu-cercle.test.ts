@@ -85,8 +85,8 @@ describe('menu d’une case libre', () => {
   });
 
   it('grise la caserne sur une case sans chemin à portée, pas les autres familles', () => {
-    // Case de test 4 : centre (9, 9), à 3 tuiles de l'axe du chemin le plus proche, pour une portée de caserne de 2,5.
-    const refus = Object.fromEntries(elementsCaseVide(partie(), 4).map((e) => [e.id, e.refus]));
+    // Case de test 6 : centre (19, 3), à plus de 4 tuiles de tout chemin, pour une portée de caserne de 3,5.
+    const refus = Object.fromEntries(elementsCaseVide(partie(), 6).map((e) => [e.id, e.refus]));
     expect(refus['construire:caserne']).toBe('caserne_sans_chemin');
     expect(refus['construire:tir']).toBeNull();
     expect(refus['construire:magie']).toBeNull();

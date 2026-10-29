@@ -115,10 +115,10 @@ const charlie: DefDieu = {
   ],
   bonus: {
     famille: 'caserne',
-    pvSoldats: 1,
+    pvSoldats: 0.25,
     cadence: 0,
     chanceCritique: 0,
-    prix: -0.3,
+    prix: 0,
     effets: [{ type: 'etourdissement', chance: 0.15, duree: 0.8, valeur: 0 }],
     piegeAuSol: null,
   },
