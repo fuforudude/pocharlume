@@ -79,7 +79,7 @@ par exemple bloquer les ennemis avec beaucoup de soldats puis les écraser en zo
   hors horde : 79 → 41 (−48 %), de −44 % (région 7) à −51 % (région 4).
 - **Horde** : les niveaux 3 et 7 de chaque région (20 niveaux), jamais le boss.
 - **Zone** (mesures de `zone.ts`, tolérances documentées dans `zone-ordinaires.test.ts`) : niveaux ordinaires sans caserne, zone +2 points par rapport à sans zone (au plus +6
-  toléré) ; avec caserne, la zone gagne +15 points (au moins +10) ; horde, +43 points (au moins +20). Les compositions se mesurent à 45 % des arêtes de départ en Vieux Sage
+  toléré) ; avec caserne, la zone gagne +15 points (au moins +10) ; horde, +42 points (au moins +20). Les compositions se mesurent à 45 % des arêtes de départ en Vieux Sage
   (sinon le soigneux gagne tout) et sans tour divine.
 - **Estimation de puissance** : `ciblesParRayonDeZone` 1,5 → 1,2 seulement (1 sortait la catapulte et le mortier de la tolérance de ±15 %, et les chiffres des tours ne bougent pas) ;
   les cibles « arrêtées » et « horde » (3,5 et 4,5) ne servent qu'au bot soigneux.
