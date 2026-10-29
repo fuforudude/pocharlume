@@ -1,4 +1,4 @@
-// Bandes du Matou sur chacune des régions 1 à 5, pour chacun des trois dieux avec son avatar : le bot soigneux gagne tout mais pas
+// Bandes du Matou sur chacune des régions 1 à 10, pour chacun des trois dieux avec son avatar : le bot soigneux gagne tout mais pas
 // sans perdre de vies (au moins une vie sur la moitié des niveaux) et sans laisser d'arêtes inutilisées (moins de 250 par niveau), le
 // bot naïf gagne entre 30 et 70 %, le héros seul ne gagne jamais, la difficulté monte du niveau 1 au niveau 10 de la région, et les
 // vies restantes du soigneux ne diffèrent pas de plus de 3 d'un dieu à l'autre.

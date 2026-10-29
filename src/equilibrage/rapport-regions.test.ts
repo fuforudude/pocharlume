@@ -1,4 +1,4 @@
-// Section du rapport pour les régions 2 à 5 (premier passage du jalon 3) : chiffres par région, difficulté et dieu, écarts
+// Section du rapport pour les régions 2 à 10 : chiffres par région, difficulté et dieu, écarts
 // aux bandes à titre d'information. Les évaluations sont fabriquées ici : le test ne joue aucune partie.
 import { describe, expect, it } from 'vitest';
 import type { Evaluation } from './campagne';

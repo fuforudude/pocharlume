@@ -1,4 +1,4 @@
-// Bandes du Chaton (spec, « Système d'équilibrage ») sur chacune des régions 1 à 5 : le bot naïf gagne tous les niveaux, et le héros
+// Bandes du Chaton (spec, « Système d'équilibrage ») sur chacune des régions 1 à 10 : le bot naïf gagne tous les niveaux, et le héros
 // seul ne suffit pas à partir du niveau 2.
 import { beforeAll, describe, expect, it } from 'vitest';
 import { ecartsChaton, ecartsSansDefense } from './bandes';

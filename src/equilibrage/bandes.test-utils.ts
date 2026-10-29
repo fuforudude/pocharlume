@@ -12,8 +12,8 @@ import { DIEUX_EVALUES, GRAINES_ENTRAINEMENT, GRAINES_EVALUATION, type Evaluatio
  */
 export const GRAINES_TEST = GRAINES_EVALUATION;
 
-/** Les régions dont les bandes s'imposent (jalon 3 : les cinq premières). */
-export const REGIONS_EVALUEES = [1, 2, 3, 4, 5] as const;
+/** Les régions dont les bandes s'imposent (jalon 4 : les dix). */
+export const REGIONS_EVALUEES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 
 const TRAVAILLEUR = new URL('./bandes.travailleur.ts', import.meta.url);
 const CROCHET = pathToFileURL(fileURLToPath(new URL('../../tools/niveaux/enregistrer.ts', import.meta.url))).href;

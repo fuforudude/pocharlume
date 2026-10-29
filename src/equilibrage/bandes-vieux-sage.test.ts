@@ -1,4 +1,4 @@
-// Bandes du Vieux Sage sur chacune des régions 1 à 5, pour chacun des trois dieux avec son avatar : le bot soigneux gagne entre 60 et
+// Bandes du Vieux Sage sur chacune des régions 1 à 10, pour chacun des trois dieux avec son avatar : le bot soigneux gagne entre 60 et
 // 85 % des parties, sans plus de 10 points d'écart d'un dieu à l'autre, et le héros seul ne gagne jamais.
 import { beforeAll, describe, expect, it } from 'vitest';
 import { SUSPENDUES_IMPOSEES, ecartsBloquants, ecartsEntreDieux, ecartsSansDefense, ecartsVieuxSage } from './bandes';

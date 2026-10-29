@@ -1,5 +1,5 @@
-// Section du rapport d'équilibrage pour les régions 2 à 5 (jalon 3, tâche 6) et pour les défis des régions 1 à 5. Les bandes de la
-// région 1 sont celles de rapport.ts ; les mêmes bandes (et celle des défis) s'imposent à chacune des régions 2 à 5 : les écarts
+// Section du rapport d'équilibrage pour les régions 2 à 10 (jalons 3 et 4) et pour les défis des régions 1 à 10. Les bandes de la
+// région 1 sont celles de rapport.ts ; les mêmes bandes (et celle des défis) s'imposent à chacune des régions 2 à 10 : les écarts
 // listés ici font échouer `npm run balance` pour Chaton, l'absence de défense et les défis ; ceux de Matou et de Vieux Sage sont suspendus.
 import { ecartsDeRegion, ecartsDefis, nomDuDieu } from './bandes';
 import { DEFIS_EVALUES, DIEUX_EVALUES, DIFFICULTES_EVALUEES, dieuxDe, partiesDe, synthetiser, trouver, type Evaluation } from './campagne';
@@ -13,6 +13,11 @@ const THEMES: Readonly<Record<number, string>> = {
   3: 'le Bourg des Bûchers',
   4: 'les Marais de l’Ordalie',
   5: 'la Ville Pestiférée',
+  6: 'le Charnier',
+  7: 'la Croisade',
+  8: 'le Monastère Noir',
+  9: 'la Cité du Roi',
+  10: 'la Cathédrale du Soleil Blême',
 };
 
 const NOM_DIFFICULTE: Readonly<Record<string, string>> = { chaton: 'Chaton', matou: 'Matou', vieux_sage: 'Vieux Sage', heroique: 'Héroïque', fer: 'Fer' };
@@ -102,14 +107,14 @@ function sectionRegion(evaluations: readonly Evaluation[], region: number): stri
 }
 
 /**
- * Le texte de la section des régions `regions` (2 à 5), à ajouter au rapport principal. Aucune date ni durée de calcul : le
+ * Le texte de la section des régions `regions` (2 à 10), à ajouter au rapport principal. Aucune date ni durée de calcul : le
  * même équilibrage donne le même texte.
  */
 export function redigerRegions(evaluations: readonly Evaluation[], regions: readonly number[]): string {
   return [
-    '## Régions 2 à 5',
+    '## Régions 2 à 10',
     '',
-    'Les bandes de la région 1 (plus haut) sont mesurées sur chacune des régions 2 à 5, pour les trois dieux : mêmes bots, mêmes graines, ' +
+    'Les bandes de la région 1 (plus haut) sont mesurées sur chacune des régions 2 à 10, pour les trois dieux : mêmes bots, mêmes graines, ' +
       'mêmes difficultés, courbe de difficulté jugée sur la moyenne des dieux, écart entre dieux comme au jalon 2. Les écarts de Chaton, ' +
       'd’absence de défense et des défis font échouer `npm run balance` ; ceux de Matou et de Vieux Sage (courbe et écart entre dieux ' +
       'compris) sont suspendus (voir bandes.ts) : listés, ils ne bloquent pas.',
@@ -147,7 +152,7 @@ function sectionDefisRegion(evaluations: readonly Evaluation[], region: number):
 /** La section des défis des régions `regions` : réussite du soigneux (bande 40 à 90 % par région et par défi). */
 export function redigerDefis(evaluations: readonly Evaluation[], regions: readonly number[]): string {
   return [
-    '## Défis, régions 1 à 5',
+    '## Défis, régions 1 à 10',
     '',
     'Le bot soigneux joue les défis avec les règles de Matou, sans objet ni amélioration : Héroïque (1 vie, groupes d’élite) et Fer ' +
       '(toutes les vagues en une, deux familles de tours). Il cherche sa variante sur les graines d’entraînement du défi lui-même, ' +

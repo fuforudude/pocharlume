@@ -1,4 +1,4 @@
-// Bandes des défis (jalon 3) sur chacune des régions 1 à 5 : le bot soigneux, avec les règles de Matou, réussit entre 40 et 90 % des
+// Bandes des défis (jalon 3) sur chacune des régions 1 à 10 : le bot soigneux, avec les règles de Matou, réussit entre 40 et 90 % des
 // parties de chaque défi (Héroïque : 1 vie et des groupes d'élite ; Fer : toutes les vagues en une et deux familles de tours),
 // tous niveaux et trois dieux confondus.
 import { beforeAll, describe, expect, it } from 'vitest';
