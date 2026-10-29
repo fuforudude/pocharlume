@@ -59,7 +59,7 @@ export {
 export { migrer, type ResultatMigration } from './migrations';
 export { normaliserImport } from './normalisation';
 export { avecPartieEnCours, partieEnCours, reprendrePartie } from './partie';
-export { changerReglages, enregistrerVictoire, etoilesDe, fusionnerProgressions, meilleuresEtoiles, niveauDebloque, niveauReussi, totalEtoiles } from './progression';
+export { campagneTerminee, changerReglages, enregistrerVictoire, etoilesDe, fusionnerProgressions, meilleuresEtoiles, niveauDebloque, niveauReussi, totalEtoiles } from './progression';
 export {
   difficulteDe,
   Session,

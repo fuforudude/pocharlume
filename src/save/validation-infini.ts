@@ -8,7 +8,7 @@ import { avecCles, echec, estEnregistrement, estEntierEntre, ok, poser, valeur, 
 export const ID_CARTE = /^[a-z][a-z0-9_]{0,31}$/;
 
 /** `x` est-il un identifiant de carte bien formé (jamais un nom hérité d'Object) ? */
-export function estIdCarteBienForme(x: unknown): x is string {
+export function estIdCarteBienForme(x: unknown): boolean {
   return typeof x === 'string' && ID_CARTE.test(x) && !(x in Object.prototype);
 }
 

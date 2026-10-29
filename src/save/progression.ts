@@ -1,6 +1,6 @@
 // Règles de progression de la campagne, en fonctions pures : elles prennent une sauvegarde et en rendent une
 // nouvelle (jamais modifiée sur place), sans toucher au stockage.
-import { IDS_DEFIS, regionOuverte } from '../data/meta';
+import { IDS_DEFIS, NIVEAU_FIN_CAMPAGNE, regionOuverte } from '../data/meta';
 import {
   DIFFICULTES_SAUVEGARDE,
   NOMBRE_NIVEAUX,
@@ -38,6 +38,11 @@ export function meilleuresEtoiles(s: Sauvegarde, numero: number): number {
 
 export function niveauReussi(s: Sauvegarde, numero: number): boolean {
   return meilleuresEtoiles(s, numero) > 0;
+}
+
+/** La campagne est terminée quand le boss de la région 10 (niveau 100, le Soleil Blême) a été battu. */
+export function campagneTerminee(s: Sauvegarde): boolean {
+  return niveauReussi(s, NIVEAU_FIN_CAMPAGNE);
 }
 
 /** Total des étoiles gagnées (meilleur résultat par niveau, toutes difficultés confondues) : 300 au plus. */

@@ -16,6 +16,8 @@ import {
   estIdHeros,
   estIdObjet,
   HEROS_PAR_DIEU,
+  NIVEAU_FIN_CAMPAGNE,
+  NIVEAU_OUVERTURE_INFINI,
   NIVEAUX_DISCIPLE_OFFERT,
   OBJETS,
   PLAFOND_MONNAIE,
@@ -255,10 +257,14 @@ export interface BilanPartie {
   readonly objetsRendus: readonly IdObjet[];
   /** Le défi réussi pour la première fois sur ce niveau (ses braises sont comprises dans `braises`). */
   readonly defiReussi?: IdDefi;
-  /** Le disciple offert par la première victoire sur le boss de la région 2 ou 4 : le premier non possédé dans l'ordre fixé. */
+  /** Le disciple offert par la première victoire sur le boss de la région 2, 4, 6 ou 8 : le premier non possédé dans l'ordre fixé. */
   readonly discipleOffert?: IdHeros;
   /** La région que cette victoire a ouverte (le boss de la région précédente vient d'être battu). */
   readonly regionDebloquee?: number;
+  /** Vrai à la première victoire sur le boss de la région 10 : l'interface affiche la fin de campagne. */
+  readonly campagneTerminee?: true;
+  /** Vrai à la première victoire sur le boss de la région 1 : le mode infini vient de s'ouvrir. */
+  readonly infiniDebloque?: true;
 }
 
 export type ResultatFin =
@@ -350,13 +356,16 @@ export function enregistrerFinDePartie(s: Sauvegarde, fin: FinDePartieMeta, defs
     if (defs) niveauHeros = { avant: niveauHerosDepuisXp(xpAvant, defs.seuilsXp), apres: niveauHerosDepuisXp(xpApres, defs.seuilsXp) };
   }
 
-  // La première victoire sur le boss de la région 2 ou 4 offre le premier disciple non encore possédé.
+  // La première victoire sur le boss de la région 2, 4, 6 ou 8 offre le premier disciple non encore possédé.
   const discipleOffert =
     victoire && defi === null && etoilesAvant === 0 && NIVEAUX_DISCIPLE_OFFERT.includes(fin.niveau)
       ? DISCIPLES_OFFERTS.find((disciple) => !Object.hasOwn(herosMeta, disciple))
       : undefined;
   if (discipleOffert !== undefined) herosMeta = { ...herosMeta, [discipleOffert]: { xp: 0, competences: {} } };
   const regionDebloquee = suivante.meta.regionMax > s.meta.regionMax ? suivante.meta.regionMax : undefined;
+  const premiereVictoireOrdinaire = victoire && defi === null && etoilesAvant === 0;
+  const campagneTerminee = premiereVictoireOrdinaire && fin.niveau === NIVEAU_FIN_CAMPAGNE;
+  const infiniDebloque = premiereVictoireOrdinaire && fin.niveau === NIVEAU_OUVERTURE_INFINI;
 
   // Les objets emportés ont été débités au lancement : on rend ceux qui n'ont pas servi, sans dépasser le stock maximal.
   const objets = { ...s.meta.objets };
@@ -382,6 +391,8 @@ export function enregistrerFinDePartie(s: Sauvegarde, fin: FinDePartieMeta, defs
       ...(defiReussi !== null ? { defiReussi } : {}),
       ...(discipleOffert !== undefined ? { discipleOffert } : {}),
       ...(regionDebloquee !== undefined ? { regionDebloquee } : {}),
+      ...(campagneTerminee ? { campagneTerminee: true as const } : {}),
+      ...(infiniDebloque ? { infiniDebloque: true as const } : {}),
     },
   };
 }

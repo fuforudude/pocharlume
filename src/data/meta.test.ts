@@ -121,8 +121,8 @@ describe('régions, défis et disciples offerts', () => {
     expect(['heroique', 'fer', 'Fer', 'constructor', 3].map(estIdDefi)).toEqual([true, true, false, false, false]);
   });
 
-  it('disciples offerts aux boss des régions 2 et 4, dans l’ordre Suie, Mastoc, Rouage, Corbeau, Brise-Os, Lanterne', () => {
-    expect(NIVEAUX_DISCIPLE_OFFERT).toEqual([20, 40]);
+  it('disciples offerts aux boss des régions 2, 4, 6 et 8, dans l’ordre Suie, Mastoc, Rouage, Corbeau, Brise-Os, Lanterne', () => {
+    expect(NIVEAUX_DISCIPLE_OFFERT).toEqual([20, 40, 60, 80]);
     expect(DISCIPLES_OFFERTS).toEqual(['suie', 'mastoc', 'rouage', 'corbeau', 'brise_os', 'lanterne']);
     // Ce sont les six disciples, ni plus ni moins.
     expect([...DISCIPLES_OFFERTS].sort()).toEqual(IDS_HEROS.filter((h) => !AVATARS.includes(h)).sort());
