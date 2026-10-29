@@ -147,6 +147,21 @@ describe('carte du monde : suspendue sous les options', () => {
   });
 });
 
+describe('carte du monde : revoir la fin', () => {
+  it('sans option, aucun bouton « Revoir la fin »', () => {
+    monter();
+    expect([...document.querySelectorAll('button')].some((b) => b.textContent === t('carte.revoir_fin'))).toBe(false);
+  });
+
+  it('avec l’option, le bouton arrête la carte puis appelle le rappel', () => {
+    const surRevoirFin = vi.fn();
+    monter({ surRevoirFin });
+    bouton(t('carte.revoir_fin')).click();
+    expect(surRevoirFin).toHaveBeenCalledTimes(1);
+    expect(document.querySelector('.carte-monde')).toBeNull();
+  });
+});
+
 describe('carte du monde : lancer un niveau', () => {
   it('lance tout de suite quand aucune partie n’est en cours', () => {
     const { surLancer } = monter();

@@ -61,6 +61,8 @@ export interface OptionsCarteMonde {
   surHeros: () => void;
   /** « Boutique » : idem pour la boutique (arbre et objets). */
   surBoutique: () => void;
+  /** « Revoir la fin » (campagne terminée) : l'écran est déjà arrêté. Absent : pas de bouton. */
+  surRevoirFin?: () => void;
   /** « Retour » ou Échap sans fiche ouverte : l'écran est déjà arrêté. */
   surRetour: () => void;
   /**
@@ -174,7 +176,15 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   boutique.textContent = t('carte.boutique');
   const reglages = bouton('bouton', t('carte.options'), options.surOptions, signal);
   reglages.textContent = t('carte.options');
-  barre.append(retour, titre, monnaies, heros, boutique, reglages);
+  const revoirFin = options.surRevoirFin;
+  const revoir = revoirFin
+    ? bouton('bouton', t('carte.revoir_fin'), () => {
+        arreter();
+        revoirFin();
+      }, signal)
+    : null;
+  if (revoir) revoir.textContent = t('carte.revoir_fin');
+  barre.append(retour, titre, monnaies, heros, boutique, ...(revoir ? [revoir] : []), reglages);
   racine.append(barre);
 
   const textesDe = (numero: number): { nom: string; ambiance: string } | null => {

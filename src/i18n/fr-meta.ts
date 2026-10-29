@@ -7,6 +7,7 @@ export const frMeta = {
   'monnaie.etoiles': 'Étoiles à dépenser : {n}',
   'carte.heros': 'Héros',
   'carte.boutique': 'Boutique',
+  'carte.revoir_fin': 'Revoir la fin',
 
   // Fiche d'un niveau : dieu, héros, objets emportés
   'fiche.choix_dieu': 'Dieu',
