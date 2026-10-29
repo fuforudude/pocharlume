@@ -72,7 +72,7 @@ export const frEcrans4 = {
   'campagne.fin_titre': 'Les Cendres Retombent',
   'campagne.fin_illustration': 'Le Dernier Veilleur sur les marches de la cathédrale, devant le Soleil Blême éteint.',
   'campagne.fin_p1': 'Le Soleil Blême s’éteint sur la cathédrale. Ni cri ni triomphe : de la cendre qui retombe sur les dalles, et au loin les cloches qui se taisent une à une.',
-  'campagne.fin_p2': 'Les bûchers ne sont plus que des braises. Dans les granges, dans les cryptes, des pas feutrés reviennent. Les Chats Suprêmes ne sont pas ressuscités : le Dernier Veilleur a seulement refusé de laisser mourir ce qu’ils avaient allumé.',
+  'campagne.fin_p2': 'Les bûchers ne sont plus que des braises. Quelque part, une porte grince et ne se referme pas tout à fait. Dans les granges reviennent des pas feutrés : une ombre qui n’est à personne, un ronronnement derrière une porte, un pas qui boite. Personne ne dit leurs noms. Le Dernier Veilleur reste à la porte.',
   'campagne.fin_p3': 'Les hommes oublieront. Les rats reviendront. Mais tant qu’une braise veille quelque part, la nuit n’est pas finie.',
   'campagne.fin_continuer': 'Continuer',
 } as const;
