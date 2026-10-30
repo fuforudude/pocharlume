@@ -16,6 +16,8 @@ import { bonusAppel } from '../engine/vagues';
 import { t, tCle } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
 import { habillageSort, iconeObjet, spriteUnite } from '../render/habillage';
+import { attacherBulle } from './bulle';
+import type { ContenuBulle } from './bulle-contenus';
 import { basculerClasse, bouton, el, image, TexteSuivi } from './dom';
 import type { Mode } from './interaction';
 import { positionsCercle, type ElementMenu } from './menu-cercle';
@@ -30,6 +32,10 @@ export interface CommandesHud {
   choisirElement: (element: ElementMenu) => void;
   /** Un bouton du menu en cercle est survolé à la souris ou pris au clavier (portée de la tour à construire) ; null quand il est quitté. */
   survolerElement: (element: ElementMenu | null) => void;
+  /** Bulle de description d'un bouton du menu en cercle (survol, appui long) ; null : pas de bulle. */
+  decrireElement?: (element: ElementMenu) => ContenuBulle | null;
+  /** Bulle de description du portrait du héros. */
+  decrireHeros?: () => ContenuBulle | null;
 }
 
 /** Ce que le HUD affiche et qui ne vient pas de l'état du moteur. */
@@ -49,6 +55,14 @@ interface BoutonSort {
 /** Textes du rappel de touche des deux sorts et des trois objets (rappel affiché sur les boutons). */
 const TOUCHES_SORTS = ['hud.touche_sort_1', 'hud.touche_sort_2'] as const;
 const TOUCHES_OBJETS = ['hud.touche_objet_1', 'hud.touche_objet_2', 'hud.touche_objet_3'] as const;
+
+/** Un bouton du menu en cercle, avec l'élément qu'il porte (remplacé en place quand prix ou grisé changent). */
+interface BoutonMenu {
+  readonly noeud: HTMLButtonElement;
+  element: ElementMenu;
+  readonly rang: HTMLElement | null;
+  readonly prix: HTMLElement | null;
+}
 
 interface BoutonObjet {
   readonly noeud: HTMLButtonElement;
@@ -87,6 +101,7 @@ export class Hud {
   private viesPrecedentes = -1;
   private fractionPv = -1;
   private signatureMenu = '';
+  private boutonsMenu: BoutonMenu[] = [];
   private versionMenu = -1;
   private menuX = Number.NaN;
   private menuY = Number.NaN;
@@ -137,6 +152,7 @@ export class Hud {
     this.portrait.append(jauge);
     this.etatHeros = new TexteSuivi(el('span', 'etat'));
     this.portrait.append(this.etatHeros.noeud);
+    if (commandes.decrireHeros) attacherBulle(this.portrait, commandes.decrireHeros, { signal });
     basGauche.append(this.portrait);
     dieu?.sorts.forEach((sort, i) => {
       const libelle = tCle(sort.nom);
@@ -330,6 +346,7 @@ export class Hud {
       if (this.signatureMenu !== '') {
         this.signatureMenu = '';
         this.versionMenu = -1;
+        this.boutonsMenu = [];
         this.menu.replaceChildren();
         this.commandes.survolerElement(null);
       }
@@ -341,17 +358,30 @@ export class Hud {
     let reconstruit = false;
     if (version !== this.versionMenu) {
       this.versionMenu = version;
-      const signature = elements.map((e) => `${e.id}|${String(e.prix)}|${String(e.gain)}|${String(e.rang)}|${String(e.refus)}`).join(';');
+      const signature = elements.map((e) => `${e.id}|${String(e.prix)}|${String(e.gain)}|${String(e.rang)}|${String(e.refus)}|${String(e.deblocage)}`).join(';');
       if (signature !== this.signatureMenu) {
         this.signatureMenu = signature;
-        const boutons = elements.map((e) => this.boutonMenu(e));
-        this.menu.replaceChildren(...boutons);
-        reconstruit = true;
-        // Les boutons remplacés n'envoient pas de « pointeur parti » : on redit lequel est survolé, s'il y en a un.
-        this.commandes.survolerElement(null);
-        boutons.forEach((b, i) => {
-          if (b.matches(':hover') || b === document.activeElement) this.commandes.survolerElement(elements[i] ?? null);
-        });
+        const forme = (e: ElementMenu): string => `${e.id}|${e.icone}|${String(e.rang !== null)}|${String(e.prix !== null || e.gain !== null)}|${String(e.deblocage)}`;
+        const actuels = this.boutonsMenu;
+        if (actuels.length === elements.length && elements.every((e, i) => forme(e) === forme(actuels[i]?.element ?? e))) {
+          // Mêmes boutons (seuls prix, grisé ou rang changent) : mis à jour en place, la bulle ouverte et un appui long en
+          // cours restent attachés au bouton.
+          elements.forEach((e, i) => {
+            const b = actuels[i];
+            if (!b) return;
+            this.remplirBouton(b, e);
+            if (b.noeud.matches(':hover') || b.noeud === document.activeElement) this.commandes.survolerElement(e);
+          });
+        } else {
+          this.boutonsMenu = elements.map((e) => this.boutonMenu(e));
+          this.menu.replaceChildren(...this.boutonsMenu.map((b) => b.noeud));
+          reconstruit = true;
+          // Les boutons remplacés n'envoient pas de « pointeur parti » : on redit lequel est survolé, s'il y en a un.
+          this.commandes.survolerElement(null);
+          for (const b of this.boutonsMenu) {
+            if (b.noeud.matches(':hover') || b.noeud === document.activeElement) this.commandes.survolerElement(b.element);
+          }
+        }
       }
     }
     if (!reconstruit && !bouge) return;
@@ -367,43 +397,60 @@ export class Hud {
     });
   }
 
-  private boutonMenu(element: ElementMenu): HTMLButtonElement {
-    const b = el('button', 'element-menu');
-    b.type = 'button';
-    // Un élément pas encore débloqué dit où il se débloque : cadenas sur l'icône, raison dans le libellé.
-    const libelle = element.deblocage !== null ? t('menu.non_debloque', { nom: element.libelle, n: element.deblocage }) : element.libelle;
-    b.title = libelle;
-    b.setAttribute('aria-label', libelle);
-    b.setAttribute('aria-disabled', String(element.refus !== null));
-    if (element.refus !== null) b.classList.add('grise');
-    if (element.refus === 'aretes_insuffisantes') b.classList.add('trop-cher');
-    if (element.refus === 'competence_au_maximum') b.classList.add('au-sommet');
-    if (element.deblocage !== null) b.classList.add('verrouille');
-    b.append(image(this.atlas.iconeUrl(element.icone, element.icone.startsWith('tour-') ? 1 : 2), 'icone'));
+  /** Un bouton du menu ; ses écouteurs lisent `element`, que `remplirBouton` remplace quand le menu est recalculé. */
+  private boutonMenu(element: ElementMenu): BoutonMenu {
+    const noeud = el('button', 'element-menu');
+    noeud.type = 'button';
+    noeud.append(image(this.atlas.iconeUrl(element.icone, element.icone.startsWith('tour-') ? 1 : 2), 'icone'));
+    // Un élément pas encore débloqué dit où il se débloque : cadenas sur l'icône et niveau à la place du prix.
     if (element.deblocage !== null) {
-      b.append(image(this.atlas.iconeUrl('icone-cadenas', 1), 'cadenas'));
-      b.append(el('span', 'deblocage', t('menu.deblocage', { n: element.deblocage })));
+      noeud.classList.add('verrouille');
+      noeud.append(image(this.atlas.iconeUrl('icone-cadenas', 1), 'cadenas'));
+      noeud.append(el('span', 'deblocage', t('menu.deblocage', { n: element.deblocage })));
     }
-    if (element.rang !== null) b.append(el('span', 'rang', element.rang));
+    const rang = element.rang !== null ? el('span', 'rang') : null;
+    if (rang) noeud.append(rang);
+    let prix: HTMLElement | null = null;
     if (element.deblocage === null && (element.prix !== null || element.gain !== null)) {
-      const prix = el('span', 'prix');
-      prix.append(image(this.atlas.iconeUrl('icone-arete', 1), 'arete'), el('span', '', `${element.gain !== null ? '+' : ''}${String(element.prix ?? element.gain)}`));
-      b.append(prix);
+      const cadre = el('span', 'prix');
+      prix = el('span');
+      cadre.append(image(this.atlas.iconeUrl('icone-arete', 1), 'arete'), prix);
+      noeud.append(cadre);
     }
+    const b: BoutonMenu = { noeud, element, rang, prix };
+    this.remplirBouton(b, element);
     // Souris seulement : au doigt, toucher un bouton le choisit tout de suite, il n'y a pas de survol.
-    b.addEventListener('pointerenter', (e) => {
-      if (e.pointerType === 'mouse') this.commandes.survolerElement(element);
+    noeud.addEventListener('pointerenter', (e) => {
+      if (e.pointerType === 'mouse') this.commandes.survolerElement(b.element);
     });
-    b.addEventListener('pointerleave', (e) => {
+    noeud.addEventListener('pointerleave', (e) => {
       if (e.pointerType === 'mouse') this.commandes.survolerElement(null);
     });
-    b.addEventListener('focus', () => { this.commandes.survolerElement(element); });
-    b.addEventListener('blur', () => { this.commandes.survolerElement(null); });
-    b.addEventListener('click', (e) => {
+    noeud.addEventListener('focus', () => { this.commandes.survolerElement(b.element); });
+    noeud.addEventListener('blur', () => { this.commandes.survolerElement(null); });
+    noeud.addEventListener('click', (e) => {
       e.stopPropagation();
-      this.commandes.choisirElement(element);
+      this.commandes.choisirElement(b.element);
     });
+    const decrire = this.commandes.decrireElement;
+    if (decrire) attacherBulle(noeud, () => decrire(b.element));
     return b;
+  }
+
+  /** Ce qui change d'un pas à l'autre sur un bouton : libellé, grisé, rang, prix. */
+  private remplirBouton(b: BoutonMenu, element: ElementMenu): void {
+    b.element = element;
+    const noeud = b.noeud;
+    const libelle = element.deblocage !== null ? t('menu.non_debloque', { nom: element.libelle, n: element.deblocage }) : element.libelle;
+    noeud.setAttribute('aria-label', libelle);
+    // Sans bulle de description, l'info-bulle du navigateur dit au moins le libellé.
+    if (!this.commandes.decrireElement) noeud.title = libelle;
+    noeud.setAttribute('aria-disabled', String(element.refus !== null));
+    basculerClasse(noeud, 'grise', element.refus !== null);
+    basculerClasse(noeud, 'trop-cher', element.refus === 'aretes_insuffisantes');
+    basculerClasse(noeud, 'au-sommet', element.refus === 'competence_au_maximum');
+    if (b.rang) b.rang.textContent = element.rang ?? '';
+    if (b.prix) b.prix.textContent = `${element.gain !== null ? '+' : ''}${String(element.prix ?? element.gain)}`;
   }
 
   detruire(): void {

@@ -10,6 +10,8 @@ import { t, tCle } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
 import { iconeDieu, portraitHeros } from '../render/habillage';
 import type { RaisonDisciple, RaisonPoint, RaisonPoints, ResultatTransaction, Sauvegarde } from '../save';
+import { attacherBulle } from './bulle';
+import { contenuCompetenceHeros } from './bulle-contenus';
 import { bouton, el, image } from './dom';
 import { afficherConfirmation } from './ecrans';
 import { creerEcranMeta, pastilles, redessiner, type EcranMeta } from './ecran-meta';
@@ -219,6 +221,12 @@ export function afficherEcranHeros(parent: HTMLElement, options: OptionsEcranHer
         entete.append(plus);
       }
       carte.append(entete, el('p', 'desc', tCle(c.description)));
+      // Ce que la compétence donne au rang actuel et au suivant, au survol ou à l'appui long (et au clavier : la carte est
+      // un groupe nommé qui prend le focus).
+      carte.setAttribute('role', 'group');
+      carte.setAttribute('aria-label', tCle(c.nom));
+      const decrit = heros;
+      attacherBulle(carte, () => contenuCompetenceHeros(decrit, i, comp.rang, comp.verrouillee));
       grille.append(carte);
     });
     panneau.append(grille);

@@ -36,3 +36,8 @@ export function tCle(cle: string, parametres: ParametresTexte = {}): string {
 export function t(cle: CleTexte, parametres: ParametresTexte = {}): string {
   return tCle(cle, parametres);
 }
+
+/** Vrai si la clé existe dans la table : pour un texte facultatif (la phrase de lore d'un ennemi). */
+export function aTexte(cle: string): boolean {
+  return Object.hasOwn(textes, cle);
+}

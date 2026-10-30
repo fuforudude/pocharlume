@@ -5,6 +5,7 @@ import { t } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
 import type { Sauvegarde } from '../save';
 import { etoilesDisponibles } from '../save';
+import { fermerBulle } from './bulle';
 import { bouton, el, image } from './dom';
 
 export interface EcranMeta {
@@ -106,6 +107,7 @@ export function creerEcranMeta(parent: HTMLElement, options: OptionsEcranMeta): 
     if (arretee) return;
     arretee = true;
     controleur.abort();
+    fermerBulle();
     racine.remove();
     precedent?.focus({ preventScroll: true });
   }

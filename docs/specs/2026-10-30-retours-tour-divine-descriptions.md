@@ -54,11 +54,13 @@ Ce qu'on peut construire dépend du **niveau joué** : une fonction pure du num�
 - [x] Le menu de construction affiche la tour divine refusée avec la raison quand une est déjà posée.
 - [x] Bots et bandes : `npm run balance` sans écart aux bandes imposées ; le rapport d'équilibrage note l'effet.
 - [x] Aucun texte affiché ne dit plus « point(s) » pour les héros ; « XP » à la place (test sur `fr`).
-- [ ] Survol (PC) et appui long (tactile) ouvrent une bulle sur : élément du menu de construction (tour, amélioration,
+- [x] Survol (PC) et appui long (tactile) ouvrent une bulle sur : élément du menu de construction (tour, amélioration,
   divine), ennemi en partie, portrait du héros en partie, compétence sur l'écran des héros, ennemi et tour de la collection
   et de la fiche d'un niveau. Tests de l'interaction (délais, appui long sans action, toucher court inchangé).
-- [ ] Les chiffres d'une bulle sont ceux des données (test : PV, dégâts, portée d'un ennemi et d'une tour).
-- [ ] La bulle reste entièrement à l'écran (bords, 740×360 et 1280×720) et ne bloque pas le jeu.
+  (Collection : tours des skins et des porteurs, la collection n'a pas d'ennemis. Fiche : le boss annoncé et les éléments
+  de l'encadré « Nouvelles découvertes ».)
+- [x] Les chiffres d'une bulle sont ceux des données (test : PV, dégâts, portée d'un ennemi et d'une tour).
+- [x] La bulle reste entièrement à l'écran (bords, 740×360 et 1280×720) et ne bloque pas le jeu.
 - [x] Déblocage : le moteur refuse (`non_debloque`) de construire, d'améliorer ou de spécialiser vers un élément que le
   niveau joué n'a pas encore débloqué, d'après son seul numéro (défis compris) ; tout est ouvert dès le niveau 11 et en
   infini. Tests du moteur.
