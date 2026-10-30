@@ -16,6 +16,8 @@ import { bonusAppel } from '../engine/vagues';
 import { t, tCle } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
 import { habillageSort, iconeObjet, spriteUnite } from '../render/habillage';
+import { attacherBulle } from './bulle';
+import type { ContenuBulle } from './bulle-contenus';
 import { basculerClasse, bouton, el, image, TexteSuivi } from './dom';
 import type { Mode } from './interaction';
 import { positionsCercle, type ElementMenu } from './menu-cercle';
@@ -30,6 +32,10 @@ export interface CommandesHud {
   choisirElement: (element: ElementMenu) => void;
   /** Un bouton du menu en cercle est survolé à la souris ou pris au clavier (portée de la tour à construire) ; null quand il est quitté. */
   survolerElement: (element: ElementMenu | null) => void;
+  /** Bulle de description d'un bouton du menu en cercle (survol, appui long) ; null : pas de bulle. */
+  decrireElement?: (element: ElementMenu) => ContenuBulle | null;
+  /** Bulle de description du portrait du héros. */
+  decrireHeros?: () => ContenuBulle | null;
 }
 
 /** Ce que le HUD affiche et qui ne vient pas de l'état du moteur. */
@@ -137,6 +143,7 @@ export class Hud {
     this.portrait.append(jauge);
     this.etatHeros = new TexteSuivi(el('span', 'etat'));
     this.portrait.append(this.etatHeros.noeud);
+    if (commandes.decrireHeros) attacherBulle(this.portrait, commandes.decrireHeros, signal);
     basGauche.append(this.portrait);
     dieu?.sorts.forEach((sort, i) => {
       const libelle = tCle(sort.nom);
@@ -396,6 +403,8 @@ export class Hud {
       e.stopPropagation();
       this.commandes.choisirElement(element);
     });
+    const decrire = this.commandes.decrireElement;
+    if (decrire) attacherBulle(b, () => decrire(element));
     return b;
   }
 

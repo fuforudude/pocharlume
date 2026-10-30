@@ -35,6 +35,8 @@ import {
   type DeplacementRegion,
   type VueNoeud,
 } from './carte-monde-logique';
+import { attacherBulleEnnemi } from './bulle';
+import { bossDuNiveau } from './bulle-contenus';
 import { bouton, el, image } from './dom';
 import { afficherConfirmation } from './ecrans';
 import { creerChoixFiche, type SessionChoix } from './fiche-choix';
@@ -358,7 +360,13 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     const droite = el('div', 'fiche-colonne');
     const entete = el('div', 'fiche-entete');
     entete.append(el('span', 'fiche-numero', t('accueil.niveau', { n: vue.numero })));
-    if (vue.boss) entete.append(el('span', 'etiquette-boss', t('fiche.boss')));
+    if (vue.boss) {
+      // Le boss annoncé se décrit au survol ou à l'appui long.
+      const etiquette = el('span', 'etiquette-boss', t('fiche.boss'));
+      const boss = bossDuNiveau(niveau.niveau);
+      if (boss) attacherBulleEnnemi(etiquette, boss, signal);
+      entete.append(etiquette);
+    }
     if (niveau.horde) entete.append(el('span', 'etiquette-horde', t('fiche.horde')));
     gauche.append(entete, el('h2', 'titre', textes.nom), el('p', 'ambiance', textes.ambiance));
     if (niveau.horde) gauche.append(el('p', 'horde-aide', t('fiche.horde_aide')));

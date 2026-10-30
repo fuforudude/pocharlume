@@ -17,6 +17,8 @@ import type {
   ResultatTransaction,
   Sauvegarde,
 } from '../save';
+import type { IdFamille } from '../engine/definitions';
+import { attacherBulleTour } from './bulle';
 import { formaterPourcent, spriteDeCollection, vueObjetsCollection, vuePorteurs, type VueObjetCollection, type VuePorteur } from './collection-vues';
 import { bouton, el, image } from './dom';
 import { creerEcranMeta, pastilles, redessiner, type EcranMeta } from './ecran-meta';
@@ -134,6 +136,9 @@ export function afficherCollection(parent: HTMLElement, options: OptionsCollecti
 
     const tete = el('div', 'tete');
     const icone = image(atlas.iconeUrl(spriteDeCollection(vue.id), 3), vue.possede ? 'icone' : 'icone silhouette');
+    // Un skin de tour : la tour qu'il habille se décrit au survol ou à l'appui long.
+    const def = CATALOGUE[vue.id];
+    if (def.genre === 'skin' && def.cible.type === 'tour') attacherBulleTour(icone, def.cible.famille);
     const noms = el('div', 'noms');
     const rarete = el('span', 'rarete');
     rarete.append(image(atlas.iconeUrl(`icone-rarete-${vue.rarete}`, 1), 'petite'), el('span', '', t(`rarete.${vue.rarete}`)));
@@ -237,7 +242,9 @@ export function afficherCollection(parent: HTMLElement, options: OptionsCollecti
     ligne.dataset.id = p.id;
     ligne.classList.toggle('plafonne', p.plafonne);
     const entete = el('div', 'tete');
-    entete.append(image(atlas.iconeUrl(p.genre === 'heros' ? portraitHeros(p.id) : `icone-${p.id}`, 2), 'icone'), el('span', 'nom', nom));
+    const icone = image(atlas.iconeUrl(p.genre === 'heros' ? portraitHeros(p.id) : `icone-${p.id}`, 2), 'icone');
+    if (p.genre === 'tour') attacherBulleTour(icone, p.id as IdFamille);
+    entete.append(icone, el('span', 'nom', nom));
 
     const portes = el('div', 'portes');
     const emplacement = (classe: string, texte: string, cleRetrait: string | null, libelle: string): HTMLElement => {

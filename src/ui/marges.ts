@@ -57,7 +57,7 @@ export function calculerMarges(
 }
 
 /** Zones sûres de l'écran en pixels CSS, lues par une sonde invisible qui prend les `env(safe-area-inset-*)`. */
-function lireZonesSures(racine: HTMLElement): Marges {
+export function lireZonesSures(racine: HTMLElement): Marges {
   const sonde = document.createElement('div');
   sonde.setAttribute('aria-hidden', 'true');
   sonde.style.cssText =

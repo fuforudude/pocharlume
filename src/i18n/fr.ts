@@ -1,4 +1,5 @@
 // Tous les textes affichés du jeu, en français. Une clé par texte, groupées par écran.
+import { frBulles } from './fr-bulles';
 import { frCollection } from './fr-collection';
 import { frDieux } from './fr-dieux';
 import { frEcrans3 } from './fr-ecrans3';
@@ -221,6 +222,9 @@ export const fr = {
 
   // Interface des inscriptions des statues : recueil, fenêtre en partie (fr-inscriptions.ts)
   ...frInscriptions,
+
+  // Bulles de description au survol et à l'appui long (fr-bulles.ts)
+  ...frBulles,
 
   // Inscriptions, paroles des boss, descriptions des ennemis (fr-lore.ts, généré depuis docs/lore.md)
   ...frLore,
