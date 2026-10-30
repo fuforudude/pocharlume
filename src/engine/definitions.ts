@@ -733,6 +733,11 @@ export interface Niveau {
   readonly sansElites?: boolean;
   /** Niveau de horde (jalon 5) : nombreux ennemis faibles et serrés. Les bots de l'équilibrage s'en servent pour estimer ce que vaut la zone. */
   readonly horde?: boolean;
+  /**
+   * Numéro de campagne (1 à 100) : il décide des tours déjà débloquées (src/data/deblocage.ts). Absent (niveau d'essai) : tout
+   * est ouvert.
+   */
+  readonly numero?: number;
 }
 
 /** Une région du mode infini : ses ennemis propres, et le boss dont les mini-boss sont tirés. */

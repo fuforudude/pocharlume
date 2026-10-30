@@ -370,15 +370,22 @@ export class Hud {
   private boutonMenu(element: ElementMenu): HTMLButtonElement {
     const b = el('button', 'element-menu');
     b.type = 'button';
-    b.title = element.libelle;
-    b.setAttribute('aria-label', element.libelle);
+    // Un élément pas encore débloqué dit où il se débloque : cadenas sur l'icône, raison dans le libellé.
+    const libelle = element.deblocage !== null ? t('menu.non_debloque', { nom: element.libelle, n: element.deblocage }) : element.libelle;
+    b.title = libelle;
+    b.setAttribute('aria-label', libelle);
     b.setAttribute('aria-disabled', String(element.refus !== null));
     if (element.refus !== null) b.classList.add('grise');
     if (element.refus === 'aretes_insuffisantes') b.classList.add('trop-cher');
     if (element.refus === 'competence_au_maximum') b.classList.add('au-sommet');
+    if (element.deblocage !== null) b.classList.add('verrouille');
     b.append(image(this.atlas.iconeUrl(element.icone, element.icone.startsWith('tour-') ? 1 : 2), 'icone'));
+    if (element.deblocage !== null) {
+      b.append(image(this.atlas.iconeUrl('icone-cadenas', 1), 'cadenas'));
+      b.append(el('span', 'deblocage', t('menu.deblocage', { n: element.deblocage })));
+    }
     if (element.rang !== null) b.append(el('span', 'rang', element.rang));
-    if (element.prix !== null || element.gain !== null) {
+    if (element.deblocage === null && (element.prix !== null || element.gain !== null)) {
       const prix = el('span', 'prix');
       prix.append(image(this.atlas.iconeUrl('icone-arete', 1), 'arete'), el('span', '', `${element.gain !== null ? '+' : ''}${String(element.prix ?? element.gain)}`));
       b.append(prix);

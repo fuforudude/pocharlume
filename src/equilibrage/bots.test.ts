@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
+import { NIVEAU_TOUT_OUVERT, niveauOuverture } from '../data/deblocage';
 import { DIFFICULTES } from '../data/difficultes';
 import { NIVEAU_TEST, REGION1 } from '../data/niveaux/region1';
 import { avancer, casesLibres, centreCase, creerPartie, rejouer, serialiser } from '../engine';
-import type { Action } from '../engine';
+import type { Action, Niveau } from '../engine';
 import { creerBotNaif } from './bot-naif';
 import { creerBotSoigneux, noterPartie, optimiserBot, VARIANTES } from './bot-soigneux';
 import { distance, echantillonner, etatInitial, longueurVue, poidsDesChemins } from './geometrie';
@@ -64,8 +65,8 @@ describe('bot naïf', () => {
   });
 
   it('construit, améliore et spécialise seulement : ni sorts, ni ordres au héros, ni appel de vague', () => {
-    // Avec assez d'arêtes pour remplir ses emplacements, le débutant améliore ses tours.
-    const riche = { ...niveau1, aretesDepart: 3000 };
+    // Avec assez d'arêtes pour remplir ses emplacements, le débutant améliore ses tours (carte du niveau 1, tout débloqué).
+    const riche = { ...niveau1, aretesDepart: 3000, numero: NIVEAU_TOUT_OUVERT };
     const actions = [4, 5].flatMap((graine) => actionsJouees(creerBotNaif({ graine: 9 }), graine, 'matou', riche));
     const types = new Set(actions.map((a) => a.type));
     expect(types.has('construire')).toBe(true);
@@ -163,8 +164,9 @@ describe('bot soigneux avec chaque dieu', () => {
   }, DELAI_PARTIE_LONGUE);
 
   it('les trois dieux construisent leur tour divine, sauf si on la retire au bot', () => {
-    // Le niveau 5 est assez long pour que le bot, même sans recherche de variante, réunisse ses 200 arêtes.
-    const niveau5 = { ...(REGION1[4]?.niveau ?? niveau3), aretesDepart: 700 };
+    // Le niveau 5 est assez long pour que le bot, même sans recherche de variante, réunisse ses 400 arêtes ; il est joué comme le
+    // niveau 10, où la tour divine se débloque.
+    const niveau5 = { ...(REGION1[4]?.niveau ?? niveau3), aretesDepart: 700, numero: niveauOuverture('divine', 1) };
     for (const dieu of ['plume', 'charlie', 'pollen']) {
       const bot = creerBotSoigneux();
       const etat = creerPartie(niveau5, configPartie({ graine: 33, difficulte: 'matou', dieu }));
@@ -212,4 +214,39 @@ describe('géométrie des cartes', () => {
       for (const c of proches) expect(longueurVue(echantillons, poids, centreCase(c.cx, c.cy), 4)).toBeGreaterThan(0);
     }
   });
+});
+
+describe('déblocage progressif : les bots ne demandent que ce que le niveau a ouvert', () => {
+  /** Toutes les actions demandées par le bot (acceptées ou non) et les refus du moteur, sur une partie entière. */
+  function refusDuBot(bot: Bot, niveau: Niveau): { demandees: Action[]; refus: string[] } {
+    const etat = creerPartie(niveau, configPartie({ graine: 3, difficulte: 'matou' }));
+    const demandees: Action[] = [];
+    const refus: string[] = [];
+    while (etat.statut === 'en_cours') {
+      const aJouer = etat.pas % 15 === 0 ? bot.decider(etat) : [];
+      demandees.push(...aJouer);
+      for (const r of avancer(etat, aJouer)) if (!r.ok) refus.push(r.raison);
+    }
+    return { demandees, refus };
+  }
+
+  it.each([2, 4])('niveau %i : ni le naïf ni le soigneux ne se font refuser une tour fermée, et aucun ne pose la tour divine', (numero) => {
+    const niveau = REGION1[numero - 1]?.niveau;
+    if (!niveau) throw new Error('niveau manquant');
+    for (const bot of [creerBotNaif({ graine: 7 }), creerBotSoigneux()]) {
+      const { demandees, refus } = refusDuBot(bot, niveau);
+      expect(refus, bot.nom).not.toContain('non_debloque');
+      expect(demandees.some((a) => a.type === 'construire' && a.tour === 'divine'), bot.nom).toBe(false);
+      expect(demandees.some((a) => a.type === 'specialiser'), bot.nom).toBe(false);
+    }
+  }, DELAI_PARTIE_LONGUE);
+
+  it('niveau 10 : le soigneux pose sa tour divine (une seule)', () => {
+    const niveau = REGION1[9]?.niveau;
+    if (!niveau) throw new Error('niveau manquant');
+    const etat = creerPartie(niveau, configPartie({ graine: 3, difficulte: 'matou' }));
+    const bot = creerBotSoigneux();
+    while (etat.statut === 'en_cours') avancer(etat, etat.pas % 15 === 0 ? bot.decider(etat) : []);
+    expect(etat.journal.filter((e) => e.action.type === 'construire' && e.action.tour === 'divine')).toHaveLength(1);
+  }, DELAI_PARTIE_LONGUE);
 });

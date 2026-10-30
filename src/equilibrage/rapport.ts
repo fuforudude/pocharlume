@@ -1,5 +1,6 @@
 // Rédaction de balance-report.md à partir des évaluations. Aucune date ni durée de calcul dans le texte : le
 // même équilibrage donne le même rapport, octet pour octet.
+import { NIVEAU_TOUT_OUVERT, nouveautesDuNiveau } from '../data/deblocage';
 import { DIEUX } from '../data/dieux';
 import { DIFFICULTES } from '../data/difficultes';
 import { EQUILIBRAGE } from '../data/equilibrage';
@@ -51,6 +52,29 @@ function signe(x: number, decimales = 1): string {
 
 function tableau(entetes: readonly string[], lignes: readonly (readonly string[])[]): string {
   return [`| ${entetes.join(' | ')} |`, `| ${entetes.map(() => '---').join(' | ')} |`, ...lignes.map((l) => `| ${l.join(' | ')} |`)].join('\n');
+}
+
+/**
+ * Le déblocage progressif des tours (src/data/deblocage.ts), tiré de la table : ce que chaque niveau de la région 1 ouvre. Les bots
+ * s'y plient comme le joueur ; les chiffres des niveaux 1 à 10 plus haut se lisent avec lui.
+ */
+export function sectionDeblocage(): string[] {
+  const lignes: string[][] = [];
+  for (let niveau = 1; niveau < NIVEAU_TOUT_OUVERT; niveau++) {
+    const ouverts = nouveautesDuNiveau(niveau).map((d) => {
+      const nom = t(`famille.${d.famille}`);
+      if (d.famille === 'divine') return nom;
+      return d.palier === 4 ? `${nom} (spécialisations A et B)` : `${nom} (niveau ${String(d.palier)})`;
+    });
+    if (ouverts.length > 0) lignes.push([String(niveau), ouverts.join(', ')]);
+  }
+  return [
+    '## Déblocage progressif des tours',
+    '',
+    `Ce qu’on peut construire dépend du seul numéro du niveau joué, défis compris (src/data/deblocage.ts) : les niveaux 1 à ${String(NIVEAU_TOUT_OUVERT - 1)} se jouent avec moins d’outils, et les bots s’y plient comme le joueur (le soigneux n’économise pas pour un achat encore fermé). Tout est ouvert à partir du niveau ${String(NIVEAU_TOUT_OUVERT)} et en mode infini. La tour divine coûte ${String(DIEUX.plume.tourDivine.cout)} arêtes et une seule se dresse à la fois.`,
+    '',
+    tableau(['Niveau', 'Débloque'], lignes),
+  ];
 }
 
 function victoires(e: Evaluation | undefined): string {
@@ -308,8 +332,8 @@ export function redigerRapport(evaluations: readonly Evaluation[], graines: numb
   sortie.push(
     '## Tours divines',
     '',
-    'Construite : part des parties du soigneux où la tour divine a été construite (elle l’est dès la troisième tour, si le bot a eu le temps de réunir ses 200 arêtes avant la fin du niveau).',
-    'Sans tour divine : le même soigneux, mêmes graines, dépense ces 200 arêtes en tours communes (tour commune de même coût). Le gain est la différence de taux de victoire et de vies restantes.',
+    'Construite : part des parties du soigneux où la tour divine a été construite (elle l’est dès la troisième tour, si le bot a eu le temps de réunir ses 400 arêtes avant la fin du niveau ; une seule par partie, et pas avant le niveau 10 où elle se débloque).',
+    'Sans tour divine : le même soigneux, mêmes graines, dépense ces 400 arêtes en tours communes (tour commune de même coût). Le gain est la différence de taux de victoire et de vies restantes.',
     '',
   );
   const lignesDivines: string[][] = [];
@@ -345,6 +369,9 @@ export function redigerRapport(evaluations: readonly Evaluation[], graines: numb
     ),
     '',
   );
+
+  // --- Déblocage progressif ---
+  sortie.push(...sectionDeblocage(), '');
 
   // --- Disciples ---
   const disciples = profils.filter((p) => p.difficulte === 'matou' && (HEROS_PAR_DIEU as Readonly<Record<string, readonly string[]>>)[p.dieu]?.some((h) => h === p.profil && h !== p.dieu));

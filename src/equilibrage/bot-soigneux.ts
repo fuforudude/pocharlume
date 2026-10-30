@@ -18,7 +18,7 @@
 // virage. La puissance qui couvre un point du chemin est donc comptée avec un rendement décroissant (`SATURATION_DPS`) : une nouvelle
 // tour, ou le niveau suivant d'une tour, vaut ce qu'elle ajoute à ce que les tours posées couvrent déjà, comme le fait un joueur
 // qui répartit sa défense sur le chemin plutôt que de tout miser sur une seule tour.
-import { ajusterMontant, casesLibres, centreCase, ralliementParDefaut, tourSurCase, validerAction } from '../engine';
+import { ajusterMontant, casesLibres, centreCase, niveauDeblocage, ralliementParDefaut, tourSurCase, validerAction } from '../engine';
 import type { Action, BonusFamille, CaseGrille, DefDieu, DefNiveauTour, DefSort, Ennemi, EtatPartie, IdFamille, Niveau, Point, Tour, Voie } from '../engine';
 import { DIEUX } from '../data/dieux';
 import { dpsEfficace, EQUILIBRAGE, estTourDeZone } from '../data/equilibrage';
@@ -416,12 +416,14 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
       }
       deplacerCouverture(tour, 1);
     }
-    liste.sort((a, b) => b.ratio - a.ratio);
-    const divine = candidatDivine(etat, liste[0]?.ratio ?? 0);
-    if (divine) liste.unshift(divine);
-    const guetteurs = candidatGuetteurs(etat, liste[0]?.ratio ?? 0);
-    if (guetteurs) liste.unshift(guetteurs);
-    return liste;
+    // Déblocage progressif : ce que le niveau n'a pas encore ouvert n'est pas un achat (le bot n'économise pas pour lui).
+    const ouverts = liste.filter((c) => niveauDeblocage(etat, c.action) === null);
+    ouverts.sort((a, b) => b.ratio - a.ratio);
+    const divine = candidatDivine(etat, ouverts[0]?.ratio ?? 0);
+    if (divine) ouverts.unshift(divine);
+    const guetteurs = candidatGuetteurs(etat, ouverts[0]?.ratio ?? 0);
+    if (guetteurs) ouverts.unshift(guetteurs);
+    return ouverts;
   }
 
   /**
@@ -439,8 +441,9 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     const tir = etat.tours.filter((t) => t.famille === 'tir' && t.niveau < 4).sort((a, b) => b.niveau - a.niveau)[0];
     const ratio = meilleurRatio * 1.02;
     if (tir) {
-      if (tir.niveau >= 3) return { action: { type: 'specialiser', cx: tir.cx, cy: tir.cy, voie: 'A' }, ratio, imperatif: true };
-      return { action: { type: 'ameliorer', cx: tir.cx, cy: tir.cy }, ratio, imperatif: true };
+      const action: Action = tir.niveau >= 3 ? { type: 'specialiser', cx: tir.cx, cy: tir.cy, voie: 'A' } : { type: 'ameliorer', cx: tir.cx, cy: tir.cy };
+      // Pas encore débloqués à ce niveau : on ne bloque pas les arêtes pour des Guetteurs impossibles.
+      return niveauDeblocage(etat, action) === null ? { action, ratio, imperatif: true } : null;
     }
     const meilleure = meilleureCase(etat, 'tir', TOURS.tir.niveaux[0].portee);
     return meilleure ? { action: { type: 'construire', cx: meilleure.cx, cy: meilleure.cy, tour: 'tir' }, ratio, imperatif: true } : null;
@@ -454,6 +457,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     if (!(options.tourDivine ?? true)) return null;
     const dieu = dieux[etat.config.dieu];
     if (!dieu || etat.tours.length < 3 || etat.tours.some((t) => t.famille === 'divine')) return null;
+    if (niveauDeblocage(etat, { type: 'construire', cx: 0, cy: 0, tour: 'divine' }) !== null) return null;
     // Au défi Fer, la tour divine suit la famille de son dieu : elle n'est permise que si cette famille l'est.
     if (!famillePermise(etat, dieu.bonus.famille, options.familles)) return null;
     const meilleure = meilleureCase(etat, 'divine', dieu.tourDivine.portee);

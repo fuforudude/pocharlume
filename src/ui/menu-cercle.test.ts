@@ -29,11 +29,11 @@ describe('menu d’une case libre', () => {
     expect(elements.map((e) => e.id)).toEqual([
       'construire:caserne', 'construire:tir', 'construire:magie', 'construire:artillerie', 'construire:divine',
     ]);
-    // Charlie : Grenier des Griffes 70, Clocher 70, Autel 100, Catapulte (prix des données), Totem 200.
+    // Charlie : Grenier des Griffes 70, Clocher 70, Autel 100, Catapulte (prix des données), Totem 400.
     expect(elements[0]?.prix).toBe(70);
     expect(elements[1]?.prix).toBe(70);
     expect(elements[2]?.prix).toBe(100);
-    expect(elements[4]?.prix).toBe(200);
+    expect(elements[4]?.prix).toBe(400);
     expect(elements.every((e) => e.action?.type === 'construire')).toBe(true);
     expect(elements.every((e) => e.refus === null)).toBe(true);
   });
@@ -81,7 +81,7 @@ describe('menu d’une case libre', () => {
     const etat = partie();
     jouer(etat, { type: 'construire', ...ct(1), tour: 'divine' });
     const divine = elementsCaseVide(etat, 0).find((e) => e.id === 'construire:divine');
-    expect(divine?.refus).toBe('tour_divine_unique');
+    expect(divine?.refus).toBe('une_seule_divine');
   });
 
   it('grise la caserne sur une case sans chemin à portée, pas les autres familles', () => {
@@ -152,6 +152,43 @@ describe('menu d’une tour construite', () => {
 
   it('une case libre n’a pas de menu de tour', () => {
     expect(elementsTour(partie(), 3)).toEqual([]);
+  });
+});
+
+describe('déblocage progressif dans le menu', () => {
+  /** Le niveau de test, joué comme le niveau de campagne `numero`. */
+  function partieNumero(numero: number): EtatPartie {
+    const etat = creerPartie({ ...NIVEAU_TEST, numero }, CONFIG);
+    etat.aretes = 5000;
+    return etat;
+  }
+
+  it('niveau 1 : les quatre tours se posent, la tour divine est montrée avec son cadenas (niveau 10)', () => {
+    const elements = elementsCaseVide(partieNumero(1), 0);
+    expect(elements.map((e) => e.id)).toContain('construire:divine');
+    const divine = elements.find((e) => e.id === 'construire:divine');
+    expect(divine?.refus).toBe('non_debloque');
+    expect(divine?.deblocage).toBe(10);
+    for (const e of elements.filter((x) => x.id !== 'construire:divine')) {
+      expect(e.refus, e.id).toBeNull();
+      expect(e.deblocage, e.id).toBeNull();
+    }
+  });
+
+  it('une amélioration ou une spécialisation pas encore ouverte dit son niveau', () => {
+    const deux = partieNumero(2);
+    jouer(deux, { type: 'construire', ...ct(0), tour: 'magie' });
+    expect(elementsTour(deux, 0).find((e) => e.id === 'ameliorer')).toMatchObject({ refus: 'non_debloque', deblocage: 3 });
+    const sept = partieNumero(7);
+    jouer(sept, { type: 'construire', ...ct(0), tour: 'magie' }, { type: 'ameliorer', ...ct(0) }, { type: 'ameliorer', ...ct(0) });
+    for (const voie of ['A', 'B']) expect(elementsTour(sept, 0).find((e) => e.id === `specialiser:${voie}`)).toMatchObject({ refus: 'non_debloque', deblocage: 8 });
+  });
+
+  it('un refus d’une autre raison n’a pas de cadenas, et tout est ouvert dès le niveau 11', () => {
+    const pauvre = partieNumero(10);
+    pauvre.aretes = 0;
+    for (const e of elementsCaseVide(pauvre, 0)) expect(e.deblocage).toBeNull();
+    for (const e of elementsCaseVide(partieNumero(11), 0)) expect(e.refus).toBeNull();
   });
 });
 

@@ -14,8 +14,14 @@ describe('textes de refus', () => {
     expect(texteRefus('famille_interdite')).toBe('Ce défi n’autorise pas ce type de tour.');
   });
 
+  it('une seule tour divine par partie, et un élément pas encore débloqué dit à quel niveau il s’ouvre', () => {
+    expect(texteRefus('une_seule_divine')).toContain('Une seule tour divine par partie');
+    expect(texteRefus('non_debloque', 4)).toBe('Se débloque au niveau 4.');
+    expect(texteRefus('non_debloque')).toBe('Pas encore débloqué à ce niveau.');
+  });
+
   it('chaque clé de refus de la table de textes est utilisée par une raison', () => {
-    const utilisees = new Set<string>(Object.values(CLES_REFUS));
+    const utilisees = new Set<string>([...Object.values(CLES_REFUS), 'refus.non_debloque_au']);
     for (const cle of Object.keys(fr).filter((k) => k.startsWith('refus.'))) expect(utilisees.has(cle), cle).toBe(true);
   });
 });

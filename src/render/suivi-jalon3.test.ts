@@ -1,6 +1,7 @@
 // Le suivi visuel des nouveautés du jalon 3 : élites, relèvement et plongée, effets d'état (brûlure, noyade, tour en feu ou
 // affamée, nuage toxique, soin d'ennemis, appels), skins équipés et familier du héros.
 import { describe, expect, it } from 'vitest';
+import { NIVEAU_TOUT_OUVERT } from '../data/deblocage';
 import { ENNEMIS } from '../data/ennemis';
 import { REGION1 } from '../data/niveaux/region1';
 import { ajouterEnnemi, appliquerAction, creerPartie } from '../engine';
@@ -10,7 +11,8 @@ import type { AtlasRendu, SpriteAtlas, SpriteHabille } from './atlas';
 import { PoolEffets, TYPE_EFFET } from './effets';
 import { Suivi } from './suivi';
 
-const NIVEAU = REGION1[0]?.niveau;
+// La carte du niveau 1, jouée comme un niveau où toutes les tours sont débloquées (on y améliore des tours).
+const NIVEAU = REGION1[0] ? { ...REGION1[0].niveau, numero: NIVEAU_TOUT_OUVERT } : undefined;
 if (!NIVEAU) throw new Error('niveau 1 absent');
 
 /** Un atlas dont on choisit les sprites connus ; les demandes de skin sont notées et un skin « skin_refuse » n'habille rien. */

@@ -4,6 +4,7 @@ import { frDieux } from './fr-dieux';
 import { frEcrans3 } from './fr-ecrans3';
 import { frEcrans4 } from './fr-ecrans4';
 import { frEnnemis } from './fr-ennemis';
+import { frDeblocage } from './fr-deblocage';
 import { frHorde } from './fr-horde';
 import { frInscriptions } from './fr-inscriptions';
 import { frEnnemisRegions6a10 } from './fr-ennemis-regions-6-10';
@@ -166,7 +167,7 @@ export const fr = {
   'refus.niveau_max': 'Cette tour est au sommet.',
   'refus.specialisation_requise': 'Il faut choisir une spécialisation.',
   'refus.specialisation_impossible': 'Pas de spécialisation possible.',
-  'refus.tour_divine_unique': 'Une seule tour divine par carte.',
+  'refus.une_seule_divine': 'Une seule tour divine par partie : vends la tienne pour la reposer.',
   'refus.pas_une_caserne': 'Seule une caserne a un ralliement.',
   'refus.hors_portee': 'C’est trop loin de la tour.',
   'refus.hors_carte': 'C’est hors de la carte.',
@@ -218,6 +219,8 @@ export const fr = {
 
   // Niveaux de horde du jalon 5 (fr-horde.ts)
   ...frHorde,
+  // Déblocage progressif des tours (fr-deblocage.ts)
+  ...frDeblocage,
 
   // Interface des inscriptions des statues : recueil, fenêtre en partie (fr-inscriptions.ts)
   ...frInscriptions,

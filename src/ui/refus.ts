@@ -16,7 +16,7 @@ export const CLES_REFUS: Readonly<Record<RaisonRefus, CleTexte>> = {
   niveau_max: 'refus.niveau_max',
   specialisation_requise: 'refus.specialisation_requise',
   specialisation_impossible: 'refus.specialisation_impossible',
-  tour_divine_unique: 'refus.tour_divine_unique',
+  une_seule_divine: 'refus.une_seule_divine',
   pas_une_caserne: 'refus.pas_une_caserne',
   hors_portee: 'refus.hors_portee',
   hors_carte: 'refus.hors_carte',
@@ -32,8 +32,11 @@ export const CLES_REFUS: Readonly<Record<RaisonRefus, CleTexte>> = {
   vies_pleines: 'refus.vies_pleines',
   plus_de_vague: 'refus.plus_de_vague',
   famille_interdite: 'refus.famille_interdite',
+  non_debloque: 'refus.non_debloque',
 };
 
-export function texteRefus(raison: RaisonRefus): string {
+/** La phrase d'un refus ; pour un élément pas encore débloqué, `niveau` dit où il se débloque (« Se débloque au niveau 4. »). */
+export function texteRefus(raison: RaisonRefus, niveau: number | null = null): string {
+  if (raison === 'non_debloque' && niveau !== null) return t('refus.non_debloque_au', { n: niveau });
   return t(CLES_REFUS[raison]);
 }

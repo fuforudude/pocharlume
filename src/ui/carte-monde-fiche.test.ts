@@ -238,3 +238,27 @@ describe('fiche de niveau : dieu, héros et objets', () => {
     expect(surLancer.mock.calls[0]?.[2]).toEqual({ dieu: 'plume', heros: 'plume', objets: ['sablier'] });
   });
 });
+
+describe('fiche de niveau : nouvelles découvertes', () => {
+  it('niveau 1 : les quatre tours de base, repérables par leurs data-attributs, avant « Lancer »', () => {
+    monter();
+    appuyer('Enter');
+    const encadre = document.querySelector<HTMLElement>('.decouvertes');
+    expect(encadre?.querySelector('.decouvertes-titre')?.textContent).toBe(t('fiche.decouvertes'));
+    expect(encadre?.dataset.niveau).toBe('1');
+    const elements = [...document.querySelectorAll<HTMLElement>('.decouverte')];
+    expect(elements.map((e) => `${e.dataset.tour ?? ''}-${e.dataset.palier ?? ''}`)).toEqual(['caserne-1', 'tir-1', 'magie-1', 'artillerie-1']);
+    expect(elements.every((e) => e.dataset.niveau === '1' && e.querySelector('img') && e.querySelector('.decouverte-apport')?.textContent)).toBe(true);
+    // L'encadré vient avant les boutons « Lancer » et « Fermer ».
+    const lancer = parTexte(t('fiche.lancer'));
+    expect(encadre && encadre.compareDocumentPosition(lancer) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('un niveau qui n’apporte rien de neuf n’a pas d’encadré', () => {
+    const s = sauvegardeVide();
+    monter({ ...s, progression: { niveauMax: 11, etoiles: {} }, meta: { ...s.meta, regionMax: 2 } });
+    appuyer('Enter');
+    expect(document.querySelector('.fiche-numero')?.textContent).toBe(t('accueil.niveau', { n: 11 }));
+    expect(document.querySelector('.decouvertes')).toBeNull();
+  });
+});

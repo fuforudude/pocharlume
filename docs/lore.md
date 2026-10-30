@@ -97,7 +97,7 @@ Ce qu'on voit au choix avant un niveau : un symbole, une épithète, une phrase.
 - `heros.lanterne.desc` : Une flamme sans mèche. Elle éclaire ceux qui doivent rester debout.
 - `heros.titre` : Héros
 - `heros.fermer` : Fermer
-- `heros.reinitialiser` : Reprendre les points
+- `heros.reinitialiser` : Reprendre l’XP
 - `heros.verrouille` : Pas encore recruté
 - `heros.ultime` : Ultime
 - `heros.plus` : +

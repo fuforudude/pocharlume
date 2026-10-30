@@ -1,19 +1,66 @@
 // Tours divines de Plume (Sanctuaire de l'Ombre) et de Pollen (Atelier Boiteux). Le Totem de Charlie est dans tours.test.ts.
+// La règle commune aux trois (une seule par partie, 400 arêtes) est en tête.
 import { describe, expect, it } from 'vitest';
 import { DIEUX } from '../data/dieux';
 import { ce, avancerSecondes, compter, configDe, construireTour, ennemiFixe, evenementsPendant, partieEssai } from './aides.test-utils';
 import type { Evenement } from './evenements';
-import { appliquerAction } from './partie';
+import { appliquerAction, coutConstruction, validerAction } from './partie';
 import { PAS_PAR_SECONDE } from './temps';
+
+describe('une seule tour divine par partie, à 400 arêtes', () => {
+  const dieux = Object.keys(DIEUX);
+
+  it.each(dieux)('%s : coûte 400 arêtes', (dieu) => {
+    const etat = partieEssai(configDe(dieu));
+    expect(coutConstruction(etat, 'divine')).toBe(400);
+    construireTour(etat, 0, 'divine');
+    expect(etat.aretes).toBe(5000 - 400);
+  });
+
+  it.each(dieux)('%s : une seconde tour divine est refusée (une_seule_divine), sur n’importe quelle case', (dieu) => {
+    const etat = partieEssai(configDe(dieu));
+    construireTour(etat, 0, 'divine');
+    const aretes = etat.aretes;
+    for (const i of [1, 2, 3]) {
+      const action = { type: 'construire', ...ce(i), tour: 'divine' } as const;
+      expect(validerAction(etat, action)).toBe('une_seule_divine');
+      expect(appliquerAction(etat, action)).toEqual({ ok: false, raison: 'une_seule_divine' });
+    }
+    expect(etat.tours.filter((t) => t.famille === 'divine')).toHaveLength(1);
+    expect(etat.aretes).toBe(aretes);
+  });
+
+  it('le refus passe avant le manque d’arêtes : il dit la vraie raison', () => {
+    const etat = partieEssai(configDe('plume'), 400);
+    construireTour(etat, 0, 'divine');
+    expect(etat.aretes).toBe(0);
+    expect(validerAction(etat, { type: 'construire', ...ce(1), tour: 'divine' })).toBe('une_seule_divine');
+  });
+
+  it('n’empêche pas les tours communes à côté', () => {
+    const etat = partieEssai(configDe('charlie'));
+    construireTour(etat, 0, 'divine');
+    expect(validerAction(etat, { type: 'construire', ...ce(1), tour: 'tir' })).toBeNull();
+  });
+
+  it.each(dieux)('%s : après la vente de la tour divine, on peut la reposer', (dieu) => {
+    const etat = partieEssai(configDe(dieu));
+    construireTour(etat, 0, 'divine');
+    expect(appliquerAction(etat, { type: 'vendre', ...ce(0) })).toEqual({ ok: true });
+    expect(etat.tours.some((t) => t.famille === 'divine')).toBe(false);
+    expect(appliquerAction(etat, { type: 'construire', ...ce(1), tour: 'divine' })).toEqual({ ok: true });
+    expect(appliquerAction(etat, { type: 'construire', ...ce(2), tour: 'divine' })).toEqual({ ok: false, raison: 'une_seule_divine' });
+  });
+});
 
 describe('Sanctuaire de l’Ombre (Plume)', () => {
   const sanctuaire = DIEUX.plume.tourDivine;
 
-  it('se construit une seule fois pour 200 arêtes et fait sortir ses assassins', () => {
+  it('se construit une seule fois pour son coût et fait sortir ses assassins', () => {
     const etat = partieEssai(configDe('plume'));
     construireTour(etat, 0, 'divine');
-    expect(etat.aretes).toBe(5000 - 200);
-    expect(appliquerAction(etat, { type: 'construire', ...ce(1), tour: 'divine' })).toEqual({ ok: false, raison: 'tour_divine_unique' });
+    expect(etat.aretes).toBe(5000 - sanctuaire.cout);
+    expect(appliquerAction(etat, { type: 'construire', ...ce(1), tour: 'divine' })).toEqual({ ok: false, raison: 'une_seule_divine' });
     const assassins = etat.unites.filter((u) => u.genre === 'soldat');
     expect(assassins).toHaveLength(sanctuaire.soldats?.nombre ?? 0);
     expect(assassins.length).toBeGreaterThan(0);
@@ -103,7 +150,7 @@ describe('Atelier Boiteux (Pollen)', () => {
   it('construit jusqu’à deux tourelles à intervalles réguliers, qui disparaissent après 30 s', () => {
     const etat = partieEssai(configDe('pollen'));
     construireTour(etat, 0, 'divine');
-    expect(etat.aretes).toBe(5000 - 200);
+    expect(etat.aretes).toBe(5000 - DIEUX.pollen.tourDivine.cout);
     expect(etat.structures).toHaveLength(0);
     const cadence = atelier?.constructeur?.cadence ?? 0;
     const vus = evenementsPendant(etat, cadence + 1);

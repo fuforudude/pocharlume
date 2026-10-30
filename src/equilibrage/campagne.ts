@@ -107,7 +107,7 @@ export function evaluerCampagne(o: OptionsCampagne): Evaluation[] {
 export interface Profil extends Joueur {
   readonly id: string;
   readonly dieu: string;
-  /** Faux : le soigneux n'a pas de tour divine (il dépense ses 200 arêtes en tours communes). */
+  /** Faux : le soigneux n'a pas de tour divine (il dépense ses 400 arêtes en tours communes). */
   readonly tourDivine?: boolean;
 }
 

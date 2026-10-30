@@ -51,6 +51,7 @@ export function assemblerNiveau(plan: PlanNiveau, vagues: readonly Vague[]): Niv
   const statue = STATUES[plan.carte];
   const niveau: Niveau = {
     id: `r${String(region)}-${String(rang).padStart(2, '0')}`,
+    numero: plan.numero,
     aretesDepart: plan.aretesDepart,
     defiFer: plan.defiFer,
     ...(REGIONS_SANS_ELITES.includes(region) ? { sansElites: true } : {}),

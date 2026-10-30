@@ -22,16 +22,17 @@ describe('puissance des tours par palier de coût', () => {
 });
 
 describe('puissance des tours divines', () => {
-  it('chaque dieu a sa tour divine à 200 arêtes, comparée aux tours communes de coût voisin', () => {
+  it('chaque dieu a sa tour divine à 400 arêtes, comparée aux tours communes de coût voisin', () => {
     const divines = puissancesDivines();
     expect(divines.map((d) => d.dieu).sort()).toEqual(['charlie', 'plume', 'pollen']);
     for (const d of divines) {
-      expect(d.cout).toBe(200);
+      expect(d.cout).toBe(400);
       expect(d.puissance, d.dieu).toBeGreaterThan(0);
       expect(d.reference, d.dieu).toBeGreaterThan(0);
-      // Tours communes de coût cumulé entre 140 et 260 : les niveaux 2 de caserne et de tir (180) et de magie (260).
+      // Tours communes de coût cumulé entre 280 et 520 : les niveaux 3 de caserne, de tir (340) et de magie (500), le niveau 2
+      // d'artillerie (325).
       expect(d.tours.length, d.dieu).toBeGreaterThanOrEqual(2);
-      for (const t of d.tours) expect(Math.abs(t.coutCumule - 200)).toBeLessThanOrEqual(60);
+      for (const t of d.tours) expect(Math.abs(t.coutCumule - 400)).toBeLessThanOrEqual(120);
     }
   });
 

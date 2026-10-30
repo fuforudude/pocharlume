@@ -20,6 +20,7 @@ import type { AtlasRendu } from '../render/atlas';
 import { RenduCarteMonde } from '../render/carte-monde';
 import { DIFFICULTES_SAUVEGARDE, etoilesDisponibles, NOMBRE_NIVEAUX, totalEtoiles, type ChoixPartie, type DifficulteSauvegarde } from '../save';
 import { dessinerIconesDefis } from './carte-monde-defis';
+import { decouvertesDuNiveau } from './decouvertes';
 import {
   directionDeTouche,
   etoilesParDifficulte,
@@ -334,6 +335,34 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     });
   };
 
+  /**
+   * L'encadré « Nouvelles découvertes » d'un niveau, ou null s'il n'apporte rien. Chaque élément porte la classe `decouverte` et
+   * ses data-attributs (`data-tour`, `data-palier`, `data-voie`, `data-niveau`) pour qu'on puisse y brancher une description.
+   */
+  const encadreDecouvertes = (numero: number, dieu: string): HTMLElement | null => {
+    const liste = decouvertesDuNiveau(numero, dieu);
+    if (liste.length === 0) return null;
+    const encadre = el('section', 'decouvertes');
+    encadre.dataset.niveau = String(numero);
+    encadre.setAttribute('aria-label', t('fiche.decouvertes'));
+    encadre.append(el('h3', 'decouvertes-titre', t('fiche.decouvertes')));
+    const ul = el('ul', 'decouvertes-liste');
+    for (const d of liste) {
+      const li = el('li', 'decouverte');
+      li.dataset.decouverte = d.id;
+      li.dataset.tour = d.famille;
+      li.dataset.palier = String(d.palier);
+      if (d.voie) li.dataset.voie = d.voie;
+      li.dataset.niveau = String(numero);
+      const texte = el('div', 'decouverte-texte');
+      texte.append(el('strong', 'decouverte-nom', d.nom), el('span', 'decouverte-apport', d.apport));
+      li.append(image(atlas.iconeUrl(d.icone, 1), 'decouverte-icone'), texte);
+      ul.append(li);
+    }
+    encadre.append(ul);
+    return encadre;
+  };
+
   const ouvrirFiche = (i: number): void => {
     const vue = vues[i];
     const niveau = vue ? regionCourante()?.contenu?.niveaux.find((n) => n.numero === vue.numero) : undefined;
@@ -441,6 +470,10 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     }
     boutonsDifficulte = boutons;
     gauche.append(groupe, regles);
+
+    // Ce que ce niveau débloque (déblocage progressif), juste avant « Lancer » ; rien s'il n'apporte rien de neuf.
+    const decouvertes = encadreDecouvertes(vue.numero, choisir.choix().dieu);
+    if (decouvertes) gauche.append(decouvertes);
 
     const actions = el('div', 'rangee');
     const lancer = bouton('bouton grand', t('fiche.lancer'), () => {

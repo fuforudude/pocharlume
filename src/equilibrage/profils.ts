@@ -46,7 +46,7 @@ export function profilProgression(dieu: string, id: IdProfilProgression): Profil
   return { id, dieu, ...arbre, ...heros };
 }
 
-/** Le soigneux sans tour divine : ses 200 arêtes vont à des tours communes. */
+/** Le soigneux sans tour divine : ses 400 arêtes vont à des tours communes. */
 export function profilSansTourDivine(dieu: string): Profil {
   return { id: 'sans_divine', dieu, tourDivine: false };
 }

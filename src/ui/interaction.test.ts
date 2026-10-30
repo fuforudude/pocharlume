@@ -114,6 +114,16 @@ describe('cases et menu', () => {
     expect(ui.mode).toEqual({ type: 'menu', ...ct(0) });
   });
 
+  it('un élément pas encore débloqué renvoie aussi le niveau qui l’ouvre', () => {
+    const etat = creerPartie({ ...NIVEAU_TEST, numero: 3 }, CONFIG);
+    const ui = new Interaction();
+    ui.toucher(etat, ...pt(0), RAYON);
+    const divine = elementsMenu(etat, 0).find((e) => e.id === 'construire:divine');
+    if (!divine) throw new Error('élément manquant');
+    expect(ui.choisirElement(divine)).toEqual({ action: null, refus: 'non_debloque', deblocage: 10 });
+    expect(ui.mode).toEqual({ type: 'menu', ...ct(0) });
+  });
+
   it('le menu d’une tour offre améliorer, spécialiser et vendre, validés par le moteur', () => {
     const etat = partie();
     const ui = new Interaction();

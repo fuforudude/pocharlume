@@ -300,7 +300,7 @@ seules les règles comptent pour l'acceptation.
 | Bonus de famille | Tir : +60 % cadence, +15 points de critique (×2 dégâts) | Artillerie : −10 % prix, +15 % cadence ; chaque tir d'artillerie qui touche le sol a 20 % de chances de laisser un piège |
 | Sort 1 | Voile de Nuit (recharge 30 s) : zone de rayon 3 pendant 10 s, ennemis −60 % vitesse, tours qui tirent dans la zone +50 points de critique | Pièges à Ressort (recharge 30 s) : 4 pièges sur le chemin autour du point, chacun 60 dégâts physiques et immobilise 1,5 s |
 | Sort 2 | Griffes d'Ombre (recharge 40 s) : rayon 1,6, tue net les non-boss, −15 % des PV actuels d'un boss | Ingéniosité (recharge 50 s) : +130 arêtes, tours dans un rayon de 3 à +80 % cadence pendant 10 s |
-| Tour divine (200) | Sanctuaire de l'Ombre : 4 assassins qui ne peuvent pas être ciblés, frappent vite, exécutent un non-boss sous 15 % de PV ; révèle les furtifs à portée | Atelier Boiteux : construit jusqu'à 2 tourelles (arbalète automatique, 30 s de vie) et pose un piège toutes les 12 s sur le chemin à portée |
+| Tour divine (400, une seule par partie) | Sanctuaire de l'Ombre : 4 assassins qui ne peuvent pas être ciblés, frappent vite, exécutent un non-boss sous 15 % de PV ; révèle les furtifs à portée | Atelier Boiteux : construit jusqu'à 2 tourelles (arbalète automatique, 30 s de vie) et pose un piège toutes les 12 s sur le chemin à portée |
 
 Mécaniques nouvelles du moteur : zones qui durent, pièges posés sur le chemin, exécution, boost temporaire de
 tours, unités non ciblables, structures construites par une tour.

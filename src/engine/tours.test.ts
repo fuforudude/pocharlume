@@ -391,7 +391,7 @@ describe('tour divine de Charlie : Totem du Colosse', () => {
     construire(etat, 0, 'divine');
     expect(etat.aretes).toBe(5000 - DIEUX.charlie.tourDivine.cout);
     expect(etat.tours[0]?.famille).toBe('divine');
-    expect(appliquerAction(etat, { type: 'construire', ...ce(1), tour: 'divine' })).toEqual({ ok: false, raison: 'tour_divine_unique' });
+    expect(appliquerAction(etat, { type: 'construire', ...ce(1), tour: 'divine' })).toEqual({ ok: false, raison: 'une_seule_divine' });
     expect(appliquerAction(etat, { type: 'ameliorer', ...ce(0) })).toEqual({ ok: false, raison: 'niveau_max' });
     expect(appliquerAction(etat, { type: 'specialiser', ...ce(0), voie: 'A' })).toEqual({ ok: false, raison: 'specialisation_impossible' });
   });

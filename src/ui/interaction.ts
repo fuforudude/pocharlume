@@ -28,6 +28,8 @@ export type Mode =
 export interface Issue {
   readonly action: Action | null;
   readonly refus: RaisonRefus | null;
+  /** Refus `non_debloque` d'un bouton du menu : le niveau qui ouvre l'élément, pour le dire au joueur. */
+  readonly deblocage?: number | null;
 }
 
 const RIEN: Issue = { action: null, refus: null };
@@ -139,7 +141,7 @@ export class Interaction {
   choisirElement(element: ElementMenu): Issue {
     const mode = this.mode;
     if (mode.type !== 'menu') return RIEN;
-    if (element.refus !== null) return { action: null, refus: element.refus };
+    if (element.refus !== null) return { action: null, refus: element.refus, ...(element.deblocage === null ? {} : { deblocage: element.deblocage }) };
     if (element.id === 'ralliement') {
       this.mode = { type: 'ralliement', cx: mode.cx, cy: mode.cy };
       return RIEN;

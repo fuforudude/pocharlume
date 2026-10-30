@@ -359,7 +359,7 @@ est le centre de la case** (`tour.x = (cx + 0,5) × 2`). Deux tours ne partagent
   se relit en échec et est oubliée à la reprise (règle existante de `Session.reprendre`), un journal de l'ancien format est refusé.
 - **Refus** (`RaisonRefus`), dans l'ordre où `validerAction` les rend pour `construire` : `action_invalide` (cases non entières ou
   absentes), `case_hors_carte` (hors de la grille), `case_interdite` (chemin, grand décor), `case_occupee`, puis les refus de famille et de
-  prix existants (`tour_divine_unique`, `famille_interdite` du défi Fer, `aretes_insuffisantes`), avec **`caserne_sans_chemin`** inséré
+  prix existants (`une_seule_divine`, `famille_interdite` du défi Fer, `aretes_insuffisantes`), avec **`caserne_sans_chemin`** inséré
   avant le prix : une tour à soldats (la caserne, la tour divine de Plume) n'est constructible que là où le point du chemin le plus
   proche du centre de la case est à portée (`ralliementParDefaut(chemins, cx, cy, portee)`, portée 3,5 pour la caserne (tous ses niveaux),
   3,5 pour le Sanctuaire) ; ce point devient son ralliement par défaut. Les autres familles restent permises sur cette case. Pour les autres actions
@@ -853,3 +853,25 @@ Tout est piloté par les données (`src/data/ennemis.ts`, `src/data/infini.ts`) 
 - **En partie** (`src/ui/statue.ts`, `inscription-partie.ts`, `partie.ts`) : toucher la case de la statue, quand aucune visée n'est en cours (ni héros, ni sort, ni objet, ni ralliement) et que le héros n'est pas sous le doigt, ouvre une fenêtre et met la simulation en pause ; la refermer la relance. Rien n'entre dans la file d'actions ni dans le journal du moteur (méta). `OptionsPartie.surInscription` range l'inscription dans la sauvegarde et dit si elle est nouvelle. Pas de raccourci clavier en partie pour l'instant (le recueil, lui, se parcourt au clavier).
 - **Sauvegarde v6** : `meta.inscriptions` (ids de cartes, sans doublon, dans l'ordre de la campagne ; `validation-inscriptions.ts` refuse tout id inconnu). Migration v5 vers v6 : liste vide (fixture `fixtures/sauvegarde-v5.json`). `transactions-inscriptions.ts` : `trouverInscription` ne change rien la seconde fois ; `Session.trouverInscription` l'écrit ; la fusion de deux onglets réunit les listes ; l'export et l'import la transportent avec la méta.
 - **Recueil** (`ecran-inscriptions.ts`, `inscriptions-vues.ts`) : bouton « Inscriptions » de la barre de la carte du monde, liste des 31 (trouvée : texte et lieu ; sinon « ??? » et la région), compteur « n / 31 », message d'état vide. Textes dans `src/i18n/fr-inscriptions.ts`.
+
+## Tour divine unique et déblocage progressif des tours (2026-10-30)
+
+Spec : [retours du 2026-10-30](specs/2026-10-30-retours-tour-divine-descriptions.md).
+- **Tour divine** : 400 arêtes pour les trois dieux (`src/data/dieux.ts`), une seule posée à la fois par partie : `validerAction`
+  rend `une_seule_divine` (ex-`tour_divine_unique`) tant qu'une tour divine est debout, quel que soit le dieu ; vendue, elle se repose.
+- **Déblocage** : ce qu'on construit dépend du seul numéro du niveau joué (« rythme du niveau », défis compris). La table est
+  `src/data/deblocage.ts` (`DEBLOCAGES` : niveau, famille, palier 1 à 4 ; `NIVEAU_TOUT_OUVERT` = 11). `Niveau.numero` (posé par
+  `assemblerNiveau`) la relie au moteur ; un niveau sans numéro (essai) et le mode infini ont tout d'ouvert.
+  `src/engine/deblocage.ts` : `niveauDeblocage(etat, action)` dit quel niveau ouvre ce qu'une action `construire`, `ameliorer` ou
+  `specialiser` construirait (null si c'est ouvert). `validerAction` rend `non_debloque` après les refus de forme, de case, de tour
+  divine unique et de famille du Fer, avant le prix. Les compétences d'une spécialisation viennent avec elle.
+- **Interface** : le menu en cercle garde l'élément, grisé, avec un cadenas et « Niv. N » à la place du prix
+  (`ElementMenu.deblocage`) ; le toucher dit « Se débloque au niveau N. » (`texteRefus(raison, niveau)`). La fiche d'un niveau montre
+  l'encadré « Nouvelles découvertes » (`src/ui/decouvertes.ts`, textes `fr-deblocage.ts`) : icône, nom, une phrase tirée des données ;
+  éléments `.decouverte` avec `data-tour`, `data-palier`, `data-voie`, `data-niveau`.
+- **Bots** : le naïf et le soigneux écartent ce que `niveauDeblocage` refuse (le soigneux n'économise pas pour une amélioration
+  fermée ; les Guetteurs et la tour divine attendent leur niveau).
+- **Versions** : `VERSION_DONNEES` 12 → 13 (coût de la tour divine, déblocage) ; une partie en cours enregistrée avant ne se reprend
+  pas (règle existante), donc aucune partie sauvegardée ne garde deux tours divines. `VERSION_ETAT` inchangée (`numero` est un champ
+  optionnel du niveau rangé dans l'état).
+

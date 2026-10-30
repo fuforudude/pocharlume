@@ -230,7 +230,7 @@ export async function lancerNiveau(
     if (issue.action) envoyer(issue.action);
     if (issue.refus !== null) {
       jouerInterface('refus');
-      hud.afficherMessage(texteRefus(issue.refus));
+      hud.afficherMessage(texteRefus(issue.refus, issue.deblocage ?? null));
     }
   };
   const definirPause = (pause: boolean): void => {

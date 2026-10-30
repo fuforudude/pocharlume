@@ -2,7 +2,7 @@
 // placement des boutons. Logique pure : le DOM est dans hud.ts. Les actions sont celles du moteur, et c'est
 // `validerAction` qui décide de ce qui est grisé : l'interface ne duplique aucune règle de jeu.
 import type { Action, RaisonRefus } from '../engine';
-import { coutCompetence, coutConstruction, ralliementParDefaut, tourSurCase, validerAction, valeurRevente } from '../engine';
+import { coutCompetence, coutConstruction, niveauDeblocage, ralliementParDefaut, tourSurCase, validerAction, valeurRevente } from '../engine';
 import type { Point } from '../engine/definitions';
 import type { EtatPartie, FamilleTour, Tour } from '../engine/etat';
 import { defNiveau, prix, statsTour } from '../engine/tours';
@@ -37,6 +37,13 @@ export interface ElementMenu {
   readonly refus: RaisonRefus | null;
   /** Portée et ralliement d'une tour à construire (éléments « construire » seulement), sinon null. */
   readonly apercu: ApercuConstruction | null;
+  /** Élément pas encore débloqué par le niveau joué (refus `non_debloque`) : le numéro du niveau qui l'ouvre ; sinon null. */
+  readonly deblocage: number | null;
+}
+
+/** Le niveau qui ouvrira l'action, quand c'est le déblocage qui la refuse (le cadenas du bouton). */
+function deblocageDe(etat: EtatPartie, action: Action, refus: RaisonRefus | null): number | null {
+  return refus === 'non_debloque' ? niveauDeblocage(etat, action) : null;
 }
 
 export const FAMILLES_MENU: readonly FamilleTour[] = ['caserne', 'tir', 'magie', 'artillerie', 'divine'];
@@ -53,6 +60,7 @@ export function elementsCaseVide(etat: EtatPartie, cx: number, cy: number): Elem
   return FAMILLES_MENU.map((famille) => {
     const action: Action = { type: 'construire', cx, cy, tour: famille };
     const def = defNiveau(etat, famille, 1, null);
+    const refus = validerAction(etat, action);
     return {
       id: `construire:${famille}`,
       action,
@@ -61,8 +69,9 @@ export function elementsCaseVide(etat: EtatPartie, cx: number, cy: number): Elem
       prix: coutConstruction(etat, famille) ?? null,
       gain: null,
       rang: null,
-      refus: validerAction(etat, action),
+      refus,
       apercu: def ? { portee: statsTour(etat, famille, def).portee, ralliement: def.soldats ? ralliementParDefaut(etat.chemins, cx, cy, def.portee) : null } : null,
+      deblocage: deblocageDe(etat, action, refus),
     };
   }).filter((element) => element.refus !== 'famille_interdite');
 }
@@ -81,6 +90,7 @@ export function elementsTour(etat: EtatPartie, cx: number, cy: number): ElementM
     if (tour.niveau < 3) {
       const action: Action = { type: 'ameliorer', cx, cy };
       const def = defNiveau(etat, famille, tour.niveau + 1, null);
+      const refus = validerAction(etat, action);
       elements.push({
         id: 'ameliorer',
         action,
@@ -89,13 +99,15 @@ export function elementsTour(etat: EtatPartie, cx: number, cy: number): ElementM
         prix: def ? prix(etat, famille, def) : null,
         gain: null,
         rang: null,
-        refus: validerAction(etat, action),
+        refus,
         apercu: null,
+        deblocage: deblocageDe(etat, action, refus),
       });
     } else if (tour.niveau === 3) {
       for (const voie of ['A', 'B'] as const) {
         const action: Action = { type: 'specialiser', cx, cy, voie };
         const def = defNiveau(etat, famille, 4, voie);
+        const refus = validerAction(etat, action);
         elements.push({
           id: `specialiser:${voie}`,
           action,
@@ -104,8 +116,9 @@ export function elementsTour(etat: EtatPartie, cx: number, cy: number): ElementM
           prix: def ? prix(etat, famille, def) : null,
           gain: null,
           rang: null,
-          refus: validerAction(etat, action),
+          refus,
           apercu: null,
+          deblocage: deblocageDe(etat, action, refus),
         });
       }
     } else {
@@ -124,6 +137,7 @@ export function elementsTour(etat: EtatPartie, cx: number, cy: number): ElementM
           rang: t('menu.competence_rang', { n: rang, m: RANG_MAX_COMPETENCE }),
           refus: validerAction(etat, action),
           apercu: null,
+          deblocage: null,
         });
       });
     }
@@ -139,9 +153,10 @@ export function elementsTour(etat: EtatPartie, cx: number, cy: number): ElementM
     rang: null,
     refus: validerAction(etat, vente),
     apercu: null,
+    deblocage: null,
   });
   if (tour.stats.soldats) {
-    elements.push({ id: 'ralliement', action: null, icone: 'icone-ralliement', libelle: t('menu.ralliement'), prix: null, gain: null, rang: null, refus: null, apercu: null });
+    elements.push({ id: 'ralliement', action: null, icone: 'icone-ralliement', libelle: t('menu.ralliement'), prix: null, gain: null, rang: null, refus: null, apercu: null, deblocage: null });
   }
   return elements;
 }

@@ -451,6 +451,24 @@ html[data-sans-clavier] .touche {
   color: #e87060;
 }
 
+/* Pas encore débloqué par le niveau joué : cadenas sur l'icône et niveau d'ouverture à la place du prix. */
+.element-menu .cadenas {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  image-rendering: pixelated;
+}
+
+.element-menu .deblocage {
+  font-size: 10px;
+  font-weight: bold;
+  color: var(--bord-clair);
+  line-height: 1;
+  white-space: nowrap;
+}
+
 @keyframes apparition {
   from {
     transform: scale(0.4);

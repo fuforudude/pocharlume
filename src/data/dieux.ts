@@ -45,7 +45,7 @@ const plume: DefDieu = {
   bonus: { famille: 'tir', pvSoldats: 0, cadence: 0.6, chanceCritique: 0.15, prix: 0, effets: [], piegeAuSol: null },
   tourDivine: niveau({
     nom: 'tour.sanctuaire_de_l_ombre',
-    cout: 200,
+    cout: 400,
     portee: 3.5,
     revele: true,
     soldats: soldats({
@@ -124,7 +124,7 @@ const charlie: DefDieu = {
   },
   tourDivine: niveau({
     nom: 'tour.totem_du_colosse',
-    cout: 200,
+    cout: 400,
     portee: 2.5,
     cadence: 7,
     degats: [20, 30],
@@ -178,7 +178,7 @@ const pollen: DefDieu = {
   },
   tourDivine: niveau({
     nom: 'tour.atelier_boiteux',
-    cout: 200,
+    cout: 400,
     portee: 3.5,
     atelier: {
       constructeur: {

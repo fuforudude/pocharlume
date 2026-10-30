@@ -47,11 +47,11 @@ describe('textes du jalon 2', () => {
 });
 
 describe('dieux', () => {
-  it('sont trois : Plume, Charlie, Pollen, avec chacun deux sorts et une tour divine à 200', () => {
+  it('sont trois : Plume, Charlie, Pollen, avec chacun deux sorts et une tour divine à 400', () => {
     expect(Object.keys(DIEUX).sort()).toEqual(['charlie', 'plume', 'pollen']);
     for (const d of Object.values(DIEUX)) {
       expect(d.sorts).toHaveLength(2);
-      expect(d.tourDivine.cout).toBe(200);
+      expect(d.tourDivine.cout).toBe(400);
     }
   });
 

@@ -2,8 +2,8 @@
 // mélangé, avec des familles tirées au hasard, améliore ce qu'il peut quand il a des arêtes, choisit ses
 // spécialisations au hasard, et n'utilise ni les sorts ni le héros. Tous ses choix viennent d'un générateur à
 // graine : même graine, même partie.
-import { casesLibres, centreCase, creerGenerateur, tirer, tourSurCase, validerAction } from '../engine';
-import type { Action, CaseGrille, EtatPartie, Generateur, IdFamille, Voie } from '../engine';
+import { casesLibres, centreCase, creerGenerateur, niveauDeblocage, tirer, tourSurCase, validerAction } from '../engine';
+import type { Action, CaseGrille, EtatPartie, Generateur, IdFamille, Tour, Voie } from '../engine';
 import { ENNEMIS } from '../data/ennemis';
 import { FAMILLES } from '../data/tours';
 import { distance, echantillonner, PAS_ECHANTILLON, type Echantillon } from './geometrie';
@@ -40,6 +40,11 @@ function ordreDesCases(etat: EtatPartie, g: Generateur, echantillons: readonly E
   return notes.sort((a, b) => a.note - b.note).map((n) => n.c);
 }
 
+/** Le pas suivant d'une tour : l'améliorer, ou la spécialiser (voie `voie`) au niveau 3. */
+function actionSuivante(tour: Tour, voie: Voie): Action {
+  return tour.niveau === 3 ? { type: 'specialiser', cx: tour.cx, cy: tour.cy, voie } : { type: 'ameliorer', cx: tour.cx, cy: tour.cy };
+}
+
 export function creerBotNaif(options: OptionsNaif): Bot {
   const g = creerGenerateur(options.graine);
   const goutDeConstruire = options.goutDeConstruire ?? 0.95;
@@ -57,7 +62,11 @@ export function creerBotNaif(options: OptionsNaif): Bot {
     const tirs = etat.tours.filter((t) => t.famille === 'tir');
     if (tirs.filter((t) => t.voie === 'A').length >= etat.niveau.carte.chemins.length) return null;
     const tour = tirs.filter((t) => t.niveau < 4).sort((a, b) => b.niveau - a.niveau)[0];
-    if (tour) return tour.niveau === 3 ? { type: 'specialiser', cx: tour.cx, cy: tour.cy, voie: 'A' } : { type: 'ameliorer', cx: tour.cx, cy: tour.cy };
+    if (tour) {
+      const action: Action = tour.niveau === 3 ? { type: 'specialiser', cx: tour.cx, cy: tour.cy, voie: 'A' } : { type: 'ameliorer', cx: tour.cx, cy: tour.cy };
+      // Pas encore débloqué à ce niveau : il joue comme sans furtifs.
+      return niveauDeblocage(etat, action) === null ? action : null;
+    }
     const choisie = ordre?.find((c) => !tourSurCase(etat, c.cx, c.cy));
     return choisie ? { type: 'construire', cx: choisie.cx, cy: choisie.cy, tour: 'tir' } : null;
   }
@@ -68,7 +77,8 @@ export function creerBotNaif(options: OptionsNaif): Bot {
     if (guetteurs) return guetteurs;
     // Un débutant n'occupe que les emplacements qui lui paraissent bons ; une fois ceux-là pris, il améliore ses tours.
     const libres = ordre.slice(0, EMPLACEMENTS_DEBUTANT).filter((c) => !tourSurCase(etat, c.cx, c.cy));
-    const ameliorables = etat.tours.filter((t) => t.famille !== 'divine' && t.niveau < 4);
+    // Il ne voit à améliorer que ce que le niveau a déjà débloqué (déblocage progressif).
+    const ameliorables = etat.tours.filter((t) => t.famille !== 'divine' && t.niveau < 4 && niveauDeblocage(etat, actionSuivante(t, 'A')) === null);
     const construire = libres.length > 0 && (ameliorables.length === 0 || tirer(g) < goutDeConstruire);
     if (construire) {
       const choisie = libres[0];
@@ -77,11 +87,7 @@ export function creerBotNaif(options: OptionsNaif): Bot {
     }
     const tour = choisir(g, ameliorables);
     if (!tour) return null;
-    if (tour.niveau === 3) {
-      const voie: Voie = tirer(g) < 0.5 ? 'A' : 'B';
-      return { type: 'specialiser', cx: tour.cx, cy: tour.cy, voie };
-    }
-    return { type: 'ameliorer', cx: tour.cx, cy: tour.cy };
+    return actionSuivante(tour, tour.niveau === 3 && tirer(g) >= 0.5 ? 'B' : 'A');
   }
 
   return {

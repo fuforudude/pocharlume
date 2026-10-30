@@ -1246,6 +1246,60 @@
   color: var(--sang);
 }
 
+/* --- Nouvelles découvertes de la fiche d'un niveau (déblocage progressif) --- */
+
+.decouvertes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px;
+  border: 2px solid var(--bord-clair);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.decouvertes-titre {
+  margin: 0;
+  font-size: 14px;
+  color: var(--or);
+}
+
+.decouvertes-liste {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 4px 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.decouverte {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.decouverte-icone {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.decouverte-texte {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.decouverte-apport {
+  color: var(--texte-doux);
+}
+
 /* --- Petits écrans --- */
 
 @media (max-width: 640px) {
@@ -1313,6 +1367,20 @@
 
   .fiche-colonne {
     gap: 6px;
+  }
+
+  .decouvertes {
+    padding: 4px 6px;
+    gap: 2px;
+  }
+
+  .decouverte-icone {
+    width: 24px;
+    height: 24px;
+  }
+
+  .decouverte-texte {
+    font-size: 11px;
   }
 }
 

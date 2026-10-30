@@ -7,6 +7,7 @@ import type { Action, RaisonRefus, ResultatAction } from './actions';
 import { partEntiere } from './argent';
 import { distanceAuxChemins } from './chemins';
 import { defFamille, defObjet, dieuDe } from './contenu';
+import { niveauDeblocage } from './deblocage';
 import type { DefNiveauTour } from './definitions';
 import type { EtatPartie, FamilleTour, Tour } from './etat';
 import { ouvrirPas } from './evenements';
@@ -127,8 +128,9 @@ export function validerAction(etat: EtatPartie, action: Action): RaisonRefus | n
       if (!caseExiste(etat.niveau.carte, action.cx, action.cy)) return 'case_hors_carte';
       if (estCaseInterdite(etat.niveau, action.cx, action.cy)) return 'case_interdite';
       if (tourSurCase(etat, action.cx, action.cy)) return 'case_occupee';
-      if (action.tour === 'divine' && etat.tours.some((t) => t.famille === 'divine')) return 'tour_divine_unique';
+      if (action.tour === 'divine' && etat.tours.some((t) => t.famille === 'divine')) return 'une_seule_divine';
       if (familleInterdite(etat, action.tour)) return 'famille_interdite';
+      if (niveauDeblocage(etat, action) !== null) return 'non_debloque';
       const def = defNiveau(etat, action.tour, 1, null);
       if (!def) return 'tour_inconnue';
       if (def.soldats && !ralliementParDefaut(etat.chemins, action.cx, action.cy, def.portee)) return 'caserne_sans_chemin';
@@ -140,6 +142,7 @@ export function validerAction(etat: EtatPartie, action: Action): RaisonRefus | n
       if (!t) return 'case_vide';
       const suivant = niveauSuivant(etat, t, action);
       if (typeof suivant === 'string') return suivant;
+      if (niveauDeblocage(etat, action) !== null) return 'non_debloque';
       return prix(etat, t.famille, suivant) > etat.aretes ? 'aretes_insuffisantes' : null;
     }
     case 'ameliorerCompetence': {

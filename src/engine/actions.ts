@@ -35,7 +35,7 @@ export type RaisonRefus =
   | 'niveau_max'
   | 'specialisation_requise'
   | 'specialisation_impossible'
-  | 'tour_divine_unique'
+  | 'une_seule_divine'
   | 'pas_une_caserne'
   | 'hors_portee'
   | 'hors_carte'
@@ -51,6 +51,8 @@ export type RaisonRefus =
   | 'vague_en_cours'
   | 'plus_de_vague'
   /** Défi Fer : cette famille de tours n'est pas constructible sur ce niveau. */
-  | 'famille_interdite';
+  | 'famille_interdite'
+  /** Déblocage progressif : le niveau joué n'a pas encore ouvert ce palier de tour (src/data/deblocage.ts). */
+  | 'non_debloque';
 
 export type ResultatAction = { ok: true } | { ok: false; raison: RaisonRefus };

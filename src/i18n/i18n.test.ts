@@ -74,3 +74,20 @@ describe('tCle', () => {
     expect(() => tCle('constructor')).toThrow('constructor');
   });
 });
+
+describe('héros : les points à placer s’appellent « XP »', () => {
+  it('aucun texte de l’écran des héros ni de ses refus ne parle de « point(s) »', () => {
+    const cles = Object.keys(fr).filter((cle) => cle.startsWith('heros.') || cle.startsWith('meta.refus.'));
+    expect(cles.length).toBeGreaterThan(20);
+    for (const cle of cles) expect(fr[cle as keyof typeof fr], cle).not.toMatch(/\bpoints?\b/i);
+  });
+
+  it('dit « XP » à la place', () => {
+    expect(t('heros.points', { n: 3 })).toBe('XP à placer : 3');
+    expect(t('heros.reinitialiser')).toBe('Reprendre l’XP');
+    expect(t('heros.placer', { nom: 'Griffe' })).toBe('Placer de l’XP : Griffe');
+    expect(t('heros.points_repris', { nom: 'Suie' })).toBe('L’XP de Suie est à replacer.');
+    expect(t('meta.refus.plus_de_points')).toContain('XP');
+    expect(t('meta.refus.competences_incoherentes')).toContain('XP');
+  });
+});
