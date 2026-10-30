@@ -2,12 +2,13 @@
 // recopiés à la main ; les textes sont ceux de src/i18n.
 import { describe, expect, it } from 'vitest';
 import { DIEUX } from '../data/dieux';
+import { DIFFICULTES } from '../data/difficultes';
 import { ENNEMIS } from '../data/ennemis';
 import { HEROS } from '../data/heros';
 import { REGION1 } from '../data/niveaux/region1';
-import { TOURS } from '../data/tours';
+import { niveau, TOURS } from '../data/tours';
 import { VERSION_DONNEES } from '../data/version';
-import { ajouterEnnemi, appliquerAction, casesLibres, creerPartie, step, validerAction } from '../engine';
+import { ajouterEnnemi, appliquerAction, casesLibres, creerPartie, step, validerAction, valeurRevente } from '../engine';
 import type { ConfigPartie, EtatPartie } from '../engine';
 import { chercherParId } from '../engine/recherche';
 import { t, tCle } from '../i18n';
@@ -17,11 +18,13 @@ import {
   contenuEnnemi,
   contenuEnnemiDeDonnees,
   contenuHerosEnPartie,
+  contenuTour,
   contenuTourDeDonnees,
   ennemiSous,
   type ContenuBulle,
 } from './bulle-contenus';
 import { elementsMenu } from './menu-cercle';
+import { texteRefus } from './refus';
 
 const NIVEAU = REGION1[0];
 if (!NIVEAU) throw new Error('niveau 1 absent');
@@ -54,6 +57,18 @@ function aLigne(contenu: ContenuBulle | null, libelle: string): boolean {
 
 const fourchette = (a: number, b: number): string => t('bulle.fourchette', { a, b });
 const nombre = (n: number): string => String(n).replace('.', ',');
+/** « 0,9 case », « 3,5 cases » : singulier sous 2. */
+const cases = (n: number): string => t(n < 2 ? 'bulle.case_un' : 'bulle.cases', { n: nombre(n) });
+
+describe('pluriels', () => {
+  it('les unités s’accordent au nombre au lieu d’écrire « case(s) »', () => {
+    expect(valeur(contenuEnnemiDeDonnees('paysan_affame'), t('bulle.ennemi.vitesse'))).toBe(t('bulle.ennemi.vitesse_valeur', { n: t('bulle.case_un', { n: '0,9' }) }));
+    expect(valeur(contenuTourDeDonnees('tir'), t('bulle.tour.portee'))).toBe(t('bulle.cases', { n: '3,5' }));
+    expect(t('bulle.case_un', { n: 1 })).toBe('1 case');
+    const textes = [contenuTourDeDonnees('artillerie', { niveau: 4, voie: 'B' }), contenuEnnemiDeDonnees('chien_errant')].flatMap((c) => [...c.lignes.map((l) => l.valeur), ...c.notes]);
+    for (const texte of textes) expect(texte).not.toContain('(s)');
+  });
+});
 
 describe('bulle d’une tour (données brutes)', () => {
   it('reprend dégâts, cadence et portée du Clocher des Archers de niveau 1', () => {
@@ -98,6 +113,23 @@ describe('bulle d’une tour (données brutes)', () => {
       expect(contenu.lignes.length).toBeGreaterThan(1);
     }
     expect(valeur(contenuTourDeDonnees('divine', { dieu: 'charlie' }), t('bulle.tour.onde'))).toBe(t('bulle.tour.onde_valeur'));
+  });
+
+  it('deux effets du même type sont tous les deux dits (aucun ne masque l’autre)', () => {
+    const def = niveau({
+      nom: 'tour.clocher_des_archers',
+      cout: 70,
+      portee: 3,
+      cadence: 1,
+      degats: [1, 2],
+      effets: [
+        { type: 'poison', chance: 1, duree: 3, valeur: 4 },
+        { type: 'poison', chance: 0.5, duree: 2, valeur: 9 },
+      ],
+    });
+    const poisons = contenuTour(def, 'tir').lignes.filter((l) => l.libelle === t('bulle.effet.poison'));
+    expect(poisons).toHaveLength(2);
+    expect(poisons[1]?.valeur).toContain('9');
   });
 
   it('n’écrit jamais un paramètre vide ni un nombre anglais', () => {
@@ -188,13 +220,35 @@ describe('bulles du menu de construction', () => {
     );
   });
 
-  it('vendre et le ralliement n’ont pas de bulle', () => {
+  it('vendre dit ce qu’on récupère, le ralliement sa portée et quoi faire ensuite', () => {
     const e = partie();
     e.aretes = 5000;
-    appliquerAction(e, { type: 'construire', ...libre, tour: 'caserne' });
-    for (const element of elementsMenu(e, libre.cx, libre.cy).filter((x) => x.id === 'vendre' || x.id === 'ralliement')) {
-      expect(contenuElementMenu(e, libre.cx, libre.cy, element)).toBeNull();
-    }
+    const ici = casesLibres(e).find((c) => validerAction(e, { type: 'construire', ...c, tour: 'caserne' }) === null);
+    if (!ici) throw new Error('aucune case pour une caserne');
+    appliquerAction(e, { type: 'construire', ...ici, tour: 'caserne' });
+    const elements = elementsMenu(e, ici.cx, ici.cy);
+    const vendre = elements.find((x) => x.id === 'vendre');
+    const ralliement = elements.find((x) => x.id === 'ralliement');
+    if (!vendre || !ralliement) throw new Error('vendre ou ralliement absent');
+    const rendu = valeurRevente(e, ici.cx, ici.cy);
+    expect(rendu).toBeGreaterThan(1);
+    expect(valeur(contenuElementMenu(e, ici.cx, ici.cy, vendre), t('bulle.vendre.rendu'))).toBe(t('bulle.aretes', { n: rendu }));
+    const contenu = contenuElementMenu(e, ici.cx, ici.cy, ralliement);
+    expect(valeur(contenu, t('bulle.tour.portee_ralliement'))).toBe(cases(TOURS.caserne.niveaux[0].portee));
+    expect(contenu?.notes).toContain(t('bulle.ralliement.note'));
+  });
+
+  it('un bouton refusé dit pourquoi, et plus rien quand il redevient permis', () => {
+    const e = partie();
+    e.aretes = 0;
+    const tir = elementsMenu(e, libre.cx, libre.cy).find((x) => x.id === 'construire:tir');
+    expect(tir?.refus).toBe('aretes_insuffisantes');
+    if (!tir) throw new Error('pas de tir');
+    expect(contenuElementMenu(e, libre.cx, libre.cy, tir)?.notes).toContain(texteRefus('aretes_insuffisantes'));
+    e.aretes = 5000;
+    const permis = elementsMenu(e, libre.cx, libre.cy).find((x) => x.id === 'construire:tir');
+    if (!permis) throw new Error('pas de tir');
+    expect(contenuElementMenu(e, libre.cx, libre.cy, permis)?.notes).not.toContain(texteRefus('aretes_insuffisantes'));
   });
 });
 
@@ -207,9 +261,15 @@ describe('bulle d’un ennemi', () => {
     expect(valeur(contenu, t('bulle.pv'))).toBe(String(def.pv));
     expect(valeur(contenu, t('bulle.ennemi.armure'))).toBe(t('bulle.ennemi.armure_valeur', { n: Math.round(def.armure * 100) }));
     expect(valeur(contenu, t('bulle.ennemi.resistance'))).toBe(t('bulle.ennemi.resistance_valeur', { n: Math.round(def.resistance * 100) }));
-    expect(valeur(contenu, t('bulle.ennemi.vitesse'))).toBe(t('bulle.ennemi.vitesse_valeur', { n: nombre(def.vitesse) }));
+    expect(valeur(contenu, t('bulle.ennemi.vitesse'))).toBe(t('bulle.ennemi.vitesse_valeur', { n: cases(def.vitesse) }));
     expect(contenu.notes).toContain(t('bulle.ennemi.inarretable'));
     expect(contenu.texte).toBe(tCle('ennemi.boucher_vaudrelle.desc'));
+  });
+
+  it('hors partie, les PV suivent la difficulté donnée (fiche d’un niveau)', () => {
+    for (const d of ['chaton', 'matou', 'vieux_sage'] as const) {
+      expect(valeur(contenuEnnemiDeDonnees('boucher_vaudrelle', d), t('bulle.pv'))).toBe(String(Math.round(ENNEMIS.boucher_vaudrelle.pv * DIFFICULTES[d].pvEnnemis)));
+    }
   });
 
   it('dit « aucune » sans armure et nomme les particularités (volant, furtif, soigneur)', () => {
@@ -228,7 +288,7 @@ describe('bulle d’un ennemi', () => {
     const contenu = contenuEnnemi(e);
     expect(valeur(contenu, t('bulle.pv'))).toBe(t('bulle.pv_valeur', { n: Math.round(e.pv), m: Math.round(e.pvMax) }));
     expect(contenu.notes).toContain(t('bulle.ennemi.elite'));
-    expect(valeur(contenu, t('bulle.ennemi.vitesse'))).toBe(t('bulle.ennemi.vitesse_valeur', { n: nombre(ENNEMIS.paysan_affame.vitesse) }));
+    expect(valeur(contenu, t('bulle.ennemi.vitesse'))).toBe(t('bulle.ennemi.vitesse_valeur', { n: cases(ENNEMIS.paysan_affame.vitesse) }));
   });
 
   it('trouve l’ennemi vivant le plus proche du point touché, dans le rayon', () => {

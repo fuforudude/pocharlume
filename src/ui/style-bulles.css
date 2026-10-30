@@ -8,7 +8,7 @@
   z-index: 1000;
   box-sizing: border-box;
   max-width: 320px;
-  overflow: hidden;
+  overflow-y: auto;
   padding: 7px 9px;
   background: rgba(16, 12, 14, 0.96);
   border: 2px solid var(--bord-clair);

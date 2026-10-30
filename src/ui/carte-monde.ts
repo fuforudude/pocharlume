@@ -35,7 +35,7 @@ import {
   type DeplacementRegion,
   type VueNoeud,
 } from './carte-monde-logique';
-import { attacherBulleEnnemi } from './bulle';
+import { attacherBulleEnnemi, fermerBulle } from './bulle';
 import { bossDuNiveau } from './bulle-contenus';
 import { bouton, el, image } from './dom';
 import { afficherConfirmation } from './ecrans';
@@ -318,6 +318,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   // --- Fiche d'un niveau ---
 
   const fermerFiche = (): void => {
+    fermerBulle();
     controleurFiche?.abort();
     controleurFiche = null;
     fiche?.remove();
@@ -360,18 +361,18 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     const droite = el('div', 'fiche-colonne');
     const entete = el('div', 'fiche-entete');
     entete.append(el('span', 'fiche-numero', t('accueil.niveau', { n: vue.numero })));
+    controleurFiche = new AbortController();
+    const signalFiche = AbortSignal.any([signal, controleurFiche.signal]);
     if (vue.boss) {
-      // Le boss annoncé se décrit au survol ou à l'appui long.
+      // Le boss annoncé se décrit au survol ou à l'appui long, avec les PV de la difficulté cochée (Matou en défi).
       const etiquette = el('span', 'etiquette-boss', t('fiche.boss'));
       const boss = bossDuNiveau(niveau.niveau);
-      if (boss) attacherBulleEnnemi(etiquette, boss, signal);
+      if (boss) attacherBulleEnnemi(etiquette, boss, { signal: signalFiche, difficulte: () => (mode === 'normal' ? difficulte : 'matou') });
       entete.append(etiquette);
     }
     if (niveau.horde) entete.append(el('span', 'etiquette-horde', t('fiche.horde')));
     gauche.append(entete, el('h2', 'titre', textes.nom), el('p', 'ambiance', textes.ambiance));
     if (niveau.horde) gauche.append(el('p', 'horde-aide', t('fiche.horde_aide')));
-    controleurFiche = new AbortController();
-    const signalFiche = AbortSignal.any([signal, controleurFiche.signal]);
     const choisir = creerChoixFiche(atlas, session, signalFiche);
     droite.append(choisir.racine);
 
@@ -605,6 +606,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     arretee = true;
     cancelAnimationFrame(identifiantImage);
     controleur.abort();
+    fermerBulle();
     retirerEcouteur?.();
     racine.remove();
   }

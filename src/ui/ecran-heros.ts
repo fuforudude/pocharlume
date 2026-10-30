@@ -221,7 +221,10 @@ export function afficherEcranHeros(parent: HTMLElement, options: OptionsEcranHer
         entete.append(plus);
       }
       carte.append(entete, el('p', 'desc', tCle(c.description)));
-      // Ce que la compétence donne au rang actuel et au suivant, au survol ou à l'appui long.
+      // Ce que la compétence donne au rang actuel et au suivant, au survol ou à l'appui long (et au clavier : la carte est
+      // un groupe nommé qui prend le focus).
+      carte.setAttribute('role', 'group');
+      carte.setAttribute('aria-label', tCle(c.nom));
       const decrit = heros;
       attacherBulle(carte, () => contenuCompetenceHeros(decrit, i, comp.rang, comp.verrouillee));
       grille.append(carte);

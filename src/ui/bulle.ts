@@ -88,10 +88,17 @@ interface Ouverture {
 }
 
 let compteur = 0;
-/** Dernière entrée du joueur : le clavier (le focus ouvre alors la bulle) ou un pointeur (le focus vient d'un clic). */
+/** Dernière entrée du joueur : la navigation au clavier (le focus ouvre alors la bulle) ou un pointeur (le focus vient d'un clic). */
 let entreeClavier = false;
 /** Le clic qui suit un appui long est avalé : l'appui long ne déclenche jamais l'action de l'élément. */
 let avalerClic = false;
+/** Vrai pendant qu'on retire le focus à l'élément d'un appui long : sa bulle reste ouverte. */
+let garderAuBlur = false;
+
+/** Touches de navigation : seules elles font ouvrir la bulle au focus (Entrée ou une touche de jeu n'en sont pas). */
+function estNavigation(touche: string): boolean {
+  return touche === 'Tab' || touche.startsWith('Arrow');
+}
 
 class BulleFlottante {
   readonly noeud: HTMLElement;
@@ -99,6 +106,10 @@ class BulleFlottante {
   private signature = '';
   private minuteur = 0;
   private descriptionAvant: string | null = null;
+  /** Ancre du dernier placement : la bulle est replacée quand l'élément décrit bouge (ennemi qui marche, zoom). */
+  private ancrePlacee: Rectangle | null = null;
+  /** Zones sûres lues une fois, relues quand l'écran change de taille. */
+  private zones: Marges | null = null;
 
   constructor() {
     this.noeud = el('div', 'bulle');
@@ -116,11 +127,27 @@ class BulleFlottante {
       avalerClic = false;
       e.preventDefault();
       e.stopImmediatePropagation();
+      // L'élément touché ne garde pas le focus (comme après un clic du HUD) : Espace ne le réactiverait pas.
+      const actif = document.activeElement;
+      if (actif instanceof HTMLElement && e.target instanceof Node && actif.contains(e.target)) {
+        garderAuBlur = true;
+        try {
+          actif.blur();
+        } finally {
+          garderAuBlur = false;
+        }
+      }
     }, true);
     document.addEventListener('keydown', (e) => {
+      avalerClic = false;
       if (e.key === 'Escape') this.fermer();
-      else entreeClavier = true;
+      else if (estNavigation(e.key)) entreeClavier = true;
     }, true);
+    const oublierZones = (): void => {
+      this.zones = null;
+    };
+    window.addEventListener('resize', oublierZones);
+    window.addEventListener('orientationchange', oublierZones);
   }
 
   estA(jeton: object): boolean {
@@ -151,6 +178,7 @@ class BulleFlottante {
     window.clearInterval(this.minuteur);
     this.minuteur = 0;
     this.signature = '';
+    this.ancrePlacee = null;
     this.noeud.hidden = true;
     this.noeud.replaceChildren();
     if (ouverture.decrit) {
@@ -172,7 +200,12 @@ class BulleFlottante {
 
   private afficher(contenu: ContenuBulle): void {
     const signature = JSON.stringify(contenu);
-    if (signature === this.signature) return;
+    if (signature === this.signature) {
+      const ancre = this.ouverture?.ancre();
+      const avant = this.ancrePlacee;
+      if (ancre && avant && Math.max(Math.abs(ancre.left - avant.left), Math.abs(ancre.top - avant.top)) > 0.5) this.placer();
+      return;
+    }
     this.signature = signature;
     const enfants: HTMLElement[] = [el('strong', 'bulle-titre', contenu.titre)];
     if (contenu.sousTitre) enfants.push(el('span', 'bulle-sous-titre', contenu.sousTitre));
@@ -197,8 +230,10 @@ class BulleFlottante {
     const ouverture = this.ouverture;
     if (!ouverture) return;
     const ecran = { largeur: window.innerWidth, hauteur: window.innerHeight };
-    const zones = lireZonesSures(document.body);
+    this.zones ??= lireZonesSures(document.body);
+    const zones = this.zones;
     const ancre = ouverture.ancre();
+    this.ancrePlacee = { left: ancre.left, top: ancre.top, right: ancre.right, bottom: ancre.bottom };
     const bornes = placerBulle(ancre, { largeur: 0, hauteur: 0 }, ecran, zones);
     const style = this.noeud.style;
     style.maxWidth = `${String(Math.min(ecran.hauteur < HAUTEUR_ECRAN_BAS ? LARGEUR_MAX_ECRAN_BAS : LARGEUR_MAX, bornes.largeurMax))}px`;
@@ -284,21 +319,33 @@ function prendLeFocus(element: HTMLElement): boolean {
   return element instanceof HTMLButtonElement || element instanceof HTMLAnchorElement || element instanceof HTMLInputElement || element.hasAttribute('tabindex');
 }
 
+export interface OptionsBulle {
+  /** Retire tous les écouteurs (et ferme la bulle) quand il est annulé. */
+  readonly signal?: AbortSignal;
+  /**
+   * Faux pour un élément décoratif (une icône dans une carte) : il ne devient pas une étape du clavier. Vrai par défaut :
+   * un élément qui ne prenait pas le focus reçoit `tabindex="0"`, pour que la bulle s'ouvre aussi au clavier.
+   */
+  readonly focus?: boolean;
+}
+
 /**
  * Donne une bulle à un élément : `fabriquer` rend son contenu (lu à l'ouverture puis relu tant qu'elle est ouverte), ou
- * null s'il n'a rien à dire. L'élément perd son `title` (la bulle le remplace) et prend le focus s'il ne le prenait pas.
- * Tout est retiré quand `signal` est annulé.
+ * null s'il n'a rien à dire. L'élément perd son `title` (la bulle le remplace). Un appui long n'exécute jamais son
+ * action, même quand il n'a rien à dire.
  */
-export function attacherBulle(element: HTMLElement, fabriquer: () => ContenuBulle | null, signal?: AbortSignal): void {
+export function attacherBulle(element: HTMLElement, fabriquer: () => ContenuBulle | null, options: OptionsBulle = {}): void {
+  const { signal } = options;
   if (signal?.aborted) return;
   // Crée la bulle tout de suite : ses écouteurs (clavier, toucher suivant, clic à avaler) doivent voir la première entrée.
   bulle();
   const jeton = {};
-  const options = signal ? { signal } : undefined;
+  const ecoute = signal ? { signal } : undefined;
   element.removeAttribute('title');
-  if (!prendLeFocus(element)) element.tabIndex = 0;
-  element.classList.add('a-bulle');
+  if (options.focus !== false && !prendLeFocus(element)) element.tabIndex = 0;
   let minuteur = 0;
+  /** L'appui long en cours a atteint son délai : le menu contextuel et le clic qui suivent sont pour lui. */
+  let appuiAtteint = false;
   const annulerSurvol = (): void => {
     window.clearTimeout(minuteur);
     minuteur = 0;
@@ -306,7 +353,10 @@ export function attacherBulle(element: HTMLElement, fabriquer: () => ContenuBull
   const ouvrir = (mode: ModeOuverture): boolean =>
     element.isConnected && bulle().ouvrir({ jeton, proprietaire: element, decrit: true, ancre: () => element.getBoundingClientRect(), fabriquer, mode });
   const appui = new AppuiLong(() => {
-    if (ouvrir('toucher')) avalerClic = true;
+    // Le clic qui suit est avalé même sans bulle (iOS l'envoie après l'appui long) : un appui long n'agit jamais.
+    appuiAtteint = true;
+    avalerClic = true;
+    ouvrir('toucher');
   });
 
   element.addEventListener('pointerenter', (e) => {
@@ -316,13 +366,14 @@ export function attacherBulle(element: HTMLElement, fabriquer: () => ContenuBull
       minuteur = 0;
       ouvrir('souris');
     }, DELAI_SURVOL_MS);
-  }, options);
+  }, ecoute);
   element.addEventListener('pointerleave', (e) => {
     if (e.pointerType !== 'mouse') return;
     annulerSurvol();
     bulle().fermer(jeton);
-  }, options);
+  }, ecoute);
   element.addEventListener('pointerdown', (e) => {
+    appuiAtteint = false;
     if (e.pointerType === 'mouse') {
       // Un clic garde son effet et referme la bulle : son contenu (prix, niveau) va sans doute changer.
       annulerSurvol();
@@ -330,18 +381,20 @@ export function attacherBulle(element: HTMLElement, fabriquer: () => ContenuBull
       return;
     }
     appui.appuyer(e.pointerId, e.clientX, e.clientY);
-  }, options);
-  element.addEventListener('pointermove', (e) => { appui.bouger(e.pointerId, e.clientX, e.clientY); }, options);
-  element.addEventListener('pointerup', (e) => { appui.relacher(e.pointerId); }, options);
-  element.addEventListener('pointercancel', (e) => { appui.relacher(e.pointerId); }, options);
+  }, ecoute);
+  element.addEventListener('pointermove', (e) => { appui.bouger(e.pointerId, e.clientX, e.clientY); }, ecoute);
+  element.addEventListener('pointerup', (e) => { appui.relacher(e.pointerId); }, ecoute);
+  element.addEventListener('pointercancel', (e) => { appui.relacher(e.pointerId); }, ecoute);
   // Au doigt, l'appui long ouvrirait aussi le menu du système (Android) : la bulle le remplace.
   element.addEventListener('contextmenu', (e) => {
-    if (appui.enCours || bulle().estA(jeton)) e.preventDefault();
-  }, options);
+    if (appui.enCours || appuiAtteint) e.preventDefault();
+  }, ecoute);
   element.addEventListener('focus', () => {
     if (entreeClavier) ouvrir('clavier');
-  }, options);
-  element.addEventListener('blur', () => { bulle().fermer(jeton); }, options);
+  }, ecoute);
+  element.addEventListener('blur', () => {
+    if (!garderAuBlur) bulle().fermer(jeton);
+  }, ecoute);
   signal?.addEventListener('abort', () => {
     annulerSurvol();
     appui.oublier();
@@ -350,13 +403,17 @@ export function attacherBulle(element: HTMLElement, fabriquer: () => ContenuBull
 }
 
 /** Bulle d'une tour décrite par les données (collection, fiche d'un niveau, nouvelles découvertes). */
-export function attacherBulleTour(element: HTMLElement, famille: IdFamille | 'divine', choix: ChoixTour = {}, signal?: AbortSignal): void {
-  attacherBulle(element, () => contenuTourDeDonnees(famille, choix), signal);
+export function attacherBulleTour(element: HTMLElement, famille: IdFamille | 'divine', choix: ChoixTour = {}, options: OptionsBulle = {}): void {
+  attacherBulle(element, () => contenuTourDeDonnees(famille, choix), options);
 }
 
-/** Bulle d'un ennemi décrit par les données (id de src/data/ennemis.ts). */
-export function attacherBulleEnnemi(element: HTMLElement, id: string, signal?: AbortSignal): void {
-  attacherBulle(element, () => contenuEnnemiDeDonnees(id), signal);
+/**
+ * Bulle d'un ennemi décrit par les données (id de src/data/ennemis.ts). `difficulte` (relue à chaque lecture de la bulle)
+ * ajuste ses PV comme en partie ; absente, ce sont ceux des données.
+ */
+export function attacherBulleEnnemi(element: HTMLElement, id: string, options: OptionsBulle & { readonly difficulte?: () => string } = {}): void {
+  const { difficulte } = options;
+  attacherBulle(element, () => contenuEnnemiDeDonnees(id, difficulte?.()), options);
 }
 
 const FAMILLES_BULLE: readonly string[] = ['caserne', 'tir', 'magie', 'artillerie'];
@@ -366,15 +423,15 @@ const DIEUX_BULLE: readonly string[] = ['plume', 'charlie', 'pollen'];
  * Donne leur bulle à tous les éléments de `racine` qui portent `data-bulle-tour` (« tir », « tir:2 », « tir:4:B »,
  * « divine:charlie ») ou `data-bulle-ennemi` (id de l'ennemi). Une valeur inconnue est ignorée.
  */
-export function brancherBulles(racine: ParentNode, signal?: AbortSignal): void {
+export function brancherBulles(racine: ParentNode, options: OptionsBulle = {}): void {
   for (const element of racine.querySelectorAll<HTMLElement>('[data-bulle-tour]')) {
     const [famille = '', second = '', voie = ''] = (element.dataset.bulleTour ?? '').split(':');
     if (famille === 'divine' && DIEUX_BULLE.includes(second)) {
-      attacherBulleTour(element, 'divine', { dieu: second as IdDieu }, signal);
+      attacherBulleTour(element, 'divine', { dieu: second as IdDieu }, options);
     } else if (FAMILLES_BULLE.includes(famille)) {
       const niveau = Number(second || '1');
       if (![1, 2, 3, 4].includes(niveau) || (niveau === 4 && voie !== 'A' && voie !== 'B')) continue;
-      attacherBulleTour(element, famille as IdFamille, { niveau: niveau as 1 | 2 | 3 | 4, ...(niveau === 4 ? { voie: voie as Voie } : {}) }, signal);
+      attacherBulleTour(element, famille as IdFamille, { niveau: niveau as 1 | 2 | 3 | 4, ...(niveau === 4 ? { voie: voie as Voie } : {}) }, options);
     }
   }
   for (const element of racine.querySelectorAll<HTMLElement>('[data-bulle-ennemi]')) {
@@ -384,7 +441,7 @@ export function brancherBulles(racine: ParentNode, signal?: AbortSignal): void {
     } catch {
       continue;
     }
-    attacherBulleEnnemi(element, id, signal);
+    attacherBulleEnnemi(element, id, options);
   }
 }
 
@@ -412,14 +469,16 @@ export class BulleSurCarte {
   private minuteur = 0;
   private readonly appui: AppuiLong;
   private chercher: () => CibleCarte | null = () => null;
-  private surPris: (id: number) => void = () => undefined;
+  private surAppuiLong: (id: number) => void = () => undefined;
 
   /** `racine` : l'élément de la partie (la bulle se ferme s'il quitte la page). */
   constructor(private readonly racine: HTMLElement) {
     bulle();
     this.appui = new AppuiLong((id) => {
+      // Un appui long atteint ne finit jamais en toucher, qu'il y ait une cible ou non.
+      this.surAppuiLong(id);
       const cible = this.chercher();
-      if (cible && this.ouvrir(cible, 'toucher')) this.surPris(id);
+      if (cible) this.ouvrir(cible, 'toucher');
     });
   }
 
@@ -430,7 +489,8 @@ export class BulleSurCarte {
   /** La souris est au-dessus de `cible` (identifiée par `cle`, l'id d'un ennemi), ou de rien (null). */
   survoler(cible: CibleCarteSurvolee | null): void {
     const cle = cible?.cle ?? null;
-    if (cle === this.cleSurvol) return;
+    // La même cible : rien à refaire, sauf si sa bulle s'est refermée d'elle-même (cible sortie de sous la souris).
+    if (cle === this.cleSurvol && (cle === null || this.minuteur !== 0 || bulle().estA(this.jeton))) return;
     this.cleSurvol = cle;
     window.clearTimeout(this.minuteur);
     this.minuteur = 0;
@@ -443,12 +503,12 @@ export class BulleSurCarte {
   }
 
   /**
-   * Un doigt se pose en (x, y). Au bout de l'appui long, `chercher` dit ce qu'il y a dessous : s'il y a quelque chose,
-   * la bulle s'ouvre et `surPris(id)` prévient la partie, qui abandonne le geste (pas de toucher au relâché).
+   * Un doigt se pose en (x, y). Au bout de l'appui long, `surAppuiLong(id)` prévient la partie, qui abandonne le geste
+   * (pas de toucher au relâché), puis `chercher` dit ce qu'il faut décrire : s'il y a quelque chose, la bulle s'ouvre.
    */
-  appuyer(id: number, x: number, y: number, chercher: () => CibleCarte | null, surPris: (id: number) => void): void {
+  appuyer(id: number, x: number, y: number, chercher: () => CibleCarte | null, surAppuiLong: (id: number) => void): void {
     this.chercher = chercher;
-    this.surPris = surPris;
+    this.surAppuiLong = surAppuiLong;
     this.appui.appuyer(id, x, y);
   }
 

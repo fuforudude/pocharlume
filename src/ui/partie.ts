@@ -17,7 +17,7 @@ import type { BilanPartie, RaisonFin } from '../save';
 import { ECART_MAX_MS, PasFixes } from '../render/pas-fixes';
 import { Rendu, Surbrillance } from '../render/rendu';
 import { apparenceDeLaPartie, type Equipes } from './apparence';
-import { BulleSurCarte, type CibleCarteSurvolee } from './bulle';
+import { BulleSurCarte, fermerBulle, type CibleCarteSurvolee } from './bulle';
 import { contenuElementMenu, contenuEnnemi, contenuHerosEnPartie, ennemiSous } from './bulle-contenus';
 import { commandeClavier, type Commande } from './clavier';
 import { afficherFin, creerAvisPaysage, creerPause } from './ecrans';
@@ -354,10 +354,17 @@ export async function lancerNiveau(
   });
   // Bulle d'un ennemi : survol à la souris, appui long au doigt ; la partie continue dessous.
   const bulleCarte = new BulleSurCarte(racine);
-  const ennemiPointe = (x: number, y: number): CibleCarteSurvolee | null => {
-    const rayon = Math.max(RAYON_TOUCHE_MIN_TUILES, RAYON_TOUCHE_CSS / rendu.pixelsCssParTuile);
-    const ennemi = ennemiSous(etat, rendu.enTuilesX(x), rendu.enTuilesY(y), rayon);
+  /** Dernière position de la souris sur le canvas (pixels CSS) : une souris immobile peut voir l'ennemi s'éloigner. */
+  let sourisX = Number.NaN;
+  let sourisY = Number.NaN;
+  /** Type du dernier pointeur posé sur le canvas : le menu contextuel qui suit vient de la souris ou d'un appui long. */
+  let dernierPointeur = '';
+  const rayonToucheTuiles = (): number => Math.max(RAYON_TOUCHE_MIN_TUILES, RAYON_TOUCHE_CSS / rendu.pixelsCssParTuile);
+  /** `souris` : la bulle se ferme quand l'ennemi n'est plus sous la souris (survol) ; au doigt, elle reste jusqu'au toucher suivant. */
+  const ennemiPointe = (x: number, y: number, souris: boolean): CibleCarteSurvolee | null => {
+    const ennemi = ennemiSous(etat, rendu.enTuilesX(x), rendu.enTuilesY(y), rayonToucheTuiles());
     if (!ennemi) return null;
+    const sousLaSouris = (): boolean => ennemiSous(etat, rendu.enTuilesX(sourisX), rendu.enTuilesY(sourisY), rayonToucheTuiles()) === ennemi;
     return {
       cle: ennemi.id,
       ancre: () => {
@@ -366,10 +373,11 @@ export async function lancerNiveau(
         const ey = rendu.enCssY(ennemi.y - 0.5);
         return { left: ex - demi, top: ey - demi, right: ex + demi, bottom: ey + demi };
       },
-      fabriquer: () => (ennemi.vivant && etat.ennemis.includes(ennemi) ? contenuEnnemi(ennemi) : null),
+      fabriquer: () => (ennemi.vivant && etat.ennemis.includes(ennemi) && (!souris || sousLaSouris()) ? contenuEnnemi(ennemi) : null),
     };
   };
   canvas.addEventListener('pointerdown', (e) => {
+    dernierPointeur = e.pointerType;
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     canvas.setPointerCapture(e.pointerId);
     enGlissement = false;
@@ -378,8 +386,10 @@ export async function lancerNiveau(
     if (e.pointerType !== 'mouse') {
       const x = e.clientX;
       const y = e.clientY;
-      // Appui long sur un ennemi : sa bulle s'ouvre et le geste s'arrête là (ni menu ni ordre au relâché).
-      bulleCarte.appuyer(e.pointerId, x, y, () => ennemiPointe(x, y), (id) => {
+      // L'ennemi désigné est celui sous le doigt à l'appui : un ennemi rapide a pu s'éloigner au bout de l'appui long.
+      const designe = ennemiPointe(x, y, false);
+      // Appui long : le geste s'arrête là (ni menu ni ordre au relâché), et la bulle de l'ennemi s'ouvre s'il y en a un.
+      bulleCarte.appuyer(e.pointerId, x, y, () => (designe?.fabriquer() ? designe : ennemiPointe(x, y, false)), (id) => {
         gestes.annuler(id);
         interaction.cesserDeViser();
       });
@@ -388,8 +398,13 @@ export async function lancerNiveau(
   canvas.addEventListener('pointermove', (e) => {
     if (e.pointerType !== 'mouse' || e.buttons !== 0) pointeurSurTuiles(e.clientX, e.clientY);
     gestes.bouger(e.pointerId, e.clientX, e.clientY);
-    if (e.pointerType === 'mouse' && e.buttons === 0) bulleCarte.survoler(ennemiPointe(e.clientX, e.clientY));
-    else bulleCarte.bouger(e.pointerId, e.clientX, e.clientY);
+    if (e.pointerType === 'mouse' && e.buttons === 0) {
+      sourisX = e.clientX;
+      sourisY = e.clientY;
+      bulleCarte.survoler(ecranFinAffiche ? null : ennemiPointe(e.clientX, e.clientY, true));
+    } else {
+      bulleCarte.bouger(e.pointerId, e.clientX, e.clientY);
+    }
   }, { signal });
   canvas.addEventListener('pointerup', (e) => {
     bulleCarte.relacher(e.pointerId);
@@ -414,7 +429,9 @@ export async function lancerNiveau(
   }, { signal, passive: false });
   canvas.addEventListener('contextmenu', (e) => {
     e.preventDefault();
-    interaction.annuler();
+    // Clic droit de la souris : annule. Chrome Android l'envoie aussi à chaque appui long du doigt : on garde alors le mode.
+    const type = e instanceof PointerEvent && e.pointerType !== '' ? e.pointerType : dernierPointeur;
+    if (type === 'mouse') interaction.annuler();
   }, { signal });
 
   const executer = (commande: Commande): void => {
@@ -500,6 +517,8 @@ export async function lancerNiveau(
   };
   const montrerEcranFin = (): void => {
     ecranFinAffiche = true;
+    bulleCarte.detruire();
+    fermerBulle();
     if (etat.statut === 'en_cours') return;
     const continuer = options.surContinuer;
     afficherFin(racine, atlas, { statut: etat.statut, etoiles: etat.etoiles, vies: etat.vies, viesDepart: etat.viesDepart, ...(options.infini ? { infini: true } : {}) }, {
@@ -626,6 +645,7 @@ export async function lancerNiveau(
     cancelAnimationFrame(identifiantImage);
     controleur.abort();
     bulleCarte.detruire();
+    fermerBulle();
     hud.detruire();
     racine.remove();
     document.body.classList.remove('en-partie');

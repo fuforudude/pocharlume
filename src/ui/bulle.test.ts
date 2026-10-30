@@ -158,6 +158,40 @@ describe('appui long au doigt', () => {
     bouton.dispatchEvent(menu);
     expect(menu.defaultPrevented).toBe(true);
   });
+
+  it('un appui long sur un élément sans contenu n’exécute pas non plus l’action (clic d’iOS avalé)', () => {
+    const vide = document.createElement('button');
+    const actionVide = vi.fn<() => void>();
+    vide.addEventListener('click', actionVide);
+    document.body.append(vide);
+    attacherBulle(vide, () => null);
+    toucher(vide, DELAI_APPUI_LONG_MS);
+    expect(bulleVisible()).toBeNull();
+    expect(actionVide).not.toHaveBeenCalled();
+    toucher(vide, 50);
+    expect(actionVide).toHaveBeenCalledTimes(1);
+  });
+
+  it('une touche du clavier après un appui long sans clic laisse passer l’activation suivante', () => {
+    pointeur(bouton, 'pointerdown', 'touch');
+    vi.advanceTimersByTime(DELAI_APPUI_LONG_MS);
+    pointeur(bouton, 'pointercancel', 'touch');
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    bouton.click();
+    expect(action).toHaveBeenCalledTimes(1);
+  });
+
+  it('l’élément ne garde pas le focus après un appui long, et la bulle reste ouverte', () => {
+    pointeur(bouton, 'pointerdown', 'touch');
+    vi.advanceTimersByTime(DELAI_APPUI_LONG_MS);
+    pointeur(bouton, 'pointerup', 'touch');
+    // Le navigateur donne le focus au bouton touché juste avant le clic.
+    bouton.focus();
+    bouton.click();
+    expect(document.activeElement).not.toBe(bouton);
+    expect(bulleVisible()).not.toBeNull();
+    expect(action).not.toHaveBeenCalled();
+  });
 });
 
 describe('accessibilité', () => {
@@ -190,11 +224,27 @@ describe('accessibilité', () => {
     expect(bulleVisible()).toBeNull();
   });
 
-  it('un élément qui ne prend pas le focus le reçoit (tabindex 0)', () => {
+  it('seuls Tab et les flèches comptent comme navigation au clavier', () => {
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', bubbles: true }));
+    pointeur(document.body, 'pointerdown', 'mouse', 0, 0, 3);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', bubbles: true }));
+    bouton.focus();
+    expect(bulleVisible()).toBeNull();
+    bouton.blur();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+    bouton.focus();
+    expect(bulleVisible()).not.toBeNull();
+  });
+
+  it('un élément qui ne prend pas le focus le reçoit (tabindex 0), sauf s’il est décoratif', () => {
     const carte = document.createElement('div');
     document.body.append(carte);
     attacherBulle(carte, () => CONTENU);
     expect(carte.tabIndex).toBe(0);
+    const icone = document.createElement('img');
+    document.body.append(icone);
+    attacherBulle(icone, () => CONTENU, { focus: false });
+    expect(icone.hasAttribute('tabindex')).toBe(false);
   });
 });
 
@@ -228,7 +278,7 @@ describe('contenu et cycle de vie', () => {
     const controleur = new AbortController();
     const autre = document.createElement('button');
     document.body.append(autre);
-    attacherBulle(autre, () => CONTENU, controleur.signal);
+    attacherBulle(autre, () => CONTENU, { signal: controleur.signal });
     pointeur(autre, 'pointerenter', 'mouse');
     vi.advanceTimersByTime(DELAI_SURVOL_MS);
     expect(bulleVisible()).not.toBeNull();
@@ -280,7 +330,35 @@ describe('bulle sur la carte (ennemis)', () => {
     carte.detruire();
   });
 
-  it('appui long : ouvre si une cible est sous le doigt et prévient l’appelant ; sinon rien', () => {
+  it('suit la cible qui bouge : la bulle est replacée à la relecture', () => {
+    const carte = new BulleSurCarte(document.body);
+    let x = 100;
+    carte.survoler({ cle: 7, ancre: () => ({ left: x, top: 300, right: x + 10, bottom: 310 }), fabriquer: () => CONTENU });
+    vi.advanceTimersByTime(DELAI_SURVOL_MS);
+    const avant = bulleVisible()?.style.left;
+    x = 400;
+    vi.advanceTimersByTime(300);
+    expect(bulleVisible()?.style.left).not.toBe(avant);
+    carte.detruire();
+  });
+
+  it('refermée d’elle-même, la même cible survolée de nouveau rouvre la bulle', () => {
+    const carte = new BulleSurCarte(document.body);
+    let dessous = true;
+    const cible = { cle: 7, ancre: () => ancre, fabriquer: () => (dessous ? CONTENU : null) };
+    carte.survoler(cible);
+    vi.advanceTimersByTime(DELAI_SURVOL_MS);
+    dessous = false;
+    vi.advanceTimersByTime(300);
+    expect(bulleVisible()).toBeNull();
+    dessous = true;
+    carte.survoler(cible);
+    vi.advanceTimersByTime(DELAI_SURVOL_MS);
+    expect(bulleVisible()).not.toBeNull();
+    carte.detruire();
+  });
+
+  it('appui long : ouvre si une cible est sous le doigt ; prévient l’appelant dans tous les cas', () => {
     const carte = new BulleSurCarte(document.body);
     const pris = vi.fn();
     carte.appuyer(1, 50, 50, () => ({ ancre: () => ancre, fabriquer: () => CONTENU }), pris);
@@ -291,10 +369,11 @@ describe('bulle sur la carte (ennemis)', () => {
     pointeur(document.body, 'pointerdown', 'touch', 0, 0, 2);
     expect(bulleVisible()).toBeNull();
 
+    // Sans cible : pas de bulle, mais l'appui long ne doit pas se finir en toucher.
     const rien = vi.fn();
     carte.appuyer(3, 50, 50, () => null, rien);
     vi.advanceTimersByTime(DELAI_APPUI_LONG_MS);
-    expect(rien).not.toHaveBeenCalled();
+    expect(rien).toHaveBeenCalledWith(3);
     expect(bulleVisible()).toBeNull();
     carte.detruire();
   });

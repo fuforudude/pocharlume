@@ -13,6 +13,7 @@ import type { Action, ConfigPartie } from '../engine';
 import { t, tCle } from '../i18n';
 import { DELAI_APPUI_LONG_MS, DELAI_SURVOL_MS, fermerBulle } from './bulle';
 import { lancerNiveau, type PartieEnCours } from './partie';
+import { texteRefus } from './refus';
 
 vi.mock('../audio', () => ({
   audio: { jouerEvenements: vi.fn() },
@@ -167,6 +168,47 @@ describe('menu de construction', () => {
     vi.advanceTimersByTime(DELAI_SURVOL_MS);
     expect(bulle()?.textContent).toContain(t('bulle.role.tir'));
   });
+
+  it('les arêtes changent pendant que la bulle est ouverte : le bouton reste, la bulle aussi, avec le nouvel état', async () => {
+    const partie = await demarrer();
+    toucher(canvas(), CENTRE.x * 16, CENTRE.y * 16, 50);
+    partie.etat.aretes = 0;
+    images(2);
+    const tir = boutonTir();
+    expect(tir.classList.contains('grise')).toBe(true);
+    tir.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+    vi.advanceTimersByTime(DELAI_SURVOL_MS);
+    expect(bulle()?.textContent).toContain(texteRefus('aretes_insuffisantes'));
+
+    partie.etat.aretes = 5000;
+    images(2);
+    vi.advanceTimersByTime(300);
+    expect(boutonTir()).toBe(tir);
+    expect(tir.classList.contains('grise')).toBe(false);
+    expect(bulle()?.textContent).toContain(tCle(TOURS.tir.niveaux[0].nom));
+    expect(bulle()?.textContent).not.toContain(texteRefus('aretes_insuffisantes'));
+    // Le bouton mis à jour envoie l'élément à jour : la tour se construit.
+    tir.click();
+    images(3);
+    expect(journal(partie, 'construire')).toBe(1);
+  });
+
+  it('un appui long en cours sur un bouton survit à la mise à jour du menu', async () => {
+    const partie = await demarrer();
+    toucher(canvas(), CENTRE.x * 16, CENTRE.y * 16, 50);
+    images(1);
+    const tir = boutonTir();
+    pointeur(tir, 'pointerdown', 'touch', 0, 0, 1);
+    partie.etat.aretes = 0;
+    images(2);
+    vi.advanceTimersByTime(DELAI_APPUI_LONG_MS);
+    pointeur(tir, 'pointerup', 'touch', 0, 0);
+    tir.click();
+    expect(bulle()).not.toBeNull();
+    partie.etat.aretes = 5000;
+    images(3);
+    expect(journal(partie, 'construire')).toBe(0);
+  });
 });
 
 describe('portrait du héros', () => {
@@ -215,5 +257,57 @@ describe('ennemis sur la carte', () => {
     expect(bulle()).toBeNull();
     images(3);
     expect(journal(partie, 'deplacerHeros')).toBe(1);
+  });
+
+  it('le menu contextuel qu’Android envoie pendant l’appui long ne remet pas le mode à « libre »', async () => {
+    const partie = await demarrer();
+    document.querySelector<HTMLButtonElement>('.bouton.portrait')?.click();
+    const e = ajouterEnnemi(partie.etat, ENNEMIS.mendiant, 'mendiant', 0, 4);
+    pointeur(canvas(), 'pointerdown', 'touch', e.x * 16, (e.y - 0.5) * 16, 1);
+    vi.advanceTimersByTime(DELAI_APPUI_LONG_MS);
+    canvas().dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+    pointeur(canvas(), 'pointerup', 'touch', e.x * 16, (e.y - 0.5) * 16);
+    expect(partie.mode.type).toBe('heros');
+    // Le clic droit de la souris, lui, annule toujours.
+    pointeur(canvas(), 'pointerdown', 'mouse', 5, 5, 2);
+    canvas().dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+    expect(partie.mode.type).toBe('libre');
+  });
+
+  it('un ennemi rapide parti de sous le doigt pendant l’appui reste celui décrit', async () => {
+    const partie = await demarrer();
+    document.querySelector<HTMLButtonElement>('.bouton.portrait')?.click();
+    const e = ajouterEnnemi(partie.etat, ENNEMIS.chien_errant, 'chien_errant', 0, 4);
+    const x = e.x * 16;
+    const y = (e.y - 0.5) * 16;
+    pointeur(canvas(), 'pointerdown', 'touch', x, y, 1);
+    images(30);
+    expect(Math.hypot(e.x * 16 - x, (e.y - 0.5) * 16 - y)).toBeGreaterThan(24);
+    vi.advanceTimersByTime(DELAI_APPUI_LONG_MS);
+    expect(bulle()?.textContent).toContain(tCle(ENNEMIS.chien_errant.nom));
+    pointeur(canvas(), 'pointerup', 'touch', x, y);
+    images(3);
+    expect(journal(partie, 'deplacerHeros')).toBe(0);
+  });
+
+  it('un appui long sur la carte vide ne finit jamais en toucher (pas d’ordre au héros)', async () => {
+    const partie = await demarrer();
+    document.querySelector<HTMLButtonElement>('.bouton.portrait')?.click();
+    toucher(canvas(), CENTRE.x * 16, CENTRE.y * 16, DELAI_APPUI_LONG_MS);
+    images(3);
+    expect(journal(partie, 'deplacerHeros')).toBe(0);
+    expect(partie.mode.type).toBe('heros');
+  });
+});
+
+describe('changements d’écran', () => {
+  it('quitter la partie ferme la bulle ouverte', async () => {
+    const partie = await demarrer();
+    const portrait = document.querySelector<HTMLButtonElement>('.bouton.portrait');
+    if (!portrait) throw new Error('portrait absent');
+    toucher(portrait, 0, 0, DELAI_APPUI_LONG_MS);
+    expect(bulle()).not.toBeNull();
+    partie.arreter();
+    expect(bulle()).toBeNull();
   });
 });

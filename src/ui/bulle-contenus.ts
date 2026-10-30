@@ -2,11 +2,12 @@
 // compétences. Logique pure, sans DOM : chaque chiffre est lu dans les données (src/data/) ou dans l'état de la partie,
 // jamais recopié dans un texte, et les tournures viennent de src/i18n (fr-bulles.ts).
 import { DIEUX, type IdDieu } from '../data/dieux';
+import { DIFFICULTES } from '../data/difficultes';
 import { ENNEMIS } from '../data/ennemis';
 import { HEROS, type IdHeros } from '../data/heros';
 import { RANG_MAX_COMPETENCE } from '../data/meta';
 import { TOURS } from '../data/tours';
-import { tourSurCase } from '../engine';
+import { tourSurCase, valeurRevente } from '../engine';
 import type {
   ActionEnnemi,
   CapacitesUnite,
@@ -28,6 +29,7 @@ import { PAS_PAR_SECONDE } from '../engine/temps';
 import { defNiveau, statsTour } from '../engine/tours';
 import { aTexte, t, tCle } from '../i18n';
 import type { ElementMenu } from './menu-cercle';
+import { texteRefus } from './refus';
 
 /** Une ligne « libellé : valeur » de la bulle. */
 export interface LigneBulle {
@@ -63,8 +65,15 @@ function pourcent(fraction: number): number {
   return Math.round(fraction * 100);
 }
 
+type CleTexte = Parameters<typeof t>[0];
+
+/** Un nombre avec son unité accordée : singulier sous 2 (« 1,5 case »), pluriel au-delà (« 3 cases »). */
+function accorde(n: number, un: CleTexte, plusieurs: CleTexte): string {
+  return t(Math.abs(n) < 2 ? un : plusieurs, { n: nombre(n) });
+}
+
 function cases(n: number): string {
-  return t('bulle.cases', { n: nombre(n) });
+  return accorde(n, 'bulle.case_un', 'bulle.cases');
 }
 
 function fourchette(degats: Fourchette): string {
@@ -99,8 +108,12 @@ class Caracs {
     if (!this.liste.some((c) => c.cle === cle)) this.liste.push({ cle, libelle, valeur });
   }
 
+  /** Chaque effet a sa ligne : deux effets du même type (celui de la tour et celui du dieu) sont tous les deux dits. */
   effets(effets: readonly EffetCoup[]): void {
-    for (const e of effets) this.ajouter(`effet:${e.type}`, t(`bulle.effet.${e.type}`), texteEffet(e));
+    for (const e of effets) {
+      const deja = this.liste.filter((c) => c.cle.startsWith(`effet:${e.type}:`)).length;
+      this.ajouter(`effet:${e.type}:${String(deja)}`, t(`bulle.effet.${e.type}`), texteEffet(e));
+    }
   }
 
   /** Pouvoirs d'une unité alliée (soldats d'une tour ou héros). */
@@ -164,13 +177,13 @@ function caracsTour(def: DefNiveauTour): Carac[] {
   if (def.critique && def.critique.chance > 0) {
     c.ajouter('critique', t('bulle.tour.critique'), t('bulle.tour.critique_valeur', { c: pourcent(def.critique.chance), m: nombre(def.critique.multiplicateur) }));
   }
-  if (def.chaine) c.ajouter('chaine', t('bulle.tour.chaine'), t('bulle.tour.chaine_valeur', { n: def.chaine.nombre, p: pourcent(def.chaine.facteur) }));
+  if (def.chaine) c.ajouter('chaine', t('bulle.tour.chaine'), t('bulle.tour.chaine_valeur', { n: accorde(def.chaine.nombre, 'bulle.ennemi_un', 'bulle.ennemis'), p: pourcent(def.chaine.facteur) }));
   if (def.ignoreArmure > 0) c.ajouter('perceArmure', t('bulle.tour.perce_armure'), t('bulle.tour.perce_armure_valeur', { n: pourcent(def.ignoreArmure) }));
   if (def.revele) c.ajouter('furtifs', t('bulle.tour.furtifs'), t('bulle.tour.furtifs_valeur'));
   if (def.onde) c.ajouter('onde', t('bulle.tour.onde'), t('bulle.tour.onde_valeur'));
   c.effets(def.effets);
   if (s) c.effets(s.effets);
-  if (def.nappe) c.ajouter('nappe', t('bulle.tour.nappe'), t('bulle.tour.nappe_valeur', { r: nombre(def.nappe.rayon), d: nombre(def.nappe.duree) }));
+  if (def.nappe) c.ajouter('nappe', t('bulle.tour.nappe'), t('bulle.tour.nappe_valeur', { r: cases(def.nappe.rayon), d: nombre(def.nappe.duree) }));
   if (def.piegeAuSol) c.ajouter('piegesSol', t('bulle.tour.pieges_sol'), t('bulle.tour.pieges_sol_valeur', { c: pourcent(def.piegeAuSol.chance) }));
   if (def.atelier) c.capacites({ ...CAPACITES_SANS_POUVOIR, ouvrage: def.atelier });
   return c.liste;
@@ -212,7 +225,8 @@ function notesCompetences(def: DefNiveauTour): string[] {
   return def.competences.length > 0 ? [t('bulle.competences_tour', { noms: def.competences.map((c) => tCle(c.nom)).join(', ') })] : [];
 }
 
-function contenuTour(def: DefNiveauTour, famille: FamilleTour, notes: readonly string[] = []): ContenuBulle {
+/** Une tour d'après ses stats (brutes ou effectives) : rôle de sa famille, caractéristiques, compétences à acheter. */
+export function contenuTour(def: DefNiveauTour, famille: FamilleTour, notes: readonly string[] = []): ContenuBulle {
   return { titre: tCle(def.nom), sousTitre: t(`bulle.role.${famille}`), lignes: lignes(caracsTour(def)), notes: [...notes, ...notesCompetences(def)], texte: null };
 }
 
@@ -235,9 +249,16 @@ export function contenuTourDeDonnees(famille: IdFamille | 'divine', choix: Choix
 
 /**
  * Bulle d'un bouton du menu en cercle de la case (cx, cy) : la tour à construire (stats effectives de la partie), ce
- * qu'une amélioration ou une compétence change, le pouvoir d'une spécialisation. Vendre et le ralliement n'en ont pas.
+ * qu'une amélioration ou une compétence change, le pouvoir d'une spécialisation, ce que rend la vente, le ralliement.
+ * Un bouton refusé dit aussi pourquoi (le même texte que le message de refus).
  */
 export function contenuElementMenu(etat: EtatPartie, cx: number, cy: number, element: ElementMenu): ContenuBulle | null {
+  const contenu = contenuSansRefus(etat, cx, cy, element);
+  if (!contenu || element.refus === null || element.refus === 'competence_au_maximum') return contenu;
+  return { ...contenu, notes: [...contenu.notes, texteRefus(element.refus)] };
+}
+
+function contenuSansRefus(etat: EtatPartie, cx: number, cy: number, element: ElementMenu): ContenuBulle | null {
   const [genre, detail] = element.id.split(':');
   if (genre === 'construire') {
     const famille = detail as FamilleTour;
@@ -269,6 +290,25 @@ export function contenuElementMenu(etat: EtatPartie, cx: number, cy: number, ele
     const avant = statsTour(etat, famille, base, tour.rangs);
     const apres = statsTour(etat, famille, base, rangs);
     return { ...entete, lignes: difference(caracsTour(avant), caracsTour(apres)), notes: [] };
+  }
+  if (genre === 'vendre') {
+    const rendu = valeurRevente(etat, cx, cy);
+    return {
+      titre: t('menu.vendre'),
+      sousTitre: tCle(tour.stats.nom),
+      lignes: [{ libelle: t('bulle.vendre.rendu'), valeur: accorde(rendu, 'bulle.arete_un', 'bulle.aretes') }],
+      notes: [t('bulle.vendre.note')],
+      texte: null,
+    };
+  }
+  if (genre === 'ralliement') {
+    return {
+      titre: t('menu.ralliement'),
+      sousTitre: tCle(tour.stats.nom),
+      lignes: [{ libelle: t('bulle.tour.portee_ralliement'), valeur: cases(tour.stats.portee) }],
+      notes: [t('bulle.ralliement.note')],
+      texte: null,
+    };
   }
   return null;
 }
@@ -310,7 +350,7 @@ function texteAction(a: ActionEnnemi): string {
     case 'plonger':
       return t('bulle.ennemi.plonger', { d: nombre(a.duree) });
     case 'figer_tour':
-      return t('bulle.ennemi.figer_tour', { n: a.nombre, d: nombre(a.duree) });
+      return t('bulle.ennemi.figer_tour', { n: accorde(a.nombre, 'bulle.tour_un', 'bulle.tours'), d: nombre(a.duree) });
     case 'aveugler':
       return t('bulle.ennemi.aveugler', { n: pourcent(a.portee), d: nombre(a.duree) });
     case 'bannir':
@@ -360,11 +400,11 @@ function contenuDeVue(v: VueEnnemi): ContenuBulle {
     { libelle: t('bulle.pv'), valeur: pv },
     { libelle: t('bulle.ennemi.armure'), valeur: protection(v.armure, 'bulle.ennemi.armure_valeur') },
     { libelle: t('bulle.ennemi.resistance'), valeur: protection(v.resistance, 'bulle.ennemi.resistance_valeur') },
-    { libelle: t('bulle.ennemi.vitesse'), valeur: t('bulle.ennemi.vitesse_valeur', { n: nombre(v.vitesse) }) },
+    { libelle: t('bulle.ennemi.vitesse'), valeur: t('bulle.ennemi.vitesse_valeur', { n: cases(v.vitesse) }) },
   ];
   if (v.degats[1] > 0) lignesEnnemi.push({ libelle: t('bulle.ennemi.coups'), valeur: fourchette(v.degats) });
   if (d.distance) {
-    lignesEnnemi.push({ libelle: t('bulle.ennemi.tir'), valeur: t('bulle.ennemi.tir_valeur', { d: texteDegats(d.distance.degats, d.distance.typeDegats), p: nombre(d.distance.portee) }) });
+    lignesEnnemi.push({ libelle: t('bulle.ennemi.tir'), valeur: t('bulle.ennemi.tir_valeur', { d: texteDegats(d.distance.degats, d.distance.typeDegats), p: cases(d.distance.portee) }) });
   }
   lignesEnnemi.push({ libelle: t('bulle.ennemi.vies'), valeur: String(v.coutVies) });
   const notes: string[] = [];
@@ -389,14 +429,16 @@ function defEnnemiDe(id: string): DefEnnemi {
   return ENNEMIS[id as keyof typeof ENNEMIS];
 }
 
-/** Un ennemi tel que le décrivent les données (fiche d'un niveau, collection). */
-export function contenuEnnemiDeDonnees(id: string): ContenuBulle {
+/** Un ennemi tel que le décrivent les données (fiche d'un niveau) ; `difficulte` ajuste ses PV comme en partie. */
+export function contenuEnnemiDeDonnees(id: string, difficulte?: string): ContenuBulle {
   const def = defEnnemiDe(id);
+  // Avec une difficulté (fiche d'un niveau), les PV sont ceux qu'il aura en partie, comme le fait `ajouterEnnemi`.
+  const facteur = difficulte !== undefined && Object.hasOwn(DIFFICULTES, difficulte) ? DIFFICULTES[difficulte as keyof typeof DIFFICULTES].pvEnnemis : 1;
   return contenuDeVue({
     id,
     def,
     pv: null,
-    pvMax: def.pv,
+    pvMax: def.pv * facteur,
     armure: def.armure,
     resistance: def.resistance,
     vitesse: def.vitesse,
@@ -480,7 +522,7 @@ export function contenuHerosEnPartie(etat: EtatPartie): ContenuBulle | null {
   if (s.resistance > 0) c.ajouter('resistance', t('bulle.ennemi.resistance'), t('bulle.ennemi.resistance_valeur', { n: pourcent(s.resistance) }));
   if (s.capacite > 1) c.ajouter('capacite', t('bulle.heros.capacite'), String(s.capacite));
   const zone: ZoneHeros | null = unite.zone;
-  if (zone) c.ajouter('zone', t('bulle.heros.zone'), t('bulle.heros.zone_valeur', { r: nombre(zone.rayon) }));
+  if (zone) c.ajouter('zone', t('bulle.heros.zone'), t('bulle.heros.zone_valeur', { r: cases(zone.rayon) }));
   c.capacites(s.capacites);
   c.effets(s.effets);
   if (zone) c.effets(zone.effets);
@@ -496,28 +538,37 @@ export function contenuHerosEnPartie(etat: EtatPartie): ContenuBulle | null {
 /** Ce qu'un rang de compétence de héros ajoute, en clair (« +4 % d'esquive, +8 % de dégâts »). */
 function texteMod(m: ModUnite): string {
   const morceaux: string[] = [];
-  const fraction = (valeur: number, cle: Parameters<typeof t>[0]): void => {
+  const fraction = (valeur: number, cle: CleTexte): void => {
     if (valeur !== 0) morceaux.push(t(cle, { n: pourcent(valeur) }));
   };
-  const brut = (valeur: number, cle: Parameters<typeof t>[0]): void => {
+  const brut = (valeur: number, cle: CleTexte): void => {
     if (valeur !== 0) morceaux.push(t(cle, { n: nombre(valeur) }));
   };
+  /** La valeur entre dans le texte déjà mise en forme (unité accordée). */
+  const avec = (valeur: number, cle: CleTexte, texte: string): void => {
+    if (valeur !== 0) morceaux.push(t(cle, { n: texte }));
+  };
+  const entier = (valeur: number, un: CleTexte, plusieurs: CleTexte): void => {
+    if (valeur !== 0) morceaux.push(accorde(valeur, un, plusieurs));
+  };
+  // Armure et soin s'ajoutent à une part (0,3 + 0,1) : ce sont des points, pas un pourcentage de la valeur actuelle.
+  const points = (valeur: number): string => accorde(pourcent(valeur), 'bulle.point_un', 'bulle.points');
   fraction(m.pv, 'bulle.mod.pv');
   fraction(m.degats, 'bulle.mod.degats');
   fraction(m.cadence, 'bulle.mod.cadence');
-  fraction(m.armure, 'bulle.mod.armure');
+  avec(m.armure, 'bulle.mod.armure', points(m.armure));
   fraction(m.vitesse, 'bulle.mod.vitesse');
-  brut(m.portee, 'bulle.mod.portee');
-  brut(m.capacite, 'bulle.mod.capacite');
+  avec(m.portee, 'bulle.mod.portee', cases(m.portee));
+  entier(m.capacite, 'bulle.mod.capacite_un', 'bulle.mod.capacite');
   fraction(m.esquive, 'bulle.mod.esquive');
   fraction(m.execution, 'bulle.mod.execution');
   fraction(m.ignoreArmure, 'bulle.mod.ignore_armure');
   fraction(m.critique, 'bulle.mod.critique');
   brut(m.regeneration, 'bulle.mod.regeneration');
   fraction(m.rage, 'bulle.mod.rage');
-  brut(m.zone, 'bulle.mod.zone');
-  fraction(m.soin, 'bulle.mod.soin');
-  brut(m.nombreOuvrages, 'bulle.mod.nombre_ouvrages');
+  avec(m.zone, 'bulle.mod.zone', cases(m.zone));
+  avec(m.soin, 'bulle.mod.soin', points(m.soin));
+  entier(m.nombreOuvrages, 'bulle.mod.nombre_ouvrages_un', 'bulle.mod.nombre_ouvrages');
   fraction(m.cadenceOuvrages, 'bulle.mod.cadence_ouvrages');
   fraction(m.degatsOuvrages, 'bulle.mod.degats_ouvrages');
   return morceaux.join(', ');
