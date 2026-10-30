@@ -221,6 +221,14 @@ function lignes(caracs: readonly Carac[]): LigneBulle[] {
   return caracs.map(({ libelle, valeur }) => ({ libelle, valeur }));
 }
 
+/** Caractéristiques communes à toutes les tours (dégâts, cadence, portée, soldats de base) : ce qui n'est pas un pouvoir. */
+const CARACS_DE_BASE: ReadonlySet<string> = new Set(['degats', 'cadence', 'portee', 'volants', 'soldats', 'pvSoldats', 'degatsSoldats', 'cadenceSoldats', 'zone']);
+
+/** Les pouvoirs d'une tour (furtifs, spectres, chaîne, effets, critique…), d'après ses stats : tout sauf ses caractéristiques de base. */
+export function pouvoirsTour(def: DefNiveauTour): LigneBulle[] {
+  return lignes(caracsTour(def).filter((c) => !CARACS_DE_BASE.has(c.cle)));
+}
+
 function notesCompetences(def: DefNiveauTour): string[] {
   return def.competences.length > 0 ? [t('bulle.competences_tour', { noms: def.competences.map((c) => tCle(c.nom)).join(', ') })] : [];
 }
@@ -255,7 +263,7 @@ export function contenuTourDeDonnees(famille: IdFamille | 'divine', choix: Choix
 export function contenuElementMenu(etat: EtatPartie, cx: number, cy: number, element: ElementMenu): ContenuBulle | null {
   const contenu = contenuSansRefus(etat, cx, cy, element);
   if (!contenu || element.refus === null || element.refus === 'competence_au_maximum') return contenu;
-  return { ...contenu, notes: [...contenu.notes, texteRefus(element.refus)] };
+  return { ...contenu, notes: [...contenu.notes, texteRefus(element.refus, element.deblocage)] };
 }
 
 function contenuSansRefus(etat: EtatPartie, cx: number, cy: number, element: ElementMenu): ContenuBulle | null {

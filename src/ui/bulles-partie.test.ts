@@ -193,6 +193,24 @@ describe('menu de construction', () => {
     expect(journal(partie, 'construire')).toBe(1);
   });
 
+  it('niveau 1 : la tour divine est verrouillée (cadenas, pastille du niveau 10, pas de prix) et sa bulle dit où elle s’ouvre', async () => {
+    const partie = await demarrer();
+    toucher(canvas(), CENTRE.x * 16, CENTRE.y * 16, 50);
+    images(1);
+    const divine = document.querySelector<HTMLButtonElement>('.element-menu.verrouille');
+    if (!divine) throw new Error('bouton verrouillé absent');
+    expect(document.querySelectorAll('.element-menu.verrouille')).toHaveLength(1);
+    expect(divine.querySelector('img.cadenas')).not.toBeNull();
+    expect(divine.querySelector('.pastille-niveau')?.textContent).toBe('10');
+    expect(divine.querySelector('.prix')).toBeNull();
+    expect(divine.getAttribute('aria-label')).toContain(t('menu.non_debloque', { nom: '', n: 10 }).trim());
+    toucher(divine, 0, 0, DELAI_APPUI_LONG_MS);
+    expect(bulle()?.textContent).toContain(texteRefus('non_debloque', 10));
+    expect(bulle()?.textContent).not.toContain(texteRefus('non_debloque'));
+    images(3);
+    expect(journal(partie, 'construire')).toBe(0);
+  });
+
   it('un appui long en cours sur un bouton survit à la mise à jour du menu', async () => {
     const partie = await demarrer();
     toucher(canvas(), CENTRE.x * 16, CENTRE.y * 16, 50);

@@ -39,6 +39,8 @@ export interface ChoixFiche {
    * (il revient en quittant le défi).
    */
   definirDefi(enDefi: boolean): void;
+  /** Prévient quand le dieu choisi change (choix du joueur, ou retour à l'ancien après un refus). */
+  surDieu(ecouteur: (dieu: IdDieu) => void): void;
 }
 
 function icone(atlas: AtlasRendu, nom: string, echelle: number, classe = 'icone'): HTMLImageElement {
@@ -51,6 +53,8 @@ export function creerChoixFiche(atlas: AtlasRendu, session: SessionChoix, signal
   let choix = choixJouable(session.sauvegarde);
   let message = '';
   let enDefi = false;
+  let dieuPrevenu = choix.dieu;
+  const ecouteursDieu: ((dieu: IdDieu) => void)[] = [];
 
   const dire = (texte: string, cleFocus?: string): void => {
     message = texte;
@@ -223,6 +227,10 @@ export function creerChoixFiche(atlas: AtlasRendu, session: SessionChoix, signal
     const msg = el('p', 'choix-message', message);
     msg.setAttribute('role', 'status');
     racine.replaceChildren(sectionDieu(), sectionHeros(), sectionObjets(), msg);
+    if (choix.dieu !== dieuPrevenu) {
+      dieuPrevenu = choix.dieu;
+      for (const ecouteur of ecouteursDieu) ecouteur(choix.dieu);
+    }
     if (actif && racine.isConnected) {
       for (const b of racine.querySelectorAll<HTMLElement>('button')) {
         if (b.dataset.cle === actif) {
@@ -241,6 +249,9 @@ export function creerChoixFiche(atlas: AtlasRendu, session: SessionChoix, signal
       if (valeur === enDefi) return;
       enDefi = valeur;
       rendre();
+    },
+    surDieu: (ecouteur) => {
+      ecouteursDieu.push(ecouteur);
     },
   };
 }

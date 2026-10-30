@@ -3,9 +3,11 @@
 // écrans des héros et de la boutique). Le rendu Canvas est remplacé par une doublure ; la session est un faux qui
 // accepte tout (ou refuse, selon le test) et garde ses appels.
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { t } from '../i18n';
+import { DIEUX } from '../data/dieux';
+import { t, tCle } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
 import { sauvegardeVide, type RaisonChoix, type RaisonEquipement, type Sauvegarde } from '../save';
+import { DELAI_SURVOL_MS, fermerBulle } from './bulle';
 import { afficherCarteMonde, type OptionsCarteMonde } from './carte-monde';
 
 vi.mock('../render/carte-monde', () => ({
@@ -22,7 +24,7 @@ vi.mock('../render/carte-monde', () => ({
   },
 }));
 
-const ATLAS = { iconeUrl: () => 'icone.png' } as unknown as AtlasRendu;
+const ATLAS = { iconeUrl: (nom: string) => `${nom}.png` } as unknown as AtlasRendu;
 
 type Succes = { ok: true; sauvegarde: Sauvegarde; ecrite: boolean };
 
@@ -252,6 +254,33 @@ describe('fiche de niveau : nouvelles découvertes', () => {
     // L'encadré vient avant les boutons « Lancer » et « Fermer ».
     const lancer = parTexte(t('fiche.lancer'));
     expect(encadre && encadre.compareDocumentPosition(lancer) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it('niveau 10 : la tour divine suit le dieu choisi dans la fiche (icône et bulle)', async () => {
+    const s = sauvegardeVide();
+    monter({ ...s, progression: { niveauMax: 10, etoiles: {} } });
+    for (let n = 1; n < 10; n++) appuyer('ArrowRight');
+    appuyer('Enter');
+    expect(document.querySelector('.fiche-numero')?.textContent).toBe(t('accueil.niveau', { n: 10 }));
+    const divine = (): HTMLElement | null => document.querySelector<HTMLElement>('.decouverte[data-tour="divine"]');
+    expect(divine()?.querySelector('img')?.getAttribute('src')).toBe('tour-totem.png');
+    expect(divine()?.textContent).toContain(String(DIEUX.charlie.tourDivine.cout));
+
+    parTitre('L’Ombre').click();
+    await attendre();
+    expect(document.querySelectorAll('.decouvertes')).toHaveLength(1);
+    expect(divine()?.querySelector('img')?.getAttribute('src')).toBe('tour-sanctuaire.png');
+    vi.useFakeTimers();
+    try {
+      divine()?.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse', bubbles: true }));
+      vi.advanceTimersByTime(DELAI_SURVOL_MS);
+      const bulle = document.querySelector<HTMLElement>('.bulle');
+      expect(bulle && !bulle.hidden).toBe(true);
+      expect(bulle?.textContent).toContain(tCle(DIEUX.plume.tourDivine.nom));
+    } finally {
+      fermerBulle();
+      vi.useRealTimers();
+    }
   });
 
   it('un niveau qui n’apporte rien de neuf n’a pas d’encadré', () => {

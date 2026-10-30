@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DIEUX } from '../data/dieux';
 import { TOURS } from '../data/tours';
+import { t, tCle } from '../i18n';
 import { apportTour, decouvertesDuNiveau } from './decouvertes';
 
 describe('nouvelles découvertes d’un niveau', () => {
@@ -23,6 +24,21 @@ describe('nouvelles découvertes d’un niveau', () => {
     expect(divine.map((x) => x.id)).toEqual(['divine']);
     expect(divine[0]?.apport).toContain(String(DIEUX.pollen.tourDivine.cout));
     expect(divine[0]?.icone).not.toBe(decouvertesDuNiveau(10, 'charlie')[0]?.icone);
+  });
+
+  it('une spécialisation dit son pouvoir et la tour de base qu’elle prolonge, pas « spécialisation Tir »', () => {
+    const [guetteurs, arbaletriers] = decouvertesDuNiveau(7, 'plume');
+    expect(guetteurs?.nom).toBe(`${tCle('tour.guetteurs_des_toits')} (${tCle(TOURS.tir.niveaux[0].nom)})`);
+    expect(guetteurs?.nom).not.toMatch(/spécialisation/i);
+    expect(guetteurs?.apport).toContain(t('bulle.tour.furtifs'));
+    expect(guetteurs?.apport).toContain(t('bulle.effet.poison'));
+    expect(arbaletriers?.apport).toContain(t('bulle.tour.critique'));
+    const [, necromancien] = decouvertesDuNiveau(8, 'plume');
+    expect(necromancien?.apport).toContain(t('bulle.tour.spectres'));
+    const [, baliste] = decouvertesDuNiveau(9, 'plume');
+    expect(baliste?.apport).toContain(t('bulle.tour.chaine'));
+    // Les caractéristiques de base (dégâts, portée) restent dans la bulle, pas dans la phrase du pouvoir.
+    expect(guetteurs?.apport).not.toContain(t('bulle.tour.portee'));
   });
 
   it('rien de neuf à partir du niveau 11', () => {

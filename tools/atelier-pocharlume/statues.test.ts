@@ -3,7 +3,11 @@
 import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+// Ces tests relisent ou réécrivent tous les sprites, ou toutes les cases d'une carte : 4 à 8 s seuls, mais bien plus quand
+// les simulations d'équilibrage occupent la machine (`npm run verifier`). Le délai couvre la lenteur, pas une attente.
+vi.setConfig({ testTimeout: 180_000 });
 import { caseExiste, estCaseDeChemin, estCaseInterdite } from '../../src/engine/grille';
 import { REGLES } from '../../src/data/regles';
 import { CAMPAGNE } from '../../src/data/niveaux/campagne';

@@ -402,11 +402,15 @@ export class Hud {
     const noeud = el('button', 'element-menu');
     noeud.type = 'button';
     noeud.append(image(this.atlas.iconeUrl(element.icone, element.icone.startsWith('tour-') ? 1 : 2), 'icone'));
-    // Un élément pas encore débloqué dit où il se débloque : cadenas sur l'icône et niveau à la place du prix.
+    // Un élément pas encore débloqué dit où il se débloque : cadenas sur l'icône et, à la place du prix, le numéro du niveau de
+    // campagne dans une pastille qui imite le nœud de la carte du monde (rond sombre cerclé de bronze). Un « Niv. N » se lisait
+    // comme un niveau de tour ; le libellé lu (aria-label) dit la phrase entière.
     if (element.deblocage !== null) {
       noeud.classList.add('verrouille');
       noeud.append(image(this.atlas.iconeUrl('icone-cadenas', 1), 'cadenas'));
-      noeud.append(el('span', 'deblocage', t('menu.deblocage', { n: element.deblocage })));
+      const pastille = el('span', 'pastille-niveau', String(element.deblocage));
+      pastille.setAttribute('aria-hidden', 'true');
+      noeud.append(pastille);
     }
     const rang = element.rang !== null ? el('span', 'rang') : null;
     if (rang) noeud.append(rang);

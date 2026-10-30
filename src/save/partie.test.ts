@@ -98,6 +98,21 @@ describe('partie en cours', () => {
     expect(reprendrePartie({ ...bonne, etat: JSON.stringify(terminee) })).toBeNull();
   });
 
+  it('refuse de reprendre un état dont le niveau ne porte pas le numéro de la partie rangée (il déciderait des tours débloquées)', () => {
+    const etat = niveau1();
+    jusquaVague(etat, 1);
+    const bonne = partieEnCours(etat, 1);
+    if (!bonne) throw new Error('pas de partie');
+    // L'état du niveau 1 rangé comme une partie du niveau 12 : à la reprise, il ouvrirait des tours que le niveau 1 n'a pas.
+    expect(reprendrePartie({ ...bonne, niveau: 12 })).toBeNull();
+    const sansNumero = JSON.parse(bonne.etat) as { niveau: { numero?: number } };
+    delete sansNumero.niveau.numero;
+    expect(reprendrePartie({ ...bonne, etat: JSON.stringify(sansNumero) })).toBeNull();
+    const autreNumero = JSON.parse(bonne.etat) as { niveau: { numero?: number } };
+    autreNumero.niveau.numero = 11;
+    expect(reprendrePartie({ ...bonne, etat: JSON.stringify(autreNumero) })).toBeNull();
+  });
+
   it('oublie une partie enregistrée avant la grille de construction (tours sur des socles, état en version 4, données en version 7)', () => {
     const etat = niveau1();
     jusquaVague(etat, 1);

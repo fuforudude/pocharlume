@@ -34,7 +34,8 @@ export function avecPartieEnCours(s: Sauvegarde, partie: PartieEnCours | null): 
 
 /**
  * Relit l'état d'une partie en cours. Rend null si elle ne peut pas reprendre : état illisible, partie
- * enregistrée avec d'autres données de jeu (le moteur refuse alors de la relire), ou incohérente.
+ * enregistrée avec d'autres données de jeu (le moteur refuse alors de la relire), ou incohérente (dont un état dont le
+ * niveau ne porte pas le numéro de la partie rangée).
  */
 export function reprendrePartie(partie: PartieEnCours): EtatPartie | null {
   try {
@@ -42,6 +43,8 @@ export function reprendrePartie(partie: PartieEnCours): EtatPartie | null {
     const coherent =
       etat.statut === 'en_cours' &&
       etat.vagues.lancees === partie.vague &&
+      // Le niveau de l'état est celui de la partie rangée : son numéro décide aussi des tours débloquées.
+      etat.niveau.numero === partie.niveau &&
       etat.config.versionDonnees === partie.config.versionDonnees &&
       etat.config.difficulte === partie.config.difficulte &&
       etat.config.dieu === partie.config.dieu &&

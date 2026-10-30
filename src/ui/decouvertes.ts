@@ -6,6 +6,7 @@ import { TOURS } from '../data/tours';
 import type { DefNiveauTour, IdFamille, Voie } from '../engine/definitions';
 import { t, tCle } from '../i18n';
 import { spriteTour } from '../render/habillage';
+import { pouvoirsTour } from './bulle-contenus';
 
 export interface Decouverte {
   /** Identifiant stable : « caserne-2 », « tir-4A », « divine ». */
@@ -41,6 +42,16 @@ export function apportTour(def: DefNiveauTour): string {
 }
 
 /**
+ * La phrase d'une spécialisation : son pouvoir (ce qui la distingue : furtifs, spectres, chaîne, effets…), tiré des mêmes
+ * caractéristiques que la bulle ; à défaut, ses dégâts comme une tour commune.
+ */
+export function apportSpecialisation(def: DefNiveauTour): string {
+  const pouvoirs = pouvoirsTour(def);
+  if (pouvoirs.length === 0) return apportTour(def);
+  return t('decouverte.pouvoir', { texte: pouvoirs.map((p) => t('decouverte.pouvoir_un', { nom: p.libelle, valeur: p.valeur })).join(' ; ') });
+}
+
+/**
  * Ce que le niveau `numero` débloque de neuf, dans l'ordre de la table ; vide s'il n'apporte rien. Une spécialisation donne
  * ses deux voies. `dieu` choisit l'image et le prix de la tour divine.
  */
@@ -60,8 +71,9 @@ export function decouvertesDuNiveau(numero: number, dieu: string): Decouverte[] 
           palier: 4,
           voie,
           icone: spriteTour(d.famille, 4, voie),
-          nom: t('decouverte.specialisation', { nom: tCle(def.nom), famille: t(`famille.${d.famille}`) }),
-          apport: apportTour(def),
+          // La famille telle que le joueur la connaît : le nom de sa tour de base.
+          nom: t('decouverte.specialisation', { nom: tCle(def.nom), base: tCle(famille.niveaux[0].nom) }),
+          apport: apportSpecialisation(def),
         };
       });
     }

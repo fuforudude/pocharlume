@@ -2,7 +2,11 @@
 // suivent les retouches, palette, cartes et règles d'écriture.
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+// Ces tests relisent ou réécrivent tous les sprites, ou toutes les cases d'une carte : 4 à 8 s seuls, mais bien plus quand
+// les simulations d'équilibrage occupent la machine (`npm run verifier`). Le délai couvre la lenteur, pas une attente.
+vi.setConfig({ testTimeout: 180_000 });
 import { lireSprites } from '../art/format.ts';
 import { estPermis, normaliser } from '../atelier/chemins.ts';
 import { remplacerGrilles, type BlocGrille } from '../atelier/ecriture-texte.ts';

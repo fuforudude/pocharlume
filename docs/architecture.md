@@ -865,10 +865,18 @@ Spec : [retours du 2026-10-30](specs/2026-10-30-retours-tour-divine-descriptions
   `src/engine/deblocage.ts` : `niveauDeblocage(etat, action)` dit quel niveau ouvre ce qu'une action `construire`, `ameliorer` ou
   `specialiser` construirait (null si c'est ouvert). `validerAction` rend `non_debloque` après les refus de forme, de case, de tour
   divine unique et de famille du Fer, avant le prix. Les compétences d'une spécialisation viennent avec elle.
-- **Interface** : le menu en cercle garde l'élément, grisé, avec un cadenas et « Niv. N » à la place du prix
-  (`ElementMenu.deblocage`) ; le toucher dit « Se débloque au niveau N. » (`texteRefus(raison, niveau)`). La fiche d'un niveau montre
-  l'encadré « Nouvelles découvertes » (`src/ui/decouvertes.ts`, textes `fr-deblocage.ts`) : icône, nom, une phrase tirée des données ;
-  éléments `.decouverte` avec `data-tour`, `data-palier`, `data-voie`, `data-niveau`.
+- **Interface** : le menu en cercle garde l'élément, grisé, avec un cadenas sur l'icône et, à la place du prix, le numéro du
+  niveau de campagne qui l'ouvre dans une pastille aux couleurs d'un nœud de la carte du monde (`ElementMenu.deblocage`,
+  `.pastille-niveau`). Choix : un « Niv. N » se lisait comme un niveau de tour (« Améliorer » d'une tour niveau 1 marqué
+  « Niv. 2 ») et « Carte N » serait faux (31 cartes pour 100 niveaux) ; le libellé lu dit la phrase entière (« … (se débloque au
+  niveau N) »). Le toucher et la bulle disent « Se débloque au niveau N. » (`texteRefus(raison, niveau)`). La fiche d'un niveau
+  montre l'encadré « Nouvelles découvertes » (`src/ui/decouvertes.ts`, textes `fr-deblocage.ts`) : icône, nom, une phrase tirée
+  des données (pour une spécialisation, son pouvoir : les caractéristiques de la bulle hors dégâts, cadence et portée,
+  `pouvoirsTour`) ; éléments `.decouverte` avec `data-tour`, `data-palier`, `data-voie`, `data-niveau`. La tour divine y est celle
+  du dieu choisi : l'encadré se refait quand il change (`ChoixFiche.surDieu`). Sur un écran bas (`max-height: 460px`, 740×360),
+  l'encadré tient sur une rangée d'icônes (nom et apport dans la bulle et le libellé lu) pour que « Lancer » reste visible.
+- **Reprise** : `reprendrePartie` refuse un état dont `niveau.numero` n'est pas le numéro de la partie rangée (il déciderait des
+  tours débloquées).
 - **Bots** : le naïf et le soigneux écartent ce que `niveauDeblocage` refuse (le soigneux n'économise pas pour une amélioration
   fermée ; les Guetteurs et la tour divine attendent leur niveau).
 - **Versions** : `VERSION_DONNEES` 12 → 13 (coût de la tour divine, déblocage) ; une partie en cours enregistrée avant ne se reprend

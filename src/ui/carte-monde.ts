@@ -357,6 +357,8 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
       li.dataset.palier = String(d.palier);
       if (d.voie) li.dataset.voie = d.voie;
       li.dataset.niveau = String(numero);
+      // Sur un écran bas, seules les icônes restent visibles : le libellé lu garde le nom et l'apport.
+      li.setAttribute('aria-label', t('decouverte.libelle', { nom: d.nom, apport: d.apport }));
       const texte = el('div', 'decouverte-texte');
       texte.append(el('strong', 'decouverte-nom', d.nom), el('span', 'decouverte-apport', d.apport));
       li.append(image(atlas.iconeUrl(d.icone, 1), 'decouverte-icone'), texte);
@@ -482,9 +484,16 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     boutonsDifficulte = boutons;
     gauche.append(groupe, regles);
 
-    // Ce que ce niveau débloque (déblocage progressif), juste avant « Lancer » ; rien s'il n'apporte rien de neuf.
-    const decouvertes = encadreDecouvertes(vue.numero, choisir.choix().dieu, signalFiche);
+    // Ce que ce niveau débloque (déblocage progressif), juste avant « Lancer » ; rien s'il n'apporte rien de neuf. La tour
+    // divine est celle du dieu choisi : l'encadré se refait quand le joueur en change.
+    let decouvertes = encadreDecouvertes(vue.numero, choisir.choix().dieu, signalFiche);
     if (decouvertes) gauche.append(decouvertes);
+    choisir.surDieu((dieu) => {
+      const nouveau = encadreDecouvertes(vue.numero, dieu, signalFiche);
+      if (!decouvertes || !nouveau) return;
+      decouvertes.replaceWith(nouveau);
+      decouvertes = nouveau;
+    });
 
     const actions = el('div', 'rangee');
     const lancer = bouton('bouton grand', t('fiche.lancer'), () => {
