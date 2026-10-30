@@ -1,5 +1,9 @@
 # Atelier : éditeur local de sprites, palettes et cartes
 
+> **Ce dossier a été repris dans un dépôt à part, `Atelier` (`ProjetJeux/Atelier`, cœur dans `src/coeur/`),** qui en fait
+> aussi une appli Windows de dessin autonome. Ce mode local reste en service ici pendant la transition ; les
+> corrections du cœur se font d'abord dans le dépôt `Atelier`, puis sont recopiées ici.
+
 Un outil qui tourne sur votre machine, dans le navigateur, pour retoucher à la main les ressources d'un projet (pixels,
 animations, couleurs, objets placés sur une grille) et réécrire directement les fichiers sources. Ce dossier est le
 **cœur générique** : il ne connaît aucun projet et n'importe rien hors de lui-même (un test le vérifie). Tout ce qui
