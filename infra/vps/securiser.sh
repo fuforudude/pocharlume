@@ -23,7 +23,7 @@ MaxAuthTries 3
 LoginGraceTime 30
 X11Forwarding no
 AllowAgentForwarding no
-AllowUsers ubuntu deploy
+AllowUsers ubuntu deploy deploy-notion
 EOF
 sshd -t
 systemctl reload ssh 2>/dev/null || systemctl restart ssh
