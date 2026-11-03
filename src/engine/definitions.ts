@@ -137,8 +137,8 @@ export interface Rage {
 export type ActionEnnemi =
   /** Les tours à `rayon` tuiles perdent `cadence` (0,3 = −30 %) de cadence de tir pendant `duree` s. */
   | { readonly type: 'affamer'; readonly rayon: number; readonly cadence: number; readonly duree: number }
-  /** La tour la plus proche est désactivée (en feu) pendant `duree` s. */
-  | { readonly type: 'desactiver_tour'; readonly duree: number }
+  /** La tour la plus proche (à moins de `rayon` tuiles s'il est donné) est désactivée (en feu) pendant `duree` s. */
+  | { readonly type: 'desactiver_tour'; readonly duree: number; readonly rayon?: number }
   /** Appelle `nombre` ennemis sur son chemin, à sa hauteur, espacés de `ecart` tuiles vers l'entrée. */
   | { readonly type: 'invoquer'; readonly ennemi: string; readonly nombre: number; readonly ecart: number }
   /** Plonge : intouchable `duree` s, puis réapparaît `saut` tuiles plus loin sur son chemin. */
@@ -154,7 +154,13 @@ export type ActionEnnemi =
   /** Charge : vitesse multipliée par `vitesse` pendant `duree` s, sans s'arrêter aux soldats. */
   | { readonly type: 'charger'; readonly duree: number; readonly vitesse: number }
   /** Intouchable `duree` s, sans bouger. */
-  | { readonly type: 'invulnerabilite'; readonly duree: number };
+  | { readonly type: 'invulnerabilite'; readonly duree: number }
+  /** Désamorce les pièges et les tourelles des alliés à moins de `rayon` tuiles (Sapeur). Sans effet s'il n'y en a aucun. */
+  | { readonly type: 'desamorcer'; readonly rayon: number }
+  /** Les ennemis à moins de `rayon` tuiles (lui compris) perdent ralentissement et étourdissement (Aumônier de Guerre). Sans effet s'il n'y en a aucun. */
+  | { readonly type: 'purifier'; readonly rayon: number }
+  /** Les unités alliées (soldats, héros) à moins de `rayon` tuiles sont étourdies `etourdissement` s (Chantre). Sans effet s'il n'y en a aucune. */
+  | { readonly type: 'terrifier'; readonly rayon: number; readonly etourdissement: number };
 
 /** Se déclenche une fois quand ses PV passent sous `pv` (fraction des PV maximaux). Paliers par `pv` décroissant. */
 export interface PalierEnnemi {
@@ -173,6 +179,70 @@ export interface ActionPeriodique {
   readonly phase?: readonly [number, number];
 }
 
+/**
+ * Bouclier frontal : les coups directs d'une tour, d'une tourelle ou d'un héros tireur qui viennent de devant lui (du côté où il avance)
+ * ne passent que pour `1 − reduction`. Les tirs au sol, les ondes, les chaînes et les soldats ne sont pas arrêtés (Porte-Herse).
+ */
+export interface Bouclier {
+  readonly reduction: number;
+}
+
+/** Kamikaze : au premier contact avec une unité alliée, il explose et meurt, sans prime ni vie perdue (Gerbe Ardente). */
+export interface Explosion {
+  readonly rayon: number;
+  /** Dégâts physiques à chaque unité alliée dans le rayon. */
+  readonly degats: number;
+}
+
+/** Bondit par-dessus l'unité qui le retient : `distance` tuiles plus loin sur son chemin, puis `recharge` s avant de pouvoir recommencer (Crapaud Gonflé). */
+export interface Bond {
+  readonly distance: number;
+  readonly recharge: number;
+}
+
+/**
+ * Voleur : à la première unité alliée qui le retient, ou en atteignant la sortie, il prend `aretes` arêtes au joueur. Retenu, il file à
+ * `vitesse` fois sa vitesse, sans plus s'arrêter. Tué, il rend son butin ; échappé, le butin est perdu (Coupe-Bourse).
+ */
+export interface Vol {
+  readonly aretes: number;
+  readonly vitesse: number;
+}
+
+/** Aura de protection : les autres ennemis à moins de `rayon` tuiles subissent `reduction` de moins (0,3 = −30 %) de dégâts physiques et magiques. Non cumulable (Crieur Public). */
+export interface AuraProtection {
+  readonly rayon: number;
+  readonly reduction: number;
+}
+
+/** À sa mort (tué, non échappé), `nombre` ennemis apparaissent là où il est tombé, espacés de `ecart` tuiles vers l'entrée (Grand Manteau). */
+export interface Division {
+  readonly ennemi: string;
+  readonly nombre: number;
+  readonly ecart: number;
+}
+
+/** Récupère `quantite` (0,03 = 3 %) de ses PV maximaux par seconde (Bubonneux). */
+export interface Regeneration {
+  readonly quantite: number;
+}
+
+/** Chaque coup au corps-à-corps qu'il reçoit blesse l'unité qui le porte de `degats` points purs (Fagot d'Os). */
+export interface Epines {
+  readonly degats: number;
+}
+
+/** Toutes les `periode` secondes, son armure et sa résistance magique s'échangent (Effigie du Roi). */
+export interface Alternance {
+  readonly periode: number;
+}
+
+/** À sa mort, rend `quantite` de leurs PV maximaux aux ennemis à moins de `rayon` tuiles (Martyr Blême). */
+export interface DerniereLueur {
+  readonly rayon: number;
+  readonly quantite: number;
+}
+
 export interface PouvoirsEnnemi {
   readonly brulure?: BrulureContact;
   readonly noyade?: Noyade;
@@ -184,6 +254,18 @@ export interface PouvoirsEnnemi {
   readonly aura?: AuraVitesse;
   readonly renversement?: Renversement;
   readonly rage?: Rage;
+  readonly bouclier?: Bouclier;
+  readonly explosion?: Explosion;
+  readonly bond?: Bond;
+  readonly vol?: Vol;
+  readonly auraProtection?: AuraProtection;
+  readonly division?: Division;
+  readonly regeneration?: Regeneration;
+  readonly epines?: Epines;
+  readonly alternance?: Alternance;
+  readonly derniereLueur?: DerniereLueur;
+  /** Aucun soldat ni héros ne l'arrête ni ne le vise : il passe entre eux (Frère Sans-Porte). Les tours l'atteignent comme un ennemi au sol. */
+  readonly insaisissable?: boolean;
   /** Aucun ralentissement ne le touche (Grand Inquisiteur). */
   readonly insensibleRalentissement?: boolean;
   /** Multiplicateur de ses dégâts contre un héros (2 = double). */

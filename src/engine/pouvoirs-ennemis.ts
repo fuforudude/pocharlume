@@ -1,7 +1,9 @@
 // Pouvoirs des ennemis qui s'exercent à chaque pas, tous pilotés par `Ennemi.pouvoirs` (données) : fin de
 // l'intouchabilité (relèvement, plongée), paliers de PV et actions périodiques des boss (affamer ou aveugler les tours,
 // les mettre en feu ou les geler, appeler des ennemis, plonger, charger, bannir une invocation, relever les morts),
-// aura de vitesse, soin des ennemis proches, nuage toxique laissé à la mort.
+// aura de vitesse et de protection, soin des ennemis proches, régénération, échange armure/résistance, nuage toxique,
+// division et dernière lueur à la mort, et les actions qui s'en prennent aux pièges, aux tourelles et aux soldats (désamorcer, terrifier,
+// purifier).
 // Les mécaniques propres au combat (brûlure, noyade, drain, dégâts contre le héros, rage, renversement) sont dans
 // ennemis.ts et unites.ts.
 import { placerSurChemin, segmentPour } from './chemins';
@@ -9,7 +11,7 @@ import { defEnnemi } from './contenu';
 import { libererEnnemi } from './degats';
 import type { ActionEnnemi, SoinEnnemis } from './definitions';
 import { ajouterEnnemi } from './ennemis';
-import type { Ennemi, EtatPartie, Tour, Unite } from './etat';
+import { EFFET, type Ennemi, type EtatPartie, type Tour, type Unite } from './etat';
 import { chercherParId, distance2 } from './recherche';
 import { creerZone } from './structures';
 import { enPas, PAS_PAR_SECONDE } from './temps';
@@ -28,19 +30,20 @@ function affamer(etat: EtatPartie, e: Ennemi, action: Extract<ActionEnnemi, { ty
 }
 
 /** La tour la plus proche du lanceur est mise en feu (Juge des Flammes). */
-function desactiverTour(etat: EtatPartie, e: Ennemi, duree: number): void {
+function desactiverTour(etat: EtatPartie, e: Ennemi, duree: number, rayon = Infinity): boolean {
   let proche: Tour | undefined;
-  let min = Infinity;
+  let min = rayon * rayon;
   for (const t of etat.tours) {
     const d = distance2(t.x, t.y, e.x, e.y);
-    if (d < min) {
+    if (d <= min) {
       min = d;
       proche = t;
     }
   }
-  if (!proche) return;
+  if (!proche) return false;
   proche.desactivee = Math.max(proche.desactivee, Math.max(1, enPas(duree)));
   etat.evenements.push({ type: 'tour_desactivee', ennemi: e.id, tour: proche.id, duree });
+  return true;
 }
 
 /** `nombre` ennemis apparaissent sur le chemin du lanceur, à sa hauteur puis espacés de `ecart` tuiles vers l'entrée. */
@@ -154,6 +157,60 @@ function plonger(etat: EtatPartie, e: Ennemi, action: Extract<ActionEnnemi, { ty
   etat.evenements.push({ type: 'plongee', ennemi: e.id, x: e.x, y: e.y, delai: action.duree });
 }
 
+/** Sapeur : les pièges et les tourelles des alliés à portée sont détruits. Faux s'il n'y en a aucun. */
+function desamorcer(etat: EtatPartie, e: Ennemi, rayon: number): boolean {
+  const rayon2 = rayon * rayon;
+  let nombre = 0;
+  etat.pieges = etat.pieges.filter((p) => {
+    const proche = distance2(p.x, p.y, e.x, e.y) <= rayon2;
+    if (proche) nombre++;
+    return !proche;
+  });
+  etat.structures = etat.structures.filter((s) => {
+    const proche = distance2(s.x, s.y, e.x, e.y) <= rayon2;
+    if (proche) {
+      nombre++;
+      etat.evenements.push({ type: 'structure_fin', structure: s.id, x: s.x, y: s.y });
+    }
+    return !proche;
+  });
+  if (nombre === 0) return false;
+  etat.evenements.push({ type: 'desamorcage', ennemi: e.id, x: e.x, y: e.y, nombre });
+  return true;
+}
+
+/** Aumônier : les ennemis à portée (lui compris) perdent leur ralentissement et leur étourdissement. Faux si aucun n'en avait. */
+function purifier(etat: EtatPartie, e: Ennemi, rayon: number): boolean {
+  const rayon2 = rayon * rayon;
+  let purifie = false;
+  for (const autre of etat.ennemis) {
+    if (!autre.vivant || distance2(autre.x, autre.y, e.x, e.y) > rayon2) continue;
+    for (const k of [EFFET.ralentissement, EFFET.etourdissement]) {
+      if ((autre.effetsPas[k] ?? 0) > 0) {
+        autre.effetsPas[k] = 0;
+        purifie = true;
+      }
+    }
+  }
+  if (purifie) etat.evenements.push({ type: 'purification', ennemi: e.id, x: e.x, y: e.y, rayon });
+  return purifie;
+}
+
+/** Chantre : les soldats, le héros et les autres unités ciblables à portée sont étourdis et lâchent leurs ennemis. Faux s'il n'y en a aucune. */
+function terrifier(etat: EtatPartie, e: Ennemi, rayon: number, etourdissement: number): boolean {
+  const rayon2 = rayon * rayon;
+  const pas = Math.max(1, enPas(etourdissement));
+  let touche = false;
+  for (const u of etat.unites) {
+    if (u.mort || u.stats.capacites?.ciblable === false || distance2(u.x, u.y, e.x, e.y) > rayon2) continue;
+    u.etourdi = Math.max(u.etourdi, pas);
+    libererBloques(etat, u);
+    touche = true;
+  }
+  if (touche) etat.evenements.push({ type: 'terreur', ennemi: e.id, x: e.x, y: e.y, rayon, duree: etourdissement });
+  return touche;
+}
+
 /** Exécute une action ; faux si elle n'a eu aucun effet (personne à geler, à bannir, à relever) : l'action périodique est retentée. */
 function executerAction(etat: EtatPartie, e: Ennemi, action: ActionEnnemi): boolean {
   switch (action.type) {
@@ -161,8 +218,7 @@ function executerAction(etat: EtatPartie, e: Ennemi, action: ActionEnnemi): bool
       affamer(etat, e, action);
       return true;
     case 'desactiver_tour':
-      desactiverTour(etat, e, action.duree);
-      return true;
+      return desactiverTour(etat, e, action.duree, action.rayon);
     case 'invoquer':
       appeler(etat, e, action);
       return true;
@@ -184,6 +240,12 @@ function executerAction(etat: EtatPartie, e: Ennemi, action: ActionEnnemi): bool
     case 'invulnerabilite':
       protegerTemporairement(etat, e, action.duree);
       return true;
+    case 'desamorcer':
+      return desamorcer(etat, e, action.rayon);
+    case 'purifier':
+      return purifier(etat, e, action.rayon);
+    case 'terrifier':
+      return terrifier(etat, e, action.rayon, action.etourdissement);
   }
 }
 
@@ -222,16 +284,32 @@ function soigner(etat: EtatPartie, e: Ennemi, soin: SoinEnnemis): void {
  * couvre, jamais la somme (non cumulable). L'ennemi qui porte l'aura n'en profite pas.
  */
 function appliquerAuras(etat: EtatPartie): void {
-  for (const e of etat.ennemis) e.bonusVitesse = 0;
+  for (const e of etat.ennemis) {
+    e.bonusVitesse = 0;
+    e.bonusProtection = 0;
+  }
   for (const source of etat.ennemis) {
     const aura = source.pouvoirs?.aura;
-    if (!aura || !source.vivant || source.invulnerable > 0) continue;
-    const rayon2 = aura.rayon * aura.rayon;
+    const protection = source.pouvoirs?.auraProtection;
+    if ((!aura && !protection) || !source.vivant || source.invulnerable > 0) continue;
     for (const e of etat.ennemis) {
-      if (e === source || !e.vivant || distance2(e.x, e.y, source.x, source.y) > rayon2) continue;
-      e.bonusVitesse = Math.max(e.bonusVitesse, aura.vitesse);
+      if (e === source || !e.vivant) continue;
+      const d2 = distance2(e.x, e.y, source.x, source.y);
+      if (aura && d2 <= aura.rayon * aura.rayon) e.bonusVitesse = Math.max(e.bonusVitesse, aura.vitesse);
+      if (protection && d2 <= protection.rayon * protection.rayon) e.bonusProtection = Math.max(e.bonusProtection, protection.reduction);
     }
   }
+}
+
+/** Échange l'armure et la résistance magique de l'ennemi toutes les `periode` secondes (Effigie du Roi). */
+function alterner(etat: EtatPartie, e: Ennemi, periode: number): void {
+  e.alternancePas--;
+  if (e.alternancePas > 0) return;
+  e.alternancePas = Math.max(1, enPas(periode));
+  const armure = e.armure;
+  e.armure = e.resistance;
+  e.resistance = armure;
+  etat.evenements.push({ type: 'inversion', ennemi: e.id, x: e.x, y: e.y });
 }
 
 /**
@@ -252,6 +330,8 @@ export function mettreAJourPouvoirsEnnemis(etat: EtatPartie): void {
     }
     const pouvoirs = e.pouvoirs;
     if (!pouvoirs) continue;
+    if (pouvoirs.regeneration && e.pv < e.pvMax) e.pv = Math.min(e.pvMax, e.pv + (e.pvMax * pouvoirs.regeneration.quantite) / PAS_PAR_SECONDE);
+    if (pouvoirs.alternance) alterner(etat, e, pouvoirs.alternance.periode);
     if (pouvoirs.soin) soigner(etat, e, pouvoirs.soin);
     const paliers = pouvoirs.paliers;
     if (paliers) {
@@ -307,5 +387,36 @@ export function laisserNuagesDesMorts(etat: EtatPartie): void {
     const nuage = e.pouvoirs?.nuage;
     if (!nuage || e.vivant || e.pv > 0) continue;
     creerZone(etat, { duree: nuage.duree, effets: [], critique: 0, volants: true, degatsAllies: nuage.degats }, e.x, e.y, nuage.rayon);
+  }
+}
+
+/**
+ * Ce que laisse un ennemi tué (et non échappé) : sa division en `nombre` ennemis là où il est tombé (Grand Manteau) et sa dernière
+ * lueur, qui rend des PV aux ennemis qui l'entourent (Martyr Blême). Appelé avant que les morts ne soient retirés ; les ennemis
+ * nés de la division agissent dès le pas suivant.
+ */
+export function laisserEffetsDesMorts(etat: EtatPartie): void {
+  const n = etat.ennemis.length;
+  for (let i = 0; i < n; i++) {
+    const e = etat.ennemis[i];
+    if (!e || e.vivant || e.pv > 0) continue;
+    const division = e.pouvoirs?.division;
+    const def = division ? defEnnemi(division.ennemi) : undefined;
+    if (division && def) {
+      etat.evenements.push({ type: 'division', ennemi: e.id, typeEnnemi: division.ennemi, nombre: division.nombre, x: e.x, y: e.y });
+      for (let k = 0; k < division.nombre; k++) {
+        ajouterEnnemi(etat, def, division.ennemi, e.chemin, Math.max(0, e.distance - k * division.ecart), false, { vague: e.vague });
+      }
+    }
+    const lueur = e.pouvoirs?.derniereLueur;
+    if (!lueur) continue;
+    const rayon2 = lueur.rayon * lueur.rayon;
+    etat.evenements.push({ type: 'derniere_lueur', ennemi: e.id, x: e.x, y: e.y, rayon: lueur.rayon });
+    for (const autre of etat.ennemis) {
+      if (autre === e || !autre.vivant || autre.invulnerable > 0 || autre.pv >= autre.pvMax || distance2(autre.x, autre.y, e.x, e.y) > rayon2) continue;
+      const rendu = Math.min(autre.pvMax - autre.pv, autre.pvMax * lueur.quantite);
+      autre.pv += rendu;
+      etat.evenements.push({ type: 'soin_ennemi', source: e.id, ennemi: autre.id, pv: rendu });
+    }
   }
 }

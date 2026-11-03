@@ -5,7 +5,7 @@ import { ajusterMontant } from './argent';
 import { placerSurChemin, segmentPour } from './chemins';
 import { difficulteDe } from './contenu';
 import { infligerDegats, libererEnnemi } from './degats';
-import type { BrulureContact, DefEnnemi, Drain, Noyade, Rage, Renversement } from './definitions';
+import type { Bond, BrulureContact, DefEnnemi, Drain, Explosion, Noyade, Rage, Renversement, Vol } from './definitions';
 import { EFFET, type Ennemi, type EtatPartie, type Unite } from './etat';
 import { chercherParId, distance2 } from './recherche';
 import { enPas, PAS_PAR_SECONDE } from './temps';
@@ -76,6 +76,11 @@ export function ajouterEnnemi(etat: EtatPartie, def: DefEnnemi, type: string, ch
     charge: 0,
     chargeVitesse: 1,
     renversements: def.pouvoirs?.renversement ? 1 : 0,
+    bondPas: 0,
+    vole: false,
+    butin: 0,
+    bonusProtection: 0,
+    alternancePas: def.pouvoirs?.alternance ? Math.max(1, enPas(def.pouvoirs.alternance.periode)) : 0,
     invulnerable: 0,
     saut: 0,
     palier: 0,
@@ -145,7 +150,28 @@ function uniteLaPlusProche(etat: EtatPartie, x: number, y: number, portee: numbe
   return meilleure;
 }
 
+/** Durée (en pas) d'une fuite « jusqu'à la sortie » : le voleur qui a pris son butin ne s'arrête plus. */
+const FUITE_JUSQU_A_LA_SORTIE = 1_000_000_000;
+
+/**
+ * Le voleur prend ses arêtes au joueur (ce qu'il en reste au plus). Retenu par une unité, il file ensuite sans plus s'arrêter ;
+ * à la sortie, le butin est perdu pour de bon.
+ */
+function voler(etat: EtatPartie, e: Ennemi, vol: Vol, enFuite: boolean): void {
+  const pris = Math.max(0, Math.min(vol.aretes, etat.aretes));
+  etat.aretes -= pris;
+  e.vole = true;
+  e.butin = enFuite ? 0 : pris;
+  etat.evenements.push({ type: 'vol', ennemi: e.id, aretes: pris });
+  if (enFuite) return;
+  e.charge = FUITE_JUSQU_A_LA_SORTIE;
+  e.chargeVitesse = vol.vitesse;
+  libererEnnemi(etat, e);
+}
+
 function fuir(etat: EtatPartie, e: Ennemi): void {
+  const vol = e.pouvoirs?.vol;
+  if (vol && !e.vole) voler(etat, e, vol, true);
   e.vivant = false;
   libererEnnemi(etat, e);
   etat.vies = Math.max(0, etat.vies - e.coutVies);
@@ -190,8 +216,24 @@ function renverser(etat: EtatPartie, e: Ennemi, u: Unite, renversement: Renverse
   etat.evenements.push({ type: 'renversement', ennemi: e.id, unite: u.id, duree: renversement.etourdissement });
 }
 
+/** Kamikaze : il explose au contact, blesse toutes les unités alliées autour de lui et disparaît (ni prime, ni vie perdue). */
+function exploser(etat: EtatPartie, e: Ennemi, explosion: Explosion): void {
+  const rayon2 = explosion.rayon * explosion.rayon;
+  etat.evenements.push({ type: 'explosion', ennemi: e.id, x: e.x, y: e.y, rayon: explosion.rayon });
+  for (const u of etat.unites) {
+    if (u.mort || u.stats.capacites?.ciblable === false || distance2(u.x, u.y, e.x, e.y) > rayon2) continue;
+    blesserUnite(etat, u, explosion.degats, 'physique', e.id);
+  }
+  e.vivant = false;
+  libererEnnemi(etat, e);
+}
+
 function attaquerAuContact(etat: EtatPartie, e: Ennemi, u: Unite): void {
   const pouvoirs = e.pouvoirs;
+  if (pouvoirs?.explosion) {
+    exploser(etat, e, pouvoirs.explosion);
+    return;
+  }
   if (pouvoirs?.drain) {
     drainer(etat, e, u, pouvoirs.drain);
     if (u.mort) return;
@@ -224,6 +266,20 @@ function attaquerADistance(etat: EtatPartie, e: Ennemi): void {
   blesserUnite(etat, u, degatsContre(e, u, tirerEntre(etat, attaque.degats[0], attaque.degats[1]) * facteurDegats(e)), attaque.typeDegats, e.id);
 }
 
+/** Le sauteur franchit l'unité qui le retient : il se retrouve `distance` tuiles plus loin sur son chemin et ne bondira pas avant `recharge` s. */
+function bondir(etat: EtatPartie, e: Ennemi, bond: Bond): void {
+  const c = etat.chemins[e.chemin];
+  if (!c) return;
+  const departX = e.x;
+  const departY = e.y;
+  libererEnnemi(etat, e);
+  e.distance = Math.min(c.longueur, e.distance + bond.distance);
+  e.segment = segmentPour(c, e.distance, e.segment);
+  placerSurChemin(c, e.distance, e.segment, e.decalage, e);
+  e.bondPas = Math.max(1, enPas(bond.recharge));
+  etat.evenements.push({ type: 'bond', ennemi: e.id, x: departX, y: departY, versX: e.x, versY: e.y });
+}
+
 export function mettreAJourEnnemis(etat: EtatPartie): void {
   for (const e of etat.ennemis) {
     // À terre ou plongé : rien ne le touche, il ne bouge ni n'attaque (voir pouvoirs-ennemis.ts).
@@ -247,13 +303,24 @@ export function mettreAJourEnnemis(etat: EtatPartie): void {
     if (e.recharge > 0) e.recharge--;
     if (e.rechargeDistance > 0) e.rechargeDistance--;
     if (e.charge > 0) e.charge--;
+    if (e.bondPas > 0) e.bondPas--;
     if (facteur === 0) continue;
 
-    // Un volant, ou un ennemi en pleine charge, ne s'arrête pas aux soldats.
-    let bloqueur = e.volant || enCharge ? undefined : bloqueurAuContact(etat, e);
+    // Un volant, un insaisissable ou un ennemi en pleine charge ne s'arrête pas aux soldats.
+    let bloqueur = e.volant || enCharge || e.pouvoirs?.insaisissable ? undefined : bloqueurAuContact(etat, e);
     const renversement = e.pouvoirs?.renversement;
     if (bloqueur && renversement && e.renversements > 0 && bloqueur.genre !== 'heros') {
       renverser(etat, e, bloqueur, renversement);
+      bloqueur = undefined;
+    }
+    const vol = e.pouvoirs?.vol;
+    if (bloqueur && vol && !e.vole) {
+      voler(etat, e, vol, false);
+      bloqueur = undefined;
+    }
+    const bond = e.pouvoirs?.bond;
+    if (bloqueur && bond && e.bondPas === 0) {
+      bondir(etat, e, bond);
       bloqueur = undefined;
     }
     if (bloqueur) {

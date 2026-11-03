@@ -540,6 +540,244 @@ export const ENNEMIS = {
       ],
     },
   }),
+  // --- Variété : deux nouveaux ennemis par région, arrivés vers les niveaux 4 et 7 (docs/specs/2026-11-03-lisibilite-bestiaire-variete.md) ---
+  // Région 1 : le Village Affamé
+  /** Au premier soldat qui le retient (ou à la sortie), prend 20 arêtes au joueur ; retenu, il file ensuite à double vitesse. Tué, il rend le butin. */
+  coupe_bourse: ennemi({
+    nom: 'ennemi.coupe_bourse',
+    pv: 26,
+    vitesse: 1.5,
+    degats: [1, 2],
+    cadence: 1,
+    coutVies: 1,
+    prime: 5,
+    pouvoirs: { vol: { aretes: 20, vitesse: 2 } },
+  }),
+  /** À sa mort, trois Mendiants sortent de son manteau. */
+  grand_manteau: ennemi({
+    nom: 'ennemi.grand_manteau',
+    pv: 70,
+    vitesse: 0.8,
+    degats: [3, 4],
+    cadence: 1.3,
+    coutVies: 1,
+    prime: 10,
+    pouvoirs: { division: { ennemi: 'mendiant', nombre: 3, ecart: 0.4 } },
+  }),
+  // Région 2 : les Champs Brûlés
+  /** Kamikaze : au contact d'un soldat, explose (22 dégâts physiques à 1,3 tuile) et disparaît. */
+  gerbe_ardente: ennemi({
+    nom: 'ennemi.gerbe_ardente',
+    pv: 36,
+    vitesse: 1.7,
+    degats: [0, 0],
+    cadence: 1,
+    coutVies: 1,
+    prime: 7,
+    pouvoirs: { explosion: { rayon: 1.3, degats: 22 } },
+  }),
+  /** Bouclier frontal : les coups directs des tours venus de devant lui ne passent qu'à 25 %. */
+  porte_herse: ennemi({
+    nom: 'ennemi.porte_herse',
+    pv: 100,
+    vitesse: 0.7,
+    degats: [4, 6],
+    cadence: 1.4,
+    coutVies: 1,
+    prime: 12,
+    pouvoirs: { bouclier: { reduction: 0.75 } },
+  }),
+  // Région 3 : le Bourg des Bûchers
+  /** Toutes les 12 s, met le feu à une tour à 3 tuiles : elle ne tire plus pendant 3 s. */
+  fagotier: ennemi({
+    nom: 'ennemi.fagotier',
+    pv: 55,
+    vitesse: 0.9,
+    degats: [2, 4],
+    cadence: 1.2,
+    coutVies: 1,
+    prime: 10,
+    pouvoirs: { periodiques: [{ cadence: 12, actions: [{ type: 'desactiver_tour', duree: 3, rayon: 3 }] }] },
+  }),
+  /** Aura : les autres ennemis à 2,5 tuiles subissent 30 % de dégâts en moins (non cumulable). */
+  crieur_public: ennemi({
+    nom: 'ennemi.crieur_public',
+    pv: 80,
+    vitesse: 0.8,
+    degats: [2, 3],
+    cadence: 1.3,
+    coutVies: 1,
+    prime: 14,
+    pouvoirs: { auraProtection: { rayon: 2.5, reduction: 0.3 } },
+  }),
+  // Région 4 : les Marais de l'Ordalie
+  /** Bondit par-dessus le soldat qui le retient (3 tuiles plus loin), au plus toutes les 4 s. */
+  crapaud_gonfle: ennemi({
+    nom: 'ennemi.crapaud_gonfle',
+    pv: 60,
+    vitesse: 1,
+    degats: [3, 5],
+    cadence: 1.3,
+    coutVies: 1,
+    prime: 10,
+    pouvoirs: { bond: { distance: 3, recharge: 4 } },
+  }),
+  /** Résistance magique 30 % ; toutes les 10 s, aveugle les tours à 3 tuiles (portée −30 % pendant 3 s). */
+  feu_follet: ennemi({
+    nom: 'ennemi.feu_follet',
+    pv: 40,
+    vitesse: 1.1,
+    resistance: 0.3,
+    degats: [1, 2],
+    cadence: 1,
+    coutVies: 1,
+    prime: 10,
+    pouvoirs: { periodiques: [{ cadence: 10, actions: [{ type: 'aveugler', rayon: 3, portee: 0.3, duree: 3 }] }] },
+  }),
+  // Région 5 : la Ville Pestiférée
+  /** Toutes les 10 s, lâche 2 Rats de Peste sur le chemin. */
+  montreur_rats: ennemi({
+    nom: 'ennemi.montreur_rats',
+    pv: 65,
+    vitesse: 0.8,
+    degats: [2, 3],
+    cadence: 1.3,
+    coutVies: 1,
+    prime: 13,
+    pouvoirs: { periodiques: [{ cadence: 10, actions: [{ type: 'invoquer', ennemi: 'rat_peste', nombre: 2, ecart: 0.3 }] }] },
+  }),
+  /** Récupère 3 % de ses PV maximaux par seconde. */
+  bubonneux: ennemi({
+    nom: 'ennemi.bubonneux',
+    pv: 120,
+    vitesse: 0.8,
+    degats: [3, 5],
+    cadence: 1.3,
+    coutVies: 1,
+    prime: 12,
+    pouvoirs: { regeneration: { quantite: 0.03 } },
+  }),
+  // Région 6 : le Charnier
+  /** Toutes les 9 s, s'enfonce sous terre (intouchable 2 s) et ressort 2,5 tuiles plus loin. */
+  deterreur: ennemi({
+    nom: 'ennemi.deterreur',
+    pv: 85,
+    vitesse: 0.9,
+    degats: [4, 6],
+    cadence: 1.3,
+    coutVies: 1,
+    prime: 13,
+    pouvoirs: { periodiques: [{ cadence: 9, actions: [{ type: 'plonger', duree: 2, saut: 2.5 }] }] },
+  }),
+  /** Épines : chaque coup au corps-à-corps qu'il reçoit blesse l'unité qui frappe (6 dégâts purs). */
+  fagot_os: ennemi({
+    nom: 'ennemi.fagot_os',
+    pv: 110,
+    vitesse: 0.8,
+    degats: [5, 7],
+    cadence: 1.4,
+    coutVies: 1,
+    prime: 14,
+    pouvoirs: { epines: { degats: 6 } },
+  }),
+  // Région 7 : la Croisade
+  /** Toutes les 6 s, détruit les pièges et les tourelles à 2 tuiles. */
+  sapeur: ennemi({
+    nom: 'ennemi.sapeur',
+    pv: 90,
+    vitesse: 0.9,
+    degats: [3, 5],
+    cadence: 1.3,
+    coutVies: 1,
+    prime: 15,
+    pouvoirs: { periodiques: [{ cadence: 6, actions: [{ type: 'desamorcer', rayon: 2 }] }] },
+  }),
+  /** Résistance magique 30 % ; toutes les 5 s, retire ralentissement et étourdissement aux ennemis à 3 tuiles. */
+  aumonier: ennemi({
+    nom: 'ennemi.aumonier',
+    pv: 100,
+    vitesse: 0.8,
+    resistance: 0.3,
+    degats: [2, 4],
+    cadence: 1.3,
+    coutVies: 1,
+    prime: 18,
+    pouvoirs: { periodiques: [{ cadence: 5, actions: [{ type: 'purifier', rayon: 3 }] }] },
+  }),
+  // Région 8 : le Monastère Noir
+  /** Toutes les 9 s, étourdit 1,5 s les soldats et le héros à 2 tuiles. */
+  chantre: ennemi({
+    nom: 'ennemi.chantre',
+    pv: 85,
+    vitesse: 0.8,
+    degats: [2, 3],
+    cadence: 1.3,
+    coutVies: 1,
+    prime: 17,
+    pouvoirs: { periodiques: [{ cadence: 9, actions: [{ type: 'terrifier', rayon: 2, etourdissement: 1.5 }] }] },
+  }),
+  /** Insaisissable : aucun soldat ni héros ne l'arrête ni ne le vise ; seules les tours l'atteignent. */
+  frere_sans_porte: ennemi({
+    nom: 'ennemi.frere_sans_porte',
+    pv: 120,
+    vitesse: 1,
+    degats: [5, 8],
+    cadence: 1.3,
+    coutVies: 1,
+    prime: 18,
+    pouvoirs: { insaisissable: true },
+  }),
+  // Région 9 : la Cité du Roi
+  /** Armure 60 % ; toutes les 5 s, son armure et sa résistance magique s'échangent. */
+  effigie_roi: ennemi({
+    nom: 'ennemi.effigie_roi',
+    pv: 120,
+    vitesse: 0.7,
+    armure: 0.6,
+    degats: [7, 10],
+    cadence: 1.4,
+    coutVies: 1,
+    prime: 22,
+    pouvoirs: { alternance: { periode: 5 } },
+  }),
+  /** Armure 30 % ; tue d'un coup le soldat qui le retient, toutes les 5 s. */
+  bourreau_roi: ennemi({
+    nom: 'ennemi.bourreau_roi',
+    pv: 150,
+    vitesse: 0.7,
+    armure: 0.3,
+    degats: [9, 13],
+    cadence: 1.5,
+    coutVies: 1,
+    prime: 26,
+    devore: 5,
+  }),
+  // Région 10 : la Cathédrale du Soleil Blême
+  /** Armure 60 %, insensible aux ralentissements et aux étourdissements ; toutes les 8 s, se fige en pierre (intouchable 2 s, sans avancer). */
+  gargouille: ennemi({
+    nom: 'ennemi.gargouille',
+    pv: 160,
+    vitesse: 0.8,
+    armure: 0.6,
+    degats: [8, 12],
+    cadence: 1.4,
+    coutVies: 1,
+    prime: 28,
+    insensibleEtourdissement: true,
+    pouvoirs: { insensibleRalentissement: true, periodiques: [{ cadence: 8, actions: [{ type: 'invulnerabilite', duree: 2 }] }] },
+  }),
+  /** Résistance magique 30 % ; à sa mort, rend 35 % de leurs PV maximaux aux ennemis à 3 tuiles. */
+  martyr_bleme: ennemi({
+    nom: 'ennemi.martyr_bleme',
+    pv: 95,
+    vitesse: 0.9,
+    resistance: 0.3,
+    degats: [4, 6],
+    cadence: 1.3,
+    coutVies: 1,
+    prime: 22,
+    pouvoirs: { derniereLueur: { rayon: 3, quantite: 0.35 } },
+  }),
 } as const satisfies Record<string, DefEnnemi>;
 
 export type IdEnnemi = keyof typeof ENNEMIS;

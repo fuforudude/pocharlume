@@ -83,6 +83,25 @@ export type Evenement =
   | { type: 'charge'; ennemi: number; x: number; y: number; duree: number }
   /** Un boss devient intouchable `duree` s. */
   | { type: 'invulnerabilite'; ennemi: number; x: number; y: number; duree: number }
+  // --- Mécaniques des ennemis (variété : deux nouveaux ennemis par région) ---
+  /** Un kamikaze explose au contact : il blesse les unités alliées dans `rayon` et disparaît. */
+  | { type: 'explosion'; ennemi: number; x: number; y: number; rayon: number }
+  /** Un sauteur franchit l'unité qui le retenait : de (x, y) à (versX, versY). */
+  | { type: 'bond'; ennemi: number; x: number; y: number; versX: number; versY: number }
+  /** Un voleur prend `aretes` arêtes au joueur. */
+  | { type: 'vol'; ennemi: number; aretes: number }
+  /** Un porteur meurt et se divise : `nombre` ennemis de `typeEnnemi` apparaissent (leurs `apparition` suivent). */
+  | { type: 'division'; ennemi: number; typeEnnemi: string; nombre: number; x: number; y: number }
+  /** Un ennemi qui meurt rend des PV à ceux qui l'entourent. */
+  | { type: 'derniere_lueur'; ennemi: number; x: number; y: number; rayon: number }
+  /** Un Aumônier retire ralentissement et étourdissement aux ennemis autour de lui. */
+  | { type: 'purification'; ennemi: number; x: number; y: number; rayon: number }
+  /** Un Chantre étourdit les unités alliées autour de lui `duree` s. */
+  | { type: 'terreur'; ennemi: number; x: number; y: number; rayon: number; duree: number }
+  /** Un Sapeur désamorce `nombre` pièges ou tourelles. */
+  | { type: 'desamorcage'; ennemi: number; x: number; y: number; nombre: number }
+  /** L'armure et la résistance d'une Effigie s'échangent. */
+  | { type: 'inversion'; ennemi: number; x: number; y: number }
   | { type: 'fin'; statut: Statut; etoiles: number };
 
 /** Ouvre la liste d'événements du pas courant : celle d'un pas précédent est remplacée. */

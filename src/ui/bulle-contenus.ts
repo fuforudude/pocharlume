@@ -369,6 +369,12 @@ function texteAction(a: ActionEnnemi): string {
       return t('bulle.ennemi.charger', { d: nombre(a.duree) });
     case 'invulnerabilite':
       return t('bulle.ennemi.invulnerabilite', { d: nombre(a.duree) });
+    case 'desamorcer':
+      return t('bulle.ennemi.desamorcer');
+    case 'purifier':
+      return t('bulle.ennemi.purifier');
+    case 'terrifier':
+      return t('bulle.ennemi.terrifier', { d: nombre(a.etourdissement) });
   }
 }
 
@@ -388,6 +394,20 @@ function notesPouvoirs(p: PouvoirsEnnemi | undefined): string[] {
   if (p.aura) notes.push(t('bulle.ennemi.aura', { n: pourcent(p.aura.vitesse) }));
   if (p.renversement) notes.push(t('bulle.ennemi.renversement', { d: nombre(p.renversement.etourdissement) }));
   if (p.rage) notes.push(t('bulle.ennemi.rage', { p: pourcent(p.rage.pv), v: pourcent(p.rage.vitesse), d: pourcent(p.rage.degats) }));
+  if (p.bouclier) notes.push(t('bulle.ennemi.bouclier', { n: pourcent(p.bouclier.reduction) }));
+  if (p.explosion) notes.push(t('bulle.ennemi.explosion', { n: nombre(p.explosion.degats) }));
+  if (p.bond) notes.push(t('bulle.ennemi.bond', { d: nombre(p.bond.recharge) }));
+  if (p.vol) notes.push(t('bulle.ennemi.vol', { n: p.vol.aretes }));
+  if (p.auraProtection) notes.push(t('bulle.ennemi.aura_protection', { n: pourcent(p.auraProtection.reduction) }));
+  if (p.division) {
+    const nom = Object.hasOwn(ENNEMIS, p.division.ennemi) ? tCle(ENNEMIS[p.division.ennemi as keyof typeof ENNEMIS].nom) : p.division.ennemi;
+    notes.push(t('bulle.ennemi.division', { n: p.division.nombre, nom }));
+  }
+  if (p.regeneration) notes.push(t('bulle.ennemi.regeneration', { n: pourcent(p.regeneration.quantite) }));
+  if (p.epines) notes.push(t('bulle.ennemi.epines', { n: nombre(p.epines.degats) }));
+  if (p.alternance) notes.push(t('bulle.ennemi.alternance', { d: nombre(p.alternance.periode) }));
+  if (p.derniereLueur) notes.push(t('bulle.ennemi.derniere_lueur', { p: pourcent(p.derniereLueur.quantite) }));
+  if (p.insaisissable) notes.push(t('bulle.ennemi.insaisissable'));
   if (p.insensibleRalentissement) notes.push(t('bulle.ennemi.insensible_ralentissement'));
   if (p.degatsHeros !== undefined && p.degatsHeros !== 1) notes.push(t('bulle.ennemi.degats_heros', { n: nombre(p.degatsHeros) }));
   if (p.essaim !== undefined && p.essaim > 1) notes.push(t('bulle.ennemi.essaim', { n: p.essaim }));

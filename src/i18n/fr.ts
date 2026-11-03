@@ -9,6 +9,7 @@ import { frDeblocage } from './fr-deblocage';
 import { frHorde } from './fr-horde';
 import { frInscriptions } from './fr-inscriptions';
 import { frEnnemisRegions6a10 } from './fr-ennemis-regions-6-10';
+import { frEnnemisVariete } from './fr-ennemis-variete';
 import { frLore } from './fr-lore';
 import { frMeta } from './fr-meta';
 import { frNiveaux } from './fr-niveaux';
@@ -32,6 +33,7 @@ export const fr = {
 
   // Ennemis et boss des régions 6 à 10 (fr-ennemis-regions-6-10.ts)
   ...frEnnemisRegions6a10,
+  ...frEnnemisVariete,
 
   // Tours communes
   'tour.grenier_des_griffes': 'Grenier des Griffes',

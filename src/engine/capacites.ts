@@ -3,7 +3,7 @@
 // (exécution, rage, critique, esquive) sont dans unites.ts.
 import { CAPACITES_NULLES } from '../data/capacites';
 import { tirer, tirerEntre } from './aleatoire';
-import { appliquerEffets, estVisible, infligerDegats } from './degats';
+import { appliquerEffets, estVisible, infligerDegats, partApresBouclier } from './degats';
 import type { CapacitesUnite, SoinZone } from './definitions';
 import { MINUTEUR, type Ennemi, type EtatPartie, type Unite } from './etat';
 import { distance2 } from './recherche';
@@ -78,7 +78,7 @@ export function tirerDeLoin(etat: EtatPartie, u: Unite): void {
   u.cible = cible.id;
   const { degats, critique } = degatsDuCoup(etat, u, cap, attaque.degats[0], attaque.degats[1]);
   etat.evenements.push({ type: 'tir_unite', unite: u.id, ennemi: cible.id, critique });
-  infligerDegats(etat, cible, degats, attaque.typeDegats, cap.ignoreArmure);
+  infligerDegats(etat, cible, degats * partApresBouclier(etat, cible, u.x, u.y), attaque.typeDegats, cap.ignoreArmure);
   appliquerEffets(etat, cible, attaque.effets);
 }
 

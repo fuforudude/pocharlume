@@ -190,8 +190,8 @@ function avancerVers(u: Unite, x: number, y: number, arret: number): boolean {
 }
 
 function engageable(e: Ennemi): boolean {
-  // Un ennemi en pleine charge passe sans que personne l'arrête.
-  return e.vivant && !e.volant && e.invulnerable === 0 && e.charge === 0 && estVisible(e, false);
+  // Un ennemi en pleine charge ou insaisissable passe sans que personne l'arrête.
+  return e.vivant && !e.volant && e.invulnerable === 0 && e.charge === 0 && !e.pouvoirs?.insaisissable && estVisible(e, false);
 }
 
 /** Brûlure en cours : dégâts purs de ce pas. Vrai si l'unité en est morte. */
@@ -282,13 +282,16 @@ function coup(etat: EtatPartie, u: Unite, cap: CapacitesUnite, cible: Ennemi, ef
   const { degats } = degatsDuCoup(etat, u, cap, s.degats[0], s.degats[1]);
   infligerDegats(etat, cible, degats, 'physique', cap.ignoreArmure);
   if (effets) appliquerEffets(etat, cible, s.effets);
+  // Épines (Fagot d'Os) : celui qui frappe un ennemi hérissé s'y blesse.
+  const epines = cible.pouvoirs?.epines;
+  if (epines && cible.vivant) blesserUnite(etat, u, epines.degats, 'pur', cible.id);
 }
 
 function frapper(etat: EtatPartie, u: Unite, cible: Ennemi): void {
   const s = u.stats;
   const cap = s.capacites ?? CAPACITES_NULLES;
   etat.evenements.push({ type: 'coup', unite: u.id, ennemi: cible.id });
-  for (let i = 0; i < s.coups; i++) coup(etat, u, cap, cible, true);
+  for (let i = 0; i < s.coups && !u.mort; i++) coup(etat, u, cap, cible, true);
   const zone = u.zone;
   if (!zone) return;
   const rayon2 = zone.rayon * zone.rayon;

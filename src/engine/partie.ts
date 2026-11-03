@@ -12,7 +12,7 @@ import { mettreAJourEnnemis } from './ennemis';
 import { VERSION_ETAT, type ConfigPartie, type DefiPartie, type EntreeJournal, type EtatPartie } from './etat';
 import { ouvrirPas } from './evenements';
 import { resoudreHeros } from './modificateurs';
-import { laisserNuagesDesMorts, mettreAJourNuages, mettreAJourPouvoirsEnnemis } from './pouvoirs-ennemis';
+import { laisserEffetsDesMorts, laisserNuagesDesMorts, mettreAJourNuages, mettreAJourPouvoirsEnnemis } from './pouvoirs-ennemis';
 import { mettreAJourSorts, rechargeSort } from './sorts';
 import { mettreAJourPieges, mettreAJourStructures, mettreAJourZones } from './structures';
 import { enPas, PAS_PAR_SECONDE } from './temps';
@@ -194,6 +194,7 @@ function simuler(etat: EtatPartie): void {
   mettreAJourProjectiles(etat);
   mettreAJourSorts(etat);
   laisserNuagesDesMorts(etat);
+  laisserEffetsDesMorts(etat);
   retirerDisparus(etat);
   verifierFin(etat);
   etat.pas++;

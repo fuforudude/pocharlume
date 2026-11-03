@@ -698,7 +698,16 @@ export class Suivi {
       case 'resurrection':
       case 'charge':
       case 'invulnerabilite':
-        // Mécaniques des régions 6 à 10 : leurs effets visuels viennent avec la tâche d'interface (rien à dessiner pour l'instant).
+      case 'explosion':
+      case 'bond':
+      case 'vol':
+      case 'division':
+      case 'derniere_lueur':
+      case 'purification':
+      case 'terreur':
+      case 'desamorcage':
+      case 'inversion':
+        // Mécaniques des régions 6 à 10 et de la variété des ennemis : leurs effets visuels viennent avec la tâche d'interface (rien à dessiner pour l'instant).
         // La zone, les structures, les tours boostées ou en feu, les unités qui brûlent et l'ennemi à terre se dessinent d'après
         // l'état, tant qu'ils durent.
         return;

@@ -17,7 +17,7 @@ import type {
 } from './definitions';
 import type { Evenement } from './evenements';
 
-export const VERSION_ETAT = 6;
+export const VERSION_ETAT = 7;
 
 export type Statut = 'en_cours' | 'victoire' | 'defaite';
 export type FamilleTour = IdFamille | 'divine';
@@ -133,6 +133,15 @@ export interface Ennemi {
   chargeVitesse: number;
   /** Renversements de soldats encore possibles (Cavalier). */
   renversements: number;
+  /** Pas restants avant le prochain bond (Crapaud Gonflé), 0 = prêt. */
+  bondPas: number;
+  /** Vrai une fois qu'il a volé ses arêtes (Coupe-Bourse), et arêtes qu'il porte et qu'il rend à sa mort. */
+  vole: boolean;
+  butin: number;
+  /** Réduction de dégâts de l'aura d'un autre ennemi ce pas-ci (0,3 = −30 %), recalculée à chaque pas. */
+  bonusProtection: number;
+  /** Pas restants avant que l'armure et la résistance s'échangent (Effigie du Roi). */
+  alternancePas: number;
   /** Pas restants pendant lesquels il est intouchable (à terre, plongé) : ni ciblé, ni blessé, ni affecté, il ne bouge pas. */
   invulnerable: number;
   /** Tuiles dont il avance sur son chemin en réapparaissant (plongée). */

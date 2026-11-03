@@ -4,7 +4,7 @@ import { REGLES } from '../data/regles';
 import { tirerEntre } from './aleatoire';
 import { pointSurChemin, projeterSurChemin } from './chemins';
 import { premierEnnemi } from './ciblage';
-import { appliquerEffet, appliquerEffets, infligerDegats } from './degats';
+import { appliquerEffet, appliquerEffets, infligerDegats, partApresBouclier } from './degats';
 import type { DefPiege, DefTourelle, DefZoneDurable, Ouvrage } from './definitions';
 import { EFFET, MINUTEUR, type EtatPartie, type Piege, type Structure, type ZoneDurable } from './etat';
 import { distance2 } from './recherche';
@@ -135,7 +135,7 @@ export function mettreAJourStructures(etat: EtatPartie): void {
     if (!cible) continue;
     s.recharge = Math.max(1, enPas(s.stats.cadence));
     etat.evenements.push({ type: 'tir_structure', structure: s.id, ennemi: cible.id, x: s.x, y: s.y });
-    infligerDegats(etat, cible, tirerEntre(etat, s.stats.degats[0], s.stats.degats[1]), s.stats.typeDegats);
+    infligerDegats(etat, cible, tirerEntre(etat, s.stats.degats[0], s.stats.degats[1]) * partApresBouclier(etat, cible, s.x, s.y), s.stats.typeDegats);
     appliquerEffets(etat, cible, s.stats.effets);
   }
   etat.structures.length = garde;

@@ -205,6 +205,25 @@ export const SON_DES_EVENEMENTS: TableEvenements = {
   charge: lecture('onde_choc', 0.7, 0.8),
   /** Un boss devient intouchable : l'éclat de verre, aigu et fort. */
   invulnerabilite: lecture('impact_magique', 0.9, 1.6),
+  // Mécaniques de la variété des ennemis : sons existants réglés par événement.
+  /** Une Gerbe Ardente explose : l'explosion de la catapulte, plus aiguë. */
+  explosion: lecture('explosion', 0.8, 1.2),
+  /** Le Crapaud bondit : un choc sourd et grave. */
+  bond: lecture('impact_physique', 0.8, 0.6, 'bond', 1),
+  /** Le Coupe-Bourse vole : un éclat de verre, aigu et discret. */
+  vol: lecture('impact_magique', 0.7, 1.7),
+  /** Un Grand Manteau se défait : le souffle du sort, grave. */
+  division: lecture('sort', 0.7, 0.7, 'division', 1),
+  /** La dernière lueur d'un Martyr Blême : le soin, très grave. */
+  derniere_lueur: lecture('soin', 0.7, 0.6, 'derniere_lueur', 1),
+  /** L'Aumônier purifie : le soin, aigu. */
+  purification: lecture('soin', 0.6, 1.4, 'purification', 1),
+  /** Le Chantre terrifie : le souffle du sort, très grave. */
+  terreur: lecture('sort', 0.9, 0.55, 'terreur', 1),
+  /** Le Sapeur désamorce : un choc sec. */
+  desamorcage: lecture('impact_physique', 0.9, 1.1, 'desamorcage', 1),
+  /** L'Effigie change de peau : l'éclat de verre, grave. */
+  inversion: lecture('impact_magique', 0.6, 0.8, 'inversion', 1),
   fin: (e) => (e.statut === 'victoire' ? 'victoire' : e.statut === 'defaite' ? 'defaite' : null),
 };
 

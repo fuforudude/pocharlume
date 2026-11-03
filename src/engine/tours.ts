@@ -7,7 +7,7 @@ import { appliquerBonusTour, bonusDeFamille, bonusEffectif } from './bonus';
 import { placerSurChemin, segmentPour } from './chemins';
 import { premierEnnemi } from './ciblage';
 import { defFamille, dieuDe } from './contenu';
-import { appliquerEffets, estVisible, infligerDegats } from './degats';
+import { appliquerEffets, estVisible, infligerDegats, partApresBouclier } from './degats';
 import type { DefNiveauTour, Voie } from './definitions';
 import { facteurVitesse } from './ennemis';
 import type { Ennemi, EtatPartie, FamilleTour, Projectile, Tour } from './etat';
@@ -128,10 +128,11 @@ export function deplacerSoldats(etat: EtatPartie, tour: Tour): void {
 const dejaTouches: number[] = [];
 
 /** Coup au but sur une cible : dégâts, effets, puis chaîne vers les voisins visibles (pas les furtifs cachés). */
-function toucher(etat: EtatPartie, s: DefNiveauTour, cible: Ennemi, degats: number): void {
+function toucher(etat: EtatPartie, s: DefNiveauTour, cible: Ennemi, degats: number, origineX: number, origineY: number): void {
   const x = cible.x;
   const y = cible.y;
-  infligerDegats(etat, cible, degats, s.typeDegats, s.ignoreArmure);
+  // Le bouclier frontal (Porte-Herse) arrête le coup direct venu de devant lui ; la chaîne qui suit n'est pas arrêtée.
+  infligerDegats(etat, cible, degats * partApresBouclier(etat, cible, origineX, origineY), s.typeDegats, s.ignoreArmure);
   appliquerEffets(etat, cible, s.effets);
   const chaine = s.chaine;
   if (!chaine) return;
@@ -217,7 +218,7 @@ function tirerSur(etat: EtatPartie, t: Tour, cible: Ennemi): void {
   if (critique) degats *= s.critique?.multiplicateur ?? REGLES.multiplicateurCritique;
   if (s.projectile <= 0) {
     etat.evenements.push({ type: 'tir', tour: t.id, cible: cible.id, projectile: -1, x: t.x, y: t.y, critique });
-    toucher(etat, s, cible, degats);
+    toucher(etat, s, cible, degats, t.x, t.y);
     return;
   }
   const vitesse = s.projectile / PAS_PAR_SECONDE;
@@ -328,7 +329,10 @@ export function mettreAJourProjectiles(etat: EtatPartie): void {
       if (s.nappe) creerZone(etat, s.nappe, p.x, p.y, s.nappe.rayon);
       // Un tir au sol de la famille d'un dieu qui sème des pièges (Pollen) en laisse parfois un à l'impact.
       if (s.piegeAuSol && tirer(etat) < s.piegeAuSol.chance) poserPiege(etat, s.piegeAuSol.piege, p.x, p.y);
-    } else if (cible) toucher(etat, s, cible, p.degats);
+    } else if (cible) {
+      const tour = chercherParId(etat.tours, p.tour);
+      toucher(etat, s, cible, p.degats, tour?.x ?? p.x, tour?.y ?? p.y);
+    }
   }
   liste.length = garde;
 }

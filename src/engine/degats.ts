@@ -27,13 +27,14 @@ export function libererEnnemi(etat: EtatPartie, e: Ennemi): void {
 function tuer(etat: EtatPartie, e: Ennemi): void {
   e.vivant = false;
   e.pv = 0;
-  etat.aretes += e.prime;
+  // Un voleur tué rend le butin qu'il portait en plus de sa prime.
+  etat.aretes += e.prime + e.butin;
   libererEnnemi(etat, e);
   if (!e.boss) {
     etat.morts.push({ type: e.type, chemin: e.chemin, distance: e.distance, elite: e.elite, vague: e.vague });
     if (etat.morts.length > REGLES.memoireMorts) etat.morts.shift();
   }
-  etat.evenements.push({ type: 'mort', ennemi: e.id, typeEnnemi: e.type, x: e.x, y: e.y, prime: e.prime });
+  etat.evenements.push({ type: 'mort', ennemi: e.id, typeEnnemi: e.type, x: e.x, y: e.y, prime: e.prime + e.butin });
 }
 
 /**
@@ -55,7 +56,8 @@ function relever(etat: EtatPartie, e: Ennemi, relevement: Relevement): void {
  */
 export function infligerDegats(etat: EtatPartie, e: Ennemi, montant: number, type: TypeDegats, ignoreArmure = 0): number {
   if (!e.vivant || e.invulnerable > 0) return 0;
-  const subis = montant * partRestante(type, e.armure, e.resistance, ignoreArmure);
+  // L'aura d'un autre ennemi (Crieur Public) amoindrit les dégâts physiques et magiques, pas les dégâts purs.
+  const subis = montant * partRestante(type, e.armure, e.resistance, ignoreArmure) * (type === 'pur' ? 1 : 1 - e.bonusProtection);
   e.pv -= subis;
   if (e.pv <= 0) {
     const relevement = e.pouvoirs?.relevement;
@@ -63,6 +65,19 @@ export function infligerDegats(etat: EtatPartie, e: Ennemi, montant: number, typ
     else tuer(etat, e);
   }
   return subis;
+}
+
+/**
+ * Part des dégâts d'un coup direct tiré depuis (x, y) qui passe le bouclier frontal de l'ennemi (1 s'il n'en a pas) : le bouclier
+ * arrête le coup venu de devant lui, c'est-à-dire du côté où son chemin le mène, pas celui venu de côté ou de derrière.
+ */
+export function partApresBouclier(etat: EtatPartie, e: Ennemi, x: number, y: number): number {
+  const bouclier = e.pouvoirs?.bouclier;
+  if (!bouclier) return 1;
+  const chemin = etat.chemins[e.chemin];
+  if (!chemin) return 1;
+  const devant = (x - e.x) * (chemin.dirX[e.segment] ?? 0) + (y - e.y) * (chemin.dirY[e.segment] ?? 0) > 0;
+  return devant ? 1 - bouclier.reduction : 1;
 }
 
 /** Tue net un ennemi (exécution), quels que soient ses PV et ses protections ; un ennemi qui se relève ne se relève pas. La prime est versée. */
