@@ -4,13 +4,14 @@
 //
 // Affichage seulement : rien ici n'écrit dans l'état ni dans le journal, et le moteur n'est pas modifié. La composition
 // annoncée est lue dans les vagues figées du niveau (ou, en mode infini, dans la vague que le générateur produira).
+// Rien dans le calque ne capte le toucher : la bulle d'une pastille s'ouvre depuis le canvas (`puceSous`, branché sur
+// `BulleSurCarte` par la partie), si bien qu'un toucher court atteint toujours la case dessous.
 import { ENNEMIS } from '../data/ennemis';
 import { genererVagueInfinie } from '../engine';
-import type { Ennemi, EtatPartie, Evenement, Vague } from '../engine';
+import type { EtatPartie, Evenement, Vague } from '../engine';
 import { t, tCle } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
 import { spriteEnnemi } from '../render/habillage';
-import { attacherBulleEnnemi } from './bulle';
 import { el } from './dom';
 
 /** Un type d'ennemi et le nombre qui sortira par une entrée. */
@@ -21,7 +22,7 @@ export interface GroupeEntree {
 
 /** Durée de la traînée lumineuse le long d'un chemin (ms de temps de jeu). */
 export const DUREE_TRAINEE_MS = 2000;
-/** Durée de la réaction de la porte à une fuite (ms de temps de jeu). */
+/** Durée de la réaction de la porte à une fuite (ms réelles : la même à la vitesse ×1 et ×2). */
 export const DUREE_SECOUSSE_MS = 500;
 /** Au plus ce nombre de types d'ennemis par panneau ; les autres sont résumés par « +n ». */
 export const TYPES_MAX_PAR_PANNEAU = 4;
@@ -29,21 +30,34 @@ export const TYPES_MAX_PAR_PANNEAU = 4;
 const QUEUE_TUILES = 5;
 const TRANCHES_TRAINEE = 14;
 const MARGE_BORD = 6;
+/** Les pastilles se touchent un peu à côté : un doigt n'est pas précis. */
+const TOLERANCE_PUCE = 4;
 
-/** Ce que voit le rendu : la conversion tuiles vers pixels CSS du canvas (satisfait par `Rendu`). */
-export interface ProjectionIndications {
-  readonly pixelsCssParTuile: number;
-  enCssX(tuilesX: number): number;
-  enCssY(tuilesY: number): number;
+/** La requête « réduire les animations » du système (le jeu n'a pas de réglage à lui), créée une seule fois par partie. */
+function requeteAnimationsReduites(): MediaQueryList | null {
+  try {
+    return window.matchMedia('(prefers-reduced-motion: reduce)');
+  } catch {
+    return null;
+  }
 }
 
-/** Le réglage « réduire les animations » du système (le jeu n'a pas de réglage à lui). */
-export function animationsReduitesDuSysteme(): boolean {
-  try {
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  } catch {
-    return false;
-  }
+/** Les bandes de l'écran que le HUD recouvre (pixels CSS), comme `Marges` de marges.ts. */
+export interface MargesEcran {
+  readonly haut: number;
+  readonly bas: number;
+  readonly gauche: number;
+  readonly droite: number;
+}
+
+/** Une pastille d'ennemi sous le pointeur : de quoi ouvrir sa bulle depuis le canvas. */
+export interface PuceSous {
+  /** Négatif, pour ne jamais se confondre avec l'id d'un ennemi du canvas. */
+  readonly cle: number;
+  readonly type: string;
+  ancre(): { readonly left: number; readonly top: number; readonly right: number; readonly bottom: number };
+  /** Faux dès que la pastille a disparu (vague partie, panneau masqué) : la bulle se referme. */
+  encore(): boolean;
 }
 
 /**
@@ -63,11 +77,15 @@ export function compositionParChemin(vague: Vague, chemins: number): GroupeEntre
   return resultat;
 }
 
-/** La prochaine vague à lancer, ou null s'il n'en reste plus. En mode infini, c'est celle que le générateur va produire. */
-export function prochaineVague(etat: EtatPartie): Vague | null {
-  const index = etat.vagues.lancees;
+/** La vague d'indice `index` (0 pour la première), lue dans sa définition : les vagues figées, ou le générateur en infini. */
+export function vagueDefinie(etat: EtatPartie, index: number): Vague | null {
   if (etat.config.infini) return genererVagueInfinie(etat.config, etat.chemins.length, index + 1);
   return etat.niveau.vagues[index] ?? null;
+}
+
+/** La prochaine vague à lancer, ou null s'il n'en reste plus. */
+export function prochaineVague(etat: EtatPartie): Vague | null {
+  return vagueDefinie(etat, etat.vagues.lancees);
 }
 
 /** Vrai quand les panneaux d'entrée sont à montrer : la vague en cours a fini d'apparaître, la suivante n'est pas partie. */
@@ -80,13 +98,18 @@ interface Point {
   readonly y: number;
 }
 
+interface PuceAffichee {
+  readonly noeud: HTMLElement;
+  readonly type: string;
+}
+
 interface Entree {
   readonly noeud: HTMLElement;
   readonly point: Point;
   /** Indices des chemins qui partent de ce point. */
   readonly chemins: readonly number[];
+  readonly puces: PuceAffichee[];
   signature: string;
-  controleur: AbortController | null;
   largeur: number;
   hauteur: number;
 }
@@ -96,6 +119,7 @@ interface Sortie {
   readonly image: HTMLImageElement;
   readonly point: Point;
   readonly chemins: readonly number[];
+  /** Fin de la réaction, en ms de l'horloge réelle ; -1 : calme. */
   secoueJusque: number;
   etat: string;
 }
@@ -125,6 +149,8 @@ function groupesParPoint(etat: EtatPartie, bout: 'debut' | 'fin'): { point: Poin
 export interface OptionsIndications {
   /** Vrai : pas de mouvement (ni traînée, ni pulsation, ni tremblement). Par défaut, la préférence du système. */
   readonly reduit?: () => boolean;
+  /** Horloge réelle en ms (la porte tremble le même temps à toutes les vitesses). Par défaut `performance.now`. */
+  readonly maintenant?: () => number;
 }
 
 export class Indications {
@@ -136,26 +162,42 @@ export class Indications {
   private readonly trainees: Trainee[] = [];
   /** Chemins déjà annoncés ou utilisés : leur traînée a eu lieu. */
   private readonly servis = new Set<number>();
+  /** Chemin de chaque ennemi vivant au dernier pas : à la fuite, l'ennemi n'est déjà plus dans `etat.ennemis`. */
+  private readonly cheminDe = new Map<number, number>();
   private readonly reduit: () => boolean;
+  private readonly maintenant: () => number;
   private compositionIndex = -2;
   private composition: GroupeEntree[][] = [];
   private tailleCanvas = '';
+  private canvasDessine = false;
+  private largeur: number;
+  private hauteur: number;
+  private marges: MargesEcran = { haut: 0, bas: 0, gauche: 0, droite: 0 };
 
   constructor(
-    parent: HTMLElement,
+    private readonly parent: HTMLElement,
     private readonly atlas: AtlasRendu,
-    private readonly projection: ProjectionIndications,
+    private readonly projection: {
+      readonly pixelsCssParTuile: number;
+      enCssX(tuilesX: number): number;
+      enCssY(tuilesY: number): number;
+    },
     etat: EtatPartie,
-    private readonly signal: AbortSignal,
+    signal: AbortSignal,
     temps: number,
     options: OptionsIndications = {},
   ) {
-    this.reduit = options.reduit ?? animationsReduitesDuSysteme;
+    const requete = options.reduit ? null : requeteAnimationsReduites();
+    this.reduit = options.reduit ?? ((): boolean => requete?.matches === true);
+    this.maintenant = options.maintenant ?? ((): number => performance.now());
     this.racine = el('div', 'indications');
     this.canvas = el('canvas', 'trace');
     this.canvas.setAttribute('aria-hidden', 'true');
+    this.canvas.hidden = true;
     this.ctx = this.canvas.getContext('2d');
     this.racine.append(this.canvas);
+    this.largeur = parent.clientWidth || window.innerWidth;
+    this.hauteur = parent.clientHeight || window.innerHeight;
 
     for (const { point, chemins } of groupesParPoint(etat, 'fin')) {
       const noeud = el('div', 'sortie-chemin');
@@ -170,21 +212,18 @@ export class Indications {
       this.sorties.push({ noeud, image, point, chemins, secoueJusque: -1, etat: '' });
     }
     for (const { point, chemins } of groupesParPoint(etat, 'debut')) {
-      // Le conteneur laisse passer les clics (la construction reste possible dessous) ; seules les pastilles les captent.
       const noeud = el('div', 'entree-chemin');
       noeud.style.pointerEvents = 'none';
       noeud.hidden = true;
       this.racine.append(noeud);
-      this.entrees.push({ noeud, point, chemins, signature: '', controleur: null, largeur: 0, hauteur: 0 });
+      this.entrees.push({ noeud, point, chemins, puces: [], signature: '', largeur: 0, hauteur: 0 });
     }
     parent.append(this.racine);
+    this.memoriserEnnemis(etat);
 
     // Une partie reprise ne rejoue pas l'annonce des chemins déjà servis ; une nouvelle partie annonce ceux de la 1re vague.
     if (etat.vagues.lancees > 0) etat.chemins.forEach((_, i) => this.servis.add(i));
-    else {
-      const premiere = prochaineVague(etat);
-      if (premiere) premiere.paquets.forEach((p) => this.servis.add(p.chemin));
-    }
+    else prochaineVague(etat)?.paquets.forEach((p) => this.servis.add(p.chemin));
     this.lancerTrainees(etat.chemins.map((_, i) => i), temps);
     signal.addEventListener('abort', () => { this.detruire(); }, { once: true });
   }
@@ -203,38 +242,66 @@ export class Indications {
     }
   }
 
-  /** À appeler pour chaque événement du pas : une vague qui part annonce ses chemins neufs, une fuite fait réagir la porte. */
+  private memoriserEnnemis(etat: EtatPartie): void {
+    this.cheminDe.clear();
+    for (const e of etat.ennemis) this.cheminDe.set(e.id, e.chemin);
+  }
+
+  /**
+   * À appeler pour chaque événement du pas, puis `apresPas` une fois le pas fini : une vague qui part annonce ses chemins
+   * neufs, une fuite fait réagir la porte.
+   */
   evenement(etat: EtatPartie, evenement: Evenement, temps: number): void {
     if (evenement.type === 'vague') {
+      // Lue dans sa définition : un paquet d'un seul ennemi sans délai est déjà sorti de `etat.vagues.paquets` à ce pas.
+      const vague = vagueDefinie(etat, evenement.index);
       const neufs = new Set<number>();
-      for (const paquet of etat.vagues.paquets) {
-        if (paquet.vague === evenement.index && !this.servis.has(paquet.chemin)) neufs.add(paquet.chemin);
-      }
+      for (const paquet of vague?.paquets ?? []) if (!this.servis.has(paquet.chemin)) neufs.add(paquet.chemin);
       for (const chemin of neufs) this.servis.add(chemin);
       this.lancerTrainees([...neufs], temps);
     } else if (evenement.type === 'fuite') {
-      // L'ennemi est encore dans la liste au pas de sa fuite ; sinon, toutes les portes réagissent.
-      const ennemi: Ennemi | undefined = etat.ennemis.find((e) => e.id === evenement.ennemi);
+      // L'ennemi a déjà quitté `etat.ennemis` : son chemin vient de la table du pas précédent. Inconnu : toutes les portes réagissent.
+      const chemin = this.cheminDe.get(evenement.ennemi);
+      const fin = this.maintenant() + DUREE_SECOUSSE_MS;
       for (const sortie of this.sorties) {
-        if (!ennemi || sortie.chemins.includes(ennemi.chemin)) sortie.secoueJusque = temps + DUREE_SECOUSSE_MS;
+        if (chemin === undefined || sortie.chemins.includes(chemin)) sortie.secoueJusque = fin;
       }
     }
   }
 
-  private viewport(): { largeur: number; hauteur: number } {
-    return {
-      largeur: this.racine.parentElement?.clientWidth || window.innerWidth,
-      hauteur: this.racine.parentElement?.clientHeight || window.innerHeight,
-    };
+  /** À appeler après les événements de chaque pas : retient les ennemis vivants et leur chemin. */
+  apresPas(etat: EtatPartie): void {
+    this.memoriserEnnemis(etat);
+  }
+
+  /** Les bandes que le HUD recouvre : les panneaux restent dans la zone libre. */
+  definirMarges(marges: MargesEcran): void {
+    this.marges = marges;
+  }
+
+  /** L'écran a changé de taille (redimensionnement, rotation) : taille relue, largeur des panneaux remesurée. */
+  redimensionner(): void {
+    this.largeur = this.parent.clientWidth || window.innerWidth;
+    this.hauteur = this.parent.clientHeight || window.innerHeight;
+    for (const entree of this.entrees) entree.signature = '';
   }
 
   mettreAJour(etat: EtatPartie, temps: number): void {
     const reduit = this.reduit();
     this.racine.classList.toggle('animations-reduites', reduit);
-    const { largeur, hauteur } = this.viewport();
-    this.mettreAJourEntrees(etat, largeur, hauteur);
-    this.mettreAJourSorties(temps, reduit, largeur, hauteur);
-    this.dessinerTrainees(etat, temps, reduit, largeur, hauteur);
+    this.mettreAJourEntrees(etat);
+    this.mettreAJourSorties(reduit);
+    this.dessinerTrainees(etat, temps, reduit);
+  }
+
+  private zone(): { gauche: number; haut: number; droite: number; bas: number } {
+    const m = this.marges;
+    return {
+      gauche: m.gauche + MARGE_BORD,
+      haut: m.haut + MARGE_BORD,
+      droite: this.largeur - m.droite - MARGE_BORD,
+      bas: this.hauteur - m.bas - MARGE_BORD,
+    };
   }
 
   private compositionCourante(etat: EtatPartie): GroupeEntree[][] {
@@ -256,21 +323,30 @@ export class Indications {
     return [...cumul.entries()].map(([type, nombre]) => ({ type, nombre }));
   }
 
-  private mettreAJourEntrees(etat: EtatPartie, largeur: number, hauteur: number): void {
+  private mettreAJourEntrees(etat: EtatPartie): void {
     const visible = panneauxVisibles(etat);
     const composition = visible ? this.compositionCourante(etat) : [];
+    const zone = this.zone();
     for (const entree of this.entrees) {
       const groupes = visible ? this.groupesDe(entree, composition) : [];
-      entree.noeud.hidden = groupes.length === 0;
-      if (groupes.length === 0) continue;
+      if (groupes.length === 0) {
+        entree.noeud.hidden = true;
+        entree.puces.length = 0;
+        entree.signature = '';
+        continue;
+      }
       const signature = groupes.map((g) => `${g.type}:${String(g.nombre)}`).join('|');
       if (signature !== entree.signature) this.reconstruire(entree, groupes, signature);
       const x = this.projection.enCssX(entree.point.x);
       const y = this.projection.enCssY(entree.point.y);
-      // Posé juste au-dessus du point d'entrée, ramené dans l'écran.
-      const demi = entree.largeur / 2;
-      const gauche = Math.min(Math.max(x, demi + MARGE_BORD), Math.max(demi + MARGE_BORD, largeur - demi - MARGE_BORD));
-      const haut = Math.min(Math.max(y, entree.hauteur + MARGE_BORD), Math.max(entree.hauteur + MARGE_BORD, hauteur - MARGE_BORD));
+      // Posé au-dessus du point d'entrée ; sans place au-dessus (entrée en haut de la carte, sous la barre du HUD),
+      // en dessous. Toujours dans la zone libre.
+      const w = entree.largeur;
+      const h = entree.hauteur;
+      let haut = y - h;
+      if (haut < zone.haut) haut = y;
+      const gauche = Math.min(Math.max(x - w / 2, zone.gauche), Math.max(zone.gauche, zone.droite - w));
+      haut = Math.min(Math.max(haut, zone.haut), Math.max(zone.haut, zone.bas - h));
       entree.noeud.style.left = `${String(Math.round(gauche))}px`;
       entree.noeud.style.top = `${String(Math.round(haut))}px`;
     }
@@ -278,10 +354,7 @@ export class Indications {
 
   private reconstruire(entree: Entree, groupes: readonly GroupeEntree[], signature: string): void {
     entree.signature = signature;
-    entree.controleur?.abort();
-    const controleur = new AbortController();
-    entree.controleur = controleur;
-    this.signal.addEventListener('abort', () => { controleur.abort(); }, { once: true });
+    entree.puces.length = 0;
     const noeud = entree.noeud;
     noeud.replaceChildren();
     noeud.setAttribute('role', 'group');
@@ -296,32 +369,61 @@ export class Indications {
       const puce = el('span', 'puce-ennemi');
       puce.dataset['type'] = groupe.type;
       puce.dataset['nombre'] = String(groupe.nombre);
-      puce.style.pointerEvents = 'auto';
       const nom = Object.hasOwn(ENNEMIS, groupe.type) ? tCle(ENNEMIS[groupe.type as keyof typeof ENNEMIS].nom) : groupe.type;
+      puce.setAttribute('role', 'img');
       puce.setAttribute('aria-label', t('indications.entree_ennemi', { nom, nombre: groupe.nombre }));
       const icone = el('img', 'icone-ennemi');
       icone.alt = '';
       icone.src = this.atlas.iconeUrl(spriteEnnemi(groupe.type), 2);
       puce.append(icone, el('span', 'nombre-ennemi', `×${String(groupe.nombre)}`));
-      if (Object.hasOwn(ENNEMIS, groupe.type)) attacherBulleEnnemi(puce, groupe.type, { signal: controleur.signal, focus: false });
       puces.append(puce);
+      entree.puces.push({ noeud: puce, type: groupe.type });
     }
     if (groupes.length > montres.length) {
       const autres = el('span', 'puce-ennemi autres', `+${String(groupes.length - montres.length)}`);
+      autres.setAttribute('role', 'img');
       autres.setAttribute('aria-label', t('indications.autres', { n: groupes.length - montres.length }));
       puces.append(autres);
     }
     noeud.append(puces);
-    // Mesuré une fois par contenu : sert à ramener le panneau dans l'écran sans lire le DOM à chaque image.
+    // Mesuré une fois par contenu (et à chaque redimensionnement) : sert à placer le panneau sans lire le DOM à chaque image.
     noeud.hidden = false;
     entree.largeur = noeud.offsetWidth || 24 + 36 * montres.length;
     entree.hauteur = noeud.offsetHeight || 34;
   }
 
-  private mettreAJourSorties(temps: number, reduit: boolean, largeur: number, hauteur: number): void {
+  /**
+   * La pastille d'ennemi sous le point (x, y) de l'écran (pixels CSS), ou null. Les pastilles ne captent aucun événement :
+   * la partie interroge ce test depuis les événements du canvas pour ouvrir la bulle (survol, appui long).
+   */
+  puceSous(x: number, y: number): PuceSous | null {
+    for (let e = 0; e < this.entrees.length; e++) {
+      const entree = this.entrees[e];
+      if (!entree || entree.noeud.hidden) continue;
+      for (let i = 0; i < entree.puces.length; i++) {
+        const puce = entree.puces[i];
+        if (!puce) continue;
+        const r = puce.noeud.getBoundingClientRect();
+        if (r.right <= r.left || r.bottom <= r.top) continue;
+        if (x < r.left - TOLERANCE_PUCE || x > r.right + TOLERANCE_PUCE || y < r.top - TOLERANCE_PUCE || y > r.bottom + TOLERANCE_PUCE) continue;
+        return {
+          cle: -(1 + e * TYPES_MAX_PAR_PANNEAU + i),
+          type: puce.type,
+          ancre: () => puce.noeud.getBoundingClientRect(),
+          encore: () => !entree.noeud.hidden && entree.puces.includes(puce) && puce.noeud.isConnected,
+        };
+      }
+    }
+    return null;
+  }
+
+  private mettreAJourSorties(reduit: boolean): void {
     const cote = Math.round(Math.min(56, Math.max(28, this.projection.pixelsCssParTuile * 2.4)));
+    const demi = cote / 2;
+    const zone = this.zone();
+    const maintenant = this.maintenant();
     for (const sortie of this.sorties) {
-      const secoue = temps < sortie.secoueJusque;
+      const secoue = maintenant < sortie.secoueJusque;
       const etat = `${secoue ? 'r' : '-'}${reduit ? 'm' : '-'}${String(cote)}`;
       if (etat !== sortie.etat) {
         sortie.etat = etat;
@@ -330,31 +432,38 @@ export class Indications {
         sortie.image.style.width = `${String(cote)}px`;
         sortie.image.style.height = `${String(cote)}px`;
       }
-      const demi = cote / 2;
-      const x = Math.min(Math.max(this.projection.enCssX(sortie.point.x), demi + MARGE_BORD), Math.max(demi + MARGE_BORD, largeur - demi - MARGE_BORD));
-      const y = Math.min(Math.max(this.projection.enCssY(sortie.point.y), demi + MARGE_BORD), Math.max(demi + MARGE_BORD, hauteur - demi - MARGE_BORD));
+      const x = Math.min(Math.max(this.projection.enCssX(sortie.point.x), zone.gauche + demi), Math.max(zone.gauche + demi, zone.droite - demi));
+      const y = Math.min(Math.max(this.projection.enCssY(sortie.point.y), zone.haut + demi), Math.max(zone.haut + demi, zone.bas - demi));
       sortie.noeud.style.left = `${String(Math.round(x))}px`;
       sortie.noeud.style.top = `${String(Math.round(y))}px`;
     }
   }
 
-  private dessinerTrainees(etat: EtatPartie, temps: number, reduit: boolean, largeur: number, hauteur: number): void {
-    const ctx = this.ctx;
+  private dessinerTrainees(etat: EtatPartie, temps: number, reduit: boolean): void {
     if (reduit) this.trainees.length = 0;
     for (let i = this.trainees.length - 1; i >= 0; i--) {
       const tr = this.trainees[i];
       if (tr && temps - tr.debut >= DUREE_TRAINEE_MS) this.trainees.splice(i, 1);
     }
-    if (!ctx) return;
+    const ctx = this.ctx;
+    const actif = this.trainees.length > 0;
+    // Le canvas n'est effacé que s'il a dessiné à l'image précédente, et masqué quand aucune traînée ne tourne.
+    this.canvas.hidden = !actif;
+    if (!actif && !this.canvasDessine) return;
+    if (!ctx) {
+      this.canvasDessine = false;
+      return;
+    }
     const dpr = window.devicePixelRatio || 1;
-    const taille = `${String(largeur)}x${String(hauteur)}@${String(dpr)}`;
+    const taille = `${String(this.largeur)}x${String(this.hauteur)}@${String(dpr)}`;
     if (taille !== this.tailleCanvas) {
       this.tailleCanvas = taille;
-      this.canvas.width = Math.round(largeur * dpr);
-      this.canvas.height = Math.round(hauteur * dpr);
+      this.canvas.width = Math.round(this.largeur * dpr);
+      this.canvas.height = Math.round(this.hauteur * dpr);
     }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.clearRect(0, 0, largeur, hauteur);
+    ctx.clearRect(0, 0, this.largeur, this.hauteur);
+    this.canvasDessine = actif;
     for (const tr of this.trainees) {
       const chemin = etat.chemins[tr.chemin];
       if (!chemin) continue;
@@ -409,7 +518,6 @@ export class Indications {
   }
 
   detruire(): void {
-    for (const entree of this.entrees) entree.controleur?.abort();
     this.racine.remove();
   }
 }

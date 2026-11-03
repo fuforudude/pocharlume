@@ -3,15 +3,13 @@
 // disparaît quand la vague part et revient avant la suivante, la porte réagit à une fuite, la traînée part au début du
 // niveau et respecte « réduire les animations ». Le rendu est remplacé par une projection simple (1 tuile = 16 px).
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ENNEMIS } from '../data/ennemis';
-import { CAMPAGNE } from '../data/niveaux/campagne';
+import { CAMPAGNE, niveauDeCampagne } from '../data/niveaux/campagne';
 import { VERSION_DONNEES } from '../data/version';
-import { ajouterEnnemi, creerPartie } from '../engine';
-import type { ConfigPartie, EtatPartie, Vague } from '../engine';
+import { ajouterEnnemi, avancer, creerPartie } from '../engine';
+import type { Action, ConfigPartie, EtatPartie, Vague } from '../engine';
 import { defEnnemi } from '../engine/contenu';
-import { tCle } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
-import { DELAI_SURVOL_MS, fermerBulle } from './bulle';
+import { fermerBulle } from './bulle';
 import {
   compositionParChemin,
   DUREE_SECOUSSE_MS,
@@ -44,11 +42,11 @@ interface Montage {
   readonly controleur: AbortController;
 }
 
-function monter(options: { reduit?: boolean; etat?: EtatPartie; temps?: number } = {}): Montage {
+function monter(options: { reduit?: boolean; etat?: EtatPartie; temps?: number; maintenant?: () => number } = {}): Montage {
   const etat = options.etat ?? nouvellePartie();
   const controleur = new AbortController();
   const reduit = options.reduit ?? false;
-  const indications = new Indications(document.body, ATLAS, PROJECTION, etat, controleur.signal, options.temps ?? 0, { reduit: () => reduit });
+  const indications = new Indications(document.body, ATLAS, PROJECTION, etat, controleur.signal, options.temps ?? 0, { reduit: () => reduit, ...(options.maintenant ? { maintenant: options.maintenant } : {}) });
   return { etat, indications, controleur };
 }
 
@@ -72,6 +70,13 @@ function attendu(etat: EtatPartie, vague: Vague): string[][] {
   return [...parEntree.values()]
     .filter((m) => m.size > 0)
     .map((m) => [...m.entries()].slice(0, TYPES_MAX_PAR_PANNEAU).map(([type, n]) => `${type}:${String(n)}`));
+}
+
+/** Une partie dont chaque vague n'a qu'un paquet d'un ennemi, sans délai, sur le chemin donné. */
+function partieAvecVagues(chemins: readonly (readonly number[])[]): EtatPartie {
+  const niveau = (MULTI as NonNullable<typeof MULTI>).niveau;
+  const vagues: Vague[] = chemins.map((cs) => ({ paquets: cs.map((chemin) => ({ ennemi: 'paysan_affame', nombre: 1, intervalle: 1, chemin, delai: 0 })) }));
+  return creerPartie({ ...niveau, vagues }, CONFIG);
 }
 
 function paquet(vague: number, chemin: number, ennemi = 'paysan_affame'): EtatPartie['vagues']['paquets'][number] {
@@ -137,7 +142,10 @@ describe('panneaux d’entrée', () => {
     indications.mettreAJour(etat, 0);
     const panneau = document.querySelector<HTMLElement>('.entree-chemin');
     expect(panneau?.style.pointerEvents).toBe('none');
-    expect(document.querySelector<HTMLElement>('.puce-ennemi')?.style.pointerEvents).toBe('auto');
+    // Les pastilles non plus ne captent rien : un toucher court atteint toujours la case dessous.
+    expect(document.querySelector<HTMLElement>('.puce-ennemi')?.style.pointerEvents).not.toBe('auto');
+    expect(document.querySelector('.puce-ennemi')?.getAttribute('role')).toBe('img');
+    expect(document.querySelector('.puce-ennemi')?.getAttribute('aria-label')).toContain('par cette entrée');
     expect(document.querySelector<HTMLElement>('.indications')?.parentElement).toBe(document.body);
   });
 
@@ -181,23 +189,55 @@ describe('panneaux d’entrée', () => {
     expect(affiche()).toEqual(attendu(etat, vague));
   });
 
-  it('la bulle d’une pastille décrit l’ennemi au survol de la souris', () => {
+  it('une pastille est retrouvée sous le pointeur (pour sa bulle) et ne l’est plus quand le panneau se masque', () => {
     const { etat, indications } = monter();
     indications.mettreAJour(etat, 0);
     const puce = document.querySelector<HTMLElement>('.puce-ennemi[data-type]');
-    const type = puce?.dataset['type'] ?? '';
-    expect(type).not.toBe('');
-    puce?.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse', bubbles: true }));
-    vi.advanceTimersByTime(DELAI_SURVOL_MS);
-    const bulle = document.querySelector<HTMLElement>('.bulle');
-    expect(bulle?.hidden).toBe(false);
-    expect(bulle?.textContent).toContain(tCle(ENNEMIS[type as keyof typeof ENNEMIS].nom));
+    if (!puce) throw new Error('pastille absente');
+    puce.getBoundingClientRect = (): DOMRect => ({ left: 100, top: 50, right: 130, bottom: 80, width: 30, height: 30, x: 100, y: 50, toJSON: () => ({}) });
+    expect(indications.puceSous(10, 10)).toBeNull();
+    const trouvee = indications.puceSous(115, 65);
+    expect(trouvee?.type).toBe(puce.dataset['type']);
+    expect(trouvee?.cle).toBeLessThan(0);
+    expect(trouvee?.encore()).toBe(true);
+    // Un peu à côté compte aussi (tolérance d'un doigt).
+    expect(indications.puceSous(133, 65)).not.toBeNull();
+    etat.vagues.paquets.push(paquet(0, 0));
+    indications.mettreAJour(etat, 10);
+    expect(trouvee?.encore()).toBe(false);
+    expect(indications.puceSous(115, 65)).toBeNull();
+  });
+
+  it('un panneau d’une entrée en haut de la carte ne passe jamais sous la barre du HUD', () => {
+    const niveau = CAMPAGNE.find((n) => n.niveau.id === 'r1-02');
+    if (!niveau) throw new Error('r1-02 absent');
+    const etat = creerPartie(niveau.niveau, CONFIG);
+    const haut = etat.chemins.some((c) => (c.points[0]?.y ?? 99) <= 0);
+    expect(haut).toBe(true);
+    const { indications } = monter({ etat });
+    indications.definirMarges({ haut: 44, bas: 60, gauche: 0, droite: 0 });
+    indications.mettreAJour(etat, 0);
+    const panneaux = [...document.querySelectorAll<HTMLElement>('.entree-chemin')].filter((p) => !p.hidden);
+    expect(panneaux.length).toBeGreaterThan(0);
+    for (const p of panneaux) expect(Number.parseFloat(p.style.top)).toBeGreaterThanOrEqual(44);
+  });
+
+  it('au redimensionnement ou à la rotation, la largeur des panneaux est remesurée (le panneau est refait)', () => {
+    const { etat, indications } = monter();
+    indications.mettreAJour(etat, 0);
+    const avant = document.querySelector('.puce-ennemi');
+    indications.mettreAJour(etat, 1);
+    expect(document.querySelector('.puce-ennemi')).toBe(avant);
+    indications.redimensionner();
+    indications.mettreAJour(etat, 2);
+    expect(document.querySelector('.puce-ennemi')).not.toBe(avant);
   });
 });
 
 describe('porte de sortie', () => {
   it('tremble et rougit quand un ennemi sort, puis se calme', () => {
-    const { etat, indications } = monter();
+    let horloge = 1000;
+    const { etat, indications } = monter({ maintenant: () => horloge });
     const portes = [...document.querySelectorAll<HTMLElement>('.sortie-chemin')];
     expect(portes.length).toBeGreaterThan(0);
     expect(portes.some((p) => p.classList.contains('rougit'))).toBe(false);
@@ -207,12 +247,15 @@ describe('porte de sortie', () => {
     ajouterEnnemi(etat, def, 'paysan_affame', 0, 0, false, {});
     const ennemi = etat.ennemis[etat.ennemis.length - 1];
     if (!ennemi) throw new Error('ennemi non créé');
+    indications.apresPas(etat);
     indications.evenement(etat, { type: 'fuite', ennemi: ennemi.id, vies: 1 }, 1000);
+    horloge = 1100;
     indications.mettreAJour(etat, 1100);
     const reagit = [...document.querySelectorAll<HTMLElement>('.sortie-chemin')].filter((p) => p.classList.contains('rougit'));
     expect(reagit.length).toBeGreaterThan(0);
     expect(reagit.every((p) => p.classList.contains('secoue'))).toBe(true);
 
+    horloge = 1000 + DUREE_SECOUSSE_MS + 1;
     indications.mettreAJour(etat, 1000 + DUREE_SECOUSSE_MS + 1);
     expect(document.querySelector('.sortie-chemin.rougit')).toBeNull();
     expect(document.querySelector('.sortie-chemin.secoue')).toBeNull();
@@ -239,36 +282,29 @@ describe('traînée des chemins', () => {
   });
 
   it('repart la première fois qu’un chemin sert, pas pour un chemin déjà annoncé', () => {
-    const etat = nouvellePartie();
-    // Un chemin que la première vague n'emprunte pas, s'il y en a un.
-    const premiere = etat.niveau.vagues[0] as Vague;
-    const emprunte = premiere.paquets.map((p) => p.chemin);
-    const absent = etat.chemins.findIndex((_, i) => !emprunte.includes(i));
+    const etat = partieAvecVagues([[0], [0], [1], [1]]);
     const { indications } = monter({ etat });
     indications.mettreAJour(etat, DUREE_TRAINEE_MS + 10);
     expect(indications.cheminsEnTrainee).toEqual([]);
 
-    // La première vague part : ses chemins ont déjà eu leur traînée au début.
-    etat.vagues.paquets.push(...premiere.paquets.map((p) => paquet(0, p.chemin, p.ennemi)));
+    // Les vagues 0 et 1 n'empruntent que le chemin 0, déjà annoncé au début.
     indications.evenement(etat, { type: 'vague', index: 0, bonus: 0 }, 3000);
+    indications.evenement(etat, { type: 'vague', index: 1, bonus: 0 }, 6000);
     expect(indications.cheminsEnTrainee).toEqual([]);
 
-    if (absent >= 0) {
-      etat.vagues.paquets.push(paquet(1, absent));
-      indications.evenement(etat, { type: 'vague', index: 1, bonus: 0 }, 9000);
-      expect(indications.cheminsEnTrainee).toEqual([absent]);
-      // Une seconde fois : le chemin est déjà servi.
-      indications.mettreAJour(etat, 9000 + DUREE_TRAINEE_MS);
-      etat.vagues.paquets.push(paquet(2, absent));
-      indications.evenement(etat, { type: 'vague', index: 2, bonus: 0 }, 20_000);
-      expect(indications.cheminsEnTrainee).toEqual([]);
-    }
+    // La vague 2 emprunte le chemin 1 pour la première fois, même si son paquet est déjà sorti à ce pas.
+    indications.evenement(etat, { type: 'vague', index: 2, bonus: 0 }, 9000);
+    expect(indications.cheminsEnTrainee).toEqual([1]);
+    // Une seconde fois : le chemin est déjà servi.
+    indications.mettreAJour(etat, 9000 + DUREE_TRAINEE_MS);
+    indications.evenement(etat, { type: 'vague', index: 3, bonus: 0 }, 20_000);
+    expect(indications.cheminsEnTrainee).toEqual([]);
   });
 
   it('avec « réduire les animations » aucune traînée ne part', () => {
-    const { etat, indications } = monter({ reduit: true });
+    const etat = partieAvecVagues([[0], [1]]);
+    const { indications } = monter({ reduit: true, etat });
     expect(indications.cheminsEnTrainee).toEqual([]);
-    etat.vagues.paquets.push(paquet(1, 0));
     indications.evenement(etat, { type: 'vague', index: 1, bonus: 0 }, 5000);
     expect(indications.cheminsEnTrainee).toEqual([]);
   });
@@ -278,9 +314,133 @@ describe('traînée des chemins', () => {
     etat.vagues.lancees = 2;
     const { indications } = monter({ etat });
     indications.mettreAJour(etat, DUREE_TRAINEE_MS + 1);
-    etat.vagues.paquets.push(paquet(2, 0));
     indications.evenement(etat, { type: 'vague', index: 2, bonus: 0 }, 5000);
     expect(indications.cheminsEnTrainee).toEqual([]);
+  });
+});
+
+describe('avec le vrai moteur', () => {
+  /** Joue un pas comme `partie.ts` : les événements du pas, puis `apresPas`. */
+  function pas(etat: EtatPartie, indications: Indications, temps: number, actions: readonly Action[] = []): void {
+    avancer(etat, actions);
+    for (const ev of etat.evenements) indications.evenement(etat, ev, temps);
+    indications.apresPas(etat);
+  }
+
+  it('r10-10 : la traînée d’un chemin neuf part même quand son paquet (1 ennemi, sans délai) est déjà sorti', () => {
+    const niveau = niveauDeCampagne(100);
+    if (!niveau) throw new Error('niveau 100 absent');
+    const etat = creerPartie(niveau.niveau, CONFIG);
+    const { indications } = monter({ etat });
+    // La première vague dont un paquet unique et immédiat emprunte un chemin jamais servi avant.
+    const vus = new Set((etat.niveau.vagues[0] as Vague).paquets.map((p) => p.chemin));
+    let cible = -1;
+    let neuf = -1;
+    for (let k = 1; k < etat.niveau.vagues.length && cible < 0; k++) {
+      const vague = etat.niveau.vagues[k] as Vague;
+      const trouve = vague.paquets.find((p) => !vus.has(p.chemin) && p.nombre === 1 && p.delai === 0);
+      if (trouve) {
+        cible = k;
+        neuf = trouve.chemin;
+      }
+      for (const p of vague.paquets) vus.add(p.chemin);
+    }
+    expect(cible).toBeGreaterThan(0);
+    let temps = DUREE_TRAINEE_MS + 100;
+    indications.mettreAJour(etat, temps);
+    let garde = 0;
+    let vu = false;
+    while (etat.vagues.lancees <= cible && etat.statut === 'en_cours' && garde++ < 20_000) {
+      temps += 33;
+      const avant = etat.vagues.lancees;
+      pas(etat, indications, temps, [{ type: 'appelerVague' }]);
+      // La vague vient de partir : le paquet d'un seul ennemi sans délai est déjà sorti de la file des paquets.
+      if (avant === cible && etat.vagues.lancees === cible + 1) {
+        vu = true;
+        expect(indications.cheminsEnTrainee).toContain(neuf);
+      }
+    }
+    expect(vu).toBe(true);
+  });
+
+  it('une vraie fuite fait réagir la porte du chemin de l’ennemi, alors qu’il n’est plus dans etat.ennemis', () => {
+    // Aucun niveau de la campagne n'a deux sorties : on sépare celles d'un niveau à deux chemins.
+    const niveau = (MULTI).niveau;
+    const [c0, c1] = niveau.carte.chemins;
+    if (!c0 || !c1) throw new Error('deux chemins attendus');
+    const fin = c1.points[c1.points.length - 1] ?? { x: 0, y: 0 };
+    const separe = { points: [...c1.points.slice(0, -1), { x: fin.x + 5, y: fin.y + 5 }] };
+    const etat = creerPartie({ ...niveau, carte: { ...niveau.carte, chemins: [c0, separe] } }, CONFIG);
+    const { indications } = monter({ etat, maintenant: () => 5000 });
+    const def = defEnnemi('paysan_affame');
+    if (!def) throw new Error('ennemi absent');
+    const chemin = 1;
+    const ennemi = ajouterEnnemi(etat, def, 'paysan_affame', chemin, 0, false, {});
+    pas(etat, indications, 0);
+    const calcule = etat.chemins[chemin];
+    if (!calcule) throw new Error('chemin absent');
+    ennemi.distance = calcule.longueur - 0.001;
+    ennemi.segment = calcule.points.length - 2;
+    let fuite = false;
+    for (let i = 0; i < 20 && !fuite; i++) {
+      pas(etat, indications, 0);
+      fuite = etat.evenements.some((e) => e.type === 'fuite');
+    }
+    expect(fuite).toBe(true);
+    expect(etat.ennemis.some((e) => e.id === ennemi.id)).toBe(false);
+    indications.mettreAJour(etat, 0);
+    const reagit = [...document.querySelectorAll<HTMLElement>('.sortie-chemin')].map((p) => p.classList.contains('rougit'));
+    expect(reagit.some(Boolean)).toBe(true);
+    expect(reagit.every(Boolean)).toBe(false);
+  });
+
+  it('la porte tremble le même temps réel à la vitesse ×1 et ×2 (le temps de jeu n’y change rien)', () => {
+    for (const facteur of [1, 2]) {
+      document.body.replaceChildren();
+      let horloge = 0;
+      const { etat, indications } = monter({ maintenant: () => horloge });
+      indications.evenement(etat, { type: 'fuite', ennemi: -1, vies: 1 }, 0);
+      horloge = DUREE_SECOUSSE_MS - 1;
+      indications.mettreAJour(etat, (DUREE_SECOUSSE_MS - 1) * facteur);
+      expect(document.querySelector('.sortie-chemin.secoue')).not.toBeNull();
+      horloge = DUREE_SECOUSSE_MS + 1;
+      indications.mettreAJour(etat, (DUREE_SECOUSSE_MS + 1) * facteur);
+      expect(document.querySelector('.sortie-chemin.secoue')).toBeNull();
+    }
+  });
+});
+
+describe('canvas de la traînée et préférence du système', () => {
+  it('n’est effacé que s’il a dessiné à l’image précédente, et masqué sans traînée', () => {
+    const clearRect = vi.fn();
+    const cible: Record<string | symbol, unknown> = { clearRect };
+    const ctx = new Proxy(cible, {
+      get: (c, nom): unknown => (nom in c ? c[nom] : (): void => undefined),
+      set: () => true,
+    });
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(ctx as unknown as CanvasRenderingContext2D);
+    const { etat, indications } = monter({ temps: 0 });
+    const canvas = document.querySelector<HTMLCanvasElement>('canvas.trace');
+    indications.mettreAJour(etat, 100);
+    expect(canvas?.hidden).toBe(false);
+    expect(clearRect).toHaveBeenCalledTimes(1);
+    // La traînée finit : un dernier effacement, puis plus rien.
+    indications.mettreAJour(etat, DUREE_TRAINEE_MS + 1);
+    expect(canvas?.hidden).toBe(true);
+    expect(clearRect).toHaveBeenCalledTimes(2);
+    indications.mettreAJour(etat, DUREE_TRAINEE_MS + 50);
+    indications.mettreAJour(etat, DUREE_TRAINEE_MS + 100);
+    expect(clearRect).toHaveBeenCalledTimes(2);
+  });
+
+  it('crée la requête « réduire les animations » une seule fois', () => {
+    const matchMedia = vi.fn(() => ({ matches: false }) as MediaQueryList);
+    vi.stubGlobal('matchMedia', matchMedia);
+    window.matchMedia = matchMedia;
+    const etat = nouvellePartie();
+    const indications = new Indications(document.body, ATLAS, PROJECTION, etat, new AbortController().signal, 0);
+    for (let i = 0; i < 5; i++) indications.mettreAJour(etat, i);
+    expect(matchMedia).toHaveBeenCalledTimes(1);
   });
 });
 

@@ -18,7 +18,7 @@ import { ECART_MAX_MS, PasFixes } from '../render/pas-fixes';
 import { Rendu, Surbrillance } from '../render/rendu';
 import { apparenceDeLaPartie, type Equipes } from './apparence';
 import { BulleSurCarte, fermerBulle, type CibleCarteSurvolee } from './bulle';
-import { contenuElementMenu, contenuEnnemi, contenuHerosEnPartie, ennemiSous } from './bulle-contenus';
+import { contenuElementMenu, contenuEnnemi, contenuEnnemiDeDonnees, contenuHerosEnPartie, ennemiSous } from './bulle-contenus';
 import { commandeClavier, type Commande } from './clavier';
 import { afficherFin, creerAvisPaysage, creerPause } from './ecrans';
 import { Gestes } from './gestes';
@@ -305,7 +305,9 @@ export async function lancerNiveau(
 
   // La carte peut dépasser de l'écran de la largeur des barres du HUD : une case collée au bord reste atteignable.
   const mesurerInterface = (): void => {
-    rendu.definirMarges(mesurerMarges(hud.racine, canvas.clientWidth, canvas.clientHeight));
+    const marges = mesurerMarges(hud.racine, canvas.clientWidth, canvas.clientHeight);
+    rendu.definirMarges(marges);
+    indications.definirMarges(marges);
   };
   mesurerInterface();
 
@@ -365,6 +367,15 @@ export async function lancerNiveau(
   const rayonToucheTuiles = (): number => Math.max(RAYON_TOUCHE_MIN_TUILES, RAYON_TOUCHE_CSS / rendu.pixelsCssParTuile);
   /** `souris` : la bulle se ferme quand l'ennemi n'est plus sous la souris (survol) ; au doigt, elle reste jusqu'au toucher suivant. */
   const ennemiPointe = (x: number, y: number, souris: boolean): CibleCarteSurvolee | null => {
+    // Une pastille d'un panneau d'entrée : ses bulles passent par le canvas, les pastilles elles-mêmes ne captent rien.
+    const puce = indications.puceSous(x, y);
+    if (puce) {
+      return {
+        cle: puce.cle,
+        ancre: () => puce.ancre(),
+        fabriquer: () => (puce.encore() && (!souris || indications.puceSous(sourisX, sourisY)?.cle === puce.cle) ? contenuEnnemiDeDonnees(puce.type) : null),
+      };
+    }
     const ennemi = ennemiSous(etat, rendu.enTuilesX(x), rendu.enTuilesY(y), rayonToucheTuiles());
     if (!ennemi) return null;
     const sousLaSouris = (): boolean => ennemiSous(etat, rendu.enTuilesX(sourisX), rendu.enTuilesY(sourisY), rayonToucheTuiles()) === ennemi;
@@ -499,6 +510,7 @@ export async function lancerNiveau(
   }
   const surRedimension = (): void => {
     rendu.redimensionner();
+    indications.redimensionner();
     mesurerInterface();
   };
   window.addEventListener('resize', surRedimension, { signal });
@@ -582,6 +594,7 @@ export async function lancerNiveau(
         rendu.apresPas(etat, temps);
         mesures.pasSimules++;
         for (const evenement of etat.evenements) indications.evenement(etat, evenement, temps);
+        indications.apresPas(etat);
         for (const evenement of etat.evenements) {
           if (evenement.type !== 'vague') continue;
           const cle = cleParoleBoss(etat.niveau.vagues, evenement.index, niveau.visuel.region, niveau.boss);

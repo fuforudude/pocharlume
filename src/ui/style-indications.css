@@ -1,6 +1,6 @@
 /* --- Indications de départ et d'arrivée en partie (src/ui/indications.ts) --- */
 
-/* Calque sous le HUD, au-dessus du canvas : il laisse tout passer, seules les pastilles d'ennemis captent le toucher. */
+/* Calque sous le HUD, au-dessus du canvas : il laisse tout passer (les bulles des pastilles s'ouvrent depuis le canvas). */
 .indications {
   position: absolute;
   inset: 0;
@@ -16,10 +16,9 @@
   pointer-events: none;
 }
 
-/* Panneau d'entrée : ancré par son bas-centre sur le point d'entrée du chemin. */
+/* Panneau d'entrée : posé par son coin haut-gauche (indications.ts le place dans la zone libre, au-dessus ou sous l'entrée). */
 .entree-chemin {
   position: absolute;
-  transform: translate(-50%, -100%);
   display: flex;
   align-items: flex-end;
   gap: 2px;
@@ -72,11 +71,11 @@
   0%,
   100% {
     filter: drop-shadow(0 0 0 rgba(232, 200, 96, 0));
-    transform: translate(-50%, -100%) scale(1);
+    transform: scale(1);
   }
   50% {
     filter: drop-shadow(0 0 6px rgba(232, 200, 96, 0.9));
-    transform: translate(-50%, -100%) scale(1.07);
+    transform: scale(1.07);
   }
 }
 
