@@ -6,10 +6,11 @@ import { IDS_SONS, lectureDe, SONS, type VuePartie } from './table';
 /** Un faux contexte audio : enregistre ce qui est créé, branché et lancé. */
 class FauxContexte implements ContexteAudio {
   state = 'running';
+  currentTime = 10;
   readonly destination = { connect: () => undefined };
   readonly gains: (GainAudio & { cible: unknown })[] = [];
   readonly sources: (SourceAudio & { reliee: unknown })[] = [];
-  lancees: { source: SourceAudio; gain: number; vitesse: number; bus: unknown }[] = [];
+  lancees: { source: SourceAudio; gain: number; vitesse: number; bus: unknown; quand: number }[] = [];
   reprises = 0;
   decodages = 0;
 
@@ -34,9 +35,9 @@ class FauxContexte implements ContexteAudio {
       connect(destination: unknown): void {
         source.reliee = destination;
       },
-      start(): void {
+      start(quand = 0): void {
         const gain = source.reliee as GainAudio & { cible: unknown };
-        lancees.push({ source, gain: gain.gain.value, vitesse: source.playbackRate.value, bus: gain.cible });
+        lancees.push({ source, gain: gain.gain.value, vitesse: source.playbackRate.value, bus: gain.cible, quand });
       },
     };
     this.sources.push(source);
@@ -334,5 +335,29 @@ describe('audio indisponible', () => {
     });
     moteur.debloquer();
     expect(moteur.jouer('clic')).toBe(false);
+  });
+});
+
+describe('amélioration d’une tour', () => {
+  it('le coup de marteau part tout de suite, le carillon en différé et en montant', async () => {
+    const b = banc();
+    await pret(b);
+    b.moteur.jouerEvenement({ type: 'amelioration', tour: 1, cx: 0, cy: 0, niveau: 3, voie: null });
+    const lancees = b.contexte.lancees;
+    // marteau, bois qui craque, puis deux notes de carillon
+    expect(lancees).toHaveLength(4);
+    expect(lancees[0]?.quand).toBe(0);
+    const notes = lancees.slice(2);
+    expect(notes[0]?.quand).toBeGreaterThan(10);
+    expect(notes[1]?.quand).toBeGreaterThan(notes[0]?.quand ?? 99);
+    expect(notes[1]?.vitesse).toBeGreaterThan(notes[0]?.vitesse ?? 99);
+  });
+
+  it('sans réglage de son, rien ne part', async () => {
+    const b = banc();
+    await pret(b);
+    b.volumes.son = 0;
+    b.moteur.jouerEvenement({ type: 'amelioration', tour: 1, cx: 0, cy: 0, niveau: 2, voie: null });
+    expect(b.contexte.lancees).toHaveLength(0);
   });
 });

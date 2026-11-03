@@ -13,6 +13,7 @@ import { dureeAnimation } from './animations';
 import type { AtlasRendu, SpriteAtlas, SpriteHabille } from './atlas';
 import { TUILE } from './camera';
 import { TYPE_EFFET, type Effet, type PoolEffets } from './effets';
+import { animationsReduites, DUREE_ANNEAU, DUREE_POUSSIERE } from './effets-tours';
 import {
   effetObjet,
   habillageSort,
@@ -129,6 +130,9 @@ export class Visuel {
   noyadeMax = 0;
   /** Non dessiné (familier dont le héros est tombé). */
   masque = false;
+  /** Instants (temps de jeu) du sursaut et du flash blanc d'une tour qui vient d'être améliorée ; très anciens quand rien ne tourne. */
+  sursautDebut = -1e9;
+  flashDebut = -1e9;
 }
 
 export class VisuelProjectile {
@@ -158,6 +162,8 @@ function distance(ax: number, ay: number, bx: number, by: number): number {
 }
 
 export class Suivi {
+  /** Relu à chaque amélioration, donc un changement de préférence agit tout de suite (les tests le remplacent). */
+  animationsReduites: () => boolean = animationsReduites;
   readonly ennemis = new Map<number, Visuel>();
   readonly unites = new Map<number, Visuel>();
   readonly tours = new Map<number, Visuel>();
@@ -251,6 +257,8 @@ export class Suivi {
     v.tour = null;
     v.famille = 'caserne';
     v.niveau = 0;
+    v.sursautDebut = -1e9;
+    v.flashDebut = -1e9;
     v.voie = null;
     v.tireur = null;
     v.tireurMiroir = false;
@@ -567,6 +575,27 @@ export class Suivi {
     return e;
   }
 
+  /**
+   * Amélioration ou spécialisation d'une tour : bouffée de poussière aux deux coins de la base ; sauf si l'on réduit les animations,
+   * anneau de lumière au pied, flash blanc sur le nouveau sprite et sursaut de la tour (dessinés par le rendu d'après les instants notés).
+   */
+  private effetsAmelioration(tour: Visuel, temps: number): void {
+    const demiBase = Math.min(14, Math.max(6, Math.round((tour.sprite?.largeur ?? 24) * 0.3)));
+    const x = Math.round(tour.x * TUILE);
+    const y = Math.round(tour.y * TUILE + DECALAGE_BASE_TOUR);
+    const poussiere = this.effets.prendre(TYPE_EFFET.poussiere, temps, DUREE_POUSSIERE);
+    poussiere.x = x;
+    poussiere.y = y;
+    poussiere.valeur = demiBase;
+    if (this.animationsReduites()) return;
+    const anneau = this.effets.prendre(TYPE_EFFET.anneau, temps, DUREE_ANNEAU);
+    anneau.x = x;
+    anneau.y = y;
+    anneau.valeur = demiBase;
+    tour.sursautDebut = temps;
+    tour.flashDebut = temps;
+  }
+
   /** Trait instantané d'un point du monde (pixels logiques) à un autre : tir d'un héros à distance ou d'une tourelle. */
   private traitDeTir(x1: number, y1: number, x2: number, y2: number, temps: number, couleur: string): void {
     const e = this.effets.prendre(TYPE_EFFET.rayon, temps, DUREE_RAYON);
@@ -822,7 +851,7 @@ export class Suivi {
       }
       case 'amelioration': {
         const tour = this.tours.get(ev.tour);
-        if (tour) this.effetSprite('impact', tour.x, tour.y, temps, 2, -14 + DECALAGE_BASE_TOUR);
+        if (tour) this.effetsAmelioration(tour, temps);
         return;
       }
       case 'vente': {
