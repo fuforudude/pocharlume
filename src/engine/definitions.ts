@@ -202,11 +202,13 @@ export interface Bond {
 
 /**
  * Voleur : à la première unité alliée qui le retient, ou en atteignant la sortie, il prend `aretes` arêtes au joueur. Retenu, il file à
- * `vitesse` fois sa vitesse, sans plus s'arrêter. Tué, il rend son butin ; échappé, le butin est perdu (Coupe-Bourse).
+ * `vitesse` fois sa vitesse pendant `duree` secondes, sans s'arrêter aux unités alliées ; la fuite finie, il est un ennemi comme les autres
+ * (il ne vole qu'une fois). Tué, il rend son butin ; échappé, le butin est perdu (Coupe-Bourse).
  */
 export interface Vol {
   readonly aretes: number;
   readonly vitesse: number;
+  readonly duree: number;
 }
 
 /** Aura de protection : les autres ennemis à moins de `rayon` tuiles subissent `reduction` de moins (0,3 = −30 %) de dégâts physiques et magiques. Non cumulable (Crieur Public). */

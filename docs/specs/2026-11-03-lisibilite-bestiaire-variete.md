@@ -62,7 +62,7 @@ Tout est piloté par les données (`PouvoirsEnnemi`) : le moteur ne connaît auc
 
 | Région | Id | Nom | Niv. | Rôle mécanique | Valeurs de départ (Matou) | Ce qui le contre |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 Village Affamé | `coupe_bourse` | Coupe-Bourse | 4 | **Voleur d'arêtes qui fuit** (nouveau : `vol`). Au premier soldat qui le retient, ou à la sortie, prend 20 arêtes ; retenu, il file à ×2 sans plus s'arrêter. Tué, il rend le butin ; échappé, le butin est perdu. | 26 PV, vitesse 1,5 | Le tuer vite : tours de tir à l'entrée, héros |
+| 1 Village Affamé | `coupe_bourse` | Coupe-Bourse | 4 | **Voleur d'arêtes qui fuit** (nouveau : `vol`). Au premier soldat qui le retient, ou à la sortie, prend 20 arêtes ; retenu, il file à ×2 pendant 2 s sans que soldat ni héros ne l'arrête (`vol.duree`, ajoutée au rééquilibrage : sans elle, il filait jusqu'à la sortie et le soigneux de Charlie, dont les soldats et le héros ne peuvent plus le toucher, perdait ses 20 vies avant la vague 10 en infini), puis redevient un ennemi comme les autres (il ne vole qu'une fois). Tué, il rend le butin ; échappé, le butin est perdu. | 26 PV, vitesse 1,5 | Le tuer vite : tours de tir à l'entrée, héros |
 | 1 | `grand_manteau` | Grand Manteau | 7 | **Porteur qui se divise** (nouveau : `division`). À sa mort, 3 Mendiants sortent de son manteau, là où il tombe. | 70 PV, vitesse 0,8 | Une zone derrière lui ; ne pas le tuer sous la sortie |
 | 2 Champs Brûlés | `gerbe_ardente` | Gerbe Ardente | 4 | **Kamikaze** (nouveau : `explosion`). Au contact d'un soldat, explose (22 dégâts physiques à 1,3 tuile) et disparaît : ni prime, ni vie perdue. | 36 PV, vitesse 1,7 | La tuer avant le contact ; soldats espacés, héros solide |
 | 2 | `porte_herse` | Porte-Herse | 7 | **Bouclier frontal** (nouveau : `bouclier`). Les coups directs des tours (tir, magie), tourelles et héros tireur venus de devant lui ne passent qu'à 25 %. Les tirs au sol, ondes et soldats ne sont pas arrêtés. | 100 PV, vitesse 0,7 | Artillerie, soldats, tours placées derrière lui ou après son passage |
@@ -77,7 +77,7 @@ Tout est piloté par les données (`PouvoirsEnnemi`) : le moteur ne connaît auc
 | 7 Croisade | `sapeur` | Sapeur | 4 | **Désamorceur** (nouveau : action `desamorcer`). Toutes les 6 s, détruit les pièges et tourelles à 2 tuiles. | 90 PV, vitesse 0,9 | Pièges et tourelles loin du chemin ; le tuer avant |
 | 7 | `aumonier` | Aumônier de Guerre | 7 | **Purificateur** (nouveau : action `purifier`). Toutes les 5 s, retire ralentissement et étourdissement aux ennemis à 3 tuiles (lui compris). Résistance magique 30 %. | 100 PV, vitesse 0,8 | Dégâts sur la durée (brûlure, poison), le tuer en premier |
 | 8 Monastère Noir | `chantre` | Chantre | 4 | **Terreur** (nouveau : action `terrifier`). Toutes les 9 s, étourdit 1,5 s les soldats et le héros à 2 tuiles, qui lâchent leurs ennemis. | 85 PV, vitesse 0,8 | Le tuer avant qu'il n'atteigne la ligne de soldats |
-| 8 | `frere_sans_porte` | Frère Sans-Porte | 7 | **Insaisissable** (nouveau : `insaisissable`). Aucun soldat ni héros ne l'arrête ni ne le vise (les assassins, si) ; seules les tours l'atteignent. | 120 PV, vitesse 1 | Tours, artillerie, tout sauf les soldats |
+| 8 | `frere_sans_porte` | Frère Sans-Porte | 7 | **Insaisissable** (nouveau : `insaisissable`). Aucun soldat ni héros (tireur compris) ne l'arrête ni ne le vise ; les tours, les sorts, les pièges, les tourelles et les assassins l'atteignent. | 120 PV, vitesse 1 | Tours, artillerie, tout sauf les soldats |
 | 9 Cité du Roi | `effigie_roi` | Effigie du Roi | 4 | **Peau alternée** (nouveau : `alternance`). Armure 60 % puis, 5 s plus tard, résistance magique 60 % à la place, et ainsi de suite (la version d'élite échange ses protections renforcées). | 120 PV, vitesse 0,7 | Frapper avec le type de dégâts qui passe en ce moment |
 | 9 | `bourreau_roi` | Bourreau du Roi | 7 | **Tueur de soldats** (champ `devore` existant, sur un ennemi ordinaire). Tue d'un coup le soldat qui le retient, toutes les 5 s. Armure 30 %. | 150 PV, vitesse 0,7 | Le tuer à distance ; soldats qui reviennent vite |
 | 10 Cathédrale du Soleil Blême | `gargouille` | Gargouille | 4 | **Pierre intermittente** (combinaison : `invulnerabilite` périodique, insensible aux ralentissements et aux étourdissements). Toutes les 8 s, se fige 2 s, intouchable et immobile. Armure 60 %. | 140 PV, vitesse 0,8 | Magie ; ne pas compter sur le contrôle |
@@ -96,6 +96,42 @@ Sprites : un par ennemi dans `art/sprites/<id>.txt` (32×32, dessinés, version 
 `docs/ennemis-variete.png`. Textes : nom, et phrase `ennemi.<id>.desc` dans `docs/lore.md`. Données : `VERSION_DONNEES` 13 → 14, `VERSION_ETAT` 6 → 7 (champs de l'ennemi).
 Atlas : `LARGEUR_ATLAS` 1024 → 2048 (40 sprites de plus dépassaient 2048 px de haut).
 
+## Rééquilibrage des nouveaux ennemis (2026-11-03)
+
+Outils : `npm run balance` en entier (environ 27 à 33 minutes avec 16 fils), puis par morceaux pour la mise au point :
+`--infini=chaumes,gue,carrefour --dieux=charlie --graines=5` (2 secondes), `--niveaux=41-50 --difficultes=heroique,fer --graines=10` (une région, 30 à 100 secondes),
+`--niveaux=1-100 --difficultes=chaton,heroique,fer` (12 minutes). Bandes imposées : Chaton, héros seul, défis Héroïque et Fer (40 à 90 %), infini. Matou et Vieux Sage restent suspendues.
+
+Premier passage (les 20 ennemis, rien d'autre de changé) : **12 écarts** aux bandes imposées. Après les réglages ci-dessous : **0 écart**.
+
+| Écart au premier passage | Cause | Réglage |
+| --- | --- | --- |
+| Infini, Charlie, soigneux : médiane de la vague 7,5 à 9 (bande 25 à 45), sur les 4 cartes de la région 1 | Le Coupe-Bourse, son butin pris, filait jusqu'à la sortie sans que soldat ni héros (donc rien de ce que joue Charlie) puisse le toucher : 2 vies perdues par vague dès la vague 2, et ses arêtes volées | `Vol.duree` (nouveau champ du moteur, `ennemis.ts`) : il file 2 s à ×2 puis redevient un ennemi comme les autres. Médiane de Charlie : 35 / 33 / 35,5 / 33,5 sur chaumes, gué, pendus, carrefour |
+| Chaton : le naïf de Charlie gagne 99 % au lieu de 100 % (régions 2 et 5) | Niveau 13 : une graine perdait à cause des Corbeaux (le naïf tire ses familles au hasard) ; niveau 47 (une horde) : idem | Niveau 13 : graine de vagues 2113 → 2313 ; niveau 47 : 4147 → 4347 (le naïf tient 100 % avec les trois dieux) |
+| Défi Fer, région 5 : 38 % (bande 40 à 90) | Les niveaux 43 (caserne + magie) et 47 (caserne + tir), deux hordes, étaient à 0 % avec 700 à 2200 arêtes inutilisées : ces familles ne tiennent pas une horde | Niveau 43 : caserne + artillerie ; niveau 47 : magie + artillerie (jamais deux fois la même paire de suite : test de `campagne.test.ts`). Fer R5 : 47 % |
+| Défi Héroïque, région 9 : 29 % ; Fer, régions 9 et 10 : 93 % et 90,3 % | Les arêtes ×3 de l'Héroïque aident les niveaux qu'elles limitent (83, 85, 87, 90 : 0 à 17 %) ; le Fer est saturé (arêtes ×6 inutilisées, il ne dépend plus que des familles et des effectifs) | Niveau 7 : arêtes de départ 250 → 290 (le soigneux de Charlie perdait une des trois graines du test de `simulation.test.ts`). Arêtes de départ de la région 9 : 83 : 1090 → 1525, 85 : 1230 → 1720, 87 : 1370 → 1920, 90 : 1590 → 2225, 81 : 1685 → 1265, 82 : 1010 → 760. `facteurBudget` 81 : 0,278 → 0,31, 82 : 0,209 → 0,235, 83 : 0,217 → 0,19, 85 : 0,375 → 0,33, 87 : 0,314 → 0,275, 90 : 0,265 → 0,235. Défi Fer : effectifs ×0,3 → ×0,36 (`REGLES.fer.facteurEffectifs`, toutes les régions) |
+
+Autres changements de données : `VERSION_DONNEES` 14 → 15. Ennemis : seul le Coupe-Bourse gagne `vol.duree` (PV, vitesse et butin de la spec gardés) ; aucun PV ni prix n'a été touché.
+La menace du Montreur de Rats (invocations) et du Bubonneux (régénération) n'est pas chiffrée par `menaceEnnemi`, mais n'a pas fait sortir une bande imposée.
+
+Avant (rapport du jalon 5, `VERSION_DONNEES` 13, avant les 20 ennemis) → après (15). Défis : les trois dieux ensemble, soigneux, 10 graines. La colonne « sans réglage » est le premier passage
+(avec la correction du Coupe-Bourse pour les défis et l'infini de Plume et Pollen, qui n'ont pas été rejoués avant) ; « — » : non relevé.
+
+| Mesure | Avant les 20 ennemis | Avec les 20 ennemis, sans réglage | Après réglage |
+| --- | --- | --- | --- |
+| Chaton, naïf (région 2 : Charlie ; région 5 : Charlie) | 100 % | 99 % | 100 % |
+| Défi Héroïque, régions 1 à 10 | 82, 73, 82, 67, 80, 77, 57, 85, 49, 82 % | 72, 78, 70, 51, 66, 79, 55, 63, 29, 63 % | 74, 77, 70, 51, 68, 79, 55, 63, 47, 63 % |
+| Défi Fer, régions 1 à 10 | 87, 87, 78, 84, 57, 76, 87, 80, 87, 86 % | 72, 87, 64, 66, 38, 83, 89, 63, 93, 90 % | 67, 82, 52, 58, 47, 76, 76, 56, 88, 80 % |
+| Infini, soigneux, médiane sur chaumes (Plume / Charlie / Pollen) | 36 / 35 / 35 | — / 7,5 / — | 37 / 35 / 36 |
+| Infini, soigneux, médiane sur gué (Plume / Charlie / Pollen) | 34 / 32,5 / 33 | — / 9 / — | 34 / 33 / 33 |
+| Matou, région 1, soigneux (Plume / Charlie / Pollen) | 100 / 100 / 100 % | 99 / 52 / 99 % | 100 / 100 / 100 % |
+| Matou, région 1, naïf (Plume / Charlie / Pollen) | 77 / 52 / 98 % | — / 21 / 88 % | 45 / 29 / 90 % |
+| Vieux Sage, région 1, soigneux (Plume / Charlie / Pollen) | 99 / 100 / 100 % | — / 30 / — | 89 / 80 / 89 % |
+
+Bandes suspendues, gros écarts entre dieux (signalés seulement) : Charlie reste très en dessous de Plume en Vieux Sage (régions 2 à 10 : de 23 à 95 points, plus de 90 points aux régions 4, 6, 8 et 9) et de 3 à 10 vies en Matou (régions 2 et 4 à 10).
+Au jalon 5, l'écart était déjà de 48 à 81 points en Vieux Sage (régions 3 à 10). Les nouveaux ennemis qui contournent ou tuent les soldats (Coupe-Bourse, Frère Sans-Porte, Gerbe Ardente, Chantre, Bourreau du Roi) pèsent sur Charlie :
+reprendre ses sorts et son héros plutôt que les niveaux reste la piste. En Matou, le naïf de Pollen (90 %) sort encore de la bande par le haut, celui de Charlie (29 %) par le bas et la courbe de difficulté du naïf n'est pas décroissante (déjà le cas avant).
+
 ## Critères d'acceptation
 - [ ] A : chaque entrée montre avant chaque vague un panneau avec les icônes et le nombre d'ennemis qui en sortiront
   (test : composition affichée = composition de la vague par entrée) ; la sortie est dessinée et réagit à une fuite ;
@@ -104,9 +140,9 @@ Atlas : `LARGEUR_ATLAS` 1024 → 2048 (40 sprites de plus dépassaient 2048 px d
   et spécialisations ; chiffres = données (test).
 - [ ] B : fiche « Nouvel ennemi » une seule fois par ennemi (sauvegarde), pause pendant la fiche, option pour la couper.
 - [ ] B : la fiche du niveau montre ses ennemis.
-- [ ] C : chaque région a au moins 2 ennemis inédits et en reprend au moins 1 d'une région précédente (test sur les
+- [x] C : chaque région a au moins 2 ennemis inédits et en reprend au moins 1 d'une région précédente (test sur les
   plans) ; chaque nouvel ennemi a un rôle mécanique propre testé dans le moteur ; textes dans lore.md.
-- [ ] C : `npm run balance` sans écart aux bandes imposées.
+- [x] C : `npm run balance` sans écart aux bandes imposées (Matou et Vieux Sage restent suspendues).
 - [ ] D : planche envoyée et validée ; sprites refaits ; effet d'amélioration visible.
 - [ ] Tout tient en 740×360 et 1280×720.
 

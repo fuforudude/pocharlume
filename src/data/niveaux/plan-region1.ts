@@ -85,7 +85,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     numero: 7,
     carte: 'pendus',
     chemins: [0, 1],
-    aretesDepart: 250,
+    aretesDepart: 290,
     defiFer: { familles: ['caserne', 'tir'] },
     nom: 'niveau.r1.07.nom',
     ambiance: 'niveau.r1.07.ambiance',

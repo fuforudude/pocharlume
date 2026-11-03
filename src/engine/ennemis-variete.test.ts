@@ -6,6 +6,7 @@ import { avancerSecondes, ce, CONFIG, compter, construireTour, ennemiDonnees, en
 import { appliquerEffet, infligerDegats, partApresBouclier } from './degats';
 import type { DefPiege, DefTourelle } from './definitions';
 import { MINUTEUR, type Ennemi, type EtatPartie, type Unite } from './etat';
+import type { Evenement } from './evenements';
 import { appliquerAction, step } from './partie';
 import { construireTourelle, poserPiege } from './structures';
 import { enPas } from './temps';
@@ -37,7 +38,7 @@ describe('Coupe-Bourse : vole 20 arêtes au premier soldat qui le retient, puis 
     const etat = partieAvecCaserne();
     const avant = etat.aretes;
     const voleur = marcheur(etat, 'coupe_bourse', 1);
-    const vus = evenementsPendant(etat, 8);
+    const vus = evenementsJusquAuVol(etat, voleur);
     expect(compter(vus, 'vol')).toBe(1);
     expect(voleur.vole).toBe(true);
     expect(voleur.butin).toBe(20);
@@ -45,6 +46,20 @@ describe('Coupe-Bourse : vole 20 arêtes au premier soldat qui le retient, puis 
     expect(voleur.bloqueur).toBe(-1);
     expect(voleur.chargeVitesse).toBe(2);
     expect(voleur.charge).toBeGreaterThan(0);
+    expect(voleur.charge).toBeLessThanOrEqual(enPas(2));
+  });
+
+  it('sa fuite finie (2 s), il redevient un ennemi comme les autres : un soldat plus loin l’arrête, sans nouveau vol', () => {
+    const etat = partieAvecCaserne();
+    construireTour(etat, 3, 'caserne');
+    avancerSecondes(etat, 2);
+    const avant = etat.aretes;
+    const voleur = marcheur(etat, 'coupe_bourse', 1);
+    const vus = evenementsPendant(etat, 30);
+    expect(compter(vus, 'vol')).toBe(1);
+    expect(etat.aretes).toBe(avant - 20);
+    expect(voleur.charge).toBe(0);
+    expect(vus.some((e) => e.type === 'coup')).toBe(true);
   });
 
   it('tué, il rend son butin en plus de sa prime', () => {
@@ -624,6 +639,12 @@ describe('déterminisme', () => {
   });
 });
 
+/** Joue jusqu'au pas où le voleur prend son butin (10 s au plus) et rend les événements de ce pas. */
+function evenementsJusquAuVol(etat: EtatPartie, voleur: Ennemi): Evenement[] {
+  for (let i = 0; i < 30 * 10 && !voleur.vole; i++) step(etat);
+  return [...etat.evenements];
+}
+
 /** Place le héros (point de garde compris) en (x, y). */
 function placerHeros(etat: EtatPartie, x: number, y: number): Unite {
   const h = heros(etat);
@@ -761,7 +782,7 @@ describe('relecture : kamikaze et voleur contre le héros', () => {
     placerHeros(etat, 10, 5);
     const avant = etat.aretes;
     const voleur = marcheur(etat, 'coupe_bourse', 8.8);
-    const vus = evenementsPendant(etat, 4);
+    const vus = evenementsJusquAuVol(etat, voleur);
     expect(compter(vus, 'vol')).toBe(1);
     expect(etat.aretes).toBe(avant - 20);
     expect(voleur.bloqueur).toBe(-1);

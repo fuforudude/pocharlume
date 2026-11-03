@@ -26,7 +26,7 @@ export const frEnnemisVariete = {
   'bulle.ennemi.bouclier': 'Bouclier : les coups directs des tours venus de devant lui perdent {n} % de leurs dégâts. Les tirs au sol, les soldats et les tours placées derrière lui passent.',
   'bulle.ennemi.explosion': 'Explose au contact d’un soldat ({n} dégâts autour de lui) et disparaît, sans prime.',
   'bulle.ennemi.bond': 'Bondit par-dessus le soldat qui le retient, au plus toutes les {d} s.',
-  'bulle.ennemi.vol': 'Vole {n} arêtes au premier soldat qui le retient, ou en passant la sortie ; tué, il les rend.',
+  'bulle.ennemi.vol': 'Vole {n} arêtes au premier soldat qui le retient, puis file {d} s sans qu’on l’arrête, ou les vole en passant la sortie ; tué, il les rend.',
   'bulle.ennemi.aura_protection': 'Les ennemis autour de lui subissent {n} % de dégâts en moins.',
   'bulle.ennemi.division': 'À sa mort, {n} × {nom} sortent de lui.',
   'bulle.ennemi.regeneration': 'Récupère {n} % de ses PV par seconde.',

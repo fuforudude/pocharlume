@@ -49,7 +49,7 @@ export const PLANS_REGION2: readonly PlanNiveau[] = [
     vagues: {
       nombre: 9,
       ennemis: ennemisDuNiveau(2, 3),
-      graine: 2113,
+      graine: 2313,
       horde: true,
     },
   },

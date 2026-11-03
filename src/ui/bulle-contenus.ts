@@ -399,7 +399,7 @@ function notesPouvoirs(p: PouvoirsEnnemi | undefined): string[] {
   if (p.bouclier) notes.push(t('bulle.ennemi.bouclier', { n: pourcent(p.bouclier.reduction) }));
   if (p.explosion) notes.push(t('bulle.ennemi.explosion', { n: nombre(p.explosion.degats) }));
   if (p.bond) notes.push(t('bulle.ennemi.bond', { d: nombre(p.bond.recharge) }));
-  if (p.vol) notes.push(t('bulle.ennemi.vol', { n: p.vol.aretes }));
+  if (p.vol) notes.push(t('bulle.ennemi.vol', { n: p.vol.aretes, d: nombre(p.vol.duree) }));
   if (p.auraProtection) notes.push(t('bulle.ennemi.aura_protection', { n: pourcent(p.auraProtection.reduction) }));
   if (p.division) {
     const nom = Object.hasOwn(ENNEMIS, p.division.ennemi) ? tCle(ENNEMIS[p.division.ennemi as keyof typeof ENNEMIS].nom) : p.division.ennemi;

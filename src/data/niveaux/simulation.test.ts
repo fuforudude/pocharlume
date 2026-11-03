@@ -42,9 +42,9 @@ describe('les niveaux de la région 1 se jouent', () => {
     const campagne = REGION1[4];
     if (!campagne) throw new Error('niveau 5 absent');
     expect(campagne.niveau.vagues.some((v) => v.paquets.some((p) => (p.facteurPv ?? 1) > 1))).toBe(true);
-    // Le plan de construction fixe perd ce niveau : peu d'actions suffisent, le rejeu doit tout de même être exact.
+    // Le plan de construction fixe perd ce niveau : peu d'actions suffisent (le Coupe-Bourse vole des arêtes au passage), le rejeu doit tout de même être exact.
     const bilan = jouer(campagne.niveau, planDeConstruction(campagne.niveau));
-    expect(bilan.etat.journal.length).toBeGreaterThan(3);
+    expect(bilan.etat.journal.length).toBeGreaterThanOrEqual(2);
     const rejoue = rejouer(campagne.niveau, CONFIG_MATOU, bilan.etat.journal);
     expect(serialiser(rejoue)).toBe(serialiser(bilan.etat));
   });

@@ -767,7 +767,7 @@ valeurs de départ cohérentes avec `menaceEnnemi` : l'équilibrage fin est celu
 | Soin des ennemis proches (autres que lui) | `soin { rayon, quantite, cadence }` | `pouvoirs-ennemis.ts` (`soigner`) |
 | Double dégâts contre le héros | `degatsHeros` | `ennemis.ts` (`degatsContre`), au contact comme à distance |
 | Affamer les tours à portée (cadence −30 % pendant 5 s) | action `affamer { rayon, cadence, duree }` | `Tour.affamePas` / `affameCadence`, `tours.ts` (`periodeDeTir`) ; les casernes (cadence de leurs soldats) ne sont pas touchées |
-| Désactiver la tour la plus proche | action `desactiver_tour { duree }` | `Tour.desactivee` : ni tir, ni onde, ni révélation, ni construction (ses soldats restent) |
+| Désactiver la tour la plus proche | action `desactiver_tour { duree, rayon? }` (sans `rayon`, comme le Juge des Flammes : la première tour en cas d'égalité, l'action compte comme faite même sans tour ; avec, comme le Fagotier : seulement les tours à portée, retentée au pas suivant s'il n'y en a aucune) | `Tour.desactivee` : ni tir, ni onde, ni révélation, ni construction (ses soldats restent) |
 | Plongée : intouchable, puis réapparaît plus loin sur son chemin | action `plonger { duree, saut }` | `Ennemi.invulnerable`, `Ennemi.saut`, `pouvoirs-ennemis.ts` (`emerger`) ; un saut qui dépasse la sortie l'y mène |
 | Invocation : des ennemis apparaissent à sa hauteur | action `invoquer { ennemi, nombre, ecart }` | `pouvoirs-ennemis.ts` (`appeler`), `ajouterEnnemi` |
 

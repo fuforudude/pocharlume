@@ -150,12 +150,9 @@ function uniteLaPlusProche(etat: EtatPartie, x: number, y: number, portee: numbe
   return meilleure;
 }
 
-/** Durée (en pas) d'une fuite « jusqu'à la sortie » : le voleur qui a pris son butin ne s'arrête plus. */
-const FUITE_JUSQU_A_LA_SORTIE = 1_000_000_000;
-
 /**
- * Le voleur prend ses arêtes au joueur (ce qu'il en reste au plus). Retenu par une unité, il file ensuite sans plus s'arrêter ;
- * à la sortie, le butin est perdu pour de bon.
+ * Le voleur prend ses arêtes au joueur (ce qu'il en reste au plus). Retenu par une unité, il file ensuite `vol.duree` secondes sans s'arrêter,
+ * puis redevient un ennemi comme les autres ; à la sortie, le butin est perdu pour de bon.
  */
 function voler(etat: EtatPartie, e: Ennemi, vol: Vol, enFuite: boolean): void {
   const pris = Math.max(0, Math.min(vol.aretes, etat.aretes));
@@ -164,7 +161,7 @@ function voler(etat: EtatPartie, e: Ennemi, vol: Vol, enFuite: boolean): void {
   e.butin = enFuite ? 0 : pris;
   etat.evenements.push({ type: 'vol', ennemi: e.id, aretes: pris });
   if (enFuite) return;
-  e.charge = FUITE_JUSQU_A_LA_SORTIE;
+  e.charge = Math.max(1, enPas(vol.duree));
   e.chargeVitesse = vol.vitesse;
   libererEnnemi(etat, e);
 }

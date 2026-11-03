@@ -551,7 +551,7 @@ export const ENNEMIS = {
     cadence: 1,
     coutVies: 1,
     prime: 5,
-    pouvoirs: { vol: { aretes: 20, vitesse: 2 } },
+    pouvoirs: { vol: { aretes: 20, vitesse: 2, duree: 2 } },
   }),
   /** À sa mort, trois Mendiants sortent de son manteau. */
   grand_manteau: ennemi({
