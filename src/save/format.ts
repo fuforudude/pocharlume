@@ -11,12 +11,13 @@
 //        compteurs de garantie par caisse, skins et familiers équipés).
 // - v5 : (dans `meta`) mode infini : record par carte (dernière vague terminée) et paliers déjà payés.
 // - v6 : (dans `meta`) inscriptions des vieilles statues déjà trouvées (une par carte, jamais perdue).
+// - v7 : (dans `meta`) bestiaire : ennemis déjà rencontrés en partie, et l'option « fiche Nouvel ennemi ».
 import { AVATARS, BRANCHES_ARBRE, coutCumuleArbre, IDS_OBJETS, type IdBranche, type IdDefi, type IdDieu, type IdHeros, type IdObjet, type PalierInfini } from '../data/meta';
 import type { IdInscription } from '../data/niveaux/statues';
 import type { ConfigPartie } from '../engine/etat';
 import { collectionVide, type Collection } from '../meta/collection';
 
-export const VERSION_SAUVEGARDE = 6;
+export const VERSION_SAUVEGARDE = 7;
 
 /** Nombre de niveaux de la campagne (10 régions de 10 niveaux). */
 export const NOMBRE_NIVEAUX = 100;
@@ -103,6 +104,16 @@ export interface Infini {
 }
 
 /**
+ * Bestiaire. Un ennemi est « rencontré » dès qu'il apparaît dans une partie : il entre dans la liste (sans doublon, triée par identifiant,
+ * la forme que les transactions écrivent) et n'en sort jamais. La fiche « Nouvel ennemi » s'affiche à cette première apparition, si `fiches`.
+ */
+export interface Bestiaire {
+  rencontres: string[];
+  /** Vrai : la partie se met en pause sur la fiche d'un ennemi jamais rencontré (option des Options). */
+  fiches: boolean;
+}
+
+/**
  * Méta-progression. Les étoiles dépensées dans l'arbre ne sont pas stockées : on retient les rangs, et les étoiles
  * disponibles se déduisent (étoiles gagnées moins coût des rangs), si bien qu'une réinitialisation les rend toutes.
  */
@@ -129,6 +140,7 @@ export interface Meta {
    * campagne. Trouvée une fois, une inscription l'est pour toujours : rien ne la retire, une sauvegarde importée ne la perd pas.
    */
   inscriptions: IdInscription[];
+  bestiaire: Bestiaire;
 }
 
 export interface Sauvegarde {
@@ -156,6 +168,7 @@ export function metaParDefaut(): Meta {
     collection: collectionVide(),
     infini: { records: {}, paliers: [] },
     inscriptions: [],
+    bestiaire: { rencontres: [], fiches: true },
   };
 }
 

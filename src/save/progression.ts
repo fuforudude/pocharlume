@@ -11,6 +11,7 @@ import {
   type Reglages,
   type Sauvegarde,
 } from './format';
+import { reunirRencontres } from './transactions-bestiaire';
 import { reunirInscriptions } from './transactions-inscriptions';
 import { estEntierEntre } from './validation';
 
@@ -136,7 +137,10 @@ export function fusionnerProgressions(a: Sauvegarde, b: Sauvegarde): Sauvegarde 
   // Les inscriptions trouvées de `b` s'ajoutent à celles de `a` : une inscription trouvée ne se perd pas.
   const inscriptions = reunirInscriptions(a.meta.inscriptions, b.meta.inscriptions);
   if (inscriptions.length > a.meta.inscriptions.length) change = true;
+  // Les ennemis rencontrés de `b` s'ajoutent à ceux de `a` (l'option de `a` reste) : une rencontre ne se perd pas.
+  const rencontres = reunirRencontres(a.meta.bestiaire.rencontres, b.meta.bestiaire.rencontres);
+  if (rencontres.length > a.meta.bestiaire.rencontres.length) change = true;
   if (!change) return a;
   const niveauMax = Math.max(a.progression.niveauMax, b.progression.niveauMax);
-  return { ...a, progression: { niveauMax, etoiles }, meta: { ...a.meta, regionMax: regionOuverte(niveauMax), defis, infini: { ...a.meta.infini, records }, inscriptions } };
+  return { ...a, progression: { niveauMax, etoiles }, meta: { ...a.meta, regionMax: regionOuverte(niveauMax), defis, infini: { ...a.meta.infini, records }, inscriptions, bestiaire: { ...a.meta.bestiaire, rencontres } } };
 }

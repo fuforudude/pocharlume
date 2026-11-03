@@ -35,6 +35,7 @@ import { REGLES } from '../data/regles';
 import type { ConfigPartie } from '../engine/etat';
 import { definitionDuHeros, niveauHerosDepuisXp, pointsDeCompetence, type DefsMeta } from './definitions';
 import { estIdCarteBienForme, validerInfini } from './validation-infini';
+import { validerBestiaire } from './validation-bestiaire';
 import { validerInscriptions } from './validation-inscriptions';
 import { validerCollection, validerDefis, validerExtensionConfigV4, validerRegionMax } from './validation-collection';
 import { avecCles, CLE_NIVEAU, echec, estEnregistrement, estEntierEntre, ok, parmi, poser, validerEntiersParCle, valeur, type Resultat } from './validation-base';
@@ -194,7 +195,7 @@ function validerChoix(x: unknown): Resultat<ChoixPartie> {
 }
 
 function validerMeta(x: unknown, progression: Progression, defs: DefsMeta | undefined): Resultat<Meta> {
-  const base = avecCles(x, ['monnaies', 'heros', 'arbre', 'objets', 'choix', 'regionMax', 'defis', 'collection', 'infini', 'inscriptions'], 'meta');
+  const base = avecCles(x, ['monnaies', 'heros', 'arbre', 'objets', 'choix', 'regionMax', 'defis', 'collection', 'infini', 'inscriptions', 'bestiaire'], 'meta');
   if (!base.ok) return base;
   const monnaies = validerEntiersParCle(valeur(base.valeur, 'monnaies'), ['aretes', 'braises'] as const, PLAFOND_MONNAIE, 'meta.monnaies');
   if (!monnaies.ok) return monnaies;
@@ -217,6 +218,8 @@ function validerMeta(x: unknown, progression: Progression, defs: DefsMeta | unde
   if (!infini.ok) return infini;
   const inscriptions = validerInscriptions(valeur(base.valeur, 'inscriptions'));
   if (!inscriptions.ok) return inscriptions;
+  const bestiaire = validerBestiaire(valeur(base.valeur, 'bestiaire'));
+  if (!bestiaire.ok) return bestiaire;
   return ok({
     monnaies: monnaies.valeur,
     heros: heros.valeur,
@@ -228,6 +231,7 @@ function validerMeta(x: unknown, progression: Progression, defs: DefsMeta | unde
     collection: collection.valeur,
     infini: infini.valeur,
     inscriptions: inscriptions.valeur,
+    bestiaire: bestiaire.valeur,
   });
 }
 

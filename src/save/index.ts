@@ -39,6 +39,7 @@ export {
   type EtoilesNiveau,
   type Meta,
   type Monnaies,
+  type Bestiaire,
   type PartieEnCours,
   type Progression,
   type ProgressionHeros,
@@ -56,6 +57,7 @@ export {
   type RaisonFinInfinie,
   type ResultatFinInfinie,
 } from './transactions-infini';
+export { changerFichesEnnemis, ennemiRencontre, rencontrerEnnemis, reunirRencontres, type ResultatRencontres } from './transactions-bestiaire';
 export {
   inscriptionTrouvee,
   nombreInscriptionsTrouvees,

@@ -55,10 +55,10 @@ En jouant, l'utilisateur relève quatre problèmes :
 - [ ] A : chaque entrée montre avant chaque vague un panneau avec les icônes et le nombre d'ennemis qui en sortiront
   (test : composition affichée = composition de la vague par entrée) ; la sortie est dessinée et réagit à une fuite ;
   le tracé animé part au début du niveau et respecte « réduire les animations ».
-- [ ] B : écran Bestiaire (carte du monde et pause), ennemis rencontrés détaillés, autres « ??? » ; tours avec niveaux
+- [x] B : écran Bestiaire (carte du monde et pause), ennemis rencontrés détaillés, autres « ??? » ; tours avec niveaux
   et spécialisations ; chiffres = données (test).
-- [ ] B : fiche « Nouvel ennemi » une seule fois par ennemi (sauvegarde), pause pendant la fiche, option pour la couper.
-- [ ] B : la fiche du niveau montre ses ennemis.
+- [x] B : fiche « Nouvel ennemi » une seule fois par ennemi (sauvegarde), pause pendant la fiche, option pour la couper.
+- [x] B : la fiche du niveau montre ses ennemis.
 - [ ] C : chaque région a au moins 2 ennemis inédits et en reprend au moins 1 d'une région précédente (test sur les
   plans) ; chaque nouvel ennemi a un rôle mécanique propre testé dans le moteur ; textes dans lore.md.
 - [ ] C : `npm run balance` sans écart aux bandes imposées.

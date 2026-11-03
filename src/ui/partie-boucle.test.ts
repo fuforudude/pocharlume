@@ -769,3 +769,89 @@ describe('vieille statue cachée', () => {
     expect(ouverte()?.textContent).toContain(t('inscription.chaumes'));
   });
 });
+
+describe('fiche « Nouvel ennemi »', () => {
+  const fiche = (): HTMLElement | null => document.querySelector<HTMLElement>('.nouvel-ennemi');
+  /** Joue jusqu'à ce que la fiche s'ouvre (le premier ennemi paraît quelques secondes après la première vague). */
+  const jusquALaFiche = (): void => { imagesJusqua(() => fiche() !== null); };
+
+  it('à la première apparition, la partie se met en pause sur la fiche ; la fermer la relance, sans rien écrire au journal', async () => {
+    const surNouveauxEnnemis = vi.fn((ids: string[]) => ids);
+    const partie = await demarrer({ surNouveauxEnnemis });
+    appuyer('v');
+    jusquALaFiche();
+    expect(surNouveauxEnnemis).toHaveBeenCalledTimes(1);
+    const premiers = surNouveauxEnnemis.mock.calls[0]?.[0] ?? [];
+    expect(premiers.length).toBeGreaterThan(0);
+    expect(fiche()?.dataset.ennemi ?? fiche()?.querySelector<HTMLElement>('[data-ennemi]')?.dataset.ennemi).toBe(premiers[0]);
+    expect(fiche()?.textContent).toContain(t('bestiaire.nouveau_titre'));
+    const journal = partie.etat.journal.length;
+    const pas = partie.etat.pas;
+    images(20);
+    expect(partie.etat.pas).toBe(pas);
+    horloge += 400;
+    boutonTexte(t('bestiaire.nouveau_continuer')).click();
+    images(10);
+    expect(partie.etat.pas).toBeGreaterThan(pas);
+    expect(partie.etat.journal.length).toBe(journal);
+  });
+
+  it('une fiche par ennemi et par partie : un type déjà signalé ne rouvre rien', async () => {
+    const surNouveauxEnnemis = vi.fn((ids: string[]) => ids);
+    await demarrer({ surNouveauxEnnemis });
+    appuyer('v');
+    jusquALaFiche();
+    horloge += 400;
+    boutonTexte(t('bestiaire.nouveau_continuer')).click();
+    const vus = new Set<string>(surNouveauxEnnemis.mock.calls.flatMap((c) => c[0]));
+    images(400);
+    const tous = surNouveauxEnnemis.mock.calls.flatMap((c) => c[0]);
+    expect(tous.length).toBe(new Set(tous).size);
+    expect(tous.length).toBeGreaterThanOrEqual(vus.size);
+  });
+
+  it('si l’appelant ne demande aucune fiche (option coupée, ennemi déjà connu), la partie ne s’arrête pas', async () => {
+    const surNouveauxEnnemis = vi.fn((): string[] => []);
+    const partie = await demarrer({ surNouveauxEnnemis });
+    appuyer('v');
+    imagesJusqua(() => surNouveauxEnnemis.mock.calls.length > 0);
+    const pas = partie.etat.pas;
+    images(10);
+    expect(fiche()).toBeNull();
+    expect(partie.etat.pas).toBeGreaterThan(pas);
+  });
+
+  it('sans surNouveauxEnnemis (niveau d’essai), aucune fiche', async () => {
+    await demarrer();
+    appuyer('v');
+    images(300);
+    expect(fiche()).toBeNull();
+  });
+
+  it('Échap referme la fiche et la partie repart', async () => {
+    const partie = await demarrer({ surNouveauxEnnemis: (ids) => ids });
+    appuyer('v');
+    jusquALaFiche();
+    horloge += 400;
+    appuyer('Escape');
+    expect(fiche()).toBeNull();
+    const pas = partie.etat.pas;
+    images(5);
+    expect(partie.etat.pas).toBeGreaterThan(pas);
+  });
+
+  it('le bouton Bestiaire de la pause appelle surBestiaire avec la partie comme parent', async () => {
+    const surBestiaire = vi.fn();
+    await demarrer({ surBestiaire });
+    appuyer('p');
+    boutonTexte(t('bestiaire.bouton')).click();
+    expect(surBestiaire).toHaveBeenCalledTimes(1);
+    expect(surBestiaire.mock.calls[0]?.[0]).toBe(document.querySelector('.partie'));
+  });
+
+  it('sans surBestiaire, la pause n’a pas de bouton Bestiaire', async () => {
+    await demarrer();
+    appuyer('p');
+    expect([...document.querySelectorAll('button')].some((b) => b.textContent === t('bestiaire.bouton'))).toBe(false);
+  });
+});

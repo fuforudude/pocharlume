@@ -268,7 +268,7 @@ export interface EcranPause {
   afficher(visible: boolean): void;
 }
 
-export function creerPause(parent: HTMLElement, surReprendre: () => void, surQuitter?: () => void): EcranPause {
+export function creerPause(parent: HTMLElement, surReprendre: () => void, surQuitter?: () => void, surBestiaire?: () => void): EcranPause {
   const ecran = el('div', 'ecran pause');
   ecran.hidden = true;
   ecran.setAttribute('role', 'dialog');
@@ -278,6 +278,11 @@ export function creerPause(parent: HTMLElement, surReprendre: () => void, surQui
   const reprendre = bouton('bouton grand', t('pause.reprendre'), surReprendre);
   reprendre.textContent = t('pause.reprendre');
   boutons.append(reprendre);
+  if (surBestiaire) {
+    const bestiaire = bouton('bouton grand secondaire', t('bestiaire.bouton'), surBestiaire);
+    bestiaire.textContent = t('bestiaire.bouton');
+    boutons.append(bestiaire);
+  }
   if (surQuitter) {
     const quitter = bouton('bouton grand secondaire', t('fin.quitter'), surQuitter);
     quitter.textContent = t('fin.quitter');

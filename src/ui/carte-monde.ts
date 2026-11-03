@@ -12,6 +12,7 @@
 // (main.ts) qui enchaîne sur la partie ou l'accueil. La barre du haut suit la sauvegarde de la session (autre onglet,
 // fermeture d'un dialogue) ; les nœuds de la carte sont lus à l'ouverture d'une région : pour voir une victoire ou un
 // import, on rouvre la carte.
+import { ENNEMIS } from '../data/ennemis';
 import { BRAISES_DEFI, type IdDieu } from '../data/meta';
 import type { NiveauCampagne } from '../data/visuel';
 import type { DefiPartie } from '../engine';
@@ -20,6 +21,7 @@ import type { AtlasRendu } from '../render/atlas';
 import { RenduCarteMonde } from '../render/carte-monde';
 import { DIFFICULTES_SAUVEGARDE, etoilesDisponibles, NOMBRE_NIVEAUX, totalEtoiles, type ChoixPartie, type DifficulteSauvegarde } from '../save';
 import { dessinerIconesDefis } from './carte-monde-defis';
+import { ennemisDeLaFiche } from './bestiaire-logique';
 import { decouvertesDuNiveau } from './decouvertes';
 import {
   directionDeTouche,
@@ -66,6 +68,8 @@ export interface OptionsCarteMonde {
   surBoutique: () => void;
   /** « Inscriptions » : idem pour le recueil des inscriptions des statues. Absent : pas de bouton. */
   surInscriptions?: () => void;
+  /** « Bestiaire » : idem pour l'écran du Bestiaire. Absent : pas de bouton. */
+  surBestiaire?: () => void;
   /** « Revoir la fin » (campagne terminée) : l'écran est déjà arrêté. Absent : pas de bouton. */
   surRevoirFin?: () => void;
   /** « Retour » ou Échap sans fiche ouverte : l'écran est déjà arrêté. */
@@ -182,6 +186,9 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   const surInscriptions = options.surInscriptions;
   const inscriptions = surInscriptions ? bouton('bouton', t('carte.inscriptions'), surInscriptions, signal) : null;
   if (inscriptions) inscriptions.textContent = t('carte.inscriptions');
+  const surBestiaire = options.surBestiaire;
+  const bestiaire = surBestiaire ? bouton('bouton', t('bestiaire.bouton'), surBestiaire, signal) : null;
+  if (bestiaire) bestiaire.textContent = t('bestiaire.bouton');
   const reglages = bouton('bouton', t('carte.options'), options.surOptions, signal);
   reglages.textContent = t('carte.options');
   const revoirFin = options.surRevoirFin;
@@ -192,7 +199,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
       }, signal)
     : null;
   if (revoir) revoir.textContent = t('carte.revoir_fin');
-  barre.append(retour, titre, monnaies, heros, boutique, ...(inscriptions ? [inscriptions] : []), ...(revoir ? [revoir] : []), reglages);
+  barre.append(retour, titre, monnaies, heros, boutique, ...(inscriptions ? [inscriptions] : []), ...(bestiaire ? [bestiaire] : []), ...(revoir ? [revoir] : []), reglages);
   // La barre et la rangée des régions s'empilent dans un même bloc : si la barre passe sur deux lignes (écran étroit, bouton en
   // plus), la rangée descend avec elle au lieu de la recouvrir.
   const haut = el('div', 'carte-haut');
@@ -370,6 +377,32 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     return encadre;
   };
 
+  /**
+   * La rangée des ennemis d'un niveau (icônes tirées de ses vagues figées), ou null s'il n'en a pas. Un ennemi jamais rencontré est signalé
+   * « nouveau » ; chaque icône a sa bulle (les PV de la difficulté cochée, comme le boss).
+   */
+  const rangeeEnnemis = (niveau: NiveauCampagne, signalFiche: AbortSignal): HTMLElement | null => {
+    const ennemis = ennemisDeLaFiche(niveau.niveau, session.sauvegarde);
+    if (ennemis.length === 0) return null;
+    const encadre = el('section', 'ennemis-niveau');
+    encadre.dataset.niveau = String(niveau.numero);
+    encadre.setAttribute('aria-label', t('bestiaire.niveau_titre'));
+    encadre.append(el('h3', 'ennemis-niveau-titre', t('bestiaire.niveau_titre')));
+    const ul = el('ul', 'ennemis-niveau-liste');
+    for (const e of ennemis) {
+      const li = el('li', e.nouveau ? 'ennemi-niveau nouveau' : 'ennemi-niveau');
+      li.dataset.ennemi = e.id;
+      const nom = tCle(ENNEMIS[e.id as keyof typeof ENNEMIS].nom);
+      li.setAttribute('aria-label', e.nouveau ? t('bestiaire.niveau_libelle_nouveau', { nom }) : nom);
+      li.append(image(atlas.iconeUrl(e.id.replaceAll('_', '-'), 2), 'ennemi-niveau-icone'));
+      if (e.nouveau) li.append(el('span', 'ennemi-niveau-nouveau', t('bestiaire.niveau_nouveau')));
+      attacherBulleEnnemi(li, e.id, { signal: signalFiche, difficulte: () => (mode === 'normal' ? difficulte : 'matou') });
+      ul.append(li);
+    }
+    encadre.append(ul);
+    return encadre;
+  };
+
   const ouvrirFiche = (i: number): void => {
     const vue = vues[i];
     const niveau = vue ? regionCourante()?.contenu?.niveaux.find((n) => n.numero === vue.numero) : undefined;
@@ -406,6 +439,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     if (niveau.horde) entete.append(el('span', 'etiquette-horde', t('fiche.horde')));
     gauche.append(entete, el('h2', 'titre', textes.nom), el('p', 'ambiance', textes.ambiance));
     if (niveau.horde) gauche.append(el('p', 'horde-aide', t('fiche.horde_aide')));
+    const ennemisNiveau = rangeeEnnemis(niveau, signalFiche);
     const choisir = creerChoixFiche(atlas, session, signalFiche);
     droite.append(choisir.racine);
 
@@ -487,7 +521,12 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     // Ce que ce niveau débloque (déblocage progressif), juste avant « Lancer » ; rien s'il n'apporte rien de neuf. La tour
     // divine est celle du dieu choisi : l'encadré se refait quand le joueur en change.
     let decouvertes = encadreDecouvertes(vue.numero, choisir.choix().dieu, signalFiche);
-    if (decouvertes) gauche.append(decouvertes);
+    // Les ennemis du niveau et les découvertes se partagent une rangée (sur un écran bas, titre des ennemis masqué : icônes seules), pour que
+    // « Lancer » reste visible sans défiler.
+    const infos = el('div', 'fiche-infos');
+    if (ennemisNiveau) infos.append(ennemisNiveau);
+    if (decouvertes) infos.append(decouvertes);
+    if (infos.childElementCount > 0) gauche.append(infos);
     choisir.surDieu((dieu) => {
       const nouveau = encadreDecouvertes(vue.numero, dieu, signalFiche);
       if (!decouvertes || !nouveau) return;

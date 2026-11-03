@@ -26,6 +26,7 @@ import { Hud } from './hud';
 import { afficherInscription, type InscriptionOuverte } from './inscription-partie';
 import { Interaction, type Issue, type Mode } from './interaction';
 import { mesurerMarges } from './marges';
+import { afficherNouvelEnnemi, type NouvelEnnemiOuvert } from './nouvel-ennemi';
 import { elementsMenu, type ElementMenu } from './menu-cercle';
 import { cleParoleBoss } from './parole-boss';
 import { texteRefus } from './refus';
@@ -116,6 +117,14 @@ export interface OptionsPartie {
    * La partie, elle, ne change pas : elle se met en pause le temps de la lecture, sans rien écrire dans le journal du moteur.
    */
   surInscription?: (id: string) => boolean | null;
+  /**
+   * Des ennemis viennent de paraître pour la première fois dans CETTE partie (leurs identifiants, dans l'ordre). L'appelant les range dans
+   * le bestiaire et rend ceux dont il faut montrer la fiche « Nouvel ennemi » : ceux que le joueur n'avait jamais rencontrés, si l'option est
+   * active. La partie se met en pause le temps de chaque fiche, sans rien écrire dans le journal du moteur. Absent : aucune fiche.
+   */
+  surNouveauxEnnemis?: (ids: string[]) => string[];
+  /** « Bestiaire » dans l'écran de pause : l'appelant monte l'écran dans `parent`, par-dessus la pause. Absent : pas de bouton. */
+  surBestiaire?: (parent: HTMLElement) => void;
 }
 
 /** Temps passé dans la partie, pour mesurer le rendu (voir `PartieEnCours.mesures`). */
@@ -207,6 +216,11 @@ export async function lancerNiveau(
   let identifiantImage = 0;
   /** La fenêtre d'une inscription de statue, tant qu'elle est ouverte : la simulation attend, comme en pause. */
   let inscription: InscriptionOuverte | null = null;
+  /** La fiche « Nouvel ennemi » ouverte (une à la fois), et celles qui attendent leur tour. */
+  let ficheEnnemi: NouvelEnnemiOuvert | null = null;
+  const fichesEnAttente: string[] = [];
+  /** Les types d'ennemis déjà signalés à `surNouveauxEnnemis` dans cette partie. */
+  const ennemisVus = new Set<string>();
   /** La pause demandée par le joueur (bouton, touche P, onglet caché…), à retrouver à la fermeture de l'inscription. */
   let pauseDemandee = false;
   let pasMenu = -1;
@@ -240,7 +254,7 @@ export async function lancerNiveau(
     if (pause && !pas.pause) interaction.annuler();
     pauseDemandee = pause;
     // Une inscription ouverte garde la partie en pause, même si l'écran de pause se ferme par-dessus.
-    pas.pause = pause || inscription !== null;
+    pas.pause = pause || inscription !== null || ficheEnnemi !== null;
     ecranPause.afficher(pause);
   };
   /** Touche d'une statue : la partie attend, la fenêtre montre l'inscription, la fermer relance la partie là où elle était. */
@@ -254,9 +268,38 @@ export async function lancerNiveau(
       nouvelle,
       surFermer: () => {
         inscription = null;
-        pas.pause = pauseDemandee;
+        pas.pause = pauseDemandee || ficheEnnemi !== null;
       },
     });
+  };
+  /** Montre la fiche du prochain ennemi en attente (une seule à la fois) ; la partie attend, comme pour une inscription. */
+  const montrerFicheSuivante = (): void => {
+    if (finie || arretee || ficheEnnemi || inscription) return;
+    const id = fichesEnAttente.shift();
+    if (id === undefined) return;
+    interaction.annuler();
+    pas.pause = true;
+    ficheEnnemi = afficherNouvelEnnemi(racine, {
+      atlas,
+      id,
+      surFermer: () => {
+        ficheEnnemi = null;
+        if (fichesEnAttente.length > 0) montrerFicheSuivante();
+        else pas.pause = pauseDemandee || inscription !== null;
+      },
+    });
+  };
+  /** Les ennemis présents qu'on n'avait pas encore signalés : le bestiaire les note, les fiches utiles s'ouvrent. */
+  const signalerNouveauxEnnemis = (): void => {
+    const nouveaux: string[] = [];
+    for (const e of etat.ennemis) {
+      if (ennemisVus.has(e.type)) continue;
+      ennemisVus.add(e.type);
+      nouveaux.push(e.type);
+    }
+    if (nouveaux.length === 0 || !options.surNouveauxEnnemis) return;
+    fichesEnAttente.push(...options.surNouveauxEnnemis(nouveaux));
+    montrerFicheSuivante();
   };
   /** Les objets emportés que la partie a utilisés, un par emplacement utilisé. */
   const objetsUtilises = (): string[] => etat.config.objets.filter((_, i) => etat.objetsUtilises[i] === true);
@@ -281,7 +324,8 @@ export async function lancerNiveau(
         options.surQuitter?.(abandon);
       }
     : undefined;
-  const ecranPause = creerPause(racine, () => { definirPause(false); }, quitter);
+  const surBestiaire = options.surBestiaire;
+  const ecranPause = creerPause(racine, () => { definirPause(false); }, quitter, surBestiaire ? () => { surBestiaire(racine); } : undefined);
   const hud = new Hud(racine, atlas, etat, {
     appelerVague: demanderVague,
     changerVitesse: () => {
@@ -600,6 +644,7 @@ export async function lancerNiveau(
         }
       }
       mesures.msSimulation += performance.now() - debut;
+      signalerNouveauxEnnemis();
     }
     if (finie && !ecranFinAffiche && maintenant - finVue >= DELAI_ECRAN_FIN_MS) montrerEcranFin();
 
@@ -642,6 +687,7 @@ export async function lancerNiveau(
     if (arretee) return;
     arretee = true;
     inscription?.fermer();
+    ficheEnnemi?.fermer();
     cancelAnimationFrame(identifiantImage);
     controleur.abort();
     bulleCarte.detruire();

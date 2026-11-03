@@ -12,6 +12,7 @@ export const FIXTURE_V2 = readFileSync(new URL('./fixtures/sauvegarde-v2.json', 
 export const FIXTURE_V3 = readFileSync(new URL('./fixtures/sauvegarde-v3.json', import.meta.url), 'utf8');
 export const FIXTURE_V4 = readFileSync(new URL('./fixtures/sauvegarde-v4.json', import.meta.url), 'utf8');
 export const FIXTURE_V5 = readFileSync(new URL('./fixtures/sauvegarde-v5.json', import.meta.url), 'utf8');
+export const FIXTURE_V6 = readFileSync(new URL('./fixtures/sauvegarde-v6.json', import.meta.url), 'utf8');
 
 /**
  * Définitions de héros d'essai (les vraies viennent de src/data/heros.ts) : 4 compétences par héros, les trois
@@ -74,6 +75,8 @@ export function sauvegardeRemplie(): Sauvegarde {
       infini: { records: { chaumes: 23, gue: 12 }, paliers: [10, 20] },
       // Trois inscriptions de statues trouvées (dans l'ordre des cartes).
       inscriptions: ['chaumes', 'pendus', 'choeur'],
+      // Quatre ennemis rencontrés (triés), fiches « Nouvel ennemi » coupées.
+      bestiaire: { rencontres: ['chien_errant', 'corbeau_noir', 'mendiant', 'paysan_affame'], fiches: false },
     },
     partie: PARTIE,
   };
