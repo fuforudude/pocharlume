@@ -44,6 +44,8 @@ export class AtlasRendu {
   /** Pixels de la planche, lus une seule fois, à la première demande de skin (4 Mo : jamais lus si personne n'équipe de skin). */
   private pixels: ImageDonnees | null = null;
   private readonly habilles = new Map<string, SpriteHabille | null>();
+  /** Tampon du flash blanc (`dessinerBlanc`), créé à la première amélioration. */
+  private blanc: { canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D } | null = null;
 
   constructor(
     readonly json: AtlasJson,
@@ -90,6 +92,29 @@ export class AtlasRendu {
     } else {
       ctx.drawImage(this.planche, cadre.x, cadre.y, cadre.largeur, cadre.hauteur, px - sprite.ancre.x + cadre.dx, y, cadre.largeur, cadre.hauteur);
     }
+  }
+
+  /**
+   * Comme `dessiner`, mais en silhouette blanche d'opacité `alpha` (flash d'amélioration). Passe par un tampon réutilisé, agrandi
+   * seulement si un sprite plus grand se présente : aucune allocation une fois chaud.
+   */
+  dessinerBlanc(ctx: CanvasRenderingContext2D, sprite: SpriteAtlas, cadre: CadreAtlas, px: number, py: number, miroir: boolean, alpha: number): void {
+    if (cadre.largeur === 0 || alpha <= 0) return;
+    const l = sprite.largeur;
+    const h = sprite.hauteur;
+    if (!this.blanc || this.blanc.canvas.width < l || this.blanc.canvas.height < h) {
+      this.blanc = creerCanvas(Math.max(l, this.blanc?.canvas.width ?? 0), Math.max(h, this.blanc?.canvas.height ?? 0));
+    }
+    const { canvas, ctx: t } = this.blanc;
+    t.globalCompositeOperation = 'source-over';
+    t.clearRect(0, 0, canvas.width, canvas.height);
+    this.dessiner(t, sprite, cadre, sprite.ancre.x, sprite.ancre.y, miroir);
+    t.globalCompositeOperation = 'source-atop';
+    t.fillStyle = '#ffffff';
+    t.fillRect(0, 0, l, h);
+    ctx.globalAlpha = alpha;
+    ctx.drawImage(canvas, 0, 0, l, h, px - sprite.ancre.x, py - sprite.ancre.y, l, h);
+    ctx.globalAlpha = 1;
   }
 
   /**

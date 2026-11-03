@@ -25,6 +25,8 @@ export interface SourceAudio extends NoeudAudio {
 }
 export interface ContexteAudio {
   readonly state: string;
+  /** Horloge de l'audio en secondes : sert à programmer une note en différé (absente d'un faux contexte : 0). */
+  readonly currentTime?: number;
   readonly destination: NoeudAudio;
   createGain(): GainAudio;
   createBufferSource(): SourceAudio;
@@ -167,7 +169,10 @@ export class MoteurAudio {
     source.playbackRate.value = def.hauteur * (lecture.hauteur ?? 1) * (1 + (this.dependances.alea() * 2 - 1) * def.variation);
     source.connect(gain);
     gain.connect(bus);
-    source.start(0);
+    const delai = lecture.delai ?? 0;
+    source.start(delai > 0 ? (contexte.currentTime ?? 0) + delai : 0);
+    // Les notes suivantes (carillon) partent en différé, chacune avec sa hauteur et sa limite propres.
+    if (lecture.suite) for (const note of lecture.suite) this.lancer(note);
     return true;
   }
 
