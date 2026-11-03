@@ -1,0 +1,149 @@
+/* --- Indications de départ et d'arrivée en partie (src/ui/indications.ts) --- */
+
+/* Calque sous le HUD, au-dessus du canvas : il laisse tout passer (les bulles des pastilles s'ouvrent depuis le canvas). */
+.indications {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.indications canvas.trace {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Panneau d'entrée : posé par son coin haut-gauche (indications.ts le place dans la zone libre, au-dessus ou sous l'entrée). */
+.entree-chemin {
+  position: absolute;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  pointer-events: none;
+  animation: pulse-entree 1.1s ease-in-out infinite;
+}
+
+.entree-chemin[hidden] {
+  display: none;
+}
+
+.entree-chemin .fanion {
+  width: 28px;
+  height: 28px;
+  image-rendering: pixelated;
+  flex: none;
+}
+
+.puces-entree {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  padding: 2px 4px;
+  background: var(--panneau);
+  border: 2px solid var(--bord);
+  border-radius: 6px;
+}
+
+.puce-ennemi {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--texte);
+}
+
+.puce-ennemi .icone-ennemi {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.puce-ennemi .nombre-ennemi {
+  color: var(--or);
+}
+
+@keyframes pulse-entree {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 rgba(232, 200, 96, 0));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 6px rgba(232, 200, 96, 0.9));
+    transform: scale(1.07);
+  }
+}
+
+/* Porte de sortie : centrée sur le dernier point du chemin. */
+.sortie-chemin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.sortie-chemin .porte {
+  display: block;
+  image-rendering: pixelated;
+  transition: filter 0.15s;
+}
+
+.sortie-chemin.rougit .porte {
+  filter: sepia(1) saturate(6) hue-rotate(-30deg) brightness(1.1) drop-shadow(0 0 8px rgba(255, 40, 20, 0.9));
+}
+
+.sortie-chemin.secoue {
+  animation: secousse-sortie 0.5s linear;
+}
+
+@keyframes secousse-sortie {
+  0%,
+  100% {
+    transform: translate(-50%, -50%);
+  }
+  15% {
+    transform: translate(calc(-50% - 4px), -50%);
+  }
+  35% {
+    transform: translate(calc(-50% + 4px), calc(-50% - 1px));
+  }
+  55% {
+    transform: translate(calc(-50% - 3px), -50%);
+  }
+  75% {
+    transform: translate(calc(-50% + 2px), calc(-50% + 1px));
+  }
+}
+
+/* « Réduire les animations » : la porte rougit sans trembler, le panneau ne pulse plus. */
+.indications.animations-reduites .entree-chemin,
+.indications.animations-reduites .sortie-chemin.secoue {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entree-chemin,
+  .sortie-chemin.secoue {
+    animation: none;
+  }
+}
+
+@media (max-height: 460px) {
+  .entree-chemin .fanion {
+    width: 22px;
+    height: 22px;
+  }
+
+  .puce-ennemi .icone-ennemi {
+    width: 20px;
+    height: 20px;
+  }
+
+  .puce-ennemi {
+    font-size: 10px;
+  }
+}

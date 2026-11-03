@@ -7,6 +7,7 @@ import { frEcrans4 } from './fr-ecrans4';
 import { frEnnemis } from './fr-ennemis';
 import { frDeblocage } from './fr-deblocage';
 import { frHorde } from './fr-horde';
+import { frIndications } from './fr-indications';
 import { frInscriptions } from './fr-inscriptions';
 import { frEnnemisRegions6a10 } from './fr-ennemis-regions-6-10';
 import { frEnnemisVariete } from './fr-ennemis-variete';
@@ -222,6 +223,8 @@ export const fr = {
 
   // Niveaux de horde du jalon 5 (fr-horde.ts)
   ...frHorde,
+  // Indications de départ et d'arrivée en partie (fr-indications.ts)
+  ...frIndications,
   // Déblocage progressif des tours (fr-deblocage.ts)
   ...frDeblocage,
 

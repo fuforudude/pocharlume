@@ -133,7 +133,7 @@ Au jalon 5, l'écart était déjà de 48 à 81 points en Vieux Sage (régions 3 
 reprendre ses sorts et son héros plutôt que les niveaux reste la piste. En Matou, le naïf de Pollen (90 %) sort encore de la bande par le haut, celui de Charlie (29 %) par le bas et la courbe de difficulté du naïf n'est pas décroissante (déjà le cas avant).
 
 ## Critères d'acceptation
-- [ ] A : chaque entrée montre avant chaque vague un panneau avec les icônes et le nombre d'ennemis qui en sortiront
+- [x] A : chaque entrée montre avant chaque vague un panneau avec les icônes et le nombre d'ennemis qui en sortiront
   (test : composition affichée = composition de la vague par entrée) ; la sortie est dessinée et réagit à une fuite ;
   le tracé animé part au début du niveau et respecte « réduire les animations ».
 - [ ] B : écran Bestiaire (carte du monde et pause), ennemis rencontrés détaillés, autres « ??? » ; tours avec niveaux

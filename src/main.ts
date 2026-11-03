@@ -5,6 +5,7 @@ import './ui/style.css';
 import './ui/style-meta.css';
 import './ui/style-inscriptions.css';
 import './ui/style-bulles.css';
+import './ui/style-indications.css';
 import { installerAudio } from './audio';
 import { DEFS_META } from './data/heros';
 import { REGION1 } from './data/niveaux/region1';
