@@ -11,7 +11,7 @@ import { defEnnemi } from './contenu';
 import { libererEnnemi } from './degats';
 import type { ActionEnnemi, SoinEnnemis } from './definitions';
 import { ajouterEnnemi } from './ennemis';
-import { EFFET, type Ennemi, type EtatPartie, type Tour, type Unite } from './etat';
+import { EFFET, MINUTEUR, type Ennemi, type EtatPartie, type Tour, type Unite } from './etat';
 import { chercherParId, distance2 } from './recherche';
 import { creerZone } from './structures';
 import { enPas, PAS_PAR_SECONDE } from './temps';
@@ -29,18 +29,23 @@ function affamer(etat: EtatPartie, e: Ennemi, action: Extract<ActionEnnemi, { ty
   etat.evenements.push({ type: 'famine', ennemi: e.id, x: e.x, y: e.y, rayon: action.rayon, duree: action.duree });
 }
 
-/** La tour la plus proche du lanceur est mise en feu (Juge des Flammes). */
-function desactiverTour(etat: EtatPartie, e: Ennemi, duree: number, rayon = Infinity): boolean {
+/**
+ * La tour la plus proche du lanceur (la première en cas d'égalité) est mise en feu. Sans `rayon` (Juge des Flammes), l'action compte
+ * toujours comme faite, même sans tour : il attend toute sa cadence. Avec un `rayon` (Fagotier), elle échoue s'il n'y a aucune tour à
+ * portée et est retentée au pas suivant.
+ */
+function desactiverTour(etat: EtatPartie, e: Ennemi, duree: number, rayon?: number): boolean {
+  const rayon2 = rayon === undefined ? Infinity : rayon * rayon;
   let proche: Tour | undefined;
-  let min = rayon * rayon;
+  let min = Infinity;
   for (const t of etat.tours) {
     const d = distance2(t.x, t.y, e.x, e.y);
-    if (d <= min) {
+    if (d <= rayon2 && d < min) {
       min = d;
       proche = t;
     }
   }
-  if (!proche) return false;
+  if (!proche) return rayon === undefined;
   proche.desactivee = Math.max(proche.desactivee, Math.max(1, enPas(duree)));
   etat.evenements.push({ type: 'tour_desactivee', ennemi: e.id, tour: proche.id, duree });
   return true;
@@ -157,13 +162,25 @@ function plonger(etat: EtatPartie, e: Ennemi, action: Extract<ActionEnnemi, { ty
   etat.evenements.push({ type: 'plongee', ennemi: e.id, x: e.x, y: e.y, delai: action.duree });
 }
 
+/** Une tourelle d'atelier ou de héros détruite par le Sapeur n'est pas rebâtie aussitôt : le minuteur de construction de son origine repart de sa valeur pleine. */
+function reinitialiserConstruction(etat: EtatPartie, origine: number): void {
+  const tour = chercherParId(etat.tours, origine);
+  const unite = tour ? undefined : chercherParId(etat.unites, origine);
+  const constructeur = (tour ? tour.stats.atelier : unite?.stats.capacites?.ouvrage)?.constructeur;
+  const minuteurs = tour?.minuteurs ?? unite?.minuteurs;
+  if (constructeur && minuteurs) minuteurs[MINUTEUR.tourelle] = Math.max(1, enPas(constructeur.cadence));
+}
+
 /** Sapeur : les pièges et les tourelles des alliés à portée sont détruits. Faux s'il n'y en a aucun. */
 function desamorcer(etat: EtatPartie, e: Ennemi, rayon: number): boolean {
   const rayon2 = rayon * rayon;
   let nombre = 0;
   etat.pieges = etat.pieges.filter((p) => {
     const proche = distance2(p.x, p.y, e.x, e.y) <= rayon2;
-    if (proche) nombre++;
+    if (proche) {
+      nombre++;
+      etat.evenements.push({ type: 'piege_desamorce', piege: p.id, ennemi: e.id, x: p.x, y: p.y });
+    }
     return !proche;
   });
   etat.structures = etat.structures.filter((s) => {
@@ -171,6 +188,7 @@ function desamorcer(etat: EtatPartie, e: Ennemi, rayon: number): boolean {
     if (proche) {
       nombre++;
       etat.evenements.push({ type: 'structure_fin', structure: s.id, x: s.x, y: s.y });
+      reinitialiserConstruction(etat, s.origine);
     }
     return !proche;
   });

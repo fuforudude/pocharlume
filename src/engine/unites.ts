@@ -277,14 +277,19 @@ function coup(etat: EtatPartie, u: Unite, cap: CapacitesUnite, cible: Ennemi, ef
   const s = u.stats;
   if (cap.execution > 0 && cible.vivant && !cible.boss && cible.pv <= cible.pvMax * cap.execution) {
     executer(etat, cible);
-    return;
+  } else {
+    const { degats } = degatsDuCoup(etat, u, cap, s.degats[0], s.degats[1]);
+    infligerDegats(etat, cible, degats, 'physique', cap.ignoreArmure);
+    if (effets) appliquerEffets(etat, cible, s.effets);
   }
-  const { degats } = degatsDuCoup(etat, u, cap, s.degats[0], s.degats[1]);
-  infligerDegats(etat, cible, degats, 'physique', cap.ignoreArmure);
-  if (effets) appliquerEffets(etat, cible, s.effets);
-  // Épines (Fagot d'Os) : celui qui frappe un ennemi hérissé s'y blesse.
+  // Épines (Fagot d'Os) : celui qui frappe un ennemi hérissé s'y blesse, même si son coup l'achève.
   const epines = cible.pouvoirs?.epines;
-  if (epines && cible.vivant) blesserUnite(etat, u, epines.degats, 'pur', cible.id);
+  if (epines) blesserUnite(etat, u, epines.degats, 'pur', cible.id);
+}
+
+/** Vrai si l'unité est morte (relu à chaque appel : un coup peut la tuer par les épines). */
+function estMorte(u: Unite): boolean {
+  return u.mort;
 }
 
 function frapper(etat: EtatPartie, u: Unite, cible: Ennemi): void {
@@ -293,7 +298,8 @@ function frapper(etat: EtatPartie, u: Unite, cible: Ennemi): void {
   etat.evenements.push({ type: 'coup', unite: u.id, ennemi: cible.id });
   for (let i = 0; i < s.coups && !u.mort; i++) coup(etat, u, cap, cible, true);
   const zone = u.zone;
-  if (!zone) return;
+  // Tuée par les épines, l'unité ne frappe plus en zone.
+  if (!zone || u.mort) return;
   const rayon2 = zone.rayon * zone.rayon;
   const cx = cible.x;
   const cy = cible.y;
@@ -301,6 +307,7 @@ function frapper(etat: EtatPartie, u: Unite, cible: Ennemi): void {
   for (const e of etat.ennemis) {
     if (e === cible || !engageable(e) || distance2(e.x, e.y, cx, cy) > rayon2) continue;
     coup(etat, u, cap, e, false);
+    if (estMorte(u)) return;
     appliquerEffets(etat, e, zone.effets);
   }
 }
@@ -378,7 +385,7 @@ function mettreAJourUnite(etat: EtatPartie, u: Unite): void {
   let cible = u.cible === -1 ? undefined : chercherParId(etat.ennemis, u.cible);
   if (cible) {
     const laisse = u.stats.portee * REGLES.laisseEngagement;
-    if (!cible.vivant || cible.charge > 0 || distance2(cible.x, cible.y, u.ancreX, u.ancreY) > laisse * laisse) {
+    if (!cible.vivant || cible.charge > 0 || cible.invulnerable > 0 || distance2(cible.x, cible.y, u.ancreX, u.ancreY) > laisse * laisse) {
       if (cible.bloqueur === u.id) {
         cible.bloqueur = -1;
         u.bloques = Math.max(0, u.bloques - 1);

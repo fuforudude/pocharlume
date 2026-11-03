@@ -767,6 +767,7 @@ export class Suivi {
       case 'piege_pose':
         this.effetSprite('fumee', ev.x, ev.y, temps, 1, -2);
         return;
+      case 'piege_desamorce':
       case 'piege_declenche':
         // Le piège a déjà quitté l'état : son animation de déclenchement (mâchoires qui se ferment) se joue ici.
         this.effetSprite('piege', ev.x, ev.y, temps, 1, 0, 'declenche');

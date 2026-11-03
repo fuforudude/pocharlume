@@ -2,11 +2,11 @@
 // par ennemi, qui prouve le rôle que la spec lui donne (docs/specs/2026-11-03-lisibilite-bestiaire-variete.md).
 import { describe, expect, it } from 'vitest';
 import { ENNEMIS } from '../data/ennemis';
-import { avancerSecondes, compter, construireTour, ennemiDonnees, ennemisDe, evenementsPendant, heros, partieEssai, tourDe } from './aides.test-utils';
+import { avancerSecondes, ce, CONFIG, compter, construireTour, ennemiDonnees, ennemisDe, evenementsPendant, heros, partieEssai, tourDe } from './aides.test-utils';
 import { appliquerEffet, infligerDegats, partApresBouclier } from './degats';
 import type { DefPiege, DefTourelle } from './definitions';
-import type { Ennemi, EtatPartie, Unite } from './etat';
-import { step } from './partie';
+import { MINUTEUR, type Ennemi, type EtatPartie, type Unite } from './etat';
+import { appliquerAction, step } from './partie';
 import { construireTourelle, poserPiege } from './structures';
 import { enPas } from './temps';
 
@@ -398,6 +398,9 @@ describe('Sapeur : détruit les pièges et les tourelles proches', () => {
     expect(compter(vus, 'desamorcage')).toBe(1);
     expect(etat.pieges.map((p) => p.x)).toEqual([25]);
     expect(etat.structures.map((s) => s.x)).toEqual([25]);
+    // Chaque piège et chaque tourelle détruits ont leur événement (animation et son).
+    expect(compter(vus, 'piege_desamorce')).toBe(1);
+    expect(compter(vus, 'structure_fin')).toBe(1);
   });
 
   it('sans rien à désamorcer, il retente à chaque pas : un piège posé juste après saute aussitôt', () => {
@@ -458,7 +461,7 @@ describe('Chantre : terrifie les soldats et le héros proches', () => {
     }
     expect(terrifie).toBe(true);
     // Les soldats à moins de 2 tuiles du chantre sont étourdis ; le héros, loin, ne l'est pas.
-    const proches = etat.unites.filter((u) => u.genre === 'soldat' && (u.x - chantre.x) ** 2 + (u.y - chantre.y) ** 2 <= 4);
+    const proches = etat.unites.filter((u) => u.genre === 'soldat' && (u.x - chantre.x) * (u.x - chantre.x) + (u.y - chantre.y) * (u.y - chantre.y) <= 4);
     expect(proches.length).toBeGreaterThan(0);
     expect(proches.every((u) => u.etourdi > 0)).toBe(true);
     expect(h.etourdi).toBe(0);
@@ -618,5 +621,268 @@ describe('déterminisme', () => {
       return JSON.stringify({ ennemis: etat.ennemis, vies: etat.vies, aretes: etat.aretes, rng: etat.rng });
     };
     expect(jouer()).toBe(jouer());
+  });
+});
+
+/** Place le héros (point de garde compris) en (x, y). */
+function placerHeros(etat: EtatPartie, x: number, y: number): Unite {
+  const h = heros(etat);
+  h.x = h.ancreX = x;
+  h.y = h.ancreY = y;
+  return h;
+}
+
+/** Une partie avec un héros tireur (Pollen) ou un héros bâtisseur (Rouage). */
+function partieAvecHeros(id: 'pollen' | 'rouage'): EtatPartie {
+  return partieEssai({ ...CONFIG, dieu: 'pollen', heros: id });
+}
+
+describe('relecture : Juge des Flammes, comme avant l’action à rayon', () => {
+  it('à égalité de distance, il met le feu à la première tour', () => {
+    const etat = partieEssai();
+    construireTour(etat, 1, 'tir');
+    construireTour(etat, 2, 'tir');
+    // (11, 7) et (15, 7) sont à la même distance d'un juge en (13, 5).
+    ennemiDonnees(etat, 'juge_flammes', 13, { pv: 1e9, degats: [0, 0] });
+    const vus = evenementsPendant(etat, 13);
+    const feux = vus.filter((e) => e.type === 'tour_desactivee');
+    expect(feux.length).toBeGreaterThan(0);
+    expect(feux[0]).toMatchObject({ tour: tourDe(etat, 1)?.id });
+  });
+
+  it('sans tour, l’action compte comme faite : il attend toute sa cadence de 12 s avant de retenter', () => {
+    const etat = partieEssai();
+    ennemiDonnees(etat, 'juge_flammes', 12, { pv: 1e9, degats: [0, 0] });
+    avancerSecondes(etat, 12.5);
+    construireTour(etat, 1, 'tir');
+    expect(compter(evenementsPendant(etat, 8), 'tour_desactivee')).toBe(0);
+    expect(compter(evenementsPendant(etat, 5), 'tour_desactivee')).toBeGreaterThan(0);
+  });
+});
+
+describe('relecture : Porte-Herse, bouclier frontal', () => {
+  it('les soldats ne sont pas arrêtés par le bouclier', () => {
+    const etat = partieAvecCaserne();
+    const herse = marcheur(etat, 'porte_herse', 1, { degats: [0, 0] });
+    const soldat = unSoldat(etat);
+    const plancher = soldat.stats.degats[0] * (1 - ENNEMIS.porte_herse.armure);
+    const pvMax = herse.pv;
+    let coups = 0;
+    for (let i = 0; i < 30 * 12 && coups === 0; i++) {
+      step(etat);
+      coups = etat.evenements.filter((e) => e.type === 'coup').length;
+    }
+    expect(coups).toBeGreaterThan(0);
+    // Un coup de soldat porté de devant retire au moins son minimum : jamais 25 % seulement.
+    expect(pvMax - herse.pv).toBeGreaterThanOrEqual(plancher * coups * soldat.stats.coups * 0.99);
+  });
+
+  it('une tourelle placée devant lui le blesse quatre fois moins que la même placée derrière', () => {
+    const pvPerdus = (x: number): number => {
+      const etat = partieEssai();
+      const herse = ennemiDonnees(etat, 'porte_herse', 9, { pv: 1e6 });
+      construireTourelle(etat, -1, { ...TOURELLE, degats: [10, 10] }, x, 7);
+      for (let i = 0; i < 60 && herse.pv === herse.pvMax; i++) step(etat);
+      return herse.pvMax - herse.pv;
+    };
+    const devant = pvPerdus(11);
+    const derriere = pvPerdus(7);
+    expect(devant).toBeGreaterThan(0);
+    expect(derriere / devant).toBeCloseTo(4, 3);
+  });
+
+  it('un héros tireur placé devant lui le blesse quatre fois moins que le même placé derrière', () => {
+    const pvPerdus = (x: number): number => {
+      const etat = partieAvecHeros('pollen');
+      const herse = ennemiDonnees(etat, 'porte_herse', 9, { pv: 1e6 });
+      placerHeros(etat, x, 6);
+      for (let i = 0; i < 90 && herse.pv === herse.pvMax; i++) step(etat);
+      return herse.pvMax - herse.pv;
+    };
+    const devant = pvPerdus(11);
+    const derriere = pvPerdus(7);
+    expect(devant).toBeGreaterThan(0);
+    expect(derriere / devant).toBeCloseTo(4, 3);
+  });
+
+  it('le projectile garde l’origine du tir : la tour vendue en vol ne change pas le coup', () => {
+    const premierImpact = (vendre: boolean): number => {
+      const etat = partieEssai();
+      const herse = ennemiDonnees(etat, 'porte_herse', 9, { pv: 1e6 });
+      construireTour(etat, 1, 'tir');
+      const tour = tourDe(etat, 1);
+      for (let i = 0; i < 60 && etat.projectiles.length === 0; i++) step(etat);
+      const p = etat.projectiles[0];
+      expect(p).toBeDefined();
+      expect([p?.origineX, p?.origineY]).toEqual([tour?.x, tour?.y]);
+      if (vendre) {
+        expect(appliquerAction(etat, { type: 'vendre', ...ce(1) }).ok).toBe(true);
+        expect(tourDe(etat, 1)).toBeUndefined();
+      }
+      for (let i = 0; i < 60 && herse.pv === herse.pvMax; i++) step(etat);
+      return herse.pvMax - herse.pv;
+    };
+    const garde = premierImpact(false);
+    expect(garde).toBeGreaterThan(0);
+    expect(premierImpact(true)).toBe(garde);
+  });
+});
+
+describe('relecture : Crapaud Gonflé, plusieurs bonds', () => {
+  it('bondit de nouveau sur une seconde ligne de soldats, au moins 4 s après le premier bond', () => {
+    const etat = partieAvecCaserne();
+    construireTour(etat, 2, 'caserne');
+    avancerSecondes(etat, 2);
+    marcheur(etat, 'crapaud_gonfle', 1, { vitesse: 1.5 });
+    const pasDesBonds: number[] = [];
+    for (let i = 0; i < 30 * 25; i++) {
+      step(etat);
+      if (etat.evenements.some((e) => e.type === 'bond')) pasDesBonds.push(i);
+    }
+    expect(pasDesBonds.length).toBeGreaterThanOrEqual(2);
+    expect((pasDesBonds[1] ?? 0) - (pasDesBonds[0] ?? 0)).toBeGreaterThanOrEqual(enPas(4));
+  });
+});
+
+describe('relecture : kamikaze et voleur contre le héros', () => {
+  it('la Gerbe Ardente explose au contact du héros, qui encaisse ses 22 dégâts après armure', () => {
+    const etat = partieEssai();
+    const h = placerHeros(etat, 10, 5);
+    const pv = h.pv;
+    const gerbe = marcheur(etat, 'gerbe_ardente', 8.8);
+    const vus = evenementsPendant(etat, 4);
+    expect(compter(vus, 'explosion')).toBe(1);
+    expect(gerbe.vivant).toBe(false);
+    expect(pv - h.pv).toBeCloseTo(22 * (1 - h.stats.armure), 5);
+  });
+
+  it('le Coupe-Bourse retenu par le héros lui vole 20 arêtes, puis file', () => {
+    const etat = partieEssai();
+    placerHeros(etat, 10, 5);
+    const avant = etat.aretes;
+    const voleur = marcheur(etat, 'coupe_bourse', 8.8);
+    const vus = evenementsPendant(etat, 4);
+    expect(compter(vus, 'vol')).toBe(1);
+    expect(etat.aretes).toBe(avant - 20);
+    expect(voleur.bloqueur).toBe(-1);
+    expect(voleur.charge).toBeGreaterThan(0);
+  });
+});
+
+describe('relecture : Frère Sans-Porte, ni arrêté ni visé par un héros tireur', () => {
+  it('le héros tireur proche ne tire pas sur lui, mais tire sur un ennemi ordinaire', () => {
+    const etat = partieAvecHeros('pollen');
+    const frere = ennemiDonnees(etat, 'frere_sans_porte', 10, { pv: 1e6 });
+    placerHeros(etat, 10, 6);
+    const vus = evenementsPendant(etat, 4);
+    expect(compter(vus, 'tir_unite')).toBe(0);
+    expect(frere.pv).toBe(frere.pvMax);
+    const ordinaire = ennemiDonnees(etat, 'paysan_affame', 11, { pv: 1e6 });
+    expect(compter(evenementsPendant(etat, 4), 'tir_unite')).toBeGreaterThan(0);
+    expect(ordinaire.pv).toBeLessThan(ordinaire.pvMax);
+    expect(frere.pv).toBe(frere.pvMax);
+  });
+});
+
+describe('relecture : soldat et ennemi intouchable', () => {
+  it('le soldat relâche le Déterreur pendant toute sa plongée et ne le rebloque pas', () => {
+    const etat = partieAvecCaserne();
+    const soldat = unSoldat(etat);
+    const deterreur = marcheur(etat, 'deterreur', soldat.x);
+    avancerSecondes(etat, 1);
+    expect(deterreur.bloqueur).not.toBe(-1);
+    deterreur.minuteurs[0] = 1;
+    step(etat);
+    expect(deterreur.invulnerable).toBeGreaterThan(0);
+    let pasSousTerre = 0;
+    while (deterreur.invulnerable > 0) {
+      expect(deterreur.bloqueur, `pas ${String(pasSousTerre)}`).toBe(-1);
+      expect(etat.unites.every((u) => u.cible !== deterreur.id)).toBe(true);
+      step(etat);
+      pasSousTerre++;
+    }
+    expect(pasSousTerre).toBeGreaterThanOrEqual(enPas(2) - 2);
+  });
+
+  it('le soldat relâche aussi la Gargouille figée', () => {
+    const etat = partieAvecCaserne();
+    const soldat = unSoldat(etat);
+    const g = marcheur(etat, 'gargouille', soldat.x);
+    avancerSecondes(etat, 1);
+    expect(g.bloqueur).not.toBe(-1);
+    g.minuteurs[0] = 1;
+    step(etat);
+    expect(g.invulnerable).toBeGreaterThan(0);
+    while (g.invulnerable > 0) {
+      expect(g.bloqueur).toBe(-1);
+      step(etat);
+    }
+  });
+});
+
+describe('relecture : épines', () => {
+  it('s’appliquent aussi au coup qui tue le Fagot d’Os', () => {
+    const etat = partieEssai();
+    const h = placerHeros(etat, 10, 5);
+    const pv = h.pv;
+    const fagot = ennemiDonnees(etat, 'fagot_os', 10.4, { pv: 1, degats: [0, 0] });
+    let coups = 0;
+    for (let i = 0; i < 60 && coups === 0; i++) {
+      step(etat);
+      coups = etat.evenements.filter((e) => e.type === 'coup').length;
+    }
+    expect(coups).toBeGreaterThan(0);
+    expect(fagot.vivant).toBe(false);
+    expect(pv - h.pv).toBeCloseTo(6 * coups * h.stats.coups, 5);
+  });
+
+  it('une unité tuée par les épines ne frappe plus en zone', () => {
+    const etat = partieEssai();
+    const h = placerHeros(etat, 10, 5);
+    h.pv = 1;
+    const fagot = ennemiDonnees(etat, 'fagot_os', 10.4, { pv: 1e6, degats: [0, 0] });
+    const voisin = ennemiDonnees(etat, 'paysan_affame', 10.9, { pv: 1e6, degats: [0, 0] });
+    expect(h.zone).not.toBeNull();
+    for (let i = 0; i < 60 && !h.mort; i++) step(etat);
+    expect(h.mort).toBe(true);
+    expect(fagot.pv).toBeLessThan(fagot.pvMax);
+    expect(voisin.pv).toBe(voisin.pvMax);
+  });
+});
+
+describe('relecture : Sapeur et tourelle d’atelier', () => {
+  it('une tourelle détruite repart de zéro : le minuteur de construction est remis à sa valeur pleine', () => {
+    const etat = partieAvecHeros('rouage');
+    const h = placerHeros(etat, 12, 6.5);
+    avancerSecondes(etat, 15.5);
+    expect(etat.structures.filter((s) => s.origine === h.id)).toHaveLength(1);
+    // On vide le minuteur pour prouver que c'est le Sapeur qui le remet à sa valeur pleine.
+    h.minuteurs[MINUTEUR.tourelle] = 0;
+    ennemiDonnees(etat, 'sapeur', 12.9, { pv: 1e9, degats: [0, 0] });
+    let fin = false;
+    for (let i = 0; i < 30 * 8 && !fin; i++) {
+      step(etat);
+      fin = etat.evenements.some((e) => e.type === 'structure_fin');
+    }
+    expect(fin).toBe(true);
+    expect(etat.structures.filter((s) => s.origine === h.id)).toHaveLength(0);
+    expect(h.minuteurs[MINUTEUR.tourelle]).toBeGreaterThanOrEqual(enPas(15) - 2);
+    // Aucune reconstruction instantanée.
+    expect(compter(evenementsPendant(etat, 5), 'structure')).toBe(0);
+  });
+});
+
+describe('relecture : Grand Manteau d’élite', () => {
+  it('se divise comme l’ordinaire : 3 Mendiants ordinaires, de la même vague', () => {
+    const etat = partieEssai();
+    const manteau = ennemiDonnees(etat, 'grand_manteau', 12, {}, 0, true);
+    expect(manteau.elite).toBe(true);
+    const vague = manteau.vague;
+    infligerDegats(etat, manteau, 1e12, 'pur');
+    step(etat);
+    const mendiants = ennemisDe(etat, 'mendiant');
+    expect(mendiants).toHaveLength(3);
+    expect(mendiants.every((m) => m.vague === vague && !m.elite)).toBe(true);
+    expect(compter(etat.evenements, 'division')).toBe(1);
   });
 });

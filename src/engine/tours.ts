@@ -236,6 +236,8 @@ function tirerSur(etat: EtatPartie, t: Tour, cible: Ennemi): void {
     degats,
     critique,
     stats: s,
+    origineX: t.x,
+    origineY: t.y,
   };
   etat.projectiles.push(p);
   etat.evenements.push({ type: 'tir', tour: t.id, cible: cible.id, projectile: p.id, x: t.x, y: t.y, critique });
@@ -330,8 +332,8 @@ export function mettreAJourProjectiles(etat: EtatPartie): void {
       // Un tir au sol de la famille d'un dieu qui sème des pièges (Pollen) en laisse parfois un à l'impact.
       if (s.piegeAuSol && tirer(etat) < s.piegeAuSol.chance) poserPiege(etat, s.piegeAuSol.piege, p.x, p.y);
     } else if (cible) {
-      const tour = chercherParId(etat.tours, p.tour);
-      toucher(etat, s, cible, p.degats, tour?.x ?? p.x, tour?.y ?? p.y);
+      // L'origine est celle du tir : le bouclier frontal ne dépend pas d'une tour vendue entre-temps.
+      toucher(etat, s, cible, p.degats, p.origineX, p.origineY);
     }
   }
   liste.length = garde;

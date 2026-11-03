@@ -350,7 +350,9 @@ function texteAction(a: ActionEnnemi): string {
     case 'affamer':
       return t('bulle.ennemi.affamer', { n: pourcent(a.cadence), d: nombre(a.duree) });
     case 'desactiver_tour':
-      return t('bulle.ennemi.desactiver_tour', { d: nombre(a.duree) });
+      return a.rayon === undefined
+        ? t('bulle.ennemi.desactiver_tour', { d: nombre(a.duree) })
+        : t('bulle.ennemi.desactiver_tour_rayon', { d: nombre(a.duree), r: nombre(a.rayon) });
     case 'invoquer': {
       const appele = Object.hasOwn(ENNEMIS, a.ennemi) ? tCle(ENNEMIS[a.ennemi as keyof typeof ENNEMIS].nom) : a.ennemi;
       return t('bulle.ennemi.invoquer', { n: a.nombre, nom: appele });

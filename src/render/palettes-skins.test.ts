@@ -111,10 +111,23 @@ describe('catalogue des palettes', () => {
       if (!sprite) return null;
       let lu = lus.get(nom);
       if (!lu) {
-        const source = extraireZone(atlas, zoneDuSprite(sprite));
+        const zone = zoneDuSprite(sprite);
+        const source = extraireZone(atlas, zone);
+        // Seuls comptent les pixels des cadres du sprite : le rectangle englobant peut contenir des pixels de sprites voisins (cadres dédoublonnés).
+        const dansUnCadre = new Uint8Array(zone.largeur * zone.hauteur);
+        for (const animations of [sprite.animations, sprite.sansContour ?? {}]) {
+          for (const anim of Object.values(animations)) {
+            for (const c of anim.cadres) {
+              for (let y = c.y; y < c.y + c.hauteur; y++) {
+                for (let x = c.x; x < c.x + c.largeur; x++) dansUnCadre[(y - zone.y) * zone.largeur + (x - zone.x)] = 1;
+              }
+            }
+          }
+        }
         const hex: (string | null)[] = [];
         for (let i = 0; i < source.data.length; i += 4) {
-          hex.push((source.data[i + 3] ?? 0) === 0 ? null : [0, 1, 2].map((k) => (source.data[i + k] ?? 0).toString(16).padStart(2, '0')).join(''));
+          const transparent = (source.data[i + 3] ?? 0) === 0 || dansUnCadre[i / 4] === 0;
+          hex.push(transparent ? null : [0, 1, 2].map((k) => (source.data[i + k] ?? 0).toString(16).padStart(2, '0')).join(''));
         }
         lu = { source, hex };
         lus.set(nom, lu);

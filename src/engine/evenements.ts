@@ -41,6 +41,7 @@ export type Evenement =
   | { type: 'zone_fin'; zone: number; x: number; y: number }
   | { type: 'piege_pose'; piege: number; x: number; y: number }
   | { type: 'piege_declenche'; piege: number; ennemi: number; x: number; y: number }
+  | { type: 'piege_desamorce'; piege: number; ennemi: number; x: number; y: number }
   | { type: 'structure'; structure: number; origine: number; nom: string; x: number; y: number; duree: number }
   | { type: 'tir_structure'; structure: number; ennemi: number; x: number; y: number }
   | { type: 'structure_fin'; structure: number; x: number; y: number }

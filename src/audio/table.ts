@@ -162,6 +162,7 @@ export const SON_DES_EVENEMENTS: TableEvenements = {
   zone_fin: null,
   piege_pose: null,
   piege_declenche: 'piege',
+  piege_desamorce: lecture('piege', 0.8, 0.8, 'piege_desamorce', 2),
   structure: 'construction',
   tir_structure: 'tir_carreau',
   structure_fin: null,

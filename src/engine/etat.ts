@@ -250,6 +250,9 @@ export interface Projectile {
   degats: number;
   critique: boolean;
   stats: DefNiveauTour;
+  /** Où la tour se trouvait au départ du tir (pour le bouclier frontal). */
+  origineX: number;
+  origineY: number;
 }
 
 /** Piège posé sur le chemin : se déclenche une fois sur le premier ennemi au sol qui s'en approche. */

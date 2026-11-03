@@ -427,8 +427,12 @@ describe('vague atteinte et dernière vague terminée', () => {
     expect(etat.vagues.paquets.length + etat.ennemis.length).toBeGreaterThan(0);
     expect(derniereVagueTerminee(etat)).toBe(0);
     etat.vagues.paquets.length = 0;
-    for (const e of etat.ennemis) infligerDegats(etat, e, 1e9, 'pur');
-    step(etat);
+    // Tuer en boucle : un ennemi qui se divise à sa mort (Grand Manteau) laisse des fragments au pas suivant.
+    for (let i = 0; i < 20 && etat.ennemis.length > 0; i++) {
+      for (const e of etat.ennemis) infligerDegats(etat, e, 1e9, 'pur');
+      step(etat);
+    }
+    expect(etat.ennemis).toHaveLength(0);
     expect(derniereVagueTerminee(etat)).toBe(1);
   });
 
