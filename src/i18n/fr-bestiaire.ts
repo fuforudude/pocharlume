@@ -80,7 +80,7 @@ export const frBestiaire = {
   'bestiaire.contre.bannir': 'Il bannit tes invocations et étourdit ton héros : ne mise pas tout sur eux.',
   'bestiaire.contre.vol': 'Il te vole de l’or et file avec : tue-le vite, avant qu’il ne s’échappe, et il rend son butin en tombant.',
   'bestiaire.contre.division': 'Il se divise en plusieurs à sa mort : prépare des dégâts de zone derrière lui ({familles}) et ne le tue pas près de la sortie.',
-  'bestiaire.contre.explosion': 'Il explose à sa mort et blesse les soldats autour : tue-le avant qu’il n’arrive à leur contact.',
+  'bestiaire.contre.explosion': 'Il explose au contact de tes soldats et blesse ceux qui l’entourent : tue-le avant qu’il ne les atteigne.',
   'bestiaire.contre.bouclier': 'Son bouclier n’encaisse qu’en partie les coups de face : préfère l’artillerie, les soldats, ou des tours placées après son passage.',
   'bestiaire.contre.aura_protection': 'Il protège les ennemis autour de lui : tue-le en premier.',
   'bestiaire.contre.bond': 'Il bondit par-dessus ce qui l’arrête : aligne plusieurs lignes de soldats.',
