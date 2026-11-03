@@ -1,0 +1,109 @@
+# Frère Sans-Porte (région 8, dessiné) : un moine long et maigre dont la robe s'ouvre, sur la poitrine, sur une porte sans battant. Aucun soldat ne le retient : il passe.
+# 32×32, ancre aux pieds, de profil vers la droite. Version d'élite (`frere-sans-porte-elite`) : même recette (`modele`), tout assombri (`sombre`),
+# yeux rouges (le calque `yeux` est vide dans la version normale ; il suit la tête dans chaque cadre).
+# Fichier généré une première fois par un script puis retouché à la main : on le modifie ici.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+
+calque yeux
+.
+
+calque tete 14 2
+..vvv.
+.vUUUv
+.vUkkv
+.vUkLk
+.vUkkv
+..vUUv
+...vv.
+
+calque corps 12 9
+.vUUUUv.
+vUUUUUUv
+vUUkkUUv
+vUkLLkUv
+vUkLLkUv
+vUkLLkUv
+vUUkkUUv
+vUUUUUUv
+vUUUUUUv
+.vUUUUv.
+.vUUUUv.
+.vUUUUv.
+.vUUUUv.
+
+calque objet 10 12
+vv
+vU
+vU
+vU
+vU
+.v
+
+calque objet-frappe 20 12
+.vv
+vUv
+vUv
+vUv
+vUv
+vv.
+
+calque jambes 11 22
+.vUUUUUUv.
+vU.UUUU.Uv
+.v......v.
+..........
+
+calque jambes-a 11 22
+.vUUUUUUUv
+vU.UUU.Uv.
+..v...v...
+..........
+
+calque jambes-b 11 22
+vUUUUUUUv.
+.vU.UUU.Uv
+...v...v..
+..........
+
+calque tas 8 24
+....vvvvvv....
+..vUUUUUUUUv..
+.vUUkkkUUUUUv.
+vUUUkLLkUUUUUv
+
+sprite frere-sans-porte
+anim repos 220
+cadre jambes + corps + objet + tete + yeux
+cadre jambes + corps decale 0 -1 + objet decale 0 -1 + tete decale 0 -1 + yeux decale 0 -1
+
+anim marche 110
+cadre jambes-a + corps + objet + tete + yeux
+cadre jambes + corps decale 0 -1 + objet decale 0 -1 + tete decale 1 -1 + yeux decale 1 -1
+cadre jambes-b + corps + objet + tete + yeux
+cadre jambes + corps decale 0 -1 + objet decale 0 -1 + tete decale -1 -1 + yeux decale -1 -1
+
+# Les longues manches se déploient, mains ouvertes.
+anim attaque 100
+cadre jambes + corps decale -1 0 + objet decale -1 0 + tete decale -2 0 + yeux decale -2 0 duree 170
+cadre jambes-a + corps + objet-frappe + tete decale 2 1 + yeux decale 2 1
+cadre jambes-a + corps decale 1 0 + objet-frappe decale 1 0 + tete decale 3 1 + yeux decale 3 1 duree 140
+cadre jambes + corps + objet + tete + yeux
+
+anim blesse 120
+cadre jambes + corps decale -1 0 + objet decale -1 0 + tete decale -2 1 + yeux decale -2 1
+cadre jambes + corps + objet + tete decale -1 0 + yeux decale -1 0
+
+# La robe retombe, vide ; la porte reste ouverte un instant.
+anim mort 160
+cadre jambes + corps decale -1 2 + objet decale -1 2 + tete decale -3 3 + yeux decale -3 3
+cadre jambes-b decale 0 3 + corps decale 0 5 + objet decale 0 5 + tete decale -2 7 + yeux decale -2 7
+cadre tas duree 900
+
+sprite frere-sans-porte-elite
+modele frere-sans-porte
+sombre
+calque yeux 17 5
+x

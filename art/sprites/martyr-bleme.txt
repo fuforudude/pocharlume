@@ -1,0 +1,95 @@
+# Martyr Blême (région 10, dessiné) : un pénitent maigre, bras écartés, une auréole de cendre claire et la plaie lumineuse du flanc. Sa dernière lueur soigne ceux qui l'entourent.
+# 32×32, ancre aux pieds, de profil vers la droite. Version d'élite (`martyr-bleme-elite`) : même recette (`modele`), tout assombri (`sombre`),
+# yeux rouges (le calque `yeux` est vide dans la version normale ; il suit la tête dans chaque cadre).
+# Fichier généré une première fois par un script puis retouché à la main : on le modifie ici.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+
+calque yeux
+.
+
+calque tete 13 3
+.LLLLL.
+LIIIIIL
+.LLLLL.
+..zzzz.
+.zzzzzz
+.zzkzzz
+.zzzzzz
+..zzzz.
+...zz..
+
+calque corps 9 12
+zz..zzzzzz..zz
+.zzzzzzzzzzzz.
+..zzzzxxzzzz..
+..zzzzxxzzzz..
+..zzzzzzzzzz..
+..zzqzzzzqzz..
+...zzzzzzzz...
+...zzzzzzzz...
+...zzzzzzzz...
+..zzzzzzzzzz..
+
+calque jambes 12 22
+.zz..zz.
+.zz..zz.
+.zz..zz.
+zzz..zzz
+........
+
+calque jambes-a 12 22
+.zz...zz
+.zz...zz
+zz...zz.
+zzz.zzz.
+........
+
+calque jambes-b 12 22
+..zzzzz.
+..zzzzz.
+.zz..zz.
+.zz.zzz.
+........
+
+calque tas 8 24
+..zzzzzzzzz...
+.zzzzxxzzzzz..
+zzzzzzzzzzzzz.
+.LLLLLLLLLLL..
+
+sprite martyr-bleme
+anim repos 220
+cadre jambes + corps + tete + yeux
+cadre jambes + corps decale 0 -1 + tete decale 0 -1 + yeux decale 0 -1
+
+anim marche 110
+cadre jambes-a + corps + tete + yeux
+cadre jambes + corps decale 0 -1 + tete decale 1 -1 + yeux decale 1 -1
+cadre jambes-b + corps + tete + yeux
+cadre jambes + corps decale 0 -1 + tete decale -1 -1 + yeux decale -1 -1
+
+# Les bras s'ouvrent ; la plaie jette sa lumière.
+anim attaque 100
+cadre jambes + corps decale -1 0 + tete decale -2 0 + yeux decale -2 0 duree 170
+cadre jambes-a + corps + tete decale 2 1 + yeux decale 2 1
+cadre jambes-a + corps decale 1 0 + tete decale 3 1 + yeux decale 3 1 duree 140
+cadre jambes + corps + tete + yeux
+
+anim blesse 120
+cadre jambes + corps decale -1 0 + tete decale -2 1 + yeux decale -2 1
+cadre jambes + corps + tete decale -1 0 + yeux decale -1 0
+
+# Il s'affaisse doucement, la lueur s'éparpille.
+anim mort 160
+cadre jambes + corps decale -1 2 + tete decale -3 3 + yeux decale -3 3
+cadre jambes-b decale 0 3 + corps decale 0 5 + tete decale -2 7 + yeux decale -2 7
+cadre tas duree 900
+
+sprite martyr-bleme-elite
+modele martyr-bleme
+sombre
+calque yeux 16 8
+x

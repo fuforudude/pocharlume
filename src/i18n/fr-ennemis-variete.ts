@@ -8,7 +8,7 @@ export const frEnnemisVariete = {
   'ennemi.fagotier': 'Fagotier',
   'ennemi.crieur_public': 'Crieur Public',
   'ennemi.crapaud_gonfle': 'Crapaud Gonflé',
-  'ennemi.feu_follet': 'Feu Follet',
+  'ennemi.lueur_marais': 'Lueur des Marais',
   'ennemi.montreur_rats': 'Montreur de Rats',
   'ennemi.bubonneux': 'Bubonneux',
   'ennemi.deterreur': 'Déterreur',

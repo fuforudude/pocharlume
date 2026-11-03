@@ -297,6 +297,26 @@ Ce qu'on voit au choix avant un niveau : un symbole, une épithète, une phrase.
 - `ennemi.acolyte_cendre` : Acolyte de Cendre
 - `ennemi.ange_cendre` : Ange de Cendre
 - `ennemi.soleil_bleme` : Le Soleil Blême
+- `ennemi.coupe_bourse` : Coupe-Bourse
+- `ennemi.grand_manteau` : Grand Manteau
+- `ennemi.gerbe_ardente` : Gerbe Ardente
+- `ennemi.porte_herse` : Porte-Herse
+- `ennemi.fagotier` : Fagotier
+- `ennemi.crieur_public` : Crieur Public
+- `ennemi.crapaud_gonfle` : Crapaud Gonflé
+- `ennemi.lueur_marais` : Lueur des Marais
+- `ennemi.montreur_rats` : Montreur de Rats
+- `ennemi.bubonneux` : Bubonneux
+- `ennemi.deterreur` : Déterreur
+- `ennemi.fagot_os` : Fagot d’Os
+- `ennemi.sapeur` : Sapeur
+- `ennemi.aumonier` : Aumônier de Guerre
+- `ennemi.chantre` : Chantre
+- `ennemi.frere_sans_porte` : Frère Sans-Porte
+- `ennemi.effigie_roi` : Effigie du Roi
+- `ennemi.bourreau_roi` : Bourreau du Roi
+- `ennemi.gargouille` : Gargouille
+- `ennemi.martyr_bleme` : Martyr Blême
 
 ## Ennemis : descriptions
 
@@ -339,6 +359,26 @@ Ce qu'on voit au choix avant un niveau : un symbole, une épithète, une phrase.
 - `ennemi.acolyte_cendre.desc` : Il chante une prière pâle. Sa voix tombe en cendre avant de finir.
 - `ennemi.ange_cendre.desc` : Ses ailes sont faites de ce qui a brûlé. Il en a de très grandes.
 - `ennemi.soleil_bleme.desc` : Il n’éclaire pas. Il pâlit ce qu’il regarde, jusqu’à la cendre.
+- `ennemi.coupe_bourse.desc` : Il coupe la bourse, jamais la corde. Il laisse ça aux autres.
+- `ennemi.grand_manteau.desc` : Sous le manteau, ils se serrent pour avoir chaud. Ils sont plus nombreux qu’on ne le croit.
+- `ennemi.gerbe_ardente.desc` : On a brûlé le champ avec la récolte. La gerbe, elle, a marché jusqu’au village.
+- `ennemi.porte_herse.desc` : Il a décroché la herse du champ. Les dents regardent devant, comme lui.
+- `ennemi.fagotier.desc` : Il porte le bois des autres. Il sait déjà pour qui.
+- `ennemi.crieur_public.desc` : Il lit la sentence avant le procès. On l’applaudit.
+- `ennemi.crapaud_gonfle.desc` : On lui a jeté tout ce que le marais n’a pas voulu. Il l’a gardé.
+- `ennemi.lueur_marais.desc` : Elle mène au fond de l’eau ceux qui la suivent. Elle n’a jamais eu besoin d’appeler.
+- `ennemi.montreur_rats.desc` : Il les nourrit de la main, puis les lâche. Il jure que les rats viennent d’eux-mêmes.
+- `ennemi.bubonneux.desc` : La peste le recoud à mesure. Il se croit béni.
+- `ennemi.deterreur.desc` : Il ouvre les tombes pour ce qu’on y a laissé. Elles se referment derrière lui.
+- `ennemi.fagot_os.desc` : Ce qu’on n’a pas pu brûler a été lié en fagot. Il tient debout seul.
+- `ennemi.sapeur.desc` : Il a marché sur tous les pièges de la vieille guerre. Il sait où ils dorment.
+- `ennemi.aumonier.desc` : Il bénit les plaies et défait les liens. Les blessés l’appellent Père ; les autres, non.
+- `ennemi.chantre.desc` : Le chant est si pur qu’on oublie de bouger. Le silence, après, dure longtemps.
+- `ennemi.frere_sans_porte.desc` : Une porte sans battant sur la poitrine. Nul ne l’arrête : on n’arrête pas une porte ouverte.
+- `ennemi.effigie_roi.desc` : L’une des cent statues du roi. Elle a quitté son socle quand il a cessé de se reconnaître.
+- `ennemi.bourreau_roi.desc` : Il tranche ceux que le roi n’a plus envie de voir. Il ne regarde jamais leurs visages.
+- `ennemi.gargouille.desc` : Elle crache la pluie depuis le toit. Quand il ne pleut plus, elle descend.
+- `ennemi.martyr_bleme.desc` : Il s’est offert au Soleil Blême. Sa dernière lueur ne lui appartient plus.
 
 ## Paroles avant les boss
 

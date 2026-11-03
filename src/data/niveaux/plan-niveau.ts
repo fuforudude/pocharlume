@@ -60,16 +60,62 @@ export const ENNEMIS_REGIONS: readonly (readonly IdEnnemi[])[] = [
 /** Le boss de chaque région, au niveau 10 (indice 0 = région 1). */
 export const BOSS_REGIONS: readonly IdEnnemi[] = ['boucher_vaudrelle', 'la_faim', 'juge_flammes', 'dame_puits', 'mere_rats', 'roi_fosses', 'prince_croise', 'grand_inquisiteur', 'roi_fou', 'soleil_bleme'];
 
-/** Niveau de la région à partir duquel les ennemis des régions précédentes se mêlent aux siens. */
+/**
+ * Les deux ennemis inédits de chaque région (indice 0 = région 1) : le premier arrive au niveau 4, le second au niveau 7
+ * (`NIVEAUX_NOUVEAUX`). Chacun a un rôle mécanique propre (docs/specs/2026-11-03-lisibilite-bestiaire-variete.md).
+ */
+export const NOUVEAUX_ENNEMIS_REGIONS: readonly (readonly [IdEnnemi, IdEnnemi])[] = [
+  ['coupe_bourse', 'grand_manteau'],
+  ['gerbe_ardente', 'porte_herse'],
+  ['fagotier', 'crieur_public'],
+  ['crapaud_gonfle', 'lueur_marais'],
+  ['montreur_rats', 'bubonneux'],
+  ['deterreur', 'fagot_os'],
+  ['sapeur', 'aumonier'],
+  ['chantre', 'frere_sans_porte'],
+  ['effigie_roi', 'bourreau_roi'],
+  ['gargouille', 'martyr_bleme'],
+];
+
+/** Niveau de la région (de 1 à 10) où arrive chacun des deux nouveaux ennemis. */
+export const NIVEAUX_NOUVEAUX: readonly [number, number] = [4, 7];
+
+/**
+ * Les ennemis des régions précédentes que chaque région reprend dans ses plans de vagues, dès `NIVEAU_MELANGE` (indice 0 =
+ * région 1, qui n'en reprend aucun). Un choix à la main, pas « tout ce qui précède » : la liste garde les nouveaux ennemis visibles
+ * et rappelle ce que le joueur a déjà dû contrer (volants, armures, essaims).
+ */
+export const REPRISES_REGIONS: readonly (readonly IdEnnemi[])[] = [
+  [],
+  ['chien_errant', 'mendiant', 'coupe_bourse'],
+  ['paysan_affame', 'corbeau_noir', 'gerbe_ardente'],
+  ['chasseur_sorcieres', 'crieur_public', 'corbeau_noir'],
+  ['sangsue', 'pelerin_voile', 'fagotier'],
+  ['rat_peste', 'pestifere', 'crapaud_gonfle'],
+  ['fossoyeur', 'chauve_souris', 'deterreur'],
+  ['fantassin', 'medecin_peste', 'sapeur'],
+  ['cavalier', 'exorciste', 'chantre'],
+  ['garde_royal', 'inquisiteur', 'effigie_roi', 'bourreau_roi'],
+];
+
+/** Niveau de la région à partir duquel les ennemis repris des régions précédentes se mêlent aux siens. */
 export const NIVEAU_MELANGE = 4;
+
+/** Les nouveaux ennemis de la région déjà arrivés au niveau `k` (0, 1 ou 2). */
+export function nouveauxEnnemisDuNiveau(region: number, k: number): readonly IdEnnemi[] {
+  const nouveaux = NOUVEAUX_ENNEMIS_REGIONS[region - 1] ?? [];
+  return nouveaux.filter((_, i) => k >= (NIVEAUX_NOUVEAUX[i] ?? Infinity));
+}
 
 /**
  * Les ennemis du niveau `k` (1 à 10) de la région `region` (2 à 10), dans l'ordre du tirage : ceux de la région, un de
- * plus à chaque niveau (tous au niveau 3, ou au niveau 2 pour la région 10 qui n'en a que deux), puis dès le niveau 4 ceux des régions précédentes, de la plus proche à la plus
- * lointaine. Le boss n'en fait pas partie : le plan l'ajoute à la dernière vague du niveau 10.
+ * plus à chaque niveau (tous au niveau 3, ou au niveau 2 pour la région 10 qui n'en a que deux), ses nouveaux ennemis
+ * (le premier au niveau 4, le second au niveau 7), puis dès le niveau 4 ceux qu'elle reprend des régions précédentes
+ * (`REPRISES_REGIONS`). Le boss n'en fait pas partie : le plan l'ajoute à la dernière vague du niveau 10.
  */
 export function ennemisDuNiveau(region: number, k: number): readonly IdEnnemi[] {
   const propres = ENNEMIS_REGIONS[region - 1]?.slice(0, k) ?? [];
-  if (k < NIVEAU_MELANGE) return propres;
-  return [...propres, ...ENNEMIS_REGIONS.slice(0, region - 1).reverse().flat()];
+  const nouveaux = nouveauxEnnemisDuNiveau(region, k);
+  if (k < NIVEAU_MELANGE) return [...propres, ...nouveaux];
+  return [...propres, ...nouveaux, ...(REPRISES_REGIONS[region - 1] ?? [])];
 }

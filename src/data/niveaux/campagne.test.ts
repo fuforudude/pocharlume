@@ -11,7 +11,7 @@ import { FAMILLES } from '../tours';
 import type { NiveauCampagne } from '../visuel';
 import { CAMPAGNE, REGIONS, niveauDeCampagne } from './campagne';
 import { CARTES } from './cartes-toutes';
-import { BOSS_REGIONS, ENNEMIS_REGIONS, ennemisDuNiveau } from './plan-niveau';
+import { BOSS_REGIONS, ENNEMIS_REGIONS, ennemisDuNiveau, NIVEAUX_NOUVEAUX, NOUVEAUX_ENNEMIS_REGIONS, REPRISES_REGIONS } from './plan-niveau';
 import { PLANS_REGIONS } from './plans';
 
 const REGIONS_NOUVELLES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -107,17 +107,52 @@ describe('ennemis des régions', () => {
     for (const id of BOSS_REGIONS) expect(definition(id).boss, id).toBe(true);
   });
 
-  it('un niveau de région 2 à 10 emploie les ennemis de sa région, puis dès le niveau 4 ceux des régions précédentes', () => {
+  it('un niveau de région 2 à 10 emploie les ennemis de sa région, ses nouveaux ennemis (niveaux 4 et 7), puis dès le niveau 4 ceux qu’elle reprend', () => {
     for (const r of REGIONS_NOUVELLES) {
       const propres = ENNEMIS_REGIONS[r - 1] ?? [];
-      const anciens = ENNEMIS_REGIONS.slice(0, r - 1).flat();
+      const nouveaux = NOUVEAUX_ENNEMIS_REGIONS[r - 1] ?? [];
+      const reprises = REPRISES_REGIONS[r - 1] ?? [];
       for (let k = 1; k <= 10; k++) {
         const liste = ennemisDuNiveau(r, k);
-        expect(liste.filter((e) => propres.includes(e)), `région ${String(r)} niveau ${String(k)}`).toEqual(propres.slice(0, k));
-        if (k < 4) expect(liste.some((e) => anciens.includes(e)), `région ${String(r)} niveau ${String(k)}`).toBe(false);
-        else expect([...liste].sort(), `région ${String(r)} niveau ${String(k)}`).toEqual([...propres, ...anciens].sort());
+        const attendus = [...propres.slice(0, k), ...nouveaux.filter((_, i) => k >= (NIVEAUX_NOUVEAUX[i] ?? Infinity)), ...(k >= 4 ? reprises : [])];
+        expect([...liste].sort(), `région ${String(r)} niveau ${String(k)}`).toEqual([...attendus].sort());
       }
     }
+  });
+
+  it('chaque région a au moins 2 ennemis inédits (arrivés aux niveaux 4 et 7) et reprend au moins 1 ennemi d’une région précédente', () => {
+    expect(NOUVEAUX_ENNEMIS_REGIONS).toHaveLength(10);
+    expect(REPRISES_REGIONS).toHaveLength(10);
+    expect(NIVEAUX_NOUVEAUX).toEqual([4, 7]);
+    const vus = new Set<string>();
+    NOUVEAUX_ENNEMIS_REGIONS.forEach((nouveaux, i) => {
+      const r = i + 1;
+      expect(nouveaux.length, `région ${String(r)}`).toBeGreaterThanOrEqual(2);
+      for (const id of nouveaux) {
+        expect(definition(id).boss, id).toBe(false);
+        expect(vus.has(id), `${id} : déjà nouveau dans une autre région`).toBe(false);
+        vus.add(id);
+        // Inédit : ni un ennemi ordinaire d'une région, ni repris avant la sienne.
+        expect(ENNEMIS_REGIONS.flat().includes(id), id).toBe(false);
+      }
+      // Les nouveaux ennemis de la région sont bien dans ses plans de vagues, le premier au niveau 4 et le second au niveau 7.
+      const plans = PLANS_REGIONS[i] ?? [];
+      expect(plans[3]?.vagues.ennemis, `région ${String(r)} niveau 4`).toContain(nouveaux[0]);
+      expect(plans[2]?.vagues.ennemis, `région ${String(r)} niveau 3`).not.toContain(nouveaux[0]);
+      expect(plans[6]?.vagues.ennemis, `région ${String(r)} niveau 7`).toContain(nouveaux[1]);
+      expect(plans[5]?.vagues.ennemis, `région ${String(r)} niveau 6`).not.toContain(nouveaux[1]);
+      // Reprises : des ennemis de régions précédentes (ordinaires ou nouveaux), dans les plans des niveaux 4 à 10 (sauf la région 1).
+      const reprises = REPRISES_REGIONS[i] ?? [];
+      if (r === 1) {
+        expect(reprises).toHaveLength(0);
+        return;
+      }
+      expect(reprises.length, `région ${String(r)}`).toBeGreaterThanOrEqual(1);
+      const precedents = new Set<string>([...ENNEMIS_REGIONS.slice(0, i).flat(), ...NOUVEAUX_ENNEMIS_REGIONS.slice(0, i).flat()]);
+      for (const id of reprises) expect(precedents.has(id), `région ${String(r)} reprend ${id}`).toBe(true);
+      for (const plan of plans.slice(3)) for (const id of reprises) expect(plan.vagues.ennemis, `niveau ${String(plan.numero)}`).toContain(id);
+      for (const plan of plans.slice(0, 3)) for (const id of reprises) expect(plan.vagues.ennemis, `niveau ${String(plan.numero)}`).not.toContain(id);
+    });
   });
 
   it('les vagues ne contiennent que les ennemis permis, et tous les ennemis de la région avant le niveau 4', () => {
@@ -132,12 +167,17 @@ describe('ennemis des régions', () => {
     }
   });
 
-  it('les niveaux 4 à 10 mélangent des ennemis de plusieurs régions', () => {
+  it('les niveaux 4 à 10 mélangent des ennemis de plusieurs régions et font apparaître les nouveaux ennemis', () => {
     for (const r of REGIONS_NOUVELLES) {
-      const anciens = new Set<string>(ENNEMIS_REGIONS.slice(0, r - 1).flat());
+      const anciens = new Set<string>(REPRISES_REGIONS[r - 1] ?? []);
       const niveaux = (REGIONS[r - 1] ?? []).slice(3);
       const avecAnciens = niveaux.filter((n) => [...ennemisDe(n)].some((e) => anciens.has(e)));
       expect(avecAnciens.length, `région ${String(r)}`).toBeGreaterThanOrEqual(5);
+      // Chaque nouvel ennemi se retrouve dans les vagues de sa région (il arrive au niveau 4 ou 7, puis revient).
+      for (const id of NOUVEAUX_ENNEMIS_REGIONS[r - 1] ?? []) {
+        const niveauxAvec = (REGIONS[r - 1] ?? []).filter((n) => ennemisDe(n).has(id));
+        expect(niveauxAvec.length, `région ${String(r)} : ${id}`).toBeGreaterThanOrEqual(2);
+      }
     }
   });
 

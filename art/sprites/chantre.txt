@@ -1,0 +1,98 @@
+# Chantre (région 8, dessiné) : une bure noire, la bouche grande ouverte sur un chant sans souffle, un livre ouvert en main. Le chant fige ceux qui l'entendent.
+# 32×32, ancre aux pieds, de profil vers la droite. Version d'élite (`chantre-elite`) : même recette (`modele`), tout assombri (`sombre`),
+# yeux rouges (le calque `yeux` est vide dans la version normale ; il suit la tête dans chaque cadre).
+# Fichier généré une première fois par un script puis retouché à la main : on le modifie ici.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+couleur S c8b4a0
+
+calque yeux
+.
+
+calque tete 13 7
+..gggg..
+.gggggg.
+gggSSSS.
+ggSSkSS.
+.ggSrrS.
+..ggrrS.
+...ggg..
+
+calque corps 9 13
+..ggggggg...
+.ggGggggGg..
+.ggGggggGgSS
+.ggGggggGgSS
+gggGZZZZGggg
+gggggggggggg
+ggGggggggGgg
+gggggggggggg
+ggGgggggggGg
+ggggggggggug
+.gggggggggg.
+
+calque objet 19 19
+zzzzzzz
+zkzzzkz
+zkzzzkz
+zzzzzzz
+
+calque objet-frappe 20 15
+zzzzzzz
+zkzzzkz
+zkzzzkz
+zzzzzzz
+
+calque jambes 12 24
+.kk..kk.
+kkk..kkk
+
+calque jambes-a 12 24
+.kk...kk
+kkk..kkk
+
+calque jambes-b 12 24
+..kk.kk.
+.kkk.kkk
+
+calque tas 8 24
+..ggggggggg...
+.ggGgggGgggg..
+gggggggggggzzz
+gGggggggGgzkkz
+
+sprite chantre
+anim repos 220
+cadre jambes + corps + objet + tete + yeux
+cadre jambes + corps decale 0 -1 + objet decale 0 -1 + tete decale 0 -1 + yeux decale 0 -1
+
+anim marche 110
+cadre jambes-a + corps + objet + tete + yeux
+cadre jambes + corps decale 0 -1 + objet decale 0 -1 + tete decale 1 -1 + yeux decale 1 -1
+cadre jambes-b + corps + objet + tete + yeux
+cadre jambes + corps decale 0 -1 + objet decale 0 -1 + tete decale -1 -1 + yeux decale -1 -1
+
+# Il lève le livre et entonne la note qui fige.
+anim attaque 100
+cadre jambes + corps decale -1 0 + objet decale -1 0 + tete decale -2 0 + yeux decale -2 0 duree 170
+cadre jambes-a + corps + objet-frappe + tete decale 2 1 + yeux decale 2 1
+cadre jambes-a + corps decale 1 0 + objet-frappe decale 1 0 + tete decale 3 1 + yeux decale 3 1 duree 140
+cadre jambes + corps + objet + tete + yeux
+
+anim blesse 120
+cadre jambes + corps decale -1 0 + objet decale -1 0 + tete decale -2 1 + yeux decale -2 1
+cadre jambes + corps + objet + tete decale -1 0 + yeux decale -1 0
+
+# Le chant s'éteint dans sa gorge.
+anim mort 160
+cadre jambes + corps decale -1 2 + objet decale -1 2 + tete decale -3 3 + yeux decale -3 3
+cadre jambes-b decale 0 3 + corps decale 0 5 + objet decale 0 5 + tete decale -2 7 + yeux decale -2 7
+cadre tas duree 900
+
+sprite chantre-elite
+modele chantre
+sombre
+calque yeux 17 10
+x

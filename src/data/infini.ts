@@ -9,17 +9,18 @@ export const INFINI: ParametresInfini = {
   croissance: 1.22,
   // Au plus 200 ennemis par vague (mini-boss à part) : au-delà, le surplus de budget gonfle les PV de la vague (voir engine/infini.ts).
   ennemisMaxParVague: 200,
+  // Chaque région tire ses trois ennemis ordinaires (deux pour la dixième) puis ses deux nouveaux (spec « variété »).
   regions: [
-    { ennemis: ['paysan_affame', 'mendiant', 'chien_errant'], boss: 'boucher_vaudrelle' },
-    { ennemis: ['glaneur', 'corbeau_noir', 'epouvantail'], boss: 'la_faim' },
-    { ennemis: ['porteur_torche', 'chasseur_sorcieres', 'delateur'], boss: 'juge_flammes' },
-    { ennemis: ['noyeur', 'pelerin_voile', 'sangsue'], boss: 'dame_puits' },
-    { ennemis: ['rat_peste', 'pestifere', 'medecin_peste'], boss: 'mere_rats' },
-    { ennemis: ['fossoyeur', 'creux', 'chauve_souris'], boss: 'roi_fosses' },
-    { ennemis: ['fantassin', 'porte_banniere', 'cavalier'], boss: 'prince_croise' },
-    { ennemis: ['flagellant', 'inquisiteur', 'exorciste'], boss: 'grand_inquisiteur' },
-    { ennemis: ['garde_royal', 'arbaletrier_elite', 'chevalier'], boss: 'roi_fou' },
-    { ennemis: ['acolyte_cendre', 'ange_cendre'], boss: 'soleil_bleme' },
+    { ennemis: ['paysan_affame', 'mendiant', 'chien_errant', 'coupe_bourse', 'grand_manteau'], boss: 'boucher_vaudrelle' },
+    { ennemis: ['glaneur', 'corbeau_noir', 'epouvantail', 'gerbe_ardente', 'porte_herse'], boss: 'la_faim' },
+    { ennemis: ['porteur_torche', 'chasseur_sorcieres', 'delateur', 'fagotier', 'crieur_public'], boss: 'juge_flammes' },
+    { ennemis: ['noyeur', 'pelerin_voile', 'sangsue', 'crapaud_gonfle', 'lueur_marais'], boss: 'dame_puits' },
+    { ennemis: ['rat_peste', 'pestifere', 'medecin_peste', 'montreur_rats', 'bubonneux'], boss: 'mere_rats' },
+    { ennemis: ['fossoyeur', 'creux', 'chauve_souris', 'deterreur', 'fagot_os'], boss: 'roi_fosses' },
+    { ennemis: ['fantassin', 'porte_banniere', 'cavalier', 'sapeur', 'aumonier'], boss: 'prince_croise' },
+    { ennemis: ['flagellant', 'inquisiteur', 'exorciste', 'chantre', 'frere_sans_porte'], boss: 'grand_inquisiteur' },
+    { ennemis: ['garde_royal', 'arbaletrier_elite', 'chevalier', 'effigie_roi', 'bourreau_roi'], boss: 'roi_fou' },
+    { ennemis: ['acolyte_cendre', 'ange_cendre', 'gargouille', 'martyr_bleme'], boss: 'soleil_bleme' },
   ],
   // Élites à partir de la vague 20 : 10 % des ennemis, 5 points de plus toutes les 10 vagues, au plus 60 %.
   elites: { premiereVague: 20, partDepart: 0.1, partParPalier: 0.05, intervalle: 10, partMax: 0.6 },

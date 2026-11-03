@@ -294,11 +294,11 @@ describe('Crapaud Gonflé : bondit par-dessus le soldat qui le retient', () => {
   });
 });
 
-describe('Feu Follet : aveugle les tours proches', () => {
+describe('Lueur des Marais : aveugle les tours proches', () => {
   it('toutes les 10 s, la tour à 3 tuiles perd 30 % de portée pendant 3 s', () => {
     const etat = partieEssai();
     construireTour(etat, 1, 'tir');
-    ennemiDonnees(etat, 'feu_follet', 11, { pv: 1e9, degats: [0, 0] });
+    ennemiDonnees(etat, 'lueur_marais', 11, { pv: 1e9, degats: [0, 0] });
     avancerSecondes(etat, 10.3);
     const tour = tourDe(etat, 1);
     expect(tour?.aveuglePas).toBeGreaterThan(0);
@@ -610,7 +610,7 @@ describe('déterminisme', () => {
       const etat = partieAvecCaserne();
       construireTour(etat, 1, 'tir');
       let x = 1;
-      for (const id of ['coupe_bourse', 'grand_manteau', 'gerbe_ardente', 'porte_herse', 'fagotier', 'crieur_public', 'crapaud_gonfle', 'feu_follet', 'montreur_rats', 'bubonneux', 'deterreur', 'fagot_os', 'sapeur', 'aumonier', 'chantre', 'frere_sans_porte', 'effigie_roi', 'bourreau_roi', 'gargouille', 'martyr_bleme'] as const) {
+      for (const id of ['coupe_bourse', 'grand_manteau', 'gerbe_ardente', 'porte_herse', 'fagotier', 'crieur_public', 'crapaud_gonfle', 'lueur_marais', 'montreur_rats', 'bubonneux', 'deterreur', 'fagot_os', 'sapeur', 'aumonier', 'chantre', 'frere_sans_porte', 'effigie_roi', 'bourreau_roi', 'gargouille', 'martyr_bleme'] as const) {
         marcheur(etat, id, x, { pv: ENNEMIS[id].pv, degats: ENNEMIS[id].degats });
         x += 0.5;
       }

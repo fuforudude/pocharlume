@@ -1,0 +1,94 @@
+# Gerbe Ardente (région 2, dessinée) : une gerbe de paille qui marche, couronnée de flammes, deux yeux noirs dans les épis. Kamikaze : elle explose au contact.
+# 32×32, ancre aux pieds, de profil vers la droite. Version d'élite (`gerbe-ardente-elite`) : même recette (`modele`), tout assombri (`sombre`),
+# yeux rouges (le calque `yeux` est vide dans la version normale ; il suit la tête dans chaque cadre).
+# Fichier généré une première fois par un script puis retouché à la main : on le modifie ici.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+
+calque yeux
+.
+
+calque tete 11 5
+....x....
+...xfx...
+..xfFfx..
+.xfFyFfx.
+.xfFFFfx.
+..xfffx..
+...xxx...
+
+calque corps 10 12
+..YJYYJYY...
+.YYYJYYYJYY.
+YJYkkYYkkYJY
+YYYJYYYYJYYY
+.YYBBBBBBYY.
+YYJYYYYYYJYY
+YYYYJYYJYYYY
+.YJYYYYYYYJ.
+.YYBBBBBBYY.
+..YJYYYYJY..
+...YYJYYY...
+
+calque jambes 13 23
+.bb.bb.
+.bb.bb.
+.dd.dd.
+dd..ddd
+.......
+
+calque jambes-a 13 23
+.bb..bb.
+.bb..bb.
+dd...dd.
+dd...ddd
+........
+
+calque jambes-b 13 23
+..bbb..
+..bbb..
+.dd.dd.
+.dd.dd.
+.......
+
+calque tas 10 24
+..kkkkkkkk..
+.kkxkkkfkkk.
+kkkkkkkkkkkk
+.JkJkkJkkJ..
+
+sprite gerbe-ardente
+anim repos 220
+cadre jambes + corps + tete + yeux
+cadre jambes + corps decale 0 -1 + tete decale 0 -1 + yeux decale 0 -1
+
+anim marche 110
+cadre jambes-a + corps + tete + yeux
+cadre jambes + corps decale 0 -1 + tete decale 1 -1 + yeux decale 1 -1
+cadre jambes-b + corps + tete + yeux
+cadre jambes + corps decale 0 -1 + tete decale -1 -1 + yeux decale -1 -1
+
+# Elle se jette en avant, flammes couchées.
+anim attaque 100
+cadre jambes + corps decale -1 0 + tete decale -2 0 + yeux decale -2 0 duree 170
+cadre jambes-a + corps + tete decale 2 1 + yeux decale 2 1
+cadre jambes-a + corps decale 1 0 + tete decale 3 1 + yeux decale 3 1 duree 140
+cadre jambes + corps + tete + yeux
+
+anim blesse 120
+cadre jambes + corps decale -1 0 + tete decale -2 1 + yeux decale -2 1
+cadre jambes + corps + tete decale -1 0 + yeux decale -1 0
+
+# La gerbe s'effondre en braises.
+anim mort 160
+cadre jambes + corps decale -1 2 + tete decale -3 3 + yeux decale -3 3
+cadre jambes-b decale 0 3 + corps decale 0 5 + tete decale -2 7 + yeux decale -2 7
+cadre tas duree 900
+
+sprite gerbe-ardente-elite
+modele gerbe-ardente
+sombre
+calque yeux 14 14
+x..x

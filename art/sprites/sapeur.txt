@@ -1,0 +1,121 @@
+# Sapeur (région 7, dessiné) : casque d'acier, une barrique de poudre à la mèche vive sur le dos, une bombe à la main. Il désamorce pièges et tourelles.
+# 32×32, ancre aux pieds, de profil vers la droite. Version d'élite (`sapeur-elite`) : même recette (`modele`), tout assombri (`sombre`),
+# yeux rouges (le calque `yeux` est vide dans la version normale ; il suit la tête dans chaque cadre).
+# Fichier généré une première fois par un script puis retouché à la main : on le modifie ici.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+couleur S d0a888
+
+calque yeux
+.
+
+calque fond 5 12
+..y.....
+..f.....
+.bbbbbb.
+bBBBBBBb
+dddddddd
+bBBBBBBb
+bBBBBBBb
+dddddddd
+bBBBBBBb
+.bbbbbb.
+
+calque tete 13 9
+..TTTT..
+.TiTTTT.
+TTTTTTTT
+..TSSSS.
+..SSkSS.
+..SSSSS.
+...SSS..
+
+calque corps 9 15
+..tttttt....
+.taaaaaat...
+.taaaaaatSS.
+.taAaaaaatSS
+..tttttt....
+.bbbbbbbb...
+.bBBBBBBb...
+..bbbbbb....
+
+calque objet 21 15
+..y..
+.kkk.
+kkkkk
+kkTkk
+.kkk.
+
+calque objet-frappe 23 16
+..y..
+.kkk.
+kkkkk
+kkTkk
+.kkk.
+
+calque jambes 12 23
+.tt..tt.
+.tt..tt.
+.tt..tt.
+.tt..tt.
+.dd..dd.
+ddd..ddd
+
+calque jambes-a 12 23
+.tt...tt
+.tt...tt
+tt...tt.
+tt...tt.
+dd...dd.
+ddd..ddd
+
+calque jambes-b 12 23
+..ttttt.
+..ttttt.
+.tt..tt.
+.tt..tt.
+.dd..dd.
+ddd..dd.
+
+calque tas 5 24
+.bbbbbb.....
+bBBBBBBb.tt.
+ddddddddttaa
+.bbbbbb.dd..
+
+sprite sapeur
+anim repos 220
+cadre jambes + fond + corps + objet + tete + yeux
+cadre jambes + fond decale 0 -1 + corps decale 0 -1 + objet decale 0 -1 + tete decale 0 -1 + yeux decale 0 -1
+
+anim marche 110
+cadre jambes-a + fond + corps + objet + tete + yeux
+cadre jambes + fond decale 0 -1 + corps decale 0 -1 + objet decale 0 -1 + tete decale 1 -1 + yeux decale 1 -1
+cadre jambes-b + fond + corps + objet + tete + yeux
+cadre jambes + fond decale 0 -1 + corps decale 0 -1 + objet decale 0 -1 + tete decale -1 -1 + yeux decale -1 -1
+
+# Il jette sa bombe au pied de ce qui lui barre la route.
+anim attaque 100
+cadre jambes + fond decale -1 0 + corps decale -1 0 + objet decale -1 0 + tete decale -2 0 + yeux decale -2 0 duree 170
+cadre jambes-a + fond + corps + objet-frappe + tete decale 2 1 + yeux decale 2 1
+cadre jambes-a + fond decale 1 0 + corps decale 1 0 + objet-frappe decale 1 0 + tete decale 3 1 + yeux decale 3 1 duree 140
+cadre jambes + fond + corps + objet + tete + yeux
+
+anim blesse 120
+cadre jambes + fond decale -1 0 + corps decale -1 0 + objet decale -1 0 + tete decale -2 1 + yeux decale -2 1
+cadre jambes + fond + corps + objet + tete decale -1 0 + yeux decale -1 0
+
+# La barrique roule ; la mèche s'éteint à temps.
+anim mort 160
+cadre jambes + fond decale -1 2 + corps decale -1 2 + objet decale -1 2 + tete decale -3 3 + yeux decale -3 3
+cadre jambes-b decale 0 3 + fond decale 0 5 + corps decale 0 5 + objet decale 0 5 + tete decale -2 7 + yeux decale -2 7
+cadre tas duree 900
+
+sprite sapeur-elite
+modele sapeur
+sombre
+calque yeux 17 12
+x

@@ -1,0 +1,120 @@
+# Fagotier (région 3, dessiné) : un homme courbé sous un fagot énorme, une torche à la main. Il connaît la hauteur d'un bûcher.
+# 32×32, ancre aux pieds, de profil vers la droite. Version d'élite (`fagotier-elite`) : même recette (`modele`), tout assombri (`sombre`),
+# yeux rouges (le calque `yeux` est vide dans la version normale ; il suit la tête dans chaque cadre).
+# Fichier généré une première fois par un script puis retouché à la main : on le modifie ici.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+couleur S c8a884
+
+calque yeux
+.
+
+calque tete 14 10
+.ddddd..
+ddddddd.
+ddSSSSd.
+dSSSkSS.
+.SSSSS..
+..SSS...
+
+calque corps 6 5
+...N..N.N.......
+..NbN.bNbN......
+.NbbNbNbbbN.....
+NbbNbbbNbbbN....
+bbNbbNbbbNbbN...
+NbNbbbbNbbbbNd..
+bbbbNbbbbNbbbd..
+NbbNbbbNbbbbbd..
+.bbbNbbbNbbbbd..
+.NbbbbNbbbbbdd..
+..bbNbbbNbbd.dd.
+...NbbbbNbdddddd
+....bbbbbdddddSd
+.....bbbbdddddd.
+......ddddddddd.
+......dddddddS..
+......dddddddd..
+.......dddddd...
+
+calque objet 21 13
+..y..
+.xFx.
+.xfx.
+..b..
+..b..
+..S..
+
+calque objet-frappe 23 14
+.y...
+xFx..
+xfx..
+.b...
+.b...
+.S...
+
+calque jambes 13 23
+.dd.dd.
+.dd.dd.
+.dd.dd.
+.dd.dd.
+.kk.kk.
+kk..kkk
+
+calque jambes-a 13 23
+.dd..dd.
+.dd..dd.
+dd...dd.
+dd...dd.
+kk...kk.
+kk...kkk
+
+calque jambes-b 13 23
+..ddd..
+..ddd..
+.dd.dd.
+.dd.dd.
+.kk.kk.
+kk..kk.
+
+calque tas 8 23
+.NbbNbNbbN....
+NbNbbbbNbbNbbb
+bbNdddddbbdSNb
+kkkkkkkkkkkkkk
+
+sprite fagotier
+anim repos 220
+cadre jambes + corps + objet + tete + yeux
+cadre jambes + corps decale 0 -1 + objet decale 0 -1 + tete decale 0 -1 + yeux decale 0 -1
+
+anim marche 110
+cadre jambes-a + corps + objet + tete + yeux
+cadre jambes + corps decale 0 -1 + objet decale 0 -1 + tete decale 1 -1 + yeux decale 1 -1
+cadre jambes-b + corps + objet + tete + yeux
+cadre jambes + corps decale 0 -1 + objet decale 0 -1 + tete decale -1 -1 + yeux decale -1 -1
+
+# La torche fouette l'air devant lui.
+anim attaque 100
+cadre jambes + corps decale -1 0 + objet decale -1 0 + tete decale -2 0 + yeux decale -2 0 duree 170
+cadre jambes-a + corps + objet-frappe + tete decale 2 1 + yeux decale 2 1
+cadre jambes-a + corps decale 1 0 + objet-frappe decale 1 0 + tete decale 3 1 + yeux decale 3 1 duree 140
+cadre jambes + corps + objet + tete + yeux
+
+anim blesse 120
+cadre jambes + corps decale -1 0 + objet decale -1 0 + tete decale -2 1 + yeux decale -2 1
+cadre jambes + corps + objet + tete decale -1 0 + yeux decale -1 0
+
+# Le fagot se défait sur lui.
+anim mort 160
+cadre jambes + corps decale -1 2 + objet decale -1 2 + tete decale -3 3 + yeux decale -3 3
+cadre jambes-b decale 0 3 + corps decale 0 5 + objet decale 0 5 + tete decale -2 7 + yeux decale -2 7
+cadre tas duree 900
+
+sprite fagotier-elite
+modele fagotier
+sombre
+calque yeux 18 13
+x

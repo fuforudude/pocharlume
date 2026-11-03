@@ -9,11 +9,16 @@
 // Progression : le niveau 1 a un chemin simple ; le mendiant arrive au 3, le chien errant au 5 ;
 // plusieurs entrées du 5 au 9 ; le niveau 10 est le combat contre le Boucher de Vaudrelle.
 import type { IdEnnemi } from '../ennemis';
-import type { PlanNiveau } from './plan-niveau';
+import { nouveauxEnnemisDuNiveau, type PlanNiveau } from './plan-niveau';
 
 const PAYSAN: readonly IdEnnemi[] = ['paysan_affame'];
 const PAYSAN_MENDIANT: readonly IdEnnemi[] = ['paysan_affame', 'mendiant'];
 const TOUS: readonly IdEnnemi[] = ['paysan_affame', 'mendiant', 'chien_errant'];
+
+/** Les ennemis du niveau `k` : ceux du palier, puis les nouveaux de la région déjà arrivés (Coupe-Bourse au niveau 4, Grand Manteau au 7). */
+function avecNouveaux(base: readonly IdEnnemi[], k: number): readonly IdEnnemi[] {
+  return [...base, ...nouveauxEnnemisDuNiveau(1, k)];
+}
 
 export const PLANS_REGION1: readonly PlanNiveau[] = [
   {
@@ -54,7 +59,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     defiFer: { familles: ['tir', 'magie'] },
     nom: 'niveau.r1.04.nom',
     ambiance: 'niveau.r1.04.ambiance',
-    vagues: { nombre: 8, ennemis: PAYSAN_MENDIANT, graine: 1104, ecart: 0.8 },
+    vagues: { nombre: 8, ennemis: avecNouveaux(PAYSAN_MENDIANT, 4), graine: 1104, ecart: 0.8 },
   },
   {
     numero: 5,
@@ -64,7 +69,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     defiFer: { familles: ['tir', 'artillerie'] },
     nom: 'niveau.r1.05.nom',
     ambiance: 'niveau.r1.05.ambiance',
-    vagues: { nombre: 8, ennemis: TOUS, graine: 1105 },
+    vagues: { nombre: 8, ennemis: avecNouveaux(TOUS, 5), graine: 1105 },
   },
   {
     numero: 6,
@@ -74,7 +79,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     defiFer: { familles: ['magie', 'artillerie'] },
     nom: 'niveau.r1.06.nom',
     ambiance: 'niveau.r1.06.ambiance',
-    vagues: { nombre: 9, ennemis: TOUS, graine: 1106 },
+    vagues: { nombre: 9, ennemis: avecNouveaux(TOUS, 6), graine: 1106 },
   },
   {
     numero: 7,
@@ -84,7 +89,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     defiFer: { familles: ['caserne', 'tir'] },
     nom: 'niveau.r1.07.nom',
     ambiance: 'niveau.r1.07.ambiance',
-    vagues: { nombre: 10, ennemis: TOUS, graine: 1107, horde: true },
+    vagues: { nombre: 10, ennemis: avecNouveaux(TOUS, 7), graine: 1107, horde: true },
   },
   {
     numero: 8,
@@ -94,7 +99,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     defiFer: { familles: ['caserne', 'magie'] },
     nom: 'niveau.r1.08.nom',
     ambiance: 'niveau.r1.08.ambiance',
-    vagues: { nombre: 10, ennemis: TOUS, graine: 1108 },
+    vagues: { nombre: 10, ennemis: avecNouveaux(TOUS, 8), graine: 1108 },
   },
   {
     numero: 9,
@@ -104,7 +109,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     defiFer: { familles: ['caserne', 'artillerie'] },
     nom: 'niveau.r1.09.nom',
     ambiance: 'niveau.r1.09.ambiance',
-    vagues: { nombre: 11, ennemis: TOUS, graine: 1109 },
+    vagues: { nombre: 11, ennemis: avecNouveaux(TOUS, 9), graine: 1109 },
   },
   {
     numero: 10,
@@ -116,7 +121,7 @@ export const PLANS_REGION1: readonly PlanNiveau[] = [
     ambiance: 'niveau.r1.10.ambiance',
     vagues: {
       nombre: 12,
-      ennemis: TOUS,
+      ennemis: avecNouveaux(TOUS, 10),
       graine: 1110,
       boss: { vague: 12, ennemi: 'boucher_vaudrelle', chemin: 0, delai: 12 },
     },

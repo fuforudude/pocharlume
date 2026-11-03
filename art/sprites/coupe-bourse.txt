@@ -1,0 +1,99 @@
+# Coupe-Bourse (région 1, dessiné) : voleur maigre, capuche de toile et couteau, une bourse volée au ceinturon. Petit et rapide.
+# 32×32, ancre aux pieds, de profil vers la droite. Version d'élite (`coupe-bourse-elite`) : même recette (`modele`), tout assombri (`sombre`),
+# yeux rouges (le calque `yeux` est vide dans la version normale ; il suit la tête dans chaque cadre).
+# Fichier généré une première fois par un script puis retouché à la main : on le modifie ici.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+couleur S c8a884
+
+calque yeux
+.
+
+calque tete 13 11
+.dddd..
+dddddd.
+dddSSSd
+ddSSkSS
+.dSSSS.
+..ddSd.
+
+calque corps 11 17
+.ddddbb..
+dduuubbb.
+dduuubbbS
+.dYYubb..
+.dYYuub..
+..bbbbb..
+
+calque objet 20 19
+.TTT
+bb..
+
+calque objet-frappe 21 18
+..TTTT
+bbT...
+
+calque jambes 12 23
+.uu.uu.
+.uu.uu.
+.uu.uu.
+.uu.uu.
+.dd.dd.
+dd..ddd
+
+calque jambes-a 12 23
+.uu..uu.
+.uu..uu.
+uu...uu.
+uu...uu.
+dd...dd.
+dd...ddd
+
+calque jambes-b 12 23
+..uuu..
+..uuu..
+.uu.uu.
+.uu.uu.
+.dd.dd.
+dd..dd.
+
+calque tas 10 25
+..dddddd...
+dddbbbbddd.
+.dYYbbbddT.
+
+sprite coupe-bourse
+anim repos 220
+cadre jambes + corps + objet + tete + yeux
+cadre jambes + corps decale 0 -1 + objet decale 0 -1 + tete decale 0 -1 + yeux decale 0 -1
+
+anim marche 110
+cadre jambes-a + corps + objet + tete + yeux
+cadre jambes + corps decale 0 -1 + objet decale 0 -1 + tete decale 1 -1 + yeux decale 1 -1
+cadre jambes-b + corps + objet + tete + yeux
+cadre jambes + corps decale 0 -1 + objet decale 0 -1 + tete decale -1 -1 + yeux decale -1 -1
+
+# Il pique d'un coup sec, le couteau en avant.
+anim attaque 100
+cadre jambes + corps decale -1 0 + objet decale -1 0 + tete decale -2 0 + yeux decale -2 0 duree 170
+cadre jambes-a + corps + objet-frappe + tete decale 2 1 + yeux decale 2 1
+cadre jambes-a + corps decale 1 0 + objet-frappe decale 1 0 + tete decale 3 1 + yeux decale 3 1 duree 140
+cadre jambes + corps + objet + tete + yeux
+
+anim blesse 120
+cadre jambes + corps decale -1 0 + objet decale -1 0 + tete decale -2 1 + yeux decale -2 1
+cadre jambes + corps + objet + tete decale -1 0 + yeux decale -1 0
+
+# Il s'affaisse dans sa cape, la bourse sous lui.
+anim mort 160
+cadre jambes + corps decale -1 2 + objet decale -1 2 + tete decale -3 3 + yeux decale -3 3
+cadre jambes-b decale 0 3 + corps decale 0 5 + objet decale 0 5 + tete decale -2 7 + yeux decale -2 7
+cadre tas duree 900
+
+sprite coupe-bourse-elite
+modele coupe-bourse
+sombre
+calque yeux 17 14
+x

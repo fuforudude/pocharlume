@@ -1,0 +1,108 @@
+# Crieur Public (région 3, dessiné) : tricorne et manteau rouge sombre, la bouche grande ouverte, une clochette à la main. Il lit les sentences.
+# 32×32, ancre aux pieds, de profil vers la droite. Version d'élite (`crieur-public-elite`) : même recette (`modele`), tout assombri (`sombre`),
+# yeux rouges (le calque `yeux` est vide dans la version normale ; il suit la tête dans chaque cadre).
+# Fichier généré une première fois par un script puis retouché à la main : on le modifie ici.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+couleur S c8a884
+
+calque yeux
+.
+
+calque tete 12 6
+..kkkkk...
+.kuuuuuk..
+kuuuuuuuuk
+..kSSSSS..
+..SSSkSS..
+..SSkkSS..
+...SSkS...
+....SS....
+
+calque corps 9 15
+..rrRRRRrr...
+.rRRRRRRRRr..
+.rRRxRRRRRrSS
+.rRxRRRRRRrSS
+..rRRRRRRrr..
+..rrYYYYrr...
+.rrRRRRRRrr..
+.rRRRRRRRRr..
+
+calque objet 21 10
+.YY.
+YYYY
+YYYY
+.kk.
+
+calque objet-frappe 22 8
+.YY.
+YYYY
+YYYY
+.kk.
+
+calque jambes 12 23
+.rr..rr.
+.rr..rr.
+.rr..rr.
+.dd..dd.
+ddd..ddd
+........
+
+calque jambes-a 12 23
+.rr...rr
+.rr...rr
+rr...rr.
+.dd..dd.
+ddd.ddd.
+........
+
+calque jambes-b 12 23
+..rr.rr.
+..rr.rr.
+.rr..rr.
+dd....dd
+dd....dd
+........
+
+calque tas 9 24
+...kkkkkkk...
+.rrRRRRRRRrr.
+rRRRYYRRRRRRr
+.kkkkkkkkkkk.
+
+sprite crieur-public
+anim repos 220
+cadre jambes + corps + objet + tete + yeux
+cadre jambes + corps decale 0 -1 + objet decale 0 -1 + tete decale 0 -1 + yeux decale 0 -1
+
+anim marche 110
+cadre jambes-a + corps + objet + tete + yeux
+cadre jambes + corps decale 0 -1 + objet decale 0 -1 + tete decale 1 -1 + yeux decale 1 -1
+cadre jambes-b + corps + objet + tete + yeux
+cadre jambes + corps decale 0 -1 + objet decale 0 -1 + tete decale -1 -1 + yeux decale -1 -1
+
+# Il sonne sa clochette à toute volée, en criant.
+anim attaque 100
+cadre jambes + corps decale -1 0 + objet decale -1 0 + tete decale -2 0 + yeux decale -2 0 duree 170
+cadre jambes-a + corps + objet-frappe + tete decale 2 1 + yeux decale 2 1
+cadre jambes-a + corps decale 1 0 + objet-frappe decale 1 0 + tete decale 3 1 + yeux decale 3 1 duree 140
+cadre jambes + corps + objet + tete + yeux
+
+anim blesse 120
+cadre jambes + corps decale -1 0 + objet decale -1 0 + tete decale -2 1 + yeux decale -2 1
+cadre jambes + corps + objet + tete decale -1 0 + yeux decale -1 0
+
+# Le cri s'éteint ; la clochette roule.
+anim mort 160
+cadre jambes + corps decale -1 2 + objet decale -1 2 + tete decale -3 3 + yeux decale -3 3
+cadre jambes-b decale 0 3 + corps decale 0 5 + objet decale 0 5 + tete decale -2 7 + yeux decale -2 7
+cadre tas duree 900
+
+sprite crieur-public-elite
+modele crieur-public
+sombre
+calque yeux 17 11
+x

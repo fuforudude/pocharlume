@@ -1,0 +1,117 @@
+# Montreur de Rats (région 5, dessiné) : chapeau à larges bords, une cage de rats sur le dos et un rat en laisse. Il en lâche deux toutes les dix secondes.
+# 32×32, ancre aux pieds, de profil vers la droite. Version d'élite (`montreur-rats-elite`) : même recette (`modele`), tout assombri (`sombre`),
+# yeux rouges (le calque `yeux` est vide dans la version normale ; il suit la tête dans chaque cadre).
+# Fichier généré une première fois par un script puis retouché à la main : on le modifie ici.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+couleur S c8a884
+
+calque yeux
+.
+
+calque fond 5 11
+dddddddd
+dkykkykd
+dkkkkkkd
+dkMkkMkd
+dkkMMkkd
+dkkkkkkd
+dddddddd
+.d....d.
+
+calque tete 13 8
+.ddddd..
+dddddddd
+..dSSSS.
+..SSkSSS
+..SSSSS.
+...SSS..
+
+calque corps 11 14
+.HHHHHHh..
+HHhHHHHHh.
+HHHHhHHHhS
+HHHHHHHHhS
+.HHuuuuHh.
+.HHHHHHHh.
+.hHHHHHHh.
+.hhHHHHhh.
+..hhhhhh..
+
+calque objet 21 18
+.MM...
+MMkMM.
+.MMmm.
+.M..m.
+
+calque objet-frappe 23 18
+.MM...
+MMkMM.
+.MMmm.
+.M..m.
+
+calque jambes 13 23
+.hh.hh.
+.hh.hh.
+.hh.hh.
+.hh.hh.
+.dd.dd.
+dd..ddd
+
+calque jambes-a 13 23
+.hh..hh.
+.hh..hh.
+hh...hh.
+hh...hh.
+dd...dd.
+dd...ddd
+
+calque jambes-b 13 23
+..hhh..
+..hhh..
+.hh.hh.
+.hh.hh.
+.dd.dd.
+dd..dd.
+
+calque tas 7 24
+.dddddddd.....
+dkMkkMkddMM...
+dddddddddHHHh.
+..MM...hhhhhh.
+
+sprite montreur-rats
+anim repos 220
+cadre jambes + fond + corps + objet + tete + yeux
+cadre jambes + fond decale 0 -1 + corps decale 0 -1 + objet decale 0 -1 + tete decale 0 -1 + yeux decale 0 -1
+
+anim marche 110
+cadre jambes-a + fond + corps + objet + tete + yeux
+cadre jambes + fond decale 0 -1 + corps decale 0 -1 + objet decale 0 -1 + tete decale 1 -1 + yeux decale 1 -1
+cadre jambes-b + fond + corps + objet + tete + yeux
+cadre jambes + fond decale 0 -1 + corps decale 0 -1 + objet decale 0 -1 + tete decale -1 -1 + yeux decale -1 -1
+
+# Il lâche la laisse : le rat saute sur sa proie.
+anim attaque 100
+cadre jambes + fond decale -1 0 + corps decale -1 0 + objet decale -1 0 + tete decale -2 0 + yeux decale -2 0 duree 170
+cadre jambes-a + fond + corps + objet-frappe + tete decale 2 1 + yeux decale 2 1
+cadre jambes-a + fond decale 1 0 + corps decale 1 0 + objet-frappe decale 1 0 + tete decale 3 1 + yeux decale 3 1 duree 140
+cadre jambes + fond + corps + objet + tete + yeux
+
+anim blesse 120
+cadre jambes + fond decale -1 0 + corps decale -1 0 + objet decale -1 0 + tete decale -2 1 + yeux decale -2 1
+cadre jambes + fond + corps + objet + tete decale -1 0 + yeux decale -1 0
+
+# La cage se brise, les rats se dispersent.
+anim mort 160
+cadre jambes + fond decale -1 2 + corps decale -1 2 + objet decale -1 2 + tete decale -3 3 + yeux decale -3 3
+cadre jambes-b decale 0 3 + fond decale 0 5 + corps decale 0 5 + objet decale 0 5 + tete decale -2 7 + yeux decale -2 7
+cadre tas duree 900
+
+sprite montreur-rats-elite
+modele montreur-rats
+sombre
+calque yeux 17 11
+x

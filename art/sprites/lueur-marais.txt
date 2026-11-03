@@ -1,0 +1,81 @@
+# Lueur des Marais (région 4, dessiné) : une flamme pâle sans bûche, deux trous noirs en guise d'yeux ; elle mène au fond de l'eau ceux qui la suivent. Elle aveugle les tours.
+# 32×32, ancre aux pieds, de profil vers la droite. Version d'élite (`lueur-marais-elite`) : même recette (`modele`), tout assombri (`sombre`),
+# yeux rouges (le calque `yeux` est vide dans la version normale ; il suit la tête dans chaque cadre).
+# Fichier généré une première fois par un script puis retouché à la main : on le modifie ici.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+
+calque yeux
+.
+
+calque tete 12 9
+..LLLL..
+.LIIIIL.
+LIIIIIIL
+LIkIIkIL
+LIIIIIIL
+.LIIIIL.
+..LLLL..
+
+calque corps 11 16
+.LEEEEEL.
+.LEIIIEL.
+..LEIEL..
+..LEEEL..
+...LEL...
+
+calque jambes 13 21
+..LEL..
+...LE..
+....L..
+
+calque jambes-a 13 21
+.LEL...
+..LE...
+..L....
+
+calque jambes-b 13 21
+..LEL..
+..EL...
+...L...
+
+calque tas 9 25
+..lLLLLLl...
+.llLIIILll..
+..lllllll...
+
+sprite lueur-marais
+anim repos 220
+cadre jambes + corps + tete + yeux
+cadre jambes + corps decale 0 -1 + tete decale 0 -1 + yeux decale 0 -1
+
+anim marche 110
+cadre jambes-a + corps + tete + yeux
+cadre jambes + corps decale 0 -1 + tete decale 1 -1 + yeux decale 1 -1
+cadre jambes-b + corps + tete + yeux
+cadre jambes + corps decale 0 -1 + tete decale -1 -1 + yeux decale -1 -1
+
+# La flamme s'allonge vers sa proie.
+anim attaque 100
+cadre jambes + corps decale -1 0 + tete decale -2 0 + yeux decale -2 0 duree 170
+cadre jambes-a + corps + tete decale 2 1 + yeux decale 2 1
+cadre jambes-a + corps decale 1 0 + tete decale 3 1 + yeux decale 3 1 duree 140
+cadre jambes + corps + tete + yeux
+
+anim blesse 120
+cadre jambes + corps decale -1 0 + tete decale -2 1 + yeux decale -2 1
+cadre jambes + corps + tete decale -1 0 + yeux decale -1 0
+
+# Elle vacille, s'éteint, ne laisse qu'une lueur sur l'eau.
+anim mort 160
+cadre jambes + corps decale -1 2 + tete decale -3 3 + yeux decale -3 3
+cadre jambes-b decale 0 3 + corps decale 0 5 + tete decale -2 7 + yeux decale -2 7
+cadre tas duree 900
+
+sprite lueur-marais-elite
+modele lueur-marais
+sombre
+calque yeux 13 12
+x..x

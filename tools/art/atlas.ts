@@ -48,7 +48,8 @@ export interface CadreAtlas {
   readonly duree: number;
 }
 
-export const LARGEUR_ATLAS = 1024;
+/** 2048 px (la limite sûre des textures mobiles) : à 1024 px de large, les 40 sprites de la variété des ennemis dépassaient 2048 px de haut. */
+export const LARGEUR_ATLAS = 2048;
 /** Marge vide entre deux cadres, pour qu'un échantillonnage voisin ne bave jamais. */
 const MARGE = 1;
 

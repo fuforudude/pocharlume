@@ -623,8 +623,8 @@ export const ENNEMIS = {
     pouvoirs: { bond: { distance: 3, recharge: 4 } },
   }),
   /** Résistance magique 30 % ; toutes les 10 s, aveugle les tours à 3 tuiles (portée −30 % pendant 3 s). */
-  feu_follet: ennemi({
-    nom: 'ennemi.feu_follet',
+  lueur_marais: ennemi({
+    nom: 'ennemi.lueur_marais',
     pv: 40,
     vitesse: 1.1,
     resistance: 0.3,
@@ -756,7 +756,7 @@ export const ENNEMIS = {
   /** Armure 60 %, insensible aux ralentissements et aux étourdissements ; toutes les 8 s, se fige en pierre (intouchable 2 s, sans avancer). */
   gargouille: ennemi({
     nom: 'ennemi.gargouille',
-    pv: 160,
+    pv: 140,
     vitesse: 0.8,
     armure: 0.6,
     degats: [8, 12],

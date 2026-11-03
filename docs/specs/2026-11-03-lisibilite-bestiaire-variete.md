@@ -51,6 +51,51 @@ En jouant, l'utilisateur relève quatre problèmes :
 - Puis : chaque niveau nettement plus grand et plus riche (silhouette qui grandit, drapeaux, braseros, lueur, idle
   animé) et un effet visible à l'amélioration (éclat, poussière, son).
 
+## Nouveaux ennemis (tâche C)
+
+Vingt ennemis ordinaires, deux par région : le premier arrive au niveau 4 de sa région, le second au niveau 7, puis ils reviennent
+jusqu'au niveau 10 (`NOUVEAUX_ENNEMIS_REGIONS` et `NIVEAUX_NOUVEAUX`, `plan-niveau.ts` ; la région 1 les met dans `plan-region1.ts`).
+Chacun a un rôle mécanique propre : aucun n'est un ennemi existant à d'autres PV, et deux nouveaux n'ont jamais le même rôle. Treize
+capacités sont nouvelles dans le moteur (déterministe, une fonction de `ennemis.ts`, `pouvoirs-ennemis.ts`, `degats.ts` ou `unites.ts` chacune), sept
+réutilisent une capacité existante dans une combinaison nouvelle (invocation, plongée, aveuglement, mise en feu, dévoration, invulnérabilité périodique).
+Tout est piloté par les données (`PouvoirsEnnemi`) : le moteur ne connaît aucun de ces ennemis par son nom. Tests : `src/engine/ennemis-variete.test.ts`.
+
+| Région | Id | Nom | Niv. | Rôle mécanique | Valeurs de départ (Matou) | Ce qui le contre |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 Village Affamé | `coupe_bourse` | Coupe-Bourse | 4 | **Voleur d'arêtes qui fuit** (nouveau : `vol`). Au premier soldat qui le retient, ou à la sortie, prend 20 arêtes ; retenu, il file à ×2 sans plus s'arrêter. Tué, il rend le butin ; échappé, le butin est perdu. | 26 PV, vitesse 1,5 | Le tuer vite : tours de tir à l'entrée, héros |
+| 1 | `grand_manteau` | Grand Manteau | 7 | **Porteur qui se divise** (nouveau : `division`). À sa mort, 3 Mendiants sortent de son manteau, là où il tombe. | 70 PV, vitesse 0,8 | Une zone derrière lui ; ne pas le tuer sous la sortie |
+| 2 Champs Brûlés | `gerbe_ardente` | Gerbe Ardente | 4 | **Kamikaze** (nouveau : `explosion`). Au contact d'un soldat, explose (22 dégâts physiques à 1,3 tuile) et disparaît : ni prime, ni vie perdue. | 36 PV, vitesse 1,7 | La tuer avant le contact ; soldats espacés, héros solide |
+| 2 | `porte_herse` | Porte-Herse | 7 | **Bouclier frontal** (nouveau : `bouclier`). Les coups directs des tours (tir, magie), tourelles et héros tireur venus de devant lui ne passent qu'à 25 %. Les tirs au sol, ondes et soldats ne sont pas arrêtés. | 100 PV, vitesse 0,7 | Artillerie, soldats, tours placées derrière lui ou après son passage |
+| 3 Bourg des Bûchers | `fagotier` | Fagotier | 4 | **Incendiaire de tours** (action `desactiver_tour` avec `rayon`, nouveau paramètre). Toutes les 12 s, met le feu à la tour la plus proche à 3 tuiles : 3 s hors service. | 55 PV, vitesse 0,9 | Le tuer avant qu'il n'approche ; tours en nombre |
+| 3 | `crieur_public` | Crieur Public | 7 | **Aura de résistance** (nouveau : `auraProtection`). Les autres ennemis à 2,5 tuiles subissent 30 % de dégâts physiques et magiques en moins (non cumulable). | 80 PV, vitesse 0,8 | Le tuer en premier (dégâts purs, poison, brûlure ne sont pas réduits) |
+| 4 Marais de l'Ordalie | `crapaud_gonfle` | Crapaud Gonflé | 4 | **Sauteur** (nouveau : `bond`). Franchit le soldat qui le retient (3 tuiles plus loin), au plus toutes les 4 s, sans étourdir personne. | 60 PV, vitesse 1 | Plusieurs lignes de soldats, tours loin de la caserne |
+| 4 | `lueur_marais` | Lueur des Marais | 7 | **Aveugleur de tours** (action `aveugler` existante, sur un ennemi ordinaire). Toutes les 10 s, portée −30 % pendant 3 s aux tours à 3 tuiles. Résistance magique 30 %. | 40 PV, vitesse 1,1 | Tuer-la vite, tours à longue portée |
+| 5 Ville Pestiférée | `montreur_rats` | Montreur de Rats | 4 | **Invocateur** (action `invoquer` existante, ennemi ordinaire). Toutes les 10 s, lâche 2 Rats de Peste sur le chemin. | 65 PV, vitesse 0,8 | Le tuer en premier ; zone contre les rats |
+| 5 | `bubonneux` | Bubonneux | 7 | **Régénération** (nouveau : `regeneration`). Récupère 3 % de ses PV maximaux par seconde. | 120 PV, vitesse 0,8 | Dégâts en rafale, ne pas disperser le tir |
+| 6 Charnier | `deterreur` | Déterreur | 4 | **Creuseur** (action `plonger` existante, sur un ennemi ordinaire). Toutes les 9 s, s'enfonce sous terre (intouchable 2 s) et ressort 2,5 tuiles plus loin. | 85 PV, vitesse 0,9 | Garder du tir pour quand il ressort |
+| 6 | `fagot_os` | Fagot d'Os | 7 | **Épines** (nouveau : `epines`). Chaque coup au corps-à-corps qu'il reçoit coûte 6 PV purs à celui qui frappe. | 110 PV, vitesse 0,8 | Tours plutôt que soldats et héros |
+| 7 Croisade | `sapeur` | Sapeur | 4 | **Désamorceur** (nouveau : action `desamorcer`). Toutes les 6 s, détruit les pièges et tourelles à 2 tuiles. | 90 PV, vitesse 0,9 | Pièges et tourelles loin du chemin ; le tuer avant |
+| 7 | `aumonier` | Aumônier de Guerre | 7 | **Purificateur** (nouveau : action `purifier`). Toutes les 5 s, retire ralentissement et étourdissement aux ennemis à 3 tuiles (lui compris). Résistance magique 30 %. | 100 PV, vitesse 0,8 | Dégâts sur la durée (brûlure, poison), le tuer en premier |
+| 8 Monastère Noir | `chantre` | Chantre | 4 | **Terreur** (nouveau : action `terrifier`). Toutes les 9 s, étourdit 1,5 s les soldats et le héros à 2 tuiles, qui lâchent leurs ennemis. | 85 PV, vitesse 0,8 | Le tuer avant qu'il n'atteigne la ligne de soldats |
+| 8 | `frere_sans_porte` | Frère Sans-Porte | 7 | **Insaisissable** (nouveau : `insaisissable`). Aucun soldat ni héros ne l'arrête ni ne le vise (les assassins, si) ; seules les tours l'atteignent. | 120 PV, vitesse 1 | Tours, artillerie, tout sauf les soldats |
+| 9 Cité du Roi | `effigie_roi` | Effigie du Roi | 4 | **Peau alternée** (nouveau : `alternance`). Armure 60 % puis, 5 s plus tard, résistance magique 60 % à la place, et ainsi de suite (la version d'élite échange ses protections renforcées). | 120 PV, vitesse 0,7 | Frapper avec le type de dégâts qui passe en ce moment |
+| 9 | `bourreau_roi` | Bourreau du Roi | 7 | **Tueur de soldats** (champ `devore` existant, sur un ennemi ordinaire). Tue d'un coup le soldat qui le retient, toutes les 5 s. Armure 30 %. | 150 PV, vitesse 0,7 | Le tuer à distance ; soldats qui reviennent vite |
+| 10 Cathédrale du Soleil Blême | `gargouille` | Gargouille | 4 | **Pierre intermittente** (combinaison : `invulnerabilite` périodique, insensible aux ralentissements et aux étourdissements). Toutes les 8 s, se fige 2 s, intouchable et immobile. Armure 60 %. | 140 PV, vitesse 0,8 | Magie ; ne pas compter sur le contrôle |
+| 10 | `martyr_bleme` | Martyr Blême | 7 | **Dernière lueur** (nouveau : `derniereLueur`). À sa mort, rend 35 % de leurs PV maximaux aux ennemis à 3 tuiles. Résistance magique 30 %. | 95 PV, vitesse 0,9 | Le tuer à l'écart du groupe |
+
+L'ennemi « Feu Follet » imaginé d'abord s'appelle `lueur_marais` : `feu-follet` est déjà un décor des Marais (`art/sprites/decor-region4.txt`).
+
+Ennemis repris des régions précédentes (`REPRISES_REGIONS`, dès le niveau 4 de chaque région ; un choix à la main, plus « tout ce qui précède »
+comme avant, pour que les nouveaux ennemis restent visibles dans les plans de vagues) : R2 Chien Errant, Mendiant, Coupe-Bourse ;
+R3 Paysan Affamé, Corbeau Noir, Gerbe Ardente ; R4 Chasseur de Sorcières, Crieur Public, Corbeau Noir ; R5 Sangsue, Pèlerin Voilé, Fagotier ;
+R6 Rat de Peste, Pestiféré, Crapaud Gonflé ; R7 Fossoyeur, Chauve-Souris, Déterreur ; R8 Fantassin, Médecin de Peste, Sapeur ;
+R9 Cavalier, Exorciste, Chantre ; R10 Garde Royal, Inquisiteur, Effigie du Roi, Bourreau du Roi. Les nouveaux ennemis entrent aussi dans le mode infini
+(`INFINI.regions`), à la suite des ennemis ordinaires de leur région.
+
+Sprites : un par ennemi dans `art/sprites/<id>.txt` (32×32, dessinés, version d'élite comprise, mêmes cinq animations que les autres) ; planche d'aperçu :
+`docs/ennemis-variete.png`. Textes : nom, et phrase `ennemi.<id>.desc` dans `docs/lore.md`. Données : `VERSION_DONNEES` 13 → 14, `VERSION_ETAT` 6 → 7 (champs de l'ennemi).
+Atlas : `LARGEUR_ATLAS` 1024 → 2048 (40 sprites de plus dépassaient 2048 px de haut).
+
 ## Critères d'acceptation
 - [ ] A : chaque entrée montre avant chaque vague un panneau avec les icônes et le nombre d'ennemis qui en sortiront
   (test : composition affichée = composition de la vague par entrée) ; la sortie est dessinée et réagit à une fuite ;

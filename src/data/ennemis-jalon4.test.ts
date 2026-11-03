@@ -101,7 +101,11 @@ describe('paramètres de l’infini', () => {
     expect(INFINI.regions).toHaveLength(10);
     expect(INFINI.regions.slice(5).map((r) => r.boss)).toEqual(['roi_fosses', 'prince_croise', 'grand_inquisiteur', 'roi_fou', 'soleil_bleme']);
     for (const [region, { ennemis, boss }] of Object.entries(REGIONS)) {
-      expect(INFINI.regions[Number(region) - 1]).toEqual({ ennemis, boss });
+      // Les deux nouveaux ennemis de la région (spec « variété ») suivent ses ennemis ordinaires.
+      const regionInfini = INFINI.regions[Number(region) - 1];
+      expect(regionInfini?.boss).toBe(boss);
+      expect(regionInfini?.ennemis.slice(0, ennemis.length)).toEqual(ennemis);
+      expect(regionInfini?.ennemis).toHaveLength(ennemis.length + 2);
     }
   });
 });
