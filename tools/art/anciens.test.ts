@@ -8,7 +8,8 @@ import { empreintesSprite } from './empreintes.ts';
 
 const ATTENDUES: Record<string, Record<string, string>> = {
   'heros-mastoc': { repos: '8048208c151c36cd', marche: 'e37b5ccb7b48c3d0', attaque: 'c4c4de2663cd3b6c', competence: '7fbb362996033866', blesse: 'ebe732e1ad0e9b1b', mort: '61801927dbdd1962' },
-  'assassin-ombre': { marche: '8351fb16623eafc5', blesse: '4e61e9a620799960', repos: '3ffa06ff9d7c8265', attaque: 'f659394c3d3c8e83', competence: '0e909f7ed6834baa', mort: 'acdce6c09e7244bf' },
+  // Yeux retouchés par l'auteur le 2026-11-01 (ancien-plume.txt, commit « changes art »).
+  'assassin-ombre': { marche: 'bf15b9db86e14af7', blesse: '4e61e9a620799960', repos: '0ef1b083245f7e2b', attaque: '6cbcefb5f41d22df', competence: '32fa0f0f19e17d89', mort: 'acdce6c09e7244bf' },
 };
 
 describe('sprites de Mastoc et de l’assassin d’ombre, dérivés des anciens Charlie et Plume', () => {
