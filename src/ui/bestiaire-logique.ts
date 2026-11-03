@@ -84,6 +84,17 @@ export const CONSEILS_POUVOIRS: Readonly<Record<string, (valeur: unknown, c: Con
   insensibleRalentissement: (v) => (v === true ? ['bestiaire.contre.insensible_ralentissement'] : null),
   degatsHeros: (v) => (typeof v === 'number' && v > 1 ? ['bestiaire.contre.degats_heros'] : null),
   essaim: (v, c) => (typeof v === 'number' && v > 1 ? ['bestiaire.contre.essaim', { familles: c.zone }] : null),
+  vol: () => ['bestiaire.contre.vol'],
+  division: (_v, c) => ['bestiaire.contre.division', { familles: c.zone }],
+  explosion: () => ['bestiaire.contre.explosion'],
+  bouclier: () => ['bestiaire.contre.bouclier'],
+  auraProtection: () => ['bestiaire.contre.aura_protection'],
+  bond: () => ['bestiaire.contre.bond'],
+  regeneration: () => ['bestiaire.contre.regeneration'],
+  epines: () => ['bestiaire.contre.epines'],
+  alternance: () => ['bestiaire.contre.alternance'],
+  derniereLueur: () => ['bestiaire.contre.derniere_lueur'],
+  insaisissable: (v) => (v === true ? ['bestiaire.contre.insaisissable'] : null),
   // Listes d'actions : lues par CONSEILS_ACTIONS.
   paliers: () => null,
   periodiques: () => null,
@@ -101,6 +112,9 @@ export const CONSEILS_ACTIONS: Readonly<Record<string, Conseil>> = {
   invulnerabilite: ['bestiaire.contre.intouchable'],
   bannir: ['bestiaire.contre.bannir'],
   charger: ['bestiaire.contre.charge'],
+  desamorcer: ['bestiaire.contre.desamorcer'],
+  purifier: ['bestiaire.contre.purifier'],
+  terrifier: ['bestiaire.contre.terrifier'],
 };
 
 /**

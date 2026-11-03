@@ -176,6 +176,23 @@ describe('conseils : volants, charges, pouvoirs génériques', () => {
     expect(texte).toContain(t('bestiaire.contre.resistant', { familles: FAMILLES.map((f) => tCle(`famille.${f}`)).join(', ') }).slice(0, 20));
   });
 
+  it('les nouveaux ennemis ont leur conseil (pouvoir, action, pouvoir conditionnel)', () => {
+    expect(conseilsContre('coupe_bourse').join(' ')).toContain(t('bestiaire.contre.vol'));
+    expect(conseilsContre('porte_herse').join(' ')).toContain(t('bestiaire.contre.bouclier'));
+    expect(conseilsContre('aumonier').join(' ')).toContain(t('bestiaire.contre.purifier'));
+    expect(conseilsContre('martyr_bleme').join(' ')).toContain(t('bestiaire.contre.derniere_lueur'));
+  });
+
+  it('la division cite les familles de zone des données, sans les écrire à la main', () => {
+    const id = Object.keys(ENNEMIS).find((e) => 'division' in ((ENNEMIS[e as keyof typeof ENNEMIS] as DefEnnemi).pouvoirs ?? {}));
+    expect(id).toBeDefined();
+    const texte = conseilsContre(id as string).join(' ');
+    expect(texte).not.toContain('{familles}');
+    const zone = FAMILLES.find((f) => TOURS[f].niveaux.some((n) => n.zone > 0));
+    expect(zone).toBeDefined();
+    expect(texte).toContain(tCle(`famille.${zone ?? ''}`));
+  });
+
   it('chaque pouvoir et chaque action présents dans les données ont une phrase (ajouter une phrase dans CONSEILS_POUVOIRS ou CONSEILS_ACTIONS pour un nouveau)', () => {
     const pouvoirs = new Set<string>();
     const actions = new Set<string>();
