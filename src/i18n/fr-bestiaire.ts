@@ -24,14 +24,12 @@ export const frBestiaire = {
   'bestiaire.inconnu_libelle': 'Ennemi inconnu',
   'bestiaire.particularites': 'Particularités',
   'bestiaire.contrer': 'Comment le contrer',
-  'bestiaire.ennemi_rencontre': 'rencontré',
 
   // Fiche d'une tour
   'bestiaire.tour_verrouillee': 'Verrouillée',
   'bestiaire.tour_verrou_detail': 'Cette tour s’ouvre au niveau {n} de la campagne.',
   'bestiaire.tour_niveau': 'Niveau {n}',
   'bestiaire.tour_specialisation': 'Spécialisation {voie}',
-  'bestiaire.tour_divine': '{dieu}',
 
   // Fiche « Nouvel ennemi » en partie
   'bestiaire.nouveau_titre': 'Nouvel ennemi',
@@ -55,9 +53,10 @@ export const frBestiaire = {
   'bestiaire.contre.volant': 'Il vole par-dessus les soldats : seules les tours qui visent les volants l’atteignent ({familles}).',
   'bestiaire.contre.furtif': 'On ne le voit pas : seule une tour qui révèle le trouve ({tours}).',
   'bestiaire.contre.blinde': 'Son armure arrête les coups physiques : préfère les dégâts magiques ({familles}).',
-  'bestiaire.contre.resistant': 'Il encaisse la magie : préfère les flèches, les pierres et les soldats.',
+  'bestiaire.contre.resistant': 'Il encaisse la magie : préfère les dégâts physiques ({familles}).',
   'bestiaire.contre.rapide': 'Il file : un barrage de soldats ou un ralentissement lui fait perdre son avantage.',
-  'bestiaire.contre.distance': 'Il tire de loin sur tes soldats et ton héros : abats-le avant qu’il se pose, ou garde tes soldats hors de sa portée.',
+  'bestiaire.contre.rapide_volant': 'Il file dans les airs : un ralentissement le retient, et plusieurs tours le long du chemin lui font payer chaque case.',
+  'bestiaire.contre.distance': 'Il tire de loin sur tes soldats et ton héros : abats-le avant qu’il ne les atteigne, ou garde-les hors de sa portée.',
   'bestiaire.contre.devore': 'Il dévore les soldats qui le retiennent : ne compte pas sur eux pour le tenir, tire-lui dessus.',
   'bestiaire.contre.inarretable': 'Rien ne l’étourdit : inutile d’espérer le figer.',
   'bestiaire.contre.relevement': 'Il se relève après sa mort : garde de la puissance de feu pour le tuer deux fois.',
@@ -77,5 +76,7 @@ export const frBestiaire = {
   'bestiaire.contre.renforts': 'Il appelle du renfort ou relève les morts : tue-le avant, ou tiens assez de tours sur la route.',
   'bestiaire.contre.tours_gelees': 'Il met tes tours hors d’état de tirer : ne mise pas tout sur une seule.',
   'bestiaire.contre.intouchable': 'Il devient intouchable un moment : n’épuise pas tes sorts pendant ce temps.',
+  'bestiaire.contre.charge': 'Il charge sans s’arrêter aux soldats : compte sur tes tours, pas sur un barrage.',
+  'bestiaire.contre.bannir': 'Il bannit tes invocations et étourdit ton héros : ne mise pas tout sur eux.',
   'bestiaire.contre.boss': 'Un boss : prépare toute ta défense avant qu’il ne paraisse.',
 } as const;

@@ -91,6 +91,17 @@ describe('fiche d’un niveau : ses ennemis', () => {
     expect(document.querySelector('.bulle')).not.toBeNull();
   });
 
+  it('chaque icône est focusable au clavier (la bulle s’ouvre au focus) et porte un libellé', () => {
+    monter(sauvegardeVide());
+    ouvrirFiche();
+    const icones = [...document.querySelectorAll<HTMLElement>('.ennemi-niveau')];
+    expect(icones.length).toBeGreaterThan(0);
+    for (const i of icones) {
+      expect(i.tabIndex, i.dataset.ennemi).toBeGreaterThanOrEqual(0);
+      expect(i.getAttribute('aria-label')).toBeTruthy();
+    }
+  });
+
   it('la rangée disparaît avec la fiche', () => {
     monter(sauvegardeVide());
     ouvrirFiche();

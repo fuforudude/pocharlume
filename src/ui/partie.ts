@@ -14,6 +14,8 @@ import { t } from '../i18n';
 import type { IdInscription } from '../data/niveaux/statues';
 import { chargerAtlas } from '../render/atlas';
 import type { BilanPartie, RaisonFin } from '../save';
+import type { AtlasRendu } from '../render/atlas';
+import type { EcranBestiaire } from './bestiaire';
 import { ECART_MAX_MS, PasFixes } from '../render/pas-fixes';
 import { Rendu, Surbrillance } from '../render/rendu';
 import { apparenceDeLaPartie, type Equipes } from './apparence';
@@ -123,8 +125,12 @@ export interface OptionsPartie {
    * active. La partie se met en pause le temps de chaque fiche, sans rien écrire dans le journal du moteur. Absent : aucune fiche.
    */
   surNouveauxEnnemis?: (ids: string[]) => string[];
-  /** « Bestiaire » dans l'écran de pause : l'appelant monte l'écran dans `parent`, par-dessus la pause. Absent : pas de bouton. */
-  surBestiaire?: (parent: HTMLElement) => void;
+  /**
+   * « Bestiaire » dans l'écran de pause : l'appelant monte l'écran dans `parent`, par-dessus la pause, et rend de quoi le retirer. C'est la
+   * PARTIE qui possède l'écran : elle reste en pause tant qu'il est ouvert (ni P ni un blur ne la relancent), n'en ouvre qu'un seul, et le
+   * retire à `arreter()`. `surFermer` est à appeler quand le joueur le ferme. Absent : pas de bouton.
+   */
+  surBestiaire?: (parent: HTMLElement, atlas: AtlasRendu, surFermer: () => void) => EcranBestiaire;
 }
 
 /** Temps passé dans la partie, pour mesurer le rendu (voir `PartieEnCours.mesures`). */
@@ -219,6 +225,10 @@ export async function lancerNiveau(
   /** La fiche « Nouvel ennemi » ouverte (une à la fois), et celles qui attendent leur tour. */
   let ficheEnnemi: NouvelEnnemiOuvert | null = null;
   const fichesEnAttente: string[] = [];
+  /** Le Bestiaire ouvert depuis la pause, tant qu'il l'est : la simulation attend, comme pour une fiche. */
+  let bestiaire: EcranBestiaire | null = null;
+  /** Un écran est ouvert par-dessus la partie (inscription, fiche, Bestiaire) : elle attend, et la pause ne lui vole pas le focus. */
+  const ecranDessus = (): boolean => inscription !== null || ficheEnnemi !== null || bestiaire !== null;
   /** Les types d'ennemis déjà signalés à `surNouveauxEnnemis` dans cette partie. */
   const ennemisVus = new Set<string>();
   /** La pause demandée par le joueur (bouton, touche P, onglet caché…), à retrouver à la fermeture de l'inscription. */
@@ -254,8 +264,8 @@ export async function lancerNiveau(
     if (pause && !pas.pause) interaction.annuler();
     pauseDemandee = pause;
     // Une inscription ouverte garde la partie en pause, même si l'écran de pause se ferme par-dessus.
-    pas.pause = pause || inscription !== null || ficheEnnemi !== null;
-    ecranPause.afficher(pause);
+    pas.pause = pause || ecranDessus();
+    ecranPause.afficher(pause, !ecranDessus());
   };
   /** Touche d'une statue : la partie attend, la fenêtre montre l'inscription, la fermer relance la partie là où elle était. */
   const lireInscription = (id: string): void => {
@@ -268,7 +278,7 @@ export async function lancerNiveau(
       nouvelle,
       surFermer: () => {
         inscription = null;
-        pas.pause = pauseDemandee || ficheEnnemi !== null;
+        pas.pause = pauseDemandee || ecranDessus();
       },
     });
   };
@@ -285,21 +295,37 @@ export async function lancerNiveau(
       surFermer: () => {
         ficheEnnemi = null;
         if (fichesEnAttente.length > 0) montrerFicheSuivante();
-        else pas.pause = pauseDemandee || inscription !== null;
+        else pas.pause = pauseDemandee || ecranDessus();
       },
     });
   };
-  /** Les ennemis présents qu'on n'avait pas encore signalés : le bestiaire les note, les fiches utiles s'ouvrent. */
-  const signalerNouveauxEnnemis = (): void => {
+  /**
+   * Des ennemis viennent de paraître (événements `apparition` du moteur, ou ceux d'une partie reprise) : ceux qu'on n'avait pas encore
+   * signalés vont à `surNouveauxEnnemis`, et les fiches utiles s'ouvrent. Une partie finie ne signale rien : l'ennemi reste « jamais rencontré »
+   * et sa fiche s'ouvrira à la partie suivante.
+   */
+  const signalerNouveauxEnnemis = (types: Iterable<string>): void => {
+    if (finie || arretee || !options.surNouveauxEnnemis) return;
     const nouveaux: string[] = [];
-    for (const e of etat.ennemis) {
-      if (ennemisVus.has(e.type)) continue;
-      ennemisVus.add(e.type);
-      nouveaux.push(e.type);
+    for (const type of types) {
+      if (ennemisVus.has(type)) continue;
+      ennemisVus.add(type);
+      nouveaux.push(type);
     }
-    if (nouveaux.length === 0 || !options.surNouveauxEnnemis) return;
+    if (nouveaux.length === 0) return;
     fichesEnAttente.push(...options.surNouveauxEnnemis(nouveaux));
     montrerFicheSuivante();
+  };
+  /** Ouvre le Bestiaire depuis la pause (un seul à la fois) ; la partie attend tant qu'il est ouvert. */
+  const ouvrirBestiaire = (): void => {
+    const monter = options.surBestiaire;
+    if (!monter || finie || arretee || bestiaire) return;
+    interaction.annuler();
+    pas.pause = true;
+    bestiaire = monter(racine, atlas, () => {
+      bestiaire = null;
+      pas.pause = pauseDemandee || ecranDessus();
+    });
   };
   /** Les objets emportés que la partie a utilisés, un par emplacement utilisé. */
   const objetsUtilises = (): string[] => etat.config.objets.filter((_, i) => etat.objetsUtilises[i] === true);
@@ -324,14 +350,13 @@ export async function lancerNiveau(
         options.surQuitter?.(abandon);
       }
     : undefined;
-  const surBestiaire = options.surBestiaire;
-  const ecranPause = creerPause(racine, () => { definirPause(false); }, quitter, surBestiaire ? () => { surBestiaire(racine); } : undefined);
+  const ecranPause = creerPause(racine, () => { definirPause(false); }, quitter, options.surBestiaire ? ouvrirBestiaire : undefined);
   const hud = new Hud(racine, atlas, etat, {
     appelerVague: demanderVague,
     changerVitesse: () => {
       pas.vitesse = pas.vitesse === 1 ? 2 : 1;
     },
-    basculerPause: () => { definirPause(!pas.pause); },
+    basculerPause: () => { if (!bestiaire) definirPause(!pauseDemandee); },
     basculerSort: (emplacement) => { traiter(interaction.basculerSort(etat, emplacement)); },
     basculerObjet: (emplacement) => { traiter(interaction.basculerObjet(etat, emplacement)); },
     basculerHeros: () => { traiter(interaction.basculerHeros(etat)); },
@@ -480,8 +505,11 @@ export async function lancerNiveau(
 
   const executer = (commande: Commande): void => {
     if (finie) return;
+    // Le Bestiaire est ouvert : la pause est à lui, ni P ni aucune commande n'y change rien.
+    if (bestiaire) return;
     if (commande.type === 'pause') {
-      definirPause(!pas.pause);
+      // Bascule la pause DEMANDÉE (pas l'état réel, qu'une fiche ou une inscription ouverte force aussi).
+      definirPause(!pauseDemandee);
       return;
     }
     if (pas.pause) return;
@@ -537,6 +565,8 @@ export async function lancerNiveau(
     // Une partie reprise montre d'abord ce qu'elle contient (tours, ennemis), et attend que le joueur soit prêt.
     rendu.synchroniser(etat, temps);
     definirPause(true);
+    // Les ennemis déjà présents dans la partie reprise sont signalés une fois, au démarrage.
+    signalerNouveauxEnnemis(etat.ennemis.map((e) => e.type));
   }
   const surRedimension = (): void => {
     rendu.redimensionner();
@@ -620,6 +650,12 @@ export async function lancerNiveau(
         }
         audio.jouerEvenements(etat.evenements, etat);
         actions.length = 0;
+        // Les ennemis qui viennent d'apparaître (hors partie finie : voir signalerNouveauxEnnemis).
+        if (etat.statut === 'en_cours') {
+          const apparus: string[] = [];
+          for (const evenement of etat.evenements) if (evenement.type === 'apparition') apparus.push(evenement.typeEnnemi);
+          if (apparus.length > 0) signalerNouveauxEnnemis(apparus);
+        }
         rendu.apresPas(etat, temps);
         mesures.pasSimules++;
         for (const evenement of etat.evenements) {
@@ -644,7 +680,6 @@ export async function lancerNiveau(
         }
       }
       mesures.msSimulation += performance.now() - debut;
-      signalerNouveauxEnnemis();
     }
     if (finie && !ecranFinAffiche && maintenant - finVue >= DELAI_ECRAN_FIN_MS) montrerEcranFin();
 
@@ -688,6 +723,7 @@ export async function lancerNiveau(
     arretee = true;
     inscription?.fermer();
     ficheEnnemi?.fermer();
+    bestiaire?.arreter();
     cancelAnimationFrame(identifiantImage);
     controleur.abort();
     bulleCarte.detruire();

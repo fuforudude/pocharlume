@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ENNEMIS } from '../data/ennemis';
 import { FIXTURE_V1, sauvegardeRemplie } from './aides.test-utils';
 import { crc32, depuisBase64Url, exporterCode, importerCode, PREFIXE_CODE, remplacerProgression, TAILLE_MAX_CODE, versBase64Url } from './code';
 import { sauvegardeVide, type Sauvegarde } from './format';
@@ -72,6 +73,15 @@ describe('export et import d’un code', () => {
     expect(complete.length).toBeLessThan(1000);
     expect((await exporterCode(sauvegardeVide())).length).toBeLessThan(500);
     expect(complete).toMatch(/^PCH1\.z\.[A-Za-z0-9_-]+\.[0-9a-f]{8}$/);
+  });
+
+  it('reste compact avec un bestiaire plein (tous les ennemis rencontrés) : moins de 1300 caractères, et il revient intact', async () => {
+    const base = campagneComplete();
+    const plein: Sauvegarde = { ...base, meta: { ...base.meta, bestiaire: { rencontres: Object.keys(ENNEMIS).sort(), fiches: false } } };
+    const code = await exporterCode(plein);
+    expect(code.length).toBeLessThan(1300);
+    const relu = await importerCode(code);
+    expect(relu.ok && relu.sauvegarde.meta.bestiaire).toEqual(plein.meta.bestiaire);
   });
 
   it('produit le même code pour la même progression', async () => {

@@ -2,12 +2,11 @@
 // rencontrés en silhouette et « ??? ») et Tours (chaque famille, ses niveaux et ses spécialisations, la tour divine de chaque dieu, ce que la
 // campagne n'a pas encore ouvert montré verrouillé). À gauche la liste, à droite la fiche de ce qu'on a touché. Tout est lu dans les données
 // par `bestiaire-logique.ts` ; l'écran ne calcule rien. Même contrat que les Options : il couvre l'écran dessous, Échap le ferme.
-import { DIEUX } from '../data/dieux';
 import { ENNEMIS } from '../data/ennemis';
 import { t, tCle } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
 import type { Sauvegarde } from '../save';
-import { contenuDeTour, ennemisParRegion, groupesDeTours, nomDeTour, type EntreeTour, type GroupeEnnemis } from './bestiaire-logique';
+import { contenuDeTour, ennemisParRegion, groupesDeTours, libelleDeTour, nomDeTour, precisionDeTour, type EntreeTour, type GroupeEnnemis } from './bestiaire-logique';
 import { bouton, el, image } from './dom';
 import { construireChiffres, construireFicheEnnemi, construireFicheInconnue } from './fiche-ennemi';
 import { REGIONS_MONDE } from './regions-monde';
@@ -70,8 +69,25 @@ export function afficherBestiaire(parent: HTMLElement, options: OptionsBestiaire
     if (e.key === 'Escape') {
       e.preventDefault();
       fermer();
+      return;
+    }
+    // Piège à focus : Tab et Maj+Tab tournent dans l'écran, jamais vers ce qui est dessous (pause, « Quitter »).
+    if (e.key === 'Tab') {
+      const focalisables = [...ecran.querySelectorAll<HTMLElement>('button:not([disabled])')];
+      const premier = focalisables[0];
+      const dernier = focalisables[focalisables.length - 1];
+      if (!premier || !dernier) return;
+      const actif = document.activeElement;
+      if (!ecran.contains(actif) || (e.shiftKey && actif === premier) || (!e.shiftKey && actif === dernier)) {
+        e.preventDefault();
+        (e.shiftKey ? dernier : premier).focus({ preventScroll: true });
+      }
     }
   });
+  // Un focus qui s'échappe quand même (clic dans le vide, blur de la fenêtre) revient dans l'écran.
+  document.addEventListener('focusin', (e) => {
+    if (!ecran.contains(e.target as Node | null)) fermerBouton.focus({ preventScroll: true });
+  }, { signal });
   window.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape' || e.defaultPrevented) return;
     e.preventDefault();
@@ -91,6 +107,15 @@ export function afficherBestiaire(parent: HTMLElement, options: OptionsBestiaire
     b.textContent = libelle;
     b.setAttribute('role', 'tab');
     b.dataset.onglet = id;
+    b.setAttribute('aria-controls', 'bestiaire-panneau');
+    // Flèches gauche et droite : d'un onglet à l'autre, comme un groupe d'onglets.
+    b.addEventListener('keydown', (e) => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      e.preventDefault();
+      const autre = id === 'ennemis' ? 'tours' : 'ennemis';
+      choisirOnglet(autre);
+      boutonsOnglets.get(autre)?.focus({ preventScroll: true });
+    }, { signal });
     boutonsOnglets.set(id, b);
     onglets.append(b);
   }
@@ -100,6 +125,8 @@ export function afficherBestiaire(parent: HTMLElement, options: OptionsBestiaire
   entete.append(titre, onglets, compte, fermerBouton);
 
   const corps = el('div', 'bestiaire-corps');
+  corps.id = 'bestiaire-panneau';
+  corps.setAttribute('role', 'tabpanel');
   const liste = el('nav', 'bestiaire-liste');
   const detail = el('section', 'bestiaire-detail');
   detail.setAttribute('aria-live', 'polite');
@@ -176,6 +203,8 @@ export function afficherBestiaire(parent: HTMLElement, options: OptionsBestiaire
       tete.append(creerSpriteAnime(atlas, tour.sprite, { echelle: 3, animation: 'repos', signal: s, silhouette: tour.verrouillee }));
       const noms = el('div', 'fiche-ennemi-noms');
       noms.append(el('h3', 'fiche-ennemi-nom', nomDeTour(tour)));
+      const precision = precisionDeTour(tour);
+      if (precision !== null) noms.append(el('span', 'fiche-tour-precision', precision));
       if (tour.verrouillee) {
         noms.append(el('span', 'fiche-ennemi-boss', t('bestiaire.tour_verrouillee')), el('p', 'fiche-ennemi-lore', t('bestiaire.tour_verrou_detail', { n: tour.ouvertAuNiveau })));
         tete.append(noms);
@@ -209,7 +238,7 @@ export function afficherBestiaire(parent: HTMLElement, options: OptionsBestiaire
       section.append(el('h3', 'bestiaire-groupe-titre', groupe.famille === 'divine' ? t('bestiaire.famille_divine') : tCle(`famille.${groupe.famille}`)));
       const grille = el('div', 'bestiaire-grille');
       for (const tour of groupe.tours) {
-        const nom = groupe.famille === 'divine' ? tCle(DIEUX[tour.dieu ?? 'plume'].tourDivine.nom) : nomDeTour(tour);
+        const nom = libelleDeTour(tour);
         const b = bouton(tour.verrouillee ? 'bestiaire-tuile verrouillee' : 'bestiaire-tuile', tour.verrouillee ? `${nom} (${t('bestiaire.tour_verrouillee')})` : nom, () => { choisir(tour); }, signal);
         b.dataset.tour = tour.id;
         b.dataset.verrouillee = String(tour.verrouillee);

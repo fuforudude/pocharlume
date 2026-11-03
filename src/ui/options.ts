@@ -147,6 +147,14 @@ export function afficherOptions(parent: HTMLElement, session: Session, surFermer
         b.setAttribute('aria-checked', String(cet === actives));
       });
     };
+    // Flèches : d'un choix à l'autre, comme un groupe de boutons radio.
+    choixFiches.addEventListener('keydown', (e) => {
+      if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return;
+      e.preventDefault();
+      const autre = boutonsFiches.find((b) => b !== document.activeElement) ?? boutonsFiches[0];
+      autre?.click();
+      autre?.focus({ preventScroll: true });
+    }, { signal: controleur.signal });
     majFiches(session.sauvegarde.meta.bestiaire.fiches);
     choixFiches.append(...boutonsFiches);
     ligneFiches.append(choixFiches);

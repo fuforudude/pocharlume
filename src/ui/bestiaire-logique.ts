@@ -9,7 +9,7 @@ import { REGIONS } from '../data/niveaux/campagne';
 import { FAMILLES, TOURS } from '../data/tours';
 import type { NiveauCampagne } from '../data/visuel';
 import type { DefEnnemi, DefNiveauTour, IdFamille, Niveau, Voie } from '../engine/definitions';
-import { aTexte, t, tCle } from '../i18n';
+import { aTexte, t, tCle, type CleTexte, type ParametresTexte } from '../i18n';
 import { spriteEnnemi, spriteTour } from '../render/habillage';
 import type { Sauvegarde } from '../save';
 import { contenuEnnemiDeDonnees, contenuTourDeDonnees, type ContenuBulle } from './bulle-contenus';
@@ -42,47 +42,103 @@ function toursQui(critere: (def: DefNiveauTour) => boolean): string {
   return [...noms].join(', ');
 }
 
+/** Ce qu'une phrase de conseil reçoit pour se remplir : les listes de tours lues dans les données. */
+interface ContexteConseil {
+  readonly volants: string;
+  readonly revelent: string;
+  readonly magiques: string;
+  readonly physiques: string;
+  readonly zone: string;
+}
+
+function contexte(): ContexteConseil {
+  return {
+    volants: famillesQui((x) => x.volants),
+    revelent: toursQui((x) => x.revele),
+    magiques: famillesQui((x) => x.typeDegats === 'magique'),
+    physiques: famillesQui((x) => x.typeDegats === 'physique'),
+    zone: famillesQui((x) => x.zone > 0),
+  };
+}
+
+/** Une phrase de conseil : sa clé de texte et ses paramètres. */
+type Conseil = readonly [CleTexte, ParametresTexte?];
+
+/**
+ * Les conseils par pouvoir (`DefEnnemi.pouvoirs`), indexés par le NOM du pouvoir : `conseilsContre` parcourt les pouvoirs de l'ennemi et
+ * cherche chacun ici. POUR AJOUTER UN POUVOIR, il suffit d'une ligne ici (la valeur du pouvoir est donnée pour les cas conditionnels) et
+ * de sa phrase dans src/i18n/fr-bestiaire.ts ; un test échoue tant qu'un pouvoir présent dans les données n'a pas sa ligne. `paliers` et
+ * `periodiques` ne sont pas ici : ce sont des listes d'actions, lues dans CONSEILS_ACTIONS.
+ */
+export const CONSEILS_POUVOIRS: Readonly<Record<string, (valeur: unknown, c: ContexteConseil) => Conseil | null>> = {
+  relevement: (v) => [(v as { sauf?: string }).sauf === 'magique' ? 'bestiaire.contre.relevement_magie' : 'bestiaire.contre.relevement'],
+  brulure: () => ['bestiaire.contre.brulure'],
+  noyade: () => ['bestiaire.contre.noyade'],
+  drain: () => ['bestiaire.contre.drain'],
+  soin: () => ['bestiaire.contre.soin'],
+  nuage: () => ['bestiaire.contre.nuage'],
+  enterrement: () => ['bestiaire.contre.enterrement'],
+  aura: () => ['bestiaire.contre.aura'],
+  renversement: () => ['bestiaire.contre.renversement'],
+  rage: () => ['bestiaire.contre.rage'],
+  insensibleRalentissement: (v) => (v === true ? ['bestiaire.contre.insensible_ralentissement'] : null),
+  degatsHeros: (v) => (typeof v === 'number' && v > 1 ? ['bestiaire.contre.degats_heros'] : null),
+  essaim: (v, c) => (typeof v === 'number' && v > 1 ? ['bestiaire.contre.essaim', { familles: c.zone }] : null),
+  // Listes d'actions : lues par CONSEILS_ACTIONS.
+  paliers: () => null,
+  periodiques: () => null,
+};
+
+/** Les conseils par type d'action des boss (paliers de PV, actions périodiques), indexés par `ActionEnnemi.type`. Même règle que ci-dessus. */
+export const CONSEILS_ACTIONS: Readonly<Record<string, Conseil>> = {
+  invoquer: ['bestiaire.contre.renforts'],
+  relever_morts: ['bestiaire.contre.renforts'],
+  affamer: ['bestiaire.contre.tours_gelees'],
+  desactiver_tour: ['bestiaire.contre.tours_gelees'],
+  figer_tour: ['bestiaire.contre.tours_gelees'],
+  aveugler: ['bestiaire.contre.tours_gelees'],
+  plonger: ['bestiaire.contre.intouchable'],
+  invulnerabilite: ['bestiaire.contre.intouchable'],
+  bannir: ['bestiaire.contre.bannir'],
+  charger: ['bestiaire.contre.charge'],
+};
+
 /**
  * Comment contrer cet ennemi : une phrase par particularité, tirée de ses données (volant, furtif, protections, pouvoirs…), jamais d'un
  * texte propre à un ennemi. Les tours citées viennent des données des tours (celles qui visent les volants, celles qui révèlent).
- * Un ennemi ordinaire, sans rien de particulier, a une phrase générale. Une mécanique que ce module ne connaît pas encore n'ajoute rien :
- * ses particularités restent lisibles dans la liste (`contenuEnnemiDeDonnees`).
+ * Un ennemi ordinaire, sans rien de particulier, a une phrase générale. Les pouvoirs sont lus génériquement : voir CONSEILS_POUVOIRS et
+ * CONSEILS_ACTIONS pour ajouter une phrase. Un pouvoir inconnu n'ajoute rien (ses particularités restent lisibles dans la fiche).
  */
 export function conseilsContre(id: string): string[] {
   const d = defDe(id);
   if (!d) return [];
-  const c: string[] = [];
-  if (d.volant) c.push(t('bestiaire.contre.volant', { familles: famillesQui((x) => x.volants) }));
-  if (d.furtif) c.push(t('bestiaire.contre.furtif', { tours: toursQui((x) => x.revele) }));
-  if (d.armure >= PROTECTION_NOTABLE) c.push(t('bestiaire.contre.blinde', { familles: famillesQui((x) => x.typeDegats === 'magique') }));
-  if (d.resistance >= PROTECTION_NOTABLE) c.push(t('bestiaire.contre.resistant'));
-  if (d.vitesse >= VITESSE_RAPIDE) c.push(t('bestiaire.contre.rapide'));
-  if (d.distance) c.push(t('bestiaire.contre.distance'));
-  if (d.devore > 0) c.push(t('bestiaire.contre.devore'));
-  if (d.insensibleEtourdissement && !d.boss) c.push(t('bestiaire.contre.inarretable'));
-  const p = d.pouvoirs;
-  if (p) {
-    if (p.relevement) c.push(t(p.relevement.sauf === 'magique' ? 'bestiaire.contre.relevement_magie' : 'bestiaire.contre.relevement'));
-    if (p.brulure) c.push(t('bestiaire.contre.brulure'));
-    if (p.noyade) c.push(t('bestiaire.contre.noyade'));
-    if (p.drain) c.push(t('bestiaire.contre.drain'));
-    if (p.soin) c.push(t('bestiaire.contre.soin'));
-    if (p.nuage) c.push(t('bestiaire.contre.nuage'));
-    if (p.enterrement) c.push(t('bestiaire.contre.enterrement'));
-    if (p.aura) c.push(t('bestiaire.contre.aura'));
-    if (p.renversement) c.push(t('bestiaire.contre.renversement'));
-    if (p.rage) c.push(t('bestiaire.contre.rage'));
-    if (p.insensibleRalentissement) c.push(t('bestiaire.contre.insensible_ralentissement'));
-    if (p.degatsHeros !== undefined && p.degatsHeros > 1) c.push(t('bestiaire.contre.degats_heros'));
-    if (p.essaim !== undefined && p.essaim > 1) c.push(t('bestiaire.contre.essaim', { familles: famillesQui((x) => x.zone > 0) }));
-    const types = new Set([...(p.paliers ?? []).flatMap((x) => x.actions), ...(p.periodiques ?? []).flatMap((x) => x.actions)].map((a) => a.type));
-    if (types.has('invoquer') || types.has('relever_morts')) c.push(t('bestiaire.contre.renforts'));
-    if (types.has('affamer') || types.has('desactiver_tour') || types.has('figer_tour') || types.has('aveugler')) c.push(t('bestiaire.contre.tours_gelees'));
-    if (types.has('plonger') || types.has('invulnerabilite')) c.push(t('bestiaire.contre.intouchable'));
+  const ctx = contexte();
+  const conseils: Conseil[] = [];
+  if (d.volant) conseils.push(['bestiaire.contre.volant', { familles: ctx.volants }]);
+  if (d.furtif) conseils.push(['bestiaire.contre.furtif', { tours: ctx.revelent }]);
+  if (d.armure >= PROTECTION_NOTABLE) conseils.push(['bestiaire.contre.blinde', { familles: ctx.magiques }]);
+  if (d.resistance >= PROTECTION_NOTABLE) conseils.push(['bestiaire.contre.resistant', { familles: ctx.physiques }]);
+  // Un volant n'est pas retenu par des soldats : sa variante parle de ralentissement et de tours le long du chemin.
+  if (d.vitesse >= VITESSE_RAPIDE) conseils.push([d.volant ? 'bestiaire.contre.rapide_volant' : 'bestiaire.contre.rapide']);
+  if (d.distance) conseils.push(['bestiaire.contre.distance']);
+  if (d.devore > 0) conseils.push(['bestiaire.contre.devore']);
+  if (d.insensibleEtourdissement && !d.boss) conseils.push(['bestiaire.contre.inarretable']);
+  const pouvoirs = (d.pouvoirs ?? {}) as Readonly<Record<string, unknown>>;
+  for (const nom of Object.keys(pouvoirs)) {
+    if (!Object.hasOwn(CONSEILS_POUVOIRS, nom)) continue;
+    const conseil = CONSEILS_POUVOIRS[nom]?.(pouvoirs[nom], ctx);
+    if (conseil) conseils.push(conseil);
   }
-  if (d.boss) c.push(t('bestiaire.contre.boss'));
-  if (c.length === 0) c.push(t('bestiaire.contre.ordinaire'));
-  return c;
+  const actions = [...(d.pouvoirs?.paliers ?? []).flatMap((x) => x.actions), ...(d.pouvoirs?.periodiques ?? []).flatMap((x) => x.actions)];
+  for (const a of actions) {
+    if (Object.hasOwn(CONSEILS_ACTIONS, a.type)) {
+      const conseil = CONSEILS_ACTIONS[a.type];
+      if (conseil) conseils.push(conseil);
+    }
+  }
+  if (d.boss) conseils.push(['bestiaire.contre.boss']);
+  const textes = [...new Set(conseils.map(([cle, parametres]) => t(cle, parametres)))];
+  return textes.length > 0 ? textes : [t('bestiaire.contre.ordinaire')];
 }
 
 // --- Les ennemis, classés par région ----------------------------------------------------------------------------
@@ -223,4 +279,19 @@ export function nomDeTour(e: EntreeTour): string {
 export function contenuDeTour(e: EntreeTour): ContenuBulle {
   if (e.famille === 'divine') return contenuTourDeDonnees('divine', { dieu: e.dieu ?? 'plume' });
   return contenuTourDeDonnees(e.famille, { niveau: e.palier, ...(e.voie ? { voie: e.voie } : {}) });
+}
+
+/**
+ * Le libellé d'une tuile ou d'une fiche de tour : les trois niveaux d'une famille portent le même nom, on ajoute donc « Niveau n » ou
+ * « Spécialisation A ». La tour divine garde son nom seul.
+ */
+export function libelleDeTour(e: EntreeTour): string {
+  const precision = precisionDeTour(e);
+  return precision === null ? nomDeTour(e) : `${nomDeTour(e)} : ${precision}`;
+}
+
+/** « Niveau 2 » ou « Spécialisation A » ; null pour la tour divine (un seul niveau). */
+export function precisionDeTour(e: EntreeTour): string | null {
+  if (e.famille === 'divine') return null;
+  return e.palier === 4 ? t('bestiaire.tour_specialisation', { voie: e.voie ?? 'A' }) : t('bestiaire.tour_niveau', { n: e.palier });
 }

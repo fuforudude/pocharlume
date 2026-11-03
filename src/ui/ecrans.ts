@@ -265,7 +265,8 @@ export function afficherFin(
 
 export interface EcranPause {
   readonly noeud: HTMLElement;
-  afficher(visible: boolean): void;
+  /** `prendreFocus` faux : un écran est ouvert par-dessus (fiche, Bestiaire), le focus ne doit pas lui être volé. */
+  afficher(visible: boolean, prendreFocus?: boolean): void;
 }
 
 export function creerPause(parent: HTMLElement, surReprendre: () => void, surQuitter?: () => void, surBestiaire?: () => void): EcranPause {
@@ -293,9 +294,9 @@ export function creerPause(parent: HTMLElement, surReprendre: () => void, surQui
   parent.append(ecran);
   return {
     noeud: ecran,
-    afficher(visible: boolean): void {
+    afficher(visible: boolean, prendreFocus = true): void {
       if (ecran.hidden !== !visible) ecran.hidden = !visible;
-      if (visible) reprendre.focus({ preventScroll: true });
+      if (visible && prendreFocus) reprendre.focus({ preventScroll: true });
     },
   };
 }

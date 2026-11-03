@@ -5,9 +5,10 @@ import { ENNEMIS } from '../data/ennemis';
 import { IDS_DIEUX } from '../data/meta';
 import { REGIONS } from '../data/niveaux/campagne';
 import { FAMILLES, TOURS } from '../data/tours';
-import { aTexte, tCle } from '../i18n';
+import { aTexte, t, tCle } from '../i18n';
 import { rencontrerEnnemis, sauvegardeVide } from '../save';
-import { conseilsContre, contenuDeTour, ennemisDeLaFiche, ennemisDuNiveau, ennemisParRegion, ficheEnnemi, groupesDeTours, nomDeTour } from './bestiaire-logique';
+import type { DefEnnemi } from '../engine/definitions';
+import { CONSEILS_ACTIONS, CONSEILS_POUVOIRS, conseilsContre, contenuDeTour, libelleDeTour, ennemisDeLaFiche, ennemisDuNiveau, ennemisParRegion, ficheEnnemi, groupesDeTours, nomDeTour } from './bestiaire-logique';
 import { contenuEnnemiDeDonnees, contenuTourDeDonnees } from './bulle-contenus';
 
 describe('les ennemis viennent des données', () => {
@@ -145,5 +146,60 @@ describe('les tours et ce que la campagne a ouvert', () => {
       expect(nomDeTour(tour).length, tour.id).toBeGreaterThan(0);
       expect(contenuDeTour(tour).lignes.length, tour.id).toBeGreaterThan(0);
     }
+  });
+});
+
+describe('conseils : volants, charges, pouvoirs génériques', () => {
+  it('un volant rapide ne reçoit pas de conseil de soldats', () => {
+    const texte = conseilsContre('corbeau_noir').join(' ');
+    expect(ENNEMIS.corbeau_noir.vitesse).toBeGreaterThanOrEqual(1.8);
+    expect(texte).not.toContain(t('bestiaire.contre.rapide'));
+    expect(t('bestiaire.contre.rapide_volant')).not.toContain('soldat');
+    expect(texte).toContain(t('bestiaire.contre.rapide_volant'));
+  });
+
+  it('un ennemi au sol rapide garde le conseil de barrage', () => {
+    expect(conseilsContre('chien_errant').join(' ')).toContain(t('bestiaire.contre.rapide'));
+  });
+
+  it('un ennemi qui charge a sa phrase (action charger)', () => {
+    const charge = Object.entries(ENNEMIS).find(([, d]) => [...((d as DefEnnemi).pouvoirs?.paliers ?? []).flatMap((p) => p.actions), ...((d as DefEnnemi).pouvoirs?.periodiques ?? []).flatMap((p) => p.actions)].some((a) => a.type === 'charger'));
+    if (!charge) return;
+    expect(conseilsContre(charge[0]).join(' ')).toContain(t('bestiaire.contre.charge'));
+  });
+
+  it('le conseil des tireurs ne parle pas de se poser, celui de la résistance cite des familles des données', () => {
+    expect(t('bestiaire.contre.distance')).not.toContain('pose');
+    const resistant = Object.keys(ENNEMIS).find((id) => (ENNEMIS[id as keyof typeof ENNEMIS] as DefEnnemi).resistance >= 0.3);
+    if (!resistant) return;
+    const texte = conseilsContre(resistant).join(' ');
+    expect(texte).toContain(t('bestiaire.contre.resistant', { familles: FAMILLES.map((f) => tCle(`famille.${f}`)).join(', ') }).slice(0, 20));
+  });
+
+  it('chaque pouvoir et chaque action présents dans les données ont une phrase (ajouter une phrase dans CONSEILS_POUVOIRS ou CONSEILS_ACTIONS pour un nouveau)', () => {
+    const pouvoirs = new Set<string>();
+    const actions = new Set<string>();
+    for (const d of Object.values(ENNEMIS) as DefEnnemi[]) {
+      for (const cle of Object.keys(d.pouvoirs ?? {})) pouvoirs.add(cle);
+      for (const a of [...(d.pouvoirs?.paliers ?? []).flatMap((p) => p.actions), ...(d.pouvoirs?.periodiques ?? []).flatMap((p) => p.actions)]) actions.add(a.type);
+    }
+    for (const cle of pouvoirs) expect(cle in CONSEILS_POUVOIRS, `pouvoir sans conseil : ${cle}`).toBe(true);
+    for (const type of actions) expect(type in CONSEILS_ACTIONS, `action sans conseil : ${type}`).toBe(true);
+  });
+});
+
+describe('libellés des tours', () => {
+  it('les niveaux 1 à 3 d’une famille ont des libellés différents, et les spécialisations aussi', () => {
+    const tir = groupesDeTours(11).find((g) => g.famille === 'tir')?.tours ?? [];
+    const libelles = tir.map((x) => libelleDeTour(x));
+    expect(new Set(libelles).size).toBe(libelles.length);
+    expect(libelles[1]).toContain(t('bestiaire.tour_niveau', { n: 2 }));
+    expect(libelles[3]).toContain(t('bestiaire.tour_specialisation', { voie: 'A' }));
+  });
+
+  it('la tour divine garde son nom seul', () => {
+    const d = groupesDeTours(11).find((g) => g.famille === 'divine')?.tours[0];
+    if (!d) throw new Error('divine absente');
+    expect(libelleDeTour(d)).toBe(nomDeTour(d));
   });
 });
