@@ -23,6 +23,7 @@ import { commandeClavier, type Commande } from './clavier';
 import { afficherFin, creerAvisPaysage, creerPause } from './ecrans';
 import { Gestes } from './gestes';
 import { Hud } from './hud';
+import { Indications } from './indications';
 import { afficherInscription, type InscriptionOuverte } from './inscription-partie';
 import { Interaction, type Issue, type Mode } from './interaction';
 import { mesurerMarges } from './marges';
@@ -281,6 +282,8 @@ export async function lancerNiveau(
         options.surQuitter?.(abandon);
       }
     : undefined;
+  // Panneaux d'entrée, portes de sortie et traînée des chemins : sous le HUD, au-dessus du canvas.
+  const indications = new Indications(racine, atlas, rendu, etat, signal, temps);
   const ecranPause = creerPause(racine, () => { definirPause(false); }, quitter);
   const hud = new Hud(racine, atlas, etat, {
     appelerVague: demanderVague,
@@ -578,6 +581,7 @@ export async function lancerNiveau(
         actions.length = 0;
         rendu.apresPas(etat, temps);
         mesures.pasSimules++;
+        for (const evenement of etat.evenements) indications.evenement(etat, evenement, temps);
         for (const evenement of etat.evenements) {
           if (evenement.type !== 'vague') continue;
           const cle = cleParoleBoss(etat.niveau.vagues, evenement.index, niveau.visuel.region, niveau.boss);
@@ -608,6 +612,7 @@ export async function lancerNiveau(
     interaction.surbrillance(etat, surbrillance);
     rendu.dessiner(etat, pas.alpha, temps, surbrillance);
     mettreAJourMenu();
+    indications.mettreAJour(etat, temps);
     hud.mettreAJour(etat, { vitesse: pas.vitesse, pause: pas.pause, mode: interaction.mode }, interaction.invite(etat));
     mesures.msDessin += performance.now() - debutDessin;
     mesures.images++;

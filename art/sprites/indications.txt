@@ -1,0 +1,45 @@
+# Indications de départ et d'arrivée 16×16, avec contour comme le reste. Ancre au centre.
+categorie icone
+palette commune
+taille 16 16
+ancre 8 8
+
+# Fanion à crâne planté à chaque entrée de chemin : d'ici sortiront les ennemis.
+sprite icone-entree
+origine 0 0
+.dd.............
+.dBRRRRRRRRRRR..
+.dBRxxxxxxxxxR..
+.dBRxxwwwwwxxR..
+.dBRxwwwwwwwxR..
+.dBRxwkwwwkwxR..
+.dBRxwwwkwwwxR..
+.dBRxxwwwwwxxR..
+.dBRxxwkwkwxxR..
+.dBRRRRRRRRRRR..
+.dB.............
+.dB.............
+.dB.............
+.dB.............
+.dB.............
+dddddd..........
+
+# Porte de ce qu'on défend, au bout de chaque chemin : un cœur rouge dans l'ombre de l'arche.
+sprite porte-sortie
+origine 0 0
+....KKKKKKKK....
+..KKPPPPPPPPKK..
+.KPPppppppppPPK.
+KPPpkkkkkkkkpPPK
+KPpkkkkkkkkkkpPK
+KPpkkxxkxxkkkpPK
+KPpkxxxxxxxkkpPK
+KPpkxxxxxxxkkpPK
+KPpkkxxxxxkkkpPK
+KPpkkkxxxkkkkpPK
+KPpkkkkxkkkkkpPK
+KPpkkkkkkkkkkpPK
+KPpkkkkkkkkkkpPK
+KPpkkkkkkkkkkpPK
+KPPPPPPPPPPPPPPK
+KKKKKKKKKKKKKKKK

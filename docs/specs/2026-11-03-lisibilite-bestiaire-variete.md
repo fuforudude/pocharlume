@@ -52,7 +52,7 @@ En jouant, l'utilisateur relève quatre problèmes :
   animé) et un effet visible à l'amélioration (éclat, poussière, son).
 
 ## Critères d'acceptation
-- [ ] A : chaque entrée montre avant chaque vague un panneau avec les icônes et le nombre d'ennemis qui en sortiront
+- [x] A : chaque entrée montre avant chaque vague un panneau avec les icônes et le nombre d'ennemis qui en sortiront
   (test : composition affichée = composition de la vague par entrée) ; la sortie est dessinée et réagit à une fuite ;
   le tracé animé part au début du niveau et respecte « réduire les animations ».
 - [ ] B : écran Bestiaire (carte du monde et pause), ennemis rencontrés détaillés, autres « ??? » ; tours avec niveaux
