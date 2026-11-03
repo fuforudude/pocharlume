@@ -1,7 +1,8 @@
 # Autel des Cendres (magie) : un autel de pierre où brûlent les braises des Chats Suprêmes.
-# Niveau 1 : bloc d'autel et vasque. Niveau 2 : deux menhirs gravés de griffes rougeoyantes.
-# Niveau 3 : sanctuaire à linteau, statue de chat aux yeux de braise au sommet. Spécialisations dérivées
-# du niveau 3. repos : la flamme vacille ; attaque : la flamme jaillit. Le projectile part du point `tir`.
+# Niveau 1 : bloc d'autel et vasque, petite flamme. Niveau 2 : deux menhirs à braseros, griffes de braise, grand feu.
+# Niveau 3 : sanctuaire à linteau doré et bannières, braseros, statue de chat aux yeux de braise au sommet.
+# Spécialisations dérivées du niveau 3. repos : les flammes vacillent (et les bannières ondulent) ; attaque : la
+# flamme jaillit. Le projectile part du point `tir`. Planches : docs/tours/planche-apres.png.
 categorie tour
 palette commune
 taille 32 32
@@ -34,29 +35,29 @@ calque batiment
 ........gPPPPPPPg
 ........pPqPPPqPp
 ........pPPPPPPPp
-........pPPeePPPp
+........pPPefPPPp
 .......gggggggggggg
 .....p.ggpgGgpgGgg..p
 
-calque flamme 11 12
+calque flamme 11 13
 ..f
 .fFf
 .fyFf
 .
 
-calque flamme-b 11 12
+calque flamme-b 11 13
 .f
 .Ff
 .fyFf
 .
 
-calque flamme-c 11 12
+calque flamme-c 11 13
 ...f
 ..fF
 .fFyf
 .
 
-calque flamme-haute 10 8
+calque flamme-haute 10 9
 ...f
 ..fF
 ..fFf
@@ -75,8 +76,10 @@ cadre batiment + flamme-haute
 cadre batiment + flamme-haute miroir decale -1 0 duree 140
 cadre batiment + flamme-c
 
+# Niveau 2 : menhirs plus hauts coiffés de braseros, griffes de braise qui luisent, bougies, grand feu dans la
+# vasque, fentes de braise dans la dalle. Grilles en coordonnées de cadre (origine 0 0).
 sprite tour-magie-2
-modele tour-magie-1
+origine 0 0
 point tir 16 13
 
 calque batiment
@@ -86,55 +89,333 @@ calque batiment
 .
 .
 .
-.
-.
-.
-...Pq...............Pq
-..pPPq.............pPPq
-..pPPP.............pPPP
-..pePp.............pePp
-..ppep.............ppep
-..pPeP.............pPeP
-..pPPP...gPPPPPg...pPPP
-..ppPp....gpppg....ppPp
-..pPPp.....gpg.....pPPp
-..pPPP..gPPPPPPPg..pPPP
-..ppPp..pPqPPPqPp..ppPp
-..pPPp..pPPPPPPPp..pPPp
-..ppPp..pPPeePPPp..ppPp
-.gggggggggggggggggggggg
-..p.ggpgGgpgGggpgGgg..p
+....geffeg...........geffeg
+.....gGGg.............gGGg
+.....pPPq.............pPPq
+.....pPPq.............qPPp
+.....pfPq.............qPfp
+.....pFfq.............qfFp
+.....peFq.............qFep
+.....pPeq.............qePp
+.....pfPq.............qPfp
+.....pFfq.............qfFp
+.....peFq.............qFep
+.....pPeq.............qePp
+.....pPPq...gPPPPPg...qPPp
+.....ppPq....gpppg....qpPp
+.....pPPp.....gpg.....pPPp
+.....ppPq..gPPPPPPPg..qpPp
+.....pPPpF.pPqqPqqPp.FpPPp
+.....ppPqw.pPPPPPPPp.wqpPp
+.....pPPpq.pPefFfePp.qpPPp
+....gggegggggfgggggfggggeg
+.....p.ggpgeGgpgGegpgGgg..p
 
+calque feu-0
+.
+.
+.......f...............f
+......fF...............Ff
+......FyF.............fyF
+.....fFyf.............fFyf
+.
+.
+.
+.
+.
+...............f
+...............Ff
+..............fFf
+.............fFyFf
+.............fyyFf
+............fFyyyFf
+.............fyyyf
+
+calque braseros-0
+.
+.
+.......f...............f
+......fF...............Ff
+......FyF.............fyF
+.....fFyf.............fFyf
+
+calque feu-1
+.
+.
+......f..................f
+......Ff................fF
+.....fyF...............fyF
+.....fFyf.............fFyf
+.
+.
+.
+.
+.
+..............f
+..............fF
+..............fFf
+.............fFyFf
+.............fFyyf
+............fFyyyFf
+.............fyyyf
+
+calque braseros-1
+.
+.
+......f..................f
+......Ff................fF
+.....fyF...............fyF
+.....fFyf.............fFyf
+
+calque feu-2
+.
+.
+........f...............f
+.......fF..............fF
+......fyF..............FyF
+.....fFyf.............fFyf
+.
+.
+.
+.
+.
+................f
+...............fF
+..............fFFf
+.............ffyFf
+.............fyyFf
+............fFyyyFf
+.............fyyyf
+
+calque braseros-2
+.
+.
+........f...............f
+.......fF..............fF
+......fyF..............FyF
+.....fFyf.............fFyf
+
+calque feu-haut
+.
+.
+.
+.
+.
+.
+.
+...............f
+..............fFf
+..............fyf
+.............fFyFf
+.............fyyyf
+............fFyyyFf
+............fyyWyyf
+............fyWWWyf
+............fFyWyFf
+............fFyyyFf
+.............fyyyf
+
+anim repos 140
+cadre batiment + feu-0
+cadre batiment + feu-1
+cadre batiment + feu-2
+cadre batiment + feu-0
+cadre batiment + feu-1
+cadre batiment + feu-2
+
+anim attaque 90
+cadre batiment + braseros-0 + feu-haut
+cadre batiment + braseros-1 + feu-haut miroir decale -1 0 duree 140
+cadre batiment + feu-2
+
+# Niveau 3 : sanctuaire à linteau clouté d'or, bannières rouges sur les piliers (elles ondulent), braseros aux bouts
+# du linteau, statue aux yeux ardents et collier d'or, runes de braise sur les piliers, grand feu posé sur la vasque.
 sprite tour-magie-3
-modele tour-magie-1
+origine 0 0
 point tir 16 13
 
 calque batiment
-.........U...U
-.........UuuuU
-.........uFuFu
-........uuuuuuu
-.......guuuuuuug
-..gPPPPPPPPPPPPPPPPPPPg
-..gpPpPpPpPpPpPpPpPpPpg
-..ggggggggggggggggggggg
-...pPP..............pPP
-...pPp..............pPp
-...pPP..............pPP
-...pPp..............pPp
-...pPP..............pPP
-...pPp..............pPp
-...pPP..............pPP
-...pPp..............pPp
-...pPP...gPPPPPg....pPP
-...pPp....gpppg.....pPp
-...pPP.....gpg......pPP
-...pPp..gPPPPPPPg...pPp
-...pPP..pPqPPPqPp...pPP
-...pPp..pPPPPPPPp...pPp
-...pPP..pPPeePPPp...pPP
-.gggggggggggggggggggggggg
-..p.ggpgGgpgGggpgGgg..p
+.
+.
+............U...U
+............UuuuU
+............uyuyu
+.....gefeg.uuueuuu...gefeg
+......gGg.guYYYYYug...gGg
+.....gPPYPPPPYPPPPPYPPPPYPPg
+.....gpPpPpPpPpYFYpPpPpPpPpg
+.....ggggggggggggggggggggggg
+......pPq..............qPP
+......pPq..............qPp
+......pfq..............qfp
+......peq..............qep
+......pPq..............qPP
+......pPq..............qPp
+......pfq..............qfp
+......peq..............qep
+......pPq...gPPPPPg....qPP
+......pPq....gpppg.....qPp
+......pfq.....gpg......qfp
+......peq..gPPPPPPPg...qep
+......pPqF.pPqqPqqPp.F.qPP
+......pPqw.pPPPPPPPp.w.qPp
+......pPqq.pPefFfePp.q.qPP
+....gggegggggfgggggfggggeggg
+.....p.ggpgeGgpgGegpgGgg..p
+
+calque feu-0
+.
+.
+.......f................f
+......fFf..............Ff
+......fyF.............fyF
+.
+.
+.
+.
+.
+.
+...............f
+...............Ff
+..............fFf
+.............fFyFf
+.............fyyFf
+............fFyyyFf
+.............fyyyf
+
+calque braseros-0
+.
+.
+.......f................f
+......fFf..............Ff
+......fyF.............fyF
+
+calque feu-1
+.
+.
+......f................f
+......fF..............fFf
+......Fyf.............fyF
+.
+.
+.
+.
+.
+.
+..............f
+..............fF
+..............fFf
+.............fFyFf
+.............fFyyf
+............fFyyyFf
+.............fyyyf
+
+calque braseros-1
+.
+.
+......f................f
+......fF..............fFf
+......Fyf.............fyF
+
+calque feu-2
+.
+.
+........f.............f
+.......Ff.............fF
+......fyF.............Fyf
+.
+.
+.
+.
+.
+.
+................f
+...............fF
+..............fFFf
+.............ffyFf
+.............fyyFf
+............fFyyyFf
+.............fyyyf
+
+calque braseros-2
+.
+.
+........f.............f
+.......Ff.............fF
+......fyF.............Fyf
+
+calque feu-haut
+.
+.
+.
+.
+.
+.
+.
+...............f
+..............fFf
+..............fyf
+.............fFyFf
+.............fyyyf
+............fFyyyFf
+............fyyWyyf
+............fyWWWyf
+............fFyWyFf
+............fFyyyFf
+.............fyyyf
+
+calque banniere 6 10
+RRR
+RYR
+YxY
+RYR
+RRR
+xRx
+R.R
+
+
+calque banniere-b 6 10
+RRR
+RYR
+YxY
+RYR
+RRR
+RxR
+.R.
+
+
+calque banniere-d 23 10
+RRR
+RYR
+YxY
+RYR
+RRR
+xRx
+R.R
+
+
+calque banniere-d-b 23 10
+RRR
+RYR
+YxY
+RYR
+RRR
+RxR
+.R.
+
+
+anim repos 140
+cadre batiment + feu-0 + banniere + banniere-d-b
+cadre batiment + feu-1 + banniere-b + banniere-d
+cadre batiment + feu-2 + banniere + banniere-d-b
+cadre batiment + feu-0 + banniere-b + banniere-d
+cadre batiment + feu-1 + banniere + banniere-d-b
+cadre batiment + feu-2 + banniere-b + banniere-d
+
+anim attaque 90
+cadre batiment + braseros-0 + feu-haut + banniere-b + banniere-d
+cadre batiment + braseros-1 + feu-haut miroir decale -1 0 + banniere + banniere-d-b duree 140
+cadre batiment + feu-2 + banniere-b + banniere-d
 
 # Oracle de la Braise : un œil de braise flotte au-dessus de la vasque, la statue a les yeux blancs.
 sprite tour-magie-oracle

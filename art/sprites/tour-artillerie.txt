@@ -1,16 +1,18 @@
 # Catapulte du Rempart (artillerie) : une catapulte de bois servie par un chat.
-# Niveau 1 : catapulte sur ses roues. Niveau 2 : sur une plate-forme de pierre. Niveau 3 : sur un rempart
-# crénelé, bras cerclé de fer. Spécialisations : Mortier de Soufre (mortier de fonte qui crache une fumée
-# jaune) et Baliste à Chaînes (grande arbalète de rempart, chaîne enroulée).
-# repos : le chat servant cligne ; attaque : le bras part vers l'avant (le projectile part du point `tir`).
-# Les pièces sont des calques communs au fichier, chaque niveau les pose à sa hauteur.
+# Niveau 1 : catapulte de bois sur ses roues, rien d'autre. Niveau 2 : sur une plate-forme de pierre, moyeux de fer,
+# fanion rouge qui claque et petite bannière. Niveau 3 : sur un rempart crénelé, bras cerclé de fer, deux fanions,
+# tapisserie rouge à tête de chat d'or et deux torchères allumées. Spécialisations (sur le même rempart paré) :
+# Mortier de Soufre (mortier de fonte qui crache une fumée jaune) et Baliste à Chaînes (grande arbalète de rempart).
+# repos : le chat servant cligne, fanions et torches s'animent ; attaque : le bras part vers l'avant (le projectile
+# part du point `tir`). Les pièces sont des calques communs au fichier, en coordonnées de cadre (origine 0 0) ;
+# chaque niveau les pose à sa hauteur. Le socle fait au plus 26 px de large, centré sur l'ancre.
 categorie tour
 palette commune
 taille 32 32
 ancre 16 26
-origine 3 2
+origine 0 0
 
-calque chassis 0 18
+calque chassis 3 20
 ..........dd
 .........dbbd
 ........db..bd
@@ -20,13 +22,23 @@ dBBBBBBBBBBBBBBBBBBBd
 bddddddddddddddddddb
 .bdb..............bdb
 
-calque bras-arme 0 16
+calque chassis-fer 3 20
+..........dd
+.........dbbd
+........db..bd
+.......db....bd
+.gTg..............gTg
+dBBBBBBBBBBBBBBBBBBBd
+bddddddddddddddddddb
+.gdg..............gdg
+
+calque bras-arme 3 18
 ..pP
 .bpPb
 .bbbbOOOOOd
 .....oooo
 
-calque bras-mi 8 6
+calque bras-mi 11 8
 .pP
 bpPb
 bbbb
@@ -41,7 +53,7 @@ bbbb
 .Oo
 .Od
 
-calque bras-lance 10 10
+calque bras-lance 13 12
 ......bb
 .....bbbb
 .....Oo
@@ -52,7 +64,7 @@ calque bras-lance 10 10
 Oo
 d
 
-calque chat 21 18
+calque chat 24 20
 o..o
 oooo
 okok
@@ -61,33 +73,248 @@ obbo
 .bb
 .oo
 
-calque cligne 22 20
+calque cligne 25 22
 o.o
 
-calque rempart-2 0 21
-.gPPPPgPPPPPgPPPPPgPPg
-gpppPgppppPgpppppPgppg
-gggggggggggggggggggggg
-gPPgPPPPPgPPPPgPPPPPgg
-gppgpppppgppppgpppppgg
+calque rempart-2
+.
+.
+.
+.
+.
+.
+.
+.
+...........................d
+...........................d
+...........................d
+...........................d
+...........................d
+...........................d
+...........................d
+...........................d
+...........................d
+...........................d
+...........................d
+...........................d
+...........................d
+...........................d
+...........................d
+...gPPPPgPPPPPgPPPPPgPPPPPPPg
+...gpppPgppppbddddbpPgppppppg
+...gggggggggggRxxRggggggggggg
+...gPPgPPPPPgPRYYRPPPPPgPPPPg
+...gppgpppppgpRppRpppppgppppg
 
-calque rempart-3 0 13
-PPP...................PPP
-ppg...................ppg
-ggg...................ggg
-pPPPPgPPPPPgPPPPPgPPPPPPg
-gpppPgppppPgpppppPgpppppg
-ggggggggggggggggggggggggg
-pPPgPPPPPgPPPPgPPPPPgPPPg
-gppgpppppgpkppgpppppgpppg
-ggggggggggggggggggggggggg
-gPPPPgPPPPPgPPPPPgPPPPPPg
-gppppgppppkgpppppgpppppgg
-ggggggggggggggggggggggggg
+calque rempart-3
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+...PPP....................PPP
+...ppg....................ppg
+...ggg....................ggg
+...pPPPPgPPPPPgPPPPPgPPPPPPPg
+...gpppPgppppPgpppppPgppppppg
+...gggggggggggggggggggggggggg
+...pPPgPPPPPgPPPPgPPPPPgPPPPg
+...gppgpppppgpkppgpppppgpppkg
+...gggggggggggggggggggggggggg
+...gPPPPgPPPPPgPPPPPgPPPPPPPg
+...gppppgppppkgpppppgpppppppg
+...gggggggggggggggggggggggggg
+
+# Tapisserie et corbeilles des torchères (niveau 3 et spécialisations).
+calque parure-3
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+............bddddddb
+.............RxxxxR
+.............RYRRYR
+.............RYYYYR
+.......tgt...RRYYRR...tgt
+........g....RRRRRR....g
+.............R.RR.R
+
+calque hampes-3
+.
+.
+.
+.
+.
+....d......................d
+....d......................d
+....d......................d
+....d......................d
+....d......................d
+....d......................d
+....d......................d
+....d......................d
+....d......................d
+....d......................d
+
+# Fanions : deux états, ils claquent au vent.
+calque fanion-2
+.
+.
+.
+.
+.
+.
+.
+.
+.......................xRRRd
+......................RRRxRd
+........................RRRd
+...........................d
+
+calque fanion-2-b
+.
+.
+.
+.
+.
+.
+.
+.
+......................xRRRRd
+.......................RRxRd
+.......................RRRRd
+...........................d
+
+calque fanion-3
+.
+.
+.
+.
+.
+....dRRRx.............xRRRRd
+....dRxRRR.............RRxRd
+....dRRR...............RRRRd
+....d......................d
+
+calque fanion-3-b
+.
+.
+.
+.
+.
+....dRRRRx.............xRRRd
+....dRxRR.............RRRxRd
+....dRRRR...............RRRd
+....d......................d
+
+# Flammes des torchères, trois états.
+calque torches-0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+........f.............f
+.......fFf............fF
+.......fyf............Fyf
+
+calque torches-1
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.......f................f
+.......fF..............Ff
+.......Fyf............fyF
+
+calque torches-2
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.........f.............f
+........Ff............fFf
+.......fyF............fyf
 
 # Cercles de fer du niveau 3.
-calque fers 0 18
-.....p.......p
+calque fers 3 20
+.....T.......T
 .....p.......p
 .....p.......p
 .....p.......p
@@ -111,34 +338,38 @@ cadre chassis + bras-arme + chat duree 200
 sprite tour-artillerie-2
 point tir 4 15
 
-anim repos 400
-cadre rempart-2 + chassis decale 0 -3 + bras-arme decale 0 -3 + chat decale 0 -3
-cadre rempart-2 + chassis decale 0 -3 + bras-arme decale 0 -3 + chat decale 0 -3 + cligne decale 0 -3 duree 150
+anim repos 200
+cadre rempart-2 + fanion-2 + chassis-fer decale 0 -3 + bras-arme decale 0 -3 + chat decale 0 -3
+cadre rempart-2 + fanion-2-b + chassis-fer decale 0 -3 + bras-arme decale 0 -3 + chat decale 0 -3
+cadre rempart-2 + fanion-2 + chassis-fer decale 0 -3 + bras-arme decale 0 -3 + chat decale 0 -3
+cadre rempart-2 + fanion-2-b + chassis-fer decale 0 -3 + bras-arme decale 0 -3 + chat decale 0 -3 + cligne decale 0 -3 duree 150
 
 anim attaque 80
-cadre rempart-2 + chassis decale 0 -3 + bras-mi decale 0 -3 + chat decale 0 -3
-cadre rempart-2 + chassis decale 0 -3 + bras-lance decale 0 -3 + chat decale 0 -3
-cadre rempart-2 + chassis decale 0 -3 + bras-lance decale 0 -3 + chat decale 0 -3 duree 300
-cadre rempart-2 + chassis decale 0 -3 + bras-arme decale 0 -3 + chat decale 0 -3 duree 200
+cadre rempart-2 + fanion-2 + chassis-fer decale 0 -3 + bras-mi decale 0 -3 + chat decale 0 -3
+cadre rempart-2 + fanion-2-b + chassis-fer decale 0 -3 + bras-lance decale 0 -3 + chat decale 0 -3
+cadre rempart-2 + fanion-2 + chassis-fer decale 0 -3 + bras-lance decale 0 -3 + chat decale 0 -3 duree 300
+cadre rempart-2 + fanion-2-b + chassis-fer decale 0 -3 + bras-arme decale 0 -3 + chat decale 0 -3 duree 200
 
 sprite tour-artillerie-3
 point tir 4 11
 
-anim repos 400
-cadre rempart-3 + chassis decale 0 -7 + fers decale 0 -7 + bras-arme decale 0 -7 + chat decale 0 -7
-cadre rempart-3 + chassis decale 0 -7 + fers decale 0 -7 + bras-arme decale 0 -7 + chat decale 0 -7 + cligne decale 0 -7 duree 150
+anim repos 200
+cadre rempart-3 + parure-3 + hampes-3 + fanion-3 + torches-0 + chassis-fer decale 0 -7 + fers decale 0 -7 + bras-arme decale 0 -7 + chat decale 0 -7
+cadre rempart-3 + parure-3 + hampes-3 + fanion-3-b + torches-1 + chassis-fer decale 0 -7 + fers decale 0 -7 + bras-arme decale 0 -7 + chat decale 0 -7
+cadre rempart-3 + parure-3 + hampes-3 + fanion-3 + torches-2 + chassis-fer decale 0 -7 + fers decale 0 -7 + bras-arme decale 0 -7 + chat decale 0 -7
+cadre rempart-3 + parure-3 + hampes-3 + fanion-3-b + torches-0 + chassis-fer decale 0 -7 + fers decale 0 -7 + bras-arme decale 0 -7 + chat decale 0 -7 + cligne decale 0 -7 duree 150
 
 anim attaque 80
-cadre rempart-3 + chassis decale 0 -7 + fers decale 0 -7 + bras-mi decale 0 -7 + chat decale 0 -7
-cadre rempart-3 + chassis decale 0 -7 + fers decale 0 -7 + bras-lance decale 0 -7 + chat decale 0 -7
-cadre rempart-3 + chassis decale 0 -7 + fers decale 0 -7 + bras-lance decale 0 -7 + chat decale 0 -7 duree 300
-cadre rempart-3 + chassis decale 0 -7 + fers decale 0 -7 + bras-arme decale 0 -7 + chat decale 0 -7 duree 200
+cadre rempart-3 + parure-3 + hampes-3 + fanion-3 + torches-0 + chassis-fer decale 0 -7 + fers decale 0 -7 + bras-mi decale 0 -7 + chat decale 0 -7
+cadre rempart-3 + parure-3 + hampes-3 + fanion-3-b + torches-1 + chassis-fer decale 0 -7 + fers decale 0 -7 + bras-lance decale 0 -7 + chat decale 0 -7
+cadre rempart-3 + parure-3 + hampes-3 + fanion-3 + torches-2 + chassis-fer decale 0 -7 + fers decale 0 -7 + bras-lance decale 0 -7 + chat decale 0 -7 duree 300
+cadre rempart-3 + parure-3 + hampes-3 + fanion-3-b + torches-0 + chassis-fer decale 0 -7 + fers decale 0 -7 + bras-arme decale 0 -7 + chat decale 0 -7 duree 200
 
 # Mortier de Soufre : gros mortier de fonte cerclé, pointé vers le ciel, bouche jaune de soufre.
 sprite tour-artillerie-mortier
 point tir 11 3
 
-calque mortier 4 2
+calque mortier 7 4
 ......gGGGg
 .....gYyyYGg
 .....gGGGGGg
@@ -152,31 +383,32 @@ calque mortier 4 2
 ..dBBBBBBBBBBBd
 ..dbbbbbbbbbbbd
 
-calque fumee-soufre 4 0
+calque fumee-soufre 7 2
 .....Y..Y.Y
 ....YJY.JYJY
 ...YJYY..YJ
 .....Y
 
-calque eclair 8 0
+calque eclair 11 2
 ..y.y
 .yFFFy
 ..yFy
 
 anim repos 400
-cadre rempart-3 + mortier + chat decale 0 -7
-cadre rempart-3 + mortier + chat decale 0 -7 + cligne decale 0 -7 duree 150
+cadre rempart-3 + parure-3 + hampes-3 + fanion-3 + torches-0 + mortier + chat decale 0 -7
+cadre rempart-3 + parure-3 + hampes-3 + fanion-3-b + torches-1 + mortier + chat decale 0 -7 + cligne decale 0 -7 duree 150
 
 anim attaque 90
-cadre rempart-3 + mortier decale 0 1 + eclair + chat decale 0 -7
-cadre rempart-3 + mortier + fumee-soufre + chat decale 0 -7 duree 200
-cadre rempart-3 + mortier + fumee-soufre decale 0 -1 + chat decale 0 -7 duree 200
+cadre rempart-3 + parure-3 + hampes-3 + fanion-3 + torches-2 + mortier decale 0 1 + eclair + chat decale 0 -7
+cadre rempart-3 + parure-3 + hampes-3 + fanion-3-b + torches-0 + mortier + fumee-soufre + chat decale 0 -7 duree 200
+cadre rempart-3 + parure-3 + hampes-3 + fanion-3 + torches-1 + mortier + fumee-soufre decale 0 -1 + chat decale 0 -7 duree 200
 
-# Baliste à Chaînes : grande arbalète de rempart, trait armé, chaîne enroulée sur un treuil.
+# Baliste à Chaînes : grande arbalète de rempart, trait armé, chaîne enroulée sur un treuil. Au recul, le trait ne
+# recule que d'un pixel : le rempart élargi laisse 28 px de large en tout.
 sprite tour-artillerie-baliste
 point tir 24 8
 
-calque baliste 1 4
+calque baliste 4 6
 .........p
 .........pp
 .........p.p
@@ -193,11 +425,11 @@ calque baliste 1 4
 ..pPpPp.d.d
 ...pPp.dddd
 
-calque trait 1 8
+calque trait 4 10
 ..ww.....
 BBBBBBBBBBBBBTi
 
-calque corde-lachee 1 4
+calque corde-lachee 4 6
 .........p
 .........pp
 .........p.p
@@ -209,10 +441,10 @@ calque corde-lachee 1 4
 .........p
 
 anim repos 400
-cadre rempart-3 + baliste + trait + chat decale 0 -7
-cadre rempart-3 + baliste + trait + chat decale 0 -7 + cligne decale 0 -7 duree 150
+cadre rempart-3 + parure-3 + hampes-3 + fanion-3-b + torches-2 + baliste + trait + chat decale 0 -7
+cadre rempart-3 + parure-3 + hampes-3 + fanion-3 + torches-0 + baliste + trait + chat decale 0 -7 + cligne decale 0 -7 duree 150
 
 anim attaque 80
-cadre rempart-3 + corde-lachee + baliste + chat decale 0 -7
-cadre rempart-3 + baliste + chat decale 0 -7 duree 300
-cadre rempart-3 + baliste + trait decale -2 0 + chat decale 0 -7 duree 200
+cadre rempart-3 + parure-3 + hampes-3 + fanion-3-b + torches-1 + corde-lachee + baliste + chat decale 0 -7
+cadre rempart-3 + parure-3 + hampes-3 + fanion-3 + torches-2 + baliste + chat decale 0 -7 duree 300
+cadre rempart-3 + parure-3 + hampes-3 + fanion-3-b + torches-0 + baliste + trait decale -1 0 + chat decale 0 -7 duree 200

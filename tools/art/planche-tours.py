@@ -3,7 +3,7 @@ tools/art/planche-tours.ts : sprites agrandis sans lissage, sur l'herbe du Villa
 
 Usage :
   node tools/art/planche-tours.ts <tmp>
-  python tools/art/planche-tours.py <tmp> avant docs/tours/planche-avant.png
+  python tools/art/planche-tours.py <tmp> avant docs/tours/planche-avant.png   (ou apres → planche-apres.png)
   python tools/art/planche-tours.py <tmp> proposition docs/tours/planche-proposition.png
   python tools/art/planche-tours.py <tmp> gif docs/tours/proposition-animee.gif
 """
@@ -168,8 +168,9 @@ def main():
     if quoi == "gif":
         gif(dossier, sortie)
         return
-    if quoi == "avant":
-        planche = composer(dossier, rangees_avant(), "Tours de Pocharlume : état actuel",
+    if quoi in ("avant", "apres"):
+        titre = "Tours de Pocharlume : état actuel" if quoi == "avant" else "Tours de Pocharlume : après la refonte"
+        planche = composer(dossier, rangees_avant(), titre,
                            f"Premier cadre de repos, agrandi ×{FACTEUR} sur l'herbe du Village. "
                            "À droite de chaque case : le sprite à la taille réelle.")
     else:

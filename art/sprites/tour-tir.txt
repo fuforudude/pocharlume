@@ -1,8 +1,10 @@
 # Clocher des Archers (tir) : cadres de 32×48, ancre au pied de la tour. Le chat tireur (archer-chat,
 # guetteur-chat, arbaletrier-chat) est dessiné par le rendu au point `tireur` (ses pieds).
 # Niveau 1 : tour de guet en bois sur pilotis. Niveau 2 : tour de pierre crénelée.
-# Niveau 3 : beffroi à cloche sous un toit d'ardoise. Spécialisations dérivées du niveau 3.
-# repos : le fanion claque ; attaque : la cloche ou le fanion s'agite au tir.
+# Niveau 3 : beffroi sous un toit d'ardoise, coiffé d'un clocheton à cloche d'or et de deux fanions, braseros sur la
+# plate-forme ; son cadre a 4 px de plus en haut (32×52, ancre 16 49 : le pied reste au même endroit).
+# Spécialisations dérivées du niveau 3 (même cadre).
+# repos : les fanions claquent (et les braseros vacillent) ; attaque : la cloche ou le fanion s'agite au tir.
 categorie tour
 palette commune
 taille 32 48
@@ -152,11 +154,17 @@ d
 
 sprite tour-tir-3
 modele tour-tir-1
-point tireur 16 20
+taille 32 52
+ancre 16 49
+point tireur 16 24
 
 calque batiment
-............gGgG
-...........gGGGgg
+.............gG
+............gGGg
+...........dkYYkd
+...........dYyYYd
+...........dYyYYd
+..........gYYYYYYg
 ..........gGGgggGg
 .........gGGgGgGggG
 ........gGGgGGGggGgg
@@ -165,10 +173,10 @@ calque batiment
 .....gGGgGGgGGGggGggGgg
 ...kkkkkkkkkkkkkkkkkkkkkk
 ......gPPkkkkkkkkkkPgP
-......gPPkkkkddkkkkPgP
-......gPkkkkYYYkkkkkgP
-......gPkkk.YyYfkkkkgP
-......gPkkkYYYYffkkkgP
+......gPPkkkkkkkkkkPgP
+......gPkkkkkkkkkkkkgP
+......gPkkkkkkkkkkkkgP
+......gPkkkkkkkkkkkkgP
 ......gPkkkkkkkkkkkkgP
 ......gPkkkkkkkkkkkkgP
 ......gPkkkkkkkkkkkkgP
@@ -201,21 +209,68 @@ calque batiment
 ......gPPPPgdBBdgPPPPG
 ......gppppgdBBdgppGGG
 
-# La cloche oscille au fond de la chambre.
-calque fanion 11 12
+# Clocheton à cloche d'or au sommet (elle oscille), deux fanions qui claquent, braseros sur la plate-forme.
+calque fanion
+.......RRRRd....dRRRR
+.......xRxRd....dRxRx
+.........RRd....dRR
 .
 .
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+......f...............f
+.....fFf.............Ff
+.....fyF............fyF
+.....gfg............gfg
 
-calque fanion-b 11 12
-y
+calque fanion-b
+........RRRd....dRRR
+.......RxRRd....dRRxR
+.......xRRRdYYkkdRRRx
 .
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.....f...............f
+.....fF.............fFf
+.....Fyf............fyf
+.....gfg............gfg
 
 # Guetteurs des Toits : toit moussu, lierre sur la pierre, fanion vert-de-gris.
 sprite tour-tir-guetteurs
 derive tour-tir-3 couleurs G=H g=h
-point tireur 16 20
+taille 32 52
+ancre 16 49
+point tireur 16 24
 
-calque lierre 5 21
+calque lierre 5 25
 .H...........H...H
 HjH.........HjH.Hj
 .Hj..........H..jH
@@ -235,9 +290,11 @@ retouche attaque * + lierre
 # Arbalétriers du Beffroi : pierre bleuie et cerclée de fer, cloche de bronze sombre, étendard rouge.
 sprite tour-tir-beffroi
 derive tour-tir-3 couleurs p=G P=t q=T G=u g=k
-point tireur 16 20
+taille 32 52
+ancre 16 49
+point tireur 16 24
 
-calque etendard 11 22
+calque etendard 11 26
 RRRRRR
 RxRRxR
 RRxxRR

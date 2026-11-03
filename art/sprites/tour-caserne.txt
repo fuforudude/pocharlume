@@ -1,6 +1,6 @@
 # Grenier des Griffes (caserne) : une grange au toit de chaume d'où sortent les chats de grange.
 # Niveau 1 : remise de planches. Niveau 2 : grange à grenier, un chat guette à la lucarne.
-# Niveau 3 : grange fortifiée, pieux et bannière griffée. Spécialisations dérivées du niveau 3.
+# Niveau 3 : grange fortifiée, pignon de guet, pieux, bannière griffée, braseros devant la porte. Spécialisations dérivées du niveau 3.
 # Les trois niveaux partagent les animations du niveau 1 (modèle) : seuls les calques changent.
 # repos : porte fermée, le chat de la lucarne cligne ; attaque : la porte s'ouvre sur des yeux (sortie des soldats).
 categorie tour
@@ -25,10 +25,10 @@ calque batiment
 .
 .
 ............JJ
-..........JJjjJJ
-........JJjJJjjJJJ
-......JJjjJJjJJjjJJJ
-....JJjJJjjJJJjjJJjJJJ
+..........JJjJJJ
+........JJjJJjJJJJ
+......JJjJJJjJJjJJJJ
+....JJjJJjJJJJjJJJjJJJ
 ...hjjjjjjjjjjjjjjjjjjh
 ....BbBbBbBbBbBbBbBbBb
 ....BbBbBkkkkkkkBbBbBb
@@ -89,17 +89,17 @@ calque batiment
 .
 .
 ............JJ
-..........JJjjJ
-.........JjJJjjJJ
-........JjjJJjjJjJ
-......JJjJJjjJJjjJJ
-.....JjjJJjJJjJjjJJJ
-....JjJjjJJjjJJjJjjJJ
-...JJjJJjjJJjJjjJJjJJJ
+..........JJjJJ
+.........JjJJjJJJ
+........JjJJJjJJjJ
+......JJjJJjJJJjJJJ
+.....JjJJJjJJjJjJJJJ
+....JjJjJJJjJJJjJjJJJ
+...JJjJJjJJJjJjJJJjJJJ
 ..hjjjjjjjjjjjjjjjjjjjjh
-...BbBbBbBkkkkkBbBbBbBb
-...BbBbBbBkkkkkBbBbBbBb
-...BbBbBbBkkkkkBbBbBbBb
+...BbBbBbBkkkkdBbBbBbBb
+...BbBbBbBkkkkyBbBbBbBb
+...BbBbBbBkkkkfBbBbBbBb
 ...ddddddddddddddddddddd
 ...BbBbBkkkkkkkkBbBbBbBb
 ...BbBbkkkkkkkkkkbBbBbBb
@@ -134,17 +134,19 @@ calque chat-loft 10 14
 calque cligne 11 15
 o.o
 
-# Grange fortifiée : soubassement de pierre, pieux devant, bannière griffée qui claque au vent.
+# Grange fortifiée : soubassement de pierre, pieux devant, pignon de guet sur le faîte, bannière griffée qui claque
+# au vent, braseros devant la porte, lanterne à la lucarne.
 sprite tour-caserne-3
 modele tour-caserne-2
 
+# Bannière griffée qui claque au vent, braseros allumés de part et d'autre de la porte.
 calque extra
 .
-.dRRR
-.dRxR
-.dRRR
-.dRRR
-.dR.R
+.dRRRRR
+.dRxRxR
+.dRxRxR
+.dRRRRR
+.dR.R.R
 .d
 .d
 .d
@@ -157,21 +159,21 @@ calque extra
 .d
 .d
 .d
-.d
-.d
-.d
-B.B....................B.B
-d.d....................d.d
-dBd....................dBd
+.d...f.............f
+.d..fFf...........Ff
+.d..fyF..........fyF
+B.B.gfg..........gfg...B.B
+d.d..d............d....d.d
+dBd.d.d..........d.d...dBd
 dbd....................dbd
 
 calque extra-b
 .
-.dRRRR
-.dRRxR
-.dRRRR
-.dRRRR
-.dRR.R
+.dRRRRRR
+.dRRxRxR
+.dRRxRxR
+.dRRRRR
+.dR.R.R
 .d
 .d
 .d
@@ -184,32 +186,32 @@ calque extra-b
 .d
 .d
 .d
-.d
-.d
-.d
-B.B....................B.B
-d.d....................d.d
-dBd....................dBd
+.d..f.............f.
+.d..fF...........fFf
+.d..Fyf..........fyf
+B.B.gfg..........gfg...B.B
+d.d..d............d....d.d
+dBd.d.d..........d.d...dBd
 dbd....................dbd
 
 calque batiment
-.
-.
-.
-.
-.
 ............JJ
-..........JJjjJ
-.........JjJJjjJJ
-........JjjJJjjJjJ
-......JJjJJjjJJjjJJ
-.....JjjJJjJJjJjjJJJ
-....JjJjjJJjjJJjJjjJJ
-...JJjJJjjJJjJjjJJjJJJ
+...........JjJJ
+..........hjjjjh
+...........BkyB
+...........BkkB
+...........BBbB
+..........JJjJJ
+.........JjJJjJJJ
+........JjJJJjJJjJ
+......JJjJJjJJJjJJJ
+.....JjJJJjJJjJjJJJJ
+....JjJjJJJjJJJjJjJJJ
+...JJjJJjJJJjJjJJJjJJJ
 ..hdddddddddddddddddddddh
-...BbBbBbBkkkkkBbBbBbBb
-...BbBbBbBkkkkkBbBbBbBb
-...BbBbBbBkkkkkBbBbBbBb
+...BbBbBbBkkkkdBbBbBbBb
+...BbBbBbBkkkkyBbBbBbBb
+...BbBbBbBkkkkfBbBbBbBb
 ...ddddddddddddddddddddd
 ...pPpPgkkkkkkkkgPpPpPp
 ...PpPgkkkkkkkkkkgpPpPp
@@ -219,15 +221,13 @@ calque batiment
 ..gpPpPpggggggggggPpPpPpg
 ..gPpPpPpPpPpPpPpPpPpPpPg
 
-# Garde du Cloître : la grange devenue cloître, murs de pierre, toit d'ardoise, clocheton et bannière de lin.
+# Garde du Cloître : la grange devenue cloître, murs de pierre, toit d'ardoise, cloche d'or au pignon, bannière de lin.
 sprite tour-caserne-cloitre
 derive tour-caserne-3 couleurs J=G j=g h=k B=p b=P R=z x=Z
 
-calque clocheton 10 3
-..d
-.gZg
-.gYg
-ggggg
+calque clocheton 12 3
+YY
+ZY
 
 retouche repos * + clocheton
 retouche attaque * + clocheton
