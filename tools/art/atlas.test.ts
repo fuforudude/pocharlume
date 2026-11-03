@@ -248,12 +248,16 @@ describe('atlas commité', () => {
     }
   });
 
-  it('respecte les tailles prévues : 32×32 (tours hautes en 32×48, boss en 64×64), tuiles et icônes en 16×16 (portraits en 24×24)', () => {
+  // Le beffroi (niveau 3 du Clocher des Archers) et ses deux spécialisations ont 4 px de plus en haut pour leur
+  // clocheton : 32×52, ancre 16 49 (le pied reste au même endroit que les autres tours hautes).
+  const TOURS_TRES_HAUTES = ['tour-tir-3', 'tour-tir-guetteurs', 'tour-tir-beffroi'];
+  it('respecte les tailles prévues : 32×32 (tours hautes en 32×48, beffroi en 32×52, boss en 64×64), tuiles et icônes en 16×16 (portraits en 24×24)', () => {
     for (const [nom, s] of Object.entries(commite.sprites)) {
       const taille = `${String(s.largeur)}×${String(s.hauteur)}`;
       if (nom.startsWith('icone-portrait-')) expect(taille, nom).toBe('24×24');
       else if (s.categorie === 'tuile' || s.categorie === 'icone' || s.categorie === 'projectile') expect(taille, nom).toBe('16×16');
       else if (BOSS.includes(nom)) expect(taille, nom).toBe('64×64');
+      else if (TOURS_TRES_HAUTES.includes(nom)) expect(taille, nom).toBe('32×52');
       else if (s.categorie === 'tour') expect(['32×32', '32×48'], nom).toContain(taille);
       else if (nom === 'piege') expect(taille).toBe('16×16');
       else if (s.categorie === 'unite' || s.categorie === 'ennemi') expect(taille, nom).toBe('32×32');

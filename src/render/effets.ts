@@ -14,6 +14,10 @@ export const TYPE_EFFET = {
   texte: 3,
   /** Marque d'un ordre (héros, ralliement) : anneau qui se resserre. */
   ordre: 4,
+  /** Bouffée de poussière et d'éclats aux deux coins de la base d'une tour améliorée (valeur : demi-largeur de la base). */
+  poussiere: 5,
+  /** Anneau de lumière dorée qui part du pied d'une tour améliorée (valeur : demi-largeur de la base). */
+  anneau: 6,
 } as const;
 
 export class Effet {

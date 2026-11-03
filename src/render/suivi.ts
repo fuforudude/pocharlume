@@ -13,6 +13,7 @@ import { dureeAnimation } from './animations';
 import type { AtlasRendu, SpriteAtlas, SpriteHabille } from './atlas';
 import { TUILE } from './camera';
 import { TYPE_EFFET, type Effet, type PoolEffets } from './effets';
+import { DUREE_ANNEAU, DUREE_POUSSIERE, haloDe, requeteAnimationsReduites, type DefHalo } from './effets-tours';
 import {
   effetObjet,
   habillageSort,
@@ -129,6 +130,11 @@ export class Visuel {
   noyadeMax = 0;
   /** Non dessiné (familier dont le héros est tombé). */
   masque = false;
+  /** Instants (temps de jeu) du sursaut et du flash blanc d'une tour qui vient d'être améliorée ; très anciens quand rien ne tourne. */
+  sursautDebut = -1e9;
+  flashDebut = -1e9;
+  /** Lueur sous la tour (tours à feu), choisie quand la tour change d'aspect ; null si elle n'en a pas. */
+  halo: DefHalo | null = null;
 }
 
 export class VisuelProjectile {
@@ -158,6 +164,9 @@ function distance(ax: number, ay: number, bx: number, by: number): number {
 }
 
 export class Suivi {
+  /** Relu à chaque amélioration, donc un changement de préférence agit tout de suite (les tests le remplacent). */
+  animationsReduites: () => boolean = () => this.requeteReduite.matches;
+  private readonly requeteReduite = requeteAnimationsReduites();
   readonly ennemis = new Map<number, Visuel>();
   readonly unites = new Map<number, Visuel>();
   readonly tours = new Map<number, Visuel>();
@@ -251,6 +260,9 @@ export class Suivi {
     v.tour = null;
     v.famille = 'caserne';
     v.niveau = 0;
+    v.sursautDebut = -1e9;
+    v.flashDebut = -1e9;
+    v.halo = null;
     v.voie = null;
     v.tireur = null;
     v.tireurMiroir = false;
@@ -335,6 +347,7 @@ export class Suivi {
     v.nomSprite = spriteTour(t.famille, t.niveau, t.voie, dieu);
     v.sprite = this.atlas.sprite(v.nomSprite) ?? null;
     v.habille = this.habiller(v.nomSprite, t.famille);
+    v.halo = haloDe(t.famille, t.niveau, t.voie, v.habille?.skin ?? null);
     v.versionCollection = this.version;
     const nomTireur = spriteTireur(t.famille, t.niveau, t.voie);
     v.tireur = nomTireur ? (this.atlas.sprite(nomTireur) ?? null) : null;
@@ -565,6 +578,30 @@ export class Suivi {
     e.y = Math.round(yTuiles * TUILE + decalageY);
     e.echelle = echelle;
     return e;
+  }
+
+  /**
+   * Amélioration ou spécialisation d'une tour : bouffée de poussière aux deux coins de la base ; sauf si l'on réduit les animations,
+   * anneau de lumière au pied, flash blanc sur le nouveau sprite et sursaut de la tour (dessinés par le rendu d'après les instants notés).
+   */
+  private effetsAmelioration(tour: Visuel, temps: number): void {
+    const demiBase = Math.min(14, Math.max(6, Math.round((tour.sprite?.largeur ?? 24) * 0.3)));
+    const x = Math.round(tour.x * TUILE);
+    const y = Math.round(tour.y * TUILE + DECALAGE_BASE_TOUR);
+    const poussiere = this.effets.prendre(TYPE_EFFET.poussiere, temps, DUREE_POUSSIERE);
+    poussiere.x = x;
+    poussiere.y = y;
+    poussiere.valeur = demiBase;
+    // echelle : 1 = poussière et éclats, 0 = poussière seule (animations réduites).
+    const reduit = this.animationsReduites();
+    poussiere.echelle = reduit ? 0 : 1;
+    if (reduit) return;
+    const anneau = this.effets.prendre(TYPE_EFFET.anneau, temps, DUREE_ANNEAU);
+    anneau.x = x;
+    anneau.y = y;
+    anneau.valeur = demiBase;
+    tour.sursautDebut = temps;
+    tour.flashDebut = temps;
   }
 
   /** Trait instantané d'un point du monde (pixels logiques) à un autre : tir d'un héros à distance ou d'une tourelle. */
@@ -832,7 +869,7 @@ export class Suivi {
       }
       case 'amelioration': {
         const tour = this.tours.get(ev.tour);
-        if (tour) this.effetSprite('impact', tour.x, tour.y, temps, 2, -14 + DECALAGE_BASE_TOUR);
+        if (tour) this.effetsAmelioration(tour, temps);
         return;
       }
       case 'vente': {

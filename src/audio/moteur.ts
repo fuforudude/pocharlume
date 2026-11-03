@@ -25,6 +25,8 @@ export interface SourceAudio extends NoeudAudio {
 }
 export interface ContexteAudio {
   readonly state: string;
+  /** Horloge de l'audio en secondes : sert à programmer une note en différé (absente d'un faux contexte : 0). */
+  readonly currentTime?: number;
   readonly destination: NoeudAudio;
   createGain(): GainAudio;
   createBufferSource(): SourceAudio;
@@ -141,7 +143,11 @@ export class MoteurAudio {
     }
   }
 
-  private lancer(lecture: LectureSon): boolean {
+  /**
+   * `enSuite` : une note de la `suite` d'une lecture. Elle passe sans le limiteur (seule la lecture qui l'ouvre y compte : un carillon
+   * ne doit pas couper les autres sons), mais garde les contrôles de volume, de contexte et de chargement.
+   */
+  private lancer(lecture: LectureSon, enSuite = false): boolean {
     const id = lecture.id;
     if (this.indisponible || this.volumeSon() <= 0) return false;
     const contexte = this.contexte;
@@ -156,7 +162,7 @@ export class MoteurAudio {
       return false;
     }
     const def = SONS[id];
-    if (!this.limiteur.autoriser(lecture.cle ?? id, def.priorite, lecture.max ?? def.max, this.dependances.maintenant())) return false;
+    if (!enSuite && !this.limiteur.autoriser(lecture.cle ?? id, def.priorite, lecture.max ?? def.max, this.dependances.maintenant())) return false;
     const bus = def.bus === 'interface' ? this.busInterface : this.busEffets;
     if (!bus) return false;
     this.appliquerVolumes();
@@ -167,7 +173,10 @@ export class MoteurAudio {
     source.playbackRate.value = def.hauteur * (lecture.hauteur ?? 1) * (1 + (this.dependances.alea() * 2 - 1) * def.variation);
     source.connect(gain);
     gain.connect(bus);
-    source.start(0);
+    const delai = lecture.delai ?? 0;
+    source.start(delai > 0 ? (contexte.currentTime ?? 0) + delai : 0);
+    // Les notes suivantes (carillon) partent en différé, chacune avec sa hauteur et sa limite propres.
+    if (lecture.suite) for (const note of lecture.suite) this.lancer(note, true);
     return true;
   }
 

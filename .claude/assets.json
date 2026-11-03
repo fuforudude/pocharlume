@@ -1,0 +1,201 @@
+{
+  "version": 1,
+  "assets": {
+    "prop-tour-magie": {
+      "type": "pixel-art",
+      "source": "art/propositions/tour-magie.txt",
+      "exports": [
+        "docs/tours/planche-proposition.png",
+        "docs/tours/proposition-animee.gif"
+      ],
+      "regenerer": "node tools/art/planche-tours.ts <tmp> && python tools/art/planche-tours.py <tmp> proposition docs/tours/planche-proposition.png && python tools/art/planche-tours.py <tmp> gif docs/tours/proposition-animee.gif",
+      "brief": "docs/specs/2026-11-03-lisibilite-bestiaire-variete.md",
+      "empreintes": {
+        "art/propositions/tour-magie.txt": "a6566718e4eac833",
+        "docs/tours/planche-proposition.png": "cd9002ca489e0856",
+        "docs/tours/proposition-animee.gif": "93a32b1577272f88"
+      },
+      "historique": [
+        {
+          "date": "2026-11-03 14:40",
+          "auteur": "claude",
+          "action": "création",
+          "note": "Maquette Autel des Cendres niveaux 2 et 3 (spec partie D, premier temps)"
+        },
+        {
+          "date": "2026-11-03 16:54",
+          "auteur": "claude",
+          "action": "modification",
+          "note": "Maquette reportée dans art/sprites/tour-magie.txt (gardée pour l'historique)"
+        }
+      ]
+    },
+    "prop-tour-artillerie": {
+      "type": "pixel-art",
+      "source": "art/propositions/tour-artillerie.txt",
+      "exports": [
+        "docs/tours/planche-proposition.png",
+        "docs/tours/proposition-animee.gif"
+      ],
+      "regenerer": "node tools/art/planche-tours.ts <tmp> && python tools/art/planche-tours.py <tmp> proposition docs/tours/planche-proposition.png && python tools/art/planche-tours.py <tmp> gif docs/tours/proposition-animee.gif",
+      "brief": "docs/specs/2026-11-03-lisibilite-bestiaire-variete.md",
+      "empreintes": {
+        "art/propositions/tour-artillerie.txt": "8765ff461fb32673",
+        "docs/tours/planche-proposition.png": "cd9002ca489e0856",
+        "docs/tours/proposition-animee.gif": "93a32b1577272f88"
+      },
+      "historique": [
+        {
+          "date": "2026-11-03 14:40",
+          "auteur": "claude",
+          "action": "création",
+          "note": "Maquette Catapulte du Rempart niveaux 2 et 3 (spec partie D, premier temps)"
+        },
+        {
+          "date": "2026-11-03 16:54",
+          "auteur": "claude",
+          "action": "modification",
+          "note": "Maquette reportée dans art/sprites/tour-artillerie.txt (gardée pour l'historique)"
+        }
+      ]
+    },
+    "planche-tours-avant": {
+      "type": "pixel-art",
+      "source": "docs/tours/planche-avant.png",
+      "exports": [],
+      "generateur": "tools/art/planche-tours.py",
+      "regenerer": "node tools/art/planche-tours.ts <tmp> && python tools/art/planche-tours.py <tmp> avant docs/tours/planche-avant.png",
+      "brief": "docs/specs/2026-11-03-lisibilite-bestiaire-variete.md",
+      "empreintes": {
+        "docs/tours/planche-avant.png": "c0e62770990958d8",
+        "tools/art/planche-tours.py": "449c2342c7ad1f04"
+      },
+      "historique": [
+        {
+          "date": "2026-11-03 14:40",
+          "auteur": "claude",
+          "action": "création",
+          "note": "Planche de l'existant : 4 familles, niveaux 1-3 et spécialisations"
+        },
+        {
+          "date": "2026-11-03 16:54",
+          "auteur": "claude",
+          "action": "modification",
+          "note": "Générateur modifié par Claude (mode apres, vignettes) ; la planche avant reste celle de l'état d'origine"
+        }
+      ]
+    },
+    "tour-caserne": {
+      "type": "pixel-art",
+      "source": "art/sprites/tour-caserne.txt",
+      "exports": [
+        "public/sprites/atlas.png",
+        "public/sprites/atlas.json"
+      ],
+      "regenerer": "npm run art",
+      "brief": "docs/specs/2026-11-03-lisibilite-bestiaire-variete.md",
+      "empreintes": {
+        "art/sprites/tour-caserne.txt": "2c107a7748bbd8cc",
+        "public/sprites/atlas.png": "ed6f49541250e5c4",
+        "public/sprites/atlas.json": "4b43dab51a863954"
+      },
+      "historique": [
+        {
+          "date": "2026-11-03 16:54",
+          "auteur": "claude",
+          "action": "création",
+          "note": "Sprites existants suivis à partir de la refonte « tours plus flashy » (spec partie D, second temps)"
+        }
+      ]
+    },
+    "tour-tir": {
+      "type": "pixel-art",
+      "source": "art/sprites/tour-tir.txt",
+      "exports": [
+        "public/sprites/atlas.png",
+        "public/sprites/atlas.json"
+      ],
+      "regenerer": "npm run art",
+      "brief": "docs/specs/2026-11-03-lisibilite-bestiaire-variete.md",
+      "empreintes": {
+        "art/sprites/tour-tir.txt": "974febc25bd3afe9",
+        "public/sprites/atlas.png": "ed6f49541250e5c4",
+        "public/sprites/atlas.json": "4b43dab51a863954"
+      },
+      "historique": [
+        {
+          "date": "2026-11-03 16:54",
+          "auteur": "claude",
+          "action": "création",
+          "note": "Sprites existants suivis à partir de la refonte « tours plus flashy » (spec partie D, second temps)"
+        }
+      ]
+    },
+    "tour-magie": {
+      "type": "pixel-art",
+      "source": "art/sprites/tour-magie.txt",
+      "exports": [
+        "public/sprites/atlas.png",
+        "public/sprites/atlas.json"
+      ],
+      "regenerer": "npm run art",
+      "brief": "docs/specs/2026-11-03-lisibilite-bestiaire-variete.md",
+      "empreintes": {
+        "art/sprites/tour-magie.txt": "e91433eb15655c82",
+        "public/sprites/atlas.png": "ed6f49541250e5c4",
+        "public/sprites/atlas.json": "4b43dab51a863954"
+      },
+      "historique": [
+        {
+          "date": "2026-11-03 16:54",
+          "auteur": "claude",
+          "action": "création",
+          "note": "Sprites existants suivis à partir de la refonte « tours plus flashy » (spec partie D, second temps)"
+        }
+      ]
+    },
+    "tour-artillerie": {
+      "type": "pixel-art",
+      "source": "art/sprites/tour-artillerie.txt",
+      "exports": [
+        "public/sprites/atlas.png",
+        "public/sprites/atlas.json"
+      ],
+      "regenerer": "npm run art",
+      "brief": "docs/specs/2026-11-03-lisibilite-bestiaire-variete.md",
+      "empreintes": {
+        "art/sprites/tour-artillerie.txt": "3abc6c339fc7c283",
+        "public/sprites/atlas.png": "ed6f49541250e5c4",
+        "public/sprites/atlas.json": "4b43dab51a863954"
+      },
+      "historique": [
+        {
+          "date": "2026-11-03 16:54",
+          "auteur": "claude",
+          "action": "création",
+          "note": "Sprites existants suivis à partir de la refonte « tours plus flashy » (spec partie D, second temps)"
+        }
+      ]
+    },
+    "planche-tours-apres": {
+      "type": "pixel-art",
+      "source": "docs/tours/planche-apres.png",
+      "exports": [],
+      "generateur": "tools/art/planche-tours.py",
+      "regenerer": "node tools/art/planche-tours.ts <tmp> && python tools/art/planche-tours.py <tmp> apres docs/tours/planche-apres.png",
+      "brief": "docs/specs/2026-11-03-lisibilite-bestiaire-variete.md",
+      "empreintes": {
+        "docs/tours/planche-apres.png": "eb047ca1630c11bb",
+        "tools/art/planche-tours.py": "449c2342c7ad1f04"
+      },
+      "historique": [
+        {
+          "date": "2026-11-03 16:54",
+          "auteur": "claude",
+          "action": "création",
+          "note": "Planche après refonte : 4 familles, niveaux 1-3 et spécialisations"
+        }
+      ]
+    }
+  }
+}

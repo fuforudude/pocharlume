@@ -15,6 +15,10 @@ import type { AtlasRendu, CadreAtlas, SpriteAtlas } from './atlas';
 import { Camera, TUILE } from './camera';
 import { REGLES } from '../data/regles';
 import { PoolEffets, TYPE_EFFET, type Effet } from './effets';
+import {
+  decalageSursaut, DUREE_FLASH, DUREE_SURSAUT, opaciteAnneau, opaciteFlash, PARTICULES,
+  particule, pulsationHalo, rayonAnneau, type DefHalo, type EtatParticule,
+} from './effets-tours';
 import { dessinerNombre, largeurNombre } from './police';
 import { construireSol, peindreSol } from './sol';
 import { tuileTouchee } from './zones';
@@ -44,6 +48,12 @@ const VISEE_INTERDITE_COIN = '#9a3030';
 /** Longueur (pixels logiques) des coins qui cadrent la case visée. */
 const COIN_VISEE = 5;
 const MARQUEUR_PLACEHOLDER = '#ff00ff';
+/** Amélioration d'une tour : anneau de lumière dorée, poussière et éclats (bois et or). */
+const ANNEAU_COULEUR = '#ffd75e';
+const ANNEAU_CLAIR = '#fff4c2';
+const POUSSIERE_COULEUR = '#d9ccaa';
+const ECLAT_BOIS = '#8a5a2b';
+const ECLAT_OR = '#ffd75e';
 /** Un ennemi volant est dessiné plus haut que son ombre. */
 const ALTITUDE_VOL = 10;
 /** Opacité d'une tour aveuglée. */
@@ -148,6 +158,8 @@ export class Rendu {
   private readonly tampon: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D;
   private readonly sol: HTMLCanvasElement;
+  private readonly halos = new Map<DefHalo, HTMLCanvasElement>();
+  private readonly particuleTemp: EtatParticule = { x: 0, y: 0, taille: 0, alpha: 0, eclat: false };
   private readonly statiques: Statique[] = [];
   private readonly etourdi: SpriteAtlas | undefined;
   private readonly piege: SpriteAtlas | undefined;
@@ -299,6 +311,8 @@ export class Rendu {
     this.interpoler(alpha, ox, oy);
     this.trier();
     this.dessinerOmbres(l, h);
+    this.dessinerHalos(temps, l, h);
+    this.dessinerAnneauxArriere(temps, ox, oy);
     this.dessinerProfondeur(temps, l, h);
     this.dessinerVisee(etat, surb, ox, oy);
     this.dessinerProjectiles(alpha, temps, ox, oy);
@@ -496,7 +510,10 @@ export class Rendu {
     if (!anim) return;
     // Une unité tombée reste étendue un moment, puis disparaît jusqu'à sa réapparition.
     if (nom === 'mort' && t > 1800 && v.categorie !== CATEGORIE.ennemi) return;
-    const y = v.py - (ennemi?.volant ? ALTITUDE_VOL : 0);
+    // Tour qui vient d'être améliorée : elle se tasse puis rebondit (sursaut), et son nouveau sprite flashe en blanc.
+    const ts = v.categorie === CATEGORIE.tour ? temps - v.sursautDebut : -1;
+    const sursaut = ts >= 0 && ts < DUREE_SURSAUT ? decalageSursaut(ts) : 0;
+    const y = v.py - (ennemi?.volant ? ALTITUDE_VOL : 0) + sursaut;
     const unite = v.unite;
     const capacites = unite?.stats.capacites;
     // Les flammes de la rage sous les pieds d'un héros blessé, avant lui ; l'assassin du Sanctuaire est translucide.
@@ -509,9 +526,11 @@ export class Rendu {
     if (unite && !unite.mort && unite.noyade > 0 && v.noyadeMax > 0) this.dessinerNoyee(v, sprite, cadreA(anim, t), y, temps);
     else this.poser(v, sprite, cadreA(anim, t), v.px, y);
     if (furtif || aveuglee) ctx.globalAlpha = 1;
+    const tf = v.categorie === CATEGORIE.tour ? temps - v.flashDebut : -1;
+    if (tf >= 0 && tf < DUREE_FLASH) this.atlas.dessinerBlanc(ctx, sprite, cadreA(anim, t), v.px, y, v.miroir, opaciteFlash(tf));
 
     if (v.categorie === CATEGORIE.tour) {
-      this.dessinerTireur(v, temps);
+      this.dessinerTireur(v, temps, sursaut);
       const tour = v.tour;
       if (tour) {
         // Ingéniosité : les roues d'or tournent sur chaque tour dont la cadence est boostée.
@@ -562,13 +581,13 @@ export class Rendu {
   }
 
   /** Le chat tireur posté au sommet d'une tour de tir. */
-  private dessinerTireur(v: Visuel, temps: number): void {
+  private dessinerTireur(v: Visuel, temps: number, decalage: number): void {
     const tireur = v.tireur;
     if (!tireur) return;
     const enAction = temps < v.actionFin;
     const anim = this.atlas.animation(tireur, enAction ? 'attaque' : 'repos');
     if (!anim) return;
-    this.atlas.dessiner(this.ctx, tireur, cadreA(anim, enAction ? temps - v.actionDebut : temps + v.phase), v.px + v.tirX, v.py + v.tirY, v.tireurMiroir);
+    this.atlas.dessiner(this.ctx, tireur, cadreA(anim, enAction ? temps - v.actionDebut : temps + v.phase), v.px + v.tirX, v.py + v.tirY + decalage, v.tireurMiroir);
   }
 
   private dessinerProjectiles(alpha: number, temps: number, ox: number, oy: number): void {
@@ -629,6 +648,12 @@ export class Rendu {
         case TYPE_EFFET.texte:
           this.dessinerTexte(e, t, ox, oy);
           break;
+        case TYPE_EFFET.anneau:
+          this.dessinerAnneau(e, t, ox, oy, false);
+          break;
+        case TYPE_EFFET.poussiere:
+          this.dessinerPoussiere(e, t, ox, oy);
+          break;
         default:
           break;
       }
@@ -642,6 +667,114 @@ export class Rendu {
     const cadre = cadreA(anim, t);
     if (e.echelle > 1) this.atlas.dessinerEchelle(this.ctx, e.sprite, cadre, e.x - ox, e.y - oy, e.echelle);
     else this.atlas.dessiner(this.ctx, e.sprite, cadre, e.x - ox, e.y - oy, e.miroir);
+  }
+
+  /** Moitié arrière (côté nord) des anneaux d'amélioration : dessinée avant les tours, pour que l'anneau passe derrière le fût. */
+  private dessinerAnneauxArriere(temps: number, ox: number, oy: number): void {
+    const liste = this.effets.liste;
+    for (let i = 0; i < liste.length; i++) {
+      const e = liste[i];
+      if (!e?.actif || e.type !== TYPE_EFFET.anneau) continue;
+      const t = temps - e.debut;
+      if (t >= 0 && t < e.duree) this.dessinerAnneau(e, t, ox, oy, true);
+    }
+  }
+
+  /**
+   * Anneau de lumière dorée au pied d'une tour améliorée : une ellipse de pixels, deux rangs d'épaisseur, qui s'élargit et s'éteint.
+   * Deux passes : la moitié arrière (`arriere`) avant les tours, la moitié avant par-dessus, pour qu'il entoure la tour.
+   */
+  private dessinerAnneau(e: Effet, t: number, ox: number, oy: number, arriere: boolean): void {
+    const ctx = this.ctx;
+    const cx = e.x - ox;
+    const cy = e.y - oy - 1;
+    const rx = rayonAnneau(t, e.valeur);
+    const ry = rx * 0.45;
+    const n = Math.max(16, Math.ceil(rx * 5));
+    ctx.fillStyle = ANNEAU_COULEUR;
+    ctx.globalAlpha = opaciteAnneau(t);
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * 2 * Math.PI;
+      if (Math.sin(a) < 0 !== arriere) continue;
+      const x = Math.round(cx + Math.cos(a) * rx);
+      const y = Math.round(cy + Math.sin(a) * ry);
+      ctx.fillRect(x, y, 1, 2);
+    }
+    ctx.globalAlpha = opaciteAnneau(t) * 0.5;
+    ctx.fillStyle = ANNEAU_CLAIR;
+    for (let i = 0; i < n; i += 2) {
+      const a = (i / n) * 2 * Math.PI;
+      if (Math.sin(a) < 0 !== arriere) continue;
+      ctx.fillRect(Math.round(cx + Math.cos(a) * (rx - 2)), Math.round(cy + Math.sin(a) * (ry - 1)), 1, 1);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  /** Poussière et éclats aux deux coins de la base d'une tour améliorée. */
+  private dessinerPoussiere(e: Effet, t: number, ox: number, oy: number): void {
+    const ctx = this.ctx;
+    const s = this.particuleTemp;
+    for (let cote = -1; cote <= 1; cote += 2) {
+      for (let i = 0; i < PARTICULES.length; i++) {
+        if (e.echelle === 0 && PARTICULES[i]?.eclat) continue;
+        if (!particule(i, cote as -1 | 1, t, e.valeur, s)) continue;
+        ctx.globalAlpha = s.alpha;
+        ctx.fillStyle = s.eclat ? (i % 2 === 0 ? ECLAT_BOIS : ECLAT_OR) : POUSSIERE_COULEUR;
+        ctx.fillRect(e.x - ox + s.x, e.y - oy + s.y - 1, s.taille, s.taille);
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  /**
+   * Lueur additive sous les tours à feu (voir `HALOS`) : une image de dégradé préparée une fois par réglage, posée en ellipse,
+   * qui pulse doucement. Dessinée avant les sprites pour rester sous les ennemis et les tours : elle n'éclaire que le sol.
+   */
+  private dessinerHalos(temps: number, l: number, h: number): void {
+    const liste = this.suivi.dessinables;
+    const ctx = this.ctx;
+    let additif = false;
+    const reduit = this.suivi.animationsReduites();
+    for (let i = 0; i < liste.length; i++) {
+      const v = liste[i];
+      if (!v || v.categorie !== CATEGORIE.tour || v.masque || !v.tour) continue;
+      const def = v.halo;
+      if (!def) continue;
+      if (v.px < -48 || v.px > l + 48 || v.py < -16 || v.py > h + 80) continue;
+      const image = this.imageHalo(def);
+      if (!additif) {
+        ctx.globalCompositeOperation = 'lighter';
+        additif = true;
+      }
+      ctx.globalAlpha = Math.min(1, def.intensite * pulsationHalo(temps, v.phase, reduit));
+      const demi = def.rayon;
+      ctx.drawImage(image, v.px - demi, v.py - 5 - Math.round(demi * 0.3), demi * 2, Math.round(demi * 1.2));
+    }
+    if (additif) {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  /** Disque dégradé de la couleur du halo, créé à la première demande puis gardé. */
+  private imageHalo(def: DefHalo): HTMLCanvasElement {
+    const connue = this.halos.get(def);
+    if (connue) return connue;
+    const taille = def.rayon * 2;
+    const canvas = document.createElement('canvas');
+    canvas.width = taille;
+    canvas.height = taille;
+    const g = canvas.getContext('2d');
+    if (g) {
+      const degrade = g.createRadialGradient(def.rayon, def.rayon, 0, def.rayon, def.rayon, def.rayon);
+      degrade.addColorStop(0, `rgba(${def.couleur}, 1)`);
+      degrade.addColorStop(0.5, `rgba(${def.couleur}, 0.45)`);
+      degrade.addColorStop(1, `rgba(${def.couleur}, 0)`);
+      g.fillStyle = degrade;
+      g.fillRect(0, 0, taille, taille);
+    }
+    this.halos.set(def, canvas);
+    return canvas;
   }
 
   /** Prime en arêtes : « +6 » qui monte et s'efface, contour sombre pour rester lisible sur l'herbe. */

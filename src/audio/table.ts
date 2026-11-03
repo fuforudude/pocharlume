@@ -103,11 +103,32 @@ export interface LectureSon {
   readonly cle?: string;
   /** Instances permises dans la fenêtre du limiteur pour cette clé (`max` du son par défaut). */
   readonly max?: number;
+  /** Retard de départ en secondes (0 par défaut) : pour égrener des notes. */
+  readonly delai?: number;
+  /** Lectures lancées avec celle-ci (en général avec un `delai`) : un coup suivi d'un carillon, par exemple. */
+  readonly suite?: readonly LectureSon[];
 }
 
 /** Une lecture réglée : un son à volume et hauteur adaptés, avec sa limite propre (raccourci de `LectureSon`). */
 function lecture(id: IdSon, volume: number, hauteur: number, cle?: string, max?: number): LectureSon {
   return { id, volume, hauteur, ...(cle === undefined ? {} : { cle }), ...(max === undefined ? {} : { max }) };
+}
+
+/** Hauteurs (facteurs) des trois notes du carillon d'amélioration : une tierce majeure puis une quinte, qui montent. */
+const NOTES_CARILLON: readonly number[] = [1.5, 1.875, 2.25];
+
+/**
+ * Le son d'une amélioration : un coup de marteau sur la planche et le bois qui craque, puis un carillon montant d'une note par
+ * niveau gagné (niveau 2 : 1 note, niveau 3 : 2 notes). Une spécialisation (niveau 4, voie choisie) sonne plus grave, en 3 notes.
+ */
+export function sonAmelioration(niveau: number, specialisation: boolean): LectureSon {
+  const notes = specialisation ? 3 : Math.min(3, Math.max(1, Math.floor(niveau) - 1));
+  const grave = specialisation ? 0.7 : 1;
+  const suite: LectureSon[] = [lecture('impact_physique', 0.9, specialisation ? 0.55 : 0.7, 'craque', 1)];
+  for (let i = 0; i < notes; i++) {
+    suite[i + 1] = { ...lecture('impact_magique', 0.7, (NOTES_CARILLON[i] ?? 1) * grave, 'carillon', 3), delai: 0.2 + 0.11 * i };
+  }
+  return { ...lecture('construction', 0.9, specialisation ? 0.85 : 1.1, 'marteau', 1), suite };
 }
 
 /**
@@ -129,7 +150,7 @@ export const SON_DES_EVENEMENTS: TableEvenements = {
   // Un essaim (sangsues, rats de peste) qui tombe d'un coup ne fait qu'un son, plus doux : pas de mitraille.
   mort: (e) => (estBoss(e.typeEnnemi) ? 'mort_boss' : estEssaim(e.typeEnnemi) ? lecture('mort_ennemi', 0.7, 1.15, 'mort_essaim', 1) : 'mort_ennemi'),
   construction: 'construction',
-  amelioration: 'amelioration',
+  amelioration: (e) => sonAmelioration(e.niveau, e.voie !== null),
   vente: 'vente',
   tir: (e, p) => {
     const famille = familleDe(p, e.tour);

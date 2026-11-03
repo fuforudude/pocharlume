@@ -200,3 +200,27 @@ describe('fichiers de public/sons', () => {
     expect(total).toBeLessThan(600 * 1024);
   });
 });
+
+describe('son d’amélioration', () => {
+  const evenement = (niveau: number, voie: 'a' | null) => ({ type: 'amelioration', tour: 1, cx: 0, cy: 0, niveau, voie }) as never;
+  const notes = (niveau: number, voie: 'a' | null) => (lectureDe(evenement(niveau, voie))?.suite ?? []).filter((n) => n.cle === 'carillon');
+
+  it('une note de carillon par niveau gagné : 1, 2, puis 3 pour la spécialisation', () => {
+    expect(notes(2, null)).toHaveLength(1);
+    expect(notes(3, null)).toHaveLength(2);
+    expect(notes(4, 'a')).toHaveLength(3);
+  });
+
+  it('le carillon monte, et la spécialisation sonne plus grave', () => {
+    const n = notes(4, 'a');
+    expect(n[1]?.hauteur).toBeGreaterThan(n[0]?.hauteur ?? 99);
+    expect(n[2]?.hauteur).toBeGreaterThan(n[1]?.hauteur ?? 99);
+    expect(n[1]?.delai).toBeGreaterThan(n[0]?.delai ?? 99);
+    expect(notes(3, null)[0]?.hauteur).toBeGreaterThan(n[0]?.hauteur ?? 99);
+    expect(lectureDe(evenement(4, 'a'))?.hauteur).toBeLessThan(lectureDe(evenement(3, null))?.hauteur ?? 0);
+  });
+
+  it('ne mange pas la limite du son de construction', () => {
+    expect(lectureDe(evenement(2, null))?.cle).toBe('marteau');
+  });
+});

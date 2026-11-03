@@ -1,0 +1,354 @@
+# PROPOSITION (maquette, hors jeu) : Catapulte du Rempart niveaux 2 et 3 plus marqués.
+# Construite par tools/art/planche-tours.ts dans docs/tours/planche-proposition.png ; n'entre pas dans l'atlas.
+# Même cadre 32×32, même ancre que art/sprites/tour-artillerie.txt ; grilles en coordonnées de cadre (origine 0 0).
+# Les pièces de la catapulte (châssis, bras, chat) sont celles de l'original ; roues et fers passent à l'acier.
+# Niveau 2 : plate-forme élargie, fanion rouge qui claque, petite bannière d'étoffe, tas de boulets.
+# Niveau 3 : rempart élargi, deux fanions, grande tapisserie rouge à tête de chat d'or, deux torchères allumées.
+categorie tour
+palette commune
+taille 32 32
+ancre 16 26
+origine 0 0
+
+sprite prop-tour-artillerie-2
+point tir 4 15
+
+calque socle
+.
+.
+.
+.
+.
+.
+.
+.
+.............................d
+.............................d
+.............................d
+.............................d
+.............................d
+.............................d
+.............................d
+.............................d
+.............................d
+.............................d
+.............................d
+.............................d
+.............................d
+.............................d
+..qP.........................d
+..PpgPPPPgPPPPPgPPPPPgPPg.gPPd
+.qPqPppPgpppbddddbppPgppg.gppd
+.PpPpggggggggRxxRggggggggggggg
+...gPPgPPPPPgRYYRgPPPPPgPgg
+...gppgpppppgRppRgpppppgpgg
+
+calque fanion-0
+.
+.
+.
+.
+.
+.
+.
+.
+.........................xRRRd
+........................RRRxRd
+..........................RRRd
+.............................d
+
+calque fanion-1
+.
+.
+.
+.
+.
+.
+.
+.
+........................xRRRRd
+.........................RRxRd
+.........................RRRRd
+.............................d
+
+calque chassis 3 17
+..........dd
+.........dbbd
+........db..bd
+.......db....bd
+.gTg..............gTg
+dBBBBBBBBBBBBBBBBBBBd
+bddddddddddddddddddb
+.gdg..............gdg
+
+calque bras-arme 3 15
+..pP
+.bpPb
+.bbbbOOOOOd
+.....oooo
+
+calque bras-mi 11 5
+.pP
+bpPb
+bbbb
+.Oo
+.Oo
+.Oo
+.Oo
+.Oo
+.Oo
+.Oo
+.Oo
+.Oo
+.Od
+
+calque bras-lance 13 9
+......bb
+.....bbbb
+.....Oo
+....Oo
+...Oo
+..Oo
+.Oo
+Oo
+d
+
+calque chat 24 17
+o..o
+oooo
+okok
+.cco
+obbo
+.bb
+.oo
+
+calque cligne 25 19
+o.o
+
+calque fers 3 17
+.....T.......T
+.....p.......p
+.....p.......p
+.....p.......p
+.....p.......p
+.....p.......p
+.....p.......p
+
+anim repos 200
+cadre socle + fanion-0 + chassis + bras-arme + chat
+cadre socle + fanion-1 + chassis + bras-arme + chat
+cadre socle + fanion-0 + chassis + bras-arme + chat
+cadre socle + fanion-1 + chassis + bras-arme + chat + cligne duree 150
+
+anim attaque 80
+cadre socle + fanion-0 + chassis + bras-mi + chat
+cadre socle + fanion-1 + chassis + bras-lance + chat
+cadre socle + fanion-0 + chassis + bras-lance + chat duree 300
+cadre socle + fanion-0 + chassis + bras-arme + chat duree 200
+
+sprite prop-tour-artillerie-3
+point tir 4 11
+
+calque socle
+.
+.
+.
+.
+.
+....d.......................d
+....d.......................d
+....d.......................d
+....d.......................d
+....d.......................d
+....d.......................d
+....d.......................d
+....d.......................d
+....d.......................d
+....d.......................d
+...PPP.....................PPP
+...ppg.....................ppg
+...ggg.....................ggg
+...pPPPPgPPPPPgPPPPPgPPPPPPPPg
+...gpppPgppppPgpppppPgpppppppg
+...ggggggggbddddddbggggggggggg
+...pPPgPPPPPRxxxxRPPPPPgPPPPPg
+...gppgpppppRYRRYRpppppgppppkg
+...gggggggggRYYYYRgggggggggggg
+...gPPtgtPPPRRYYRRPPgPPtgtPPPg
+...gpppggpppRRRRRRppgpppgppppg
+...gggggggggRgRRgRgggggggggggg
+
+calque fanion-0
+.
+.
+.
+.
+.
+....dRRRx..............xRRRRd
+....dRxRRR..............RRxRd
+....dRRR................RRRRd
+....d.......................d
+
+calque fanion-1
+.
+.
+.
+.
+.
+....dRRRRx..............xRRRd
+....dRxRR..............RRRxRd
+....dRRRR................RRRd
+....d.......................d
+
+calque torches-0
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.......f...............f
+......fFf..............fF
+......fyf..............Fyf
+
+calque torches-1
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+......f..................f
+......fF................Ff
+......Fyf..............fyF
+
+calque torches-2
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+........f...............f
+.......Ff..............fFf
+......fyF..............fyf
+
+calque chassis 3 13
+..........dd
+.........dbbd
+........db..bd
+.......db....bd
+.gTg..............gTg
+dBBBBBBBBBBBBBBBBBBBd
+bddddddddddddddddddb
+.gdg..............gdg
+
+calque bras-arme 3 11
+..pP
+.bpPb
+.bbbbOOOOOd
+.....oooo
+
+calque bras-mi 11 1
+.pP
+bpPb
+bbbb
+.Oo
+.Oo
+.Oo
+.Oo
+.Oo
+.Oo
+.Oo
+.Oo
+.Oo
+.Od
+
+calque bras-lance 13 5
+......bb
+.....bbbb
+.....Oo
+....Oo
+...Oo
+..Oo
+.Oo
+Oo
+d
+
+calque chat 24 13
+o..o
+oooo
+okok
+.cco
+obbo
+.bb
+.oo
+
+calque cligne 25 15
+o.o
+
+calque fers 3 13
+.....T.......T
+.....p.......p
+.....p.......p
+.....p.......p
+.....p.......p
+.....p.......p
+.....p.......p
+
+anim repos 200
+cadre socle + fanion-0 + torches-0 + chassis + fers + bras-arme + chat
+cadre socle + fanion-1 + torches-1 + chassis + fers + bras-arme + chat
+cadre socle + fanion-0 + torches-2 + chassis + fers + bras-arme + chat
+cadre socle + fanion-1 + torches-0 + chassis + fers + bras-arme + chat + cligne duree 150
+
+anim attaque 80
+cadre socle + fanion-0 + torches-0 + chassis + fers + bras-mi + chat
+cadre socle + fanion-1 + torches-1 + chassis + fers + bras-lance + chat
+cadre socle + fanion-0 + torches-2 + chassis + fers + bras-lance + chat duree 300
+cadre socle + fanion-0 + torches-0 + chassis + fers + bras-arme + chat duree 200
