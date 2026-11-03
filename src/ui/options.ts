@@ -123,11 +123,49 @@ export function afficherOptions(parent: HTMLElement, session: Session, surFermer
     majVitesse();
     choixVitesse.append(...boutonsVitesse);
     ligneVitesse.append(choixVitesse);
+    // Les fiches « Nouvel ennemi » : oui ou non (réglage rangé avec le bestiaire dans la méta).
+    const ligneFiches = el('div', 'ligne-reglage ligne-fiches');
+    ligneFiches.append(el('span', 'nom-reglage', t('bestiaire.option_fiches')));
+    const choixFiches = el('span', 'choix-vitesse');
+    choixFiches.setAttribute('role', 'radiogroup');
+    choixFiches.setAttribute('aria-label', t('bestiaire.option_fiches'));
+    const boutonsFiches = ([true, false] as const).map((actives) => {
+      const libelle = t(actives ? 'bestiaire.option_oui' : 'bestiaire.option_non');
+      const b = bouton('bouton', libelle, () => {
+        void session.changerFichesEnnemis(actives);
+        majFiches(actives);
+      });
+      b.textContent = libelle;
+      b.dataset.fiches = String(actives);
+      b.setAttribute('role', 'radio');
+      return b;
+    });
+    const majFiches = (actives: boolean): void => {
+      boutonsFiches.forEach((b, i) => {
+        const cet = i === 0;
+        b.classList.toggle('actif', cet === actives);
+        b.setAttribute('aria-checked', String(cet === actives));
+      });
+    };
+    // Flèches : d'un choix à l'autre, comme un groupe de boutons radio.
+    choixFiches.addEventListener('keydown', (e) => {
+      if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return;
+      e.preventDefault();
+      const autre = boutonsFiches.find((b) => b !== document.activeElement) ?? boutonsFiches[0];
+      autre?.click();
+      autre?.focus({ preventScroll: true });
+    }, { signal: controleur.signal });
+    majFiches(session.sauvegarde.meta.bestiaire.fiches);
+    choixFiches.append(...boutonsFiches);
+    ligneFiches.append(choixFiches);
+    const aideFiches = el('p', 'detail', t('bestiaire.option_fiches_aide'));
     reglages.replaceChildren(
       curseurVolume(t('options.son'), lire().son, (son) => { void session.changerReglages({ son }); }),
       // Pas de musique avant le jalon 5 : le curseur est masqué, le réglage reste en sauvegarde.
       ...(MUSIQUE_DISPONIBLE ? [curseurVolume(t('options.musique'), lire().musique, (musique) => { void session.changerReglages({ musique }); })] : []),
       ligneVitesse,
+      ligneFiches,
+      aideFiches,
     );
   };
   dessinerReglages();

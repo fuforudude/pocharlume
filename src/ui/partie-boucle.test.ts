@@ -769,3 +769,206 @@ describe('vieille statue cachée', () => {
     expect(ouverte()?.textContent).toContain(t('inscription.chaumes'));
   });
 });
+
+describe('fiche « Nouvel ennemi »', () => {
+  const fiche = (): HTMLElement | null => document.querySelector<HTMLElement>('.nouvel-ennemi');
+  /** Joue jusqu'à ce que la fiche s'ouvre (le premier ennemi paraît quelques secondes après la première vague). */
+  const jusquALaFiche = (): void => { imagesJusqua(() => fiche() !== null); };
+
+  it('à la première apparition, la partie se met en pause sur la fiche ; la fermer la relance, sans rien écrire au journal', async () => {
+    const surNouveauxEnnemis = vi.fn((ids: string[]) => ids);
+    const partie = await demarrer({ surNouveauxEnnemis });
+    appuyer('v');
+    jusquALaFiche();
+    expect(surNouveauxEnnemis).toHaveBeenCalledTimes(1);
+    const premiers = surNouveauxEnnemis.mock.calls[0]?.[0] ?? [];
+    expect(premiers.length).toBeGreaterThan(0);
+    expect(fiche()?.dataset.ennemi ?? fiche()?.querySelector<HTMLElement>('[data-ennemi]')?.dataset.ennemi).toBe(premiers[0]);
+    expect(fiche()?.textContent).toContain(t('bestiaire.nouveau_titre'));
+    const journal = partie.etat.journal.length;
+    const pas = partie.etat.pas;
+    images(20);
+    expect(partie.etat.pas).toBe(pas);
+    horloge += 400;
+    boutonTexte(t('bestiaire.nouveau_continuer')).click();
+    images(10);
+    expect(partie.etat.pas).toBeGreaterThan(pas);
+    expect(partie.etat.journal.length).toBe(journal);
+  });
+
+  it('une fiche par ennemi et par partie : on ferme chaque fiche, aucun ennemi n’en rouvre une seconde', async () => {
+    const surNouveauxEnnemis = vi.fn((ids: string[]) => ids);
+    const partie = await demarrer({ surNouveauxEnnemis });
+    appuyer('v');
+    const montrees: string[] = [];
+    for (let i = 0; i < 3000; i++) {
+      if (i % 100 === 0) appuyer('v');
+      images(1);
+      const f = fiche();
+      if (f) {
+        montrees.push(f.querySelector<HTMLElement>('[data-ennemi]')?.dataset.ennemi ?? '');
+        horloge += 400;
+        boutonTexte(t('bestiaire.nouveau_continuer')).click();
+      }
+    }
+    expect(partie.etat.pas).toBeGreaterThan(300);
+    expect(montrees.length).toBeGreaterThanOrEqual(1);
+    expect(new Set(montrees).size).toBe(montrees.length);
+    // Ce qu'on a signalé à l'appelant, c'est la même liste : un type n'est jamais signalé deux fois.
+    const signales = surNouveauxEnnemis.mock.calls.flatMap((c) => c[0]);
+    expect(signales).toEqual(montrees);
+  });
+
+  it('une partie reprise signale d’abord les ennemis déjà présents (une seule fois), et ouvre leur fiche', async () => {
+    const etat = creerPartie(NIVEAU.niveau, CONFIG);
+    while (etat.ennemis.length === 0) step(etat);
+    const repris = deserialiser(serialiser(etat));
+    const surNouveauxEnnemis = vi.fn((ids: string[]) => ids);
+    await demarrer({ reprise: repris, surNouveauxEnnemis });
+    expect(surNouveauxEnnemis).toHaveBeenCalledTimes(1);
+    expect(surNouveauxEnnemis.mock.calls[0]?.[0]).toContain(repris.ennemis[0]?.type);
+    expect(fiche()).not.toBeNull();
+  });
+
+  it('une partie finie ne signale plus rien : la fiche attend la partie suivante', async () => {
+    const surNouveauxEnnemis = vi.fn((ids: string[]) => ids);
+    const partie = await demarrer({ surNouveauxEnnemis });
+    partie.etat.vies = 0;
+    partie.etat.statut = 'defaite';
+    images(5);
+    appuyer('v');
+    images(300);
+    expect(surNouveauxEnnemis).not.toHaveBeenCalled();
+    expect(fiche()).toBeNull();
+  });
+
+  it('P pendant la fiche bascule la pause demandée : la partie reste en pause après la fermeture', async () => {
+    const partie = await demarrer({ surNouveauxEnnemis: (ids) => ids });
+    appuyer('v');
+    jusquALaFiche();
+    appuyer('p');
+    horloge += 400;
+    boutonTexte(t('bestiaire.nouveau_continuer')).click();
+    const pas = partie.etat.pas;
+    images(10);
+    expect(partie.etat.pas).toBe(pas);
+    reprendre();
+    images(10);
+    expect(partie.etat.pas).toBeGreaterThan(pas);
+  });
+
+  it('si l’appelant ne demande aucune fiche (option coupée, ennemi déjà connu), la partie ne s’arrête pas', async () => {
+    const surNouveauxEnnemis = vi.fn((): string[] => []);
+    const partie = await demarrer({ surNouveauxEnnemis });
+    appuyer('v');
+    imagesJusqua(() => surNouveauxEnnemis.mock.calls.length > 0);
+    const pas = partie.etat.pas;
+    images(10);
+    expect(fiche()).toBeNull();
+    expect(partie.etat.pas).toBeGreaterThan(pas);
+  });
+
+  it('sans surNouveauxEnnemis (niveau d’essai), aucune fiche', async () => {
+    await demarrer();
+    appuyer('v');
+    images(300);
+    expect(fiche()).toBeNull();
+  });
+
+  it('Échap referme la fiche et la partie repart', async () => {
+    const partie = await demarrer({ surNouveauxEnnemis: (ids) => ids });
+    appuyer('v');
+    jusquALaFiche();
+    horloge += 400;
+    appuyer('Escape');
+    expect(fiche()).toBeNull();
+    const pas = partie.etat.pas;
+    images(5);
+    expect(partie.etat.pas).toBeGreaterThan(pas);
+  });
+
+  /** Un faux écran Bestiaire : un noeud dans la partie, et le rappel de fermeture que la partie lui a donné. */
+  function fauxBestiaire() {
+    const etat = { fermer: (): void => undefined, ouvertures: 0, arretes: 0 };
+    const surBestiaire = vi.fn((parent: HTMLElement, _atlas: unknown, surFermer: () => void) => {
+      etat.ouvertures++;
+      const racine = document.createElement('div');
+      racine.className = 'ecran bestiaire';
+      parent.append(racine);
+      etat.fermer = () => { racine.remove(); surFermer(); };
+      return { racine, arreter: () => { etat.arretes++; racine.remove(); } };
+    });
+    return { etat, surBestiaire };
+  }
+  const bestiaireOuvert = (): boolean => document.querySelector('.ecran.bestiaire') !== null;
+
+  it('le bouton Bestiaire de la pause ouvre l’écran dans la partie ; sans surBestiaire, pas de bouton', async () => {
+    const { etat, surBestiaire } = fauxBestiaire();
+    await demarrer({ surBestiaire });
+    appuyer('p');
+    boutonTexte(t('bestiaire.bouton')).click();
+    expect(etat.ouvertures).toBe(1);
+    expect(document.querySelector('.partie .ecran.bestiaire')).not.toBeNull();
+    document.body.replaceChildren();
+    for (const p of parties) p.arreter();
+    await demarrer();
+    appuyer('p');
+    expect([...document.querySelectorAll('button')].some((x) => x.textContent === t('bestiaire.bouton'))).toBe(false);
+  });
+
+  it('Bestiaire ouvert : P, blur et pause cachée ne relancent pas la partie, et le focus ne revient pas à « Reprendre »', async () => {
+    const { surBestiaire } = fauxBestiaire();
+    const partie = await demarrer({ surBestiaire });
+    images(5);
+    appuyer('p');
+    boutonTexte(t('bestiaire.bouton')).click();
+    const pas = partie.etat.pas;
+    const focus = vi.spyOn(boutonTexte(t('pause.reprendre')), 'focus');
+    appuyer('p');
+    images(10);
+    expect(partie.etat.pas).toBe(pas);
+    window.dispatchEvent(new Event('blur'));
+    appuyer('p');
+    images(10);
+    expect(partie.etat.pas).toBe(pas);
+    expect(focus).not.toHaveBeenCalled();
+  });
+
+  it('un second clic sur Bestiaire n’empile pas un second écran', async () => {
+    const { etat, surBestiaire } = fauxBestiaire();
+    await demarrer({ surBestiaire });
+    appuyer('p');
+    const bouton = boutonTexte(t('bestiaire.bouton'));
+    bouton.click();
+    bouton.click();
+    expect(etat.ouvertures).toBe(1);
+    expect(document.querySelectorAll('.ecran.bestiaire')).toHaveLength(1);
+  });
+
+  it('fermer le Bestiaire laisse la pause demandée ; « Reprendre » relance alors la partie', async () => {
+    const { etat, surBestiaire } = fauxBestiaire();
+    const partie = await demarrer({ surBestiaire });
+    appuyer('p');
+    boutonTexte(t('bestiaire.bouton')).click();
+    etat.fermer();
+    const pas = partie.etat.pas;
+    images(10);
+    expect(partie.etat.pas).toBe(pas);
+    reprendre();
+    images(10);
+    expect(partie.etat.pas).toBeGreaterThan(pas);
+  });
+
+  it('arreter() et « Quitter » ferment le Bestiaire (pas d’écran orphelin)', async () => {
+    const { etat, surBestiaire } = fauxBestiaire();
+    const surQuitter = vi.fn();
+    const partie = await demarrer({ surBestiaire, surQuitter });
+    appuyer('p');
+    boutonTexte(t('bestiaire.bouton')).click();
+    boutonTexte(t('fin.quitter')).click();
+    expect(surQuitter).toHaveBeenCalledTimes(1);
+    expect(etat.arretes).toBe(1);
+    expect(bestiaireOuvert()).toBe(false);
+    partie.arreter();
+  });
+});

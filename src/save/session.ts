@@ -43,6 +43,7 @@ import type { Chargement, Depot, OrigineChargement } from './depot';
 import { DIFFICULTES_SAUVEGARDE, type DifficulteSauvegarde, type Reglages, type Sauvegarde } from './format';
 import { avecPartieEnCours, partieEnCours, reprendrePartie } from './partie';
 import { changerReglages } from './progression';
+import { changerFichesEnnemis, rencontrerEnnemis } from './transactions-bestiaire';
 import { trouverInscription, type RaisonInscription } from './transactions-inscriptions';
 import { validerSauvegarde } from './validation';
 import {
@@ -664,6 +665,24 @@ export class Session {
       return r.ok ? { ok: true, sauvegarde: r.sauvegarde, detail: r.nouvelle } : r;
     });
     return issue.ok ? { ok: true, sauvegarde: issue.sauvegarde, ecrite: issue.ecrite, detail: issue.detail } : issue;
+  }
+
+  // --- Bestiaire ---
+
+  /**
+   * Des ennemis viennent d'apparaître en partie : ceux que le joueur n'avait jamais vus entrent dans le bestiaire (pour toujours). Rend la liste
+   * de ceux qui sont nouveaux (vide s'il n'y en a aucun : rien n'est écrit).
+   */
+  async rencontrerEnnemis(ids: readonly string[]): Promise<ResultatTransactionAvecDetail<string[], never>> {
+    return this.lancer<string[], never>((s) => {
+      const r = rencontrerEnnemis(s, ids);
+      return { ok: true, sauvegarde: r.sauvegarde, detail: r.nouveaux };
+    });
+  }
+
+  /** Active ou coupe les fiches « Nouvel ennemi » (option des Options). */
+  async changerFichesEnnemis(actives: boolean): Promise<boolean> {
+    return ecrite(await this.lancer((s) => reussite(changerFichesEnnemis(s, actives))));
   }
 
   // --- Export et import ---------------------------------------------------------------------------------------

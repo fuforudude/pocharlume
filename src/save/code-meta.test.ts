@@ -13,6 +13,8 @@ import { Session } from './session';
 import { StockageMemoire } from './stockage';
 import { validerSauvegarde } from './validation';
 
+const BESTIAIRE_VIDE = { rencontres: [], fiches: true };
+
 /** Fabrique un code valide (somme comprise) autour de données quelconques. */
 function fabriquerCode(json: string): string {
   const corps = `j.${versBase64Url(new TextEncoder().encode(json))}`;
@@ -55,6 +57,7 @@ function joueurComplet(): Sauvegarde {
       infini: { records: { chaumes: 130, gue: 75, pendus: 9999, carrefour: 1 }, paliers: [10, 20, 30, 50, 75, 100] },
       // Les 31 inscriptions trouvées.
       inscriptions: [...IDS_INSCRIPTIONS],
+      bestiaire: { rencontres: ['mendiant', 'paysan_affame'], fiches: true },
     },
   };
 }
@@ -96,7 +99,7 @@ describe('export et import de la méta-progression', () => {
     if (!r.ok) throw new Error(r.detail);
     expect(r.depuis).toBe(3);
     expect(r.sauvegarde.progression).toEqual(v3.progression);
-    expect(r.sauvegarde.meta).toEqual({ ...v3.meta, regionMax: 2, defis: {}, collection: metaParDefaut().collection, infini: { records: {}, paliers: [] }, inscriptions: [] });
+    expect(r.sauvegarde.meta).toEqual({ ...v3.meta, regionMax: 2, defis: {}, collection: metaParDefaut().collection, infini: { records: {}, paliers: [] }, inscriptions: [], bestiaire: BESTIAIRE_VIDE });
   });
 
   it('un code v3 sans méta est refusé', async () => {

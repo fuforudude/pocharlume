@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { FIXTURE_V1, FIXTURE_V2, FIXTURE_V3, FIXTURE_V4, FIXTURE_V5, sauvegardeRemplie, variante } from './aides.test-utils';
+import { FIXTURE_V1, FIXTURE_V2, FIXTURE_V3, FIXTURE_V4, FIXTURE_V5, FIXTURE_V6, sauvegardeRemplie, variante } from './aides.test-utils';
 import { etoilesDepensees, etoilesGagnees, metaParDefaut, VERSION_SAUVEGARDE } from './format';
 import { MIGRATIONS, migrer } from './migrations';
+
+/** Le bestiaire d'une sauvegarde migrée : rien de rencontré, fiches « Nouvel ennemi » activées. */
+const BESTIAIRE_VIDE = { rencontres: [], fiches: true };
 
 describe('migrations de format', () => {
   it('la fixture v1 figée est bien une sauvegarde en version 1', () => {
@@ -57,6 +60,7 @@ describe('migrations de format', () => {
       infini: { records: {}, paliers: [] },
       // Ajout de la v6 : aucune inscription de statue trouvée.
       inscriptions: [],
+      bestiaire: BESTIAIRE_VIDE,
     });
   });
 
@@ -81,6 +85,7 @@ describe('migrations de format', () => {
       collection: { possedes: {}, eclats: 0, garanties: { skins: 0, familiers: 0 }, equipes: { skins: {}, familiers: {} } },
       infini: { records: {}, paliers: [] },
       inscriptions: [],
+      bestiaire: BESTIAIRE_VIDE,
     });
   });
 
@@ -98,7 +103,7 @@ describe('migrations de format', () => {
     expect(r.sauvegarde.reglages).toEqual(v4.reglages);
     expect(r.sauvegarde.partie).toEqual(v4.partie);
     // Monnaies, héros, arbre, stock, choix, région, défis et collection sont gardés tels quels.
-    expect(r.sauvegarde.meta).toEqual({ ...v4.meta, infini: { records: {}, paliers: [] }, inscriptions: [] });
+    expect(r.sauvegarde.meta).toEqual({ ...v4.meta, infini: { records: {}, paliers: [] }, inscriptions: [], bestiaire: BESTIAIRE_VIDE });
     expect(r.sauvegarde.meta.defis).toEqual({ '2': { heroique: true }, '4': { heroique: true, fer: true } });
     expect(r.sauvegarde.meta.collection.eclats).toBe(77);
   });
@@ -112,12 +117,12 @@ describe('migrations de format', () => {
     const r = migrer(v5);
     if (!r.ok) throw new Error(r.raison);
     expect(r.depuis).toBe(5);
-    expect(r.sauvegarde.version).toBe(6);
+    expect(r.sauvegarde.version).toBe(VERSION_SAUVEGARDE);
     expect(r.sauvegarde.progression).toEqual(v5.progression);
     expect(r.sauvegarde.reglages).toEqual(v5.reglages);
     expect(r.sauvegarde.partie).toEqual(v5.partie);
     // Tout le reste de la méta, mode infini compris, est gardé tel quel ; aucune inscription n'est trouvée.
-    expect(r.sauvegarde.meta).toEqual({ ...v5.meta, inscriptions: [] });
+    expect(r.sauvegarde.meta).toEqual({ ...v5.meta, inscriptions: [], bestiaire: BESTIAIRE_VIDE });
     expect(r.sauvegarde.meta.infini).toEqual({ records: { chaumes: 23, gue: 12 }, paliers: [10, 20] });
   });
 
@@ -127,11 +132,11 @@ describe('migrations de format', () => {
     expect(migrer({ ...v5, meta: { ...(v5.meta as object), infini: { records: {}, paliers: [10] } } })).toMatchObject({ ok: false, cause: 'invalide' });
   });
 
-  it('la chaîne complète v1, v2, v3, v4, v5 aboutit à la version 6 valide', () => {
-    for (const fixture of [FIXTURE_V1, FIXTURE_V2, FIXTURE_V3, FIXTURE_V4, FIXTURE_V5]) {
+  it('la chaîne complète v1 à v6 aboutit à la version courante valide', () => {
+    for (const fixture of [FIXTURE_V1, FIXTURE_V2, FIXTURE_V3, FIXTURE_V4, FIXTURE_V5, FIXTURE_V6]) {
       const r = migrer(JSON.parse(fixture));
-      expect(r.ok && r.sauvegarde.version).toBe(6);
-      expect(r.ok && r.sauvegarde.meta.inscriptions).toEqual([]);
+      expect(r.ok && r.sauvegarde.version).toBe(VERSION_SAUVEGARDE);
+      expect(r.ok && r.sauvegarde.meta.bestiaire).toEqual({ rencontres: [], fiches: true });
     }
   });
 

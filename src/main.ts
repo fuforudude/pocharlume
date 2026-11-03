@@ -4,6 +4,7 @@
 import './ui/style.css';
 import './ui/style-meta.css';
 import './ui/style-inscriptions.css';
+import './ui/style-bestiaire.css';
 import './ui/style-bulles.css';
 import './ui/style-indications.css';
 import { installerAudio } from './audio';
@@ -14,6 +15,8 @@ import type { DefiPartie, EtatPartie } from './engine';
 import { t } from './i18n';
 import { chargerAtlas, type AtlasRendu } from './render/atlas';
 import { campagneTerminee, Depot, difficulteDe, infiniOuvert, inscriptionTrouvee, ouvrirCanalNavigateur, ouvrirStockage, recordDeLaCarte, Session, type ChoixPartie, type DifficulteSauvegarde } from './save';
+import { afficherBestiaire } from './ui/bestiaire';
+import { ennemisAMontrer } from './ui/fiches-ennemis';
 import { afficherBoutique } from './ui/boutique';
 import { afficherCaisses } from './ui/caisses';
 import { afficherCarteMonde, type EcranCarteMonde } from './ui/carte-monde';
@@ -151,6 +154,11 @@ async function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, l
         if (nouvelle) session.trouverInscription(id).catch(console.error);
         return nouvelle;
       },
+      // Un ennemi paraît pour la première fois dans cette partie : il entre au bestiaire (pour toujours) et, si l'option est active et qu'il
+      // n'avait jamais été rencontré, sa fiche « Nouvel ennemi » s'ouvre. Hors sauvegarde, rien n'est noté ni montré.
+      surNouveauxEnnemis: (ids: string[]): string[] => ennemisAMontrer(session, ids, horsSauvegarde === true),
+      // « Bestiaire » dans la pause : monté dans la partie par-dessus la pause ; c'est la partie qui le possède et le ferme.
+      surBestiaire: (parent: HTMLElement, atlas: AtlasRendu, surFermer: () => void) => afficherBestiaire(parent, { atlas, session, surFermer }),
       ...(infini ? { infini: { record: () => recordDeLaCarte(session.sauvegarde, infini.carte) } } : {}),
       ...(horsSauvegarde
         ? {}
@@ -264,6 +272,10 @@ function carte(): void {
         surInscriptions: () => {
           carteOuverte?.suspendre(true);
           afficherEcranInscriptions(app, { atlas, session, surFermer: carte });
+        },
+        surBestiaire: () => {
+          carteOuverte?.suspendre(true);
+          afficherBestiaire(app, { atlas, session, surFermer: carte });
         },
         surOptions: () => {
           // La carte dort sous les options : plus de clavier ni de dessin ; elle est rouverte à la fermeture.

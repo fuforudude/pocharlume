@@ -1,4 +1,5 @@
 // Tous les textes affichés du jeu, en français. Une clé par texte, groupées par écran.
+import { frBestiaire } from './fr-bestiaire';
 import { frBulles } from './fr-bulles';
 import { frCollection } from './fr-collection';
 import { frDieux } from './fr-dieux';
@@ -230,6 +231,9 @@ export const fr = {
 
   // Interface des inscriptions des statues : recueil, fenêtre en partie (fr-inscriptions.ts)
   ...frInscriptions,
+
+  // Bestiaire, fiche « Nouvel ennemi », ennemis de la fiche d'un niveau (fr-bestiaire.ts)
+  ...frBestiaire,
 
   // Bulles de description au survol et à l'appui long (fr-bulles.ts)
   ...frBulles,

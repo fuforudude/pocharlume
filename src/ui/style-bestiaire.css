@@ -1,0 +1,462 @@
+/* Bestiaire : l'écran (liste à gauche, fiche à droite), la fiche « Nouvel ennemi » en partie, et les ennemis de la fiche d'un niveau.
+   Tout doit tenir en 740×360 (téléphone en paysage) comme en 1280×720. */
+
+.sprite-anime {
+  flex: none;
+  image-rendering: pixelated;
+}
+
+.sprite-anime.silhouette {
+  filter: brightness(0) opacity(0.55);
+}
+
+/* --- Écran Bestiaire --- */
+
+.ecran.bestiaire {
+  z-index: 16;
+}
+
+.ecran.bestiaire .carte {
+  box-sizing: border-box;
+  width: min(920px, calc(100% - 16px));
+  height: min(600px, calc(100% - 16px));
+  align-items: stretch;
+  gap: 8px;
+  padding: 10px 14px;
+  overflow: hidden;
+  text-align: left;
+}
+
+.bestiaire-entete {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+
+.ecran.bestiaire .titre {
+  font-size: 22px;
+}
+
+.bestiaire-onglets {
+  display: flex;
+  gap: 6px;
+}
+
+.bestiaire-compte {
+  flex: 1;
+  color: var(--texte-doux);
+  font-size: 13px;
+}
+
+.bestiaire-corps {
+  display: grid;
+  grid-template-columns: minmax(200px, 40%) 1fr;
+  gap: 10px;
+  flex: 1;
+  min-height: 0;
+}
+
+.bestiaire-liste,
+.bestiaire-detail {
+  min-height: 0;
+  overflow-y: auto;
+  touch-action: pan-y;
+}
+
+.bestiaire-detail {
+  padding: 8px 10px;
+  border: 2px solid var(--bord);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.bestiaire-groupe {
+  margin-bottom: 8px;
+}
+
+.bestiaire-groupe-titre {
+  margin: 0 0 4px;
+  font-size: 13px;
+  color: var(--or);
+}
+
+.bestiaire-grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+  gap: 4px;
+}
+
+.bestiaire-tuile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  min-width: 0;
+  min-height: 48px;
+  padding: 2px;
+  box-sizing: border-box;
+  background: var(--panneau);
+  border: 2px solid var(--bord);
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--texte);
+}
+
+.bestiaire-tuile:hover {
+  border-color: var(--bord-clair);
+}
+
+.bestiaire-tuile.actif {
+  border-color: var(--or);
+  box-shadow: 0 0 0 2px rgba(232, 200, 96, 0.35);
+}
+
+.bestiaire-icone {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.bestiaire-tuile.inconnue .bestiaire-icone,
+.bestiaire-tuile.verrouillee .bestiaire-icone {
+  filter: brightness(0) opacity(0.55);
+}
+
+.bestiaire-palier {
+  position: absolute;
+  right: 2px;
+  bottom: 1px;
+  font-size: 10px;
+  font-weight: bold;
+  color: var(--or);
+}
+
+.bestiaire-cadenas {
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 16px;
+  height: 16px;
+  image-rendering: pixelated;
+}
+
+/* Fiche d'un ennemi ou d'une tour */
+
+.fiche-ennemi,
+.fiche-tour {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fiche-ennemi-tete {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fiche-ennemi-noms {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.fiche-ennemi-nom {
+  margin: 0;
+  font-size: 20px;
+  color: var(--or);
+}
+
+.fiche-ennemi-boss {
+  align-self: flex-start;
+  padding: 0 6px;
+  border: 1px solid var(--sang);
+  border-radius: 4px;
+  color: var(--sang);
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.fiche-ennemi-lore {
+  margin: 0;
+  font-style: italic;
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--texte-doux);
+}
+
+.fiche-ennemi-corps {
+  display: grid;
+  grid-template-columns: minmax(150px, 40%) 1fr;
+  gap: 8px 14px;
+}
+
+.fiche-ennemi.courte .fiche-ennemi-corps {
+  grid-template-columns: 1fr;
+}
+
+.fiche-ennemi-chiffres {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-content: start;
+  margin: 0;
+  font-size: 12px;
+}
+
+.fiche-ennemi-chiffres .chiffre {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.fiche-ennemi-chiffres dt {
+  color: var(--texte-doux);
+}
+
+.fiche-ennemi-chiffres dd {
+  margin: 0;
+  font-weight: bold;
+  text-align: right;
+}
+
+.fiche-ennemi-sous-titre {
+  margin: 4px 0 2px;
+  font-size: 13px;
+  color: var(--or);
+}
+
+.fiche-ennemi-sous-titre:first-child {
+  margin-top: 0;
+}
+
+.fiche-ennemi-liste {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+
+.fiche-ennemi-liste li {
+  margin-bottom: 2px;
+}
+
+.fiche-ennemi-liste.contrer li::marker {
+  color: var(--or);
+}
+
+/* --- Fiche « Nouvel ennemi » en partie --- */
+
+.ecran.nouvel-ennemi {
+  z-index: 15;
+}
+
+.ecran.nouvel-ennemi .carte {
+  box-sizing: border-box;
+  width: min(540px, calc(100% - 16px));
+  max-height: calc(100% - 16px);
+  gap: 6px;
+  padding: 12px 18px;
+  overflow-y: auto;
+  touch-action: pan-y;
+  text-align: left;
+}
+
+.ecran.nouvel-ennemi .titre {
+  align-self: center;
+  font-size: 20px;
+}
+
+.ecran.nouvel-ennemi .rangee {
+  align-self: center;
+}
+
+/* --- Ennemis de la fiche d'un niveau --- */
+
+/* Les ennemis et les découvertes du niveau partagent une rangée. */
+.fiche-infos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ennemis-niveau {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 8px;
+  border: 2px solid var(--bord-clair);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.ennemis-niveau-titre {
+  margin: 0;
+  font-size: 14px;
+  color: var(--or);
+}
+
+.ennemis-niveau-liste {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ennemi-niveau {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  box-sizing: border-box;
+  border: 2px solid var(--bord);
+  border-radius: 6px;
+  background: var(--panneau);
+}
+
+.ennemi-niveau.nouveau {
+  border-color: var(--or);
+}
+
+.ennemi-niveau-icone {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.ennemi-niveau-nouveau {
+  position: absolute;
+  right: -3px;
+  top: -6px;
+  padding: 0 3px;
+  border-radius: 3px;
+  background: var(--or);
+  color: #1a120a;
+  font-size: 9px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* --- Écrans bas (740×360) : tout tient sans défiler la page --- */
+
+@media (max-height: 460px) {
+  /* La barre de la carte gagne un bouton (Bestiaire) : des boutons un peu plus serrés la gardent sur une seule ligne en 740×360. */
+  .carte-barre .bouton {
+    padding: 4px 6px;
+  }
+
+  .ecran.bestiaire .carte {
+    height: calc(100% - 8px);
+    gap: 4px;
+    padding: 6px 10px;
+  }
+
+  .ecran.bestiaire .titre {
+    font-size: 18px;
+  }
+
+  .bestiaire-entete .bouton {
+    min-height: 36px;
+    padding: 2px 8px;
+  }
+
+  .bestiaire-corps {
+    grid-template-columns: minmax(150px, 38%) 1fr;
+    gap: 6px;
+  }
+
+  .bestiaire-grille {
+    grid-template-columns: repeat(auto-fill, minmax(42px, 1fr));
+  }
+
+  .bestiaire-tuile {
+    min-height: 40px;
+  }
+
+  .fiche-ennemi-nom {
+    font-size: 17px;
+  }
+
+  .fiche-ennemi-corps {
+    grid-template-columns: 1fr;
+  }
+
+  /* Les chiffres passent en ligne, à la suite les uns des autres, et le sprite se réduit : la fiche tient sans trop défiler. */
+  .fiche-ennemi-chiffres {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1px 14px;
+    font-size: 11px;
+  }
+
+  .fiche-ennemi-chiffres .chiffre {
+    justify-content: flex-start;
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  .fiche-ennemi-chiffres dt::after {
+    content: ' :';
+  }
+
+  .fiche-ennemi-tete .sprite-anime {
+    max-height: 64px;
+    width: auto;
+  }
+
+  .fiche-ennemi-liste {
+    font-size: 12px;
+  }
+
+  .ecran.nouvel-ennemi .carte {
+    gap: 4px;
+    padding: 8px 14px;
+  }
+
+  .ecran.nouvel-ennemi .detail {
+    display: none;
+  }
+
+  /* Les ennemis du niveau tiennent sur une rangée : titre puis icônes, comme l'encadré « Nouvelles découvertes ». */
+  .ennemis-niveau {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 6px;
+  }
+
+  /* Le titre passe dans le libellé lu (aria-label) : les icônes seules gardent la place des découvertes. */
+  .ennemis-niveau-titre {
+    display: none;
+  }
+
+  .fiche-infos {
+    gap: 3px;
+  }
+
+  .ennemis-niveau-liste {
+    gap: 3px;
+    padding-top: 0;
+  }
+
+  .ennemi-niveau {
+    flex: none;
+    width: 24px;
+    height: 24px;
+  }
+
+  .ennemi-niveau-nouveau {
+    top: -9px;
+    right: -4px;
+    font-size: 8px;
+  }
+}

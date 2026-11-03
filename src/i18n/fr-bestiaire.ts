@@ -1,0 +1,82 @@
+// Textes du Bestiaire (écran, fiche « Nouvel ennemi », ennemis de la fiche d'un niveau, option) et les conseils « comment le contrer ».
+// Aucun chiffre de jeu ici : les valeurs viennent des données par `bulle-contenus.ts`; les tournures, elles, sont ici. Les listes de tours
+// citées dans les conseils (`{familles}`, `{tours}`) sont lues dans les données des tours (src/ui/bestiaire-logique.ts).
+export const frBestiaire = {
+  // Accès
+  'bestiaire.bouton': 'Bestiaire',
+  'bestiaire.titre': 'Bestiaire',
+  'bestiaire.fermer': 'Fermer',
+  'bestiaire.onglets': 'Catégories',
+  'bestiaire.onglet_ennemis': 'Ennemis',
+  'bestiaire.onglet_tours': 'Tours',
+  'bestiaire.compte_ennemis': '{n} / {m} rencontrés',
+  'bestiaire.compte_tours': '{n} / {m} ouvertes',
+  'bestiaire.region': 'Région {n} : {nom}',
+  'bestiaire.region_autres': 'Renforts et autres',
+  'bestiaire.liste_ennemis': 'Liste des ennemis',
+  'bestiaire.liste_tours': 'Liste des tours',
+  'bestiaire.famille_divine': 'Tours divines',
+
+  // Fiche d'un ennemi
+  'bestiaire.choisir': 'Touche une fiche dans la liste.',
+  'bestiaire.inconnu': '???',
+  'bestiaire.inconnu_detail': 'Tu n’as encore jamais croisé cet ennemi. Il se dévoilera la première fois qu’il paraîtra dans une partie.',
+  'bestiaire.inconnu_libelle': 'Ennemi inconnu',
+  'bestiaire.particularites': 'Particularités',
+  'bestiaire.contrer': 'Comment le contrer',
+
+  // Fiche d'une tour
+  'bestiaire.tour_verrouillee': 'Verrouillée',
+  'bestiaire.tour_verrou_detail': 'Cette tour s’ouvre au niveau {n} de la campagne.',
+  'bestiaire.tour_niveau': 'Niveau {n}',
+  'bestiaire.tour_specialisation': 'Spécialisation {voie}',
+
+  // Fiche « Nouvel ennemi » en partie
+  'bestiaire.nouveau_titre': 'Nouvel ennemi',
+  'bestiaire.nouveau_libelle': 'Nouvel ennemi : {nom}',
+  'bestiaire.nouveau_continuer': 'Compris',
+  'bestiaire.nouveau_aide': 'La partie reprend quand tu fermes cette fiche. Tu retrouveras tout dans le Bestiaire.',
+
+  // Ennemis de la fiche d'un niveau
+  'bestiaire.niveau_titre': 'Ennemis du niveau',
+  'bestiaire.niveau_nouveau': 'nouveau',
+  'bestiaire.niveau_libelle_nouveau': '{nom} (nouveau)',
+
+  // Option
+  'bestiaire.option_fiches': 'Fiches « Nouvel ennemi »',
+  'bestiaire.option_fiches_aide': 'La partie se met en pause la première fois qu’un ennemi paraît.',
+  'bestiaire.option_oui': 'Oui',
+  'bestiaire.option_non': 'Non',
+
+  // Comment le contrer : une phrase par particularité (src/ui/bestiaire-logique.ts)
+  'bestiaire.contre.ordinaire': 'Rien de particulier : toutes tes tours le valent. Barre-lui la route avec des soldats et fais-le payer chaque case.',
+  'bestiaire.contre.volant': 'Il vole par-dessus les soldats : seules les tours qui visent les volants l’atteignent ({familles}).',
+  'bestiaire.contre.furtif': 'On ne le voit pas : seule une tour qui révèle le trouve ({tours}).',
+  'bestiaire.contre.blinde': 'Son armure arrête les coups physiques : préfère les dégâts magiques ({familles}).',
+  'bestiaire.contre.resistant': 'Il encaisse la magie : préfère les dégâts physiques ({familles}).',
+  'bestiaire.contre.rapide': 'Il file : un barrage de soldats ou un ralentissement lui fait perdre son avantage.',
+  'bestiaire.contre.rapide_volant': 'Il file dans les airs : un ralentissement le retient, et plusieurs tours le long du chemin lui font payer chaque case.',
+  'bestiaire.contre.distance': 'Il tire de loin sur tes soldats et ton héros : abats-le avant qu’il ne les atteigne, ou garde-les hors de sa portée.',
+  'bestiaire.contre.devore': 'Il dévore les soldats qui le retiennent : ne compte pas sur eux pour le tenir, tire-lui dessus.',
+  'bestiaire.contre.inarretable': 'Rien ne l’étourdit : inutile d’espérer le figer.',
+  'bestiaire.contre.relevement': 'Il se relève après sa mort : garde de la puissance de feu pour le tuer deux fois.',
+  'bestiaire.contre.relevement_magie': 'Il se relève, sauf s’il tombe sous un coup de magie : achève-le avec elle.',
+  'bestiaire.contre.brulure': 'Il met le feu aux soldats : garde-les en retrait et frappe-le de loin.',
+  'bestiaire.contre.noyade': 'Il noie le soldat qui le retient : tue-le vite, ou laisse-le passer devant des tours.',
+  'bestiaire.contre.drain': 'Il vole la vie de ce qu’il touche : ne le laisse pas s’éterniser au corps à corps.',
+  'bestiaire.contre.soin': 'Il soigne les autres : tue-le en premier.',
+  'bestiaire.contre.nuage': 'Sa mort empoisonne la zone : n’y place pas de soldats.',
+  'bestiaire.contre.enterrement': 'Ses voisins retardent le retour de tes soldats tombés : tue-le avant de compter sur eux.',
+  'bestiaire.contre.aura': 'Il accélère les ennemis autour de lui : tue-le en priorité.',
+  'bestiaire.contre.renversement': 'Il renverse le premier soldat qui l’arrête et passe : ne compte pas sur un seul barrage.',
+  'bestiaire.contre.rage': 'Blessé, il s’emballe : finis-le d’un seul gros coup plutôt qu’à petits coups.',
+  'bestiaire.contre.insensible_ralentissement': 'Aucun ralentissement n’a de prise sur lui.',
+  'bestiaire.contre.degats_heros': 'Il frappe très fort les héros : tiens ton héros loin de lui.',
+  'bestiaire.contre.essaim': 'Il arrive en groupe : les dégâts de zone font merveille ({familles}).',
+  'bestiaire.contre.renforts': 'Il appelle du renfort ou relève les morts : tue-le avant, ou tiens assez de tours sur la route.',
+  'bestiaire.contre.tours_gelees': 'Il met tes tours hors d’état de tirer : ne mise pas tout sur une seule.',
+  'bestiaire.contre.intouchable': 'Il devient intouchable un moment : n’épuise pas tes sorts pendant ce temps.',
+  'bestiaire.contre.charge': 'Il charge sans s’arrêter aux soldats : compte sur tes tours, pas sur un barrage.',
+  'bestiaire.contre.bannir': 'Il bannit tes invocations et étourdit ton héros : ne mise pas tout sur eux.',
+  'bestiaire.contre.boss': 'Un boss : prépare toute ta défense avant qu’il ne paraisse.',
+} as const;

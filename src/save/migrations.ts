@@ -120,8 +120,17 @@ function v5versV6(v5: Brut): Brut {
   return { ...v5, version: 6, meta: { ...objet(v5.meta), inscriptions: [] } };
 }
 
+/**
+ * v6 vers v7 : tout est gardé tel quel ; `meta` reçoit le bestiaire, sans ennemi rencontré et avec les fiches « Nouvel ennemi » activées (écrits en
+ * dur ici comme pour les versions précédentes). Rien n'est perdu : le bestiaire n'existait pas ; les ennemis déjà affrontés s'y inscriront
+ * à leur prochaine apparition (leur fiche s'affichera une fois, ce qui est voulu : le joueur ne les a jamais lus).
+ */
+function v6versV7(v6: Brut): Brut {
+  return { ...v6, version: 7, meta: { ...objet(v6.meta), bestiaire: { rencontres: [], fiches: true } } };
+}
+
 /** `MIGRATIONS[n]` fait passer une sauvegarde de la version n à la version n + 1. */
-export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: v1versV2, 2: v2versV3, 3: v3versV4, 4: v4versV5, 5: v5versV6 };
+export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: v1versV2, 2: v2versV3, 3: v3versV4, 4: v4versV5, 5: v5versV6, 6: v6versV7 };
 
 /**
  * Migre une sauvegarde brute (n'importe quelle version connue) vers la version courante et la valide. `defs`
