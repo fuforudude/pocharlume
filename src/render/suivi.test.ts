@@ -42,7 +42,7 @@ describe('Suivi : événements du pas', () => {
 
 describe('Suivi : amélioration d’une tour', () => {
   /** Une tour de tir posée puis améliorée ; rend le suivi, le pool et le visuel de la tour après l’amélioration. */
-  function ameliorer(reduit: boolean) {
+  function ameliorer(reduit: boolean, avecEvenements = true) {
     const effets = new PoolEffets(16);
     const suivi = new Suivi(ATLAS, effets);
     suivi.animationsReduites = () => reduit;
@@ -57,7 +57,7 @@ describe('Suivi : amélioration d’une tour', () => {
     for (const e of effets.liste) e.actif = false;
     const res = avancer(etat, [{ type: 'ameliorer', cx: c.cx, cy: c.cy }]);
     expect(res[0]).toEqual({ ok: true });
-    suivi.apresPas(etat, 1000);
+    suivi.apresPas(etat, 1000, avecEvenements);
     const tour = suivi.tours.values().next().value;
     if (!tour) throw new Error('tour absente');
     return { effets, tour };
@@ -69,6 +69,20 @@ describe('Suivi : amélioration d’une tour', () => {
     expect(effets.liste.filter((e) => e.actif && e.type === TYPE_EFFET.poussiere)).toHaveLength(1);
     expect(tour.sursautDebut).toBe(1000);
     expect(tour.flashDebut).toBe(1000);
+  });
+
+  it('une partie reprise (synchroniser) ne déclenche ni flash, ni sursaut, ni effet', () => {
+    const { effets, tour } = ameliorer(false, false);
+    expect(effets.actifs).toBe(0);
+    expect(tour.sursautDebut).toBeLessThan(0);
+    expect(tour.flashDebut).toBeLessThan(0);
+  });
+
+  it('en réduisant les animations, la poussière ne lance plus d’éclats', () => {
+    const { effets } = ameliorer(true);
+    expect(effets.liste.find((e) => e.actif && e.type === TYPE_EFFET.poussiere)?.echelle).toBe(0);
+    const pleine = ameliorer(false).effets;
+    expect(pleine.liste.find((e) => e.actif && e.type === TYPE_EFFET.poussiere)?.echelle).toBe(1);
   });
 
   it('en réduisant les animations, seulement la poussière', () => {

@@ -353,6 +353,27 @@ describe('amélioration d’une tour', () => {
     expect(notes[1]?.vitesse).toBeGreaterThan(notes[0]?.vitesse ?? 99);
   });
 
+  const AMELIORATION_3 = { type: 'amelioration', tour: 1, cx: 0, cy: 0, niveau: 3, voie: null } as const;
+
+  it('en pleine vague, seul le marteau compte dans le limiteur : toutes les notes sont jouées', async () => {
+    const b = banc();
+    await pret(b);
+    for (const id of ['tir_fleche', 'tir_fleche', 'tir_carreau', 'tir_carreau'] as const) b.moteur.jouer(id);
+    expect(b.contexte.lancees).toHaveLength(4);
+    b.moteur.jouerEvenement(AMELIORATION_3);
+    // marteau, craquement et les deux notes du niveau 3
+    expect(b.contexte.lancees).toHaveLength(8);
+  });
+
+  it('si le marteau est refusé, aucune note ne part', async () => {
+    const b = banc();
+    await pret(b);
+    b.moteur.jouerEvenement(AMELIORATION_3);
+    expect(b.contexte.lancees).toHaveLength(4);
+    b.moteur.jouerEvenement(AMELIORATION_3);
+    expect(b.contexte.lancees).toHaveLength(4);
+  });
+
   it('sans réglage de son, rien ne part', async () => {
     const b = banc();
     await pret(b);

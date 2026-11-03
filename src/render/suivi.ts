@@ -13,7 +13,7 @@ import { dureeAnimation } from './animations';
 import type { AtlasRendu, SpriteAtlas, SpriteHabille } from './atlas';
 import { TUILE } from './camera';
 import { TYPE_EFFET, type Effet, type PoolEffets } from './effets';
-import { animationsReduites, DUREE_ANNEAU, DUREE_POUSSIERE } from './effets-tours';
+import { DUREE_ANNEAU, DUREE_POUSSIERE, haloDe, requeteAnimationsReduites, type DefHalo } from './effets-tours';
 import {
   effetObjet,
   habillageSort,
@@ -133,6 +133,8 @@ export class Visuel {
   /** Instants (temps de jeu) du sursaut et du flash blanc d'une tour qui vient d'être améliorée ; très anciens quand rien ne tourne. */
   sursautDebut = -1e9;
   flashDebut = -1e9;
+  /** Lueur sous la tour (tours à feu), choisie quand la tour change d'aspect ; null si elle n'en a pas. */
+  halo: DefHalo | null = null;
 }
 
 export class VisuelProjectile {
@@ -163,7 +165,8 @@ function distance(ax: number, ay: number, bx: number, by: number): number {
 
 export class Suivi {
   /** Relu à chaque amélioration, donc un changement de préférence agit tout de suite (les tests le remplacent). */
-  animationsReduites: () => boolean = animationsReduites;
+  animationsReduites: () => boolean = () => this.requeteReduite.matches;
+  private readonly requeteReduite = requeteAnimationsReduites();
   readonly ennemis = new Map<number, Visuel>();
   readonly unites = new Map<number, Visuel>();
   readonly tours = new Map<number, Visuel>();
@@ -259,6 +262,7 @@ export class Suivi {
     v.niveau = 0;
     v.sursautDebut = -1e9;
     v.flashDebut = -1e9;
+    v.halo = null;
     v.voie = null;
     v.tireur = null;
     v.tireurMiroir = false;
@@ -343,6 +347,7 @@ export class Suivi {
     v.nomSprite = spriteTour(t.famille, t.niveau, t.voie, dieu);
     v.sprite = this.atlas.sprite(v.nomSprite) ?? null;
     v.habille = this.habiller(v.nomSprite, t.famille);
+    v.halo = haloDe(t.famille, t.niveau, t.voie, v.habille?.skin ?? null);
     v.versionCollection = this.version;
     const nomTireur = spriteTireur(t.famille, t.niveau, t.voie);
     v.tireur = nomTireur ? (this.atlas.sprite(nomTireur) ?? null) : null;
@@ -587,7 +592,10 @@ export class Suivi {
     poussiere.x = x;
     poussiere.y = y;
     poussiere.valeur = demiBase;
-    if (this.animationsReduites()) return;
+    // echelle : 1 = poussière et éclats, 0 = poussière seule (animations réduites).
+    const reduit = this.animationsReduites();
+    poussiere.echelle = reduit ? 0 : 1;
+    if (reduit) return;
     const anneau = this.effets.prendre(TYPE_EFFET.anneau, temps, DUREE_ANNEAU);
     anneau.x = x;
     anneau.y = y;

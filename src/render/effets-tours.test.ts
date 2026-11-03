@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   animationsReduites, decalageSursaut, DUREE_ANNEAU, DUREE_FLASH, DUREE_POUSSIERE, DUREE_SURSAUT, haloDe, HALOS, opaciteAnneau,
-  opaciteFlash, PARTICULES, particule, pulsationHalo, rayonAnneau, type EtatParticule,
+  opaciteFlash, PARTICULES, particule, pulsationHalo, rayonAnneau, requeteAnimationsReduites, type EtatParticule,
 } from './effets-tours';
 
 describe('sursaut de la tour', () => {
@@ -69,12 +69,48 @@ describe('halo des tours à feu', () => {
     expect(haloDe('caserne', 3)).toBeNull();
   });
 
-  it('la spécialisation (niveau 4) garde le halo du niveau 3', () => {
+  it('la spécialisation sans réglage propre (Oracle) garde le halo du niveau 3', () => {
+    expect(haloDe('magie', 4, 'A')).toEqual(haloDe('magie', 3));
     expect(haloDe('magie', 4)).toEqual(haloDe('magie', 3));
   });
 
+  /** « r, g, b » d'un halo. */
+  const rvb = (h: { couleur: string } | null): [number, number, number] => {
+    const [r = 0, g = 0, b = 0] = (h?.couleur ?? '0, 0, 0').split(',').map((n) => Number(n));
+    return [r, g, b];
+  };
+
+  it('la couleur vient des données : orange par défaut, vert pour le Nécromancien', () => {
+    const [r, g, b] = rvb(haloDe('magie', 3));
+    expect(r).toBeGreaterThan(g);
+    expect(g).toBeGreaterThan(b);
+    const [rn, gn, bn] = rvb(haloDe('magie', 4, 'B'));
+    expect(gn).toBeGreaterThan(rn);
+    expect(gn).toBeGreaterThan(bn);
+  });
+
+  it('un skin recolore la braise : skin_magie_1 donne un halo bleu, un skin d’une autre braise n’y change rien', () => {
+    const [r, g, b] = rvb(haloDe('magie', 3, null, 'skin_magie_1'));
+    expect(b).toBeGreaterThan(r);
+    expect(b).toBeGreaterThan(g);
+    const [, g2, b2] = rvb(haloDe('magie', 3, null, 'skin_magie_3'));
+    expect(g2).toBeGreaterThan(b2);
+    expect(haloDe('magie', 3, null, 'skin_inconnu')).toBe(haloDe('magie', 3));
+    // même réglage, même objet : le rendu s'en sert de clé de cache
+    expect(haloDe('magie', 3, null, 'skin_magie_1')).toBe(haloDe('magie', 3, null, 'skin_magie_1'));
+    expect(haloDe('magie', 3, null, 'skin_magie_1')?.rayon).toBe(haloDe('magie', 3)?.rayon);
+  });
+
+  it('animations réduites : le halo ne pulse plus', () => {
+    expect(pulsationHalo(500, 20, true)).toBe(1);
+    expect(requeteAnimationsReduites({}).matches).toBe(false);
+    expect(requeteAnimationsReduites({ matchMedia: () => ({ matches: true }) }).matches).toBe(true);
+  });
+
   it('reste doux : intensité modérée même avec la pulsation', () => {
-    for (const lignes of Object.values(HALOS)) for (const h of lignes) if (h) expect(h.intensite * 1.12).toBeLessThanOrEqual(0.55);
+    for (const t of Object.values(HALOS)) {
+      for (const h of [...t.niveaux, ...Object.values(t.voies ?? {})]) if (h) expect(h.intensite * 1.12).toBeLessThanOrEqual(0.55);
+    }
     for (let t = 0; t < 4000; t += 50) expect(Math.abs(pulsationHalo(t, 123) - 1)).toBeLessThanOrEqual(0.12 + 1e-9);
   });
 });

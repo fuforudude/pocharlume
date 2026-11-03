@@ -16,7 +16,7 @@ import { Camera, TUILE } from './camera';
 import { REGLES } from '../data/regles';
 import { PoolEffets, TYPE_EFFET, type Effet } from './effets';
 import {
-  decalageSursaut, DUREE_FLASH, DUREE_SURSAUT, haloDe, opaciteAnneau, opaciteFlash, PARTICULES,
+  decalageSursaut, DUREE_FLASH, DUREE_SURSAUT, opaciteAnneau, opaciteFlash, PARTICULES,
   particule, pulsationHalo, rayonAnneau, type DefHalo, type EtatParticule,
 } from './effets-tours';
 import { dessinerNombre, largeurNombre } from './police';
@@ -158,7 +158,7 @@ export class Rendu {
   private readonly tampon: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D;
   private readonly sol: HTMLCanvasElement;
-  private readonly halos = new Map<string, HTMLCanvasElement>();
+  private readonly halos = new Map<DefHalo, HTMLCanvasElement>();
   private readonly particuleTemp: EtatParticule = { x: 0, y: 0, taille: 0, alpha: 0, eclat: false };
   private readonly statiques: Statique[] = [];
   private readonly etourdi: SpriteAtlas | undefined;
@@ -312,6 +312,7 @@ export class Rendu {
     this.trier();
     this.dessinerOmbres(l, h);
     this.dessinerHalos(temps, l, h);
+    this.dessinerAnneauxArriere(temps, ox, oy);
     this.dessinerProfondeur(temps, l, h);
     this.dessinerVisee(etat, surb, ox, oy);
     this.dessinerProjectiles(alpha, temps, ox, oy);
@@ -648,7 +649,7 @@ export class Rendu {
           this.dessinerTexte(e, t, ox, oy);
           break;
         case TYPE_EFFET.anneau:
-          this.dessinerAnneau(e, t, ox, oy);
+          this.dessinerAnneau(e, t, ox, oy, false);
           break;
         case TYPE_EFFET.poussiere:
           this.dessinerPoussiere(e, t, ox, oy);
@@ -668,8 +669,22 @@ export class Rendu {
     else this.atlas.dessiner(this.ctx, e.sprite, cadre, e.x - ox, e.y - oy, e.miroir);
   }
 
-  /** Anneau de lumière dorée au pied d'une tour améliorée : une ellipse de pixels, deux rangs d'épaisseur, qui s'élargit et s'éteint. */
-  private dessinerAnneau(e: Effet, t: number, ox: number, oy: number): void {
+  /** Moitié arrière (côté nord) des anneaux d'amélioration : dessinée avant les tours, pour que l'anneau passe derrière le fût. */
+  private dessinerAnneauxArriere(temps: number, ox: number, oy: number): void {
+    const liste = this.effets.liste;
+    for (let i = 0; i < liste.length; i++) {
+      const e = liste[i];
+      if (!e?.actif || e.type !== TYPE_EFFET.anneau) continue;
+      const t = temps - e.debut;
+      if (t >= 0 && t < e.duree) this.dessinerAnneau(e, t, ox, oy, true);
+    }
+  }
+
+  /**
+   * Anneau de lumière dorée au pied d'une tour améliorée : une ellipse de pixels, deux rangs d'épaisseur, qui s'élargit et s'éteint.
+   * Deux passes : la moitié arrière (`arriere`) avant les tours, la moitié avant par-dessus, pour qu'il entoure la tour.
+   */
+  private dessinerAnneau(e: Effet, t: number, ox: number, oy: number, arriere: boolean): void {
     const ctx = this.ctx;
     const cx = e.x - ox;
     const cy = e.y - oy - 1;
@@ -680,6 +695,7 @@ export class Rendu {
     ctx.globalAlpha = opaciteAnneau(t);
     for (let i = 0; i < n; i++) {
       const a = (i / n) * 2 * Math.PI;
+      if (Math.sin(a) < 0 !== arriere) continue;
       const x = Math.round(cx + Math.cos(a) * rx);
       const y = Math.round(cy + Math.sin(a) * ry);
       ctx.fillRect(x, y, 1, 2);
@@ -688,6 +704,7 @@ export class Rendu {
     ctx.fillStyle = ANNEAU_CLAIR;
     for (let i = 0; i < n; i += 2) {
       const a = (i / n) * 2 * Math.PI;
+      if (Math.sin(a) < 0 !== arriere) continue;
       ctx.fillRect(Math.round(cx + Math.cos(a) * (rx - 2)), Math.round(cy + Math.sin(a) * (ry - 1)), 1, 1);
     }
     ctx.globalAlpha = 1;
@@ -699,6 +716,7 @@ export class Rendu {
     const s = this.particuleTemp;
     for (let cote = -1; cote <= 1; cote += 2) {
       for (let i = 0; i < PARTICULES.length; i++) {
+        if (e.echelle === 0 && PARTICULES[i]?.eclat) continue;
         if (!particule(i, cote as -1 | 1, t, e.valeur, s)) continue;
         ctx.globalAlpha = s.alpha;
         ctx.fillStyle = s.eclat ? (i % 2 === 0 ? ECLAT_BOIS : ECLAT_OR) : POUSSIERE_COULEUR;
@@ -716,10 +734,11 @@ export class Rendu {
     const liste = this.suivi.dessinables;
     const ctx = this.ctx;
     let additif = false;
+    const reduit = this.suivi.animationsReduites();
     for (let i = 0; i < liste.length; i++) {
       const v = liste[i];
       if (!v || v.categorie !== CATEGORIE.tour || v.masque || !v.tour) continue;
-      const def = haloDe(v.famille, v.niveau);
+      const def = v.halo;
       if (!def) continue;
       if (v.px < -48 || v.px > l + 48 || v.py < -16 || v.py > h + 80) continue;
       const image = this.imageHalo(def);
@@ -727,7 +746,7 @@ export class Rendu {
         ctx.globalCompositeOperation = 'lighter';
         additif = true;
       }
-      ctx.globalAlpha = Math.min(1, def.intensite * pulsationHalo(temps, v.phase));
+      ctx.globalAlpha = Math.min(1, def.intensite * pulsationHalo(temps, v.phase, reduit));
       const demi = def.rayon;
       ctx.drawImage(image, v.px - demi, v.py - 5 - Math.round(demi * 0.3), demi * 2, Math.round(demi * 1.2));
     }
@@ -739,8 +758,7 @@ export class Rendu {
 
   /** Disque dégradé de la couleur du halo, créé à la première demande puis gardé. */
   private imageHalo(def: DefHalo): HTMLCanvasElement {
-    const cle = `${String(def.rayon)}|${def.couleur}`;
-    const connue = this.halos.get(cle);
+    const connue = this.halos.get(def);
     if (connue) return connue;
     const taille = def.rayon * 2;
     const canvas = document.createElement('canvas');
@@ -755,7 +773,7 @@ export class Rendu {
       g.fillStyle = degrade;
       g.fillRect(0, 0, taille, taille);
     }
-    this.halos.set(cle, canvas);
+    this.halos.set(def, canvas);
     return canvas;
   }
 
