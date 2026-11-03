@@ -1,0 +1,346 @@
+# PROPOSITION (maquette, hors jeu) : Autel des Cendres niveaux 2 et 3 plus marqués.
+# Construite par tools/art/planche-tours.ts dans docs/tours/planche-proposition.png ; n'entre pas dans l'atlas.
+# Même cadre 32×32, même ancre que art/sprites/tour-magie.txt ; grilles posées en coordonnées de cadre (origine 0 0).
+# Niveau 2 : menhirs plus hauts coiffés de braseros, griffes qui brûlent, bougies, fentes de braise dans la dalle.
+# Niveau 3 : linteau clouté d'or, bannières rouges sur les piliers qui ondulent, braseros sur le linteau, statue aux yeux ardents
+# et collier d'or, runes de braise sur les piliers. Le feu de la vasque est plus grand aux deux niveaux.
+categorie tour
+palette commune
+taille 32 32
+ancre 16 26
+origine 0 0
+
+sprite prop-tour-magie-2
+point tir 15 13
+
+calque batiment
+.
+.
+.
+.
+.
+.
+....geffeg...........geffeg
+.....gGGg.............gGGg
+.....pPPq.............pPPq
+.....pPPZ.............ZPPp
+.....pfPZ.............ZPfp
+.....pFfZ.............ZfFp
+.....pxFZ.............ZFxp
+.....pPxZ.............ZxPp
+.....pfPZ.............ZPfp
+.....pFfZ.............ZfFp
+.....pxFZ.............ZFxp
+.....pPxZ.............ZxPp
+.....pPPZ...gPPPPPg...ZPPp
+.....ppPZ....gpppg....ZpPp
+.....pPPp.....gpg.....pPPp
+.....ppPZ..gPPPPPPPg..ZpPp
+.....pPPpF.pPqZPZqPp.FpPPp
+.....ppPZw.pPPPPPPPp.wZpPp
+.....pPPpq.pPxfFfxPp.qpPPp
+....gggegggggfgggggfggggeg
+.....p.ggpgeGgpgGegpgGgg..p
+
+calque feu-0
+.
+.
+.......f...............f
+......fF...............Ff
+......FyF.............fyF
+.....fFyf.............fFyf
+.
+.
+.
+.
+.
+...............f
+...............Ff
+..............fFf
+.............fFyFf
+.............fyyFf
+............fFyyyFf
+.............fyyyf
+
+calque braseros-0
+.
+.
+.......f...............f
+......fF...............Ff
+......FyF.............fyF
+.....fFyf.............fFyf
+
+calque feu-1
+.
+.
+......f..................f
+......Ff................fF
+.....fyF...............fyF
+.....fFyf.............fFyf
+.
+.
+.
+.
+.
+..............f
+..............fF
+..............fFf
+.............fFyFf
+.............fFyyf
+............fFyyyFf
+.............fyyyf
+
+calque braseros-1
+.
+.
+......f..................f
+......Ff................fF
+.....fyF...............fyF
+.....fFyf.............fFyf
+
+calque feu-2
+.
+.
+........f...............f
+.......fF..............fF
+......fyF..............FyF
+.....fFyf.............fFyf
+.
+.
+.
+.
+.
+................f
+...............fF
+..............fFFf
+.............ffyFf
+.............fyyFf
+............fFyyyFf
+.............fyyyf
+
+calque braseros-2
+.
+.
+........f...............f
+.......fF..............fF
+......fyF..............FyF
+.....fFyf.............fFyf
+
+calque feu-haut
+.
+.
+.
+.
+.
+.
+.
+...............f
+..............fFf
+..............fyf
+.............fFyFf
+.............fyyyf
+............fFyyyFf
+............fyyWyyf
+............fyWWWyf
+............fFyWyFf
+............fFyyyFf
+.............fyyyf
+
+anim repos 140
+cadre batiment + feu-0
+cadre batiment + feu-1
+cadre batiment + feu-2
+cadre batiment + feu-0
+cadre batiment + feu-1
+cadre batiment + feu-2
+
+anim attaque 90
+cadre batiment + braseros-0 + feu-haut
+cadre batiment + braseros-1 + feu-haut miroir decale -1 0 duree 140
+cadre batiment + feu-2
+
+sprite prop-tour-magie-3
+point tir 15 13
+
+calque batiment
+.
+.
+............U...U
+............UuuuU
+............uyuyu
+.....gefeg.uuuxuuu...gefeg
+......gGg.guYYYYYug...gGg
+.....gPPYPPPPYPPPPPYPPPPYPPg
+.....gpPpPpPpPpYFYpPpPpPpPpg
+.....ggggggggggggggggggggggg
+......pPZ..............ZPP
+......pPZ..............ZPp
+......pfZ..............Zfp
+......pxZ..............Zxp
+......pPZ..............ZPP
+......pPZ..............ZPp
+......pfZ..............Zfp
+......pxZ..............Zxp
+......pPZ...gPPPPPg....ZPP
+......pPZ....gpppg.....ZPp
+......pfZ.....gpg......Zfp
+......pxZ..gPPPPPPPg...Zxp
+......pPZF.pPqZPZqPp.F.ZPP
+......pPZw.pPPPPPPPp.w.ZPp
+......pPZq.pPxfFfxPp.q.ZPP
+....gggegggggfgggggfggggeggg
+.....p.ggpgeGgpgGegpgGgg..p
+
+calque feu-0
+.
+.
+.......f................f
+......fFf..............Ff
+......fyF.............fyF
+.
+.
+.
+.
+.
+.
+...............f
+...............Ff
+..............fFf
+.............fFyFf
+.............fyyFf
+............fFyyyFf
+.............fyyyf
+
+calque braseros-0
+.
+.
+.......f................f
+......fFf..............Ff
+......fyF.............fyF
+
+calque feu-1
+.
+.
+......f................f
+......fF..............fFf
+......Fyf.............fyF
+.
+.
+.
+.
+.
+.
+..............f
+..............fF
+..............fFf
+.............fFyFf
+.............fFyyf
+............fFyyyFf
+.............fyyyf
+
+calque braseros-1
+.
+.
+......f................f
+......fF..............fFf
+......Fyf.............fyF
+
+calque feu-2
+.
+.
+........f.............f
+.......Ff.............fF
+......fyF.............Fyf
+.
+.
+.
+.
+.
+.
+................f
+...............fF
+..............fFFf
+.............ffyFf
+.............fyyFf
+............fFyyyFf
+.............fyyyf
+
+calque braseros-2
+.
+.
+........f.............f
+.......Ff.............fF
+......fyF.............Fyf
+
+calque feu-haut
+.
+.
+.
+.
+.
+.
+.
+...............f
+..............fFf
+..............fyf
+.............fFyFf
+.............fyyyf
+............fFyyyFf
+............fyyWyyf
+............fyWWWyf
+............fFyWyFf
+............fFyyyFf
+.............fyyyf
+
+calque banniere 6 10
+RRR
+RYR
+YxY
+RYR
+RRR
+xRx
+R.R
+
+
+calque banniere-b 6 10
+RRR
+RYR
+YxY
+RYR
+RRR
+RxR
+.R.
+
+
+calque banniere-d 23 10
+RRR
+RYR
+YxY
+RYR
+RRR
+xRx
+R.R
+
+
+calque banniere-d-b 23 10
+RRR
+RYR
+YxY
+RYR
+RRR
+RxR
+.R.
+
+
+anim repos 140
+cadre batiment + feu-0 + banniere + banniere-d-b
+cadre batiment + feu-1 + banniere-b + banniere-d
+cadre batiment + feu-2 + banniere + banniere-d-b
+cadre batiment + feu-0 + banniere-b + banniere-d
+cadre batiment + feu-1 + banniere + banniere-d-b
+cadre batiment + feu-2 + banniere-b + banniere-d
+
+anim attaque 90
+cadre batiment + braseros-0 + feu-haut + banniere-b + banniere-d
+cadre batiment + braseros-1 + feu-haut miroir decale -1 0 + banniere + banniere-d-b duree 140
+cadre batiment + feu-2 + banniere-b + banniere-d
