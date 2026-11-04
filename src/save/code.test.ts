@@ -75,11 +75,12 @@ describe('export et import d’un code', () => {
     expect(complete).toMatch(/^PCH1\.z\.[A-Za-z0-9_-]+\.[0-9a-f]{8}$/);
   });
 
-  it('reste compact avec un bestiaire plein (tous les ennemis rencontrés) : moins de 1300 caractères, et il revient intact', async () => {
+  it('reste compact avec un bestiaire plein (tous les ennemis rencontrés) : moins de 1600 caractères, et il revient intact', async () => {
     const base = campagneComplete();
     const plein: Sauvegarde = { ...base, meta: { ...base.meta, bestiaire: { rencontres: Object.keys(ENNEMIS).sort(), fiches: false } } };
     const code = await exporterCode(plein);
-    expect(code.length).toBeLessThan(1300);
+    // 1431 caractères avec les 20 ennemis du 2026-11-03 ; plafond relevé par décision de l’auteur plutôt que de compacter les rencontres en bits.
+    expect(code.length).toBeLessThan(1600);
     const relu = await importerCode(code);
     expect(relu.ok && relu.sauvegarde.meta.bestiaire).toEqual(plein.meta.bestiaire);
   });
