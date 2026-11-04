@@ -1,6 +1,6 @@
 # Retours du 2026-11-03 : départ et arrivée lisibles, bestiaire, plus d'ennemis, tours plus flashy
 
-Statut : validée le 2026-11-03
+Statut : livrée le 2026-11-04
 Date : 2026-11-03
 
 ## Besoin
@@ -143,8 +143,8 @@ reprendre ses sorts et son héros plutôt que les niveaux reste la piste. En Mat
 - [x] C : chaque région a au moins 2 ennemis inédits et en reprend au moins 1 d'une région précédente (test sur les
   plans) ; chaque nouvel ennemi a un rôle mécanique propre testé dans le moteur ; textes dans lore.md.
 - [x] C : `npm run balance` sans écart aux bandes imposées (Matou et Vieux Sage restent suspendues).
-- [ ] D : planche envoyée et validée ; sprites refaits ; effet d'amélioration visible.
-- [ ] Tout tient en 740×360 et 1280×720.
+- [x] D : planche envoyée et validée ; sprites refaits ; effet d'amélioration visible.
+- [x] Tout tient en 740×360 et 1280×720.
 
 ## Tâches
 1. A — indications de départ et d'arrivée (rendu, HUD).
@@ -157,5 +157,13 @@ reprendre ses sorts et son héros plutôt que les niveaux reste la piste. En Mat
 - Données : ennemis, plans de vagues, `VERSION_DONNEES` ; sauvegarde (ennemis rencontrés, option).
 - Écrans : partie (entrées, sortie, tracé, fiche nouvel ennemi), carte du monde, pause, fiche du niveau, Bestiaire.
 
+## Écarts à la livraison (2026-11-04)
+- Tours : les quatre familles refaites (choix de l'auteur : « Les quatre »).
+- Coupe-Bourse : il ne file plus que 2 s après son vol (`vol.duree`), au lieu de fuir jusqu'à la sortie (voir « Rééquilibrage »).
+- Code de sauvegarde : avec les 20 ennemis, un bestiaire plein donne 1431 caractères ; plafond du test relevé à 1600 par décision de l'auteur, plutôt que de compacter les rencontres en bits.
+- Carte du monde en écran étroit (≤ 960 px) : le bouton Bestiaire n'affiche que son icône. Fiche du niveau : « nouveau » est une pastille ★ sur l'icône.
+- QA navigateur (PC 1280×720, téléphone 740×360) : A, B, C, D vus à l'écran, 0 erreur en console. Non vus à l'écran (couverts par les tests) : « réduire les animations », option qui coupe les fiches « Nouvel ennemi », traînée d'un second chemin, réaction de la porte à une fuite.
+- Reste connu, antérieur à ces changements : en 740×360, les nœuds 11 et 13 de la carte passent en partie sous les onglets de régions.
+
 ## Questions ouvertes
-- Choix des tours à refaire (après la planche).
+- Aucune.
