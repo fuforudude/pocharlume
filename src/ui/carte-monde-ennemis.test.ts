@@ -114,11 +114,11 @@ describe('barre de la carte : Bestiaire', () => {
   it('le bouton appelle surBestiaire ; sans callback, il n’y en a pas', () => {
     const surBestiaire = vi.fn();
     monter(sauvegardeVide(), { surBestiaire });
-    const b = [...document.querySelectorAll<HTMLButtonElement>('.carte-barre button')].find((x) => x.textContent === t('bestiaire.bouton'));
+    const b = [...document.querySelectorAll<HTMLButtonElement>('.carte-barre button')].find((x) => x.getAttribute('aria-label') === t('bestiaire.bouton'));
     b?.click();
     expect(surBestiaire).toHaveBeenCalledTimes(1);
     document.body.replaceChildren();
     monter(sauvegardeVide());
-    expect([...document.querySelectorAll('.carte-barre button')].some((x) => x.textContent === t('bestiaire.bouton'))).toBe(false);
+    expect([...document.querySelectorAll('.carte-barre button')].some((x) => x.getAttribute('aria-label') === t('bestiaire.bouton'))).toBe(false);
   });
 });

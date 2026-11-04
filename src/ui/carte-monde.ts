@@ -188,7 +188,14 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   if (inscriptions) inscriptions.textContent = t('carte.inscriptions');
   const surBestiaire = options.surBestiaire;
   const bestiaire = surBestiaire ? bouton('bouton', t('bestiaire.bouton'), surBestiaire, signal) : null;
-  if (bestiaire) bestiaire.textContent = t('bestiaire.bouton');
+  if (bestiaire) {
+    // Sur écran étroit la CSS ne garde que l'icône : le nom reste lu (aria-label) et affiché au survol (title).
+    bestiaire.classList.add('bouton-bestiaire');
+    bestiaire.setAttribute('aria-label', t('bestiaire.bouton'));
+    bestiaire.title = t('bestiaire.bouton');
+    bestiaire.replaceChildren(el('span', 'bouton-bestiaire-icone', '📖'), el('span', 'bouton-bestiaire-texte', t('bestiaire.bouton')));
+    bestiaire.querySelector('.bouton-bestiaire-icone')?.setAttribute('aria-hidden', 'true');
+  }
   const reglages = bouton('bouton', t('carte.options'), options.surOptions, signal);
   reglages.textContent = t('carte.options');
   const revoirFin = options.surRevoirFin;
@@ -395,7 +402,12 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
       const nom = tCle(ENNEMIS[e.id as keyof typeof ENNEMIS].nom);
       li.setAttribute('aria-label', e.nouveau ? t('bestiaire.niveau_libelle_nouveau', { nom }) : nom);
       li.append(image(atlas.iconeUrl(e.id.replaceAll('_', '-'), 2), 'ennemi-niveau-icone'));
-      if (e.nouveau) li.append(el('span', 'ennemi-niveau-nouveau', t('bestiaire.niveau_nouveau')));
+      if (e.nouveau) {
+        // Pastille dorée dans le coin de l'icône (un mot entier se chevauchait entre icônes serrées) ; le mot reste dans l'aria-label du li.
+        const marque = el('span', 'ennemi-niveau-nouveau', '★');
+        marque.setAttribute('aria-hidden', 'true');
+        li.append(marque);
+      }
       attacherBulleEnnemi(li, e.id, { signal: signalFiche, difficulte: () => (mode === 'normal' ? difficulte : 'matou') });
       ul.append(li);
     }
