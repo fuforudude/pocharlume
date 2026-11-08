@@ -33,6 +33,16 @@ export const frEcrans4 = {
   'carte.nom.nef': 'La Nef',
   'carte.nom.transept': 'Le Transept',
   'carte.nom.choeur': 'Le Chœur',
+  'carte.nom.greve': 'La Grève',
+  'carte.nom.filets': 'Les Filets',
+  'carte.nom.epaves': 'Les Épaves',
+  'carte.nom.ponton_noir': 'Le Ponton Noir',
+  'carte.nom.cap_corbeaux': 'Le Cap aux Corbeaux',
+  'carte.nom.eau_morte': 'L’Eau Morte',
+  'carte.nom.pontons': 'Les Pontons',
+  'carte.nom.passe_noyes': 'La Passe des Noyés',
+  'carte.nom.baie_morte': 'La Baie Morte',
+  'carte.nom.naufrage': 'Le Naufrage',
 
   // Mode infini : accueil, choix de la carte, record, paliers
   'accueil.infini': 'Mode infini',

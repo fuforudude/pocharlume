@@ -2,13 +2,12 @@
 // `npm run niveaux:apercu -- carte <id>` : dessine une carte avec tous ses chemins et décors.
 // `npm run niveaux:apercu -- planche [région]` : planche PNG des cartes des régions 2 à 5 (docs/cartes/regions-2-a-5.png), ou
 // des cartes d'une seule région (art/apercu/cartes-region<N>.png, non suivi par git ; docs/cartes/region<N>.png pour les régions 11
-// et suivantes, pas encore dans CARTES), avec le vrai sol et les vrais sprites.
+// et suivantes), avec le vrai sol et les vrais sprites.
 // # chemin (couloir de 2 tuiles) · : tuile d'une case interdite à la construction (chemin ou grand décor) · H départ du héros
 // m maison · a arbre · p puits · b bûcher · t potence/échafaud · c clôture · T tonneau · x croix · k crâne/ossements · s souche
 // o cailloux · ' touffe · M meule · C chariot/charrette/barque · F fosse · ~ boue · + pavés · ! décor qui mord sur un chemin
 // (les petits décors des régions 2 à 5 ont chacun une lettre, voir LETTRES ; ? = sprite sans lettre)
 import { CARTES } from '../../src/data/niveaux/cartes-toutes.ts';
-import { CARTES_REGION11 } from '../../src/data/niveaux/cartes-region11.ts';
 import type { CarteModele } from '../../src/data/niveaux/modele-carte.ts';
 import { empriseDecor, DEMI_LARGEUR_CHEMIN, MARGE_DECOR } from '../../src/data/niveaux/habillage.ts';
 import { casesInterditesDuNiveau } from '../../src/data/niveaux/grille-niveau.ts';
@@ -131,8 +130,8 @@ function dessiner(carte: Carte, visuel: VisuelCarte): string {
   return [entete, ...grille.map((l, j) => `${String(j).padStart(2)} ${l.join('')}`)].join('\n');
 }
 
-/** Les cartes de la campagne et celles des régions d'après l'histoire, pas encore branchées dans CARTES. */
-const TOUTES: Readonly<Record<string, CarteModele>> = { ...CARTES, ...CARTES_REGION11 };
+/** Toutes les cartes de la campagne, régions d'après l'histoire comprises. */
+const TOUTES: Readonly<Record<string, CarteModele>> = CARTES;
 
 const [mode, arg] = process.argv.slice(2);
 if (mode === 'planche') {

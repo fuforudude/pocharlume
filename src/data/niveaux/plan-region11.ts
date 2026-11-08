@@ -1,0 +1,203 @@
+// Plan des 10 niveaux de la région 11, les Grèves Grises (niveaux 101 à 110, après l'histoire). Comme la région 10 (plan-region10.ts) :
+// les vagues sont générées par `npm run niveaux` depuis ce plan et figées dans vagues-region11.ts. Une carte neuve par niveau
+// (cartes-region11.ts), jouée avec tous ses chemins (les 5es niveaux de chaque bloc, 105 et 110, en ont trois).
+//
+// Gimmicks (docs/specs/2026-11-08-apres-histoire-gimmicks.md) :
+// - 101 à 105, Vol de Corbeaux : les couloirs sont les rangées de cases laissées dégagées sur chaque carte. Le générateur envoie les
+//   groupes de volants dans les couloirs à tour de rôle : les listes d'ennemis comptent donc les trois volants du jeu (Corbeau Noir,
+//   Chauve-Souris, Ange de Cendre) et peu d'ennemis au sol, pour que les volants pèsent lourd malgré `EQUILIBRAGE.repetitionOrdinaires`.
+// - 106 à 110, Radeau : le trajet sur l'eau de chaque carte, 0,5 case par seconde, 3 places autour du centre (`PLACES_RADEAU`).
+//   Les ennemis sont surtout ceux de l'eau et des armures, que le radeau doit aller chercher d'un bout à l'autre de la carte.
+//
+// Ennemis : seulement les 59 existants (pas d'ennemi ordinaire nouveau), en mélanges plus durs que ceux de la région 10. Le niveau 110
+// est le combat contre le Passeur, avec le Radeau. `defiFer` : deux familles qui touchent les volants (tir ou magie) quand le niveau
+// en compte, la tour de tir dès qu'un Délateur (furtif) est là, jamais la même paire deux niveaux de suite (le niveau 100 finit sur
+// magie + tir). `aretesDepart`, `facteurBudget` et graines sont des valeurs de départ dans la continuité de la région 10 : le réglage fin
+// revient à la tâche d'équilibrage (`npm run balance`, après les stratégies de bot des gimmicks).
+import type { GimmickRadeau, PlaceRadeau } from '../../engine/definitions';
+import type { PlanNiveau } from './plan-niveau';
+
+/**
+ * Les 3 places du radeau, en tuiles autour de son centre : un triangle serré, pour que les trois tours tiennent sur le radeau dessiné
+ * (environ une tuile de côté). Le rendu peut les retoucher sans rien changer d'autre.
+ */
+const PLACES_RADEAU: readonly PlaceRadeau[] = [
+  { dx: -0.5, dy: 0.25 },
+  { dx: 0.5, dy: 0.25 },
+  { dx: 0, dy: -0.5 },
+];
+
+/** Vitesse du radeau, en cases par seconde. */
+const VITESSE_RADEAU = 0.5;
+
+/** Un radeau sur ce trajet (cases `[cx, cy]` de la grille, voisines deux à deux). */
+function radeau(...trajet: [number, number][]): GimmickRadeau {
+  return { type: 'radeau', trajet: trajet.map(([cx, cy]) => ({ cx, cy })), vitesse: VITESSE_RADEAU, places: PLACES_RADEAU };
+}
+
+export const PLANS_REGION11: readonly PlanNiveau[] = [
+  {
+    numero: 101,
+    carte: 'greve',
+    chemins: [0],
+    aretesDepart: 1300,
+    defiFer: { familles: ['caserne', 'tir'] },
+    gimmick: { type: 'corbeaux', couloirs: [{ cy: 1 }, { cy: 6 }] },
+    nom: 'niveau.r11.01.nom',
+    ambiance: 'niveau.r11.01.ambiance',
+    vagues: {
+      nombre: 12,
+      ennemis: ['corbeau_noir', 'chauve_souris', 'ange_cendre', 'acolyte_cendre', 'garde_royal'],
+      graine: 4103,
+      facteurBudget: 0.25,
+    },
+  },
+  {
+    numero: 102,
+    carte: 'filets',
+    chemins: [0],
+    aretesDepart: 1350,
+    defiFer: { familles: ['artillerie', 'magie'] },
+    gimmick: { type: 'corbeaux', couloirs: [{ cy: 2 }, { cy: 6 }] },
+    nom: 'niveau.r11.02.nom',
+    ambiance: 'niveau.r11.02.ambiance',
+    vagues: {
+      nombre: 12,
+      ennemis: ['corbeau_noir', 'chauve_souris', 'ange_cendre', 'noyeur', 'martyr_bleme', 'chevalier'],
+      graine: 1102,
+      facteurBudget: 0.28,
+    },
+  },
+  {
+    numero: 103,
+    carte: 'epaves',
+    chemins: [0],
+    aretesDepart: 1400,
+    defiFer: { familles: ['tir', 'artillerie'] },
+    gimmick: { type: 'corbeaux', couloirs: [{ cy: 1 }, { cy: 4 }, { cy: 7 }] },
+    nom: 'niveau.r11.03.nom',
+    ambiance: 'niveau.r11.03.ambiance',
+    vagues: {
+      nombre: 13,
+      ennemis: ['corbeau_noir', 'chauve_souris', 'ange_cendre', 'crapaud_gonfle', 'gargouille', 'delateur'],
+      graine: 2106,
+      horde: true,
+      facteurBudget: 0.2,
+    },
+  },
+  {
+    numero: 104,
+    carte: 'ponton_noir',
+    chemins: [0],
+    aretesDepart: 1450,
+    defiFer: { familles: ['caserne', 'magie'] },
+    gimmick: { type: 'corbeaux', couloirs: [{ cy: 2 }, { cy: 5 }, { cy: 8 }] },
+    nom: 'niveau.r11.04.nom',
+    ambiance: 'niveau.r11.04.ambiance',
+    vagues: {
+      nombre: 13,
+      ennemis: ['corbeau_noir', 'chauve_souris', 'ange_cendre', 'lueur_marais', 'bourreau_roi', 'garde_royal'],
+      graine: 3110,
+      facteurBudget: 0.33,
+    },
+  },
+  {
+    numero: 105,
+    carte: 'cap_corbeaux',
+    chemins: [0, 1, 2],
+    aretesDepart: 1550,
+    defiFer: { familles: ['magie', 'tir'] },
+    gimmick: { type: 'corbeaux', couloirs: [{ cy: 1 }, { cy: 4 }, { cy: 7 }] },
+    nom: 'niveau.r11.05.nom',
+    ambiance: 'niveau.r11.05.ambiance',
+    vagues: {
+      nombre: 14,
+      ennemis: ['corbeau_noir', 'chauve_souris', 'ange_cendre', 'delateur', 'effigie_roi', 'gargouille', 'porte_herse'],
+      graine: 4113,
+      facteurBudget: 0.38,
+    },
+  },
+  {
+    numero: 106,
+    carte: 'eau_morte',
+    chemins: [0],
+    aretesDepart: 1350,
+    defiFer: { familles: ['artillerie', 'tir'] },
+    gimmick: radeau([5, 4], [6, 4], [7, 4], [8, 4], [9, 4], [10, 4], [11, 4], [12, 4], [13, 4]),
+    nom: 'niveau.r11.06.nom',
+    ambiance: 'niveau.r11.06.ambiance',
+    vagues: {
+      nombre: 12,
+      ennemis: ['noyeur', 'sangsue', 'pelerin_voile', 'garde_royal', 'acolyte_cendre', 'delateur', 'corbeau_noir'],
+      graine: 1106,
+      facteurBudget: 0.25,
+    },
+  },
+  {
+    numero: 107,
+    carte: 'pontons',
+    chemins: [0],
+    aretesDepart: 1400,
+    defiFer: { familles: ['caserne', 'magie'] },
+    gimmick: radeau([3, 7], [4, 7], [5, 7], [6, 7], [7, 7], [7, 6], [7, 5], [7, 4]),
+    nom: 'niveau.r11.07.nom',
+    ambiance: 'niveau.r11.07.ambiance',
+    vagues: {
+      nombre: 12,
+      ennemis: ['noyeur', 'crapaud_gonfle', 'lueur_marais', 'sangsue', 'chevalier', 'martyr_bleme', 'ange_cendre'],
+      graine: 2107,
+      horde: true,
+      facteurBudget: 0.18,
+    },
+  },
+  {
+    numero: 108,
+    carte: 'passe_noyes',
+    chemins: [0],
+    aretesDepart: 1450,
+    defiFer: { familles: ['tir', 'caserne'] },
+    gimmick: radeau([5, 6], [6, 6], [7, 6], [8, 6], [9, 6], [10, 6], [11, 6], [12, 6], [12, 5], [12, 4], [12, 3]),
+    nom: 'niveau.r11.08.nom',
+    ambiance: 'niveau.r11.08.ambiance',
+    vagues: {
+      nombre: 13,
+      ennemis: ['sangsue', 'noyeur', 'gargouille', 'inquisiteur', 'exorciste', 'bourreau_roi', 'delateur', 'chauve_souris'],
+      graine: 3108,
+      facteurBudget: 0.3,
+    },
+  },
+  {
+    numero: 109,
+    carte: 'baie_morte',
+    chemins: [0],
+    aretesDepart: 1500,
+    defiFer: { familles: ['magie', 'artillerie'] },
+    gimmick: radeau([3, 5], [4, 5], [5, 5], [5, 4], [6, 4], [7, 4], [8, 4], [9, 4], [9, 5], [9, 6]),
+    nom: 'niveau.r11.09.nom',
+    ambiance: 'niveau.r11.09.ambiance',
+    vagues: {
+      nombre: 14,
+      ennemis: ['lueur_marais', 'crapaud_gonfle', 'chevalier', 'garde_royal', 'aumonier', 'frere_sans_porte', 'ange_cendre'],
+      graine: 4109,
+      facteurBudget: 0.33,
+    },
+  },
+  {
+    numero: 110,
+    carte: 'naufrage',
+    chemins: [0, 1, 2],
+    aretesDepart: 2700,
+    defiFer: { familles: ['tir', 'magie'] },
+    gimmick: radeau([4, 5], [4, 4], [4, 3], [5, 3], [6, 3], [7, 3], [8, 3], [9, 3], [10, 3], [10, 4], [10, 5], [10, 6]),
+    nom: 'niveau.r11.10.nom',
+    ambiance: 'niveau.r11.10.ambiance',
+    vagues: {
+      nombre: 15,
+      ennemis: ['noyeur', 'sangsue', 'gargouille', 'martyr_bleme', 'chevalier', 'acolyte_cendre', 'delateur', 'corbeau_noir'],
+      graine: 1110,
+      facteurBudget: 0.1,
+      ecart: 0.8,
+      boss: { vague: 15, ennemi: 'passeur', chemin: 0, delai: 12 },
+    },
+  },
+];

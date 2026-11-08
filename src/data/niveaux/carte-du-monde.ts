@@ -1,4 +1,4 @@
-// Cartes du monde des régions 1 à 10 : où se trouvent les 10 niveaux de la région et le chemin qui les relie. Une route par
+// Cartes du monde des régions livrées (1 à 11) : où se trouvent les 10 niveaux de la région et le chemin qui les relie. Une route par
 // région, chacune sur son fond de 512 × 288 pixels logiques (le rendu choisit le zoom entier). L'écran de la carte du monde
 // dessine le fond, le tracé et les nœuds de la région affichée (qui dépend de `regionMax` de la sauvegarde) ; il ne contient
 // aucune position en dur. `noeudsDeRegion` et `traceDeRegion` donnent la route d'une région.
@@ -295,18 +295,48 @@ export const TRACE_REGION10: readonly (readonly Point[])[] = [
   route([440, 220], [440, 56]),
 ];
 
-/** Les nœuds de chaque région, dans l'ordre (indice 0 = région 1). */
-export const NOEUDS_REGIONS: readonly (readonly NoeudNiveau[])[] = [NOEUDS_REGION1, NOEUDS_REGION2, NOEUDS_REGION3, NOEUDS_REGION4, NOEUDS_REGION5, NOEUDS_REGION6, NOEUDS_REGION7, NOEUDS_REGION8, NOEUDS_REGION9, NOEUDS_REGION10];
+/**
+ * Les Grèves Grises (après l'histoire) : la route longe la grève d'ouest en est (Vol de Corbeaux, niveaux 1 à 5 de la région), remonte
+ * vers les pontons, puis file vers le large où attend le Passeur, au sud-est.
+ */
+export const NOEUDS_REGION11: readonly NoeudNiveau[] = [
+  noeud(1, 40, 220),
+  noeud(2, 120, 220),
+  noeud(3, 200, 220),
+  noeud(4, 200, 140),
+  noeud(5, 120, 140),
+  noeud(6, 120, 60),
+  noeud(7, 200, 60),
+  noeud(8, 280, 60),
+  noeud(9, 360, 120),
+  noeud(10, 450, 200),
+];
 
-/** Les tronçons de chaque région, dans l'ordre (indice 0 = région 1). */
-export const TRACES_REGIONS: readonly (readonly (readonly Point[])[])[] = [TRACE_REGION1, TRACE_REGION2, TRACE_REGION3, TRACE_REGION4, TRACE_REGION5, TRACE_REGION6, TRACE_REGION7, TRACE_REGION8, TRACE_REGION9, TRACE_REGION10];
+/** Les 9 tronçons de la région 11, comme TRACE_REGION1. */
+export const TRACE_REGION11: readonly (readonly Point[])[] = [
+  route([40, 220], [120, 220]),
+  route([120, 220], [200, 220]),
+  route([200, 220], [200, 140]),
+  route([200, 140], [120, 140]),
+  route([120, 140], [120, 60]),
+  route([120, 60], [200, 60]),
+  route([200, 60], [280, 60]),
+  route([280, 60], [360, 120]),
+  route([360, 120], [450, 200]),
+];
 
-/** Les nœuds de la région `region` (1 à 10), ou `undefined` si elle n'a pas de carte. */
+/** Les nœuds de chaque région livrée, dans l'ordre (indice 0 = région 1). */
+export const NOEUDS_REGIONS: readonly (readonly NoeudNiveau[])[] = [NOEUDS_REGION1, NOEUDS_REGION2, NOEUDS_REGION3, NOEUDS_REGION4, NOEUDS_REGION5, NOEUDS_REGION6, NOEUDS_REGION7, NOEUDS_REGION8, NOEUDS_REGION9, NOEUDS_REGION10, NOEUDS_REGION11];
+
+/** Les tronçons de chaque région livrée, dans l'ordre (indice 0 = région 1). */
+export const TRACES_REGIONS: readonly (readonly (readonly Point[])[])[] = [TRACE_REGION1, TRACE_REGION2, TRACE_REGION3, TRACE_REGION4, TRACE_REGION5, TRACE_REGION6, TRACE_REGION7, TRACE_REGION8, TRACE_REGION9, TRACE_REGION10, TRACE_REGION11];
+
+/** Les nœuds de la région `region` (1 à 11), ou `undefined` si elle n'a pas de carte. */
 export function noeudsDeRegion(region: number): readonly NoeudNiveau[] | undefined {
   return Number.isInteger(region) ? NOEUDS_REGIONS[region - 1] : undefined;
 }
 
-/** Les tronçons de la région `region` (1 à 10), ou `undefined` si elle n'a pas de carte. */
+/** Les tronçons de la région `region` (1 à 11), ou `undefined` si elle n'a pas de carte. */
 export function traceDeRegion(region: number): readonly (readonly Point[])[] | undefined {
   return Number.isInteger(region) ? TRACES_REGIONS[region - 1] : undefined;
 }

@@ -5,7 +5,8 @@ import { fr } from '../i18n/fr';
 import { t } from '../i18n';
 import { enregistrerFinInfinie, enregistrerVictoire, sauvegardeVide, type BilanInfini, type Sauvegarde } from '../save';
 import { configInfini } from './lancement';
-import { carteDuNiveau, lignesBilanInfini, nomDeCarte, vueCartesInfini, vuePaliers } from './infini-vues';
+import { carteDuNiveau, carteInfiniDuNiveau, lignesBilanInfini, nomDeCarte, vueCartesInfini, vuePaliers } from './infini-vues';
+import { creerPartie } from '../engine/partie';
 
 function gagner(niveaux: readonly number[]): Sauvegarde {
   let s = sauvegardeVide();
@@ -33,6 +34,20 @@ describe('cartes du mode infini', () => {
       expect(carteDuNiveau(v.niveau.numero)).toBe(v.id);
       // Le niveau proposé pour jouer est le premier gagné de la carte.
       expect(v.niveau.numero).toBeLessThanOrEqual(10);
+    }
+  });
+
+  it('la région 11 n’apporte que ses cartes d’infini (la Grève et l’Eau Morte), en région d’infini 11, sans gimmick en partie', () => {
+    const tout = gagner(Array.from({ length: 110 }, (_, i) => i + 1));
+    const region11 = vueCartesInfini(tout).filter((v) => v.niveau.numero > 100);
+    expect(region11.map((v) => [v.id, v.niveau.numero, v.region])).toEqual([['greve', 101, 11], ['eau_morte', 106, 11]]);
+    expect(carteDuNiveau(103)).toBe('epaves');
+    expect([101, 103, 106, 110].map(carteInfiniDuNiveau)).toEqual(['greve', undefined, 'eau_morte', undefined]);
+    const choix = { dieu: tout.meta.choix.dieu, heros: tout.meta.choix.heros, objets: [] };
+    for (const v of region11) {
+      const config = configInfini(tout, choix, 77, v.region);
+      expect(config.ok, v.id).toBe(true);
+      if (config.ok) expect(creerPartie(v.niveau.niveau, config.config).niveau.gimmick, v.id).toBeUndefined();
     }
   });
 

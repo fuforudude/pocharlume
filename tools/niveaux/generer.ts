@@ -1,5 +1,5 @@
-// `npm run niveaux` : régénère src/data/niveaux/vagues-region<N>.ts, les vagues figées des 10 niveaux de chacune des 5
-// régions, avec le générateur d'équilibrage (budget b(L, w) et ennemis débloqués par niveau, voir les plans
+// `npm run niveaux` : régénère src/data/niveaux/vagues-region<N>.ts, les vagues figées des 10 niveaux de chacune des
+// régions livrées, avec le générateur d'équilibrage (budget b(L, w) et ennemis débloqués par niveau, voir les plans
 // src/data/niveaux/plan-region<N>.ts). Même plan, même graine : même fichier, octet pour octet.
 // Les fichiers sont écrits au format compact de src/data/niveaux/format-vagues.ts (le jeu livré en dépend pour son poids).
 // Un niveau marqué `retouchees: true` dans le plan garde les vagues déjà présentes dans le fichier.
@@ -13,7 +13,7 @@ import { CHAMPS_PAR_GROUPE, encoderVagues, type VagueCompacte } from '../../src/
 import { vaguesDuPlan } from '../../src/data/niveaux/generation.ts';
 import { PLANS_REGIONS } from '../../src/data/niveaux/plans.ts';
 
-const NOMS_REGION = ['du Village Affamé', 'des Champs Brûlés', 'du Bourg des Bûchers', 'des Marais de l’Ordalie', 'de la Ville Pestiférée', 'du Charnier', 'de la Croisade', 'du Monastère Noir', 'de la Cité du Roi', 'de la Cathédrale du Soleil Blême'] as const;
+const NOMS_REGION = ['du Village Affamé', 'des Champs Brûlés', 'du Bourg des Bûchers', 'des Marais de l’Ordalie', 'de la Ville Pestiférée', 'du Charnier', 'de la Croisade', 'du Monastère Noir', 'de la Cité du Roi', 'de la Cathédrale du Soleil Blême', 'des Grèves Grises'] as const;
 
 /** Une vague : ses nombres à la suite, un groupe par ligne. */
 function ecrireVague(vague: VagueCompacte): string {

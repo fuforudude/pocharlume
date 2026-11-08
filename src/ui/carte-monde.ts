@@ -19,7 +19,7 @@ import type { DefiPartie } from '../engine';
 import { t, tCle } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
 import { RenduCarteMonde } from '../render/carte-monde';
-import { DIFFICULTES_SAUVEGARDE, etoilesDisponibles, NOMBRE_NIVEAUX, totalEtoiles, type ChoixPartie, type DifficulteSauvegarde } from '../save';
+import { DIFFICULTES_SAUVEGARDE, etoilesDisponibles, totalEtoiles, type ChoixPartie, type DifficulteSauvegarde } from '../save';
 import { dessinerIconesDefis } from './carte-monde-defis';
 import { ennemisDeLaFiche } from './bestiaire-logique';
 import { decouvertesDuNiveau } from './decouvertes';
@@ -47,7 +47,7 @@ import { Gestes } from './gestes';
 import { configDuChoix } from './lancement';
 import { choixJouable, famillesDuFer, vueModes, type ModeNiveau } from './meta-vues';
 import { texteRefusMeta } from './raisons-meta';
-import { decalageDeRegion, REGIONS_MONDE, type RegionMonde } from './regions-monde';
+import { decalageDeRegion, nombreNiveauxLivres, REGIONS_MONDE, type RegionMonde } from './regions-monde';
 
 export interface OptionsCarteMonde {
   readonly atlas: AtlasRendu;
@@ -170,7 +170,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
    */
   const majEntete = (): void => {
     const courante = session.sauvegarde;
-    const libelleTotal = t('carte.total_etoiles_libelle', { n: totalEtoiles(courante), m: NOMBRE_NIVEAUX * 3 });
+    const libelleTotal = t('carte.total_etoiles_libelle', { n: totalEtoiles(courante), m: nombreNiveauxLivres() * 3 });
     const disponibles = etoilesDisponibles(courante);
     remplirPuce(puceAretes, t('monnaie.aretes', { n: courante.meta.monnaies.aretes }), courante.meta.monnaies.aretes);
     remplirPuce(puceBraises, t('monnaie.braises', { n: courante.meta.monnaies.braises }), courante.meta.monnaies.braises);

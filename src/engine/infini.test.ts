@@ -473,11 +473,11 @@ describe('vague atteinte et dernière vague terminée', () => {
 });
 
 describe('configuration du mode infini', () => {
-  it('accepte une région de 1 à 10, refuse le reste et les défis', () => {
+  it('accepte une région de 1 à 11, refuse le reste et les défis', () => {
     expect(verifierConfig(configInfinie(1))).toBeNull();
-    expect(verifierConfig(configInfinie(10))).toBeNull();
+    expect(verifierConfig(configInfinie(11))).toBeNull();
     expect(verifierConfig({ ...CONFIG, infini: null })).toBeNull();
-    for (const region of [0, 11, -1, 1.5, '2', null, undefined]) {
+    for (const region of [0, 12, -1, 1.5, '2', null, undefined]) {
       expect(verifierConfig({ ...CONFIG, infini: { region } }), String(region)).toMatch(/Infini/);
     }
     expect(verifierConfig({ ...CONFIG, infini: { region: 1, autre: 1 } })).toMatch(/Infini/);
@@ -492,11 +492,24 @@ describe('configuration du mode infini', () => {
   });
 
   it('refuse de créer une partie infinie avec une région inconnue', () => {
-    expect(() => creerPartie(NIVEAU_TEST, configInfinie(11))).toThrow('Infini');
+    expect(() => creerPartie(NIVEAU_TEST, configInfinie(12))).toThrow('Infini');
   });
 
-  it('les paramètres sont complets : dix régions, des ennemis et un boss qui existent', () => {
-    expect(INFINI.regions).toHaveLength(10);
+  it('joue sans gimmick : une carte d’après l’histoire rejoint l’infini sans sa particularité', () => {
+    const avecCorbeaux = { ...NIVEAU_TEST, gimmick: { type: 'corbeaux' as const, couloirs: [{ cy: 1 }] } };
+    const etat = creerPartie(avecCorbeaux, configInfinie(11));
+    expect(etat.niveau.gimmick).toBeUndefined();
+    expect(etat.couloirs).toEqual([]);
+    expect(creerPartie(avecCorbeaux, CONFIG).niveau.gimmick).toEqual(avecCorbeaux.gimmick);
+  });
+
+  it('la région 11 tire les ennemis des régions 1 à 10, avec le Passeur pour mini-boss', () => {
+    expect(ennemisInfini(11).map(([id]) => id)).toEqual(ennemisInfini(10).map(([id]) => id));
+    expect(genererVagueInfinie(configInfinie(11), 1, 10).paquets.filter((p) => p.ennemi === 'passeur')).toHaveLength(1);
+  });
+
+  it('les paramètres sont complets : onze régions, des ennemis et un boss qui existent', () => {
+    expect(INFINI.regions).toHaveLength(11);
     for (const r of INFINI.regions) {
       expect(defEnnemi(r.boss)?.boss, r.boss).toBe(true);
       for (const id of r.ennemis) expect(defEnnemi(id)?.boss, id).toBe(false);

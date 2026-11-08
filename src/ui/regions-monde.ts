@@ -81,6 +81,11 @@ export const REGIONS_MONDE: readonly RegionMonde[] = Array.from({ length: NOMBRE
   region(i + 1, `region.${String(i + 1)}` as CleTexte, contenuDeRegion(i + 1)),
 );
 
+/** Les niveaux qui existent vraiment (ceux des régions livrées, 110 avec la région 11) : le compteur d'étoiles en vise 3 chacun. */
+export function nombreNiveauxLivres(regions: readonly RegionMonde[] = REGIONS_MONDE): number {
+  return regions.reduce((total, r) => total + (r.contenu?.niveaux.length ?? 0), 0);
+}
+
 /** Niveaux des régions d'avant : ce qu'on ajoute au numéro d'un nœud de la région pour avoir le niveau de campagne. */
 export function decalageDeRegion(r: RegionMonde): number {
   return r.premierNiveau - 1;

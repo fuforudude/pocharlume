@@ -8,7 +8,7 @@ import type { IdCarte } from './cartes-toutes';
 import type { BossDeVague } from './generation';
 
 export interface PlanNiveau {
-  /** Numéro de campagne, de 1 à 100 (10 niveaux par région) : c'est le niveau L du budget de menace b(L, w). */
+  /** Numéro de campagne, de 1 à 110 (10 niveaux par région) : c'est le niveau L du budget de menace b(L, w). */
   readonly numero: number;
   readonly carte: IdCarte;
   /** Chemins de la carte utilisés (entrées), dans l'ordre : le paquet `chemin: i` suit `chemins[i]`. */
@@ -59,8 +59,12 @@ export const ENNEMIS_REGIONS: readonly (readonly IdEnnemi[])[] = [
   ['acolyte_cendre', 'ange_cendre'],
 ];
 
-/** Le boss de chaque région, au niveau 10 (indice 0 = région 1). */
-export const BOSS_REGIONS: readonly IdEnnemi[] = ['boucher_vaudrelle', 'la_faim', 'juge_flammes', 'dame_puits', 'mere_rats', 'roi_fosses', 'prince_croise', 'grand_inquisiteur', 'roi_fou', 'soleil_bleme'];
+/**
+ * Le boss de chaque région, au niveau 10 (indice 0 = région 1) : les dix de l'histoire, puis ceux de l'après-histoire (région 11 : le
+ * Passeur, au niveau 110, avec le Radeau). Les régions 11 et suivantes n'ont pas d'ennemis ordinaires à elles (`ENNEMIS_REGIONS` s'arrête
+ * à la région 10) : leurs plans choisissent parmi les ennemis existants.
+ */
+export const BOSS_REGIONS: readonly IdEnnemi[] = ['boucher_vaudrelle', 'la_faim', 'juge_flammes', 'dame_puits', 'mere_rats', 'roi_fosses', 'prince_croise', 'grand_inquisiteur', 'roi_fou', 'soleil_bleme', 'passeur'];
 
 /**
  * Les deux ennemis inédits de chaque région (indice 0 = région 1) : le premier arrive au niveau 4, le second au niveau 7

@@ -47,7 +47,7 @@ export function campagneTerminee(s: Sauvegarde): boolean {
   return niveauReussi(s, NIVEAU_FIN_CAMPAGNE);
 }
 
-/** Total des étoiles gagnées (meilleur résultat par niveau, toutes difficultés confondues) : 300 au plus. */
+/** Total des étoiles gagnées (meilleur résultat par niveau, toutes difficultés confondues) : 3 par niveau livré au plus (330 avec la région 11, 450 avec les 150 niveaux). */
 export function totalEtoiles(s: Sauvegarde): number {
   let total = 0;
   for (let n = 1; n <= NOMBRE_NIVEAUX; n++) total += meilleuresEtoiles(s, n);

@@ -1,13 +1,13 @@
 // Assemble un niveau de campagne à partir de son plan, de sa carte et de ses vagues figées : choisit les
 // chemins du niveau, ne garde du décor de la carte que ce qui ne recouvre pas un chemin utilisé, et en tire les
-// cases interdites de la grille de construction (grille-niveau.ts).
+// cases interdites de la grille de construction (grille-niveau.ts), eau de la région 11 comprise (`zonesBloquantes`).
 import type { Carte, CaseGrille, Niveau, Vague } from '../../engine/definitions';
 import { casesDuTrajet } from '../../engine/gimmicks/radeau';
 import type { Decor, NiveauCampagne } from '../visuel';
 import { CARTES, type CarteModele } from './cartes-toutes';
 import { distanceRectChemin } from './geometrie';
 import { casesInterditesDuNiveau } from './grille-niveau';
-import { DEMI_LARGEUR_CHEMIN, empriseDecor, MARGE_DECOR } from './habillage';
+import { DEMI_LARGEUR_CHEMIN, empriseDecor, MARGE_DECOR, zonesBloquantes } from './habillage';
 import type { PlanNiveau } from './plan-niveau';
 import { SPRITE_STATUE, STATUES } from './statues';
 
@@ -66,7 +66,7 @@ export function assemblerNiveau(plan: PlanNiveau, vagues: readonly Vague[]): Niv
     ...(plan.vagues.horde === true ? { horde: true } : {}),
     ...(plan.gimmick ? { gimmick: plan.gimmick } : {}),
     carte,
-    casesInterdites: casesInterditesAvecRadeau(casesInterditesDuNiveau(carte, decor), plan),
+    casesInterdites: casesInterditesAvecRadeau(casesInterditesDuNiveau(carte, decor, zonesBloquantes(modele)), plan),
     vagues,
   };
   return {

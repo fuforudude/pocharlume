@@ -98,8 +98,10 @@ describe('ennemis des régions 6 à 10', () => {
 
 describe('paramètres de l’infini', () => {
   it('chaque région liste ses ennemis propres et son boss, dans l’ordre de la spec', () => {
-    expect(INFINI.regions).toHaveLength(10);
-    expect(INFINI.regions.slice(5).map((r) => r.boss)).toEqual(['roi_fosses', 'prince_croise', 'grand_inquisiteur', 'roi_fou', 'soleil_bleme']);
+    // Dix régions de l'histoire, puis la région 11 (Grèves Grises) : sans ennemi à elle, le Passeur pour boss.
+    expect(INFINI.regions).toHaveLength(11);
+    expect(INFINI.regions.slice(5).map((r) => r.boss)).toEqual(['roi_fosses', 'prince_croise', 'grand_inquisiteur', 'roi_fou', 'soleil_bleme', 'passeur']);
+    expect(INFINI.regions[10]?.ennemis).toEqual([]);
     for (const [region, { ennemis, boss }] of Object.entries(REGIONS)) {
       // Les deux nouveaux ennemis de la région (spec « variété ») suivent ses ennemis ordinaires.
       const regionInfini = INFINI.regions[Number(region) - 1];

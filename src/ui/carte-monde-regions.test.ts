@@ -222,7 +222,8 @@ describe('carte du monde : régions', () => {
     expect(document.querySelector('.region-puces')?.children).toHaveLength(15);
     expect(puce(11).classList.contains('actif')).toBe(true);
     expect(nomRegion()).toBe(t('carte.region_nom', { n: 11, nom: 'Les Grèves Grises' }));
-    expect((document.querySelector('.carte-region-vide') as HTMLElement).hidden).toBe(false);
+    // La région 11 est livrée : ses nœuds s'affichent, pas l'annonce « à venir ».
+    expect((document.querySelector('.carte-region-vide') as HTMLElement).hidden).toBe(true);
     expect(document.querySelector<HTMLElement>('.carte-monde')?.style.getPropertyValue('--region-brume')).not.toBe('');
     for (let n = 1; n <= 11; n++) expect(puce(n).classList.contains('grise'), `région ${String(n)}`).toBe(false);
     for (let n = 12; n <= 15; n++) {

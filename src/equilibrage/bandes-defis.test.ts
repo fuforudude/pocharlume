@@ -1,8 +1,8 @@
-// Bandes des défis (jalon 3) sur chacune des régions 1 à 10 : le bot soigneux, avec les règles de Matou, réussit entre 40 et 90 % des
+// Bandes des défis (jalon 3) sur chacune des régions 1 à 11 : le bot soigneux, avec les règles de Matou, réussit entre 40 et 90 % des
 // parties de chaque défi (Héroïque : 1 vie et des groupes d'élite ; Fer : toutes les vagues en une et deux familles de tours),
 // tous niveaux et trois dieux confondus.
 import { beforeAll, describe, expect, it } from 'vitest';
-import { ecartsDefis } from './bandes';
+import { ecartsDefis, ecartsSelonRegion } from './bandes';
 import { DEFIS_EVALUES, type Evaluation } from './campagne';
 import { DELAI_EVALUATION, evaluerRegions, REGIONS_EVALUEES } from './bandes.test-utils';
 
@@ -15,6 +15,6 @@ beforeAll(async () => {
 
 describe.each(REGIONS_EVALUEES)('bandes des défis, région %i', (region) => {
   it.each(DEFIS_EVALUES)('le soigneux réussit entre 40 et 90 %% des parties du défi %s', (defi) => {
-    expect(ecartsDefis(parDefi.get(defi)?.[region - 1] ?? [])).toEqual([]);
+    expect(ecartsSelonRegion(region, ecartsDefis(parDefi.get(defi)?.[region - 1] ?? []))).toEqual([]);
   });
 });

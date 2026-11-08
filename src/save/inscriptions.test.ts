@@ -30,7 +30,7 @@ function apresAvoirTrouve(s: Sauvegarde, ...ids: string[]): Sauvegarde {
 }
 
 describe('validation des inscriptions trouvées (v6)', () => {
-  it('accepte aucune inscription, quelques-unes, les 31, et rend une copie', () => {
+  it('accepte aucune inscription, quelques-unes, les 41, et rend une copie', () => {
     expect(validerSauvegarde(avecInscriptions([])).ok).toBe(true);
     const brut = avecInscriptions(['gue', 'place']);
     const r = validerSauvegarde(brut);
@@ -100,8 +100,8 @@ describe('trouver une inscription', () => {
     }
   });
 
-  it('les 31 inscriptions se trouvent toutes', () => {
-    expect(nombreInscriptionsTrouvees(apresAvoirTrouve(sauvegardeVide(), ...IDS_INSCRIPTIONS))).toBe(31);
+  it('les 41 inscriptions se trouvent toutes', () => {
+    expect(nombreInscriptionsTrouvees(apresAvoirTrouve(sauvegardeVide(), ...IDS_INSCRIPTIONS))).toBe(41);
   });
 });
 

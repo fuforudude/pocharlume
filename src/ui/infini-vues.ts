@@ -1,6 +1,7 @@
 // Ce que l'écran du mode infini montre, d'après la sauvegarde : les cartes jouables avec leur record, les paliers et ce
 // qu'ils rapportent, le bilan d'une partie. Des fonctions pures, sans DOM : l'écran (ecran-infini.ts) ne fait que les dessiner.
-import { NOMBRE_REGIONS_INFINI, PALIERS_INFINI, RECOMPENSES_PALIERS_INFINI, regionDuNiveau, type PalierInfini } from '../data/meta';
+import { CARTES_INFINI_APRES_HISTOIRE } from '../data/infini';
+import { estApresHistoire, NOMBRE_REGIONS_INFINI, PALIERS_INFINI, RECOMPENSES_PALIERS_INFINI, regionDuNiveau, type PalierInfini } from '../data/meta';
 import { OBJETS } from '../data/objets';
 import { PLANS_REGIONS } from '../data/niveaux/plans';
 import type { NiveauCampagne } from '../data/visuel';
@@ -9,7 +10,7 @@ import { fr } from '../i18n/fr';
 import { cartesInfiniJouables, niveauReussi, NOMBRE_NIVEAUX, recordDeLaCarte, type BilanInfini, type Sauvegarde } from '../save';
 import { niveauDeCampagne } from './regions-monde';
 
-/** La carte que joue un niveau de campagne (1 à 100), ou undefined si son plan n'est pas dans le jeu. */
+/** La carte que joue un niveau de campagne (1 à 110), ou undefined si son plan n'est pas dans le jeu. */
 export function carteDuNiveau(numero: number): string | undefined {
   if (!Number.isInteger(numero) || numero < 1) return undefined;
   for (const plans of PLANS_REGIONS) {
@@ -17,6 +18,16 @@ export function carteDuNiveau(numero: number): string | undefined {
     if (plan) return plan.carte;
   }
   return undefined;
+}
+
+/**
+ * La carte qu'un niveau gagné ouvre en infini : celle de `carteDuNiveau`, sauf pour un niveau d'après l'histoire dont la carte n'est pas
+ * dans `CARTES_INFINI_APRES_HISTOIRE` (seules 1 ou 2 cartes par région d'après l'histoire rejoignent l'infini).
+ */
+export function carteInfiniDuNiveau(numero: number): string | undefined {
+  const carte = carteDuNiveau(numero);
+  if (carte === undefined || !estApresHistoire(numero)) return carte;
+  return (CARTES_INFINI_APRES_HISTOIRE as readonly string[]).includes(carte) ? carte : undefined;
 }
 
 /** Nom d'une carte : son texte s'il existe, sinon son identifiant mis en forme (« cour_des_miracles » : « Cour des miracles »). */
@@ -31,7 +42,7 @@ export function nomDeCarte(id: string): string {
 export interface VueCarteInfini {
   readonly id: string;
   readonly nom: string;
-  /** Région de la carte (1 à 10) : ses ennemis et son boss, et ceux des régions d'avant, peuplent les vagues. */
+  /** Région de la carte (1 à 11) : ses ennemis et son boss, et ceux des régions d'avant, peuplent les vagues. */
   readonly region: number;
   /** Le niveau de campagne qui sert de décor et d'entrées : le premier gagné sur cette carte. */
   readonly niveau: NiveauCampagne;
@@ -40,7 +51,7 @@ export interface VueCarteInfini {
 }
 
 export interface DonneesInfini {
-  /** Quelle carte porte un niveau de campagne. */
+  /** Quelle carte un niveau de campagne gagné ouvre en infini (`carteInfiniDuNiveau` par défaut). */
   readonly carteDuNiveau?: (numero: number) => string | undefined;
   /** Le niveau de campagne de ce numéro, s'il est dans le jeu. */
   readonly niveauDeCampagne?: (numero: number) => NiveauCampagne | undefined;
@@ -52,7 +63,7 @@ export interface DonneesInfini {
  * n'apporte aucune carte.
  */
 export function vueCartesInfini(s: Sauvegarde, donnees: DonneesInfini = {}): VueCarteInfini[] {
-  const carteDe = donnees.carteDuNiveau ?? carteDuNiveau;
+  const carteDe = donnees.carteDuNiveau ?? carteInfiniDuNiveau;
   const niveauDe = donnees.niveauDeCampagne ?? niveauDeCampagne;
   const livree = (n: number): string | undefined => (niveauDe(n) ? carteDe(n) : undefined);
   const vues: VueCarteInfini[] = [];

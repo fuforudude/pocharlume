@@ -22,10 +22,10 @@ function avec(...ids: string[]): Sauvegarde {
 afterEach(() => { document.body.replaceChildren(); });
 
 describe('vue des inscriptions', () => {
-  it('31 lignes ; une trouvée donne son texte et le nom de sa carte, une autre rien que sa région', () => {
+  it('41 lignes ; une trouvée donne son texte et le nom de sa carte, une autre rien que sa région', () => {
     const vue = vueInscriptions(avec('chaumes'));
-    expect(vue.lignes).toHaveLength(31);
-    expect(vue.compteur).toBe('1 / 31');
+    expect(vue.lignes).toHaveLength(41);
+    expect(vue.compteur).toBe('1 / 41');
     const chaumes = vue.lignes.find((l) => l.id === 'chaumes');
     expect(chaumes).toMatchObject({ trouvee: true, carte: 'Les Chaumes', texte: t('inscription.chaumes') });
     const gue = vue.lignes.find((l) => l.id === 'gue');
@@ -37,9 +37,9 @@ describe('vue des inscriptions', () => {
 describe('écran du recueil', () => {
   it('montre le compteur, les textes trouvés et « ??? » avec la région des autres', () => {
     afficherEcranInscriptions(document.body, { atlas: ATLAS, session: { sauvegarde: avec('chaumes', 'choeur') }, surFermer: vi.fn() });
-    expect(document.querySelector('.inscriptions-compteur')?.textContent).toBe('2 / 31');
+    expect(document.querySelector('.inscriptions-compteur')?.textContent).toBe('2 / 41');
     const entrees = [...document.querySelectorAll('.inscription')];
-    expect(entrees).toHaveLength(31);
+    expect(entrees).toHaveLength(41);
     expect(document.querySelectorAll('.inscription.trouvee')).toHaveLength(2);
     expect(document.querySelector('[data-carte="chaumes"]')?.textContent).toContain(t('inscription.chaumes'));
     const inconnue = document.querySelector('[data-carte="gue"]');
@@ -49,11 +49,11 @@ describe('écran du recueil', () => {
     expect(document.querySelector('.inscriptions-vide')).toBeNull();
   });
 
-  it('état vide : 0 / 31, un message, et les 31 entrées en « ??? »', () => {
+  it('état vide : 0 / 41, un message, et les 41 entrées en « ??? »', () => {
     afficherEcranInscriptions(document.body, { atlas: ATLAS, session: { sauvegarde: sauvegardeVide() }, surFermer: vi.fn() });
-    expect(document.querySelector('.inscriptions-compteur')?.textContent).toBe('0 / 31');
+    expect(document.querySelector('.inscriptions-compteur')?.textContent).toBe('0 / 41');
     expect(document.querySelector('.inscriptions-vide')?.textContent).toBe(t('inscriptions.vide'));
-    expect(document.querySelectorAll('.inscription.inconnue')).toHaveLength(31);
+    expect(document.querySelectorAll('.inscription.inconnue')).toHaveLength(41);
   });
 
   it('s’utilise au clavier : entrées focalisables, Échap et le bouton ferment', () => {
