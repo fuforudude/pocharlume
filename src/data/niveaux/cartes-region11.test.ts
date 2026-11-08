@@ -4,7 +4,7 @@
 // `gimmick` du niveau, qui les remplacera.
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import type { Point } from '../../engine/definitions';
+import type { Niveau, Point } from '../../engine/definitions';
 import { casesLibres, centreCase } from '../../engine/grille';
 import { REGLES } from '../regles';
 import { CARTES } from './cartes-toutes';
@@ -39,12 +39,20 @@ const TRAJETS: Readonly<Record<string, readonly (readonly [number, number])[]>> 
 /** Portée d'une tour de tir de base, et de ralliement d'une caserne : ce qui compte pour dire qu'une case « voit » le chemin. */
 const PORTEE = 3.5;
 
-const rectCase = (cx: number, cy: number): Rect => ({ x0: cx * T, y0: cy * T, x1: (cx + 1) * T, y1: (cy + 1) * T });
+const distance = (a: Point, b: Point): number => Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+const rectCase =(cx: number, cy: number): Rect => ({ x0: cx * T, y0: cy * T, x1: (cx + 1) * T, y1: (cy + 1) * T });
 const distanceAuChemin = (m: CarteModele, p: Point): number => Math.min(...m.chemins.map((c) => distancePointChemin(p.x, p.y, c.points)));
 const longueur = (points: readonly Point[]): number => points.reduce((t, p, i) => t + (i === 0 ? 0 : Math.abs(p.x - (points[i - 1]?.x ?? p.x)) + Math.abs(p.y - (points[i - 1]?.y ?? p.y))), 0);
-const niveauDe = (m: CarteModele) => {
+/** Un niveau de moteur minimal sur la carte, avec tous ses chemins et tout son décor (comme dans niveaux.test.ts). */
+const niveauDe = (m: CarteModele): Niveau => {
   const carte = { largeur: m.largeur, hauteur: m.hauteur, chemins: m.chemins, departHeros: m.departHeros };
-  return { carte, casesInterdites: casesInterditesDuNiveau(carte, m.decor) };
+  return {
+    id: m.id,
+    aretesDepart: 0,
+    carte,
+    casesInterdites: casesInterditesDuNiveau(carte, m.decor),
+    vagues: [{ paquets: [{ ennemi: 'paysan_affame', nombre: 1, intervalle: 1, chemin: 0, delai: 0 }] }],
+  };
 };
 
 describe('les 10 cartes de la région 11', () => {
@@ -171,7 +179,7 @@ describe('Radeau (niveaux 106 à 110) : trajet sur l’eau', () => {
           const pas = longueur([a, b]) * 4;
           for (let k = 0; k <= pas; k++) {
             const p = { x: a.x + ((b.x - a.x) * k) / pas, y: a.y + ((b.y - a.y) * k) / pas };
-            const d = Math.hypot(p.x - centre.x, p.y - centre.y);
+            const d = distance(p, centre);
             if (d < meilleur.d) meilleur = { d, p };
           }
         });
@@ -182,6 +190,6 @@ describe('Radeau (niveaux 106 à 110) : trajet sur l’eau', () => {
     const fin = plusProche(trajet.at(-1) ?? [0, 0]);
     expect(debut.d).toBeLessThanOrEqual(PORTEE);
     expect(fin.d).toBeLessThanOrEqual(PORTEE);
-    expect(Math.hypot(debut.p.x - fin.p.x, debut.p.y - fin.p.y)).toBeGreaterThanOrEqual(8);
+    expect(distance(debut.p, fin.p)).toBeGreaterThanOrEqual(8);
   });
 });
