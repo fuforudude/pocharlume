@@ -1,7 +1,8 @@
 // Assemble un niveau de campagne à partir de son plan, de sa carte et de ses vagues figées : choisit les
 // chemins du niveau, ne garde du décor de la carte que ce qui ne recouvre pas un chemin utilisé, et en tire les
 // cases interdites de la grille de construction (grille-niveau.ts).
-import type { Carte, Niveau, Vague } from '../../engine/definitions';
+import type { Carte, CaseGrille, Niveau, Vague } from '../../engine/definitions';
+import { casesDuTrajet } from '../../engine/gimmicks/radeau';
 import type { Decor, NiveauCampagne } from '../visuel';
 import { CARTES, type CarteModele } from './cartes-toutes';
 import { distanceRectChemin } from './geometrie';
@@ -36,6 +37,13 @@ const NIVEAUX_PAR_REGION = 10;
  */
 const REGIONS_SANS_ELITES: readonly number[] = [1];
 
+/** Sur un niveau à Radeau, les cases de son trajet s'ajoutent aux cases interdites (sans doublon) : on ne construit pas sur l'eau où il passe. */
+function casesInterditesAvecRadeau(cases: readonly CaseGrille[], plan: PlanNiveau): CaseGrille[] {
+  if (plan.gimmick?.type !== 'radeau') return [...cases];
+  const deja = new Set(cases.map((c) => `${String(c.cx)},${String(c.cy)}`));
+  return [...cases, ...casesDuTrajet(plan.gimmick).filter((c) => !deja.has(`${String(c.cx)},${String(c.cy)}`))];
+}
+
 export function assemblerNiveau(plan: PlanNiveau, vagues: readonly Vague[]): NiveauCampagne {
   const modele = CARTES[plan.carte];
   const region = Math.floor((plan.numero - 1) / NIVEAUX_PAR_REGION) + 1;
@@ -58,7 +66,7 @@ export function assemblerNiveau(plan: PlanNiveau, vagues: readonly Vague[]): Niv
     ...(plan.vagues.horde === true ? { horde: true } : {}),
     ...(plan.gimmick ? { gimmick: plan.gimmick } : {}),
     carte,
-    casesInterdites: casesInterditesDuNiveau(carte, decor),
+    casesInterdites: casesInterditesAvecRadeau(casesInterditesDuNiveau(carte, decor), plan),
     vagues,
   };
   return {

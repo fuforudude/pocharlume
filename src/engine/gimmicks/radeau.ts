@@ -2,11 +2,12 @@
 // numéro de pas (`positionRadeau`) : rien n'est stocké pour lui, le rejeu et la reprise d'une sauvegarde restent justes d'eux-mêmes.
 // Une tour du radeau garde seulement sa place (`Tour.place`) ; sa position (x, y) est recalculée au début de chaque pas
 // (`deplacerToursDuRadeau`), si bien que tout ce qui lit la position d'une tour (ciblage, portée, projectiles, ouvrages, pouvoirs des
-// ennemis, sorts) la voit là où le radeau se trouve. Le rendu interpole entre deux pas avec les mêmes fonctions.
+// ennemis, sorts) la voit là où le radeau se trouve. Le rendu interpolera entre deux pas avec ces mêmes fonctions : ce sera fait par la
+// tâche du rendu, rien ne l'appelle encore côté affichage.
 import { REGLES } from '../../data/regles';
-import type { GimmickRadeau, Niveau, Point } from '../definitions';
+import type { CaseGrille, GimmickRadeau, Niveau, Point } from '../definitions';
 import type { EtatPartie } from '../etat';
-import { caseExiste, centreCase } from '../grille';
+import { caseExiste, centreCase, estCaseInterdite } from '../grille';
 import { PAS_PAR_SECONDE } from '../temps';
 
 /** Le gimmick Radeau du niveau, s'il en a un. */
@@ -21,7 +22,34 @@ function suiteValide(a: { cx: number; cy: number }, b: { cx: number; cy: number 
   return (dx === 0) !== (dy === 0) || (dx === 1 && dy === 1);
 }
 
-/** Vérifie le radeau : trajet d'au moins 2 cases de la grille qui se suivent, vitesse positive, nombre de places des règles. */
+/**
+ * Toutes les cases que le radeau parcourt : celles du trajet et, entre deux cases alignées, les cases intermédiaires. Sans doublon,
+ * dans l'ordre du trajet. L'assemblage les ajoute aux cases interdites du niveau : on ne bâtit pas sur l'eau où passe le radeau.
+ */
+export function casesDuTrajet(gimmick: GimmickRadeau): CaseGrille[] {
+  const vues = new Set<string>();
+  const cases: CaseGrille[] = [];
+  const ajouter = (cx: number, cy: number): void => {
+    const cle = `${String(cx)},${String(cy)}`;
+    if (vues.has(cle)) return;
+    vues.add(cle);
+    cases.push({ cx, cy });
+  };
+  gimmick.trajet.forEach((c, k) => {
+    const avant = gimmick.trajet[k - 1];
+    if (avant) {
+      const pas = Math.max(Math.abs(c.cx - avant.cx), Math.abs(c.cy - avant.cy));
+      for (let i = 1; i < pas; i++) ajouter(avant.cx + Math.sign(c.cx - avant.cx) * i, avant.cy + Math.sign(c.cy - avant.cy) * i);
+    }
+    ajouter(c.cx, c.cy);
+  });
+  return cases;
+}
+
+/**
+ * Vérifie le radeau : trajet d'au moins 2 cases de la grille qui se suivent et toutes interdites à la construction (intermédiaires
+ * comprises), vitesse positive, nombre de places des règles, places à des décalages distincts.
+ */
 export function verifierRadeau(niveau: Niveau, gimmick: GimmickRadeau): void {
   if (gimmick.trajet.length < 2) throw new Error('Radeau : le trajet doit compter au moins 2 cases');
   gimmick.trajet.forEach((c, k) => {
@@ -32,6 +60,11 @@ export function verifierRadeau(niveau: Niveau, gimmick: GimmickRadeau): void {
   if (!Number.isFinite(gimmick.vitesse) || gimmick.vitesse <= 0) throw new Error(`Radeau : vitesse invalide ${String(gimmick.vitesse)}`);
   if (gimmick.places.length !== REGLES.placesRadeau) throw new Error(`Radeau : ${String(REGLES.placesRadeau)} places attendues, ${String(gimmick.places.length)} données`);
   for (const p of gimmick.places) if (!Number.isFinite(p.dx) || !Number.isFinite(p.dy)) throw new Error('Radeau : décalage de place invalide');
+  const decalages = new Set(gimmick.places.map((p) => `${String(p.dx)},${String(p.dy)}`));
+  if (decalages.size !== gimmick.places.length) throw new Error('Radeau : deux places au même décalage');
+  for (const c of casesDuTrajet(gimmick)) {
+    if (!estCaseInterdite(niveau, c.cx, c.cy)) throw new Error(`Radeau : la case (${String(c.cx)}, ${String(c.cy)}) du trajet n'est pas interdite à la construction`);
+  }
 }
 
 /** Dit si la place `n` existe sur le radeau du niveau (aucune sans radeau). */

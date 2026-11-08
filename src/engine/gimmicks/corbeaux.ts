@@ -17,12 +17,14 @@ export function peutVolerEnCouloir(def: Pick<DefEnnemi, 'volant'>): boolean {
   return def.volant;
 }
 
-/** Vérifie les couloirs du gimmick : chacun sur une ligne de la grille de la carte. */
+/** Vérifie les couloirs du gimmick : au moins un, chacun sur une ligne de la grille de la carte, deux jamais sur la même ligne. */
 export function verifierCorbeaux(niveau: Niveau, gimmick: GimmickCorbeaux): void {
   const max = lignes(niveau.carte);
+  if (gimmick.couloirs.length === 0) throw new Error('Corbeaux : au moins un couloir attendu');
   gimmick.couloirs.forEach((c, k) => {
     if (!Number.isInteger(c.cy) || c.cy < 0 || c.cy >= max) throw new Error(`Corbeaux : couloir ${String(k)} hors de la grille (ligne ${String(c.cy)})`);
   });
+  if (new Set(gimmick.couloirs.map((c) => c.cy)).size !== gimmick.couloirs.length) throw new Error('Corbeaux : deux couloirs sur la même ligne');
   if (gimmick.coutVies !== undefined && (!Number.isInteger(gimmick.coutVies) || gimmick.coutVies < 0)) throw new Error(`Corbeaux : coût en vies invalide ${String(gimmick.coutVies)}`);
 }
 

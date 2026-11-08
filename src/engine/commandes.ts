@@ -12,7 +12,7 @@ import type { DefNiveauTour, Point } from './definitions';
 import type { EtatPartie, FamilleTour, Tour } from './etat';
 import { ouvrirPas } from './evenements';
 import { gimmickRadeau, placeExiste, positionPlace } from './gimmicks/radeau';
-import { caseExiste, centreCase, estCaseInterdite, ralliementParDefaut, tourDuLieu, tourSurCase } from './grille';
+import { caseExiste, centreCase, estCaseInterdite, ralliementParDefaut, tourDuLieu } from './grille';
 import { chercherParId, distance2 } from './recherche';
 import { lancerEffets, rechargeSort } from './sorts';
 import { minuteursInitiaux } from './structures';
@@ -106,9 +106,9 @@ function competenceSuivante(etat: EtatPartie, t: Tour, id: string): { indice: nu
   return { indice, rang: rang + 1, cout: prixFamille(etat, t.famille, cout) };
 }
 
-/** Prix en arêtes du prochain rang d'une compétence de la tour de la case, ou undefined si elle n'existe pas ou est au maximum. */
-export function coutCompetence(etat: EtatPartie, cx: number, cy: number, competence: string): number | undefined {
-  const t = tourSurCase(etat, cx, cy);
+/** Prix en arêtes du prochain rang d'une compétence de la tour du lieu (case ou place du radeau), ou undefined si elle n'existe pas ou est au maximum. */
+export function coutCompetence(etat: EtatPartie, lieu: LieuTour, competence: string): number | undefined {
+  const t = tourDuLieu(etat, lieu);
   if (!t) return undefined;
   const suivante = competenceSuivante(etat, t, competence);
   return typeof suivante === 'string' ? undefined : suivante.cout;
@@ -120,10 +120,15 @@ export function coutConstruction(etat: EtatPartie, famille: FamilleTour): number
   return def ? prix(etat, famille, def) : undefined;
 }
 
-/** Valeur de revente de la tour d'une case. */
-export function valeurRevente(etat: EtatPartie, cx: number, cy: number): number {
-  const t = tourSurCase(etat, cx, cy);
+/** Valeur de revente de la tour d'un lieu (case ou place du radeau). */
+export function valeurRevente(etat: EtatPartie, lieu: LieuTour): number {
+  const t = tourDuLieu(etat, lieu);
   return t ? partEntiere(t.coutCumule, REGLES.tauxRevente) : 0;
+}
+
+/** Une place du radeau qui n'existe pas (ou aucun radeau au niveau) : raison de refus des actions sur une tour, testée avant tout le reste. */
+function placeInconnue(etat: EtatPartie, lieu: LieuTour): boolean {
+  return lieu.place !== undefined && !placeExiste(etat.niveau, lieu.place);
 }
 
 /** Dit si l'action est permise maintenant, sans rien changer. Renvoie null si elle l'est. */
@@ -153,6 +158,7 @@ export function validerAction(etat: EtatPartie, action: Action): RaisonRefus | n
     }
     case 'ameliorer':
     case 'specialiser': {
+      if (placeInconnue(etat, action)) return 'place_inconnue';
       const t = tourDuLieu(etat, action);
       if (!t) return 'case_vide';
       const suivant = niveauSuivant(etat, t, action);
@@ -162,6 +168,7 @@ export function validerAction(etat: EtatPartie, action: Action): RaisonRefus | n
       return prix(etat, t.famille, suivant) > etat.aretes ? 'aretes_insuffisantes' : null;
     }
     case 'ameliorerCompetence': {
+      if (placeInconnue(etat, action)) return 'place_inconnue';
       const t = tourDuLieu(etat, action);
       if (!t) return 'case_vide';
       const suivante = competenceSuivante(etat, t, action.competence);
@@ -169,6 +176,7 @@ export function validerAction(etat: EtatPartie, action: Action): RaisonRefus | n
       return suivante.cout > etat.aretes ? 'aretes_insuffisantes' : null;
     }
     case 'vendre':
+      if (placeInconnue(etat, action)) return 'place_inconnue';
       return tourDuLieu(etat, action) ? null : 'case_vide';
     case 'utiliserObjet': {
       const id = etat.config.objets[action.emplacement];
@@ -182,6 +190,7 @@ export function validerAction(etat: EtatPartie, action: Action): RaisonRefus | n
       return objet.surChemin && loinDuChemin(etat, action.x, action.y) ? 'hors_chemin' : null;
     }
     case 'deplacerRalliement': {
+      if (placeInconnue(etat, action)) return 'place_inconnue';
       const t = tourDuLieu(etat, action);
       if (!t) return 'case_vide';
       if (!t.stats.soldats) return 'pas_une_caserne';
@@ -260,7 +269,7 @@ function construire(etat: EtatPartie, lieu: LieuTour, famille: FamilleTour): voi
   };
   etat.tours.push(t);
   synchroniserSoldats(etat, t);
-  etat.evenements.push({ type: 'construction', tour: t.id, cx, cy, famille });
+  etat.evenements.push({ type: 'construction', tour: t.id, cx, cy, place, x: t.x, y: t.y, famille });
 }
 
 function monterNiveau(etat: EtatPartie, t: Tour, action: Action): void {
@@ -274,7 +283,7 @@ function monterNiveau(etat: EtatPartie, t: Tour, action: Action): void {
   t.rangs = suivant.competences.map(() => 0);
   t.stats = statsTour(etat, t.famille, suivant, t.rangs);
   synchroniserSoldats(etat, t);
-  etat.evenements.push({ type: 'amelioration', tour: t.id, cx: t.cx, cy: t.cy, niveau: t.niveau, voie: t.voie });
+  etat.evenements.push({ type: 'amelioration', tour: t.id, cx: t.cx, cy: t.cy, place: t.place, x: t.x, y: t.y, niveau: t.niveau, voie: t.voie });
 }
 
 /** Achète le rang suivant d'une compétence de la spécialisation et recalcule les stats de la tour. */
@@ -287,7 +296,7 @@ function acheterCompetence(etat: EtatPartie, t: Tour, id: string): void {
   t.rangs[suivante.indice] = suivante.rang;
   t.stats = statsTour(etat, t.famille, def, t.rangs);
   synchroniserSoldats(etat, t);
-  etat.evenements.push({ type: 'competence_tour', tour: t.id, cx: t.cx, cy: t.cy, competence: id, rang: suivante.rang });
+  etat.evenements.push({ type: 'competence_tour', tour: t.id, cx: t.cx, cy: t.cy, place: t.place, x: t.x, y: t.y, competence: id, rang: suivante.rang });
 }
 
 function vendre(etat: EtatPartie, t: Tour): void {
@@ -301,7 +310,7 @@ function vendre(etat: EtatPartie, t: Tour): void {
     else restent.push(u);
   }
   etat.unites = restent;
-  etat.evenements.push({ type: 'vente', tour: t.id, cx: t.cx, cy: t.cy, aretes });
+  etat.evenements.push({ type: 'vente', tour: t.id, cx: t.cx, cy: t.cy, place: t.place, x: t.x, y: t.y, aretes });
 }
 
 function executer(etat: EtatPartie, action: Action): void {

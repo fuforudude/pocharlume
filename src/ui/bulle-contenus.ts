@@ -300,7 +300,7 @@ function contenuSansRefus(etat: EtatPartie, cx: number, cy: number, element: Ele
     return { ...entete, lignes: difference(caracsTour(avant), caracsTour(apres)), notes: [] };
   }
   if (genre === 'vendre') {
-    const rendu = valeurRevente(etat, cx, cy);
+    const rendu = valeurRevente(etat, { cx, cy });
     return {
       titre: t('menu.vendre'),
       sousTitre: tCle(tour.stats.nom),

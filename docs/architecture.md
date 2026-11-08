@@ -887,7 +887,7 @@ Spec : [retours du 2026-10-30](specs/2026-10-30-retours-tour-divine-descriptions
 
 Spec : [après l'histoire](specs/2026-11-08-apres-histoire-gimmicks.md), jalon 1, tâches 2 et 3.
 - **Format** : `Niveau.gimmick?: Gimmick`, union discriminée sur `type` (`definitions.ts`) : `GimmickCorbeaux`
-  `{ type: 'corbeaux', couloirs: { cy }[], coutVies? }` et `GimmickRadeau` (plus bas). Un module par gimmick dans
+  `{ type: 'corbeaux', couloirs: { cy }[], coutVies? }` (au moins un couloir, jamais deux sur la même ligne `cy`) et `GimmickRadeau` (plus bas). Un module par gimmick dans
   `src/engine/gimmicks/`, appelé par l'aiguillage `gimmicks/index.ts` : `verifierGimmick(niveau)` à la création de la partie,
   `mettreAJourGimmick(etat)` au début de chaque pas (après `ouvrirPas`, avant les vagues). Chaque `switch` finit sur une valeur
   `never` : un type de gimmick oublié ne compile pas.
@@ -914,10 +914,13 @@ Spec : [après l'histoire](specs/2026-11-08-apres-histoire-gimmicks.md), jalon 1
 - **Format** : `GimmickRadeau = { type: 'radeau', trajet: CaseGrille[], vitesse, places: { dx, dy }[] }`. `trajet` : au moins 2 cases
   de la grille, chacune voisine de la précédente (diagonale comprise) ou alignée avec elle sur une ligne ou une colonne ; `vitesse` en
   cases par seconde (0,5 dans les données, à régler) ; `places` : exactement `REGLES.placesRadeau` (3) décalages en tuiles autour du
-  centre. `verifierRadeau` (gimmicks/radeau.ts) le contrôle à la création de la partie.
+  centre. `verifierRadeau` (gimmicks/radeau.ts) le contrôle à la création de la partie : trajet et vitesse valides, places à des décalages
+  distincts, et chaque case du trajet (intermédiaires comprises, `casesDuTrajet`) déjà dans `niveau.casesInterdites`. L'assemblage
+  (`assemblerNiveau`) les y ajoute pour un niveau à radeau : on ne bâtit pas sur l'eau où il passe.
 - **Position = fonction pure du pas** : `positionRadeau(gimmick, pas)` replie la distance parcourue (`vitesse × pas / 30` cases) en
   aller-retour sur la longueur du trajet, puis interpole sur la ligne brisée des centres des cases ; `positionPlace(gimmick, pas, n)`
-  y ajoute le décalage de la place. Rien n'est stocké pour le radeau ; le rendu appelle les mêmes fonctions pour interpoler.
+  y ajoute le décalage de la place. Rien n'est stocké pour le radeau. Le rendu devra appeler ces mêmes fonctions
+  pour interpoler entre deux pas : ce sera fait par la tâche du rendu, rien ne le fait encore.
 - **Tours du radeau** : `Tour.place` (0 à 2, -1 pour une tour posée sur une case ; une tour du radeau a `cx = cy = -1`). Au début de
   chaque pas, `mettreAJourGimmick` → `deplacerToursDuRadeau` recopie la position de chaque place dans `x`, `y` de sa tour : ciblage,
   portée, projectiles, ondes, révélation, ouvrage de l'atelier, pouvoirs des ennemis et sorts qui visent les tours lisent `t.x`,
@@ -925,7 +928,12 @@ Spec : [après l'histoire](specs/2026-11-08-apres-histoire-gimmicks.md), jalon 1
 - **Commandes** : les actions de tour prennent un `LieuTour` (`actions.ts`), soit la case `{ cx, cy }`, soit `{ place }` au lieu de
   la case (jamais les deux, sinon `action_invalide`), sérialisable tel quel dans le journal. `tourDuLieu` (grille.ts) trouve la tour ;
   `tourSurCase` ignore les tours du radeau. Refus : `place_inconnue` (pas de radeau, ou numéro hors des places), `case_occupee` et
-  `case_vide` comme pour une case, `radeau_sans_caserne` pour toute tour à soldats (caserne, tour divine de Plume), à la construction
+  `case_vide` comme pour une case (`place_inconnue` est testée en premier, aussi pour vendre, améliorer, spécialiser et acheter une
+  compétence), `radeau_sans_caserne` pour toute tour à soldats (caserne, tour divine de Plume), à la construction
   comme à une amélioration ou spécialisation qui en donnerait. Les tours divines de Charlie et de Pollen y sont admises.
+- **Événements** : `construction`, `amelioration`, `vente` et `competence_tour` portent la case (`cx`, `cy`, -1 sur le radeau), la `place`
+  (-1 sur une case) et la position `x`, `y` de la tour à cet instant, pour que le rendu sache où dessiner fumée et éclats.
+  `valeurRevente` et `coutCompetence` prennent un `LieuTour`. L'index du moteur exporte `tourDuLieu`, `tourSurPlace`, `positionRadeau`,
+  `positionPlace`, `gimmickRadeau`, `casesDuTrajet` et le type `LieuTour`.
 - **Versions** : `VERSION_ETAT` 8 → 9 (`Tour.place`). `VERSION_DONNEES` inchangée.
 

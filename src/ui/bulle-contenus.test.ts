@@ -232,7 +232,7 @@ describe('bulles du menu de construction', () => {
     const vendre = elements.find((x) => x.id === 'vendre');
     const ralliement = elements.find((x) => x.id === 'ralliement');
     if (!vendre || !ralliement) throw new Error('vendre ou ralliement absent');
-    const rendu = valeurRevente(e, ici.cx, ici.cy);
+    const rendu = valeurRevente(e, ici);
     expect(rendu).toBeGreaterThan(1);
     expect(valeur(contenuElementMenu(e, ici.cx, ici.cy, vendre), t('bulle.vendre.rendu'))).toBe(t('bulle.aretes', { n: rendu }));
     const contenu = contenuElementMenu(e, ici.cx, ici.cy, ralliement);

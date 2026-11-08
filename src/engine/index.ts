@@ -1,5 +1,5 @@
 // API publique du moteur : ce que le rendu, l'interface, la sauvegarde et le simulateur utilisent.
-export type { Action, RaisonRefus, ResultatAction } from './actions';
+export type { Action, LieuTour, RaisonRefus, ResultatAction } from './actions';
 export type * from './definitions';
 export type {
   BonusCollection,
@@ -43,8 +43,11 @@ export {
   lignes,
   ralliementParDefaut,
   toutesLesCases,
+  tourDuLieu,
   tourSurCase,
+  tourSurPlace,
 } from './grille';
+export { casesDuTrajet, gimmickRadeau, positionPlace, positionRadeau } from './gimmicks/radeau';
 export {
   appliquerAction,
   avancer,

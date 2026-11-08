@@ -32,6 +32,16 @@ describe('génération des vagues en couloir', () => {
     expect(volants).toBeGreaterThan(1);
   });
 
+  it('un boss volant reste sur son chemin, hors des couloirs', () => {
+    const vagues = genererVaguesNiveau({ ...PLAN, couloirs: 2, boss: { vague: 3, ennemi: 'ange_cendre', chemin: 1, delai: 5 } });
+    expect(estVolant('ange_cendre')).toBe(true);
+    const dernier = vagues[2]?.paquets.at(-1);
+    expect(dernier).toEqual({ ennemi: 'ange_cendre', nombre: 1, intervalle: 0, chemin: 1, delai: 5 });
+    expect(dernier).not.toHaveProperty('couloir');
+    // Les autres volants de la vague, eux, vont bien en couloir.
+    expect(vagues[2]?.paquets.slice(0, -1).filter((p) => estVolant(p.ennemi)).every((p) => p.couloir !== undefined)).toBe(true);
+  });
+
   it('sans couloir, rien ne change', () => {
     expect(genererVaguesNiveau({ ...PLAN, couloirs: 0 })).toEqual(genererVaguesNiveau(PLAN));
     expect(JSON.stringify(genererVaguesNiveau(PLAN))).not.toContain('couloir');

@@ -342,7 +342,7 @@ describe('amélioration d’une tour', () => {
   it('le coup de marteau part tout de suite, le carillon en différé et en montant', async () => {
     const b = banc();
     await pret(b);
-    b.moteur.jouerEvenement({ type: 'amelioration', tour: 1, cx: 0, cy: 0, niveau: 3, voie: null });
+    b.moteur.jouerEvenement({ type: 'amelioration', tour: 1, cx: 0, cy: 0, place: -1, x: 0.5, y: 0.5, niveau: 3, voie: null });
     const lancees = b.contexte.lancees;
     // marteau, bois qui craque, puis deux notes de carillon
     expect(lancees).toHaveLength(4);
@@ -353,7 +353,7 @@ describe('amélioration d’une tour', () => {
     expect(notes[1]?.vitesse).toBeGreaterThan(notes[0]?.vitesse ?? 99);
   });
 
-  const AMELIORATION_3 = { type: 'amelioration', tour: 1, cx: 0, cy: 0, niveau: 3, voie: null } as const;
+  const AMELIORATION_3 = { type: 'amelioration', tour: 1, cx: 0, cy: 0, place: -1, x: 0.5, y: 0.5, niveau: 3, voie: null } as const;
 
   it('en pleine vague, seul le marteau compte dans le limiteur : toutes les notes sont jouées', async () => {
     const b = banc();
@@ -378,7 +378,7 @@ describe('amélioration d’une tour', () => {
     const b = banc();
     await pret(b);
     b.volumes.son = 0;
-    b.moteur.jouerEvenement({ type: 'amelioration', tour: 1, cx: 0, cy: 0, niveau: 2, voie: null });
+    b.moteur.jouerEvenement({ type: 'amelioration', tour: 1, cx: 0, cy: 0, place: -1, x: 0.5, y: 0.5, niveau: 2, voie: null });
     expect(b.contexte.lancees).toHaveLength(0);
   });
 });

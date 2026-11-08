@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { ENNEMIS } from '../../data/ennemis';
 import { casesInterditesDuNiveau } from '../../data/niveaux/grille-niveau';
 import { REGLES } from '../../data/regles';
-import { CONFIG, compter, evenementsPendant } from '../aides.test-utils';
+import { CONFIG, compter, configDe, evenementsPendant } from '../aides.test-utils';
 import type { Action } from '../actions';
 import type { DefEnnemi, Gimmick, Niveau, Paquet, Vague } from '../definitions';
 import { ajouterEnnemi } from '../ennemis';
@@ -128,6 +128,23 @@ describe('Vol de Corbeaux : traversée en couloir', () => {
   });
 });
 
+describe('Vol de Corbeaux : défi Fer', () => {
+  it('les vagues du défi sont fondues en une seule, mais chaque groupe garde son couloir', () => {
+    const vagues: Vague[] = [{ paquets: [corbeau({ nombre: 2, couloir: 2 })] }, { paquets: [corbeau({ nombre: 3, couloir: 0, delai: 4 })] }];
+    const niveau = { ...niveauCorbeaux(vagues), defiFer: { familles: ['caserne', 'tir'] as [string, string] } };
+    const etat = creerPartie(niveau, configDe('charlie', { defi: 'fer' }));
+    expect(etat.niveau.vagues).toHaveLength(1);
+    const paquets = etat.niveau.vagues[0]?.paquets ?? [];
+    expect(paquets.map((p) => p.couloir)).toEqual([2, 0]);
+    expect(paquets.map((p) => p.nombre)).toEqual([Math.ceil(2 * REGLES.fer.facteurEffectifs - 1e-9), Math.ceil(3 * REGLES.fer.facteurEffectifs - 1e-9)]);
+    for (const r of avancer(etat, [APPEL])) expect(r.ok).toBe(true);
+    evenementsPendant(etat, 8);
+    const enCouloir = etat.ennemis.filter((e) => e.couloir >= 0);
+    expect(enCouloir.length).toBeGreaterThan(0);
+    expect(new Set(enCouloir.map((e) => e.couloir))).toEqual(new Set([2, 0]));
+  });
+});
+
 describe('Vol de Corbeaux : déterminisme', () => {
   const vagues: Vague[] = [{ paquets: [corbeau({ nombre: 6, intervalle: 0.7 }), corbeau({ nombre: 4, intervalle: 1, couloir: 0, delai: 2 }), { ennemi: 'paysan_affame', nombre: 3, intervalle: 1, chemin: 1, delai: 0 }] }];
   const journal: EntreeJournal[] = [
@@ -188,6 +205,14 @@ describe('Vol de Corbeaux : validation du niveau', () => {
     expect(refus([{ paquets: [corbeau({ couloir: 0 })] }], { type: 'corbeaux', couloirs: [{ cy: 1.5 }] })).toThrow(/couloir/i);
   });
 
+  it('refuse un gimmick sans couloir', () => {
+    expect(refus([{ paquets: [{ ennemi: 'corbeau_noir', nombre: 1, intervalle: 0, chemin: 0, delai: 0 }] }], { type: 'corbeaux', couloirs: [] })).toThrow(/au moins un couloir/);
+  });
+
+  it('refuse deux couloirs sur la même ligne', () => {
+    expect(refus([{ paquets: [corbeau({ couloir: 0 })] }], { type: 'corbeaux', couloirs: [{ cy: 4 }, { cy: 1 }, { cy: 4 }] })).toThrow(/même ligne/);
+  });
+
   it('le moteur refuse aussi de poser un non-volant dans un couloir', () => {
     const etat = partieCorbeau();
     expect(() => ajouterEnnemi(etat, ENNEMIS.paysan_affame, 'paysan_affame', 0, 0, false, { couloir: 1 })).toThrow(/vol/);
@@ -200,7 +225,7 @@ describe('Vol de Corbeaux : pouvoirs qui supposent un chemin', () => {
     return ajouterEnnemi(etat, { ...(ENNEMIS[id] as DefEnnemi), volant: true, ...surcharges }, id, 0, 0, false, { couloir: 2 });
   }
 
-  it('le Crapaud Gonflé volant traverse son couloir sans bondir', () => {
+  it('le Crapaud Gonflé volant suit la règle des volants : il ne bondit pas, traverse et sort', () => {
     const etat = partieCorbeau([{ type: 'construire', ...CASE_BORD, tour: 'caserne' }]);
     const crapaud = volantEnCouloir(etat, 'crapaud_gonfle', { vitesse: 2 });
     const vus = evenementsPendant(etat, 25);

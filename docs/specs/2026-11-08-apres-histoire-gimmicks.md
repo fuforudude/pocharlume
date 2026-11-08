@@ -26,7 +26,7 @@ rapportent nettement plus de braises.
 | Niveaux | Région | Gimmick | Règle |
 | --- | --- | --- | --- |
 | 101–105 | 11 | **Vol de Corbeaux** | Des volants traversent la carte de gauche à droite dans des couloirs horizontaux, sans suivre le chemin ; chacun qui atteint le bord droit coûte 1 cœur. Couloirs fixés par carte (2 ou 3), annoncés avant la vague par un panneau au bord gauche. Seuls ce qui vise les volants (tours, sorts, héros tireurs) les touche. |
-| 106–110 | 11 | **Radeau** | Une plateforme à 3 emplacements va et vient sans arrêt le long d'un trajet tracé sur l'eau. On y construit toute tour sauf les casernes ; ses tours tirent depuis la position courante du radeau. |
+| 106–110 | 11 | **Radeau** | Une plateforme à 3 places va et vient sans arrêt le long d'un trajet tracé sur l'eau. On y construit toute tour sauf les casernes ; ses tours tirent depuis la position courante du radeau. |
 | 111–115 | 12 | **Pont-Levis** | Deux chemins ; toutes les 2 vagues une herse bascule et les ennemis prennent l'autre. |
 | 116–120 | 12 | **Crue** | À certaines vagues, l'eau monte et noie une partie des emplacements : leurs tours sont hors service jusqu'à la décrue. |
 | 121–125 | 13 | **Nuit sans Lune** | Carte noire : on ne voit et ne touche que les ennemis éclairés (tours à feu, braseros posés, sorts de lumière). |
@@ -45,7 +45,7 @@ Les détails chiffrés des gimmicks 3 à 10 (cadences, coûts, nombres) se déci
 
 ### Décisions techniques (2026-11-08)
 1. **Format du gimmick** : champ `gimmick` du `Niveau`, union discriminée (`{ type: 'corbeaux', couloirs }`, `{ type: 'radeau', trajet,
-   emplacements }`, …) ; un module par gimmick dans `src/engine/gimmicks/`, appelé à chaque pas par un aiguillage unique ; TypeScript
+   vitesse, places }`, …) ; un module par gimmick dans `src/engine/gimmicks/`, appelé à chaque pas par un aiguillage unique ; TypeScript
    vérifie qu'aucun type n'est oublié (`switch` exhaustif). Même style que `PouvoirsEnnemi`.
 2. **Radeau** : sa position est une **fonction pure du numéro de pas** (`positionRadeau(gimmick, pas)`), rien n'est stocké ; une tour du
    radeau garde seulement « radeau, place n ». Rejeu et sauvegarde en pleine partie restent justes sans migration de l'état du radeau.
@@ -68,7 +68,7 @@ jalons 2 à 5 y ajouteront leur section après leur entretien.
   (tests de `meta.ts` et des transactions).
 - [ ] Moteur, Corbeaux : un ennemi apparu dans un couloir avance en ligne droite du bord gauche au bord droit, ignore le chemin, les
   soldats et ce qui ne vise pas les volants, et retire 1 cœur en sortant à droite ; déterministe au rejeu (tests du moteur).
-- [ ] Moteur, Radeau : 3 emplacements dont la position suit le trajet aller-retour en fonction du seul pas ; construire, améliorer,
+- [ ] Moteur, Radeau : 3 places dont la position suit le trajet aller-retour en fonction du seul pas ; construire, améliorer,
   vendre y marche ; une caserne y est refusée (raison dédiée) ; une tour du radeau vise depuis la position courante ; une sauvegarde en
   pleine partie puis reprise redonne le même état (tests du moteur).
 - [ ] Rendu : les couloirs et le panneau d'annonce au bord gauche avant chaque vague (icônes, nombre, couloir) ; le radeau et ses tours
@@ -89,7 +89,7 @@ jalons 2 à 5 y ajouteront leur section après leur entretien.
    niveau (150), ouverture, braises, validation et migration de sauvegarde, onglets 11–15 de la carte (en 740×360 aussi), `VERSION_DONNEES`.
 2. **Aiguillage des gimmicks + Corbeaux** (moteur) : type `Gimmick`, `src/engine/gimmicks/index.ts`, couloirs dans le format des vagues
    et du générateur, mouvement en couloir, cœur perdu, `VERSION_ETAT` + 1, tests.
-3. **Radeau** (moteur, après la tâche 2) : emplacements mobiles, commandes de construction, refus des casernes, ciblage, tests.
+3. **Radeau** (moteur, après la tâche 2) : places mobiles, commandes de construction, refus des casernes, ciblage, tests.
 4. **Rendu et présentation** (après 2 et 3) : couloirs, panneau, radeau, interpolation, fiche du niveau, fiche « Nouvelle particularité »,
    Bestiaire, textes.
 5. **Contenu de la région 11** (en parallèle de 2–4) : 10 cartes, décor, lore, boss, plans de vagues (`plan-region11.ts`), cartes de l'infini.

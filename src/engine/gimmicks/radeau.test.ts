@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { casesInterditesDuNiveau } from '../../data/niveaux/grille-niveau';
+import { REGLES } from '../../data/regles';
+import { partEntiere } from '../argent';
 import { CONFIG, VAGUE_LOINTAINE, configDe, distance, ennemiFixe, evenementsPendant } from '../aides.test-utils';
 import type { Action } from '../actions';
 import type { Gimmick, GimmickRadeau, Niveau, Vague } from '../definitions';
 import type { EtatPartie, Tour } from '../etat';
 import { centreCase } from '../grille';
-import { appliquerAction, avancer, creerPartie, deserialiser, rejouer, serialiser, step } from '../partie';
-import { positionPlace, positionRadeau } from './radeau';
+import { appliquerAction, avancer, coutCompetence, creerPartie, deserialiser, rejouer, serialiser, step, valeurRevente } from '../partie';
+import { casesDuTrajet, positionPlace, positionRadeau } from './radeau';
 
 /**
  * Trajet d'essai : de la case (1, 4) à la case (14, 4) puis à la case (14, 7), soit des centres (3, 9) → (29, 9) → (29, 15),
@@ -21,9 +23,11 @@ const RADEAU: GimmickRadeau = {
 const PAS_BOUT = 960;
 
 /** Niveau d'essai du Radeau (aucune carte de la région 11 n'existe encore) : 32 × 18 tuiles, chemin 0 en y = 5. */
-function niveauRadeau(vagues: readonly Vague[] = [VAGUE_LOINTAINE], gimmick: Gimmick | null = RADEAU): Niveau {
+function niveauRadeau(vagues: readonly Vague[] = [VAGUE_LOINTAINE], gimmick: Gimmick | null = RADEAU, trajetInterdit = true): Niveau {
   const carte = { largeur: 32, hauteur: 18, chemins: [{ points: [{ x: 0, y: 5 }, { x: 30, y: 5 }] }], departHeros: { x: 28, y: 1 } };
-  return { id: 'essai-radeau', aretesDepart: 5000, carte, casesInterdites: casesInterditesDuNiveau(carte, []), vagues, ...(gimmick ? { gimmick } : {}) };
+  // Comme l'assemblage d'un niveau : les cases du trajet du radeau s'ajoutent aux cases interdites.
+  const trajet = trajetInterdit && gimmick?.type === 'radeau' ? casesDuTrajet(gimmick) : [];
+  return { id: 'essai-radeau', aretesDepart: 5000, carte, casesInterdites: [...casesInterditesDuNiveau(carte, []), ...trajet], vagues, ...(gimmick ? { gimmick } : {}) };
 }
 
 function accepter(etat: EtatPartie, ...actions: Action[]): void {
@@ -77,6 +81,37 @@ describe('Radeau : position, fonction pure du pas', () => {
     expect(() => creerPartie(avec({ vitesse: -1 }), CONFIG)).toThrow(/vitesse/);
     // Deux cases voisines en diagonale font un trajet valide.
     expect(() => creerPartie(avec({ trajet: [{ cx: 1, cy: 4 }, { cx: 2, cy: 5 }] }), CONFIG)).not.toThrow();
+  });
+
+  it('refuse deux places au même décalage', () => {
+    const places = [{ dx: 0, dy: -1 }, { dx: -1, dy: 0 }, { dx: 0, dy: -1 }];
+    expect(() => creerPartie(niveauRadeau([VAGUE_LOINTAINE], { ...RADEAU, places }), CONFIG)).toThrow(/même décalage/);
+  });
+
+  it('refuse un trajet dont une case, intermédiaire comprise, n’est pas interdite à la construction', () => {
+    expect(() => creerPartie(niveauRadeau([VAGUE_LOINTAINE], RADEAU, false), CONFIG)).toThrow(/interdite/);
+    // Seule la case intermédiaire (7, 4), entre (1, 4) et (14, 4), manque.
+    const base = niveauRadeau();
+    const sans = base.casesInterdites.filter((c) => !(c.cx === 7 && c.cy === 4));
+    expect(sans).toHaveLength(base.casesInterdites.length - 1);
+    expect(() => creerPartie({ ...base, casesInterdites: sans }, CONFIG)).toThrow(/\(7, 4\)/);
+    expect(() => creerPartie(base, CONFIG)).not.toThrow();
+  });
+
+  it('une tour ne se pose pas sur le trajet du radeau', () => {
+    const etat = creerPartie(niveauRadeau(), CONFIG);
+    expect(refus(etat, { type: 'construire', cx: 7, cy: 4, tour: 'tir' })).toBe('case_interdite');
+    expect(refus(etat, { type: 'construire', cx: 14, cy: 6, tour: 'tir' })).toBe('case_interdite');
+  });
+
+  it('casesDuTrajet liste les cases du trajet et les intermédiaires, une fois chacune, dans l’ordre', () => {
+    const cases = casesDuTrajet(RADEAU);
+    expect(cases).toHaveLength(17);
+    expect(cases[0]).toEqual({ cx: 1, cy: 4 });
+    expect(cases[6]).toEqual({ cx: 7, cy: 4 });
+    expect(cases[16]).toEqual({ cx: 14, cy: 7 });
+    const diagonale = casesDuTrajet({ ...RADEAU, trajet: [{ cx: 1, cy: 1 }, { cx: 4, cy: 4 }, { cx: 1, cy: 1 }] });
+    expect(diagonale).toEqual([{ cx: 1, cy: 1 }, { cx: 2, cy: 2 }, { cx: 3, cy: 3 }, { cx: 4, cy: 4 }]);
   });
 });
 
@@ -138,6 +173,82 @@ describe('Radeau : construire sur une place', () => {
   it('sans radeau, aucune place n’existe', () => {
     const etat = creerPartie(niveauRadeau([VAGUE_LOINTAINE], null), CONFIG);
     expect(refus(etat, { type: 'construire', place: 0, tour: 'tir' })).toBe('place_inconnue');
+  });
+
+  it('vendre, améliorer, spécialiser et acheter une compétence sur une place inexistante : place_inconnue, testée en premier', () => {
+    const avecRadeau = creerPartie(niveauRadeau(), CONFIG);
+    const sansRadeau = creerPartie(niveauRadeau([VAGUE_LOINTAINE], null), CONFIG);
+    for (const etat of [avecRadeau, sansRadeau]) {
+      for (const place of [3, -1]) {
+        expect(refus(etat, { type: 'vendre', place })).toBe('place_inconnue');
+        expect(refus(etat, { type: 'ameliorer', place })).toBe('place_inconnue');
+        expect(refus(etat, { type: 'specialiser', place, voie: 'A' })).toBe('place_inconnue');
+        expect(refus(etat, { type: 'ameliorerCompetence', place, competence: 'x' })).toBe('place_inconnue');
+      }
+    }
+    // Une place qui existe mais est vide garde sa raison.
+    expect(refus(avecRadeau, { type: 'vendre', place: 1 })).toBe('case_vide');
+  });
+
+  it('construire sur une place à un pas > 0 : la tour prend la position de la place à ce pas, et l’événement la porte', () => {
+    const etat = creerPartie(niveauRadeau(), CONFIG);
+    evenementsPendant(etat, 10);
+    const pas = etat.pas;
+    expect(pas).toBeGreaterThan(0);
+    accepter(etat, { type: 'construire', place: 1, tour: 'magie' });
+    const attendu = positionPlace(RADEAU, pas, 1);
+    const t = tourDeLaPlace(etat, 1);
+    expect({ x: t.x, y: t.y }).toEqual(attendu);
+    expect(attendu).not.toEqual(positionPlace(RADEAU, 0, 1));
+    expect(etat.evenements).toContainEqual({ type: 'construction', tour: t.id, cx: -1, cy: -1, place: 1, x: attendu.x, y: attendu.y, famille: 'magie' });
+  });
+
+  it('les événements d’une tour du radeau portent sa place et sa position, ceux d’une case sa case', () => {
+    const etat = creerPartie(niveauRadeau(), CONFIG);
+    evenementsPendant(etat, 3);
+    accepter(etat, { type: 'construire', place: 2, tour: 'tir' });
+    const t = tourDeLaPlace(etat, 2);
+    accepter(etat, { type: 'ameliorer', place: 2 });
+    expect(etat.evenements).toContainEqual({ type: 'amelioration', tour: t.id, cx: -1, cy: -1, place: 2, x: t.x, y: t.y, niveau: 2, voie: null });
+    accepter(etat, { type: 'ameliorer', place: 2 }, { type: 'specialiser', place: 2, voie: 'A' });
+    const id = t.stats.competences[0]?.id ?? '';
+    accepter(etat, { type: 'ameliorerCompetence', place: 2, competence: id });
+    expect(etat.evenements).toContainEqual({ type: 'competence_tour', tour: t.id, cx: -1, cy: -1, place: 2, x: t.x, y: t.y, competence: id, rang: 1 });
+    accepter(etat, { type: 'vendre', place: 2 });
+    expect(etat.evenements).toContainEqual({ type: 'vente', tour: t.id, cx: -1, cy: -1, place: 2, x: t.x, y: t.y, aretes: expect.any(Number) as number });
+    accepter(etat, { type: 'construire', cx: 4, cy: 1, tour: 'tir' });
+    const c = etat.tours[0];
+    expect(etat.evenements).toContainEqual({ type: 'construction', tour: c?.id, cx: 4, cy: 1, place: -1, x: c?.x, y: c?.y, famille: 'tir' });
+  });
+
+  it('ameliorerCompetence sur une place : prix annoncé par coutCompetence({ place }), rang acheté, arêtes débitées', () => {
+    const etat = creerPartie(niveauRadeau(), CONFIG);
+    accepter(etat, { type: 'construire', place: 0, tour: 'tir' }, { type: 'ameliorer', place: 0 }, { type: 'ameliorer', place: 0 }, { type: 'specialiser', place: 0, voie: 'A' });
+    const t = tourDeLaPlace(etat, 0);
+    const id = t.stats.competences[0]?.id ?? '';
+    const cout = coutCompetence(etat, { place: 0 }, id);
+    expect(cout).toBeGreaterThan(0);
+    const aretes = etat.aretes;
+    const cumule = t.coutCumule;
+    accepter(etat, { type: 'ameliorerCompetence', place: 0, competence: id });
+    expect(t.rangs[0]).toBe(1);
+    expect(etat.aretes).toBe(aretes - (cout ?? 0));
+    expect(t.coutCumule).toBe(cumule + (cout ?? 0));
+    expect(coutCompetence(etat, { place: 1 }, id)).toBeUndefined();
+    expect(coutCompetence(etat, { place: 7 }, id)).toBeUndefined();
+  });
+
+  it('la revente d’une tour de place rend exactement partEntiere(coutCumule, tauxRevente), comme valeurRevente({ place })', () => {
+    const etat = creerPartie(niveauRadeau(), CONFIG);
+    accepter(etat, { type: 'construire', place: 0, tour: 'tir' }, { type: 'ameliorer', place: 0 }, { type: 'ameliorer', place: 0 });
+    const t = tourDeLaPlace(etat, 0);
+    const attendu = partEntiere(t.coutCumule, REGLES.tauxRevente);
+    expect(attendu).toBeGreaterThan(0);
+    expect(valeurRevente(etat, { place: 0 })).toBe(attendu);
+    expect(valeurRevente(etat, { place: 1 })).toBe(0);
+    const aretes = etat.aretes;
+    accepter(etat, { type: 'vendre', place: 0 });
+    expect(etat.aretes).toBe(aretes + attendu);
   });
 });
 
