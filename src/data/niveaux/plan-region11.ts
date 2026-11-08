@@ -125,7 +125,7 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
     chemins: [0],
     aretesDepart: 1690,
     defiFer: { familles: ['artillerie', 'tir'] },
-    gimmick: radeau([5, 4], [6, 4], [7, 4], [8, 4], [9, 4], [10, 4], [11, 4], [12, 4], [13, 4]),
+    gimmick: radeau([6, 3], [6, 4], [7, 4], [8, 4], [9, 4], [10, 4], [11, 4], [12, 4]),
     nom: 'niveau.r11.06.nom',
     ambiance: 'niveau.r11.06.ambiance',
     vagues: {
@@ -141,7 +141,7 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
     chemins: [0],
     aretesDepart: 1750,
     defiFer: { familles: ['caserne', 'magie'] },
-    gimmick: radeau([3, 7], [4, 7], [5, 7], [6, 7], [7, 7], [7, 6], [7, 5], [7, 4]),
+    gimmick: radeau([4, 8], [4, 7], [4, 6], [5, 6], [6, 6], [6, 5], [6, 4], [6, 3]),
     nom: 'niveau.r11.07.nom',
     ambiance: 'niveau.r11.07.ambiance',
     vagues: {
@@ -158,7 +158,7 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
     chemins: [0],
     aretesDepart: 1810,
     defiFer: { familles: ['tir', 'caserne'] },
-    gimmick: radeau([5, 6], [6, 6], [7, 6], [8, 6], [9, 6], [10, 6], [11, 6], [12, 6], [12, 5], [12, 4], [12, 3]),
+    gimmick: radeau([5, 6], [6, 6], [7, 6], [8, 6], [9, 6], [10, 6], [11, 6], [12, 6], [13, 6], [13, 5], [13, 4], [13, 3]),
     nom: 'niveau.r11.08.nom',
     ambiance: 'niveau.r11.08.ambiance',
     vagues: {
@@ -174,7 +174,7 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
     chemins: [0],
     aretesDepart: 1875,
     defiFer: { familles: ['magie', 'artillerie'] },
-    gimmick: radeau([3, 5], [4, 5], [5, 5], [5, 4], [6, 4], [7, 4], [8, 4], [9, 4], [9, 5], [9, 6]),
+    gimmick: radeau([4, 5], [5, 5], [5, 4], [6, 4], [7, 4], [8, 4], [8, 5], [8, 6]),
     nom: 'niveau.r11.09.nom',
     ambiance: 'niveau.r11.09.ambiance',
     vagues: {
@@ -190,7 +190,7 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
     chemins: [0, 1, 2],
     aretesDepart: 2700,
     defiFer: { familles: ['tir', 'magie'] },
-    gimmick: radeau([4, 5], [4, 4], [4, 3], [5, 3], [6, 3], [7, 3], [8, 3], [9, 3], [10, 3], [10, 4], [10, 5], [10, 6]),
+    gimmick: radeau([5, 6], [5, 5], [5, 4], [5, 3], [6, 3], [7, 3], [8, 3], [9, 3], [9, 4], [9, 5], [9, 6]),
     nom: 'niveau.r11.10.nom',
     ambiance: 'niveau.r11.10.ambiance',
     vagues: {
