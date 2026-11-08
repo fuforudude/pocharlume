@@ -1,0 +1,176 @@
+# Le Passeur, boss de la région 11 (les Grèves Grises), dessiné : grande silhouette en robe grise, capuche sans visage
+# où luisent deux yeux pâles, une perche de batelier et sa lanterne blême à la main droite, une obole dans la main
+# gauche, un corbeau sur l'épaule ; il se tient dans l'eau grise jusqu'aux chevilles. Dessiné en 32×32 puis agrandi ×2
+# (cadres de 64×64), ancre au pied, comme la Dame du Puits. Pas d'élite pour un boss.
+# Il plonge toutes les 12 s : animations `plonge` (s'enfonce) et `emerge` (remonte), jouées une fois.
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+agrandi 2
+
+calque capuche 12 3
+...gg...
+..gGGg..
+.gGGGGg.
+.gGkkGg.
+gGkLkLGg
+gGkkkkGg
+gGkkkkGg
+.gkkkkg.
+
+calque robe 9 11
+...gGGGGGGg...
+..gGGGpGGGGg..
+.gGGGGpGGGGGg.
+.gGGGGpGGGGGg.
+.gGGGGGpGGGGg.
+gGGGGGGpGGGGGg
+gGPGGGGpGGGGGg
+gGPGGGGGpGGGGg
+gGGGGGGGpGGGGg
+gGGGgGGGpGGGGg
+gGGGgGGGGpGGGg
+gGGGgGGGGpGGGg
+gGGgGGGGGpGGGg
+gGGgGGGGGGpGGg
+gGgGGGGGGGpGgg
+gg.gGgGgg.gGg.
+g...g..g...g..
+
+calque corbeau 7 6
+..kk.
+qkxk.
+.kkkk
+..kkk
+..k.k
+
+calque main-g 7 16
+gG
+qG
+Y.
+
+calque main-d 22 15
+GGq
+gGq
+
+calque perche 24 1
+B
+d
+d
+d
+B
+d
+d
+d
+d
+B
+d
+d
+d
+d
+d
+d
+d
+d
+d
+B
+d
+d
+d
+d
+d
+d
+d
+d
+
+calque lanterne 25 1
+kk.
+.k.
+kLk
+klk
+.k.
+
+# La perche levée en oblique, puis abattue à l'horizontale (attaque).
+calque perche-oblique 20 4
+.........d
+........d.
+........d.
+.......d..
+......B...
+......d...
+.....d....
+....d.....
+...d......
+...d......
+..d.......
+.d........
+
+calque perche-basse 20 16
+dddddBddddBd
+
+calque eau 4 27
+....uuuttttttttttuuu....
+..uuttTttttttttTttttuu..
+.uttttttttttttttttttttu.
+...uuuttttttttttttuuu...
+
+calque eau-b 4 27
+...uuuuttttttttttuu.....
+..uttttTtttttttttTttuu..
+utttttttttttttttttttttu.
+....uuutttttttttttuuuu..
+
+calque eau-masque 0 27
+________________________________
+________________________________
+________________________________
+________________________________
+
+calque bulles 12 23
+.i.....
+...i.i.
+..i....
+
+sprite passeur
+anim repos 260
+cadre perche + lanterne + robe + main-g + main-d + capuche + corbeau + eau
+cadre perche + lanterne decale 0 1 + robe decale 0 1 + main-g decale 0 1 + main-d decale 0 1 + capuche decale 0 1 + corbeau decale 0 1 + eau-b
+
+# Il avance dans l'eau en s'appuyant sur la perche : le corps tangue, la perche descend et remonte.
+anim marche 160
+cadre perche decale 0 -1 + lanterne decale 0 -1 + robe decale 0 -1 + main-g decale 0 -1 + main-d decale 0 -1 + capuche decale 0 -1 + corbeau decale 0 -1 + eau
+cadre perche + lanterne + robe + main-g + main-d + capuche decale 1 0 + corbeau decale 1 0 + eau-b
+cadre perche decale 0 1 + lanterne decale 0 1 + robe decale 0 -1 + main-g decale 0 -1 + main-d decale 0 -1 + capuche decale 0 -1 + corbeau decale 0 -1 + eau
+cadre perche + lanterne + robe + main-g + main-d + capuche decale -1 0 + corbeau decale -1 0 + eau-b
+
+# La perche se lève puis s'abat à l'horizontale ; le corbeau s'ébroue.
+anim attaque 120
+cadre perche decale 0 -2 + lanterne decale 0 -2 + robe decale -1 0 + main-g decale -1 0 + main-d decale 0 -1 + capuche decale -1 0 + corbeau decale -1 -1 + eau duree 200
+cadre perche-oblique + robe + main-g + main-d + capuche decale 1 0 + corbeau decale 0 -1 + eau-b
+cadre perche-basse + robe decale 1 0 + main-g decale 1 0 + main-d decale 0 1 + capuche decale 2 1 + corbeau + eau duree 160
+cadre perche + lanterne + robe + main-g + main-d + capuche + corbeau + eau-b
+
+anim blesse 130
+cadre perche decale -1 0 + lanterne decale -1 0 + robe decale -1 0 + main-g decale -1 0 + main-d decale -1 0 + capuche decale -2 1 + corbeau decale -2 -2 + eau
+cadre perche + lanterne + robe + main-g + main-d + capuche decale -1 0 + corbeau decale -1 -1 + eau-b
+
+# Il coule sans un geste, la perche avec lui ; le corbeau s'envole. Le dernier cadre est l'eau vide.
+anim mort 180
+cadre perche decale 0 3 + lanterne decale 0 3 + robe decale 0 3 + main-g decale 0 3 + main-d decale 0 3 + capuche decale 0 3 + corbeau decale -2 -2 + eau-masque + eau
+cadre perche decale 0 9 + lanterne decale 0 9 + robe decale 0 9 + main-g decale 0 9 + main-d decale 0 9 + capuche decale 0 8 + corbeau decale -5 -5 + eau-masque + eau-b
+cadre perche decale 0 15 + lanterne decale 0 15 + robe decale 0 15 + capuche decale 0 14 + eau-masque + eau + bulles
+cadre eau-b + bulles duree 1000
+
+# La plongée (intouchable 2 s) puis la remontée plus loin sur le chemin ; le corbeau reste au-dessus de l'eau.
+anim plonge 160 unique
+cadre perche decale 0 3 + lanterne decale 0 3 + robe decale 0 3 + main-g decale 0 3 + main-d decale 0 3 + capuche decale 0 3 + corbeau decale 0 -1 + eau-masque + eau
+cadre perche decale 0 9 + lanterne decale 0 9 + robe decale 0 9 + main-g decale 0 9 + main-d decale 0 9 + capuche decale 0 8 + corbeau decale 0 -3 + eau-masque + eau-b
+cadre perche decale 0 15 + lanterne decale 0 15 + robe decale 0 15 + capuche decale 0 14 + corbeau decale 0 -5 + eau-masque + eau + bulles
+cadre eau-b + bulles + corbeau decale 0 -5
+
+anim emerge 160 unique
+cadre eau + bulles + corbeau decale 0 -5
+cadre perche decale 0 15 + lanterne decale 0 15 + robe decale 0 15 + capuche decale 0 14 + corbeau decale 0 -4 + eau-masque + eau-b + bulles
+cadre perche decale 0 9 + lanterne decale 0 9 + robe decale 0 9 + main-g decale 0 9 + main-d decale 0 9 + capuche decale 0 8 + corbeau decale 0 -2 + eau-masque + eau
+cadre perche decale 0 3 + lanterne decale 0 3 + robe decale 0 3 + main-g decale 0 3 + main-d decale 0 3 + capuche decale 0 3 + corbeau decale 0 -1 + eau-masque + eau-b

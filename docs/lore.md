@@ -317,6 +317,7 @@ Ce qu'on voit au choix avant un niveau : un symbole, une épithète, une phrase.
 - `ennemi.bourreau_roi` : Bourreau du Roi
 - `ennemi.gargouille` : Gargouille
 - `ennemi.martyr_bleme` : Martyr Blême
+- `ennemi.passeur` : Le Passeur
 
 ## Ennemis : descriptions
 
@@ -379,6 +380,7 @@ Ce qu'on voit au choix avant un niveau : un symbole, une épithète, une phrase.
 - `ennemi.bourreau_roi.desc` : Il tranche ceux que le roi n’a plus envie de voir. Il ne regarde jamais leurs visages.
 - `ennemi.gargouille.desc` : Elle crache la pluie depuis le toit. Quand il ne pleut plus, elle descend.
 - `ennemi.martyr_bleme.desc` : Il s’est offert au Soleil Blême. Sa dernière lueur ne lui appartient plus.
+- `ennemi.passeur.desc` : Il a laissé sa barque pourrir dans les marais. Il fait toujours payer le passage, et ne dit jamais vers où.
 
 ## Paroles avant les boss
 
@@ -394,6 +396,7 @@ Ce ne sont plus les dieux qui parlent : un murmure, une inscription, une voix sa
 - `boss.r8.parole` : Une voix qui ne vient d’aucune cellule : « Il a tout lu. Sauf ce qu’on n’a jamais écrit. »
 - `boss.r9.parole` : Sous le trône, à demi effacé : « La couronne parle. Les statues… se taisent pour toi. »
 - `boss.r10.parole` : Personne ne parle. Seulement, très bas : « Garde tes braises dans l’ombre. La mort n’a jamais trouvé celle qui n’en a plus. »
+- `boss.r11.parole` : Gravé sur une rame plantée dans le sable : « Une obole pour passer. Personne n’a jamais dit qu’il y avait une autre rive. »
 
 ## Régions
 
@@ -711,6 +714,37 @@ Vrais noms : marche et avenue pour le Colosse, ruelles et avenue pour l’Ombre,
 - `niveau.r10.09.ambiance` : On n’y offre plus rien. Il prend ce qu’il veut, sans demander.
 - `niveau.r10.10.nom` : Le Soleil Blême
 - `niveau.r10.10.ambiance` : Il ne se lève plus, il pâlit. Sous sa lumière, tout ressemble déjà à de la cendre.
+
+## Après l’histoire, région 11 : Les Grèves Grises (pas encore dans le jeu)
+
+Textes proposés pour la région 11 (niveaux 101 à 110, spec `docs/specs/2026-11-08-apres-histoire-gimmicks.md`), à retoucher.
+Ils sont écrits **sans accents graves** autour des clés : `npm run lore` refuse toute clé qui n’existe pas encore dans
+`src/i18n/`, et ces niveaux n’existent pas encore. Quand la région 11 sera dans le jeu, il suffira d’entourer chaque clé
+d’accents graves, comme pour les régions 1 à 10. Les niveaux 101 à 105 sont ceux du Vol de Corbeaux, 106 à 110 ceux du Radeau.
+La clé `region.11.ambiance` est une proposition : aucune région n’a encore d’ambiance affichée.
+
+- region.11 : Les Grèves Grises
+- region.11.ambiance : Derrière la cathédrale, la cendre descend jusqu’à l’eau. Les corbeaux y attendent. Un passeur aussi, la main ouverte.
+- niveau.r11.01.nom : La Grève de Cendre
+- niveau.r11.01.ambiance : La cendre descend jusqu’à l’eau. L’eau ne l’emporte pas.
+- niveau.r11.02.nom : Les Filets Pendus
+- niveau.r11.02.ambiance : Les pêcheurs ont laissé leurs filets. Les corbeaux comptent ce qui s’y est pris.
+- niveau.r11.03.nom : Le Vol Bas
+- niveau.r11.03.ambiance : Ils rasent la grève sans un cri. On n’entend que les ailes, et c’est déjà trop tard.
+- niveau.r11.04.nom : La Coque Retournée
+- niveau.r11.04.ambiance : Une barque sur le dos, comme une bête morte. Quelque chose gratte encore dessous.
+- niveau.r11.05.nom : Le Perchoir
+- niveau.r11.05.ambiance : Un arbre sans feuilles, noir de plumes. Quand il s’envole, le ciel s’éteint.
+- niveau.r11.06.nom : L’Embarcadère
+- niveau.r11.06.ambiance : Le ponton s’arrête au milieu de l’eau. Le reste du chemin se paie.
+- niveau.r11.07.nom : Le Radeau
+- niveau.r11.07.ambiance : Des planches liées avec des cordes de pendus. Elles flottent mieux que ceux qui les portaient.
+- niveau.r11.08.nom : Les Eaux sans Fond
+- niveau.r11.08.ambiance : Ni courant, ni fond. Le radeau avance pourtant, et personne ne rame.
+- niveau.r11.09.nom : Le Gué des Oboles
+- niveau.r11.09.ambiance : Une pièce sur chaque pierre du gué. Personne n’est revenu les reprendre.
+- niveau.r11.10.nom : Le Passeur
+- niveau.r11.10.ambiance : Il attend sur la grève, la main ouverte. Ce qu’on lui donne ne revient pas.
 
 ## Objets
 

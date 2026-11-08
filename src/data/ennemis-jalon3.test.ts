@@ -32,8 +32,8 @@ describe('ennemis des régions 2 à 5', () => {
       for (const id of ennemis) expect(Object.hasOwn(ENNEMIS, id), id).toBe(true);
       expect(table[boss]?.boss, boss).toBe(true);
     }
-    expect(Object.keys(ENNEMIS)).toHaveLength(4 + 12 + 4 + 14 + 5 + 20);
-    expect(Object.values(ENNEMIS).filter((e) => e.boss)).toHaveLength(5 + 5);
+    expect(Object.keys(ENNEMIS)).toHaveLength(4 + 12 + 4 + 14 + 5 + 20 + 1);
+    expect(Object.values(ENNEMIS).filter((e) => e.boss)).toHaveLength(5 + 5 + 1);
   });
 
   it('chaque ennemi a un nom traduit, des valeurs saines et une prime', () => {

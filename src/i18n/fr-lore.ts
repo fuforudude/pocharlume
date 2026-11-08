@@ -61,6 +61,7 @@ export const frLore = {
   'ennemi.bourreau_roi.desc': 'Il tranche ceux que le roi n’a plus envie de voir. Il ne regarde jamais leurs visages.',
   'ennemi.gargouille.desc': 'Elle crache la pluie depuis le toit. Quand il ne pleut plus, elle descend.',
   'ennemi.martyr_bleme.desc': 'Il s’est offert au Soleil Blême. Sa dernière lueur ne lui appartient plus.',
+  'ennemi.passeur.desc': 'Il a laissé sa barque pourrir dans les marais. Il fait toujours payer le passage, et ne dit jamais vers où.',
 
   // Paroles avant les boss
   'boss.r1.parole': 'Gravé sur l’étal, sous le sang sec : « Ici, on pesait les chats. La balance penche encore. »',
@@ -73,6 +74,7 @@ export const frLore = {
   'boss.r8.parole': 'Une voix qui ne vient d’aucune cellule : « Il a tout lu. Sauf ce qu’on n’a jamais écrit. »',
   'boss.r9.parole': 'Sous le trône, à demi effacé : « La couronne parle. Les statues… se taisent pour toi. »',
   'boss.r10.parole': 'Personne ne parle. Seulement, très bas : « Garde tes braises dans l’ombre. La mort n’a jamais trouvé celle qui n’en a plus. »',
+  'boss.r11.parole': 'Gravé sur une rame plantée dans le sable : « Une obole pour passer. Personne n’a jamais dit qu’il y avait une autre rive. »',
 
   // Inscriptions des statues
   'inscription.chaumes': 'Neuf jours il a tenu la porte. Derrière lui, on rentrait les foins, et des petits naissaient.',
