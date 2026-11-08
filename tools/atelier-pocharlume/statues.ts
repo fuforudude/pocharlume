@@ -19,7 +19,7 @@ import { decorVisible } from '../../src/data/niveaux/assemblage';
 import type { CarteModele } from '../../src/data/niveaux/cartes-toutes';
 import { rectsSeChevauchent } from '../../src/data/niveaux/geometrie';
 import { casesInterditesDuNiveau, tuilesDeChemin } from '../../src/data/niveaux/grille-niveau';
-import { empriseDecor, GRANDS_DECORS } from '../../src/data/niveaux/habillage';
+import { empriseDecor, GRANDS_DECORS, zonesBloquantes } from '../../src/data/niveaux/habillage';
 import { PLANS_REGIONS } from '../../src/data/niveaux/plans';
 import { SPRITE_STATUE, type OrigineStatue } from '../../src/data/niveaux/statues';
 import type { ErreurCarte } from '../atelier/types.ts';
@@ -137,7 +137,7 @@ export function verifierStatue(c: ContexteStatue): ErreurCarte[] {
   if (!uneCase) return [{ objet: ID_STATUE, message: `${quoi} serait à cheval sur deux cases de la grille : elle doit tenir dans une seule case` }];
 
   const interdite = (carte: Carte, decors: readonly Decor[]): boolean =>
-    estCaseInterdite({ carte, casesInterdites: casesInterditesDuNiveau(carte, decorVisible({ ...c.modele, decor: decors }, carte)) }, cx, cy);
+    estCaseInterdite({ carte, casesInterdites: casesInterditesDuNiveau(carte, decorVisible({ ...c.modele, decor: decors }, carte), zonesBloquantes(c.modele)) }, cx, cy);
   const fautes = new Map<string, { objets: Set<string>; niveaux: (number | null)[] }>();
   const noter = (message: string, objets: readonly string[], numero: number | null): void => {
     const f = fautes.get(message) ?? { objets: new Set<string>(), niveaux: [] };

@@ -5,6 +5,7 @@
 import { decorVisible } from '../data/niveaux/assemblage';
 import { EAU_MORTE, GREVE } from '../data/niveaux/cartes-region11';
 import { casesInterditesDuNiveau } from '../data/niveaux/grille-niveau';
+import { zonesBloquantes } from '../data/niveaux/habillage';
 import type { CarteModele } from '../data/niveaux/modele-carte';
 import type { NiveauCampagne } from '../data/visuel';
 import { casesDuTrajet } from '../engine';
@@ -17,7 +18,7 @@ function assemblerNiveauEssai(modele: CarteModele, gimmick: Gimmick, vagues: rea
   const trajet = gimmick.type === 'radeau' ? casesDuTrajet(gimmick) : [];
   return {
     numero: 101,
-    niveau: { id, aretesDepart: 900, carte, casesInterdites: [...casesInterditesDuNiveau(carte, decor), ...trajet], vagues, gimmick },
+    niveau: { id, aretesDepart: 900, carte, casesInterdites: [...casesInterditesDuNiveau(carte, decor, zonesBloquantes(modele)), ...trajet], vagues, gimmick },
     visuel: { region: modele.region, zones: modele.zones, decor },
     boss: false,
     horde: false,

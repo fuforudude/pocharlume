@@ -231,7 +231,7 @@ describe('validité des cartes', () => {
         id: modele.id,
         aretesDepart: 0,
         carte,
-        casesInterdites: casesInterditesDuNiveau(carte, modele.decor),
+        casesInterdites: casesInterditesDuNiveau(carte, modele.decor, zonesBloquantes(modele)),
         vagues: [{ paquets: [{ ennemi: 'paysan_affame', nombre: 1, intervalle: 1, chemin: 0, delai: 0 }] }],
       });
     }

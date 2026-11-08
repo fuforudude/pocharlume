@@ -21,7 +21,7 @@ function niveauBanc(): Niveau {
     id: 'banc',
     aretesDepart: 100000,
     carte,
-    casesInterdites: casesInterditesDuNiveau(carte, []),
+    casesInterdites: casesInterditesDuNiveau(carte, [], []),
     vagues: [{ paquets: [{ ennemi: 'paysan_affame', nombre: 1, intervalle: 0, chemin: 0, delai: 3600 }] }],
   };
 }

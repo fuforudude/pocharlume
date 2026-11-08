@@ -919,8 +919,8 @@ Spec : [après l'histoire](specs/2026-11-08-apres-histoire-gimmicks.md), jalon 1
   (`assemblerNiveau`) les y ajoute pour un niveau à radeau : on ne bâtit pas sur l'eau où il passe.
 - **Position = fonction pure du pas** : `positionRadeau(gimmick, pas)` replie la distance parcourue (`vitesse × pas / 30` cases) en
   aller-retour sur la longueur du trajet, puis interpole sur la ligne brisée des centres des cases ; `positionPlace(gimmick, pas, n)`
-  y ajoute le décalage de la place. Rien n'est stocké pour le radeau. Le rendu devra appeler ces mêmes fonctions
-  pour interpoler entre deux pas : ce sera fait par la tâche du rendu, rien ne le fait encore.
+  y ajoute le décalage de la place. Rien n'est stocké pour le radeau. Le rendu appelle ces mêmes fonctions à un pas fractionnaire
+  (`pasAffiche`, plus bas) pour interpoler entre deux pas.
 - **Tours du radeau** : `Tour.place` (0 à 2, -1 pour une tour posée sur une case ; une tour du radeau a `cx = cy = -1`). Au début de
   chaque pas, `mettreAJourGimmick` → `deplacerToursDuRadeau` recopie la position de chaque place dans `x`, `y` de sa tour : ciblage,
   portée, projectiles, ondes, révélation, ouvrage de l'atelier, pouvoirs des ennemis et sorts qui visent les tours lisent `t.x`,
@@ -937,6 +937,28 @@ Spec : [après l'histoire](specs/2026-11-08-apres-histoire-gimmicks.md), jalon 1
   `valeurRevente` et `coutCompetence` prennent un `LieuTour`. L'index du moteur exporte `tourDuLieu`, `tourSurPlace`, `positionRadeau`,
   `positionPlace`, `gimmickRadeau`, `casesDuTrajet` et le type `LieuTour`.
 - **Versions** : `VERSION_ETAT` 8 → 9 (`Tour.place`). `VERSION_DONNEES` inchangée.
+
+### Rendu et présentation des gimmicks (tâche 4)
+- **`pasAffiche(pas, alpha)`** (`render/gimmicks.ts`) : le pas fractionnaire que montre l'image, `etat.pas - 2 + alpha` (jamais négatif).
+  Après le pas p, `etat.pas` vaut p + 1 et les tours du radeau sont à la position du pas p ; le suivi interpole leurs visuels entre
+  p - 1 et p. Le radeau (`centreRadeauAffiche`), ses nattes et la surbrillance d'une place (`placeAffichee`) se calculent à ce pas avec
+  `positionRadeau` / `positionPlace` : les tours restent posées sur leurs places, à l'arrêt comme à ×2.
+- **`Effet.suitTour`** (`render/effets.ts`) : l'identifiant de la tour qu'un effet suit (poussière de construction, anneau
+  d'amélioration d'une tour du radeau, qui bouge pendant l'effet), -1 pour un effet qui reste où il est né. Si la tour a disparu,
+  l'effet retombe sur sa position de départ ; `PoolEffets.prendre` remet le champ à -1.
+- **`Mode.menu.place`** (`ui/interaction.ts`) : le menu en cercle d'une place du radeau a `place` = son numéro et `cx = cy = -1`
+  (comme une tour du radeau dans le moteur) ; `lieuDuMenu` le convertit en `LieuTour`. Le menu reste ancré là où il s'est ouvert
+  (`ancreMenu`, `partie.ts`) : on vise mal des boutons qui glissent. L'anneau et la portée, eux, suivent la place.
+- **Toucher et survol d'une place** (`placeTouchee`) : la place la plus proche dans le rayon du doigt (0,6 à 0,9 tuile), au pied et
+  au corps de sa tour. Sur une case de la rive (hors `casesDuTrajet`), la case l'emporte sauf si le point est strictement plus près de
+  la place que du centre de la case, et le corps de la tour du radeau ne compte pas si la case porte une tour : toucher une tour de la
+  rive n'ouvre jamais le menu de la tour du radeau qui passe dessous. Sur un niveau à radeau, la visée est refaite à chaque image
+  avec la dernière position de la souris : les touches 1 à 5 visent ce qui passe sous une souris immobile.
+- **Rencontres `particularite_<type>`** : la première partie d'un niveau à gimmick note `particularite_corbeaux` ou
+  `particularite_radeau` dans `meta.bestiaire.rencontres`, à côté des ennemis rencontrés, sans nouveau format de sauvegarde. Ces
+  identifiants ont la forme d'un identifiant d'ennemi (`validerBestiaire` les accepte), traversent l'export, l'import et la fusion
+  tels quels, et l'écran des ennemis les ignore (il ne retient que les clés d'`ENNEMIS`). La fiche « Nouvelle particularité » s'ouvre
+  au lancement de la partie quand l'identifiant n'y était pas encore (et que l'option des fiches est active).
 
 ### Région 11 dans la campagne (tâche 5)
 - **Plans** : `plan-region11.ts` (niveaux 101 à 110), vagues figées dans `vagues-region11.ts` ; `CARTES`, `PLANS_REGIONS`, `REGIONS` et

@@ -3,11 +3,14 @@
 // l'ordonne. Le rendu Canvas et l'atlas sont remplacés par des doublures (happy-dom n'a pas de Canvas 2D) ; le
 // moteur, le HUD, les écrans de pause et de fin, les gestes et le clavier sont les vrais.
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { niveauDeCampagne } from '../data/niveaux/campagne';
 import { REGION1 } from '../data/niveaux/region1';
 import { VERSION_DONNEES } from '../data/version';
-import { casesLibres, centreCase, creerPartie, deserialiser, serialiser, step, validerAction } from '../engine';
+import type { NiveauCampagne } from '../data/visuel';
+import { casesLibres, centreCase, creerPartie, deserialiser, gimmickRadeau, positionPlace, serialiser, step, validerAction } from '../engine';
 import type { Action, ConfigPartie, EtatPartie } from '../engine';
 import { t } from '../i18n';
+import { placeTouchee } from './interaction';
 import { graineSuivante, lancerNiveau, type OptionsPartie, type PartieEnCours, type ResultatPartie } from './partie';
 
 const rendu = vi.hoisted(() => ({
@@ -970,5 +973,55 @@ describe('fiche « Nouvel ennemi »', () => {
     expect(etat.arretes).toBe(1);
     expect(bestiaireOuvert()).toBe(false);
     partie.arreter();
+  });
+});
+
+describe('niveau à radeau (106)', () => {
+  const NIVEAU_RADEAU = niveauDeCampagne(106);
+  const RADEAU = NIVEAU_RADEAU ? gimmickRadeau(NIVEAU_RADEAU.niveau) : undefined;
+  if (!NIVEAU_RADEAU || !RADEAU) throw new Error('niveau 106 sans radeau');
+
+  async function demarrerRadeau(): Promise<PartieEnCours> {
+    return lancerNiveau(NIVEAU_RADEAU as NiveauCampagne, CONFIG, (r) => { fins.push(r); }, { parent: document.body, surDemarrage: (p) => { parties.push(p); } });
+  }
+
+  function souris(x: number, y: number): void {
+    document.querySelector('canvas')?.dispatchEvent(new PointerEvent('pointermove', { pointerId: 9, pointerType: 'mouse', clientX: x * 16, clientY: y * 16, buttons: 0, bubbles: true }));
+  }
+
+  function chiffre(n: number): void {
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: String(n), code: `Digit${String(n)}`, bubbles: true }));
+  }
+
+  it('souris immobile : quand le radeau arrive dessous, la touche 2 construit sur la place qu’il amène', async () => {
+    const partie = await demarrerRadeau();
+    // La souris attend, immobile, là où la place 0 sera dans 150 pas (le radeau n'y est pas encore).
+    const cible = positionPlace(RADEAU, partie.etat.pas + 150, 0);
+    souris(cible.x, cible.y);
+    expect(placeTouchee(partie.etat, cible.x, cible.y, 0)).toBe(-1);
+    imagesJusqua(() => placeTouchee(partie.etat, cible.x, cible.y, 0) === 0, 400);
+    chiffre(2);
+    images(2);
+    expect(messageAffiche()).toBe('');
+    expect(partie.etat.tours.filter((tour) => tour.place === 0 && tour.famille === 'tir')).toHaveLength(1);
+  });
+
+  it('le menu d’une place reste ancré là où il s’est ouvert pendant que le radeau s’éloigne', async () => {
+    const partie = await demarrerRadeau();
+    images(2);
+    const p = positionPlace(RADEAU, partie.etat.pas - 1, 1);
+    toucherCarte(p.x, p.y);
+    images(1);
+    expect(partie.mode).toEqual({ type: 'menu', cx: -1, cy: -1, place: 1 });
+    const positions = (): string[] => [...document.querySelectorAll<HTMLElement>('.element-menu')].map((b) => `${b.style.left},${b.style.top}`);
+    const avant = positions();
+    expect(avant.length).toBeGreaterThan(0);
+    // Trois secondes plus tard, le radeau a fait une case et demie : les boutons n'ont pas bougé.
+    const pasAvant = partie.etat.pas;
+    images(60);
+    expect(partie.etat.pas - pasAvant).toBeGreaterThan(60);
+    expect(Math.abs(positionPlace(RADEAU, partie.etat.pas - 1, 1).x - p.x)).toBeGreaterThan(1);
+    expect(partie.mode).toEqual({ type: 'menu', cx: -1, cy: -1, place: 1 });
+    expect(positions()).toEqual(avant);
   });
 });

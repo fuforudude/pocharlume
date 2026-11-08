@@ -9,7 +9,7 @@
 // (les petits décors des régions 2 à 5 ont chacun une lettre, voir LETTRES ; ? = sprite sans lettre)
 import { CARTES } from '../../src/data/niveaux/cartes-toutes.ts';
 import type { CarteModele } from '../../src/data/niveaux/modele-carte.ts';
-import { empriseDecor, DEMI_LARGEUR_CHEMIN, MARGE_DECOR } from '../../src/data/niveaux/habillage.ts';
+import { empriseDecor, DEMI_LARGEUR_CHEMIN, MARGE_DECOR, zonesBloquantes } from '../../src/data/niveaux/habillage.ts';
 import { casesInterditesDuNiveau } from '../../src/data/niveaux/grille-niveau.ts';
 import { REGLES } from '../../src/data/regles.ts';
 import { distanceRectChemin, distancePointChemin } from '../../src/data/niveaux/geometrie.ts';
@@ -117,7 +117,7 @@ function dessiner(carte: Carte, visuel: VisuelCarte): string {
     }
   }
   // Les tuiles encore vides des cases interdites (la tuile d'une case entière est condamnée par l'une des siennes).
-  for (const c of casesInterditesDuNiveau(carte, visuel.decor)) {
+  for (const c of casesInterditesDuNiveau(carte, visuel.decor, zonesBloquantes(visuel))) {
     for (let j = 0; j < REGLES.tailleCase; j++) {
       for (let i = 0; i < REGLES.tailleCase; i++) {
         const ligne = grille[c.cy * REGLES.tailleCase + j];

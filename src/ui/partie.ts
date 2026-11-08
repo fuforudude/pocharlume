@@ -402,6 +402,11 @@ export async function lancerNiveau(
 
   /** Un glissé de caméra est en cours : la case sous le doigt ne s'éclaire pas, on ne vise pas. */
   let enGlissement = false;
+  /**
+   * La souris survole la carte sans appui (en `sourisX`, `sourisY`) : sur un niveau à radeau, la visée est refaite à chaque image,
+   * car le radeau passe sous une souris immobile (les touches 1 à 5 visent ce qui est vraiment dessous).
+   */
+  let sourisSurCarte = false;
   const pointeurSurTuiles = (x: number, y: number): void => {
     const tx = rendu.enTuilesX(x);
     const ty = rendu.enTuilesY(y);
@@ -438,6 +443,7 @@ export async function lancerNiveau(
     // La souris bouge sans appui : le glissé précédent est fini, on vise de nouveau.
     survol: (x, y) => {
       enGlissement = false;
+      sourisSurCarte = true;
       pointeurSurTuiles(x, y);
     },
   });
@@ -507,6 +513,7 @@ export async function lancerNiveau(
     pointeurSurTuiles(e.clientX, e.clientY);
     gestes.appuyer(e.pointerId, e.clientX, e.clientY);
     if (e.pointerType !== 'mouse') {
+      sourisSurCarte = false;
       const x = e.clientX;
       const y = e.clientY;
       // L'ennemi désigné est celui sous le doigt à l'appui : un ennemi rapide a pu s'éloigner au bout de l'appui long.
@@ -542,6 +549,7 @@ export async function lancerNiveau(
   }, { signal });
   canvas.addEventListener('pointerleave', (e) => {
     if (e.pointerType !== 'mouse') return;
+    sourisSurCarte = false;
     interaction.cesserDeViser();
     bulleCarte.survoler(null);
   }, { signal });
@@ -748,6 +756,9 @@ export async function lancerNiveau(
 
     const debutDessin = performance.now();
     interaction.rafraichir(etat);
+    if (sourisSurCarte && !enGlissement && !finie && etat.niveau.gimmick?.type === 'radeau' && !Number.isNaN(sourisX)) {
+      interaction.viser(etat, rendu.enTuilesX(sourisX), rendu.enTuilesY(sourisY));
+    }
     interaction.surbrillance(etat, surbrillance);
     rendu.dessiner(etat, pas.alpha, temps, surbrillance);
     mettreAJourMenu();

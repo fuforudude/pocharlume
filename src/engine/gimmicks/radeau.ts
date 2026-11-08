@@ -2,8 +2,8 @@
 // numéro de pas (`positionRadeau`) : rien n'est stocké pour lui, le rejeu et la reprise d'une sauvegarde restent justes d'eux-mêmes.
 // Une tour du radeau garde seulement sa place (`Tour.place`) ; sa position (x, y) est recalculée au début de chaque pas
 // (`deplacerToursDuRadeau`), si bien que tout ce qui lit la position d'une tour (ciblage, portée, projectiles, ouvrages, pouvoirs des
-// ennemis, sorts) la voit là où le radeau se trouve. Le rendu interpolera entre deux pas avec ces mêmes fonctions : ce sera fait par la
-// tâche du rendu, rien ne l'appelle encore côté affichage.
+// ennemis, sorts) la voit là où le radeau se trouve. Le rendu appelle ces mêmes fonctions à un pas fractionnaire pour interpoler entre
+// deux pas (`pasAffiche`, src/render/gimmicks.ts).
 import { REGLES } from '../../data/regles';
 import type { CaseGrille, GimmickRadeau, Niveau, Point } from '../definitions';
 import type { EtatPartie } from '../etat';

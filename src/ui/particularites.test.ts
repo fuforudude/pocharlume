@@ -6,7 +6,8 @@ import { REGION1 } from '../data/niveaux/region1';
 import { creerPartie } from '../engine';
 import { CONFIG } from '../engine/aides.test-utils';
 import { fr } from '../i18n/fr';
-import { ennemiRencontre, sauvegardeVide, type Sauvegarde } from '../save';
+import { ennemiRencontre, exporterCode, fusionnerProgressions, importerCode, sauvegardeVide, type Sauvegarde } from '../save';
+import { validerBestiaire } from '../save/validation-bestiaire';
 import { ennemisParRegion } from './bestiaire-logique';
 import {
   contenuParticularite,
@@ -37,7 +38,7 @@ function avecRencontres(rencontres: string[], fiches = true): Sauvegarde {
 }
 
 describe('textes des particularités', () => {
-  it('chaque type a son nom, sa phrase et son conseil, et la phrase est celle de la spec', () => {
+  it('chaque type a son nom, sa phrase et son conseil ; les deux phrases ne changent pas sans qu’on le voie', () => {
     for (const type of TYPES_PARTICULARITES) {
       for (const cle of ['nom', 'phrase', 'conseil']) expect(Object.hasOwn(fr, `gimmick.${type}.${cle}`)).toBe(true);
     }
@@ -82,13 +83,30 @@ describe('fiche « Nouvelle particularité »', () => {
     expect(s.notes).toEqual([]);
   });
 
-  it('l’identifiant noté a la forme d’un identifiant d’ennemi (la validation du bestiaire l’accepte) et ne trouble pas l’écran des ennemis', () => {
-    for (const type of TYPES_PARTICULARITES) expect(idRencontreParticularite(type)).toMatch(/^[a-z][a-z0-9_]{0,63}$/);
+  it('l’identifiant noté passe la validation du bestiaire de la sauvegarde et ne trouble pas l’écran des ennemis', () => {
+    const ids = TYPES_PARTICULARITES.map(idRencontreParticularite);
+    expect(ids).toEqual(['particularite_corbeaux', 'particularite_radeau']);
+    const rencontres = ['paysan_affame', ...ids].sort();
+    expect(validerBestiaire({ rencontres, fiches: true })).toEqual({ ok: true, valeur: { rencontres, fiches: true } });
     const s = avecRencontres(['particularite_corbeaux', 'paysan_affame']);
     expect(ennemiRencontre(s, 'particularite_corbeaux')).toBe(true);
     const ennemis = ennemisParRegion(s).flatMap((g) => g.ennemis);
     expect(ennemis.some((e) => e.id.startsWith('particularite_'))).toBe(false);
     expect(ennemis.filter((e) => e.rencontre).map((e) => e.id)).toEqual(['paysan_affame']);
+  });
+
+  it('une rencontre particularite_* survit à l’export puis à l’import du code de sauvegarde', async () => {
+    const source = avecRencontres(['paysan_affame', 'particularite_radeau']);
+    const r = await importerCode(await exporterCode(source));
+    if (!r.ok) throw new Error(r.detail);
+    expect(r.sauvegarde.meta.bestiaire.rencontres).toEqual(['particularite_radeau', 'paysan_affame']);
+    expect(particulariteAMontrer(session(r.sauvegarde), 'radeau', false)).toBe(false);
+  });
+
+  it('la fusion de deux sauvegardes réunit les rencontres particularite_* des deux côtés', () => {
+    const a = avecRencontres(['particularite_corbeaux']);
+    const b = avecRencontres(['paysan_affame', 'particularite_radeau']);
+    expect(fusionnerProgressions(a, b).meta.bestiaire.rencontres).toEqual(['particularite_corbeaux', 'particularite_radeau', 'paysan_affame']);
   });
 });
 

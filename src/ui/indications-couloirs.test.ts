@@ -21,7 +21,7 @@ const corbeaux = (couloir: number, n: number, ennemi = 'corbeau_noir'): Paquet =
 /** 32 × 18 tuiles, un chemin en y = 5 qui entre à gauche ; couloirs sur les lignes 1 et 7 de la grille (y = 3 et 15). */
 function niveau(vagues: readonly Vague[]): Niveau {
   const carte = { largeur: 32, hauteur: 18, chemins: [{ points: [{ x: 0, y: 5 }, { x: 30, y: 5 }] }], departHeros: { x: 28, y: 1 } };
-  return { id: 'essai', aretesDepart: 500, carte, casesInterdites: casesInterditesDuNiveau(carte, []), vagues, gimmick: { type: 'corbeaux', couloirs: [{ cy: 1 }, { cy: 7 }] } };
+  return { id: 'essai', aretesDepart: 500, carte, casesInterdites: casesInterditesDuNiveau(carte, [], []), vagues, gimmick: { type: 'corbeaux', couloirs: [{ cy: 1 }, { cy: 7 }] } };
 }
 
 function monter(vagues: readonly Vague[], maintenant = (): number => 0): { etat: EtatPartie; indications: Indications } {
@@ -134,11 +134,12 @@ describe('placement d’un panneau de couloir', () => {
     expect(placerPanneauCouloir(200, 80, 30, zone, [{ gauche: 200, haut: 180, droite: 260, bas: 214 }])).toEqual({ gauche: 6, haut: 185 });
   });
 
-  it('deux obstacles empilés : il passe sous les deux', () => {
+  it('deux obstacles empilés : juste sous le premier, il chevaucherait le second, il passe donc au-dessus du premier', () => {
     const a = { gauche: 0, haut: 180, droite: 90, bas: 214 };
     const b = { gauche: 0, haut: 216, droite: 90, bas: 250 };
     const p = placerPanneauCouloir(220, 80, 30, zone, [a, b]);
-    expect(p.haut === 252 || p.haut === 148).toBe(true);
+    // Sous a (216), le plus près du couloir, est pris par b : le premier côté libre est au-dessus de a (180 - 30 - 2).
+    expect(p.haut).toBe(148);
   });
 });
 
