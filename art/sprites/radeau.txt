@@ -1,8 +1,10 @@
 # Gimmicks de la région 11 (Grèves Grises) : le Radeau et le Vol de Corbeaux.
-# radeau : plateforme de rondins liés par deux cordes, 48 × 40, ancre au centre (24, 22) = le centre du radeau dans le moteur.
-#   Les places viennent des données (PLACES_RADEAU, src/data/niveaux/plan-region11.ts) : décalages (-0,5 ; 0,25), (0,5 ; 0,25) et
-#   (0 ; -0,5) en tuiles, soit les pixels (16, 26), (32, 26) et (24, 14). Leurs nattes (14 × 10) couvrent x 9 à 38 et y 9 à 30 :
-#   les deux cordes passent aux colonnes 5-6 et 41-42, hors des nattes. Le rendu dessine chaque natte sur sa place.
+# radeau : plateforme de 4 longs rondins liés par quatre cordes, 88 × 32, ancre au centre des rondins (44, 15) = le centre du
+#   radeau dans le moteur. Les places viennent des données (PLACES_RADEAU, src/data/niveaux/plan-region11.ts) : trois en ligne, aux
+#   décalages (-2 ; 0), (0 ; 0) et (2 ; 0) en tuiles, soit les pixels (12, 15), (44, 15) et (76, 15) : une case (32 px, la largeur
+#   d'une tour) entre deux places, les trois tours se voient entières. Leurs nattes (14 × 10) couvrent x 5 à 18, 37 à 50, 69 à 82 et
+#   y 10 à 19 : les cordes passent aux colonnes 3-4 et 83-84 (les bords), 27-28 et 59-60 (entre deux nattes), hors des nattes.
+#   Le rendu dessine chaque natte sur sa place.
 # radeau-place : natte de corde d'une place libre, 14 × 10, ancre au centre (le rendu la pose sur la place, une tour la cache).
 # effet-plumes : gerbe de plumes noires quand un corbeau sort de son couloir au bord droit (animation impact, jouée une fois).
 # icone-couloir, icone-radeau, icone-sortie-couloir : repère du panneau d'un couloir, icônes des particularités, bout d'un couloir.
@@ -12,47 +14,39 @@ couleur 2 3a5266c0
 
 sprite radeau
 categorie decor
-taille 48 40
-ancre 24 22
+taille 88 32
+ancre 44 15
 .
 .
 .
-..dddJZddddddddddddddddddddddddddddddddddJZdd
-..oooZJoooooooooooooooBooooooooooBoooooooZJoo
-..OOOJZOOOOOOoOOOOOOOOOOOOoOOOOOOOOOOOOoOJZOO
-..ObBZJBBbBBBBBbBBbBBbBBbBBbBBbBBbBBBBBbBZJBO
-..obBJZBBbBBBBBbBBbBBbBBbBBbBBbBBbBBBBBbBJZBo
-..dbbZJbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbZJbd
-...ddJZddddddddddddddddddddddddddddddddddJZddd
-...ooZJoooooooBooooooooooBoooooooooooooooZJooo
-...OOJZOOOOOOOOoOOOOOOOOOOOOoOOOOOOOOOOOOJZOOO
-...OBZJBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBZJBBO
-...oBJZBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBJZBBo
-...dbZJbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbZJbbd
-..dddJZddddddddddddddddddddddddddddddddddJZdd
-..oooZJooooooooooBooooooooooBooooooooooBoZJoo
-..OOoJZOOOOOOOOOOoOOOOOOOOOOOOoOOOOOOOOOOJZoO
-..OBBZJBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBZJBO
-..oBBJZBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBJZBo
-..dbbZJbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbZJbd
-...ddJZddddddddddddddddddddddddddddddddddJZddd
-...ooZJooBooooooooooBooooooooooBoooooooooZJooo
-...OOJZOOOOOOOOOOOOoOOOOOOOOOOOOoOOOOOOOOJZOOO
-...OBZJBbBBBBBbBBbBBbBBbBBbBBbBBbBBBBBbBBZJBbO
-...oBJZBbBBBBBbBBbBBbBBbBBbBBbBBbBBBBBbBBJZBbo
-...dbZJbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbZJbbd
-..dddJZddddddddddddddddddddddddddddddddddJZdd
-..oooZJooooooooooooooooBooooooooooBooooooZJoo
-..OOOJZOoOOOOOOOOOOOOoOOOOOOOOOOOOoOOOOOOJZOO
-..OBBZJBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBZJBO
-..oBBJZBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBJZBo
-..dbbZJbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbZJbd
-...ddJZddddddddddddddddddddddddddddddddddJZddd
-...oBZJooooooooBooooooooooBooooooooooBoooZJooo
-...OOJZOOOoOOOOOOOOOOOOoOOOOOOOOOOOOOOOOOJZOOO
-...OBZJBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBZJBBO
-....2222222222222222222222222222222222222222
-....1111111111111111111111111111111111111111
+.ddJZddddddddddddddddddddddJZddddddddddddddddddddddddddddddJZddddddddddddddddddddddJZdd
+.ooZJooBooooooooooooBooooooZJooBoooooooooooBooooooooooooooBZJooooooooooBoooooooooooZJoo
+.OOJZoOOOOOOOOOOOOOOOOoOOOOJZOOOOOOOOOOOoOOOOOOOOOOoOOOOOOOJZOOOOOOOOoOOOOOOOOOOOoOJZOO
+.OBZJBBbBBbBBbBBbBBbBBbBBbBZJBBbBBbBBbBBbBBbBBbBBbBBbBBbBBbZJbBBbBBbBBbBBbBBbBBbBBbZJBO
+.oBJZBBbBBbBBbBBbBBbBBbBBbBJZBBbBBbBBbBBbBBbBBbBBbBBbBBbBBbJZbBBbBBbBBbBBbBBbBBbBBbJZBo
+.dbZJbbbbbbbbbbbbbbbbbbbbbbZJbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbZJbbbbbbbbbbbbbbbbbbbbbbZJbd
+..dJZddddddddddddddddddddddJZddddddddddddddddddddddddddddddJZddddddddddddddddddddddJZd
+..oZJoooBooooooooooooooBoooZJoooBooooooooooBooooooooBooooooZJBooooooooooooBooooooooZJo
+..OJZOoOOOOOOOOOOOOOOOOoOOOJZOOOOOOOOOOoOOOOOOOOOOoOOOOOOOOJZOOOOoOOOOOOOOOOOOOoOOOJZO
+..OZJBBBBBBBBBBBBBBBBBBBBBBZJBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBZJBBBBBBBBBBBBBBBBBBBBBBZJO
+..oJZBBBBBBBBBBBBBBBBBBBBBBJZBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBJZBBBBBBBBBBBBBBBBBBBBBBJZo
+..dZJbbbbbbbbbbbbbbbbbbbbbbZJbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbZJbbbbbbbbbbbbbbbbbbbbbbZJd
+.ddJZddddddddddddddddddddddJZddddddddddddddddddddddddddddddJZddddddddddddddddddddddJZdd
+.ooZJooBooooooooooooooBooooZJooBoooooooooooooBoooooooooBoooZJoooBoooooooooooooBooooZJoo
+.OOJZoOOOOOOOOOOOOOOOOoOOOOJZOOOOOOOOOOoOOOOOOOOOOOOOOOOoOOJZOOOOOOOOOOOoOOOOOOOOOOJZOO
+.OBZJBBbBBbBBbBBbBBbBBbBBbBZJBBbBBbBBbBBbBBbBBbBBbBBbBBbBBbZJbBBbBBbBBbBBbBBbBBbBBbZJBO
+.oBJZBBbBBbBBbBBbBBbBBbBBbBJZBBbBBbBBbBBbBBbBBbBBbBBbBBbBBbJZbBBbBBbBBbBBbBBbBBbBBbJZBo
+.dbZJbbbbbbbbbbbbbbbbbbbbbbZJbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbZJbbbbbbbbbbbbbbbbbbbbbbZJbd
+..dJZddddddddddddddddddddddJZddddddddddddddddddddddddddddddJZddddddddddddddddddddddJZd
+..oZJoooBooooooooooBoooooooZJBooooooooooooBooooooooooBoooooZJoooBoooooooooooooBooooZJo
+..OJZOoOOOOOOOOOOOOOOOOoOOOJZOOOOOOOOOoOOOOOOOOOOOoOOOOOOOOJZOOOoOOOOOOOOOOOOOOoOOOJZO
+..OZJBBBBBBBBBBBBBBBBBBBBBBZJBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBZJBBBBBBBBBBBBBBBBBBBBBBZJO
+..oJZBBBBBBBBBBBBBBBBBBBBBBJZBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBJZBBBBBBBBBBBBBBBBBBBBBBJZo
+..dZJbbbbbbbbbbbbbbbbbbbbbbZJbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbZJbbbbbbbbbbbbbbbbbbbbbbZJd
+...2222222222222222222222222222222222222222222222222222222222222222222222222222222222
+...1111111111111111111111111111111111111111111111111111111111111111111111111111111111
+.
+.
 .
 
 sprite radeau-place

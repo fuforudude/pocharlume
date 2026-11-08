@@ -20,13 +20,13 @@ import type { GimmickRadeau, PlaceRadeau } from '../../engine/definitions';
 import type { PlanNiveau } from './plan-niveau';
 
 /**
- * Les 3 places du radeau, en tuiles autour de son centre : un triangle serré, pour que les trois tours tiennent sur le radeau dessiné
- * (environ une tuile de côté). Le rendu peut les retoucher sans rien changer d'autre.
+ * Les 3 places du radeau, en tuiles autour de son centre : en ligne, une case (2 tuiles, la largeur d'une tour) entre deux places,
+ * pour que les trois tours se voient entières sur le radeau dessiné (88 px, 5,5 tuiles de long, art/sprites/radeau.txt).
  */
 const PLACES_RADEAU: readonly PlaceRadeau[] = [
-  { dx: -0.5, dy: 0.25 },
-  { dx: 0.5, dy: 0.25 },
-  { dx: 0, dy: -0.5 },
+  { dx: -2, dy: 0 },
+  { dx: 0, dy: 0 },
+  { dx: 2, dy: 0 },
 ];
 
 /** Vitesse du radeau, en cases par seconde. */

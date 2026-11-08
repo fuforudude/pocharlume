@@ -13,7 +13,7 @@ import { Interaction, lieuDuMenu, placeTouchee } from './interaction';
 import { elementsMenu } from './menu-cercle';
 import { texteRefus } from './refus';
 
-const RADEAU: GimmickRadeau = { type: 'radeau', trajet: [{ cx: 2, cy: 4 }, { cx: 10, cy: 4 }], vitesse: 0.5, places: [{ dx: 0, dy: -1 }, { dx: -1, dy: 0 }, { dx: 1, dy: 0 }] };
+const RADEAU: GimmickRadeau = { type: 'radeau', trajet: [{ cx: 2, cy: 4 }, { cx: 10, cy: 4 }], vitesse: 0.5, places: [{ dx: -2, dy: 0 }, { dx: 0, dy: 0 }, { dx: 2, dy: 0 }] };
 
 function partie(dieu = 'charlie'): EtatPartie {
   const carte = { largeur: 32, hauteur: 18, chemins: [{ points: [{ x: 0, y: 1 }, { x: 31, y: 1 }] }], departHeros: { x: 28, y: 3 } };
