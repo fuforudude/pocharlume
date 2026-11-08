@@ -16,6 +16,7 @@ vi.mock('../render/carte-monde', () => ({
     ratio = 1;
     rayonToucher = 20;
     cadrer = vi.fn();
+    definirMargeHaut = vi.fn();
     centrerSur = vi.fn();
     redimensionner = vi.fn();
     dessiner = vi.fn();

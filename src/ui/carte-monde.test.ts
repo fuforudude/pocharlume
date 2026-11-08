@@ -7,14 +7,15 @@ import { sauvegardeVide } from '../save';
 import { t } from '../i18n';
 import { afficherCarteMonde, type EcranCarteMonde, type OptionsCarteMonde } from './carte-monde';
 
-const rendu = vi.hoisted(() => ({ dessiner: vi.fn() }));
+const rendu = vi.hoisted(() => ({ dessiner: vi.fn(), definirMargeHaut: vi.fn() }));
 
 vi.mock('../render/carte-monde', () => ({
   RenduCarteMonde: class {
-    camera = { deplacer: vi.fn(), debutPincement: vi.fn(), pincement: vi.fn(), molette: vi.fn(), decalageX: 0, decalageY: 0, vueL: 512, vueH: 288 };
+    camera = { deplacer: vi.fn(), debutPincement: vi.fn(), pincement: vi.fn(), molette: vi.fn(), decalageX: 0, decalageY: 0, margeHautLogique: 0, vueL: 512, vueH: 288 };
     ratio = 1;
     rayonToucher = 20;
     cadrer = vi.fn();
+    definirMargeHaut = rendu.definirMargeHaut;
     centrerSur = vi.fn();
     redimensionner = vi.fn();
     dessiner = rendu.dessiner;
@@ -277,5 +278,39 @@ describe('carte du monde : l’en-tête suit la sauvegarde', () => {
     ecran.arreter();
     expect(ecouteurs.size).toBe(0);
     expect(() => { autreOnglet((s) => s); }).not.toThrow();
+  });
+});
+
+describe('carte du monde : marge de l’en-tête', () => {
+  let rappels: (() => void)[] = [];
+  const disconnect = vi.fn();
+
+  beforeEach(() => {
+    rappels = [];
+    disconnect.mockClear();
+    rendu.definirMargeHaut.mockClear();
+    vi.stubGlobal('ResizeObserver', class {
+      constructor(rappel: () => void) { rappels.push(rappel); }
+      observe = vi.fn();
+      disconnect = disconnect;
+    });
+  });
+
+  it('transmet au rendu la hauteur mesurée de l’en-tête quand il change de taille', () => {
+    monter();
+    const avant = rendu.definirMargeHaut.mock.calls.length;
+    const haut = document.querySelector('.carte-haut');
+    expect(haut).toBeTruthy();
+    vi.spyOn(haut as Element, 'getBoundingClientRect').mockReturnValue({ bottom: 90, top: 0 } as DOMRect);
+    for (const r of rappels) r();
+    expect(rendu.definirMargeHaut.mock.calls.length).toBe(avant + 1);
+    expect(rendu.definirMargeHaut).toHaveBeenLastCalledWith(96);
+  });
+
+  it('déconnecte l’observateur à arreter()', () => {
+    const { ecran } = monter();
+    expect(disconnect).not.toHaveBeenCalled();
+    ecran.arreter();
+    expect(disconnect).toHaveBeenCalledTimes(1);
   });
 });
