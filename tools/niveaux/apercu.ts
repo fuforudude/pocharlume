@@ -1,12 +1,15 @@
 // `npm run niveaux:apercu -- <n>` : dessine en texte le niveau de campagne n (1 à 10), une lettre par tuile.
 // `npm run niveaux:apercu -- carte <id>` : dessine une carte avec tous ses chemins et décors.
 // `npm run niveaux:apercu -- planche [région]` : planche PNG des cartes des régions 2 à 5 (docs/cartes/regions-2-a-5.png), ou
-// des cartes d'une seule région (art/apercu/cartes-region<N>.png, non suivi par git), avec le vrai sol et les vrais sprites.
+// des cartes d'une seule région (art/apercu/cartes-region<N>.png, non suivi par git ; docs/cartes/region<N>.png pour les régions 11
+// et suivantes, pas encore dans CARTES), avec le vrai sol et les vrais sprites.
 // # chemin (couloir de 2 tuiles) · : tuile d'une case interdite à la construction (chemin ou grand décor) · H départ du héros
 // m maison · a arbre · p puits · b bûcher · t potence/échafaud · c clôture · T tonneau · x croix · k crâne/ossements · s souche
 // o cailloux · ' touffe · M meule · C chariot/charrette/barque · F fosse · ~ boue · + pavés · ! décor qui mord sur un chemin
 // (les petits décors des régions 2 à 5 ont chacun une lettre, voir LETTRES ; ? = sprite sans lettre)
-import { CARTES, type IdCarte } from '../../src/data/niveaux/cartes-toutes.ts';
+import { CARTES } from '../../src/data/niveaux/cartes-toutes.ts';
+import { CARTES_REGION11 } from '../../src/data/niveaux/cartes-region11.ts';
+import type { CarteModele } from '../../src/data/niveaux/modele-carte.ts';
 import { empriseDecor, DEMI_LARGEUR_CHEMIN, MARGE_DECOR } from '../../src/data/niveaux/habillage.ts';
 import { casesInterditesDuNiveau } from '../../src/data/niveaux/grille-niveau.ts';
 import { REGLES } from '../../src/data/regles.ts';
@@ -71,6 +74,17 @@ const LETTRES: Record<string, string> = {
   linceul: 'u',
   'lanterne-peste': 'i',
   'tas-ossements': 'k',
+  // Région 11
+  'epave-coque': 'C',
+  'epave-mat': 'C',
+  'ponton-pourri': 'P',
+  'cloche-naufrage': 'K',
+  'filets-perches': 'N',
+  'ancre-rouillee': 'A',
+  'roseaux-morts': 'r',
+  'nappe-brume': 'z',
+  'aretes-poisson': 'k',
+  'pieu-amarre': 'c',
 };
 
 function dessiner(carte: Carte, visuel: VisuelCarte): string {
@@ -117,20 +131,25 @@ function dessiner(carte: Carte, visuel: VisuelCarte): string {
   return [entete, ...grille.map((l, j) => `${String(j).padStart(2)} ${l.join('')}`)].join('\n');
 }
 
+/** Les cartes de la campagne et celles des régions d'après l'histoire, pas encore branchées dans CARTES. */
+const TOUTES: Readonly<Record<string, CarteModele>> = { ...CARTES, ...CARTES_REGION11 };
+
 const [mode, arg] = process.argv.slice(2);
 if (mode === 'planche') {
   const region = arg === undefined ? undefined : Number(arg);
-  const modeles = Object.values(CARTES).filter((m) => (region === undefined ? m.region >= 2 : m.region === region));
+  const modeles = Object.values(region === undefined ? CARTES : TOUTES).filter((m) => (region === undefined ? m.region >= 2 : m.region === region));
   if (modeles.length === 0) {
-    console.error('Usage : apercu.ts planche [région 1 à 5]');
+    console.error('Usage : apercu.ts planche [région 1 à 11]');
     process.exit(1);
   }
-  const sortie = fileURLToPath(new URL(region === undefined ? '../../docs/cartes/regions-2-a-5.png' : `../../art/apercu/cartes-region${String(region)}.png`, import.meta.url));
+  const fichier = region === undefined ? 'docs/cartes/regions-2-a-5.png' : region >= 11 ? `docs/cartes/region${String(region)}.png` : `art/apercu/cartes-region${String(region)}.png`;
+  const sortie = fileURLToPath(new URL(`../../${fichier}`, import.meta.url));
   mkdirSync(dirname(sortie), { recursive: true });
   writeFileSync(sortie, encoderPng(planche(modeles, 3)));
   console.log(`${String(modeles.length)} cartes dessinées dans ${sortie}`);
-} else if (mode === 'carte' && arg && arg in CARTES) {
-  const m = CARTES[arg as IdCarte];
+} else if (mode === 'carte' && arg && arg in TOUTES) {
+  const m = TOUTES[arg];
+  if (!m) throw new Error(`Carte inconnue : ${arg}`);
   console.log(dessiner({ largeur: m.largeur, hauteur: m.hauteur, chemins: m.chemins, departHeros: m.departHeros }, { region: m.region, zones: m.zones, decor: m.decor }));
 } else {
   const n = Number(mode);

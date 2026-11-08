@@ -1,0 +1,225 @@
+# Décor des Grèves Grises (région 11) : épaves, mât rompu, ponton pourri, cloche de naufrage, filets, ancre, roseaux morts, brume,
+# arêtes, pieu d'amarrage. Comme le décor des autres régions : avec contour (sauf la brume), ancre au pied ; les grands objets font
+# 32×32 (liste GRANDS_DECORS dans src/data/niveaux/habillage.ts, ils bloquent la pose des tours), les petits 16×16.
+# Dessinés par un script jetable puis à retoucher à la main ici.
+categorie decor
+palette commune
+taille 32 32
+ancre 16 30
+couleur 1 3a4846
+couleur 2 55645f
+couleur 3 7a7264
+couleur 4 4e483e
+couleur 5 7a4a2a
+couleur 6 a0623a
+couleur 7 c4cac6a0
+couleur 8 dde2dcb0
+couleur 9 8a8a7e
+
+# Coque d’épave échouée, membrures à nu.
+sprite epave-coque
+origine 2 17
+3...................4...4...
+33.................4...4...4
+343...............34..34..34
+3443.............334.334.334
+.34433333333333333343334.334
+.3444444444444444443.34...34
+..344444444444444443..4...34
+..34444kkkkkkkkkkk43..4....4
+...3444k1kkkkk1kkk4333333334
+...34444444444444444444444..
+....3333333333333333333333..
+.....444444444444444444444..
+...ggggggggggggggggggggggg9.
+.....ggggggggggggggggggg....
+
+# Mât rompu d’un navire, voile grise en lambeaux.
+sprite epave-mat
+origine 5 4
+.......4..............
+......434.............
+..4444434444444.......
+...vvvU434UvvvU.......
+...vUvU434vUvU........
+....vvU434UvU.........
+....vUv434vU..........
+.....vU434v...........
+.....Uv434............
+......v434............
+.......434............
+.......434............
+.......434............
+.......434............
+.......434............
+.......434............
+......44344...........
+.....4433344..........
+....443333344.........
+..44333333333444......
+.4333333333333334.....
+444444444444444444....
+.4kkkk4kkkk4kkkk4.....
+.ggggggggggggggggg....
+...gggggggggggg.......
+......................
+......................
+
+# Bout de ponton pourri sur ses pieux, au-dessus d’une flaque.
+sprite ponton-pourri
+origine 2 18
+3434343434343434343434343434
+4444444444444444444444444444
+3.3434343.3434343434.3434343
+4..44444..444444444...444444
+.4......4.......4........4..
+.4......4.......4........4..
+.4......4.......4........4..
+.4......4.......4........4..
+1411111141111111411111111411
+.21111112111111121111111121.
+..2111111111211111111211....
+....1111111111111111111.....
+......2222222222222222......
+
+# Cloche de naufrage pendue à son portique, vert-de-gris.
+sprite cloche-naufrage
+origine 6 3
+44444444444444444444
+.43333333333333334..
+.4.......4.......4..
+.4......444......4..
+.4.....tt5tt.....4..
+.4....ttTttt5....4..
+.4....tTttttt....4..
+.4...ttTtttttt...4..
+.4...tTttttttt...4..
+.4..ttTttttttt5..4..
+.4..tTtttttttttt.4..
+.4.5555555555555.4..
+.4.......5.......4..
+.4......555......4..
+.4...............4..
+.4...............4..
+.4...............4..
+.4...............4..
+.4...............4..
+.4...............4..
+.4...............4..
+.4...............4..
+.4...............4..
+.4...............4..
+44...............44.
+43...............34.
+gggggggggggggggggggg
+..gggggggggggggggg..
+
+# Filets de pêche mis à sécher entre deux perches.
+sprite filets-perches
+origine 2 10
+.4........................4.
+434......................434
+434vvvvvv..........vvvvvv434
+434vkvkvvvvvvvvvvvvvvkvkv434
+434vvvvvvkvkvkvkvkvvvvvvv434
+434vkvkvkvvvvvvvvvvvkvkvk434
+434vvvvvvkvkvkvkvkvvvvvvv434
+434.vkvkvvvvvvvvvvvvvkvk.434
+434.vvvvvkvkvkvkvkvkvvvv.434
+434..vkvkvvvvvvvvvvvkvk..434
+434...vvvvvkvkvkvkvvvv...434
+434....vkvkvvvvvvvkvk....434
+434.....vvvvvvvvvvvv.....434
+434......vk.vk..vk.......434
+434......................434
+434......................434
+434......................434
+434......................434
+4434....................4434
+.gggg..................gggg.
+..gg....................gg..
+
+# Ancre rouillée fichée dans la grève.
+sprite ancre-rouillee
+origine 6 9
+........555.........
+.......5...5........
+.......5...5........
+........555.........
+....55555655555.....
+....66666566666.....
+........565.........
+........565.........
+........565.........
+........565.........
+........565.........
+........565.........
+.5......565......5..
+.55.....565.....55..
+..65....565....56...
+..655...565...556...
+...6655.565.5566....
+....666655556666....
+......66655666......
+...pppp9999999pppp..
+.ppPPPPPPPPPPPPPPPpp
+.ggggggggggggggggggg
+
+# Roseaux morts, gris et secs.
+sprite roseaux-morts
+taille 16 16
+ancre 8 15
+origine 2 4
+..J......J..
+..9..J...9..
+.J9..9..J9..
+.99..9..9...
+.9.J.9.J9...
+.9.9.9J9.J..
+.9J9.99..9..
+.999J99.J9..
+..9999999...
+...HHHHH....
+..HHHHHHH...
+
+# Nappe de brume basse, sans contour.
+sprite nappe-brume
+taille 16 16
+ancre 8 15
+contour non
+origine 1 9
+....7777......
+..7777777777..
+.777888877777.
+77777777777777
+.777777777777.
+....777777....
+
+# Arêtes d’un gros poisson.
+sprite aretes-poisson
+taille 16 16
+ancre 8 15
+origine 1 10
+...........qq.
+.q.q.q.q..qqqq
+qqqqqqqqqqqkqq
+.q.q.q.q..qqqq
+q..........qq.
+
+# Pieu d’amarrage et son cordage.
+sprite pieu-amarre
+taille 16 16
+ancre 8 15
+origine 4 3
+...44...
+..4334..
+..4334..
+..B334..
+..BBBB..
+..4B34..
+..43B4..
+..4334..
+..4334..
+.p4334p.
+.pppppp.
+..gggg..
