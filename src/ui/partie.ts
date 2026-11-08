@@ -27,10 +27,13 @@ import { Gestes } from './gestes';
 import { Hud } from './hud';
 import { Indications } from './indications';
 import { afficherInscription, type InscriptionOuverte } from './inscription-partie';
-import { Interaction, type Issue, type Mode } from './interaction';
+import { Interaction, lieuDuMenu, placeTouchee, type Issue, type Mode } from './interaction';
 import { mesurerMarges } from './marges';
 import { afficherNouvelEnnemi, type NouvelEnnemiOuvert } from './nouvel-ennemi';
 import { elementsMenu, type ElementMenu } from './menu-cercle';
+import { afficherNouvelleParticularite } from './nouvelle-particularite';
+import { contenuParticularite, contenuRadeau, type TypeParticularite } from './particularites';
+import { centreRadeauAffiche, placeAffichee } from '../render/gimmicks';
 import { cleParoleBoss } from './parole-boss';
 import { texteRefus } from './refus';
 import { statueTouchee } from './statue';
@@ -127,6 +130,12 @@ export interface OptionsPartie {
    */
   surNouveauxEnnemis?: (ids: string[]) => string[];
   /**
+   * Le niveau a une particularité (gimmick) : appelée une fois au démarrage de la partie. L'appelant la range dans la sauvegarde et
+   * répond vrai s'il faut montrer la fiche « Nouvelle particularité » (première rencontre, option active). La partie se met en pause le
+   * temps de la fiche, comme pour « Nouvel ennemi ». Absent : aucune fiche.
+   */
+  surNouvelleParticularite?: (type: TypeParticularite) => boolean;
+  /**
    * « Bestiaire » dans l'écran de pause : l'appelant monte l'écran dans `parent`, par-dessus la pause, et rend de quoi le retirer. C'est la
    * PARTIE qui possède l'écran : elle reste en pause tant qu'il est ouvert (ni P ni un blur ne la relancent), n'en ouvre qu'un seul, et le
    * retire à `arreter()`. `surFermer` est à appeler quand le joueur le ferme. Absent : pas de bouton.
@@ -162,6 +171,11 @@ const RAYON_TOUCHE_CSS = 24;
 const RAYON_TOUCHE_MIN_TUILES = 0.9;
 /** Côté minimal d'une case de construction à l'écran sur un écran tactile (pixels CSS) : un doigt. */
 const CIBLE_TACTILE_CSS = 44;
+/** Clé de la bulle du radeau : négative et loin de celles des pastilles des panneaux (voir `PuceSous`). */
+const CLE_BULLE_RADEAU = -10_000;
+/** Moitiés de la plateforme du radeau, en tuiles (le sprite `radeau` fait 48 × 32 pixels logiques, une tuile = 16). */
+const DEMI_LARGEUR_RADEAU = 1.5;
+const DEMI_HAUTEUR_RADEAU = 1;
 /** Délai avant l'écran de fin, pour laisser voir la dernière mort. */
 const DELAI_ECRAN_FIN_MS = 1100;
 const LIGNE_PIXELS = 40;
@@ -223,9 +237,9 @@ export async function lancerNiveau(
   let identifiantImage = 0;
   /** La fenêtre d'une inscription de statue, tant qu'elle est ouverte : la simulation attend, comme en pause. */
   let inscription: InscriptionOuverte | null = null;
-  /** La fiche « Nouvel ennemi » ouverte (une à la fois), et celles qui attendent leur tour. */
+  /** La fiche ouverte (« Nouvel ennemi » ou « Nouvelle particularité », une à la fois), et celles qui attendent leur tour. */
   let ficheEnnemi: NouvelEnnemiOuvert | null = null;
-  const fichesEnAttente: string[] = [];
+  const fichesEnAttente: ({ readonly genre: 'ennemi'; readonly id: string } | { readonly genre: 'particularite'; readonly type: TypeParticularite })[] = [];
   /** Le Bestiaire ouvert depuis la pause, tant qu'il l'est : la simulation attend, comme pour une fiche. */
   let bestiaire: EcranBestiaire | null = null;
   /** Un écran est ouvert par-dessus la partie (inscription, fiche, Bestiaire) : elle attend, et la pause ne lui vole pas le focus. */
@@ -237,6 +251,8 @@ export async function lancerNiveau(
   let pasMenu = -1;
   let elementsDuMenu: ElementMenu[] | null = null;
   let caseMenu = '';
+  /** Où le menu d'une place du radeau s'est ouvert (tuiles) : il y reste, même si le radeau s'éloigne. */
+  let ancreMenu: { x: number; y: number } | null = null;
   /** Change chaque fois que le contenu du menu est recalculé : le HUD ne compare ses boutons qu'à ce moment. */
   let versionMenu = 0;
 
@@ -286,19 +302,18 @@ export async function lancerNiveau(
   /** Montre la fiche du prochain ennemi en attente (une seule à la fois) ; la partie attend, comme pour une inscription. */
   const montrerFicheSuivante = (): void => {
     if (finie || arretee || ficheEnnemi || inscription) return;
-    const id = fichesEnAttente.shift();
-    if (id === undefined) return;
+    const suivante = fichesEnAttente.shift();
+    if (suivante === undefined) return;
     interaction.annuler();
     pas.pause = true;
-    ficheEnnemi = afficherNouvelEnnemi(racine, {
-      atlas,
-      id,
-      surFermer: () => {
-        ficheEnnemi = null;
-        if (fichesEnAttente.length > 0) montrerFicheSuivante();
-        else pas.pause = pauseDemandee || ecranDessus();
-      },
-    });
+    const surFermer = (): void => {
+      ficheEnnemi = null;
+      if (fichesEnAttente.length > 0) montrerFicheSuivante();
+      else pas.pause = pauseDemandee || ecranDessus();
+    };
+    ficheEnnemi = suivante.genre === 'ennemi'
+      ? afficherNouvelEnnemi(racine, { atlas, id: suivante.id, surFermer })
+      : afficherNouvelleParticularite(racine, { atlas, type: suivante.type, surFermer });
   };
   /**
    * Des ennemis viennent de paraître (événements `apparition` du moteur, ou ceux d'une partie reprise) : ceux qu'on n'avait pas encore
@@ -314,7 +329,7 @@ export async function lancerNiveau(
       nouveaux.push(type);
     }
     if (nouveaux.length === 0) return;
-    fichesEnAttente.push(...options.surNouveauxEnnemis(nouveaux));
+    fichesEnAttente.push(...options.surNouveauxEnnemis(nouveaux).map((id) => ({ genre: 'ennemi' as const, id })));
     montrerFicheSuivante();
   };
   /** Ouvre le Bestiaire depuis la pause (un seul à la fois) ; la partie attend tant qu'il est ouvert. */
@@ -366,8 +381,8 @@ export async function lancerNiveau(
     choisirElement: (element) => { traiter(interaction.choisirElement(element)); },
     survolerElement: (element) => { interaction.survolerElement(element); },
     decrireElement: (element) => {
-      const mode = interaction.mode;
-      return mode.type === 'menu' ? contenuElementMenu(etat, mode.cx, mode.cy, element) : null;
+      const lieu = lieuDuMenu(interaction.mode);
+      return lieu ? contenuElementMenu(etat, lieu, element) : null;
     },
     decrireHeros: () => contenuHerosEnPartie(etat),
   }, signal, options.infini);
@@ -439,14 +454,16 @@ export async function lancerNiveau(
     // Une pastille d'un panneau d'entrée : ses bulles passent par le canvas, les pastilles elles-mêmes ne captent rien.
     const puce = indications.puceSous(x, y);
     if (puce) {
+      // Le repère d'un couloir dit ce qu'est le Vol de Corbeaux ; une pastille, l'ennemi qu'elle annonce.
+      const contenu = (): ReturnType<typeof contenuEnnemiDeDonnees> => (puce.genre === 'couloir' ? contenuParticularite('corbeaux', [t('gimmick.couloir.note')]) : contenuEnnemiDeDonnees(puce.type));
       return {
         cle: puce.cle,
         ancre: () => puce.ancre(),
-        fabriquer: () => (puce.encore() && (!souris || indications.puceSous(sourisX, sourisY)?.cle === puce.cle) ? contenuEnnemiDeDonnees(puce.type) : null),
+        fabriquer: () => (puce.encore() && (!souris || indications.puceSous(sourisX, sourisY)?.cle === puce.cle) ? contenu() : null),
       };
     }
     const ennemi = ennemiSous(etat, rendu.enTuilesX(x), rendu.enTuilesY(y), rayonToucheTuiles());
-    if (!ennemi) return null;
+    if (!ennemi) return radeauPointe(x, y, souris);
     const sousLaSouris = (): boolean => ennemiSous(etat, rendu.enTuilesX(sourisX), rendu.enTuilesY(sourisY), rayonToucheTuiles()) === ennemi;
     return {
       cle: ennemi.id,
@@ -457,6 +474,29 @@ export async function lancerNiveau(
         return { left: ex - demi, top: ey - demi, right: ex + demi, bottom: ey + demi };
       },
       fabriquer: () => (ennemi.vivant && etat.ennemis.includes(ennemi) && (!souris || sousLaSouris()) ? contenuEnnemi(ennemi) : null),
+    };
+  };
+  /** Le radeau sous le pointeur (une de ses places, ou sa plateforme) : sa bulle dit ses places libres et comment s'en servir. */
+  const surLeRadeau = (x: number, y: number): boolean => {
+    const tx = rendu.enTuilesX(x);
+    const ty = rendu.enTuilesY(y);
+    if (placeTouchee(etat, tx, ty, rayonToucheTuiles()) >= 0) return true;
+    const centre = centreRadeauAffiche(etat, pas.alpha);
+    return centre !== null && Math.abs(centre.x - tx) <= DEMI_LARGEUR_RADEAU && Math.abs(centre.y - ty) <= DEMI_HAUTEUR_RADEAU;
+  };
+  const radeauPointe = (x: number, y: number, souris: boolean): CibleCarteSurvolee | null => {
+    // Menu ouvert ou visée en cours : la bulle du radeau cacherait les boutons, et le joueur sait déjà ce qu'il fait.
+    if (interaction.mode.type !== 'libre' || !surLeRadeau(x, y)) return null;
+    return {
+      cle: CLE_BULLE_RADEAU,
+      ancre: () => {
+        const centre = centreRadeauAffiche(etat, pas.alpha) ?? { x: 0, y: 0 };
+        const demi = rendu.pixelsCssParTuile * DEMI_LARGEUR_RADEAU;
+        const cx = rendu.enCssX(centre.x);
+        const cy = rendu.enCssY(centre.y);
+        return { left: cx - demi, top: cy - demi, right: cx + demi, bottom: cy + demi };
+      },
+      fabriquer: () => (interaction.mode.type === 'libre' && (!souris || surLeRadeau(sourisX, sourisY)) ? contenuRadeau(etat) : null),
     };
   };
   canvas.addEventListener('pointerdown', (e) => {
@@ -575,6 +615,12 @@ export async function lancerNiveau(
     if (e.matches) definirPause(true);
   }, { signal });
   if (portrait.matches) definirPause(true);
+  // Un niveau à particularité : la première fois, sa fiche s'ouvre avant tout le reste (la partie attend).
+  const gimmick = etat.niveau.gimmick;
+  if (gimmick && options.surNouvelleParticularite?.(gimmick.type) === true) {
+    fichesEnAttente.push({ genre: 'particularite', type: gimmick.type });
+    montrerFicheSuivante();
+  }
   if (options.reprise) {
     // Une partie reprise montre d'abord ce qu'elle contient (tours, ennemis), et attend que le joueur soit prêt.
     rendu.synchroniser(etat, temps);
@@ -714,8 +760,14 @@ export async function lancerNiveau(
   /** Menu en cercle de la case sélectionnée, recalculé à chaque pas de simulation (prix, grisé) et replacé à chaque image. */
   const mettreAJourMenu = (): void => {
     const mode = interaction.mode;
-    const centre = mode.type === 'menu' && caseExiste(etat.niveau.carte, mode.cx, mode.cy) ? centreCase(mode.cx, mode.cy) : null;
-    if (mode.type !== 'menu' || !centre || finie) {
+    const lieu = lieuDuMenu(mode);
+    const cle = !lieu ? '' : lieu.place !== undefined ? `place:${String(lieu.place)}` : `${String(lieu.cx)},${String(lieu.cy)}`;
+    // Sur le radeau, le menu reste là où il s'est ouvert : des boutons qui glissent sous le doigt ou la souris (le radeau fait une
+    // tuile par seconde) se visent mal. L'anneau de la place et la portée, eux, suivent le radeau (Surbrillance.place).
+    if (lieu?.place !== undefined && (cle !== caseMenu || !ancreMenu)) ancreMenu = placeAffichee(etat, pas.alpha, lieu.place);
+    const centre = !lieu ? null : lieu.place !== undefined ? ancreMenu : caseExiste(etat.niveau.carte, lieu.cx, lieu.cy) ? centreCase(lieu.cx, lieu.cy) : null;
+    if (!lieu || !centre || finie) {
+      ancreMenu = null;
       if (elementsDuMenu) {
         elementsDuMenu = null;
         caseMenu = '';
@@ -723,9 +775,8 @@ export async function lancerNiveau(
       }
       return;
     }
-    const cle = `${String(mode.cx)},${String(mode.cy)}`;
     if (!elementsDuMenu || etat.pas !== pasMenu || cle !== caseMenu) {
-      elementsDuMenu = elementsMenu(etat, mode.cx, mode.cy);
+      elementsDuMenu = elementsMenu(etat, lieu);
       pasMenu = etat.pas;
       caseMenu = cle;
       versionMenu++;

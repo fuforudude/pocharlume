@@ -34,6 +34,7 @@ import { afficherOptions } from './ui/options';
 import { lancerNiveau, graineSuivante, type PartieEnCours, type ResultatPartie, type RetourFin } from './ui/partie';
 import { texteRefusMeta } from './ui/raisons-meta';
 import { niveauDeCampagne } from './ui/regions-monde';
+import { particulariteAMontrer } from './ui/particularites';
 
 const conteneur = document.querySelector<HTMLElement>('#app');
 if (!conteneur) throw new Error('Conteneur #app introuvable');
@@ -57,6 +58,8 @@ interface OptionsLancement {
   readonly reprise?: EtatPartie;
   /** Raccourci de développement : la partie ne touche pas à la sauvegarde. */
   readonly horsSauvegarde?: boolean;
+  /** Niveau d'essai d'un gimmick (développement) : hors sauvegarde, mais la fiche « Nouvelle particularité » s'ouvre quand même. */
+  readonly essai?: boolean;
   /** Partie du mode infini : la carte jouée et sa région. Le niveau passé à `jouer` fournit la carte et ses entrées. */
   readonly infini?: { readonly carte: string; readonly region: number };
 }
@@ -157,6 +160,8 @@ async function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, l
       // Un ennemi paraît pour la première fois dans cette partie : il entre au bestiaire (pour toujours) et, si l'option est active et qu'il
       // n'avait jamais été rencontré, sa fiche « Nouvel ennemi » s'ouvre. Hors sauvegarde, rien n'est noté ni montré.
       surNouveauxEnnemis: (ids: string[]): string[] => ennemisAMontrer(session, ids, horsSauvegarde === true),
+      // Un niveau à particularité : la première fois, elle est notée et sa fiche s'ouvre (même option que « Nouvel ennemi »).
+      surNouvelleParticularite: (type) => particulariteAMontrer(session, type, horsSauvegarde === true, lancement.essai === true),
       // « Bestiaire » dans la pause : monté dans la partie par-dessus la pause ; c'est la partie qui le possède et le ferme.
       surBestiaire: (parent: HTMLElement, atlas: AtlasRendu, surFermer: () => void) => afficherBestiaire(parent, { atlas, session, surFermer }),
       ...(infini ? { infini: { record: () => recordDeLaCarte(session.sauvegarde, infini.carte) } } : {}),
@@ -336,7 +341,20 @@ function raccourcisDeveloppement(): readonly ChoixNiveau[] {
   return [
     { libelle: t('accueil.niveau', { n: dernier.numero }), surChoisir: () => { jouer(dernier, 'matou', { horsSauvegarde: true }).catch(console.error); } },
     { libelle: t('accueil.niveau_test'), surChoisir: () => { jouer(NIVEAU_CAMPAGNE_TEST, 'matou', { horsSauvegarde: true }).catch(console.error); } },
+    { libelle: t('accueil.essai_corbeaux'), surChoisir: () => { lancerEssaiGimmick('corbeaux'); } },
+    { libelle: t('accueil.essai_radeau'), surChoisir: () => { lancerEssaiGimmick('radeau'); } },
   ];
+}
+
+/**
+ * Développement seulement : un niveau d'essai d'un gimmick (couloirs de corbeaux, radeau), hors sauvegarde. Le module est chargé à
+ * la demande, derrière `import.meta.env.DEV` : le site publié ne l'embarque pas.
+ */
+function lancerEssaiGimmick(type: 'corbeaux' | 'radeau'): void {
+  if (!import.meta.env.DEV) return;
+  import('./ui/niveaux-essai-gimmicks')
+    .then(({ ESSAIS_GIMMICKS }) => jouer(ESSAIS_GIMMICKS[type], 'matou', { horsSauvegarde: true, essai: true }))
+    .catch(console.error);
 }
 
 function accueil(): void {
@@ -381,7 +399,10 @@ async function demarrer(): Promise<void> {
   session = await Session.ouvrir(new Depot(stockage), ouvrirCanalNavigateur(), { defs: DEFS_META });
   installerAudio(() => session.sauvegarde.reglages);
   installerIndicationsClavier();
-  accueil();
+  // Développement : `?essai=corbeaux` ou `?essai=radeau` ouvre directement le niveau d'essai du gimmick (captures, réglages).
+  const essai = import.meta.env.DEV ? new URLSearchParams(window.location.search).get('essai') : null;
+  if (essai === 'corbeaux' || essai === 'radeau') lancerEssaiGimmick(essai);
+  else accueil();
   avertirSauvegarde(session.origine, nom === 'memoire');
 }
 

@@ -43,8 +43,8 @@ export const frBestiaire = {
   'bestiaire.niveau_libelle_nouveau': '{nom} (nouveau)',
 
   // Option
-  'bestiaire.option_fiches': 'Fiches « Nouvel ennemi »',
-  'bestiaire.option_fiches_aide': 'La partie se met en pause la première fois qu’un ennemi paraît.',
+  'bestiaire.option_fiches': 'Fiches « Nouvel ennemi » et « Nouvelle particularité »',
+  'bestiaire.option_fiches_aide': 'La partie se met en pause la première fois qu’un ennemi paraît, ou qu’un niveau a une particularité.',
   'bestiaire.option_oui': 'Oui',
   'bestiaire.option_non': 'Non',
 

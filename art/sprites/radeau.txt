@@ -1,0 +1,206 @@
+# Gimmicks de la région 11 (Grèves Grises) : le Radeau et le Vol de Corbeaux.
+# radeau : plateforme de rondins liés par deux cordes, 48 × 40, ancre au centre (24, 22) = le centre du radeau dans le moteur.
+#   Ses trois places par défaut (décalages (0, -1), (-1, 0), (1, 0) en tuiles) tombent en (24, 6), (8, 22) et (40, 22).
+# radeau-place : natte de corde d'une place libre, 14 × 10, ancre au centre (le rendu la pose sur la place, une tour la cache).
+# effet-plumes : gerbe de plumes noires quand un corbeau sort de son couloir au bord droit (animation impact, jouée une fois).
+# icone-couloir, icone-radeau, icone-sortie-couloir : repère du panneau d'un couloir, icônes des particularités, bout d'un couloir.
+palette commune
+couleur 1 1c2a36a0
+couleur 2 3a5266c0
+
+sprite radeau
+categorie decor
+taille 48 40
+ancre 24 22
+.
+.
+.
+..dddddddddJZddddddddddddddddddddddJZdddddddd
+..oooooooooZJoooooooooBooooooooooBoZJoooooooo
+..OOOOOOOOOJZoOOOOOOOOOOOOoOOOOOOOOJZOOoOOOOO
+..ObBBbBBbBZJBBbBBbBBbBBbBBbBBbBBbBZJBBbBBbBO
+..obBBbBBbBJZBBbBBbBBbBBbBBbBBbBBbBJZBBbBBbBo
+..dbbbbbbbbZJbbbbbbbbbbbbbbbbbbbbbbZJbbbbbbbd
+...ddddddddJZddddddddddddddddddddddJZddddddddd
+...ooooooooZJoBooooooooooBoooooooooZJooooooooo
+...OOOOOOOOJZOOoOOOOOOOOOOOOoOOOOOOJZOOOOoOOOO
+...OBBBBBBBZJBBBBBBBBBBBBBBBBBBBBBBZJBBBBBBBBO
+...oBBBBBBBJZBBBBBBBBBBBBBBBBBBBBBBJZBBBBBBBBo
+...dbbbbbbbZJbbbbbbbbbbbbbbbbbbbbbbZJbbbbbbbbd
+..dddddddddJZddddddddddddddddddddddJZdddddddd
+..ooooBooooZJooooBooooooooooBooooooZJooBooooo
+..OOoOOOOOOJZOOOOoOOOOOOOOOOOOoOOOOJZOOOOOOoO
+..OBBBBBBBBZJBBBBBBBBBBBBBBBBBBBBBBZJBBBBBBBO
+..oBBBBBBBBJZBBBBBBBBBBBBBBBBBBBBBBJZBBBBBBBo
+..dbbbbbbbbZJbbbbbbbbbbbbbbbbbbbbbbZJbbbbbbbd
+...ddddddddJZddddddddddddddddddddddJZddddddddd
+...ooooooBoZJoooooooBooooooooooBoooZJoooooBooo
+...OOOoOOOOJZOOOOOOoOOOOOOOOOOOOoOOJZOOOOOOOOO
+...OBbBBbBBZJBbBBbBBbBBbBBbBBbBBbBBZJBbBBbBBbO
+...oBbBBbBBJZBbBBbBBbBBbBBbBBbBBbBBJZBbBBbBBbo
+...dbbbbbbbZJbbbbbbbbbbbbbbbbbbbbbbZJbbbbbbbbd
+..dddddddddJZddddddddddddddddddddddJZdddddddd
+..oooooooooZJooooooooooBooooooooooBZJoooooooo
+..OOOOOOoOOJZOOOOOOOOoOOOOOOOOOOOOoJZOOOOOOOO
+..OBBBBBBBBZJBBBBBBBBBBBBBBBBBBBBBBZJBBBBBBBO
+..oBBBBBBBBJZBBBBBBBBBBBBBBBBBBBBBBJZBBBBBBBo
+..dbbbbbbbbZJbbbbbbbbbbbbbbbbbbbbbbZJbbbbbbbd
+...ddddddddJZddddddddddddddddddddddJZddddddddd
+...oBooooooZJooBooooooooooBooooooooZJBoooooooo
+...OOOOOOOoJZOOOOOOOOOOoOOOOOOOOOOOJZOOOOOOOOO
+...OBBBBBBBZJBBBBBBBBBBBBBBBBBBBBBBZJBBBBBBBBO
+....2222222222222222222222222222222222222222
+....1111111111111111111111111111111111111111
+.
+
+sprite radeau-place
+categorie decor
+taille 14 10
+ancre 7 5
+.bbbbbbbbbbbb
+bJZJZJZJZJZJZb
+bZJZJZJZJZJZJb
+bJZJZJZJZJZJZb
+bZJZJZJZJZJZJb
+bJZJZJZJZJZJZb
+bZJZJZJZJZJZJb
+bJZJZJZJZJZJZb
+bZJZJZJZJZJZJb
+.bbbbbbbbbbbb
+
+sprite effet-plumes
+categorie effet
+taille 16 16
+ancre 8 8
+anim impact 110
+cadre
+.
+.
+.
+.
+.
+.
+.......kuuku
+........x
+.......kuxku
+........x
+......kuku.ku
+.
+.
+.
+.
+.
+cadre
+.
+.
+.
+.
+.
+.....ku.ku..ku
+.
+.
+.
+.....ku.....ku
+.
+.
+.
+....ku..ku...ku
+.
+.
+cadre
+.
+.
+.
+.
+...ku...ku....ku
+.
+.
+.
+.
+.
+...ku.........ku
+.
+.
+.
+.
+.
+cadre
+.
+.
+.
+.kU.....kU
+.
+.
+.
+.
+.
+.
+.
+.kU
+.
+.
+.
+.
+
+sprite icone-couloir
+categorie icone
+taille 16 16
+ancre 8 8
+................
+....kk..........
+...kuuk.........
+...kuuuk........
+....kuuuk....kk.
+.....kuuukkkuvk.
+..kkkkuuuuuuuuk.
+.kuuuuuuuuuuuk..
+kUUUUuuuuuuuk...
+.kkkkUUuuuukk...
+.....kkUUkk.....
+.......kk.......
+.ww.ww.ww.ww.x..
+.ww.ww.ww.ww.xx.
+.............x..
+................
+
+sprite icone-radeau
+categorie icone
+taille 16 16
+ancre 8 8
+................
+................
+.......kk.......
+......kwwk......
+......kwwk......
+...kk..kk..kk...
+..kwwk....kwwk..
+..kwwk....kwwk..
+.ddoddoddoddodd.
+.oOOOJOOOOJOOOo.
+.dbbbJbbbbJbbbd.
+.oOOOJOOOOJOOOo.
+.dbbbJbbbbJbbbd.
+..1111111111111.
+................
+................
+
+sprite icone-sortie-couloir
+categorie icone
+taille 16 16
+ancre 8 8
+................
+..kkk.....kkk...
+.kxxxk...kxxxk..
+kxxwxxk.kxxxxRk.
+kxwxxxxkkxxxxRk.
+kxxxxxk.kxxxxRk.
+.kxxxxk..kxxRk..
+..kxxk..kxxRk...
+...kxxk..kRk....
+....kxk..kk.....
+.....kk..k......
+..............k.
+.kk.........kuk.
+kuuk.......kuk..
+.kuuk.....kuk...
+..kk.......k....

@@ -47,7 +47,7 @@ function boutonDivine(): HTMLButtonElement {
 
 /** Les éléments de la case de test 0, constructible sur la carte du niveau 1. */
 function elements(etat: EtatPartie): ElementMenu[] {
-  return elementsCaseVide(etat, ct(0).cx, ct(0).cy);
+  return elementsCaseVide(etat, ct(0));
 }
 
 afterEach(() => {

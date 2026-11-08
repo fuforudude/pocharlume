@@ -79,6 +79,57 @@
   }
 }
 
+/* Panneau d'un couloir du Vol de Corbeaux : au bord gauche, à la hauteur du couloir (indications.ts évite les panneaux d'entrée). */
+.entree-couloir {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  pointer-events: none;
+  animation: pulse-entree 1.1s ease-in-out infinite;
+}
+
+.entree-couloir[hidden] {
+  display: none;
+}
+
+.entree-couloir .fanion {
+  width: 28px;
+  height: 28px;
+  image-rendering: pixelated;
+  flex: none;
+}
+
+/* Les puces d'un couloir sur un fond plus froid que celles d'une entrée : on les distingue d'un coup d'œil. */
+.entree-couloir .puces-entree {
+  border-color: #6f7f96;
+  background: rgba(24, 28, 40, 0.88);
+}
+
+/* Bout d'un couloir : la marque n'apparaît que quand un corbeau sort, rougit et tremble comme la porte. */
+.sortie-couloir {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.sortie-couloir[hidden] {
+  display: none;
+}
+
+.sortie-couloir .marque {
+  display: block;
+  image-rendering: pixelated;
+}
+
+.sortie-couloir.rougit .marque {
+  filter: drop-shadow(0 0 8px rgba(255, 40, 20, 0.9));
+}
+
+.sortie-couloir.secoue {
+  animation: secousse-sortie 0.5s linear;
+}
+
 /* Porte de sortie : centrée sur le dernier point du chemin. */
 .sortie-chemin {
   position: absolute;
@@ -121,18 +172,23 @@
 
 /* « Réduire les animations » : la porte rougit sans trembler, le panneau ne pulse plus. */
 .indications.animations-reduites .entree-chemin,
+.indications.animations-reduites .entree-couloir,
+.indications.animations-reduites .sortie-couloir.secoue,
 .indications.animations-reduites .sortie-chemin.secoue {
   animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .entree-chemin,
+  .entree-couloir,
+  .sortie-couloir.secoue,
   .sortie-chemin.secoue {
     animation: none;
   }
 }
 
 @media (max-height: 460px) {
+  .entree-couloir .fanion,
   .entree-chemin .fanion {
     width: 22px;
     height: 22px;

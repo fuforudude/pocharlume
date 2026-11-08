@@ -6,7 +6,7 @@
 // Tout est réutilisé d'un pas à l'autre : les objets sortis du jeu rejoignent une réserve, les effets
 // viennent d'un pool. Seule la création d'une entité nouvelle peut allouer (et seulement au début).
 import { DIEUX } from '../data/dieux';
-import { centreCase, type Ennemi, type EtatPartie, type Evenement, type Projectile, type Tour, type Unite } from '../engine';
+import { type Ennemi, type EtatPartie, type Evenement, type Projectile, type Tour, type Unite } from '../engine';
 import type { Voie } from '../engine/definitions';
 import type { FamilleTour } from '../engine/etat';
 import { dureeAnimation } from './animations';
@@ -72,6 +72,9 @@ const DUREE_FAMINE = 700;
 const MAINTIEN_CADAVRE = 700;
 /** Au-delà de cette distance (tuiles) entre deux pas, c'est une téléportation (réapparition) : pas d'interpolation. */
 const SAUT_TUILES = 3;
+/** Gerbe de plumes d'un corbeau qui sort : un peu en deçà du bord (tuiles) pour rester visible, à la hauteur où il vole (px). */
+const RECUL_PLUMES = 0.5;
+const ALTITUDE_PLUMES = 10;
 const MOUVEMENT_MIN2 = 1e-6;
 /** Rayon visible du dernier cadre de l'onde de choc, pour l'agrandir d'un entier jusqu'au rayon voulu. */
 const RAYON_SPRITE_ONDE = 15;
@@ -335,6 +338,14 @@ export class Suivi {
         this.tours.set(t.id, v);
       }
       if (v.niveau !== t.niveau || v.voie !== t.voie || v.sprite === null || v.versionCollection !== this.version) this.habillerTour(v, t, etat.config.dieu);
+      // Une tour du radeau suit sa place : le moteur recopie la position de la place dans t.x, t.y à chaque pas, le rendu
+      // interpole entre le pas précédent et celui-ci (halo, tireur, portée et anneaux suivent son visuel).
+      if (t.place >= 0) {
+        v.xPrec = v.x;
+        v.yPrec = v.y;
+        v.x = t.x;
+        v.y = t.y;
+      }
       v.tour = t;
       v.vu = marque;
     }
@@ -592,6 +603,9 @@ export class Suivi {
     poussiere.x = x;
     poussiere.y = y;
     poussiere.valeur = demiBase;
+    // Sur le radeau, la tour bouge pendant l'effet : poussière et anneau la suivent.
+    const suit = (tour.tour?.place ?? -1) >= 0 ? tour.id : -1;
+    poussiere.suitTour = suit;
     // echelle : 1 = poussière et éclats, 0 = poussière seule (animations réduites).
     const reduit = this.animationsReduites();
     poussiere.echelle = reduit ? 0 : 1;
@@ -600,6 +614,7 @@ export class Suivi {
     anneau.x = x;
     anneau.y = y;
     anneau.valeur = demiBase;
+    anneau.suitTour = suit;
     tour.sursautDebut = temps;
     tour.flashDebut = temps;
   }
@@ -718,7 +733,13 @@ export class Suivi {
         }
         return;
       }
-      case 'fuite':
+      case 'fuite': {
+        // Un corbeau sort de son couloir au bord droit : une gerbe de plumes là où il quitte la carte (le bout du couloir rougit
+        // et tremble dans les indications, comme la porte d'un chemin). L'ennemi n'est déjà plus dans l'état, son visuel si.
+        const v = this.ennemis.get(ev.ennemi);
+        if (v?.ennemi && v.ennemi.couloir >= 0) this.effetSprite('effet-plumes', v.x - RECUL_PLUMES, v.y, temps, 1, -ALTITUDE_PLUMES);
+        return;
+      }
       case 'vague':
       case 'fin':
       case 'regain_vies':
@@ -862,21 +883,19 @@ export class Suivi {
         this.effetSprite(invoque?.stats.capacites?.ciblable === false ? 'effet-ombre' : 'fumee', ev.x, ev.y, temps, 1, -4);
         return;
       }
-      case 'construction': {
-        const tour = this.tours.get(ev.tour);
-        if (tour) this.effetSprite('fumee', tour.x, tour.y, temps, 2, -6 + DECALAGE_BASE_TOUR);
+      case 'construction':
+        // À la position de la tour à cet instant (sur le radeau, celle de sa place).
+        this.effetSprite('fumee', ev.x, ev.y, temps, 2, -6 + DECALAGE_BASE_TOUR);
         return;
-      }
       case 'amelioration': {
         const tour = this.tours.get(ev.tour);
         if (tour) this.effetsAmelioration(tour, temps);
         return;
       }
-      case 'vente': {
-        const centre = centreCase(ev.cx, ev.cy);
-        this.effetSprite('fumee', centre.x, centre.y, temps, 2, -6);
+      case 'vente':
+        // La tour a déjà quitté l'état : fumée là où elle était (la case, ou la place du radeau au moment de la vente).
+        this.effetSprite('fumee', ev.x, ev.y, temps, 2, -6);
         return;
-      }
       case 'ralliement':
         this.marqueOrdre(ev.x, ev.y, temps, '#7fc6f0');
         return;

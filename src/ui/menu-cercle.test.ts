@@ -6,9 +6,9 @@ import type { Action, EtatPartie } from '../engine';
 import { elementsCaseVide as caseVide, elementsMenu as menuDe, elementsTour as tourDe, positionsCercle } from './menu-cercle';
 
 /** Les éléments du menu de la case de test numéro `i` (voir `CASES_TEST`). */
-const elementsCaseVide = (etat: EtatPartie, i: number) => caseVide(etat, ct(i).cx, ct(i).cy);
-const elementsTour = (etat: EtatPartie, i: number) => tourDe(etat, ct(i).cx, ct(i).cy);
-const elementsMenu = (etat: EtatPartie, i: number) => menuDe(etat, ct(i).cx, ct(i).cy);
+const elementsCaseVide = (etat: EtatPartie, i: number) => caseVide(etat, ct(i));
+const elementsTour = (etat: EtatPartie, i: number) => tourDe(etat, ct(i));
+const elementsMenu = (etat: EtatPartie, i: number) => menuDe(etat, ct(i));
 
 function partie(aretes = 5000): EtatPartie {
   const etat = creerPartie(NIVEAU_TEST, CONFIG);
