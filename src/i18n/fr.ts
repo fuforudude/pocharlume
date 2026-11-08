@@ -170,7 +170,7 @@ export const fr = {
   'refus.partie_terminee': 'La partie est finie.',
   'refus.action_invalide': 'Ce geste est impossible.',
   'refus.case_hors_carte': 'Cette case n’est pas sur la carte.',
-  'refus.case_interdite': 'On ne construit pas ici (chemin ou décor).',
+  'refus.case_interdite': 'On ne construit pas ici (chemin, décor ou eau).',
   'refus.case_occupee': 'Une tour se dresse déjà ici.',
   'refus.case_vide': 'Il n’y a pas de tour ici.',
   'refus.place_inconnue': 'Il n’y a pas de place ici sur le radeau.',

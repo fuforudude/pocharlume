@@ -1,8 +1,8 @@
-// `npm run balance` : rejoue les 100 niveaux des régions 1 à 10 dans les trois difficultés et les deux défis avec chacun des trois
+// `npm run balance` : rejoue les 110 niveaux des régions 1 à 11 dans les trois difficultés et les deux défis avec chacun des trois
 // dieux (son avatar, sans amélioration ni objet) et les bots (naïf, soigneux, sans défense ; le soigneux seul pour les défis) sur
 // toutes les graines d'évaluation, plus, pour la région 1, les vérifications supplémentaires (disciples, arbre au maximum, héros
 // de niveau 10, soigneux sans tour divine). Écrit balance-report.md à la racine et affiche les écarts aux bandes cibles. Code de
-// sortie 1 si une bande imposée d'une région (1 à 10) ou de l'infini n'est pas respectée.
+// sortie 1 si une bande imposée d'une région (1 à 11) ou de l'infini n'est pas respectée.
 // Les tâches (niveau, difficulté, dieu ou profil) se calculent dans un petit nombre de fils qui restent en vie et les prennent
 // une à une ; le résultat ne dépend pas de leur ordre d'arrivée (les évaluations sont remises dans l'ordre avant la rédaction).
 //
@@ -33,7 +33,7 @@ import { CARTES_INFINI_AUTRES, CARTES_INFINI_REGION1, ecartsInfini, mediane, red
 import { redigerRapport } from '../../src/equilibrage/rapport.ts';
 import { moyennesZone, NIVEAUX_ZONE_HORDE, NIVEAUX_ZONE_ORDINAIRES, redigerZone } from '../../src/equilibrage/zone.ts';
 import { niveauDeCampagne } from '../../src/data/niveaux/campagne.ts';
-import { ecartsDeLaRegion, evaluationsDeRegion, redigerDefis, redigerRegions } from '../../src/equilibrage/rapport-regions.ts';
+import { ecartsDeLaRegion, evaluationsDeRegion, redigerDefis, redigerRegions, REGIONS_EVALUEES } from '../../src/equilibrage/rapport-regions.ts';
 import type { TacheBandes, TacheInfini, TacheProfil } from './travailleur.ts';
 
 const SORTIE = fileURLToPath(new URL('../../balance-report.md', import.meta.url));
@@ -155,9 +155,9 @@ taches.forEach((tache, i) => {
   }
 });
 
-/** Les écarts aux bandes de toutes les régions évaluées (1 à 10), ceux de la région 1 avec la puissance des tours. */
+/** Les écarts aux bandes de toutes les régions évaluées (1 à 11), ceux de la région 1 avec la puissance des tours. */
 function ecartsDeTout(): string[] {
-  const regions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].filter((r) => evaluationsDeRegion(evaluations, r).length > 0);
+  const regions = REGIONS_EVALUEES.filter((r) => evaluationsDeRegion(evaluations, r).length > 0);
   return [
     ...regions.flatMap((r) => (r === 1 ? verifierBandes(evaluationsDeRegion(evaluations, 1)) : ecartsDeLaRegion(evaluations, r))),
     ...ecartsInfini(mesuresInfini),
@@ -198,7 +198,7 @@ if (miseAuPoint) {
   }
   // Défis : part de réussites du soigneux par région et par défi (bande 40 à 90 %), trois dieux ensemble.
   for (const defi of difficultesJouees.filter(estDefi)) {
-    const parRegion = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].flatMap((r) => {
+    const parRegion = REGIONS_EVALUEES.flatMap((r) => {
       const deLaRegion = evaluationsDeRegion(evaluations, r).filter((e) => e.difficulte === defi && e.bot === 'soigneux');
       return deLaRegion.length === 0 ? [] : [`R${String(r)} ${pct(synthetiser(deLaRegion.flatMap((e) => [...e.parties])).tauxVictoire)} %`];
     });
@@ -222,7 +222,7 @@ if (miseAuPoint) {
   }
   console.log(`${String(Math.round((performance.now() - debut) / 100) / 10)} s.`);
 } else {
-  // Rapport principal : région 1, comme avant ; puis les régions 2 à 10 et les défis des dix régions.
+  // Rapport principal : région 1, comme avant ; puis les régions 2 à 11 et les défis des onze régions.
   const region1 = evaluationsDeRegion(evaluations, 1);
   // La zone : mesurée dans le fil principal (une à trois minutes).
   const niveauDe = (n: number) => niveauDeCampagne(n)?.niveau;
@@ -231,9 +231,9 @@ if (miseAuPoint) {
     SORTIE,
     `${redigerRapport(region1, graines, profils).trimEnd()}
 
-${redigerRegions(evaluations, [2, 3, 4, 5, 6, 7, 8, 9, 10]).trimEnd()}
+${redigerRegions(evaluations, REGIONS_EVALUEES.filter((r) => r > 1)).trimEnd()}
 
-${redigerDefis(evaluations, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).trimEnd()}
+${redigerDefis(evaluations, REGIONS_EVALUEES).trimEnd()}
 
 ${redigerInfini(mesuresInfini).trimEnd()}
 
@@ -244,7 +244,7 @@ ${zone.trimEnd()}
   const imposes = ecartsImposes(ecarts);
   console.log(`balance-report.md écrit en ${String(Math.round((performance.now() - debut) / 100) / 10)} s.`);
   if (ecarts.length === 0) {
-    console.log('Toutes les bandes des régions 1 à 10 et des défis sont respectées.');
+    console.log('Toutes les bandes des régions 1 à 11 et des défis sont respectées.');
   } else {
     const suspendus = ecarts.filter((e) => !imposes.includes(e));
     console.log(`${String(imposes.length)} écart(s) aux bandes imposées${imposes.length === 0 ? '' : ' :'}`);

@@ -2,8 +2,18 @@
 // moteur (`avancer` avec des actions), exactement comme l'interface : il lit l'état mais ne le modifie jamais
 // directement.
 import { avancer, creerPartie, derniereVagueTerminee, PAS_PAR_SECONDE } from '../engine';
-import type { Action, ConfigPartie, DefiPartie, EtatPartie, IdFamille, Niveau, Statut, Voie } from '../engine';
+import type { Action, ConfigPartie, DefiPartie, EtatPartie, IdFamille, LieuTour, Niveau, Statut, Tour, Voie } from '../engine';
 import { VERSION_DONNEES } from '../data/version';
+
+/** Clé d'un lieu de tour : la case (« cx,cy ») ou la place du radeau (« radeau n »). */
+export function cleDuLieu(lieu: LieuTour): string {
+  return lieu.place !== undefined ? `radeau ${String(lieu.place)}` : `${String(lieu.cx)},${String(lieu.cy)}`;
+}
+
+/** Le lieu d'une tour posée : sa place sur le radeau, ou sa case. */
+export function lieuDeLaTour(tour: Tour): LieuTour {
+  return tour.place >= 0 ? { place: tour.place } : { cx: tour.cx, cy: tour.cy };
+}
 
 /** Un joueur automatique : il regarde l'état et renvoie les actions à jouer à ce pas. */
 export interface Bot {
@@ -98,7 +108,7 @@ export function jouerPartie(niveau: Niveau, bot: Bot, options: OptionsPartie): R
   const viesPerduesParVague: number[] = niveau.vagues.map(() => 0);
   const vagueDe = new Map<number, number>();
   const choix: ChoixTour[] = [];
-  const familleDeLaCase = new Map<string, IdFamille>();
+  const familleDuLieu = new Map<string, IdFamille>();
   const sorts: number[] = [0, 0];
   let tourDivine = false;
   let actions = 0;
@@ -113,13 +123,13 @@ export function jouerPartie(niveau: Niveau, bot: Bot, options: OptionsPartie): R
       if (a.type === 'lancerSort') sorts[a.emplacement] = (sorts[a.emplacement] ?? 0) + 1;
       else if (a.type === 'construire' && a.tour === 'divine') tourDivine = true;
       if (a.type === 'construire' && a.tour !== 'divine') {
-        familleDeLaCase.set(`${String(a.cx)},${String(a.cy)}`, a.tour);
+        familleDuLieu.set(cleDuLieu(a), a.tour);
         choix.push({ famille: a.tour });
       } else if (a.type === 'specialiser') {
-        const famille = familleDeLaCase.get(`${String(a.cx)},${String(a.cy)}`);
+        const famille = familleDuLieu.get(cleDuLieu(a));
         if (famille) choix.push({ famille, voie: a.voie });
       } else if (a.type === 'vendre') {
-        familleDeLaCase.delete(`${String(a.cx)},${String(a.cy)}`);
+        familleDuLieu.delete(cleDuLieu(a));
       }
     });
     for (const ev of etat.evenements) {

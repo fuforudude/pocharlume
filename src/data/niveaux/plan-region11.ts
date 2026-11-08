@@ -4,16 +4,18 @@
 //
 // Gimmicks (docs/specs/2026-11-08-apres-histoire-gimmicks.md) :
 // - 101 à 105, Vol de Corbeaux : les couloirs sont les rangées de cases laissées dégagées sur chaque carte. Le générateur envoie les
-//   groupes de volants dans les couloirs à tour de rôle : les listes d'ennemis comptent donc les trois volants du jeu (Corbeau Noir,
-//   Chauve-Souris, Ange de Cendre) et peu d'ennemis au sol, pour que les volants pèsent lourd malgré `EQUILIBRAGE.repetitionOrdinaires`.
+//   groupes de volants dans les couloirs à tour de rôle : les listes d'ennemis comptent donc des volants (Corbeau Noir, Ange de Cendre,
+//   et la Chauve-Souris sauf aux niveaux 103 et 105) et peu d'ennemis au sol, pour que les volants pèsent lourd malgré
+//   `EQUILIBRAGE.repetitionOrdinaires`. Les essaims de Chauves-Souris d'élite (10 à 0,2 s dans un couloir) rendaient le défi Héroïque
+//   impossible aux niveaux 103 et 105 : elles en sont retirées (voir « Équilibrage de la région 11 » dans la spec).
 // - 106 à 110, Radeau : le trajet sur l'eau de chaque carte, 0,5 case par seconde, 3 places autour du centre (`PLACES_RADEAU`).
 //   Les ennemis sont surtout ceux de l'eau et des armures, que le radeau doit aller chercher d'un bout à l'autre de la carte.
 //
 // Ennemis : seulement les 59 existants (pas d'ennemi ordinaire nouveau), en mélanges plus durs que ceux de la région 10. Le niveau 110
 // est le combat contre le Passeur, avec le Radeau. `defiFer` : deux familles qui touchent les volants (tir ou magie) quand le niveau
 // en compte, la tour de tir dès qu'un Délateur (furtif) est là, jamais la même paire deux niveaux de suite (le niveau 100 finit sur
-// magie + tir). `aretesDepart`, `facteurBudget` et graines sont des valeurs de départ dans la continuité de la région 10 : le réglage fin
-// revient à la tâche d'équilibrage (`npm run balance`, après les stratégies de bot des gimmicks).
+// magie + tir). `aretesDepart` et `facteurBudget` sont réglés par `npm run balance` avec les stratégies de bot des gimmicks (tâche 6,
+// « Équilibrage de la région 11 » dans docs/specs/2026-11-08-apres-histoire-gimmicks.md).
 import type { GimmickRadeau, PlaceRadeau } from '../../engine/definitions';
 import type { PlanNiveau } from './plan-niveau';
 
@@ -40,7 +42,7 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
     numero: 101,
     carte: 'greve',
     chemins: [0],
-    aretesDepart: 1300,
+    aretesDepart: 1820,
     defiFer: { familles: ['caserne', 'tir'] },
     gimmick: { type: 'corbeaux', couloirs: [{ cy: 1 }, { cy: 6 }] },
     nom: 'niveau.r11.01.nom',
@@ -49,14 +51,14 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
       nombre: 12,
       ennemis: ['corbeau_noir', 'chauve_souris', 'ange_cendre', 'acolyte_cendre', 'garde_royal'],
       graine: 4103,
-      facteurBudget: 0.25,
+      facteurBudget: 0.19,
     },
   },
   {
     numero: 102,
     carte: 'filets',
     chemins: [0],
-    aretesDepart: 1350,
+    aretesDepart: 1890,
     defiFer: { familles: ['artillerie', 'magie'] },
     gimmick: { type: 'corbeaux', couloirs: [{ cy: 2 }, { cy: 6 }] },
     nom: 'niveau.r11.02.nom',
@@ -65,31 +67,31 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
       nombre: 12,
       ennemis: ['corbeau_noir', 'chauve_souris', 'ange_cendre', 'noyeur', 'martyr_bleme', 'chevalier'],
       graine: 1102,
-      facteurBudget: 0.28,
+      facteurBudget: 0.22,
     },
   },
   {
     numero: 103,
     carte: 'epaves',
     chemins: [0],
-    aretesDepart: 1400,
+    aretesDepart: 1960,
     defiFer: { familles: ['tir', 'artillerie'] },
     gimmick: { type: 'corbeaux', couloirs: [{ cy: 1 }, { cy: 4 }, { cy: 7 }] },
     nom: 'niveau.r11.03.nom',
     ambiance: 'niveau.r11.03.ambiance',
     vagues: {
       nombre: 13,
-      ennemis: ['corbeau_noir', 'chauve_souris', 'ange_cendre', 'crapaud_gonfle', 'gargouille', 'delateur'],
-      graine: 2106,
+      ennemis: ['corbeau_noir', 'ange_cendre', 'crapaud_gonfle', 'gargouille', 'delateur'],
+      graine: 2156,
       horde: true,
-      facteurBudget: 0.2,
+      facteurBudget: 0.12,
     },
   },
   {
     numero: 104,
     carte: 'ponton_noir',
     chemins: [0],
-    aretesDepart: 1450,
+    aretesDepart: 2030,
     defiFer: { familles: ['caserne', 'magie'] },
     gimmick: { type: 'corbeaux', couloirs: [{ cy: 2 }, { cy: 5 }, { cy: 8 }] },
     nom: 'niveau.r11.04.nom',
@@ -98,30 +100,30 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
       nombre: 13,
       ennemis: ['corbeau_noir', 'chauve_souris', 'ange_cendre', 'lueur_marais', 'bourreau_roi', 'garde_royal'],
       graine: 3110,
-      facteurBudget: 0.33,
+      facteurBudget: 0.26,
     },
   },
   {
     numero: 105,
     carte: 'cap_corbeaux',
     chemins: [0, 1, 2],
-    aretesDepart: 1550,
+    aretesDepart: 2170,
     defiFer: { familles: ['magie', 'tir'] },
     gimmick: { type: 'corbeaux', couloirs: [{ cy: 1 }, { cy: 4 }, { cy: 7 }] },
     nom: 'niveau.r11.05.nom',
     ambiance: 'niveau.r11.05.ambiance',
     vagues: {
       nombre: 14,
-      ennemis: ['corbeau_noir', 'chauve_souris', 'ange_cendre', 'delateur', 'effigie_roi', 'gargouille', 'porte_herse'],
-      graine: 4113,
-      facteurBudget: 0.38,
+      ennemis: ['corbeau_noir', 'ange_cendre', 'delateur', 'effigie_roi', 'gargouille', 'porte_herse'],
+      graine: 4133,
+      facteurBudget: 0.24,
     },
   },
   {
     numero: 106,
     carte: 'eau_morte',
     chemins: [0],
-    aretesDepart: 1350,
+    aretesDepart: 1690,
     defiFer: { familles: ['artillerie', 'tir'] },
     gimmick: radeau([5, 4], [6, 4], [7, 4], [8, 4], [9, 4], [10, 4], [11, 4], [12, 4], [13, 4]),
     nom: 'niveau.r11.06.nom',
@@ -137,7 +139,7 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
     numero: 107,
     carte: 'pontons',
     chemins: [0],
-    aretesDepart: 1400,
+    aretesDepart: 1750,
     defiFer: { familles: ['caserne', 'magie'] },
     gimmick: radeau([3, 7], [4, 7], [5, 7], [6, 7], [7, 7], [7, 6], [7, 5], [7, 4]),
     nom: 'niveau.r11.07.nom',
@@ -154,7 +156,7 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
     numero: 108,
     carte: 'passe_noyes',
     chemins: [0],
-    aretesDepart: 1450,
+    aretesDepart: 1810,
     defiFer: { familles: ['tir', 'caserne'] },
     gimmick: radeau([5, 6], [6, 6], [7, 6], [8, 6], [9, 6], [10, 6], [11, 6], [12, 6], [12, 5], [12, 4], [12, 3]),
     nom: 'niveau.r11.08.nom',
@@ -170,7 +172,7 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
     numero: 109,
     carte: 'baie_morte',
     chemins: [0],
-    aretesDepart: 1500,
+    aretesDepart: 1875,
     defiFer: { familles: ['magie', 'artillerie'] },
     gimmick: radeau([3, 5], [4, 5], [5, 5], [5, 4], [6, 4], [7, 4], [8, 4], [9, 4], [9, 5], [9, 6]),
     nom: 'niveau.r11.09.nom',

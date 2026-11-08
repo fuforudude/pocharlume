@@ -1,7 +1,10 @@
-// Géométrie des cartes pour les bots : points d'échantillonnage le long des chemins, longueur de chemin vue
-// depuis une case de la grille, poids de chaque chemin dans les vagues du niveau.
+// Géométrie des cartes pour les bots : points d'échantillonnage le long des chemins (et des couloirs du Vol de Corbeaux), longueur
+// de chemin vue depuis une case de la grille, poids de chaque chemin dans les vagues du niveau.
+//
+// Un « trajet » est un chemin ou un couloir : les chemins gardent leurs indices (0 à N − 1), le couloir k prend l'indice N + k. Un
+// ennemi apparu dans un couloir n'est donc jamais compté sur le chemin 0. Sans couloir, rien ne change.
 import { creerPartie, genererVagueInfinie, pointSurChemin } from '../engine';
-import type { DefEnnemi, EtatPartie, Niveau, Point } from '../engine';
+import type { DefEnnemi, EtatPartie, Niveau, Paquet, Point } from '../engine';
 import { ENNEMIS } from '../data/ennemis';
 import { menaceEnnemi } from '../data/equilibrage';
 import { VERSION_DONNEES } from '../data/version';
@@ -10,7 +13,7 @@ import { VERSION_DONNEES } from '../data/version';
 export const PAS_ECHANTILLON = 0.5;
 
 export interface Echantillon extends Point {
-  /** Indice du chemin. */
+  /** Indice du trajet : le chemin (0 à N − 1), ou N + k pour le couloir k du Vol de Corbeaux. */
   readonly chemin: number;
   /** Distance parcourue depuis l'entrée. */
   readonly distance: number;
@@ -20,10 +23,10 @@ export function distance(a: Point, b: Point): number {
   return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
 }
 
-/** Points régulièrement espacés sur chaque chemin de la partie. */
+/** Points régulièrement espacés sur chaque chemin de la partie, puis sur chaque couloir (indices N + k). */
 export function echantillonner(etat: EtatPartie): Echantillon[] {
   const points: Echantillon[] = [];
-  etat.chemins.forEach((c, chemin) => {
+  [...etat.chemins, ...etat.couloirs].forEach((c, chemin) => {
     for (let d = 0; d <= c.longueur; d += PAS_ECHANTILLON) {
       const p = pointSurChemin(c, d);
       points.push({ x: p.x, y: p.y, chemin, distance: d });
@@ -32,15 +35,32 @@ export function echantillonner(etat: EtatPartie): Echantillon[] {
   return points;
 }
 
+/** Nombre de couloirs du Vol de Corbeaux du niveau (0 sans ce gimmick). */
+export function nombreCouloirs(niveau: Niveau): number {
+  return niveau.gimmick?.type === 'corbeaux' ? niveau.gimmick.couloirs.length : 0;
+}
+
+/** Indice du trajet d'un groupe de la vague : son couloir (N + k) s'il en a un, sinon son chemin. */
+export function trajetDuPaquet(niveau: Niveau, p: Paquet): number {
+  return p.couloir !== undefined ? niveau.carte.chemins.length + p.couloir : p.chemin;
+}
+
 const table: Readonly<Record<string, DefEnnemi>> = ENNEMIS;
 
-/** Part de la menace du niveau qui emprunte chaque chemin (somme égale à 1). */
+/** Menace d'un groupe de la vague (0 pour un ennemi inconnu). */
+export function menacePaquet(p: Paquet): number {
+  const def = table[p.ennemi];
+  return def ? p.nombre * menaceEnnemi(def) * (p.facteurPv ?? 1) : 0;
+}
+
+/** Part de la menace du niveau qui emprunte chaque trajet, chemins puis couloirs (somme égale à 1). */
 export function poidsDesChemins(niveau: Niveau): number[] {
-  const menaces = niveau.carte.chemins.map(() => 0);
+  const menaces = Array.from({ length: niveau.carte.chemins.length + nombreCouloirs(niveau) }, () => 0);
   for (const vague of niveau.vagues) {
     for (const p of vague.paquets) {
       const def = table[p.ennemi];
-      if (def) menaces[p.chemin] = (menaces[p.chemin] ?? 0) + p.nombre * menaceEnnemi(def) * (p.facteurPv ?? 1);
+      const t = trajetDuPaquet(niveau, p);
+      if (def) menaces[t] = (menaces[t] ?? 0) + p.nombre * menaceEnnemi(def) * (p.facteurPv ?? 1);
     }
   }
   const total = menaces.reduce((a, b) => a + b, 0);
@@ -48,8 +68,9 @@ export function poidsDesChemins(niveau: Niveau): number[] {
 }
 
 /**
- * Parts (0 à 1) de la menace du niveau portées par des volants et par des furtifs : ce que le bot soigneux doit savoir pour
- * ne pas acheter de tours qui ne touchent pas les volants, et pour penser aux Guetteurs des Toits contre les furtifs.
+ * Parts (0 à 1) de la menace des chemins portées par des volants et par des furtifs : ce que le bot soigneux doit savoir pour
+ * ne pas acheter de tours qui ne touchent pas les volants, et pour penser aux Guetteurs des Toits contre les furtifs. Les groupes
+ * des couloirs n'y comptent pas : le bot les traite à part (seules les tours qui visent les volants les touchent).
  */
 export function partsSpeciales(niveau: Niveau): { volants: number; furtifs: number } {
   let total = 0;
@@ -58,7 +79,7 @@ export function partsSpeciales(niveau: Niveau): { volants: number; furtifs: numb
   for (const vague of niveau.vagues) {
     for (const p of vague.paquets) {
       const def = table[p.ennemi];
-      if (!def) continue;
+      if (!def || p.couloir !== undefined) continue;
       const menace = p.nombre * menaceEnnemi(def) * (p.facteurPv ?? 1);
       total += menace;
       if (def.volant) volants += menace;

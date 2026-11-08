@@ -9,7 +9,7 @@ import { TAILLE_MAX_ETAT } from '../save/validation';
 import { configPartie } from './simulation';
 
 describe('partie infinie à la vague 100', () => {
-  it.each([1, 6, 10])('région %i : l’état sérialisé reste sous la taille maximale et les ennemis vivants restent bornés', (region) => {
+  it.each([1, 6, 10, 11])('région %i : l’état sérialisé reste sous la taille maximale et les ennemis vivants restent bornés', (region) => {
     const campagne = niveauDeCampagne(region === 1 ? 1 : region * 10 - 9);
     if (!campagne) throw new Error('niveau introuvable');
     const etat = creerPartie(campagne.niveau, configPartie({ graine: 11, difficulte: 'matou', infini: { region } }));
