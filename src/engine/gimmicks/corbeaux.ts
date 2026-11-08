@@ -25,7 +25,7 @@ export function verifierCorbeaux(niveau: Niveau, gimmick: GimmickCorbeaux): void
     if (!Number.isInteger(c.cy) || c.cy < 0 || c.cy >= max) throw new Error(`Corbeaux : couloir ${String(k)} hors de la grille (ligne ${String(c.cy)})`);
   });
   if (new Set(gimmick.couloirs.map((c) => c.cy)).size !== gimmick.couloirs.length) throw new Error('Corbeaux : deux couloirs sur la même ligne');
-  if (gimmick.coutVies !== undefined && (!Number.isInteger(gimmick.coutVies) || gimmick.coutVies < 0)) throw new Error(`Corbeaux : coût en vies invalide ${String(gimmick.coutVies)}`);
+  if (gimmick.coutVies !== undefined && (!Number.isInteger(gimmick.coutVies) || gimmick.coutVies < 1)) throw new Error(`Corbeaux : coût en vies invalide (au moins 1 cœur) ${String(gimmick.coutVies)}`);
 }
 
 /** Vérifie un groupe qui vole en couloir (vague numéro `vague`, de 1) : couloir du gimmick et ennemi volant. */

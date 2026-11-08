@@ -49,7 +49,7 @@ describe('partie en cours', () => {
   it('refuse un numéro de niveau invalide et une partie finie', () => {
     const etat = niveau1();
     jusquaVague(etat, 1);
-    for (const n of [0, 101, 1.5, Number.NaN]) expect(partieEnCours(etat, n)).toBeNull();
+    for (const n of [0, 151, 1.5, Number.NaN]) expect(partieEnCours(etat, n)).toBeNull();
     etat.statut = 'defaite';
     expect(partieEnCours(etat, 1)).toBeNull();
   });

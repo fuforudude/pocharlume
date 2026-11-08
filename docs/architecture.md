@@ -929,8 +929,9 @@ Spec : [après l'histoire](specs/2026-11-08-apres-histoire-gimmicks.md), jalon 1
   la case (jamais les deux, sinon `action_invalide`), sérialisable tel quel dans le journal. `tourDuLieu` (grille.ts) trouve la tour ;
   `tourSurCase` ignore les tours du radeau. Refus : `place_inconnue` (pas de radeau, ou numéro hors des places), `case_occupee` et
   `case_vide` comme pour une case (`place_inconnue` est testée en premier, aussi pour vendre, améliorer, spécialiser et acheter une
-  compétence), `radeau_sans_caserne` pour toute tour à soldats (caserne, tour divine de Plume), à la construction
-  comme à une amélioration ou spécialisation qui en donnerait. Les tours divines de Charlie et de Pollen y sont admises.
+  compétence), `radeau_sol_requis` pour toute tour qui pose quelque chose au sol (soldats et assassins : casernes, tour divine de Plume ;
+  tourelles et pièges : tour divine de Pollen), à la construction comme à une amélioration ou spécialisation qui en donnerait.
+  La tour divine de Charlie y est admise.
 - **Événements** : `construction`, `amelioration`, `vente` et `competence_tour` portent la case (`cx`, `cy`, -1 sur le radeau), la `place`
   (-1 sur une case) et la position `x`, `y` de la tour à cet instant, pour que le rendu sache où dessiner fumée et éclats.
   `valeurRevente` et `coutCompetence` prennent un `LieuTour`. L'index du moteur exporte `tourDuLieu`, `tourSurPlace`, `positionRadeau`,

@@ -68,14 +68,14 @@ describe('progression de la campagne', () => {
       expect(validerSauvegarde(JSON.parse(JSON.stringify(s))).ok, `niveau ${String(n)}`).toBe(true);
     }
     expect(s.progression.niveauMax).toBe(NOMBRE_NIVEAUX);
-    expect(totalEtoiles(s)).toBe(300);
+    expect(totalEtoiles(s)).toBe(NOMBRE_NIVEAUX * 3);
   });
 
   it('ignore les victoires impossibles : niveau verrouillé ou inconnu, étoiles invalides', () => {
     const s = sauvegardeVide();
     expect(enregistrerVictoire(s, 2, 'matou', 3)).toBe(s);
     expect(enregistrerVictoire(s, 0, 'matou', 3)).toBe(s);
-    expect(enregistrerVictoire(s, 101, 'matou', 3)).toBe(s);
+    expect(enregistrerVictoire(s, 151, 'matou', 3)).toBe(s);
     expect(enregistrerVictoire(s, 1.5, 'matou', 3)).toBe(s);
     expect(enregistrerVictoire(s, 1, 'matou', 0)).toBe(s);
     expect(enregistrerVictoire(s, 1, 'matou', 4)).toBe(s);

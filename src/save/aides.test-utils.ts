@@ -13,6 +13,7 @@ export const FIXTURE_V3 = readFileSync(new URL('./fixtures/sauvegarde-v3.json', 
 export const FIXTURE_V4 = readFileSync(new URL('./fixtures/sauvegarde-v4.json', import.meta.url), 'utf8');
 export const FIXTURE_V5 = readFileSync(new URL('./fixtures/sauvegarde-v5.json', import.meta.url), 'utf8');
 export const FIXTURE_V6 = readFileSync(new URL('./fixtures/sauvegarde-v6.json', import.meta.url), 'utf8');
+export const FIXTURE_V7 = readFileSync(new URL('./fixtures/sauvegarde-v7.json', import.meta.url), 'utf8');
 
 /**
  * Définitions de héros d'essai (les vraies viennent de src/data/heros.ts) : 4 compétences par héros, les trois

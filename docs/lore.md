@@ -723,7 +723,7 @@ Ils sont écrits **sans accents graves** autour des clés : `npm run lore` refus
 d’accents graves, comme pour les régions 1 à 10. Les niveaux 101 à 105 sont ceux du Vol de Corbeaux, 106 à 110 ceux du Radeau.
 La clé `region.11.ambiance` est une proposition : aucune région n’a encore d’ambiance affichée.
 
-- region.11 : Les Grèves Grises
+- `region.11` : Les Grèves Grises
 - region.11.ambiance : Derrière la cathédrale, la cendre descend jusqu’à l’eau. Les corbeaux y attendent. Un passeur aussi, la main ouverte.
 - niveau.r11.01.nom : La Grève de Cendre
 - niveau.r11.01.ambiance : La cendre descend jusqu’à l’eau. L’eau ne l’emporte pas.

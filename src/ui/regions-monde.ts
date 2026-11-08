@@ -1,4 +1,4 @@
-// Les régions que la carte du monde montre (les dix de la campagne) et ce qu'elles contiennent : les 10 niveaux, leurs
+// Les régions que la carte du monde montre (les quinze : l'histoire, puis l'après-histoire) et ce qu'elles contiennent : les 10 niveaux, leurs
 // nœuds sur le fond de 512 × 288, le tracé de la route, le décor de la carte et les textes des niveaux. C'est ici, et
 // seulement ici, que la carte apprend l'existence d'une région : brancher une région livrée par la tâche « niveaux »
 // (src/data/niveaux/) se fait en remplaçant son `contenu: null` par ses données, sans toucher aux écrans.
@@ -12,7 +12,7 @@ import { tCle } from '../i18n';
 import type { CleTexte } from '../i18n';
 import { DECOR_MONDE_REGION1, type DecorMonde } from '../render/carte-monde-decor';
 
-/** Les données d'une région livrée. Les numéros de `niveaux` et de `textes` sont ceux de la campagne (1 à 100). */
+/** Les données d'une région livrée. Les numéros de `niveaux` et de `textes` sont ceux de la campagne (1 à 150). */
 export interface ContenuRegion {
   readonly niveaux: readonly NiveauCampagne[];
   /** Un nœud par niveau, dans l'ordre ; le `numero` d'un nœud est son numéro dans la région (1 à 10). */
@@ -23,8 +23,20 @@ export interface ContenuRegion {
   readonly textes: readonly TextesNiveau[];
 }
 
+/** Les couleurs d'ambiance d'une région : le fond (le plus sombre) et la brume qui le voile. */
+export interface AmbianceRegion {
+  readonly fond: string;
+  readonly brume: string;
+}
+
+/** Ambiance des régions qui n'ont pas encore la leur : un gris neutre. */
+const AMBIANCE_PROVISOIRE: AmbianceRegion = { fond: '#16161a', brume: '#2a2a31' };
+/** Les Grèves Grises (région 11) : cendre et brume sur l'eau, du gris-bleu terne. */
+const AMBIANCE_GREVES_GRISES: AmbianceRegion = { fond: '#15181b', brume: '#4b5258' };
+const AMBIANCES: Readonly<Record<number, AmbianceRegion>> = { 11: AMBIANCE_GREVES_GRISES };
+
 export interface RegionMonde {
-  /** 1 à 10. */
+  /** 1 à 15. */
   readonly numero: number;
   /** Clé de texte du nom de la région. */
   readonly nom: CleTexte;
@@ -32,14 +44,16 @@ export interface RegionMonde {
   readonly premierNiveau: number;
   /** null : ses niveaux ne sont pas encore dans le jeu (la carte l'annonce, sans rien dessiner). */
   readonly contenu: ContenuRegion | null;
+  /** Couleurs d'ambiance : celles du panneau « à venir » d'une région sans niveaux, et du fond quand elle en aura. */
+  readonly ambiance?: AmbianceRegion;
 }
 
 function region(numero: number, nom: CleTexte, contenu: ContenuRegion | null): RegionMonde {
-  return { numero, nom, premierNiveau: (numero - 1) * NIVEAUX_PAR_REGION + 1, contenu };
+  return { numero, nom, premierNiveau: (numero - 1) * NIVEAUX_PAR_REGION + 1, contenu, ambiance: AMBIANCES[numero] ?? AMBIANCE_PROVISOIRE };
 }
 
 /**
- * Le contenu de la région `numero` (1 à 10) : ses niveaux et leurs textes (numéros de campagne), ses nœuds (numéros 1 à 10) et son
+ * Le contenu de la région `numero` (1 à 15) : ses niveaux et leurs textes (numéros de campagne), ses nœuds (numéros 1 à 10) et son
  * tracé. Rend null tant que l'une de ces données manque (région dont les niveaux ne sont pas encore livrés) : la carte
  * l'annonce alors « à venir » au lieu de planter. Le décor du fond n'existe que pour la région 1 : les autres ont un fond sans décor.
  */
@@ -72,7 +86,7 @@ export function decalageDeRegion(r: RegionMonde): number {
   return r.premierNiveau - 1;
 }
 
-/** Le niveau de campagne de ce numéro (1 à 100), dans les régions livrées ; undefined sinon. */
+/** Le niveau de campagne de ce numéro (1 à 150), dans les régions livrées ; undefined sinon. */
 export function niveauDeCampagne(numero: number, regions: readonly RegionMonde[] = REGIONS_MONDE): NiveauCampagne | undefined {
   for (const r of regions) {
     const trouve = r.contenu?.niveaux.find((n) => n.numero === numero);

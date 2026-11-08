@@ -31,10 +31,13 @@ describe('région ouverte', () => {
     expect(enregistrerVictoire(s, 3, 'vieux_sage', 2).meta.regionMax).toBe(2);
   });
 
-  it('la région 10 est la dernière : gagner le niveau 100 ne l’avance pas', () => {
+  it('gagner le niveau 100 ouvre la région 11, et la région 15 est la dernière', () => {
     const s = victoiresJusqua(100);
-    expect(s.progression.niveauMax).toBe(100);
-    expect(s.meta.regionMax).toBe(10);
+    expect(s.progression.niveauMax).toBe(101);
+    expect(s.meta.regionMax).toBe(11);
+    const fin = victoiresJusqua(150);
+    expect(fin.progression.niveauMax).toBe(150);
+    expect(fin.meta.regionMax).toBe(15);
   });
 
   it('une victoire refusée (niveau verrouillé) ne change rien', () => {

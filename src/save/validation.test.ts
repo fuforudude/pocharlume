@@ -102,13 +102,13 @@ describe('validation d’une sauvegarde', () => {
     };
 
     it('niveau max : entier de 1 à 100', () => {
-      for (const v of [0, -1, 101, 2.5, '3', null, Number.POSITIVE_INFINITY]) refusee(variante({ ...sansPartie, 'progression.niveauMax': v }));
-      // La région ouverte suit : 1 jusqu'au niveau 10, 5 au niveau 50, 10 au niveau 100.
-      for (const [niveauMax, region] of [[1, 1], [50, 5], [100, 10]] as const) acceptee(variante({ ...sansPartie, 'meta.regionMax': region, 'progression.niveauMax': niveauMax }));
+      for (const v of [0, -1, 151, 2.5, '3', null, Number.POSITIVE_INFINITY]) refusee(variante({ ...sansPartie, 'progression.niveauMax': v }));
+      // La région ouverte suit : 1 jusqu'au niveau 10, 5 au niveau 50, 10 au niveau 99, 11 au niveau 101, 15 au niveau 150.
+      for (const [niveauMax, region] of [[1, 1], [50, 5], [100, 10], [101, 11], [150, 15]] as const) acceptee(variante({ ...sansPartie, 'meta.regionMax': region, 'progression.niveauMax': niveauMax }));
     });
 
-    it('clés de niveau : 1 à 100 en chiffres, sans zéro de tête ni signe ni décimale', () => {
-      for (const cle of ['0', '101', '01', '-1', '1.5', 'a', '', ' 1', '1e1']) {
+    it('clés de niveau : 1 à 150 en chiffres, sans zéro de tête ni signe ni décimale', () => {
+      for (const cle of ['0', '151', '01', '-1', '1.5', 'a', '', ' 1', '1e1']) {
         refusee(variante({ ...sansPartie, 'meta.regionMax': 10, 'progression.niveauMax': 100, 'progression.etoiles': { [cle]: { matou: 1 } } }));
       }
     });
@@ -123,7 +123,9 @@ describe('validation d’une sauvegarde', () => {
     it('un niveau réussi doit avoir son suivant débloqué (sauf le dernier)', () => {
       refusee(variante({ ...sansPartie, 'progression.niveauMax': 3, 'progression.etoiles': { '3': { matou: 1 } } }));
       acceptee(variante({ ...sansPartie, 'progression.niveauMax': 4, 'progression.etoiles': { '3': { matou: 1 } } }));
-      acceptee(variante({ ...sansPartie, 'meta.regionMax': 10, 'progression.niveauMax': 100, 'progression.etoiles': { '100': { matou: 3 } } }));
+      refusee(variante({ ...sansPartie, 'meta.regionMax': 10, 'progression.niveauMax': 100, 'progression.etoiles': { '100': { matou: 3 } } }));
+      acceptee(variante({ ...sansPartie, 'meta.regionMax': 11, 'progression.niveauMax': 101, 'progression.etoiles': { '100': { matou: 3 } } }));
+      acceptee(variante({ ...sansPartie, 'meta.regionMax': 15, 'progression.niveauMax': 150, 'progression.etoiles': { '150': { matou: 3 } } }));
     });
   });
 

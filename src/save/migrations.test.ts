@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FIXTURE_V1, FIXTURE_V2, FIXTURE_V3, FIXTURE_V4, FIXTURE_V5, FIXTURE_V6, sauvegardeRemplie, variante } from './aides.test-utils';
+import { FIXTURE_V1, FIXTURE_V2, FIXTURE_V3, FIXTURE_V4, FIXTURE_V5, FIXTURE_V6, FIXTURE_V7, sauvegardeRemplie, variante } from './aides.test-utils';
 import { etoilesDepensees, etoilesGagnees, metaParDefaut, VERSION_SAUVEGARDE } from './format';
 import { MIGRATIONS, migrer } from './migrations';
 
@@ -132,8 +132,48 @@ describe('migrations de format', () => {
     expect(migrer({ ...v5, meta: { ...(v5.meta as object), infini: { records: {}, paliers: [10] } } })).toMatchObject({ ok: false, cause: 'invalide' });
   });
 
-  it('la chaîne complète v1 à v6 aboutit à la version courante valide', () => {
-    for (const fixture of [FIXTURE_V1, FIXTURE_V2, FIXTURE_V3, FIXTURE_V4, FIXTURE_V5, FIXTURE_V6]) {
+  it('la fixture v7 figée est bien une sauvegarde en version 7, fin de l’histoire gagnée', () => {
+    const v7 = JSON.parse(FIXTURE_V7) as { version: number; progression: { niveauMax: number }; meta: { regionMax: number } };
+    expect([v7.version, v7.progression.niveauMax, v7.meta.regionMax]).toEqual([7, 100, 10]);
+  });
+
+  it('migre la v7 figée en v8 : le niveau 100 gagné débloque le niveau 101 et la région 11, le reste est identique', () => {
+    const v7 = JSON.parse(FIXTURE_V7) as { progression: { niveauMax: number; etoiles: unknown }; reglages: unknown; meta: Record<string, unknown>; partie: unknown };
+    const r = migrer(v7);
+    if (!r.ok) throw new Error(r.raison);
+    expect(r.depuis).toBe(7);
+    expect(r.sauvegarde.version).toBe(8);
+    expect(r.sauvegarde.progression).toEqual({ ...v7.progression, niveauMax: 101 });
+    expect(r.sauvegarde.reglages).toEqual(v7.reglages);
+    expect(r.sauvegarde.partie).toEqual(v7.partie);
+    expect(r.sauvegarde.meta).toEqual({ ...v7.meta, regionMax: 11 });
+  });
+
+  it('une v7 dont le niveau 100 n’est pas gagné ne change pas de progression', () => {
+    const v7 = JSON.parse(FIXTURE_V7) as { progression: { niveauMax: number; etoiles: Record<string, unknown> }; meta: Record<string, unknown> };
+    const etoiles = { ...v7.progression.etoiles };
+    Reflect.deleteProperty(etoiles, '100');
+    const r = migrer({ ...v7, progression: { niveauMax: 100, etoiles }, meta: { ...v7.meta, defis: {} } });
+    if (!r.ok) throw new Error(r.raison);
+    expect(r.sauvegarde.progression.niveauMax).toBe(100);
+    expect(r.sauvegarde.meta.regionMax).toBe(10);
+  });
+
+  it('la sauvegarde courante accepte les niveaux jusqu’à 150 et les régions jusqu’à 15, pas au-delà', () => {
+    const v7 = JSON.parse(FIXTURE_V7) as { progression: { etoiles: Record<string, unknown> }; meta: Record<string, unknown> };
+    const etoiles: Record<string, unknown> = { ...v7.progression.etoiles };
+    for (let n = 101; n <= 150; n++) etoiles[String(n)] = { matou: 1 };
+    const complete = { ...v7, version: 8, progression: { niveauMax: 150, etoiles }, meta: { ...v7.meta, regionMax: 15 } };
+    const rc = migrer(complete);
+    expect(rc.ok ? '' : rc.raison).toBe('');
+    expect(migrer({ ...complete, progression: { niveauMax: 151, etoiles } })).toMatchObject({ ok: false, cause: 'invalide' });
+    expect(migrer({ ...complete, meta: { ...v7.meta, regionMax: 16 } })).toMatchObject({ ok: false, cause: 'invalide' });
+    // Une région ne s'ouvre pas sans son niveau : niveauMax 120 veut dire région 12.
+    expect(migrer({ ...complete, progression: { niveauMax: 120, etoiles } })).toMatchObject({ ok: false, cause: 'invalide' });
+  });
+
+  it('la chaîne complète v1 à v7 aboutit à la version courante valide', () => {
+    for (const fixture of [FIXTURE_V1, FIXTURE_V2, FIXTURE_V3, FIXTURE_V4, FIXTURE_V5, FIXTURE_V6, FIXTURE_V7]) {
       const r = migrer(JSON.parse(fixture));
       expect(r.ok && r.sauvegarde.version).toBe(VERSION_SAUVEGARDE);
       expect(r.ok && r.sauvegarde.meta.bestiaire).toEqual({ rencontres: [], fiches: true });

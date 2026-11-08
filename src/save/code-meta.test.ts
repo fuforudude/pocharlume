@@ -31,7 +31,7 @@ function donneesExportees(changements: Record<string, unknown> = {}): string {
 /** Un joueur qui a tout : campagne terminée, les neuf héros au niveau maximal, arbre au maximum, stocks pleins. */
 function joueurComplet(): Sauvegarde {
   let s = sauvegardeVide();
-  for (let n = 1; n <= 100; n++) s = enregistrerVictoire(s, n, 'vieux_sage', 3);
+  for (let n = 1; n <= 150; n++) s = enregistrerVictoire(s, n, 'vieux_sage', 3);
   const competences = (h: string) => ({ [`${h}_a`]: 3, [`${h}_b`]: 3, [`${h}_c`]: 3, [`${h}_ultime`]: 1 });
   return {
     ...s,
@@ -41,9 +41,9 @@ function joueurComplet(): Sauvegarde {
       arbre: Object.fromEntries(BRANCHES_ARBRE.map((b) => [b, 5])) as Sauvegarde['meta']['arbre'],
       objets: { fiole_soufre: 10, herbe_sabbat: 10, griffe_renfort: 10, sablier: 10 },
       choix: { dieu: 'pollen', heros: 'lanterne', objets: ['sablier', 'herbe_sabbat', 'griffe_renfort'] },
-      regionMax: 10,
-      // Les deux défis réussis sur les 100 niveaux (tous à 3 étoiles).
-      defis: Object.fromEntries(Array.from({ length: 100 }, (_, i) => [String(i + 1), { heroique: true as const, fer: true as const }])),
+      regionMax: 15,
+      // Les deux défis réussis sur les 150 niveaux (tous à 3 étoiles).
+      defis: Object.fromEntries(Array.from({ length: 150 }, (_, i) => [String(i + 1), { heroique: true as const, fer: true as const }])),
       collection: {
         possedes: Object.fromEntries(IDS_COLLECTION.map((id) => [id, 5])),
         eclats: 99_999_999,

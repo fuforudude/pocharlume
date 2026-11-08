@@ -109,16 +109,37 @@ export function aretesDeVictoire(niveau: number, nouvellesEtoiles: number): numb
 }
 
 /**
- * Braises gagnées par une victoire : 5 la première fois qu'un niveau est gagné, 10 de plus à la première victoire sur
- * un boss, 2 la première fois qu'un niveau atteint ses 3 étoiles. Les 10 niveaux de la région 1 en rapportent au plus
- * 50 + 10 + 20 = 80, soit deux disciples à 30 braises.
+ * Braises gagnées par une victoire. Niveaux 1 à 100 : 5 la première fois qu'un niveau est gagné, 10 de plus à la
+ * première victoire sur un boss, 2 la première fois qu'un niveau atteint ses 3 étoiles (les 10 niveaux de la région 1
+ * en rapportent au plus 50 + 10 + 20 = 80, soit deux disciples à 30 braises).
+ * Niveaux 101 à 150 (après l'histoire) : 15 la première victoire, 30 de plus à la première victoire du 5e niveau de
+ * chaque bloc (à la place du bonus de boss), 6 la première fois que les 3 étoiles sont atteintes.
  */
 export function braisesDeVictoire(niveau: number, premiereVictoire: boolean, premieresTroisEtoiles: boolean): number {
+  if (estApresHistoire(niveau)) {
+    return (
+      (premiereVictoire ? BRAISES_APRES_HISTOIRE.premiereVictoire : 0) +
+      (premiereVictoire && estFinDeBloc(niveau) ? BRAISES_APRES_HISTOIRE.finDeBloc : 0) +
+      (premieresTroisEtoiles ? BRAISES_APRES_HISTOIRE.troisEtoiles : 0)
+    );
+  }
   return (premiereVictoire ? BRAISES_PREMIERE_VICTOIRE : 0) + (premiereVictoire && estNiveauBoss(niveau) ? 10 : 0) + (premieresTroisEtoiles ? 2 : 0);
 }
 
 /** Braises d'un niveau gagné pour la première fois. */
 export const BRAISES_PREMIERE_VICTOIRE = 5;
+
+/** Braises des niveaux 101 à 150 (valeurs fixées par la spec « après l'histoire »). */
+export const BRAISES_APRES_HISTOIRE = {
+  premiereVictoire: 15,
+  /** En plus, à la première victoire du 5e niveau de chaque bloc de 5 (105, 110, … 150). */
+  finDeBloc: 30,
+  troisEtoiles: 6,
+  defi: 12,
+} as const;
+
+/** Niveaux d'un bloc de gimmick : chaque région compte deux blocs de 5 niveaux. */
+export const NIVEAUX_PAR_BLOC = 5;
 
 /** Expérience gagnée par le héros joué : 100 + 20 × N pour une victoire, la moitié pour une défaite. */
 export function xpDePartie(niveau: number, victoire: boolean): number {
@@ -128,13 +149,35 @@ export function xpDePartie(niveau: number, victoire: boolean): number {
 
 // --- Régions et défis ------------------------------------------------------------------------------------------
 
-/** Niveaux par région, et nombre de régions de la campagne. */
+/**
+ * Niveaux par région. La campagne entière compte `NOMBRE_REGIONS` régions et `NIVEAU_MAX` niveaux : l'histoire (régions 1 à 10,
+ * niveaux 1 à 100, `NIVEAU_FIN_CAMPAGNE`) puis l'après-histoire (régions 11 à 15, niveaux 101 à 150).
+ */
 export const NIVEAUX_PAR_REGION = 10;
-export const NOMBRE_REGIONS = 10;
+/** Régions de l'histoire seule : celles dont le dernier boss termine la campagne. */
+export const NOMBRE_REGIONS_HISTOIRE = 10;
+/** Toutes les régions, histoire et après-histoire. */
+export const NOMBRE_REGIONS = 15;
+/** Dernier niveau de la campagne entière. */
+export const NIVEAU_MAX = NOMBRE_REGIONS * NIVEAUX_PAR_REGION;
+/** Premier niveau d'après l'histoire (région 11). */
+export const PREMIER_NIVEAU_APRES_HISTOIRE = NOMBRE_REGIONS_HISTOIRE * NIVEAUX_PAR_REGION + 1;
+/** Le mode infini ne connaît que les régions de l'histoire : les régions 11 à 15 n'ont pas encore de cartes d'infini. */
+export const NOMBRE_REGIONS_INFINI = NOMBRE_REGIONS_HISTOIRE;
 
-/** Région d'un niveau de campagne (1 à 10), ou 0 pour un numéro qui n'en est pas un. */
+/** Niveau d'après l'histoire (101 à 150). */
+export function estApresHistoire(niveau: number): boolean {
+  return Number.isInteger(niveau) && niveau >= PREMIER_NIVEAU_APRES_HISTOIRE && niveau <= NIVEAU_MAX;
+}
+
+/** 5e niveau d'un bloc de 5 après l'histoire (105, 110, … 150). */
+export function estFinDeBloc(niveau: number): boolean {
+  return estApresHistoire(niveau) && niveau % NIVEAUX_PAR_BLOC === 0;
+}
+
+/** Région d'un niveau de campagne (1 à 15), ou 0 pour un numéro qui n'en est pas un. */
 export function regionDuNiveau(niveau: number): number {
-  return Number.isInteger(niveau) && niveau >= 1 && niveau <= NIVEAUX_PAR_REGION * NOMBRE_REGIONS ? Math.floor((niveau - 1) / NIVEAUX_PAR_REGION) + 1 : 0;
+  return Number.isInteger(niveau) && niveau >= 1 && niveau <= NIVEAU_MAX ? Math.floor((niveau - 1) / NIVEAUX_PAR_REGION) + 1 : 0;
 }
 
 /**
@@ -151,16 +194,20 @@ export type IdDefi = (typeof IDS_DEFIS)[number];
 export function estIdDefi(x: unknown): x is IdDefi {
   return typeof x === 'string' && (IDS_DEFIS as readonly string[]).includes(x);
 }
-/** Braises que rapporte la première réussite d'un défi sur un niveau. */
+/** Braises que rapporte la première réussite d'un défi sur un niveau de l'histoire (1 à 100). */
 export const BRAISES_DEFI = 4;
+/** Braises de la première réussite d'un défi sur le niveau `niveau` : 4 jusqu'au niveau 100, 12 après l'histoire. */
+export function braisesDeDefi(niveau: number): number {
+  return estApresHistoire(niveau) ? BRAISES_APRES_HISTOIRE.defi : BRAISES_DEFI;
+}
 
 /** Niveaux (boss) dont la première victoire offre un disciple : fin des régions 2, 4, 6 et 8. */
 export const NIVEAUX_DISCIPLE_OFFERT: readonly number[] = [20, 40, 60, 80];
 
 /** Niveau (boss de la région 1) dont la victoire ouvre le mode infini. */
 export const NIVEAU_OUVERTURE_INFINI = 10;
-/** Niveau (boss de la région 10, le Soleil Blême) dont la victoire termine la campagne. */
-export const NIVEAU_FIN_CAMPAGNE = NOMBRE_REGIONS * NIVEAUX_PAR_REGION;
+/** Niveau (boss de la région 10, le Soleil Blême) dont la victoire termine l'histoire et ouvre la région 11. */
+export const NIVEAU_FIN_CAMPAGNE = NOMBRE_REGIONS_HISTOIRE * NIVEAUX_PAR_REGION;
 
 // --- Mode infini : record par carte et paliers --------------------------------------------------------------------
 

@@ -209,6 +209,15 @@ describe('Vol de Corbeaux : validation du niveau', () => {
     expect(refus([{ paquets: [{ ennemi: 'corbeau_noir', nombre: 1, intervalle: 0, chemin: 0, delai: 0 }] }], { type: 'corbeaux', couloirs: [] })).toThrow(/au moins un couloir/);
   });
 
+  it('refuse un coût en vies inférieur à 1 ou non entier, accepte 1 et plus', () => {
+    const vagues = [{ paquets: [corbeau({ couloir: 0 })] }];
+    for (const coutVies of [0, -1, 0.5, 1.5, Number.NaN]) {
+      expect(refus(vagues, { ...CORBEAUX, coutVies }), String(coutVies)).toThrow(/coût en vies invalide/);
+    }
+    expect(refus(vagues, { ...CORBEAUX, coutVies: 1 })).not.toThrow();
+    expect(refus(vagues, { ...CORBEAUX, coutVies: 3 })).not.toThrow();
+  });
+
   it('refuse deux couloirs sur la même ligne', () => {
     expect(refus([{ paquets: [corbeau({ couloir: 0 })] }], { type: 'corbeaux', couloirs: [{ cy: 4 }, { cy: 1 }, { cy: 4 }] })).toThrow(/même ligne/);
   });

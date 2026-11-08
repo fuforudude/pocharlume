@@ -12,15 +12,15 @@
 // - v5 : (dans `meta`) mode infini : record par carte (dernière vague terminée) et paliers déjà payés.
 // - v6 : (dans `meta`) inscriptions des vieilles statues déjà trouvées (une par carte, jamais perdue).
 // - v7 : (dans `meta`) bestiaire : ennemis déjà rencontrés en partie, et l'option « fiche Nouvel ennemi ».
-import { AVATARS, BRANCHES_ARBRE, coutCumuleArbre, IDS_OBJETS, type IdBranche, type IdDefi, type IdDieu, type IdHeros, type IdObjet, type PalierInfini } from '../data/meta';
+import { AVATARS, NIVEAU_MAX, BRANCHES_ARBRE, coutCumuleArbre, IDS_OBJETS, type IdBranche, type IdDefi, type IdDieu, type IdHeros, type IdObjet, type PalierInfini } from '../data/meta';
 import type { IdInscription } from '../data/niveaux/statues';
 import type { ConfigPartie } from '../engine/etat';
 import { collectionVide, type Collection } from '../meta/collection';
 
-export const VERSION_SAUVEGARDE = 7;
+export const VERSION_SAUVEGARDE = 8;
 
-/** Nombre de niveaux de la campagne (10 régions de 10 niveaux). */
-export const NOMBRE_NIVEAUX = 100;
+/** Nombre de niveaux de la campagne entière : l'histoire (1 à 100) et l'après-histoire (101 à 150), soit 15 régions de 10. */
+export const NOMBRE_NIVEAUX = NIVEAU_MAX;
 
 /** Difficultés, dans l'ordre d'affichage. Mêmes clés que src/data/difficultes.ts (vérifié par un test). */
 export const DIFFICULTES_SAUVEGARDE = ['chaton', 'matou', 'vieux_sage'] as const;

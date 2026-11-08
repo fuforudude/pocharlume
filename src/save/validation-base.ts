@@ -2,7 +2,7 @@
 // typé, la lecture de propriétés propres seulement, les objets à clés exactes, les entiers bornés.
 
 /** Un numéro de niveau de campagne en chiffres, de « 1 » à « 100 » (clé des tables par niveau). */
-export const CLE_NIVEAU = /^(?:[1-9]\d?|100)$/;
+export const CLE_NIVEAU = /^(?:[1-9]\d?|1[0-4]\d|150)$/;
 
 export type Resultat<T> = { readonly ok: true; readonly valeur: T } | { readonly ok: false; readonly raison: string };
 

@@ -12,6 +12,12 @@ export const frEcrans3 = {
   'region.8': 'Le Monastère Noir',
   'region.9': 'La Cité du Roi',
   'region.10': 'La Cathédrale du Soleil Blême',
+  'region.11': 'Les Grèves Grises',
+  // Régions 12 à 15 : noms provisoires, en attendant leur lore.
+  'region.12': 'Région 12',
+  'region.13': 'Région 13',
+  'region.14': 'Région 14',
+  'region.15': 'Région 15',
   'carte.regions': 'Régions',
   'carte.region_precedente': 'Région précédente',
   'carte.region_suivante': 'Région suivante',

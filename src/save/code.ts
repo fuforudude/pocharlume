@@ -15,7 +15,7 @@ import { migrer } from './migrations';
 import { normaliserImport } from './normalisation';
 
 export const PREFIXE_CODE = 'PCH1';
-/** Taille maximale d'un code accepté, en caractères. Une progression complète en fait moins de 1000. */
+/** Taille maximale d'un code accepté, en caractères. Une progression complète en fait moins de 1500 (150 niveaux). */
 export const TAILLE_MAX_CODE = 16 * 1024;
 /** Taille maximale des données une fois décompressées, en octets (protège d'une bombe de décompression). */
 const TAILLE_MAX_DONNEES = 64 * 1024;

@@ -20,6 +20,14 @@ import { defNiveau, deplacerSoldats, prix, prixFamille, statsTour, synchroniserS
 import { libererBloques } from './unites';
 import { bonusAppel, lancerVague } from './vagues';
 
+/**
+ * Une tour pose quelque chose au sol : des soldats ou des assassins (casernes, tour divine de Plume), ou des tourelles et des
+ * pièges (tour divine de Pollen). Une telle tour ne se construit pas sur le radeau, ni n'y devient une par amélioration.
+ */
+function poseAuSol(def: DefNiveauTour): boolean {
+  return def.soldats !== null || def.atelier !== null;
+}
+
 function estFini(v: unknown): v is number {
   return typeof v === 'number' && Number.isFinite(v);
 }
@@ -149,11 +157,9 @@ export function validerAction(etat: EtatPartie, action: Action): RaisonRefus | n
       if (niveauDeblocage(etat, action) !== null) return 'non_debloque';
       const def = defNiveau(etat, action.tour, 1, null);
       if (!def) return 'tour_inconnue';
-      if (def.soldats) {
-        // Sur le radeau, des soldats n'auraient pas de chemin où se rallier : toute tour à soldats y est refusée.
-        if (action.place !== undefined) return 'radeau_sans_caserne';
-        if (!ralliementParDefaut(etat.chemins, action.cx, action.cy, def.portee)) return 'caserne_sans_chemin';
-      }
+      // Le radeau flotte : une tour qui pose quelque chose au sol y est refusée.
+      if (action.place !== undefined && poseAuSol(def)) return 'radeau_sol_requis';
+      if (def.soldats && action.place === undefined && !ralliementParDefaut(etat.chemins, action.cx, action.cy, def.portee)) return 'caserne_sans_chemin';
       return prix(etat, action.tour, def) > etat.aretes ? 'aretes_insuffisantes' : null;
     }
     case 'ameliorer':
@@ -163,7 +169,7 @@ export function validerAction(etat: EtatPartie, action: Action): RaisonRefus | n
       if (!t) return 'case_vide';
       const suivant = niveauSuivant(etat, t, action);
       if (typeof suivant === 'string') return suivant;
-      if (t.place >= 0 && suivant.soldats) return 'radeau_sans_caserne';
+      if (t.place >= 0 && poseAuSol(suivant)) return 'radeau_sol_requis';
       if (niveauDeblocage(etat, action) !== null) return 'non_debloque';
       return prix(etat, t.famille, suivant) > etat.aretes ? 'aretes_insuffisantes' : null;
     }

@@ -144,16 +144,17 @@ describe('Radeau : construire sur une place', () => {
 
   it('une caserne est refusée sur le radeau, avec sa raison', () => {
     const etat = creerPartie(niveauRadeau(), CONFIG);
-    expect(refus(etat, { type: 'construire', place: 1, tour: 'caserne' })).toBe('radeau_sans_caserne');
+    expect(refus(etat, { type: 'construire', place: 1, tour: 'caserne' })).toBe('radeau_sol_requis');
     expect(etat.tours).toEqual([]);
   });
 
-  it('une tour divine se pose sur le radeau, sauf celle qui a des soldats', () => {
-    // Charlie (onde de choc) et Pollen (atelier) : rien ne l'interdit.
+  it('une tour divine se pose sur le radeau, sauf celles qui posent quelque chose au sol', () => {
+    // Charlie (onde de choc) : rien ne l'interdit.
     expect(refus(creerPartie(niveauRadeau(), CONFIG), { type: 'construire', place: 0, tour: 'divine' })).toBeNull();
-    expect(refus(creerPartie(niveauRadeau(), configDe('pollen')), { type: 'construire', place: 0, tour: 'divine' })).toBeNull();
     // Plume : son sanctuaire a des assassins, c'est une caserne.
-    expect(refus(creerPartie(niveauRadeau(), configDe('plume')), { type: 'construire', place: 0, tour: 'divine' })).toBe('radeau_sans_caserne');
+    expect(refus(creerPartie(niveauRadeau(), configDe('plume')), { type: 'construire', place: 0, tour: 'divine' })).toBe('radeau_sol_requis');
+    // Pollen : son atelier construit des tourelles et des pièges au sol.
+    expect(refus(creerPartie(niveauRadeau(), configDe('pollen')), { type: 'construire', place: 0, tour: 'divine' })).toBe('radeau_sol_requis');
   });
 
   it('une place occupée, inexistante ou mal désignée est refusée', () => {

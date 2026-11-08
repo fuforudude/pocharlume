@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { copie, FIXTURE_V6 } from './aides.test-utils';
 import { Depot } from './depot';
-import { sauvegardeVide, type Sauvegarde } from './format';
+import { sauvegardeVide, VERSION_SAUVEGARDE, type Sauvegarde } from './format';
 import { migrer } from './migrations';
 import { fusionnerProgressions } from './progression';
 import { Session } from './session';
@@ -26,7 +26,7 @@ describe('migration v6 vers v7', () => {
     const r = migrer(v6);
     if (!r.ok) throw new Error(r.raison);
     expect(r.depuis).toBe(6);
-    expect(r.sauvegarde.version).toBe(7);
+    expect(r.sauvegarde.version).toBe(VERSION_SAUVEGARDE);
     expect(r.sauvegarde.progression).toEqual(v6.progression);
     expect(r.sauvegarde.reglages).toEqual(v6.reglages);
     expect(r.sauvegarde.partie).toEqual(v6.partie);

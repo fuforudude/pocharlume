@@ -18,7 +18,7 @@ async function fabriquerCode(json: string, mode: 'j' | 'z' = 'j'): Promise<strin
 
 function campagneComplete(): Sauvegarde {
   let s = sauvegardeVide();
-  for (let n = 1; n <= 100; n++) {
+  for (let n = 1; n <= 150; n++) {
     s = enregistrerVictoire(s, n, 'matou', 3);
     s = enregistrerVictoire(s, n, 'chaton', 2);
     if (n % 2 === 0) s = enregistrerVictoire(s, n, 'vieux_sage', 1);
@@ -68,19 +68,19 @@ describe('export et import d’un code', () => {
     expect(r.ok && r.sauvegarde.partie).toBeNull();
   });
 
-  it('est compact : une campagne complète tient en moins de 1000 caractères, une sauvegarde vide en moins de 500', async () => {
+  it('est compact : une campagne complète tient en moins de 1500 caractères, une sauvegarde vide en moins de 500', async () => {
     const complete = await exporterCode(campagneComplete());
-    expect(complete.length).toBeLessThan(1000);
+    expect(complete.length).toBeLessThan(1500);
     expect((await exporterCode(sauvegardeVide())).length).toBeLessThan(500);
     expect(complete).toMatch(/^PCH1\.z\.[A-Za-z0-9_-]+\.[0-9a-f]{8}$/);
   });
 
-  it('reste compact avec un bestiaire plein (tous les ennemis rencontrés) : moins de 1600 caractères, et il revient intact', async () => {
+  it('reste compact avec un bestiaire plein (tous les ennemis rencontrés) : moins de 2200 caractères, et il revient intact', async () => {
     const base = campagneComplete();
     const plein: Sauvegarde = { ...base, meta: { ...base.meta, bestiaire: { rencontres: Object.keys(ENNEMIS).sort(), fiches: false } } };
     const code = await exporterCode(plein);
     // 1431 caractères avec les 20 ennemis du 2026-11-03 ; plafond relevé par décision de l’auteur plutôt que de compacter les rencontres en bits.
-    expect(code.length).toBeLessThan(1600);
+    expect(code.length).toBeLessThan(2200);
     const relu = await importerCode(code);
     expect(relu.ok && relu.sauvegarde.meta.bestiaire).toEqual(plein.meta.bestiaire);
   });

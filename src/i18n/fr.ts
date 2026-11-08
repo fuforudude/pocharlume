@@ -171,7 +171,7 @@ export const fr = {
   'refus.case_occupee': 'Une tour se dresse déjà ici.',
   'refus.case_vide': 'Il n’y a pas de tour ici.',
   'refus.place_inconnue': 'Il n’y a pas de place ici sur le radeau.',
-  'refus.radeau_sans_caserne': 'Pas de caserne sur le radeau : ses chats n’auraient pas pied.',
+  'refus.radeau_sol_requis': 'Rien de ce qui se pose au sol sur le radeau : soldats, assassins, tourelles et pièges n’y auraient pas pied.',
   'refus.caserne_sans_chemin': 'Aucun chemin à portée de cette caserne.',
   'refus.tour_inconnue': 'Cette tour n’existe pas.',
   'refus.aretes_insuffisantes': 'Pas assez d’arêtes.',
