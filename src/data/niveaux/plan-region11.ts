@@ -82,7 +82,7 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
     vagues: {
       nombre: 13,
       ennemis: ['corbeau_noir', 'ange_cendre', 'crapaud_gonfle', 'gargouille', 'delateur'],
-      graine: 2106,
+      graine: 2156,
       horde: true,
       facteurBudget: 0.12,
     },
@@ -115,7 +115,7 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
     vagues: {
       nombre: 14,
       ennemis: ['corbeau_noir', 'ange_cendre', 'delateur', 'effigie_roi', 'gargouille', 'porte_herse'],
-      graine: 4113,
+      graine: 4133,
       facteurBudget: 0.24,
     },
   },
