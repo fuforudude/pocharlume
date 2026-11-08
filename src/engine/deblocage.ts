@@ -4,7 +4,7 @@
 import { NIVEAU_TOUT_OUVERT, niveauOuverture } from '../data/deblocage';
 import type { Action } from './actions';
 import type { EtatPartie, FamilleTour } from './etat';
-import { tourSurCase } from './grille';
+import { tourDuLieu } from './grille';
 
 /** Numéro du niveau qui ouvre ce palier de cette famille, ou null s'il est déjà ouvert dans cette partie. */
 export function niveauDeblocagePalier(etat: EtatPartie, famille: FamilleTour, palier: number): number | null {
@@ -21,7 +21,7 @@ export function niveauDeblocagePalier(etat: EtatPartie, famille: FamilleTour, pa
 export function niveauDeblocage(etat: EtatPartie, action: Action): number | null {
   if (action.type === 'construire') return niveauDeblocagePalier(etat, action.tour, 1);
   if (action.type !== 'ameliorer' && action.type !== 'specialiser') return null;
-  const t = tourSurCase(etat, action.cx, action.cy);
+  const t = tourDuLieu(etat, action);
   if (!t || t.famille === 'divine') return null;
   if (action.type === 'specialiser') return t.niveau === 3 ? niveauDeblocagePalier(etat, t.famille, 4) : null;
   return t.niveau < 3 ? niveauDeblocagePalier(etat, t.famille, t.niveau + 1) : null;

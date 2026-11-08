@@ -161,6 +161,7 @@ describe('Suivi : zones, boost et tour divine par dieu', () => {
         id: 50,
         cx: 4,
         cy: 3,
+        place: -1,
         famille: 'divine',
         niveau: 1,
         voie: null,

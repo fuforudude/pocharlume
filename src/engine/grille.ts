@@ -3,6 +3,7 @@
 // interdites (chemin, grands décors) ; le moteur ne lit pas l'habillage. Tout est pur, sans hasard ni horloge.
 import { tuilesDeChemin } from '../data/niveaux/grille-niveau';
 import { REGLES } from '../data/regles';
+import type { LieuTour } from './actions';
 import { pointSurChemin, projeterSurChemin } from './chemins';
 import type { Carte, CaseGrille, Niveau, Point } from './definitions';
 import type { CheminCalcule, EtatPartie, Tour } from './etat';
@@ -72,10 +73,22 @@ export function estCaseDeChemin(carte: Pick<Carte, 'largeur' | 'hauteur' | 'chem
   return false;
 }
 
-/** La tour posée sur la case, si elle existe. */
+/** La tour posée sur la case, si elle existe (une tour du radeau n'est sur aucune case). */
 export function tourSurCase(etat: Pick<EtatPartie, 'tours'>, cx: number, cy: number): Tour | undefined {
-  for (const t of etat.tours) if (t.cx === cx && t.cy === cy) return t;
+  for (const t of etat.tours) if (t.place < 0 && t.cx === cx && t.cy === cy) return t;
   return undefined;
+}
+
+/** La tour posée sur la place `place` du radeau, si elle existe. */
+export function tourSurPlace(etat: Pick<EtatPartie, 'tours'>, place: number): Tour | undefined {
+  if (place < 0) return undefined;
+  for (const t of etat.tours) if (t.place === place) return t;
+  return undefined;
+}
+
+/** La tour du lieu d'une action : sur la place du radeau si elle en désigne une, sinon sur la case. */
+export function tourDuLieu(etat: Pick<EtatPartie, 'tours'>, lieu: LieuTour): Tour | undefined {
+  return lieu.place !== undefined ? tourSurPlace(etat, lieu.place) : tourSurCase(etat, lieu.cx, lieu.cy);
 }
 
 /** Toutes les cases de la grille, ligne par ligne (du nord au sud, de l'ouest à l'est). */

@@ -750,6 +750,8 @@ export interface Regles {
   readonly memoireMorts: number;
   /** Cœurs perdus par un ennemi qui sort d'un couloir du Vol de Corbeaux, si le gimmick n'en dit rien. */
   readonly coutViesCouloir: number;
+  /** Nombre de places exigé d'un Radeau (gimmick). */
+  readonly placesRadeau: number;
   /** Bonus de collection : total maximal (0,1 = +10 %) par tour de base ou pour le héros. */
   readonly plafondBonus: number;
   /** PV régénérés par seconde pour un bonus de régénération de 100 % (1 = +100 %) du héros. */
@@ -807,11 +809,29 @@ export interface GimmickCorbeaux {
   readonly coutVies?: number;
 }
 
+/** Décalage d'une place du radeau par rapport à son centre, en tuiles. */
+export interface PlaceRadeau {
+  readonly dx: number;
+  readonly dy: number;
+}
+
+/**
+ * Le Radeau : une plateforme à `REGLES.placesRadeau` places va et vient sans arrêt sur `trajet` (au moins 2 cases, chacune voisine de
+ * la précédente ou dans son alignement), à `vitesse` cases par seconde, aller puis retour. Sa position est une fonction pure du pas
+ * (`positionRadeau`, gimmicks/radeau.ts) : rien n'est stocké. Toute tour s'y construit, sauf celles qui ont des soldats.
+ */
+export interface GimmickRadeau {
+  readonly type: 'radeau';
+  readonly trajet: readonly CaseGrille[];
+  readonly vitesse: number;
+  readonly places: readonly PlaceRadeau[];
+}
+
 /**
  * Particularité d'un niveau (régions 11 à 15), union discriminée sur `type` : un module par type dans src/engine/gimmicks/, appelé
- * par l'aiguillage de src/engine/gimmicks/index.ts. Le Radeau s'ajoutera ici (`| GimmickRadeau`).
+ * par l'aiguillage de src/engine/gimmicks/index.ts.
  */
-export type Gimmick = GimmickCorbeaux;
+export type Gimmick = GimmickCorbeaux | GimmickRadeau;
 
 export interface CheminCarte {
   /** Polyligne de l'entrée à la sortie. */

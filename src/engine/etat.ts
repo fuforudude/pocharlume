@@ -17,7 +17,7 @@ import type {
 } from './definitions';
 import type { Evenement } from './evenements';
 
-export const VERSION_ETAT = 8;
+export const VERSION_ETAT = 9;
 
 export type Statut = 'en_cours' | 'victoire' | 'defaite';
 export type FamilleTour = IdFamille | 'divine';
@@ -209,9 +209,14 @@ export interface Unite {
 
 export interface Tour {
   id: number;
-  /** Case de la grille où la tour est posée ; (x, y) en est le centre. */
+  /** Case de la grille où la tour est posée ; (x, y) en est le centre. -1 et -1 pour une tour du radeau. */
   cx: number;
   cy: number;
+  /**
+   * Place du Radeau (gimmick) où la tour est posée, -1 pour une tour posée sur une case. Une tour du radeau ne garde que cela : son
+   * (x, y) est celui de sa place, recalculé au début de chaque pas (`deplacerToursDuRadeau`).
+   */
+  place: number;
   famille: FamilleTour;
   niveau: number;
   voie: Voie | null;

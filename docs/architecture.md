@@ -883,11 +883,11 @@ Spec : [retours du 2026-10-30](specs/2026-10-30-retours-tour-divine-descriptions
   pas (règle existante), donc aucune partie sauvegardée ne garde deux tours divines. `VERSION_ETAT` inchangée (`numero` est un champ
   optionnel du niveau rangé dans l'état).
 
-## Gimmicks des niveaux 101 à 150 : aiguillage et Vol de Corbeaux (2026-11-08)
+## Gimmicks des niveaux 101 à 150 : aiguillage, Vol de Corbeaux et Radeau (2026-11-08)
 
-Spec : [après l'histoire](specs/2026-11-08-apres-histoire-gimmicks.md), jalon 1, tâche 2.
-- **Format** : `Niveau.gimmick?: Gimmick`, union discriminée sur `type` (`definitions.ts`). Pour l'instant `GimmickCorbeaux` :
-  `{ type: 'corbeaux', couloirs: { cy }[], coutVies? }` ; le Radeau s'ajoutera à l'union. Un module par gimmick dans
+Spec : [après l'histoire](specs/2026-11-08-apres-histoire-gimmicks.md), jalon 1, tâches 2 et 3.
+- **Format** : `Niveau.gimmick?: Gimmick`, union discriminée sur `type` (`definitions.ts`) : `GimmickCorbeaux`
+  `{ type: 'corbeaux', couloirs: { cy }[], coutVies? }` et `GimmickRadeau` (plus bas). Un module par gimmick dans
   `src/engine/gimmicks/`, appelé par l'aiguillage `gimmicks/index.ts` : `verifierGimmick(niveau)` à la création de la partie,
   `mettreAJourGimmick(etat)` au début de chaque pas (après `ouvrirPas`, avant les vagues). Chaque `switch` finit sur une valeur
   `never` : un type de gimmick oublié ne compile pas.
@@ -909,4 +909,23 @@ Spec : [après l'histoire](specs/2026-11-08-apres-histoire-gimmicks.md), jalon 1
 - **Versions** : `VERSION_ETAT` 7 → 8 (`Ennemi.couloir`, `PaquetActif.couloir`, `etat.couloirs`). Une partie en cours enregistrée
   avant ne se reprend pas (`deserialiser` refuse, `reprendrePartie` rend null), comme aux hausses précédentes. `VERSION_DONNEES`
   inchangée : rien ne change pour les niveaux existants.
+
+### Radeau (tâche 3, moteur)
+- **Format** : `GimmickRadeau = { type: 'radeau', trajet: CaseGrille[], vitesse, places: { dx, dy }[] }`. `trajet` : au moins 2 cases
+  de la grille, chacune voisine de la précédente (diagonale comprise) ou alignée avec elle sur une ligne ou une colonne ; `vitesse` en
+  cases par seconde (0,5 dans les données, à régler) ; `places` : exactement `REGLES.placesRadeau` (3) décalages en tuiles autour du
+  centre. `verifierRadeau` (gimmicks/radeau.ts) le contrôle à la création de la partie.
+- **Position = fonction pure du pas** : `positionRadeau(gimmick, pas)` replie la distance parcourue (`vitesse × pas / 30` cases) en
+  aller-retour sur la longueur du trajet, puis interpole sur la ligne brisée des centres des cases ; `positionPlace(gimmick, pas, n)`
+  y ajoute le décalage de la place. Rien n'est stocké pour le radeau ; le rendu appelle les mêmes fonctions pour interpoler.
+- **Tours du radeau** : `Tour.place` (0 à 2, -1 pour une tour posée sur une case ; une tour du radeau a `cx = cy = -1`). Au début de
+  chaque pas, `mettreAJourGimmick` → `deplacerToursDuRadeau` recopie la position de chaque place dans `x`, `y` de sa tour : ciblage,
+  portée, projectiles, ondes, révélation, ouvrage de l'atelier, pouvoirs des ennemis et sorts qui visent les tours lisent `t.x`,
+  `t.y` et voient donc le radeau où il est. Les tourelles et pièges d'un atelier du radeau restent là où ils ont été posés.
+- **Commandes** : les actions de tour prennent un `LieuTour` (`actions.ts`), soit la case `{ cx, cy }`, soit `{ place }` au lieu de
+  la case (jamais les deux, sinon `action_invalide`), sérialisable tel quel dans le journal. `tourDuLieu` (grille.ts) trouve la tour ;
+  `tourSurCase` ignore les tours du radeau. Refus : `place_inconnue` (pas de radeau, ou numéro hors des places), `case_occupee` et
+  `case_vide` comme pour une case, `radeau_sans_caserne` pour toute tour à soldats (caserne, tour divine de Plume), à la construction
+  comme à une amélioration ou spécialisation qui en donnerait. Les tours divines de Charlie et de Pollen y sont admises.
+- **Versions** : `VERSION_ETAT` 8 → 9 (`Tour.place`). `VERSION_DONNEES` inchangée.
 
