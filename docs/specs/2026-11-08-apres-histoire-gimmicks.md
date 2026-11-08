@@ -102,6 +102,55 @@ jalons 2 à 5 y ajouteront leur section après leur entretien.
 6. **Bots et équilibrage** (après 2–5) : stratégies, `npm run balance`, CI à 11 régions, rapport.
 7. Relecture, intégration, QA, mise en ligne.
 
+### Équilibrage de la région 11 (tâche 6, 2026-11-08)
+
+Outils : `npm run balance -- --niveaux=101-110 --difficultes=chaton,heroique,fer --graines=10 --detail` (80 à 110 secondes, les mêmes
+chiffres que la passe complète : 10 graines = les graines d'évaluation), un niveau isolé pour chercher la cause, puis une seule passe
+complète. Bandes imposées : Chaton (le naïf gagne tout), sans défense, défis Héroïque et Fer (40 à 90 % sur la région). Matou et Vieux
+Sage restent suspendues, comme ailleurs. `npm run balance` jetait jusqu'ici les écarts de la région 11 (`ecartsDeTout` s'arrêtait à la
+région 10) : `REGIONS_EVALUEES` (rapport-regions.ts) va maintenant de 1 à 11.
+
+**Stratégies de bot** (décision technique 4) :
+- *Vol de Corbeaux* : pour la géométrie des bots, un couloir est un trajet comme un chemin (indice N + k), jamais compté sur le chemin 0.
+  Le soigneux n'y compte que les tours qui visent les volants. Il achète en priorité de quoi abattre chaque volant annoncé (vague en cours
+  et prochaine) pendant sa traversée : 1,25 fois ses PV, avec puissance × (temps à portée + (n − 1) × intervalle) / n par tour. Son héros,
+  s'il tire sur les volants, se poste au croisement du chemin et du couloir le plus menacé. Le naïf, sur une case qui voit plus de couloir
+  que de chemin, tire sa famille parmi celles qui touchent les volants.
+- *Radeau* : une tour s'identifie par son lieu (case ou place), jamais par sa case. Le soigneux construit sur les places libres tir,
+  magie, artillerie et la tour divine de Charlie. Une place vaut sa couverture moyenne sur 8 positions de l'aller-retour.
+
+**Premier passage** : **4 écarts** aux bandes imposées avec les bots d'avant la tâche (Chaton pour les trois dieux, Défi Héroïque), **3**
+avec les bots des gimmicks sans réglage des plans (Chaton de Plume et de Charlie, Défi Héroïque). Après les réglages : **0 écart**.
+
+| Écart au premier passage | Cause | Réglage |
+| --- | --- | --- |
+| Chaton : le naïf gagne 90 / 82 / 93 % (Plume / Charlie / Pollen) des niveaux 101 à 110, puis 92 / 89 / 100 % avec les bots des gimmicks (niveaux 101, 103, 104 : 30 à 80 %) | Il tirait sa famille au hasard, caserne et artillerie comprises, même sur une case qui ne voit qu'un couloir de volants | Familles qui touchent les volants sur une case tournée vers un couloir (bot naïf). Effectifs plus bas aux niveaux 101 à 105 (ci-dessous) |
+| Défi Héroïque : 24 % (bots d'avant), 25 % (bots des gimmicks) | Niveaux 101, 103, 105 : un volant sort d'un couloir dès la vague 4 à 6, et c'est la seule vie. Un couloir ne pèse que 2 à 17 % de la menace : le soigneux le laissait presque nu. Les essaims de 10 Chauves-Souris d'élite à 0,2 s ne s'abattent qu'avec une dizaine de tours de magie. Niveaux 107 à 109 : Charlie et Pollen à court d'arêtes | Règle des couloirs annoncés (soigneux). Arêtes de départ : 101 : 1300 → 1820, 102 : 1350 → 1890, 103 : 1400 → 1960, 104 : 1450 → 2030, 105 : 1550 → 2170, 106 : 1350 → 1690, 107 : 1400 → 1750, 108 : 1450 → 1810, 109 : 1500 → 1875. `facteurBudget` 101 : 0,25 → 0,19, 102 : 0,28 → 0,22, 103 : 0,2 → 0,12, 104 : 0,33 → 0,26, 105 : 0,38 → 0,24. Plus de Chauve-Souris aux niveaux 103 et 105 ; graines 103 : 2106 → 2156, 105 : 4113 → 4133 (pour que chaque couloir serve encore) |
+
+Ce qui n'a pas aidé, et a été retiré : peser un couloir par sa part d'ennemis plutôt que de menace (Héroïque 101 à 105 de 7 % à 6 %).
+Les arêtes seules (+40 %) ne faisaient passer l'Héroïque de 101 à 105 que de 7 à 13 % : il fallait des effectifs plus bas et moins
+d'essaims. Le radeau, la vitesse du radeau, le nombre de couloirs et le Passeur n'ont pas été touchés.
+
+| Mesure (soigneux, 10 graines) | Bots d'avant | Bots des gimmicks, sans réglage | Après réglage |
+| --- | --- | --- | --- |
+| Chaton, naïf (Plume / Charlie / Pollen) | 90 / 82 / 93 % | 92 / 89 / 100 % | 100 / 100 / 100 % |
+| Défi Héroïque, région 11 (trois dieux) | 24 % | 25 % | 50 % |
+| Défi Héroïque (Plume / Charlie / Pollen) | 45 / 12 / 14 % | 48 / 10 / 18 % | 78 / 32 / 39 % |
+| Défi Fer, région 11 (trois dieux) | 87 % | 87 % | 90 % |
+| Héroïque par niveau, 101 à 110 (Plume) | 0, 100, 0, 0, 0, 100, 50, 100, 100, 0 | 0, 100, 0, 40, 0, 100, 50, 100, 90, 0 | 100, 100, 60, 90, 50, 100, 100, 90, 90, 0 |
+| Héroïque par niveau (Charlie) | 0, 0, 0, 0, 0, 100, 0, 20, 0, 0 | 0, 0, 0, 0, 0, 100, 0, 0, 0, 0 | 0, 80, 0, 0, 0, 90, 90, 60, 0, 0 |
+| Héroïque par niveau (Pollen) | 0, 0, 0, 0, 0, 70, 40, 30, 0, 0 | 0, 0, 0, 0, 0, 70, 40, 70, 0, 0 | 0, 90, 0, 0, 0, 100, 100, 100, 0, 0 |
+| Fer par niveau (trois dieux) | 100 sauf 101 Pollen (0) et 110 (0) | idem | 100 sauf 110 (0) |
+
+Signalé, sans réglage (les bandes imposées n'y obligent pas) :
+- **Niveau 110 (le Passeur)** : 0 % en Héroïque et en Fer pour les trois dieux. En Chaton, le soigneux de Pollen y perd toujours (Charlie
+  50 %) alors que le naïf gagne : le Passeur pèse à lui seul 95 % de la menace du niveau, et le soigneux délaisse les chemins 1 et 2,
+  d'où sortent Acolytes et Creux. Corriger ce poids du boss changerait le jeu du soigneux sur les niveaux de boss des régions 1 à 10. Le
+  Fer de la région (90 %, borne incluse) ne tient que parce que le 110 y reste perdu.
+- **Écart entre dieux en Héroïque** : Plume 78 %, Charlie 32 %, Pollen 39 %. Charlie et Pollen ne gagnent aucun niveau à couloirs sauf le
+  102. Le héros de Charlie ne tire pas sur les volants ; pour Pollen, la cause n'est pas chiffrée.
+- `VERSION_DONNEES` reste 16 : elle a déjà été montée dans ce jalon, qui n'est pas encore en ligne.
+
 ## Impacts
 - Données : `meta.ts` (régions, braises), `Niveau.gimmick`, format des vagues (couloir), ennemis (boss de région), `VERSION_DONNEES`, `VERSION_ETAT`.
 - Sauvegarde : bornes de validation (niveau 150, région 15) ; migration seulement si le format change.
