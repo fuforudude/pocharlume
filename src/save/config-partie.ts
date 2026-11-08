@@ -49,7 +49,7 @@ export interface OptionsConfig {
 
 /** Les options d'une partie qui peut être un défi : il faut dire quel niveau on joue pour savoir s'il en ouvre un. */
 export interface OptionsConfigDefi extends OptionsConfig {
-  /** Numéro du niveau de campagne joué (1 à 100). */
+  /** Numéro du niveau de campagne joué (1 à 150). */
   readonly niveau: number;
   /** « heroique », « fer », ou null pour une partie ordinaire. Un défi se joue en Matou, sans objet : `difficulte` et `objetsEquipes` sont alors ignorés. */
   readonly defi: string | null;

@@ -15,8 +15,12 @@ import { migrer } from './migrations';
 import { normaliserImport } from './normalisation';
 
 export const PREFIXE_CODE = 'PCH1';
-/** Taille maximale d'un code accepté, en caractères. Une progression complète en fait moins de 1500 (150 niveaux). */
-export const TAILLE_MAX_CODE = 16 * 1024;
+/**
+ * Taille maximale d'un code accepté, en caractères. Un joueur complet (150 niveaux) fait environ 18 400 caractères quand le navigateur
+ * ne sait pas compresser (mode `j`), bien moins en mode `z` : la limite doit laisser passer le premier cas. Les 64 Ko de données
+ * décompressées (ci-dessous) protègent déjà des codes démesurés.
+ */
+export const TAILLE_MAX_CODE = 32 * 1024;
 /** Taille maximale des données une fois décompressées, en octets (protège d'une bombe de décompression). */
 const TAILLE_MAX_DONNEES = 64 * 1024;
 

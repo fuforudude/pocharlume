@@ -12,6 +12,8 @@
 // - v5 : (dans `meta`) mode infini : record par carte (dernière vague terminée) et paliers déjà payés.
 // - v6 : (dans `meta`) inscriptions des vieilles statues déjà trouvées (une par carte, jamais perdue).
 // - v7 : (dans `meta`) bestiaire : ennemis déjà rencontrés en partie, et l'option « fiche Nouvel ennemi ».
+// - v8 : la campagne passe de 100 à 150 niveaux (régions 11 à 15) ; le niveau 100 gagné débloque le niveau 101 et la région 11
+//        (migration `v7versV8`).
 import { AVATARS, NIVEAU_MAX, BRANCHES_ARBRE, coutCumuleArbre, IDS_OBJETS, type IdBranche, type IdDefi, type IdDieu, type IdHeros, type IdObjet, type PalierInfini } from '../data/meta';
 import type { IdInscription } from '../data/niveaux/statues';
 import type { ConfigPartie } from '../engine/etat';
@@ -33,9 +35,9 @@ export type VitesseJeu = 1 | 2;
 export type EtoilesNiveau = Partial<Record<DifficulteSauvegarde, Etoiles>>;
 
 export interface Progression {
-  /** Plus grand numéro de niveau jouable (1 à 100) : réussir le niveau N débloque N + 1. */
+  /** Plus grand numéro de niveau jouable (1 à 150) : réussir le niveau N débloque N + 1. */
   niveauMax: number;
-  /** Clé : numéro du niveau en chiffres ("1" à "100"). Seuls les niveaux réussis y figurent. */
+  /** Clé : numéro du niveau en chiffres ("1" à "150"). Seuls les niveaux réussis y figurent. */
   etoiles: Record<string, EtoilesNiveau>;
 }
 
@@ -53,7 +55,7 @@ export interface Reglages {
  * `vague` (voir `partieEnCours` dans partie.ts).
  */
 export interface PartieEnCours {
-  /** Numéro du niveau de campagne (1 à 100). */
+  /** Numéro du niveau de campagne (1 à 150). */
   niveau: number;
   config: ConfigPartie;
   /** `serialiser(etat)` du moteur, au début de la vague. */

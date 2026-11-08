@@ -246,6 +246,19 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   // pastille de la région montrée est ramenée dans la bande (voir `majRegionsUI`).
   const bandePuces = el('div', 'region-puces');
   bandePuces.append(...puces);
+  // La molette fait défiler la bande de côté (un défilement vertical devient horizontal), sans faire défiler la page quand la bande
+  // ne déborde pas ou qu'elle est déjà au bout.
+  bandePuces.addEventListener('wheel', (e) => {
+    if (e.deltaX !== 0 || e.deltaY === 0) return;
+    const avant = bandePuces.scrollLeft;
+    bandePuces.scrollLeft += e.deltaY;
+    if (bandePuces.scrollLeft !== avant) e.preventDefault();
+  }, { passive: false, signal });
+  /** Ramène la pastille de la région montrée au milieu de la bande (la bande ne défile que si elle déborde). */
+  const centrerPuceCourante = (): void => {
+    const b = puces[indiceRegion];
+    if (b) bandePuces.scrollLeft = Math.max(0, b.offsetLeft - (bandePuces.clientWidth - b.offsetWidth) / 2);
+  };
   rangeeRegions.append(flechePrecedente, bandePuces, flecheSuivante, nomRegion);
   haut.append(rangeeRegions);
 
@@ -268,9 +281,8 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
       b.setAttribute('aria-disabled', String(!vr.ouverte));
       b.querySelector('img.cadenas')?.remove();
       if (!vr.ouverte) b.append(image(atlas.iconeUrl('icone-cadenas', 1), 'cadenas'));
-      // La pastille de la région montrée au milieu de la bande (la bande ne défile que si elle déborde).
-      if (courante) bandePuces.scrollLeft = Math.max(0, b.offsetLeft - (bandePuces.clientWidth - b.offsetWidth) / 2);
     });
+    centrerPuceCourante();
     const precedenteOuverte = indiceRegion > 0;
     const suivanteOuverte = vuesRegions[indiceRegion + 1]?.ouverte ?? false;
     flechePrecedente.classList.toggle('grise', !precedenteOuverte);
@@ -699,7 +711,9 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     }
   }, { signal });
   window.addEventListener('resize', cadrerRegion, { signal });
+  window.addEventListener('resize', centrerPuceCourante, { signal });
   window.addEventListener('orientationchange', cadrerRegion, { signal });
+  window.addEventListener('orientationchange', centrerPuceCourante, { signal });
   // L'en-tête change de hauteur sans que la fenêtre bouge (police chargée, nom de région sur deux lignes) : la carte suit,
   // sans reprendre le cadrage (le joueur a pu déplacer la vue).
   if (typeof ResizeObserver !== 'undefined') {

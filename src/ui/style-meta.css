@@ -652,10 +652,9 @@
   position: relative;
   display: flex;
   gap: 4px;
-  /* 15 pastilles en une seule rangée débordent d'un écran de 740 px : la bande en montre sept et défile, sans barre. */
+  /* Sur grand écran les 15 pastilles tiennent ; sur écran étroit la bande est limitée (voir la media query plus bas) et défile, sans barre. */
   flex: 0 1 auto;
   min-width: 0;
-  max-width: calc(7 * var(--cible) + 6 * 4px + 4px);
   padding: 2px;
   overflow-x: auto;
   scrollbar-width: none;
@@ -1326,6 +1325,11 @@
 /* --- Petits écrans --- */
 
 @media (max-width: 640px) {
+  /* Sept pastilles visibles, le reste défile. */
+  .region-puces {
+    max-width: calc(7 * var(--cible) + 6 * 4px + 4px);
+  }
+
   .fiche-colonnes {
     grid-template-columns: 1fr;
   }
