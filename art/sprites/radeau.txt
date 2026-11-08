@@ -1,6 +1,8 @@
 # Gimmicks de la région 11 (Grèves Grises) : le Radeau et le Vol de Corbeaux.
 # radeau : plateforme de rondins liés par deux cordes, 48 × 40, ancre au centre (24, 22) = le centre du radeau dans le moteur.
-#   Ses trois places par défaut (décalages (0, -1), (-1, 0), (1, 0) en tuiles) tombent en (24, 6), (8, 22) et (40, 22).
+#   Les places viennent des données (PLACES_RADEAU, src/data/niveaux/plan-region11.ts) : décalages (-0,5 ; 0,25), (0,5 ; 0,25) et
+#   (0 ; -0,5) en tuiles, soit les pixels (16, 26), (32, 26) et (24, 14). Leurs nattes (14 × 10) couvrent x 9 à 38 et y 9 à 30 :
+#   les deux cordes passent aux colonnes 5-6 et 41-42, hors des nattes. Le rendu dessine chaque natte sur sa place.
 # radeau-place : natte de corde d'une place libre, 14 × 10, ancre au centre (le rendu la pose sur la place, une tour la cache).
 # effet-plumes : gerbe de plumes noires quand un corbeau sort de son couloir au bord droit (animation impact, jouée une fois).
 # icone-couloir, icone-radeau, icone-sortie-couloir : repère du panneau d'un couloir, icônes des particularités, bout d'un couloir.
@@ -15,40 +17,40 @@ ancre 24 22
 .
 .
 .
-..dddddddddJZddddddddddddddddddddddJZdddddddd
-..oooooooooZJoooooooooBooooooooooBoZJoooooooo
-..OOOOOOOOOJZoOOOOOOOOOOOOoOOOOOOOOJZOOoOOOOO
-..ObBBbBBbBZJBBbBBbBBbBBbBBbBBbBBbBZJBBbBBbBO
-..obBBbBBbBJZBBbBBbBBbBBbBBbBBbBBbBJZBBbBBbBo
-..dbbbbbbbbZJbbbbbbbbbbbbbbbbbbbbbbZJbbbbbbbd
-...ddddddddJZddddddddddddddddddddddJZddddddddd
-...ooooooooZJoBooooooooooBoooooooooZJooooooooo
-...OOOOOOOOJZOOoOOOOOOOOOOOOoOOOOOOJZOOOOoOOOO
-...OBBBBBBBZJBBBBBBBBBBBBBBBBBBBBBBZJBBBBBBBBO
-...oBBBBBBBJZBBBBBBBBBBBBBBBBBBBBBBJZBBBBBBBBo
-...dbbbbbbbZJbbbbbbbbbbbbbbbbbbbbbbZJbbbbbbbbd
-..dddddddddJZddddddddddddddddddddddJZdddddddd
-..ooooBooooZJooooBooooooooooBooooooZJooBooooo
-..OOoOOOOOOJZOOOOoOOOOOOOOOOOOoOOOOJZOOOOOOoO
-..OBBBBBBBBZJBBBBBBBBBBBBBBBBBBBBBBZJBBBBBBBO
-..oBBBBBBBBJZBBBBBBBBBBBBBBBBBBBBBBJZBBBBBBBo
-..dbbbbbbbbZJbbbbbbbbbbbbbbbbbbbbbbZJbbbbbbbd
-...ddddddddJZddddddddddddddddddddddJZddddddddd
-...ooooooBoZJoooooooBooooooooooBoooZJoooooBooo
-...OOOoOOOOJZOOOOOOoOOOOOOOOOOOOoOOJZOOOOOOOOO
-...OBbBBbBBZJBbBBbBBbBBbBBbBBbBBbBBZJBbBBbBBbO
-...oBbBBbBBJZBbBBbBBbBBbBBbBBbBBbBBJZBbBBbBBbo
-...dbbbbbbbZJbbbbbbbbbbbbbbbbbbbbbbZJbbbbbbbbd
-..dddddddddJZddddddddddddddddddddddJZdddddddd
-..oooooooooZJooooooooooBooooooooooBZJoooooooo
-..OOOOOOoOOJZOOOOOOOOoOOOOOOOOOOOOoJZOOOOOOOO
-..OBBBBBBBBZJBBBBBBBBBBBBBBBBBBBBBBZJBBBBBBBO
-..oBBBBBBBBJZBBBBBBBBBBBBBBBBBBBBBBJZBBBBBBBo
-..dbbbbbbbbZJbbbbbbbbbbbbbbbbbbbbbbZJbbbbbbbd
-...ddddddddJZddddddddddddddddddddddJZddddddddd
-...oBooooooZJooBooooooooooBooooooooZJBoooooooo
-...OOOOOOOoJZOOOOOOOOOOoOOOOOOOOOOOJZOOOOOOOOO
-...OBBBBBBBZJBBBBBBBBBBBBBBBBBBBBBBZJBBBBBBBBO
+..dddJZddddddddddddddddddddddddddddddddddJZdd
+..oooZJoooooooooooooooBooooooooooBoooooooZJoo
+..OOOJZOOOOOOoOOOOOOOOOOOOoOOOOOOOOOOOOoOJZOO
+..ObBZJBBbBBBBBbBBbBBbBBbBBbBBbBBbBBBBBbBZJBO
+..obBJZBBbBBBBBbBBbBBbBBbBBbBBbBBbBBBBBbBJZBo
+..dbbZJbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbZJbd
+...ddJZddddddddddddddddddddddddddddddddddJZddd
+...ooZJoooooooBooooooooooBoooooooooooooooZJooo
+...OOJZOOOOOOOOoOOOOOOOOOOOOoOOOOOOOOOOOOJZOOO
+...OBZJBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBZJBBO
+...oBJZBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBJZBBo
+...dbZJbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbZJbbd
+..dddJZddddddddddddddddddddddddddddddddddJZdd
+..oooZJooooooooooBooooooooooBooooooooooBoZJoo
+..OOoJZOOOOOOOOOOoOOOOOOOOOOOOoOOOOOOOOOOJZoO
+..OBBZJBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBZJBO
+..oBBJZBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBJZBo
+..dbbZJbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbZJbd
+...ddJZddddddddddddddddddddddddddddddddddJZddd
+...ooZJooBooooooooooBooooooooooBoooooooooZJooo
+...OOJZOOOOOOOOOOOOoOOOOOOOOOOOOoOOOOOOOOJZOOO
+...OBZJBbBBBBBbBBbBBbBBbBBbBBbBBbBBBBBbBBZJBbO
+...oBJZBbBBBBBbBBbBBbBBbBBbBBbBBbBBBBBbBBJZBbo
+...dbZJbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbZJbbd
+..dddJZddddddddddddddddddddddddddddddddddJZdd
+..oooZJooooooooooooooooBooooooooooBooooooZJoo
+..OOOJZOoOOOOOOOOOOOOoOOOOOOOOOOOOoOOOOOOJZOO
+..OBBZJBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBZJBO
+..oBBJZBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBJZBo
+..dbbZJbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbZJbd
+...ddJZddddddddddddddddddddddddddddddddddJZddd
+...oBZJooooooooBooooooooooBooooooooooBoooZJooo
+...OOJZOOOoOOOOOOOOOOOOoOOOOOOOOOOOOOOOOOJZOOO
+...OBZJBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBZJBBO
 ....2222222222222222222222222222222222222222
 ....1111111111111111111111111111111111111111
 .

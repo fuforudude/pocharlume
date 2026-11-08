@@ -1,8 +1,12 @@
 // Rendu des gimmicks : le radeau est dessiné au même instant que les tours interpolées par le suivi (elles restent sur leurs
 // places), une tour du radeau suit sa place d'un pas à l'autre, ses effets (fumée, anneau) partent de sa position, et un corbeau
 // qui sort de son couloir lance sa gerbe de plumes.
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { niveauDeCampagne } from '../data/niveaux/campagne';
 import { casesInterditesDuNiveau } from '../data/niveaux/grille-niveau';
+import { gimmickRadeau } from '../engine';
+import { TUILE } from './camera';
 import { VERSION_DONNEES } from '../data/version';
 import { avancer, casesDuTrajet, creerPartie, positionPlace, positionRadeau } from '../engine';
 import type { ConfigPartie, EtatPartie } from '../engine';
@@ -148,5 +152,42 @@ describe('plumes des couloirs', () => {
     expect(xs.every((x) => x > 8 && x < 504)).toBe(true);
     expect(abscissesPlumes(512, 10)[0]).toBe(34);
     expect(abscissesPlumes(512, 48)).toEqual(xs);
+  });
+});
+
+describe('sprite du radeau et places des données', () => {
+  /** Les lignes de pixels du sprite `nom` dans art/sprites/radeau.txt, avec sa taille et son ancre. */
+  function sprite(nom: string): { lignes: string[]; largeur: number; hauteur: number; ax: number; ay: number } {
+    const texte = readFileSync(new URL('../../art/sprites/radeau.txt', import.meta.url), 'utf8').split(/\r?\n/);
+    const debut = texte.indexOf(`sprite ${nom}`);
+    const ligne = (prefixe: string): number => texte.findIndex((l, i) => i > debut && l.startsWith(prefixe));
+    const [largeur = 0, hauteur = 0] = (texte[ligne('taille ')] ?? '').split(' ').slice(1).map(Number);
+    const [ax = 0, ay = 0] = (texte[ligne('ancre ')] ?? '').split(' ').slice(1).map(Number);
+    const premiere = ligne('ancre ') + 1;
+    return { lignes: texte.slice(premiere, premiere + hauteur), largeur, hauteur, ax, ay };
+  }
+
+  it('sur chaque niveau à radeau (106 à 110), les nattes des trois places tiennent sur la plateforme, hors des cordes', () => {
+    const plateforme = sprite('radeau');
+    const natte = sprite('radeau-place');
+    expect([plateforme.largeur, plateforme.hauteur, natte.largeur, natte.hauteur]).toEqual([48, 40, 14, 10]);
+    for (let numero = 106; numero <= 110; numero++) {
+      const niveau = niveauDeCampagne(numero)?.niveau;
+      const g = niveau ? gimmickRadeau(niveau) : undefined;
+      if (!g) throw new Error(`niveau ${String(numero)} sans radeau`);
+      for (const p of g.places) {
+        // Le coin haut gauche de la natte, en pixels du sprite de la plateforme.
+        const x0 = plateforme.ax + p.dx * TUILE - natte.ax;
+        const y0 = plateforme.ay + p.dy * TUILE - natte.ay;
+        for (let y = y0; y < y0 + natte.hauteur; y++) {
+          for (let x = x0; x < x0 + natte.largeur; x++) {
+            const pixel = plateforme.lignes[y]?.[x] ?? '.';
+            const ou = `niveau ${String(numero)}, place (${String(p.dx)}, ${String(p.dy)}), pixel (${String(x)}, ${String(y)})`;
+            expect(pixel, ou).not.toBe('.');
+            expect('JZ'.includes(pixel), `corde sous la natte : ${ou}`).toBe(false);
+          }
+        }
+      }
+    }
   });
 });
