@@ -154,6 +154,8 @@ export function validerAction(etat: EtatPartie, action: Action): RaisonRefus | n
         if (action.place !== undefined) return 'radeau_sans_caserne';
         if (!ralliementParDefaut(etat.chemins, action.cx, action.cy, def.portee)) return 'caserne_sans_chemin';
       }
+      // Ses tourelles et pièges resteraient sur l'eau, loin de la tour qui va et vient : l'atelier (divine de Pollen) est refusé aussi.
+      if (def.atelier && action.place !== undefined) return 'radeau_sans_ouvrage';
       return prix(etat, action.tour, def) > etat.aretes ? 'aretes_insuffisantes' : null;
     }
     case 'ameliorer':
