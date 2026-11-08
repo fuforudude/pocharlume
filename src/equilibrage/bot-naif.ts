@@ -1,11 +1,12 @@
 // Bot « naïf » : un joueur débutant. Il construit sur les cases de la grille proches du chemin, dans un ordre un peu
-// mélangé, avec des familles tirées au hasard, améliore ce qu'il peut quand il a des arêtes, choisit ses
+// mélangé, avec des familles tirées au hasard (au Vol de Corbeaux, parmi celles qui touchent les volants sur une case qui voit
+// surtout un couloir), améliore ce qu'il peut quand il a des arêtes, choisit ses
 // spécialisations au hasard, et n'utilise ni les sorts ni le héros. Tous ses choix viennent d'un générateur à
 // graine : même graine, même partie.
 import { casesLibres, centreCase, creerGenerateur, niveauDeblocage, tirer, tourSurCase, validerAction } from '../engine';
 import type { Action, CaseGrille, EtatPartie, Generateur, IdFamille, Tour, Voie } from '../engine';
 import { ENNEMIS } from '../data/ennemis';
-import { FAMILLES } from '../data/tours';
+import { FAMILLES, TOURS } from '../data/tours';
 import { distance, echantillonner, PAS_ECHANTILLON, type Echantillon } from './geometrie';
 import { lieuDeLaTour, type Bot } from './simulation';
 
@@ -26,19 +27,33 @@ const EMPLACEMENTS_DEBUTANT = 16;
 /** Distance (en tuiles) à laquelle le débutant juge qu'une case « voit » le chemin. */
 const PORTEE_VUE = 3.5;
 
+/** Une case jugée par le débutant : il la sait « tournée vers un couloir » quand elle voit plus de couloir que de chemin. */
+interface CaseVue extends CaseGrille {
+  readonly versCouloir: boolean;
+}
+
 /**
- * Toutes les cases constructibles du niveau, les mieux placées d'abord : un débutant construit là où le chemin passe le plus près et le
- * plus longtemps (virages, boucles), à vue d'œil, donc avec un bruit. Il ne connaît pas les vagues : aucun chemin n'est pesé.
+ * Toutes les cases constructibles du niveau, les mieux placées d'abord : un débutant construit là où le chemin (ou un couloir du Vol de
+ * Corbeaux) passe le plus près et le plus longtemps (virages, boucles), à vue d'œil, donc avec un bruit. Il ne connaît pas les vagues :
+ * aucun chemin n'est pesé.
  */
-function ordreDesCases(etat: EtatPartie, g: Generateur, echantillons: readonly Echantillon[]): CaseGrille[] {
+function ordreDesCases(etat: EtatPartie, g: Generateur, echantillons: readonly Echantillon[]): CaseVue[] {
   const notes = casesLibres({ niveau: etat.niveau, tours: [] }).map((c) => {
     const centre = centreCase(c.cx, c.cy);
     let vue = 0;
-    for (const e of echantillons) if (distance(e, centre) <= PORTEE_VUE) vue += PAS_ECHANTILLON;
-    return { c, note: -vue + tirer(g) * 4 };
+    let vueCouloir = 0;
+    for (const e of echantillons) {
+      if (distance(e, centre) > PORTEE_VUE) continue;
+      vue += PAS_ECHANTILLON;
+      if (e.chemin >= etat.chemins.length) vueCouloir += PAS_ECHANTILLON;
+    }
+    return { c: { cx: c.cx, cy: c.cy, versCouloir: 2 * vueCouloir > vue }, note: -vue + tirer(g) * 4 };
   });
   return notes.sort((a, b) => a.note - b.note).map((n) => n.c);
 }
+
+/** Les familles qui touchent les volants : ce qu'un débutant pose face à un couloir de corbeaux. */
+const FAMILLES_ANTI_VOLANTS: readonly IdFamille[] = FAMILLES.filter((f) => TOURS[f].niveaux[0].volants);
 
 /** Le pas suivant d'une tour : l'améliorer, ou la spécialiser (voie `voie`) au niveau 3. */
 function actionSuivante(tour: Tour, voie: Voie): Action {
@@ -48,7 +63,7 @@ function actionSuivante(tour: Tour, voie: Voie): Action {
 export function creerBotNaif(options: OptionsNaif): Bot {
   const g = creerGenerateur(options.graine);
   const goutDeConstruire = options.goutDeConstruire ?? 0.95;
-  let ordre: CaseGrille[] | null = null;
+  let ordre: CaseVue[] | null = null;
   /** Achat voulu mais pas encore payable : le bot économise plutôt que d'en changer. */
   let envie: Action | null = null;
 
@@ -82,7 +97,7 @@ export function creerBotNaif(options: OptionsNaif): Bot {
     const construire = libres.length > 0 && (ameliorables.length === 0 || tirer(g) < goutDeConstruire);
     if (construire) {
       const choisie = libres[0];
-      const famille: IdFamille | undefined = choisir(g, FAMILLES);
+      const famille: IdFamille | undefined = choisir(g, choisie?.versCouloir === true ? FAMILLES_ANTI_VOLANTS : FAMILLES);
       return choisie && famille ? { type: 'construire', cx: choisie.cx, cy: choisie.cy, tour: famille } : null;
     }
     const tour = choisir(g, ameliorables);

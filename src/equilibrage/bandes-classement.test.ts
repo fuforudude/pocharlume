@@ -15,11 +15,11 @@ describe('écarts suspendus et imposés', () => {
     expect(ecartsImposes([...imposes, 'Région 10 : Matou : e'])).toEqual(imposes);
   });
 
-  it('suspend toutes les bandes de la région 11, le temps que les bots sachent jouer ses gimmicks', () => {
-    expect(REGIONS_SUSPENDUES).toEqual([11]);
-    for (const phrase of ['Région 11 : Chaton (Plume) : a', 'Région 11 : Défi Fer : c', 'Région 11 : Sans défense (Pollen) : b']) expect(estSuspendu(phrase), phrase).toBe(true);
-    expect(estSuspendu('Région 1 : Chaton (Plume) : a')).toBe(false);
-    expect(ecartsSelonRegion(11, ['Région 11 : Chaton : a'])).toEqual([]);
+  it('impose les bandes de la région 11 depuis que les bots jouent ses gimmicks : aucune région n’est suspendue', () => {
+    expect(REGIONS_SUSPENDUES).toEqual([]);
+    for (const phrase of ['Région 11 : Chaton (Plume) : a', 'Région 11 : Défi Fer : c', 'Région 11 : Sans défense (Pollen) : b']) expect(estSuspendu(phrase), phrase).toBe(false);
+    expect(estSuspendu('Région 11 : Matou : e')).toBe(true);
+    expect(ecartsSelonRegion(11, ['Région 11 : Chaton : a'])).toEqual(['Région 11 : Chaton : a']);
     expect(ecartsSelonRegion(10, ['Région 10 : Chaton : a'])).toEqual(['Région 10 : Chaton : a']);
   });
 });

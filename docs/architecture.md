@@ -949,8 +949,22 @@ Spec : [après l'histoire](specs/2026-11-08-apres-histoire-gimmicks.md), jalon 1
   `NOMBRE_REGIONS_INFINI` (meta.ts, borne de la sauvegarde) en est dérivé, pour rester égal à la borne du moteur. Seules les cartes de
   `CARTES_INFINI_APRES_HISTOIRE` (la Grève, l'Eau Morte) s'ouvrent en infini (`carteInfiniDuNiveau`), et `creerPartie` retire le gimmick
   d'un niveau joué en infini.
-- **Bandes** : la CI joue la région 11, mais `REGIONS_SUSPENDUES` (bandes.ts) rend ses écarts non bloquants tant que les bots ne
-  savent pas jouer les gimmicks.
+- **Bandes** : la CI joue la région 11 et ses bandes sont imposées comme ailleurs (`REGIONS_SUSPENDUES`, bandes.ts, est vide depuis
+  la tâche 6). `npm run balance` rend les écarts des régions de `REGIONS_EVALUEES` (rapport-regions.ts), 1 à 11.
+
+### Bots et gimmicks (tâche 6)
+- **Trajets** : pour les bots, un couloir est un trajet comme un chemin (`echantillonner`, `poidsDesChemins` de geometrie.ts) : les
+  chemins gardent leurs indices 0 à N − 1, le couloir k prend N + k. Un ennemi ou un groupe de couloir n'est jamais compté sur le chemin 0
+  (`trajetDuPaquet`), et `partsSpeciales` ne compte que les chemins.
+- **Soigneux, Vol de Corbeaux** : sur un point de couloir, seule une tour qui vise les volants compte (couverture, utilité, blocage) ; les
+  soldats n'y arrêtent rien. `candidatCouloir` : pour les groupes de la vague en cours et de la prochaine, si les tours qui visent les
+  volants n'infligent pas à chaque volant 1,25 fois ses PV pendant sa traversée (puissance × (temps à portée + (n − 1) × intervalle) / n),
+  il achète en priorité la tour ou l'amélioration qui en ajoute le plus par arête. Le héros qui tire sur les volants (`capacites.distance
+  .volants`) se poste au croisement du chemin et du couloir le plus menacé (`couloirAGarder`, `croisement`).
+- **Naïf, Vol de Corbeaux** : sur une case qui voit plus de couloir que de chemin, il tire sa famille parmi celles qui touchent les volants.
+- **Radeau** : une tour s'identifie par son lieu (`lieuDeLaTour`, `cleDuLieu` de simulation.ts), jamais par sa case. Le soigneux construit
+  sur les places libres les familles qui ne posent rien au sol (et la tour divine de Charlie) ; une place vaut la moyenne de sa couverture
+  sur 8 positions réparties sur un aller-retour (`pasRepartis`, `positionPlace`), chacune pour un huitième du temps.
 
 ## Migration de sauvegarde v7 → v8 (150 niveaux, 15 régions)
 

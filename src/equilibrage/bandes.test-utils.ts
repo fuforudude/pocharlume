@@ -15,7 +15,7 @@ export const GRAINES_TEST = GRAINES_EVALUATION;
 const TOUTES_LES_REGIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as const;
 
 /**
- * Les régions évaluées : les onze livrées (la 11 a ses bandes suspendues, `REGIONS_SUSPENDUES` de bandes.ts), ou celles de `BANDES_REGIONS` (ex. `3` ou `1,2`). La CI de déploiement s'en sert pour
+ * Les régions évaluées : les onze livrées, ou celles de `BANDES_REGIONS` (ex. `3` ou `1,2`). La CI de déploiement s'en sert pour
  * jouer une région par machine : sur 2 cœurs, les dix d'un coup dépassent le quart d'heure. Une valeur invalide est refusée
  * plutôt que de laisser passer des tests qui n'évaluent rien.
  */

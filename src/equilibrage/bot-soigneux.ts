@@ -28,8 +28,10 @@
 //   tours qui ne posent rien au sol (tir, magie, artillerie, tour divine de Charlie) et les estime par la couverture moyenne de leur
 //   place sur un aller-retour du radeau (`POSITIONS_RADEAU` positions réparties, chacune pour sa part du temps).
 import { PAS_PAR_SECONDE, ajusterMontant, casesLibres, centreCase, gimmickRadeau, niveauDeblocage, positionPlace, ralliementParDefaut, tourSurCase, tourSurPlace, validerAction } from '../engine';
-import type { Action, BonusFamille, CaseGrille, DefDieu, DefHeros, DefNiveauTour, DefSort, Ennemi, EtatPartie, GimmickRadeau, IdFamille, LieuTour, Niveau, Point, Tour, Voie } from '../engine';
+import type { Action, BonusFamille, CaseGrille, DefDieu, DefEnnemi, DefHeros, DefNiveauTour, DefSort, Ennemi, EtatPartie, GimmickRadeau, IdFamille, LieuTour, Niveau, Point, Tour, Voie } from '../engine';
 import { DIEUX } from '../data/dieux';
+import { DIFFICULTE_DES_DEFIS, DIFFICULTES } from '../data/difficultes';
+import { ENNEMIS } from '../data/ennemis';
 import { HEROS } from '../data/heros';
 import { dpsEfficace, EQUILIBRAGE, estTourDeZone } from '../data/equilibrage';
 import { REGLES } from '../data/regles';
@@ -94,6 +96,10 @@ interface Candidat {
 
 const dieux: Readonly<Record<string, DefDieu>> = DIEUX;
 const heros: Readonly<Record<string, DefHeros>> = HEROS;
+const ennemis: Readonly<Record<string, DefEnnemi>> = ENNEMIS;
+
+/** Dégâts qu'un volant annoncé doit pouvoir encaisser en traversant son couloir, en multiples de ses PV (Vol de Corbeaux). */
+const MARGE_COULOIR = 1.25;
 
 /** Positions du radeau (réparties sur un aller-retour) avec lesquelles le bot estime la couverture d'une place. */
 const POSITIONS_RADEAU = 8;
@@ -512,7 +518,98 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     if (divine) ouverts.unshift(divine);
     const guetteurs = candidatGuetteurs(etat, ouverts[0]?.ratio ?? 0);
     if (guetteurs) ouverts.unshift(guetteurs);
+    const couloir = candidatCouloir(etat, ouverts[0]?.ratio ?? 0);
+    if (couloir) ouverts.unshift(couloir);
     return ouverts;
+  }
+
+  /** Un groupe de volants annoncé dans un couloir : PV de chacun, temps passé sur une tuile, nombre et intervalle entre deux volants. */
+  interface GroupeCouloir {
+    readonly couloir: number;
+    readonly pv: number;
+    readonly secondesParTuile: number;
+    readonly nombre: number;
+    readonly intervalle: number;
+  }
+
+  /**
+   * Les groupes de la vague en cours et de la prochaine (celle que le panneau annonce) qui traversent un couloir, avec les PV de chaque
+   * volant (difficulté, élite et facteur du groupe compris). En Héroïque, le bot suppose chaque groupe d'élite.
+   */
+  function groupesAnnonces(etat: EtatPartie): GroupeCouloir[] {
+    const groupes: GroupeCouloir[] = [];
+    const pvDifficulte = (DIFFICULTES as Readonly<Record<string, { pvEnnemis: number }>>)[etat.config.defi ? DIFFICULTE_DES_DEFIS : etat.config.difficulte]?.pvEnnemis ?? 1;
+    const elite = etat.config.defi === 'heroique';
+    for (const vague of [etat.niveau.vagues[etat.vagues.lancees - 1], etat.niveau.vagues[etat.vagues.lancees]]) {
+      for (const p of vague?.paquets ?? []) {
+        const def = ennemis[p.ennemi];
+        if (p.couloir === undefined || !def) continue;
+        const pv = def.pv * pvDifficulte * (p.facteurPv ?? 1) * (elite || p.elite === true ? REGLES.elite.facteurPv : 1);
+        groupes.push({ couloir: p.couloir, pv, secondesParTuile: 1 / Math.max(def.vitesse, 0.1), nombre: Math.max(1, p.nombre), intervalle: p.intervalle });
+      }
+    }
+    return groupes;
+  }
+
+  /**
+   * Dégâts qu'une tour de cette puissance et de cette portée inflige à chaque volant d'un groupe qui traverse le couloir : elle tire tant
+   * qu'un volant du groupe est à portée (temps à portée T d'un volant, plus l'étalement du groupe), et partage ce feu entre les n volants,
+   * soit puissance × (T + (n − 1) × intervalle) / n, sans jamais dépasser ce qu'elle inflige à un volant seul (puissance × T). Sur le
+   * radeau, chaque position compte pour sa part du temps.
+   */
+  function degatsAuVolant(lieu: LieuTour, portee: number, puissance: number, groupe: GroupeCouloir): number {
+    const trajet = nombreChemins + groupe.couloir;
+    let total = 0;
+    for (const { indices, part } of couvertureDuLieu(lieu, portee)) {
+      let vue = 0;
+      for (const i of indices) if (echantillons[i]?.chemin === trajet) vue += PAS_ECHANTILLON;
+      const aPortee = vue * groupe.secondesParTuile;
+      if (aPortee > 0) total += part * puissance * Math.min(aPortee, (aPortee + (groupe.nombre - 1) * groupe.intervalle) / groupe.nombre);
+    }
+    return total;
+  }
+
+  /**
+   * Vol de Corbeaux : chaque volant qui sort d'un couloir coûte un cœur, quelle que soit la faible part de menace du couloir dans le
+   * niveau. Si les tours qui visent les volants n'infligent pas à chaque volant d'un groupe annoncé `MARGE_COULOIR` fois ses PV pendant
+   * sa traversée (`degatsAuVolant`), le bot achète, pour le groupe le moins bien couvert, ce qui en ajoute le plus par arête : une tour qui vise les volants sur un lieu libre,
+   * ou le niveau suivant d'une tour qui vise les volants. Valeur juste au-dessus du meilleur autre achat : le bot économise jusqu'à
+   * pouvoir le payer.
+   */
+  function candidatCouloir(etat: EtatPartie, meilleurRatio: number): Candidat | null {
+    if (etat.couloirs.length === 0) return null;
+    // Le groupe le moins bien couvert d'abord (dégâts infligés rapportés au besoin) : un couloir nu passe avant un couloir déjà défendu.
+    const parCouverture = groupesAnnonces(etat)
+      .map((groupe) => {
+        let degats = 0;
+        for (const t of etat.tours) if (t.stats.volants) degats += degatsAuVolant(lieuDeLaTour(t), t.stats.portee, dps(t.stats), groupe);
+        return { groupe, couvert: degats / (MARGE_COULOIR * groupe.pv) };
+      })
+      .filter((g) => g.couvert < 1)
+      .sort((a, b) => a.couvert - b.couvert);
+    for (const { groupe } of parCouverture) {
+      const meilleur: { action: Action | null; gain: number } = { action: null, gain: 0 };
+      const proposer = (action: Action, gain: number): void => {
+        if (gain > meilleur.gain && niveauDeblocage(etat, action) === null) Object.assign(meilleur, { action, gain });
+      };
+      for (const famille of FAMILLES.filter((f) => famillePermise(etat, f, options.familles) && TOURS[f].niveaux[0].volants)) {
+        const def = TOURS[famille].niveaux[0];
+        const lieux: LieuTour[] = [...casesLibres(etat).map((c) => ({ cx: c.cx, cy: c.cy })), ...(poseAuSol(def) ? [] : placesLibres(etat))];
+        const puissance = dpsFamille(etat, def, famille);
+        for (const lieu of lieux) proposer({ type: 'construire', tour: famille, ...lieu }, degatsAuVolant(lieu, def.portee, puissance, groupe) / cout(etat, def, famille));
+      }
+      for (const tour of etat.tours) {
+        const actuelle = defCourante(tour);
+        if (tour.famille === 'divine' || !actuelle?.volants || tour.niveau >= 3) continue;
+        const suivante = TOURS[tour.famille].niveaux[tour.niveau];
+        if (!suivante || (tour.place >= 0 && poseAuSol(suivante))) continue;
+        const lieu = lieuDeLaTour(tour);
+        const gain = degatsAuVolant(lieu, suivante.portee, dpsFamille(etat, suivante, tour.famille), groupe) - degatsAuVolant(lieu, actuelle.portee, dpsFamille(etat, actuelle, tour.famille), groupe);
+        proposer({ type: 'ameliorer', ...lieu }, gain / cout(etat, suivante, tour.famille));
+      }
+      if (meilleur.action) return { action: meilleur.action, ratio: meilleurRatio * 1.03, imperatif: true };
+    }
+    return null;
   }
 
   /**
