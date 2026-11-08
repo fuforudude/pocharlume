@@ -275,6 +275,22 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     direRegion(region ? t('carte.region_nom', { n: region.numero, nom: tCle(region.nom) }) : '', false);
   };
 
+  /** Hauteur de l'en-tête (barre, niveau, régions) à partir du haut de l'écran, en pixels CSS : la carte se place dessous. */
+  const hauteurEntete = (): number => Math.ceil(haut.getBoundingClientRect().bottom - racine.getBoundingClientRect().top) + 6;
+
+  /**
+   * Cadre la vue dans la place que l'en-tête laisse libre, mesurée à l'instant : les niveaux débloqués et le premier qui ne
+   * l'est pas encore (on devine où mène la route) y tiennent si le zoom le permet, sinon la vue se centre sur le nœud choisi.
+   */
+  const cadrerRegion = (): void => {
+    if (!rendu) return;
+    rendu.redimensionner();
+    rendu.definirMargeHaut(hauteurEntete());
+    const premierCache = vues.findIndex((v) => !v.visible);
+    const aVoir = premierCache === -1 ? vues : vues.slice(0, premierCache + 1);
+    rendu.cadrer(aVoir, vues[selection] ?? aVoir[0] ?? { x: 0, y: 0 });
+  };
+
   /** Montre la région d'indice `i` : ses nœuds d'après la sauvegarde, son fond, la sélection. */
   const chargerRegion = (i: number): void => {
     const region = regions[i];
@@ -285,14 +301,8 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     selection = noeudInitial(vues);
     rendu = contenu ? new RenduCarteMonde(canvas, atlas, contenu.trace, contenu.decor, nombreTroncons(vues)) : null;
     regionVide.hidden = contenu !== null;
-    if (rendu) {
-      // La vue montre les niveaux débloqués et le premier qui ne l'est pas encore (on devine où mène la route).
-      const premierCache = vues.findIndex((v) => !v.visible);
-      const aVoir = premierCache === -1 ? vues : vues.slice(0, premierCache + 1);
-      rendu.cadrer(aVoir, vues[selection] ?? aVoir[0] ?? { x: 0, y: 0 });
-    } else {
-      contexte?.clearRect(0, 0, canvas.width, canvas.height);
-    }
+    if (rendu) cadrerRegion();
+    else contexte?.clearRect(0, 0, canvas.width, canvas.height);
     majTitre();
     majRegionsUI();
   };
@@ -674,8 +684,21 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
       ouvrirFiche(selection);
     }
   }, { signal });
-  window.addEventListener('resize', () => { rendu?.redimensionner(); }, { signal });
-  window.addEventListener('orientationchange', () => { rendu?.redimensionner(); }, { signal });
+  window.addEventListener('resize', cadrerRegion, { signal });
+  window.addEventListener('orientationchange', cadrerRegion, { signal });
+  // L'en-tête change de hauteur sans que la fenêtre bouge (police chargée, nom de région sur deux lignes) : la carte suit,
+  // sans reprendre le cadrage (le joueur a pu déplacer la vue).
+  if (typeof ResizeObserver !== 'undefined') {
+    let derniere = 0;
+    const observateur = new ResizeObserver(() => {
+      const h = hauteurEntete();
+      if (h === derniere) return;
+      derniere = h;
+      rendu?.definirMargeHaut(h);
+    });
+    observateur.observe(haut);
+    signal.addEventListener('abort', () => { observateur.disconnect(); }, { once: true });
+  }
 
   // --- Boucle : le clignotement du prochain niveau et le chevron de sélection bougent à chaque image ---
 

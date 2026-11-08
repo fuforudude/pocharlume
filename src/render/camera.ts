@@ -95,6 +95,11 @@ export class Camera {
     this.plancher = Number.isFinite(zoom) && zoom > 1 ? Math.floor(zoom) : 1;
   }
 
+  /** Hauteur de la bande du haut recouverte par l'interface, en pixels logiques du fond (selon le zoom actuel). */
+  get margeHautLogique(): number {
+    return this.margeHaut / this.zoom;
+  }
+
   /** Marges de l'interface (pixels physiques) ; une valeur négative ou qui n'est pas un nombre fini compte pour 0. */
   definirMarges(haut: number, bas: number, gauche: number, droite: number): void {
     const propre = (v: number): number => (Number.isFinite(v) && v > 0 ? v : 0);

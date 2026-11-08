@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { HAUTEUR_CARTE_MONDE, LARGEUR_CARTE_MONDE, NOEUDS_REGION1, TRACE_REGION1 } from '../data/niveaux/carte-du-monde';
 import type { Point } from '../engine/definitions';
-import { carteDuSol, DEMI_LARGEUR_ROUTE, pointsPointilles } from './carte-monde';
+import { carteDuSol, DEMI_LARGEUR_ROUTE, pointsPointilles, zoomQuiFait } from './carte-monde';
 import { DECOR_MONDE_REGION1 } from './carte-monde-decor';
 import { construireSol, masqueChemin } from './sol';
 
@@ -101,5 +101,26 @@ describe('décor de la carte du monde', () => {
         expect(Math.sqrt(dx * dx + dy * dy), `${d.sprite} trop près du nœud ${String(n.numero)}`).toBeGreaterThanOrEqual(24);
       }
     }
+  });
+});
+
+describe('zoom du cadrage dans la zone libre', () => {
+  it('garde le zoom préféré quand la boîte y tient', () => {
+    expect(zoomQuiFait(100, 60, 1480, 720, 4, 2)).toBe(4);
+  });
+
+  it('descend d’un cran à la fois jusqu’au premier zoom où la boîte tient', () => {
+    // Boîte de 100 × 160 (+ 2 × 40 de marge) : 240 de haut, soit 960 px à 4, 720 à 3, 480 à 2.
+    expect(zoomQuiFait(100, 160, 1480, 720, 4, 2)).toBe(3);
+    expect(zoomQuiFait(100, 160, 1480, 500, 4, 2)).toBe(2);
+  });
+
+  it('compte la hauteur laissée libre par l’en-tête, pas celle de l’écran', () => {
+    expect(zoomQuiFait(100, 160, 1480, 720, 4, 2)).toBe(3);
+    expect(zoomQuiFait(100, 160, 1480, 720 - 285, 4, 2)).toBeNull();
+  });
+
+  it('renvoie null quand la boîte ne tient pas, même au zoom le plus petit permis', () => {
+    expect(zoomQuiFait(400, 200, 1480, 400, 4, 2)).toBeNull();
   });
 });
