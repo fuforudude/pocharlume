@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { HAUTEUR_CARTE_MONDE, LARGEUR_CARTE_MONDE, NOEUDS_REGION1, TRACE_REGION1 } from '../data/niveaux/carte-du-monde';
 import type { Point } from '../engine/definitions';
-import { carteDuSol, DEMI_LARGEUR_ROUTE, pointsPointilles, zoomQuiFait } from './carte-monde';
+import { calculerCadrage, carteDuSol, DEMI_LARGEUR_ROUTE, pointsPointilles, zoomQuiFait } from './carte-monde';
 import { DECOR_MONDE_REGION1 } from './carte-monde-decor';
 import { construireSol, masqueChemin } from './sol';
 
@@ -122,5 +122,32 @@ describe('zoom du cadrage dans la zone libre', () => {
 
   it('renvoie null quand la boîte ne tient pas, même au zoom le plus petit permis', () => {
     expect(zoomQuiFait(400, 200, 1480, 400, 4, 2)).toBeNull();
+  });
+});
+
+describe('cadrage dans la zone libre', () => {
+  const points: Point[] = [{ x: 100, y: 100 }, { x: 200, y: 260 }];
+  const focus: Point = { x: 150, y: 180 };
+
+  it('la marge haute fait descendre le zoom : sans elle la boîte tient à 3, avec elle seulement à 2', () => {
+    // Boîte de 160 de haut (+ 2 × 40 de marge) = 240 : 720 px à 3, 480 px à 2.
+    expect(calculerCadrage(points, focus, 1480, 720, 0, 4, 2).zoom).toBe(3);
+    expect(calculerCadrage(points, focus, 1480, 720, 200, 4, 2).zoom).toBe(2);
+  });
+
+  it('centre la boîte quand elle tient, sur le focus au zoom préféré sinon', () => {
+    expect(calculerCadrage(points, focus, 1480, 720, 0, 4, 2)).toEqual({ zoom: 3, x: 150, y: 180 });
+    const loin: Point[] = [{ x: 0, y: 0 }, { x: 900, y: 900 }];
+    expect(calculerCadrage(loin, { x: 10, y: 20 }, 1480, 720, 200, 4, 2)).toEqual({ zoom: 4, x: 10, y: 20 });
+  });
+
+  it('sans point, se centre sur le focus', () => {
+    expect(calculerCadrage([], focus, 1480, 720, 0, 4, 2)).toEqual({ zoom: 4, x: 150, y: 180 });
+  });
+});
+
+describe('zoom jamais nul', () => {
+  it('un plancher à 0 ne donne jamais un zoom de 0', () => {
+    expect(zoomQuiFait(1e6, 1e6, 100, 100, 3, 0)).toBeNull();
   });
 });

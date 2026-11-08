@@ -301,10 +301,11 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     selection = noeudInitial(vues);
     rendu = contenu ? new RenduCarteMonde(canvas, atlas, contenu.trace, contenu.decor, nombreTroncons(vues)) : null;
     regionVide.hidden = contenu !== null;
-    if (rendu) cadrerRegion();
-    else contexte?.clearRect(0, 0, canvas.width, canvas.height);
+    // L'en-tête se mesure une fois rempli (titre et régions), avant le cadrage.
     majTitre();
     majRegionsUI();
+    if (rendu) cadrerRegion();
+    else contexte?.clearRect(0, 0, canvas.width, canvas.height);
   };
 
   /** Va là où la demande mène ; une région fermée reste fermée et dit comment l'ouvrir. */
@@ -335,7 +336,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     majTitre();
     const cam = rendu.camera;
     const marge = 28;
-    if (vue.x - cam.decalageX < marge || vue.x - cam.decalageX > cam.vueL - marge || vue.y - cam.decalageY < marge + 20 || vue.y - cam.decalageY > cam.vueH - marge) {
+    if (vue.x - cam.decalageX < marge || vue.x - cam.decalageX > cam.vueL - marge || vue.y - cam.decalageY < cam.margeHautLogique + marge || vue.y - cam.decalageY > cam.vueH - marge) {
       rendu.centrerSur(vue.x, vue.y);
     }
   };
