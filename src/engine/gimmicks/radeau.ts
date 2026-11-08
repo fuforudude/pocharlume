@@ -65,7 +65,7 @@ export function verifierRadeau(niveau: Niveau, gimmick: GimmickRadeau): void {
   if (decalages.size !== gimmick.places.length) throw new Error('Radeau : deux places au même décalage');
   gimmick.places.forEach((a, i) => {
     for (const b of gimmick.places.slice(i + 1)) {
-      if (Math.hypot(a.dx - b.dx, a.dy - b.dy) < REGLES.tailleCase) throw new Error(`Radeau : deux places à moins d'une case l'une de l'autre (${String(REGLES.tailleCase)} tuiles)`);
+      if ((a.dx - b.dx) * (a.dx - b.dx) + (a.dy - b.dy) * (a.dy - b.dy) < REGLES.tailleCase * REGLES.tailleCase) throw new Error(`Radeau : deux places à moins d'une case l'une de l'autre (${String(REGLES.tailleCase)} tuiles)`);
     }
   });
   for (const c of casesDuTrajet(gimmick)) {

@@ -18,7 +18,7 @@ const CARTE_COULOIRS = { largeur: 32, hauteur: 18, chemins: [{ points: [{ x: 17,
 const CORBEAUX: GimmickCorbeaux = { type: 'corbeaux', couloirs: [{ cy: 6 }] };
 
 function niveauCouloirs(vagues: readonly Vague[]): Niveau {
-  return { id: 'essai-couloirs', aretesDepart: 900, carte: CARTE_COULOIRS, casesInterdites: casesInterditesDuNiveau(CARTE_COULOIRS, []), vagues, gimmick: CORBEAUX };
+  return { id: 'essai-couloirs', aretesDepart: 900, carte: CARTE_COULOIRS, casesInterdites: casesInterditesDuNiveau(CARTE_COULOIRS, [], []), vagues, gimmick: CORBEAUX };
 }
 
 /** Des corbeaux dans le couloir, et quelques paysans sur le chemin. */
