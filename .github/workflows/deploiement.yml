@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: false
 
 # `npm run verifier` en entier, réparti sur plusieurs machines : sur les 2 cœurs d'une machine GitHub, les simulations
-# d'équilibrage des dix régions prennent plus d'une demi-heure d'un seul tenant. Le site ne part que si tout passe.
+# d'équilibrage des onze régions prennent plus d'une demi-heure d'un seul tenant. Le site ne part que si tout passe.
 env:
   BANDES: src/equilibrage/bandes-chaton.test.ts src/equilibrage/bandes-defis.test.ts src/equilibrage/bandes-matou.test.ts src/equilibrage/bandes-vieux-sage.test.ts
 
@@ -44,7 +44,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        # La région 11 tourne avec ses bandes suspendues (REGIONS_SUSPENDUES de src/equilibrage/bandes.ts) : écarts affichés, non bloquants.
+        # Une machine par région de la campagne (REGIONS_DE_LA_CAMPAGNE de src/equilibrage/rapport-regions.ts), toutes avec leurs
+        # bandes imposées. Une région ajoutée à la campagne doit aussi être ajoutée ici.
         region: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     steps:
       - uses: actions/checkout@v7

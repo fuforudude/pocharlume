@@ -2,13 +2,17 @@
 // Les bandes de la région 1 sont celles de rapport.ts ; les mêmes bandes (et celle des défis) s'imposent à chacune des régions 2 à 11 : les écarts
 // listés ici font échouer `npm run balance` pour Chaton, l'absence de défense et les défis ; ceux de Matou et de Vieux Sage sont suspendus.
 import { ecartsDeRegion, ecartsDefis, nomDuDieu } from './bandes';
+import { CAMPAGNE } from '../data/niveaux/campagne';
 import { DEFIS_EVALUES, DIEUX_EVALUES, DIFFICULTES_EVALUEES, dieuxDe, partiesDe, synthetiser, trouver, type Evaluation } from './campagne';
 
 /** Niveaux par région : le numéro de campagne se range par dizaines. */
 const NIVEAUX_PAR_REGION = 10;
 
-/** Les régions que `npm run balance` évalue et dont il rend les écarts : toutes celles de la campagne. */
-export const REGIONS_EVALUEES: readonly number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+/**
+ * Les régions de la campagne, dérivées de ses niveaux (10 par région) : `npm run balance` les évalue toutes et rend leurs écarts, et les
+ * tests des bandes en partent. Une région ajoutée à la campagne y entre d'elle-même : aucune liste à tenir à la main.
+ */
+export const REGIONS_DE_LA_CAMPAGNE: readonly number[] = [...new Set(CAMPAGNE.map((n) => Math.ceil(n.numero / NIVEAUX_PAR_REGION)))];
 
 const THEMES: Readonly<Record<number, string>> = {
   1: 'le Village Affamé',

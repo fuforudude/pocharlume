@@ -3,7 +3,7 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { SUSPENDUES_IMPOSEES, ecartsBloquants, ecartsSelonRegion, ecartsEntreDieux, ecartsSansDefense, ecartsVieuxSage } from './bandes';
 import type { Evaluation } from './campagne';
-import { DELAI_EVALUATION, evaluerRegions, REGIONS_EVALUEES } from './bandes.test-utils';
+import { DELAI_EVALUATION, evaluerRegions, REGIONS_DES_BANDES } from './bandes.test-utils';
 
 let parRegion: Evaluation[][] = [];
 // Les bandes de cette difficulté sont suspendues (bandes.ts) : sans `BANDES_SUSPENDUES_IMPOSEES=1`, seul le héros sans défense est joué.
@@ -11,7 +11,7 @@ beforeAll(async () => {
   parRegion = await evaluerRegions('vieux_sage', SUSPENDUES_IMPOSEES ? undefined : ['inactif']);
 }, DELAI_EVALUATION);
 
-describe.each(REGIONS_EVALUEES)('bandes en Vieux Sage, région %i', (region) => {
+describe.each(REGIONS_DES_BANDES)('bandes en Vieux Sage, région %i', (region) => {
   it.skipIf(!SUSPENDUES_IMPOSEES)('le bot soigneux gagne entre 60 et 85 % des niveaux', () => {
     expect(ecartsSelonRegion(region, ecartsBloquants(ecartsVieuxSage(parRegion[region - 1] ?? [])))).toEqual([]);
   });

@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { casesInterditesDuNiveau } from '../data/niveaux/grille-niveau';
 import { TOURS } from '../data/tours';
 import { avancer, centreCase, creerPartie, toutesLesCases, validerAction } from '../engine';
-import type { Action, GimmickCorbeaux, GimmickRadeau, Niveau, Vague } from '../engine';
+import type { Action, DefiPartie, GimmickCorbeaux, GimmickRadeau, IdFamille, Niveau, Vague, Voie } from '../engine';
 import { creerBotNaif } from './bot-naif';
 import { creerBotSoigneux } from './bot-soigneux';
 import { partsSpeciales, poidsDesChemins } from './geometrie';
@@ -48,20 +48,52 @@ function vaguesSol(fois = 6): Vague[] {
   return Array.from({ length: fois }, () => ({ paquets: [{ ennemi: 'paysan_affame', nombre: 10, intervalle: 0.8, chemin: 0, delai: 0 }] }));
 }
 
-/** Joue la partie avec le bot et rend les actions acceptées, avec celles qu'il a proposées et que le moteur a refusées. */
-function partie(niveau: Niveau, bot: Bot, dieu: string, secondes = 600, avant: readonly Action[] = []): { jouees: Action[]; refusees: string[] } {
-  const etat = creerPartie(niveau, configPartie({ graine: 3, difficulte: 'chaton', dieu }));
+interface Deroulement {
+  /** Actions acceptées par le moteur. */
+  readonly jouees: Action[];
+  /** Toutes les actions proposées par le bot, acceptées ou non. */
+  readonly proposees: Action[];
+  /** Actions proposées et refusées, avec la raison du refus. */
+  readonly refusees: string[];
+  /** Vies perdues par des volants sortis d'un couloir. */
+  readonly fuitesCouloir: number;
+  readonly statut: string;
+}
+
+/** Joue la partie avec le bot et rend les actions acceptées, celles qu'il a proposées, celles que le moteur a refusées et les fuites des couloirs. */
+function partie(niveau: Niveau, bot: Bot, dieu: string, secondes = 600, avant: readonly Action[] = [], defi?: DefiPartie): Deroulement {
+  const etat = creerPartie(niveau, configPartie({ graine: 3, difficulte: defi ? 'matou' : 'chaton', dieu, ...(defi ? { defi } : {}) }));
   avancer(etat, avant);
+  const proposees: Action[] = [];
   const refusees: string[] = [];
+  const deCouloir = new Set<number>();
+  let fuitesCouloir = 0;
   while (etat.statut === 'en_cours' && etat.pas < secondes * 30) {
     const actions = etat.pas % 15 === 0 ? bot.decider(etat) : [];
     for (const a of actions) {
+      proposees.push(a);
       const raison = validerAction(etat, a);
       if (raison) refusees.push(`${a.type} : ${raison}`);
     }
     avancer(etat, actions);
+    for (const ev of etat.evenements) if (ev.type === 'fuite' && deCouloir.has(ev.ennemi)) fuitesCouloir += ev.vies;
+    for (const e of etat.ennemis) if (e.couloir >= 0) deCouloir.add(e.id);
   }
-  return { jouees: etat.journal.map((e) => e.action), refusees };
+  return { jouees: etat.journal.map((e) => e.action), proposees, refusees, fuitesCouloir, statut: etat.statut };
+}
+
+/** Un bot qui joue ces actions dans l'ordre, chacune dès que le moteur l'accepte. */
+function botScripte(actions: readonly Action[]): Bot {
+  let suivante = 0;
+  return {
+    nom: 'scripté',
+    decider(etat) {
+      const a = actions[suivante];
+      if (!a || validerAction(etat, a) !== null) return [];
+      suivante++;
+      return [a];
+    },
+  };
 }
 
 describe('géométrie des couloirs', () => {
@@ -87,6 +119,41 @@ describe('bot soigneux et Vol de Corbeaux', () => {
     expect(aPortee.length, dieu).toBeGreaterThan(0);
   });
 
+  it.each(['charlie', 'plume', 'pollen'])(
+    '%s, Héroïque : un couloir qui pèse peu dans la menace est quand même défendu, aucun volant ne sort',
+    (dieu) => {
+      // Beaucoup d'ennemis au sol, un Ange de Cendre d'élite par vague dans le couloir (12 % de la menace) : l'utilité ordinaire
+      // délaisse le couloir, et sans la règle des couloirs annoncés (`candidatCouloir`) un ange sort et la partie est perdue (Charlie).
+      const vagues: Vague[] = Array.from({ length: 6 }, () => ({
+        paquets: [
+          { ennemi: 'paysan_affame', nombre: 40, intervalle: 0.5, chemin: 0, delai: 0 },
+          { ennemi: 'garde_royal', nombre: 4, intervalle: 2, chemin: 0, delai: 5 },
+          { ennemi: 'ange_cendre', nombre: 1, intervalle: 1, chemin: 0, couloir: 0, delai: 3 },
+        ],
+      }));
+      const niveau: Niveau = { ...niveauCouloirs(vagues), aretesDepart: 1500 };
+      const poids = poidsDesChemins(niveau)[1] ?? 0;
+      expect(poids).toBeGreaterThanOrEqual(0.02);
+      expect(poids).toBeLessThanOrEqual(0.17);
+      const { fuitesCouloir, statut } = partie(niveau, creerBotSoigneux({ variante: EQUILIBREE }), dieu, 900, [], 'heroique');
+      expect(fuitesCouloir, dieu).toBe(0);
+      expect(statut, dieu).toBe('victoire');
+    },
+  );
+
+  it('le naïf bâtit une tour de tir ou de magie sur une case tournée vers un couloir', () => {
+    // Le chemin descend en x = 17 et le couloir passe en y = 13 : une case à plus de 3,5 tuiles du chemin et à moins de 3,5 du
+    // couloir ne voit que le couloir (portée de vue du naïf).
+    const versCouloir = (cx: number, cy: number): boolean => Math.abs(centreCase(cx, cy).x - 17) > 3.5 && Math.abs(centreCase(cx, cy).y - centreCase(0, 6).y) <= 3.5;
+    const familles = [1, 2, 3, 4, 5].flatMap((graine) =>
+      partie(niveauCouloirs(vaguesCouloir()), creerBotNaif({ graine }), 'charlie', 300).jouees.flatMap((a) =>
+        a.type === 'construire' && a.cx !== undefined && versCouloir(a.cx, a.cy) ? [a.tour] : [],
+      ),
+    );
+    expect(familles.length).toBeGreaterThanOrEqual(5);
+    for (const f of familles) expect(['tir', 'magie']).toContain(f);
+  });
+
   it('le héros tireur (Pollen) se poste au croisement du chemin et du couloir', () => {
     const { jouees } = partie(niveauCouloirs(vaguesCouloir()), creerBotSoigneux({ variante: EQUILIBREE }), 'pollen', 300);
     const ordres = jouees.flatMap((a) => (a.type === 'deplacerHeros' ? [a] : []));
@@ -110,19 +177,34 @@ describe('bots et Radeau', () => {
     for (const a of ameliorations) expect('place' in a && a.place !== undefined).toBe(true);
   });
 
-  it('la tour divine de Charlie va sur le radeau, celles de Plume et de Pollen jamais', () => {
+  it('la tour divine de Charlie va sur le radeau, celles de Plume et de Pollen jamais, ni jouées ni proposées', () => {
     // Trois tours déjà posées loin du chemin : la tour divine est permise, et seul le radeau voit le chemin.
     const avant: Action[] = [0, 2, 4].map((cx) => ({ type: 'construire', cx, cy: 8, tour: 'tir' }));
-    const divine = (dieu: string): boolean =>
-      partie(niveauRadeau(vaguesSol()), creerBotSoigneux({ variante: EQUILIBREE }), dieu, 600, avant).jouees.some((a) => a.type === 'construire' && a.tour === 'divine' && a.place !== undefined);
-    expect(divine('charlie')).toBe(true);
-    expect(divine('plume')).toBe(false);
-    expect(divine('pollen')).toBe(false);
+    const surRadeau = (a: Action): boolean => a.type === 'construire' && a.tour === 'divine' && a.place !== undefined;
+    const joue = (dieu: string) => partie(niveauRadeau(vaguesSol()), creerBotSoigneux({ variante: EQUILIBREE }), dieu, 600, avant);
+    expect(joue('charlie').jouees.some(surRadeau)).toBe(true);
+    for (const dieu of ['plume', 'pollen']) {
+      const { proposees, refusees } = joue(dieu);
+      // Le moteur refuserait la tour divine de Plume ou de Pollen sur une place : elle ne doit même pas être proposée.
+      expect(proposees.some(surRadeau), dieu).toBe(false);
+      expect(refusees, dieu).toEqual([]);
+    }
   });
 
-  it('jouerPartie compte les spécialisations d’une tour du radeau dans les choix', () => {
-    const r = jouerPartie(niveauRadeau(vaguesSol()), creerBotSoigneux({ variante: EQUILIBREE }), { graine: 3, difficulte: 'chaton', dieu: 'charlie' });
-    expect(r.choix.some((c) => c.voie !== undefined)).toBe(true);
+  it('jouerPartie rattache la spécialisation d’une tour du radeau à la famille de sa place', () => {
+    // Deux familles sur deux places, la première bâtie seule spécialisée : avec une clé de lieu commune aux places, la voie
+    // serait rattachée à la dernière famille bâtie (le tir).
+    const voie: Voie = (['A', 'B'] as const).find((v) => TOURS.magie.specialisations[v].soldats === null && TOURS.magie.specialisations[v].atelier === null) ?? 'A';
+    const script: Action[] = [
+      { type: 'construire', place: 0, tour: 'magie' },
+      { type: 'construire', place: 1, tour: 'tir' },
+      { type: 'ameliorer', place: 0 },
+      { type: 'ameliorer', place: 0 },
+      { type: 'specialiser', place: 0, voie },
+    ];
+    const r = jouerPartie({ ...niveauRadeau(vaguesSol()), aretesDepart: 5000 }, botScripte(script), { graine: 3, difficulte: 'chaton', dieu: 'charlie' });
+    const familles: IdFamille[] = ['magie', 'tir'];
+    expect(r.choix).toEqual([...familles.map((famille) => ({ famille })), { famille: 'magie', voie }]);
   });
 
   it('le naïf améliore une tour du radeau par sa place', () => {

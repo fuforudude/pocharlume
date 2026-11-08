@@ -26,7 +26,8 @@
 //   en cours (ou de la prochaine, celle que le panneau annonce).
 // - Radeau : une tour s'identifie par son lieu (`LieuTour`, la case ou la place du radeau). Le bot construit sur les places libres les
 //   tours qui ne posent rien au sol (tir, magie, artillerie, tour divine de Charlie) et les estime par la couverture moyenne de leur
-//   place sur un aller-retour du radeau (`POSITIONS_RADEAU` positions réparties, chacune pour sa part du temps).
+//   place sur le trajet du radeau (`POSITIONS_RADEAU` positions réparties sur un aller, chacune pour sa part du temps : l'aller-retour
+//   repasse aux mêmes endroits). La zone de feu d'une tour du radeau (héros, sorts) suit la même couverture moyenne.
 import { PAS_PAR_SECONDE, ajusterMontant, casesLibres, centreCase, gimmickRadeau, niveauDeblocage, positionPlace, ralliementParDefaut, tourSurCase, tourSurPlace, validerAction } from '../engine';
 import type { Action, BonusFamille, CaseGrille, DefDieu, DefEnnemi, DefHeros, DefNiveauTour, DefSort, Ennemi, EtatPartie, GimmickRadeau, IdFamille, LieuTour, Niveau, Point, Tour, Voie } from '../engine';
 import { DIEUX } from '../data/dieux';
@@ -101,7 +102,7 @@ const ennemis: Readonly<Record<string, DefEnnemi>> = ENNEMIS;
 /** Dégâts qu'un volant annoncé doit pouvoir encaisser en traversant son couloir, en multiples de ses PV (Vol de Corbeaux). */
 const MARGE_COULOIR = 1.25;
 
-/** Positions du radeau (réparties sur un aller-retour) avec lesquelles le bot estime la couverture d'une place. */
+/** Positions du radeau (réparties sur un aller) avec lesquelles le bot estime la couverture d'une place. */
 const POSITIONS_RADEAU = 8;
 
 /** Une tour qui pose quelque chose au sol (soldats, tourelles, pièges) : le radeau la refuse (`radeau_sol_requis`). */
@@ -109,7 +110,10 @@ function poseAuSol(def: DefNiveauTour): boolean {
   return def.soldats !== null || def.atelier !== null;
 }
 
-/** Les pas d'un aller-retour du radeau, `POSITIONS_RADEAU` fois répartis : de quoi moyenner la couverture d'une place. */
+/**
+ * `POSITIONS_RADEAU` pas répartis sur un aller du radeau : de quoi moyenner la couverture d'une place. Sur un aller-retour, les instants
+ * t et P − t tombent au même endroit : on répartit donc sur la première moitié de la période, pour avoir autant de positions distinctes.
+ */
 function pasRepartis(gimmick: GimmickRadeau): number[] {
   // Durée d'un aller-retour : la longueur du trajet (somme des segments entre centres de cases) faite deux fois à `vitesse`.
   let longueur = 0;
@@ -118,7 +122,7 @@ function pasRepartis(gimmick: GimmickRadeau): number[] {
     if (avant) longueur += distance(centreCase(avant.cx, avant.cy), centreCase(c.cx, c.cy));
   });
   const periode = (2 * longueur * PAS_PAR_SECONDE) / (gimmick.vitesse * REGLES.tailleCase);
-  return Array.from({ length: POSITIONS_RADEAU }, (_, k) => Math.round(((k + 0.5) * periode) / POSITIONS_RADEAU));
+  return Array.from({ length: POSITIONS_RADEAU }, (_, k) => Math.round(((k + 0.5) * periode) / (2 * POSITIONS_RADEAU)));
 }
 
 /** Nombre de cases libres examinées par famille à chaque achat (les mieux classées d'abord). */
@@ -139,6 +143,32 @@ function utilite(dps: number): number {
 
 /** Part de menace furtive à partir de laquelle le bot se soucie des Guetteurs des Toits. */
 const PART_FURTIFS_MIN = 0.001;
+
+/** Le palier de protection au-dessus de `valeur` (le dernier s'il y est déjà) : ce que devient l'armure d'une élite, comme dans le moteur. */
+function palierSuperieur(valeur: number): number {
+  for (const palier of REGLES.paliersProtection) if (palier > valeur) return palier;
+  return REGLES.paliersProtection[REGLES.paliersProtection.length - 1] ?? valeur;
+}
+
+/**
+ * DPS d'un niveau de tour contre un ennemi de cette armure et de cette résistance. `dpsEfficace` donne le DPS sur chaque palier de
+ * protection, et il est affine en la part de protection : on interpole au palier que le coup rencontre (l'armure, moins ce que le coup
+ * en ignore, pour des dégâts physiques ; la résistance pour des dégâts magiques ; rien pour des dégâts purs).
+ */
+function dpsContre(def: DefNiveauTour, armure: number, resistance: number): number {
+  const protection = def.typeDegats === 'physique' ? armure * (1 - def.ignoreArmure) : def.typeDegats === 'magique' ? resistance : 0;
+  const paliers = REGLES.paliersProtection;
+  const dps = dpsEfficace(def);
+  for (let i = 1; i < paliers.length; i++) {
+    const bas = paliers[i - 1] ?? 0;
+    const haut = paliers[i] ?? 1;
+    if (protection <= haut || i === paliers.length - 1) {
+      const t = (protection - bas) / (haut - bas);
+      return (dps[i - 1] ?? 0) * (1 - t) + (dps[i] ?? 0) * t;
+    }
+  }
+  return dps[0] ?? 0;
+}
 
 function dpsMoyen(def: DefNiveauTour, cibles?: number, presenceChaine?: number): number {
   const dps = dpsEfficace(def, cibles, presenceChaine);
@@ -211,17 +241,20 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
   const dpsBloqueParDef = new Map<DefNiveauTour, number>();
   const dpsAvecBonusParDef = new Map<DefNiveauTour, number>();
   const dpsAvecBonusBloqueParDef = new Map<DefNiveauTour, number>();
+  /** DPS contre les volants d'un couloir, par niveau de tour puis par (bonus, armure, résistance). */
+  const dpsAuVolantParDef = new Map<DefNiveauTour, Map<string, number>>();
   /** Cases utiles de chaque famille (et de la tour divine), classées par longueur de chemin vue décroissante. */
   let classement: Readonly<Record<IdFamille | 'divine', readonly CaseGrille[]>> | null = null;
   let zones: (Echantillon | undefined)[] = [];
   let clefZones = -1;
   let dernierOrdreHeros: Point | null = null;
 
-  function vue(cx: number, cy: number, portee: number): number {
-    const clef = `${String(cx)},${String(cy)}:${String(portee)}`;
+  /** Longueur de trajet pesée vue depuis la case ; les couloirs n'y comptent que pour une tour qui vise les volants. */
+  function vue(cx: number, cy: number, portee: number, volants: boolean): number {
+    const clef = `${String(cx)},${String(cy)}:${String(portee)}:${volants ? 'v' : 's'}`;
     let v = vues.get(clef);
     if (v === undefined) {
-      v = longueurVue(echantillons, poids, centreCase(cx, cy), portee);
+      v = longueurVue(echantillons, poids, centreCase(cx, cy), portee, volants ? undefined : nombreChemins);
       vues.set(clef, v);
     }
     return v;
@@ -333,12 +366,16 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     return total;
   }
 
-  /** Les cases non interdites où une tour de cette portée voit du chemin, de la plus utile à la moins utile (égalité : ordre de la grille). */
-  function classer(etat: EtatPartie, portee: number, avecSoldats: boolean): CaseGrille[] {
+  /**
+   * Les cases non interdites où une tour de cette portée voit du chemin, de la plus utile à la moins utile (égalité : ordre de la grille).
+   * Les couloirs du Vol de Corbeaux n'y comptent que pour une tour qui vise les volants : la caserne et l'artillerie n'y touchent rien.
+   */
+  function classer(etat: EtatPartie, def: Pick<DefNiveauTour, 'portee' | 'soldats' | 'volants'>): CaseGrille[] {
     const vide = { niveau: etat.niveau, tours: [] };
+    const avecSoldats = def.soldats !== null;
     return casesLibres(vide)
-      .filter((c) => !avecSoldats || ralliementParDefaut(etat.chemins, c.cx, c.cy, portee) !== null)
-      .map((c) => ({ c, v: vue(c.cx, c.cy, portee) }))
+      .filter((c) => !avecSoldats || ralliementParDefaut(etat.chemins, c.cx, c.cy, def.portee) !== null)
+      .map((c) => ({ c, v: vue(c.cx, c.cy, def.portee, def.volants) }))
       .filter((m) => m.v > 0)
       .sort((a, b) => b.v - a.v)
       .map((m) => m.c);
@@ -347,16 +384,13 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
   function classements(etat: EtatPartie): Readonly<Record<IdFamille | 'divine', readonly CaseGrille[]>> {
     if (classement) return classement;
     const dieu = dieux[etat.config.dieu];
-    const parFamille = (famille: IdFamille): CaseGrille[] => {
-      const def = TOURS[famille].niveaux[0];
-      return classer(etat, def.portee, def.soldats !== null);
-    };
+    const parFamille = (famille: IdFamille): CaseGrille[] => classer(etat, TOURS[famille].niveaux[0]);
     classement = {
       caserne: parFamille('caserne'),
       tir: parFamille('tir'),
       magie: parFamille('magie'),
       artillerie: parFamille('artillerie'),
-      divine: dieu ? classer(etat, dieu.tourDivine.portee, dieu.tourDivine.soldats !== null) : [],
+      divine: dieu ? classer(etat, dieu.tourDivine) : [],
     };
     return classement;
   }
@@ -523,10 +557,15 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     return ouverts;
   }
 
-  /** Un groupe de volants annoncé dans un couloir : PV de chacun, temps passé sur une tuile, nombre et intervalle entre deux volants. */
+  /**
+   * Un groupe de volants annoncé dans un couloir : PV de chacun, protections (celles d'une élite montent d'un palier), temps passé sur une
+   * tuile, nombre et intervalle entre deux volants.
+   */
   interface GroupeCouloir {
     readonly couloir: number;
     readonly pv: number;
+    readonly armure: number;
+    readonly resistance: number;
     readonly secondesParTuile: number;
     readonly nombre: number;
     readonly intervalle: number;
@@ -534,7 +573,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
 
   /**
    * Les groupes de la vague en cours et de la prochaine (celle que le panneau annonce) qui traversent un couloir, avec les PV de chaque
-   * volant (difficulté, élite et facteur du groupe compris). En Héroïque, le bot suppose chaque groupe d'élite.
+   * volant (difficulté, élite et facteur du groupe compris) et ses protections. En Héroïque, le bot suppose chaque groupe d'élite.
    */
   function groupesAnnonces(etat: EtatPartie): GroupeCouloir[] {
     const groupes: GroupeCouloir[] = [];
@@ -544,18 +583,42 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
       for (const p of vague?.paquets ?? []) {
         const def = ennemis[p.ennemi];
         if (p.couloir === undefined || !def) continue;
-        const pv = def.pv * pvDifficulte * (p.facteurPv ?? 1) * (elite || p.elite === true ? REGLES.elite.facteurPv : 1);
-        groupes.push({ couloir: p.couloir, pv, secondesParTuile: 1 / Math.max(def.vitesse, 0.1), nombre: Math.max(1, p.nombre), intervalle: p.intervalle });
+        const estElite = (elite || p.elite === true) && !def.boss;
+        const pv = def.pv * pvDifficulte * (p.facteurPv ?? 1) * (estElite ? REGLES.elite.facteurPv : 1);
+        const armure = estElite ? palierSuperieur(def.armure) : def.armure;
+        const resistance = estElite ? palierSuperieur(def.resistance) : def.resistance;
+        groupes.push({ couloir: p.couloir, pv, armure, resistance, secondesParTuile: 1 / Math.max(def.vitesse, 0.1), nombre: Math.max(1, p.nombre), intervalle: p.intervalle });
       }
     }
     return groupes;
   }
 
   /**
-   * Dégâts qu'une tour de cette puissance et de cette portée inflige à chaque volant d'un groupe qui traverse le couloir : elle tire tant
-   * qu'un volant du groupe est à portée (temps à portée T d'un volant, plus l'étalement du groupe), et partage ce feu entre les n volants,
-   * soit puissance × (T + (n − 1) × intervalle) / n, sans jamais dépasser ce qu'elle inflige à un volant seul (puissance × T). Sur le
-   * radeau, chaque position compte pour sa part du temps.
+   * DPS d'un niveau de tour contre les volants d'un groupe (armure et résistance, élites comprises), bonus de famille du dieu compris
+   * si `famille` est donnée (une tour posée le porte déjà dans ses stats : `famille` absente).
+   */
+  function dpsAuVolant(etat: EtatPartie, def: DefNiveauTour, groupe: GroupeCouloir, famille?: IdFamille): number {
+    const bonus = famille ? bonusDuDieu(etat) : undefined;
+    const avec = bonus !== undefined && famille !== undefined && bonus.famille === famille;
+    const clef = `${avec ? 'b' : '-'}:${String(groupe.armure)}:${String(groupe.resistance)}`;
+    let table = dpsAuVolantParDef.get(def);
+    if (!table) {
+      table = new Map();
+      dpsAuVolantParDef.set(def, table);
+    }
+    let v = table.get(clef);
+    if (v === undefined) {
+      v = dpsContre(avec ? avecBonus(def, famille, bonus) : def, groupe.armure, groupe.resistance);
+      table.set(clef, v);
+    }
+    return v;
+  }
+
+  /**
+   * Dégâts qu'une tour de cette puissance (contre ce groupe : `dpsAuVolant`) et de cette portée inflige à chaque volant d'un groupe qui
+   * traverse le couloir : elle tire tant qu'un volant du groupe est à portée (temps à portée T d'un volant, plus l'étalement du groupe),
+   * et partage ce feu entre les n volants, soit puissance × (T + (n − 1) × intervalle) / n, sans jamais dépasser ce qu'elle inflige à un
+   * volant seul (puissance × T). Sur le radeau, chaque position compte pour sa part du temps.
    */
   function degatsAuVolant(lieu: LieuTour, portee: number, puissance: number, groupe: GroupeCouloir): number {
     const trajet = nombreChemins + groupe.couloir;
@@ -582,7 +645,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     const parCouverture = groupesAnnonces(etat)
       .map((groupe) => {
         let degats = 0;
-        for (const t of etat.tours) if (t.stats.volants) degats += degatsAuVolant(lieuDeLaTour(t), t.stats.portee, dps(t.stats), groupe);
+        for (const t of etat.tours) if (t.stats.volants) degats += degatsAuVolant(lieuDeLaTour(t), t.stats.portee, dpsAuVolant(etat, t.stats, groupe), groupe);
         return { groupe, couvert: degats / (MARGE_COULOIR * groupe.pv) };
       })
       .filter((g) => g.couvert < 1)
@@ -595,7 +658,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
       for (const famille of FAMILLES.filter((f) => famillePermise(etat, f, options.familles) && TOURS[f].niveaux[0].volants)) {
         const def = TOURS[famille].niveaux[0];
         const lieux: LieuTour[] = [...casesLibres(etat).map((c) => ({ cx: c.cx, cy: c.cy })), ...(poseAuSol(def) ? [] : placesLibres(etat))];
-        const puissance = dpsFamille(etat, def, famille);
+        const puissance = dpsAuVolant(etat, def, groupe, famille);
         for (const lieu of lieux) proposer({ type: 'construire', tour: famille, ...lieu }, degatsAuVolant(lieu, def.portee, puissance, groupe) / cout(etat, def, famille));
       }
       for (const tour of etat.tours) {
@@ -604,7 +667,9 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
         const suivante = TOURS[tour.famille].niveaux[tour.niveau];
         if (!suivante || (tour.place >= 0 && poseAuSol(suivante))) continue;
         const lieu = lieuDeLaTour(tour);
-        const gain = degatsAuVolant(lieu, suivante.portee, dpsFamille(etat, suivante, tour.famille), groupe) - degatsAuVolant(lieu, actuelle.portee, dpsFamille(etat, actuelle, tour.famille), groupe);
+        const gain =
+          degatsAuVolant(lieu, suivante.portee, dpsAuVolant(etat, suivante, groupe, tour.famille), groupe) -
+          degatsAuVolant(lieu, actuelle.portee, dpsAuVolant(etat, actuelle, groupe, tour.famille), groupe);
         proposer({ type: 'ameliorer', ...lieu }, gain / cout(etat, suivante, tour.famille));
       }
       if (meilleur.action) return { action: meilleur.action, ratio: meilleurRatio * 1.03, imperatif: true };
@@ -665,19 +730,27 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     return null;
   }
 
-  /** Point de chaque chemin où les tours posées concentrent le plus de feu. */
+  /**
+   * Point de chaque chemin où les tours posées concentrent le plus de feu. Une tour compte par la couverture de son lieu
+   * (`couvertureDuLieu`) : sur une case, ses alentours ; sur le radeau, la moyenne des positions de sa place, qui ne dépend pas de
+   * l'endroit où se trouve le radeau au moment du calcul.
+   */
   function calculerZones(etat: EtatPartie): void {
     // Une tour du radeau (cx = cy = -1) compte par sa place ; une tour sur une case, comme avant.
     const clef = etat.tours.reduce((a, t) => a + t.coutCumule + 1000 * (t.place >= 0 ? -100000 * (t.place + 1) : t.cx + 100 * t.cy), 0);
     if (clef === clefZones) return;
     clefZones = clef;
+    const feu = new Float64Array(echantillons.length);
+    for (const t of etat.tours) {
+      const puissance = dps(t.stats);
+      for (const { indices, part } of couvertureDuLieu(lieuDeLaTour(t), t.stats.portee)) for (const i of indices) feu[i] = (feu[i] ?? 0) + part * puissance;
+    }
     zones = etat.chemins.map((_, chemin) => {
       let meilleur: Echantillon | undefined;
       let max = 0;
-      for (const e of echantillons) {
+      for (const [i, e] of echantillons.entries()) {
         if (e.chemin !== chemin) continue;
-        let somme = 0;
-        for (const t of etat.tours) if (distance(t, e) <= t.stats.portee) somme += dps(t.stats);
+        const somme = feu[i] ?? 0;
         if (somme > max) {
           max = somme;
           meilleur = e;

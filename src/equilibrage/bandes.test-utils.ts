@@ -5,6 +5,7 @@
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { Worker } from 'node:worker_threads';
 import { DIEUX_EVALUES, GRAINES_ENTRAINEMENT, GRAINES_EVALUATION, type Evaluation, type IdBot } from './campagne';
+import { REGIONS_DE_LA_CAMPAGNE } from './rapport-regions';
 
 /**
  * Graines des tests : les dix de `npm run balance`, avec ses deux graines d'entraînement (mêmes résultats que le rapport).
@@ -12,20 +13,19 @@ import { DIEUX_EVALUES, GRAINES_ENTRAINEMENT, GRAINES_EVALUATION, type Evaluatio
  */
 export const GRAINES_TEST = GRAINES_EVALUATION;
 
-const TOUTES_LES_REGIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as const;
-
 /**
- * Les régions évaluées : les onze livrées, ou celles de `BANDES_REGIONS` (ex. `3` ou `1,2`). La CI de déploiement s'en sert pour
- * jouer une région par machine : sur 2 cœurs, les dix d'un coup dépassent le quart d'heure. Une valeur invalide est refusée
- * plutôt que de laisser passer des tests qui n'évaluent rien.
+ * Les régions que testent les bandes : toutes celles de la campagne (`REGIONS_DE_LA_CAMPAGNE`), ou celles de `BANDES_REGIONS` (ex. `3`
+ * ou `1,2`). La CI de déploiement s'en sert pour jouer une région par machine : sur 2 cœurs, toutes d'un coup dépassent le quart
+ * d'heure. Une valeur invalide est refusée plutôt que de laisser passer des tests qui n'évaluent rien.
  */
-export const REGIONS_EVALUEES: readonly number[] = lireRegions(process.env['BANDES_REGIONS']);
+export const REGIONS_DES_BANDES: readonly number[] = lireRegions(process.env['BANDES_REGIONS']);
 
 function lireRegions(valeur: string | undefined): readonly number[] {
-  if (valeur === undefined || valeur.trim() === '') return TOUTES_LES_REGIONS;
+  if (valeur === undefined || valeur.trim() === '') return REGIONS_DE_LA_CAMPAGNE;
   const regions = valeur.split(',').map((morceau) => Number(morceau.trim()));
-  if (regions.some((r) => !(TOUTES_LES_REGIONS as readonly number[]).includes(r))) {
-    throw new Error(`BANDES_REGIONS invalide : « ${valeur} » (attendu : numéros de région de 1 à 11, séparés par des virgules)`);
+  if (regions.some((r) => !REGIONS_DE_LA_CAMPAGNE.includes(r))) {
+    const derniere = String(REGIONS_DE_LA_CAMPAGNE[REGIONS_DE_LA_CAMPAGNE.length - 1] ?? 1);
+    throw new Error(`BANDES_REGIONS invalide : « ${valeur} » (attendu : numéros de région de 1 à ${derniere}, séparés par des virgules)`);
   }
   return [...new Set(regions)];
 }
@@ -59,9 +59,9 @@ export async function evaluerRegion(region: number, difficulte: string, bots?: r
 
 /** Les évaluations de chaque région évaluée (indice 0 = région 1, vide pour une région non évaluée), calculées en parallèle. */
 export async function evaluerRegions(difficulte: string, bots?: readonly IdBot[]): Promise<Evaluation[][]> {
-  const parRegion: Evaluation[][] = TOUTES_LES_REGIONS.map(() => []);
+  const parRegion: Evaluation[][] = REGIONS_DE_LA_CAMPAGNE.map(() => []);
   await Promise.all(
-    REGIONS_EVALUEES.map(async (region) => {
+    REGIONS_DES_BANDES.map(async (region) => {
       parRegion[region - 1] = await evaluerRegion(region, difficulte, bots);
     }),
   );

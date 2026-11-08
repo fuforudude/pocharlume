@@ -95,11 +95,14 @@ export function premiereVagueFurtifs(niveau: Niveau): number {
   return i + 1;
 }
 
-/** Longueur de chemin (en tuiles) à moins de `portee` du point, chaque chemin pesé par `poids`. */
-export function longueurVue(echantillons: readonly Echantillon[], poids: readonly number[], p: Point, portee: number): number {
+/**
+ * Longueur de chemin (en tuiles) à moins de `portee` du point, chaque trajet pesé par `poids`. Avec `nombreChemins`, les couloirs du Vol de
+ * Corbeaux (trajets d'indice au moins égal) ne comptent pas : ce que voit une tour qui ne vise pas les volants.
+ */
+export function longueurVue(echantillons: readonly Echantillon[], poids: readonly number[], p: Point, portee: number, nombreChemins = Infinity): number {
   let total = 0;
   for (const e of echantillons) {
-    if (distance(e, p) <= portee) total += (poids[e.chemin] ?? 0) * PAS_ECHANTILLON;
+    if (e.chemin < nombreChemins && distance(e, p) <= portee) total += (poids[e.chemin] ?? 0) * PAS_ECHANTILLON;
   }
   return total;
 }
