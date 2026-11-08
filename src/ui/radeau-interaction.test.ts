@@ -61,6 +61,91 @@ describe('place du radeau touchée', () => {
   });
 });
 
+/** Joue jusqu'à ce que le dernier pas joué (celui des tours) soit `pasTours`. */
+function jouerJusqua(etat: EtatPartie, pasTours: number): void {
+  while (etat.pas - 1 < pasTours) avancer(etat, []);
+  expect(etat.pas - 1).toBe(pasTours);
+}
+
+describe('une tour de la rive au contact du trajet garde son menu', () => {
+  // Le radeau fait une tuile par seconde : il est à x = 5 + pas / 30 tuiles à l'aller, de x = 5 (case 2) à x = 21 (case 10).
+  it('au-dessus du trajet : toucher la tour de la rive quand le radeau passe dessous ouvre son menu, pas celui de la place 0', () => {
+    const etat = partie();
+    avancer(etat, [{ type: 'construire', place: 0, tour: 'tir' }, { type: 'construire', cx: 6, cy: 3, tour: 'tir' }]);
+    expect(etat.tours).toHaveLength(2);
+    // Au pas 240, le radeau est sous la case (6, 3) : la place 0 en (13, 8), le corps de sa tour en (13, 7,5), le centre de la case en (13, 7).
+    jouerJusqua(etat, 240);
+    expect(place(etat, 0)).toEqual({ x: 13, y: 8 });
+    expect(placeTouchee(etat, 13, 7, 0.9)).toBe(-1);
+    const interaction = new Interaction();
+    interaction.toucher(etat, 13, 7, 0.9);
+    expect(interaction.mode).toEqual({ type: 'menu', cx: 6, cy: 3 });
+    expect(elementsMenu(etat, lieuDuMenu(interaction.mode) ?? { cx: -1, cy: -1 }).find((e) => e.id === 'vendre')?.action).toEqual({ type: 'vendre', cx: 6, cy: 3 });
+    // Le corps de la tour de la rive, un peu plus bas, reste à elle aussi.
+    expect(placeTouchee(etat, 13, 7.4, 0.9)).toBe(-1);
+    // Sur l'eau du trajet, la place 0 et sa tour se touchent toujours.
+    expect(placeTouchee(etat, 13, 8.2, 0.9)).toBe(0);
+  });
+
+  it('une case de la rive sans tour : la place ne l’emporte que si le point est plus près d’elle que du centre de la case', () => {
+    const etat = partie();
+    jouerJusqua(etat, 240);
+    expect(placeTouchee(etat, 13, 7.8, 0.9)).toBe(0);
+    expect(placeTouchee(etat, 13, 7.4, 0.9)).toBe(-1);
+  });
+
+  it('au bout gauche du trajet : la tour de la case (1, 4) garde son menu face à la tour de la place 1', () => {
+    const etat = partie();
+    avancer(etat, [{ type: 'construire', place: 1, tour: 'tir' }, { type: 'construire', cx: 1, cy: 4, tour: 'tir' }]);
+    expect(etat.tours).toHaveLength(2);
+    // Le radeau revient au bout gauche au pas 960 (aller-retour de 16 tuiles) : la place 1 est en (4, 9), le centre de la case en (3, 9).
+    jouerJusqua(etat, 960);
+    expect(place(etat, 1)).toEqual({ x: 4, y: 9 });
+    // Ce point est à 0,61 tuile du corps de la tour du radeau : il ouvrait son menu avant la correction.
+    expect(placeTouchee(etat, 3.4, 8.6, 0.9)).toBe(-1);
+    const interaction = new Interaction();
+    interaction.toucher(etat, 3.4, 8.6, 0.9);
+    expect(interaction.mode).toEqual({ type: 'menu', cx: 1, cy: 4 });
+    expect(placeTouchee(etat, 4.2, 9, 0.9)).toBe(1);
+  });
+
+  it('au bout droit du trajet : la tour de la case (11, 4) garde son menu face à la tour de la place 2', () => {
+    const etat = partie();
+    avancer(etat, [{ type: 'construire', place: 2, tour: 'tir' }, { type: 'construire', cx: 11, cy: 4, tour: 'tir' }]);
+    expect(etat.tours).toHaveLength(2);
+    jouerJusqua(etat, 480);
+    expect(place(etat, 2)).toEqual({ x: 22, y: 9 });
+    expect(placeTouchee(etat, 22.6, 8.6, 0.9)).toBe(-1);
+    const interaction = new Interaction();
+    interaction.toucher(etat, 22.6, 8.6, 0.9);
+    expect(interaction.mode).toEqual({ type: 'menu', cx: 11, cy: 4 });
+    expect(placeTouchee(etat, 21.8, 9, 0.9)).toBe(2);
+  });
+
+  it('le survol suit la même règle : la case de la rive s’éclaire, pas la place', () => {
+    const etat = partie();
+    avancer(etat, [{ type: 'construire', place: 0, tour: 'tir' }, { type: 'construire', cx: 6, cy: 3, tour: 'tir' }]);
+    jouerJusqua(etat, 240);
+    const interaction = new Interaction();
+    interaction.viser(etat, 13, 7);
+    expect(interaction.viseePlace).toBe(-1);
+    expect(interaction.visee).toEqual({ cx: 6, cy: 3 });
+  });
+
+  it('souris immobile : refaire la visée au même point après le passage du radeau suit ce qui est dessous', () => {
+    const etat = partie();
+    jouerJusqua(etat, 240);
+    const interaction = new Interaction();
+    interaction.viser(etat, 13, 8.2);
+    expect(interaction.viseePlace).toBe(0);
+    // Le radeau s'en va : la même position vise la case d'eau du trajet (rien ne s'y construit).
+    jouerJusqua(etat, 300);
+    interaction.viser(etat, 13, 8.2);
+    expect(interaction.viseePlace).toBe(-1);
+    expect(interaction.construireSurSelection(etat, 'tir').refus).toBe('case_interdite');
+  });
+});
+
 describe('menu d’une place du radeau', () => {
   it('toucher une place libre ouvre son menu ; la retoucher le referme', () => {
     const etat = partie();
@@ -90,7 +175,7 @@ describe('menu d’une place du radeau', () => {
     expect(contenuElementMenu(etat, { place: 1 }, caserne)?.notes).toContain(texteRefus('radeau_sol_requis'));
   });
 
-  it('les tours divines de Plume (assassins) et de Pollen (atelier) sont grisées, chacune avec sa raison', () => {
+  it('les tours divines de Plume (assassins) et de Pollen (atelier) sont grisées, toutes deux pour radeau_sol_requis', () => {
     expect(elementsMenu(partie('plume'), { place: 0 }).find((e) => e.id === 'construire:divine')?.refus).toBe('radeau_sol_requis');
     expect(elementsMenu(partie('pollen'), { place: 0 }).find((e) => e.id === 'construire:divine')?.refus).toBe('radeau_sol_requis');
   });

@@ -4,8 +4,8 @@
 import { DIEUX } from '../data/dieux';
 import { OBJETS } from '../data/objets';
 import type { Action, EtatPartie, LieuTour, RaisonRefus } from '../engine';
-import type { CaseGrille } from '../engine/definitions';
-import { caseSousPoint, estCaseDeChemin, estCaseInterdite, gimmickRadeau, positionPlace, tourDuLieu, tourSurCase, validerAction } from '../engine';
+import type { CaseGrille, GimmickRadeau } from '../engine/definitions';
+import { casesDuTrajet, caseSousPoint, centreCase, estCaseDeChemin, estCaseInterdite, gimmickRadeau, positionPlace, tourDuLieu, tourSurCase, validerAction } from '../engine';
 import type { FamilleTour } from '../engine/etat';
 import { chercherParId } from '../engine/recherche';
 import { tCle } from '../i18n';
@@ -55,24 +55,49 @@ export function lieuDuMenu(mode: Mode): LieuTour | null {
   return mode.place === undefined ? { cx: mode.cx, cy: mode.cy } : { place: mode.place };
 }
 
+/** Les cases que parcourt chaque radeau (clés `cx,cy`), calculées une fois : `placeTouchee` les lit à chaque image. */
+const trajets = new WeakMap<GimmickRadeau, ReadonlySet<string>>();
+
+function caseDuTrajet(g: GimmickRadeau, cx: number, cy: number): boolean {
+  let cases = trajets.get(g);
+  if (!cases) {
+    cases = new Set(casesDuTrajet(g).map((c) => `${String(c.cx)},${String(c.cy)}`));
+    trajets.set(g, cases);
+  }
+  return cases.has(`${String(cx)},${String(cy)}`);
+}
+
 /**
  * La place du radeau touchée en (x, y) (tuiles), ou -1 : la plus proche dans le rayon du doigt (borné), mesuré au pied de la
  * place et, si une tour l'occupe, aussi au corps de la tour. La position est celle du dernier pas joué (celle des tours) : le
  * rendu montre le radeau au plus un pas plus tôt, quelques centièmes de tuile d'écart.
+ *
+ * Hors des cases du trajet (sur la rive), la case touchée garde la priorité : une place ne l'emporte que si le point est
+ * strictement plus près d'elle que du centre de cette case, et le corps de sa tour ne compte pas si la case porte elle-même une
+ * tour. Sans cela, toucher une tour de la rive quand le radeau passe dessous ouvrirait le menu (et « Vendre ») de la tour du radeau.
  */
 export function placeTouchee(etat: EtatPartie, x: number, y: number, rayon: number): number {
   const g = gimmickRadeau(etat.niveau);
   if (!g) return -1;
   const r = Math.min(Math.max(rayon, RAYON_PLACE_MIN), RAYON_PLACE_MAX);
+  const sous = caseSousPoint(etat.niveau.carte, x, y);
+  const rive = sous !== null && !caseDuTrajet(g, sous.cx, sous.cy);
+  const corps = !rive || !tourSurCase(etat, sous.cx, sous.cy);
+  let limite = r * r;
+  if (rive) {
+    const centre = centreCase(sous.cx, sous.cy);
+    limite = Math.min(limite, (centre.x - x) * (centre.x - x) + (centre.y - y) * (centre.y - y));
+  }
   const pas = Math.max(0, etat.pas - 1);
   let meilleure = -1;
-  let meilleureDistance = r * r;
+  let meilleureDistance = limite;
   for (let n = 0; n < g.places.length; n++) {
     const p = positionPlace(g, pas, n);
     const dx = p.x - x;
     let d = dx * dx + (p.y - y) * (p.y - y);
-    if (tourDuLieu(etat, { place: n })) d = Math.min(d, dx * dx + (p.y - CENTRE_SPRITE - y) * (p.y - CENTRE_SPRITE - y));
-    if (d <= meilleureDistance) {
+    if (corps && tourDuLieu(etat, { place: n })) d = Math.min(d, dx * dx + (p.y - CENTRE_SPRITE - y) * (p.y - CENTRE_SPRITE - y));
+    // Sur le trajet, une égalité avec le rayon suffit ; sur la rive, il faut battre strictement le centre de la case.
+    if (d < meilleureDistance || (!rive && d === meilleureDistance)) {
       meilleure = n;
       meilleureDistance = d;
     }
@@ -139,7 +164,8 @@ export class Interaction {
         break;
     }
     if (cible?.type === 'heros') return this.selectionnerHeros(etat);
-    // Une place du radeau passe avant la case d'eau sous elle : on y construit comme sur une case libre.
+    // Une place du radeau passe avant la case d'eau sous elle (sur la rive, seulement si elle est plus près que le centre de la
+    // case touchée : voir placeTouchee) : on y construit comme sur une case libre.
     const place = placeTouchee(etat, x, y, rayon);
     if (place >= 0) {
       this.mode = mode.type === 'menu' && mode.place === place ? LIBRE : { type: 'menu', cx: -1, cy: -1, place };
