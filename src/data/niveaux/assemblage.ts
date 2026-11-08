@@ -56,6 +56,7 @@ export function assemblerNiveau(plan: PlanNiveau, vagues: readonly Vague[]): Niv
     defiFer: plan.defiFer,
     ...(REGIONS_SANS_ELITES.includes(region) ? { sansElites: true } : {}),
     ...(plan.vagues.horde === true ? { horde: true } : {}),
+    ...(plan.gimmick ? { gimmick: plan.gimmick } : {}),
     carte,
     casesInterdites: casesInterditesDuNiveau(carte, decor),
     vagues,

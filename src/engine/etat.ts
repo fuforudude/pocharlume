@@ -17,7 +17,7 @@ import type {
 } from './definitions';
 import type { Evenement } from './evenements';
 
-export const VERSION_ETAT = 7;
+export const VERSION_ETAT = 8;
 
 export type Statut = 'en_cours' | 'victoire' | 'defaite';
 export type FamilleTour = IdFamille | 'divine';
@@ -90,7 +90,12 @@ export interface Ennemi {
   id: number;
   type: string;
   chemin: number;
-  /** Distance parcourue le long du chemin. */
+  /**
+   * Couloir du Vol de Corbeaux où il vole (indice dans `EtatPartie.couloirs`), -1 s'il suit son chemin. Un ennemi en couloir est
+   * toujours volant ; `distance` et `segment` se lisent alors le long du couloir (voir `trajetEnnemi`).
+   */
+  couloir: number;
+  /** Distance parcourue le long du chemin (ou du couloir). */
   distance: number;
   segment: number;
   /** Décalage latéral par rapport à l'axe du chemin (visuel et ciblage). */
@@ -303,6 +308,8 @@ export interface PaquetActif {
   elite: boolean;
   /** Part des PV de l'ennemi (1 = tous). */
   facteurPv: number;
+  /** Couloir du Vol de Corbeaux du groupe, -1 s'il suit `chemin`. */
+  couloir: number;
 }
 
 /** Un ennemi mort (pas échappé), gardé en mémoire pour le Roi des Fosses. */
@@ -337,6 +344,8 @@ export interface EtatPartie {
   /** Copie de la config reçue (`copierConfig`) : `defi` et `bonus` n'y sont que s'ils servent. */
   config: ConfigPartie;
   chemins: CheminCalcule[];
+  /** Couloirs du Vol de Corbeaux précalculés comme des chemins droits (bord gauche vers bord droit) ; vide sans ce gimmick. */
+  couloirs: CheminCalcule[];
   pas: number;
   rng: number;
   statut: Statut;

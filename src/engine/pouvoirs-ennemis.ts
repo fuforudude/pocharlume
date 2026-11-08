@@ -6,7 +6,7 @@
 // purifier).
 // Les mécaniques propres au combat (brûlure, noyade, drain, dégâts contre le héros, rage, renversement) sont dans
 // ennemis.ts et unites.ts.
-import { placerSurChemin, segmentPour } from './chemins';
+import { placerSurChemin, segmentPour, trajetEnnemi } from './chemins';
 import { defEnnemi } from './contenu';
 import { libererEnnemi } from './degats';
 import type { ActionEnnemi, SoinEnnemis } from './definitions';
@@ -229,8 +229,15 @@ function terrifier(etat: EtatPartie, e: Ennemi, rayon: number, etourdissement: n
   return touche;
 }
 
-/** Exécute une action ; faux si elle n'a eu aucun effet (personne à geler, à bannir, à relever) : l'action périodique est retentée. */
+/** Actions qui supposent un chemin : un ennemi en couloir (Vol de Corbeaux) les ignore. */
+const ACTIONS_DE_CHEMIN: ReadonlySet<ActionEnnemi['type']> = new Set(['invoquer', 'plonger']);
+
+/**
+ * Exécute une action ; faux si elle n'a eu aucun effet (personne à geler, à bannir, à relever, ou action de chemin d'un ennemi en
+ * couloir) : l'action périodique est retentée.
+ */
 function executerAction(etat: EtatPartie, e: Ennemi, action: ActionEnnemi): boolean {
+  if (e.couloir >= 0 && ACTIONS_DE_CHEMIN.has(action.type)) return false;
   switch (action.type) {
     case 'affamer':
       affamer(etat, e, action);
@@ -269,7 +276,7 @@ function executerAction(etat: EtatPartie, e: Ennemi, action: ActionEnnemi): bool
 
 /** Fin de l'intouchabilité : après une plongée, l'ennemi saute plus loin sur son chemin ; il est de nouveau là. */
 function emerger(etat: EtatPartie, e: Ennemi): void {
-  const chemin = etat.chemins[e.chemin];
+  const chemin = trajetEnnemi(etat, e);
   if (e.saut > 0 && chemin) {
     e.distance = Math.min(chemin.longueur, e.distance + e.saut);
     e.segment = segmentPour(chemin, e.distance, e.segment);
@@ -418,7 +425,8 @@ export function laisserEffetsDesMorts(etat: EtatPartie): void {
   for (let i = 0; i < n; i++) {
     const e = etat.ennemis[i];
     if (!e || e.vivant || e.pv > 0) continue;
-    const division = e.pouvoirs?.division;
+    // Un ennemi en couloir ne se divise pas : ses morceaux, qui ne volent pas forcément, n'auraient pas de chemin.
+    const division = e.couloir < 0 ? e.pouvoirs?.division : undefined;
     const def = division ? defEnnemi(division.ennemi) : undefined;
     if (division && def) {
       etat.evenements.push({ type: 'division', ennemi: e.id, typeEnnemi: division.ennemi, nombre: division.nombre, x: e.x, y: e.y });

@@ -4,7 +4,7 @@ import { REGLES } from '../data/regles';
 import { tirer, tirerEntre } from './aleatoire';
 import { ajusterMontant } from './argent';
 import { appliquerBonusTour, bonusDeFamille, bonusEffectif } from './bonus';
-import { placerSurChemin, segmentPour } from './chemins';
+import { placerSurChemin, segmentPour, trajetEnnemi } from './chemins';
 import { premierEnnemi } from './ciblage';
 import { defFamille, dieuDe } from './contenu';
 import { appliquerEffets, estVisible, infligerDegats, partApresBouclier } from './degats';
@@ -176,7 +176,7 @@ const visee = { x: 0, y: 0 };
 function anticiper(etat: EtatPartie, t: Tour, e: Ennemi, vitesse: number): void {
   visee.x = e.x;
   visee.y = e.y;
-  const c = etat.chemins[e.chemin];
+  const c = trajetEnnemi(etat, e);
   if (!c || e.bloqueur !== -1) return;
   const vol = Math.sqrt(distance2(t.x, t.y, e.x, e.y)) / vitesse;
   const distance = Math.min(c.longueur, e.distance + e.vitesse * facteurVitesse(e) * vol);

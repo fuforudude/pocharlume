@@ -1,5 +1,6 @@
 // Choix d'une cible pour ce qui tire sans bouger : tours, tourelles.
 import { estVisible } from './degats';
+import { trajetEnnemi } from './chemins';
 import type { Ennemi, EtatPartie } from './etat';
 import { distance2 } from './recherche';
 
@@ -14,7 +15,7 @@ export function premierEnnemi(etat: EtatPartie, x: number, y: number, portee: nu
   for (const e of etat.ennemis) {
     if (!e.vivant || e.invulnerable > 0 || (e.volant && !volants) || !estVisible(e, revele)) continue;
     if (distance2(e.x, e.y, x, y) > portee2) continue;
-    const restant = (etat.chemins[e.chemin]?.longueur ?? 0) - e.distance;
+    const restant = (trajetEnnemi(etat, e)?.longueur ?? 0) - e.distance;
     if (restant < restantMin) {
       restantMin = restant;
       meilleur = e;

@@ -883,3 +883,30 @@ Spec : [retours du 2026-10-30](specs/2026-10-30-retours-tour-divine-descriptions
   pas (règle existante), donc aucune partie sauvegardée ne garde deux tours divines. `VERSION_ETAT` inchangée (`numero` est un champ
   optionnel du niveau rangé dans l'état).
 
+## Gimmicks des niveaux 101 à 150 : aiguillage et Vol de Corbeaux (2026-11-08)
+
+Spec : [après l'histoire](specs/2026-11-08-apres-histoire-gimmicks.md), jalon 1, tâche 2.
+- **Format** : `Niveau.gimmick?: Gimmick`, union discriminée sur `type` (`definitions.ts`). Pour l'instant `GimmickCorbeaux` :
+  `{ type: 'corbeaux', couloirs: { cy }[], coutVies? }` ; le Radeau s'ajoutera à l'union. Un module par gimmick dans
+  `src/engine/gimmicks/`, appelé par l'aiguillage `gimmicks/index.ts` : `verifierGimmick(niveau)` à la création de la partie,
+  `mettreAJourGimmick(etat)` au début de chaque pas (après `ouvrirPas`, avant les vagues). Chaque `switch` finit sur une valeur
+  `never` : un type de gimmick oublié ne compile pas.
+- **Couloir** : la ligne `cy` de la grille (comme `CaseGrille.cy`), traversée à la hauteur `centreCase(0, cy).y` de x = 0 à
+  x = largeur. `creerPartie` précalcule les couloirs en chemins droits dans `etat.couloirs` (vide sans Corbeaux).
+- **Apparition** : `Paquet.couloir?: number` (indice dans `couloirs`) remplace le chemin du groupe (`chemin` vaut alors 0 et
+  est ignoré). Seul un volant y est admis (`peutVolerEnCouloir`, vérifié à la création de la partie et par `ajouterEnnemi`).
+  `PaquetActif.couloir` et `Ennemi.couloir` valent -1 hors couloir.
+- **Mouvement** : `trajetEnnemi(etat, e)` (`chemins.ts`) rend le couloir ou le chemin ; déplacement, fuite, ciblage du plus
+  avancé, anticipation des tirs, bouclier frontal et plongée passent par lui. Volant, l'ennemi n'est pas retenu par les soldats et
+  seul ce qui vise les volants le touche (règles existantes). À la sortie, il coûte `gimmick.coutVies ?? REGLES.coutViesCouloir`
+  (1) cœur, élite comprise.
+- **Pouvoirs de chemin** : un ennemi en couloir n'appelle personne (`invoquer`), ne plonge pas (`plonger`), ne se divise pas à
+  sa mort et n'entre pas dans `etat.morts` (on ne le relève pas sur un chemin). Le bond ne se déclenche jamais (il faut être retenu).
+- **Vagues figées** : dans le format compact, un groupe en couloir k s'écrit avec le chemin −(k + 1). Le générateur
+  (`PlanVagues.couloirs`, déduit de `PlanNiveau.gimmick` par `vaguesDuPlan`) envoie les groupes de volants dans les couloirs à
+  tour de rôle, sans changer ses tirages ; `assemblerNiveau` copie `plan.gimmick` dans le niveau. Les vagues des régions 1 à 10
+  sont inchangées.
+- **Versions** : `VERSION_ETAT` 7 → 8 (`Ennemi.couloir`, `PaquetActif.couloir`, `etat.couloirs`). Une partie en cours enregistrée
+  avant ne se reprend pas (`deserialiser` refuse, `reprendrePartie` rend null), comme aux hausses précédentes. `VERSION_DONNEES`
+  inchangée : rien ne change pour les niveaux existants.
+

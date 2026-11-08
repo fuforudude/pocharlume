@@ -1,6 +1,6 @@
 // Chemins en polylignes : précalcul des longueurs, position à une distance parcourue, distance au chemin.
 import type { CheminCarte, Point } from './definitions';
-import type { CheminCalcule } from './etat';
+import type { CheminCalcule, Ennemi, EtatPartie } from './etat';
 
 export function calculerChemin(chemin: CheminCarte): CheminCalcule {
   const points = chemin.points.map((p) => ({ x: p.x, y: p.y }));
@@ -19,6 +19,14 @@ export function calculerChemin(chemin: CheminCarte): CheminCalcule {
     cumul.push(total);
   }
   return { points, cumul, dirX, dirY, longueur: total };
+}
+
+/**
+ * Le trajet que suit un ennemi : son couloir s'il vole en couloir (Vol de Corbeaux), sinon son chemin. Tout ce qui lit sa progression
+ * (déplacement, ciblage du plus avancé, anticipation des tirs, bouclier frontal) passe par ici.
+ */
+export function trajetEnnemi(etat: Pick<EtatPartie, 'chemins' | 'couloirs'>, e: Pick<Ennemi, 'chemin' | 'couloir'>): CheminCalcule | undefined {
+  return e.couloir >= 0 ? etat.couloirs[e.couloir] : etat.chemins[e.chemin];
 }
 
 /** Avance l'indice de segment pour la distance donnée (les ennemis ne reculent jamais). */

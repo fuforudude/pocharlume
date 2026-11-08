@@ -3,6 +3,7 @@
 // (exécution, rage, critique, esquive) sont dans unites.ts.
 import { CAPACITES_NULLES } from '../data/capacites';
 import { tirer, tirerEntre } from './aleatoire';
+import { trajetEnnemi } from './chemins';
 import { appliquerEffets, estVisible, infligerDegats, partApresBouclier } from './degats';
 import type { CapacitesUnite, SoinZone } from './definitions';
 import { MINUTEUR, type Ennemi, type EtatPartie, type Unite } from './etat';
@@ -67,7 +68,7 @@ export function tirerDeLoin(etat: EtatPartie, u: Unite): void {
   let restantMin = Infinity;
   for (const e of etat.ennemis) {
     if (!e.vivant || e.invulnerable > 0 || e.pouvoirs?.insaisissable || (e.volant && !attaque.volants) || !estVisible(e, cap.voitFurtifs) || distance2(e.x, e.y, u.x, u.y) > portee2) continue;
-    const restant = (etat.chemins[e.chemin]?.longueur ?? 0) - e.distance;
+    const restant = (trajetEnnemi(etat, e)?.longueur ?? 0) - e.distance;
     if (restant < restantMin) {
       restantMin = restant;
       cible = e;

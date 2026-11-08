@@ -748,6 +748,8 @@ export interface Regles {
   readonly fer: { readonly facteurEffectifs: number; readonly facteurAretes: number };
   /** Nombre de morts récentes gardées en mémoire (le Roi des Fosses en relève les plus récentes). */
   readonly memoireMorts: number;
+  /** Cœurs perdus par un ennemi qui sort d'un couloir du Vol de Corbeaux, si le gimmick n'en dit rien. */
+  readonly coutViesCouloir: number;
   /** Bonus de collection : total maximal (0,1 = +10 %) par tour de base ou pour le héros. */
   readonly plafondBonus: number;
   /** PV régénérés par seconde pour un bonus de régénération de 100 % (1 = +100 %) du héros. */
@@ -758,8 +760,14 @@ export interface Paquet {
   readonly ennemi: string;
   readonly nombre: number;
   readonly intervalle: number;
-  /** Indice du chemin dans la carte : chaque chemin part d'une entrée et mène à une sortie. */
+  /** Indice du chemin dans la carte : chaque chemin part d'une entrée et mène à une sortie. Ignoré si `couloir` est donné (0 par convention). */
   readonly chemin: number;
+  /**
+   * Indice d'un couloir du gimmick Corbeaux du niveau (`GimmickCorbeaux.couloirs`) : le groupe vole en ligne droite du bord gauche au
+   * bord droit à la hauteur de ce couloir, au lieu de suivre `chemin`. Seul un ennemi volant y est admis (vérifié à la création de la
+   * partie). Absent = le groupe suit son chemin.
+   */
+  readonly couloir?: number;
   /** Secondes après le lancement de la vague. */
   readonly delai: number;
   /** Les ennemis de ce groupe sont des élites (PV, protections et prime en hausse). Ignoré pour un boss. */
@@ -780,6 +788,30 @@ export interface CaseGrille {
   readonly cx: number;
   readonly cy: number;
 }
+
+/**
+ * Un couloir du Vol de Corbeaux : la ligne `cy` de la grille de construction (comptée comme `CaseGrille.cy`). Un ennemi du couloir
+ * part du bord gauche de la carte à la hauteur du centre de cette ligne et file droit vers le bord droit.
+ */
+export interface Couloir {
+  readonly cy: number;
+}
+
+/**
+ * Vol de Corbeaux : des volants traversent la carte dans des couloirs horizontaux, sans suivre de chemin ; chacun qui sort par le bord
+ * droit coûte `coutVies` cœurs (`REGLES.coutViesCouloir` si absent), quels que soient ses propres coûts.
+ */
+export interface GimmickCorbeaux {
+  readonly type: 'corbeaux';
+  readonly couloirs: readonly Couloir[];
+  readonly coutVies?: number;
+}
+
+/**
+ * Particularité d'un niveau (régions 11 à 15), union discriminée sur `type` : un module par type dans src/engine/gimmicks/, appelé
+ * par l'aiguillage de src/engine/gimmicks/index.ts. Le Radeau s'ajoutera ici (`| GimmickRadeau`).
+ */
+export type Gimmick = GimmickCorbeaux;
 
 export interface CheminCarte {
   /** Polyligne de l'entrée à la sortie. */
@@ -822,6 +854,8 @@ export interface Niveau {
    * est ouvert.
    */
   readonly numero?: number;
+  /** Particularité du niveau (Vol de Corbeaux…) ; absent = niveau ordinaire. */
+  readonly gimmick?: Gimmick;
 }
 
 /** Une région du mode infini : ses ennemis propres, et le boss dont les mini-boss sont tirés. */
