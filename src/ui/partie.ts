@@ -251,6 +251,8 @@ export async function lancerNiveau(
   let pasMenu = -1;
   let elementsDuMenu: ElementMenu[] | null = null;
   let caseMenu = '';
+  /** Où le menu d'une place du radeau s'est ouvert (tuiles) : il y reste, même si le radeau s'éloigne. */
+  let ancreMenu: { x: number; y: number } | null = null;
   /** Change chaque fois que le contenu du menu est recalculé : le HUD ne compare ses boutons qu'à ce moment. */
   let versionMenu = 0;
 
@@ -483,7 +485,8 @@ export async function lancerNiveau(
     return centre !== null && Math.abs(centre.x - tx) <= DEMI_LARGEUR_RADEAU && Math.abs(centre.y - ty) <= DEMI_HAUTEUR_RADEAU;
   };
   const radeauPointe = (x: number, y: number, souris: boolean): CibleCarteSurvolee | null => {
-    if (!surLeRadeau(x, y)) return null;
+    // Menu ouvert ou visée en cours : la bulle du radeau cacherait les boutons, et le joueur sait déjà ce qu'il fait.
+    if (interaction.mode.type !== 'libre' || !surLeRadeau(x, y)) return null;
     return {
       cle: CLE_BULLE_RADEAU,
       ancre: () => {
@@ -493,7 +496,7 @@ export async function lancerNiveau(
         const cy = rendu.enCssY(centre.y);
         return { left: cx - demi, top: cy - demi, right: cx + demi, bottom: cy + demi };
       },
-      fabriquer: () => (!souris || surLeRadeau(sourisX, sourisY) ? contenuRadeau(etat) : null),
+      fabriquer: () => (interaction.mode.type === 'libre' && (!souris || surLeRadeau(sourisX, sourisY)) ? contenuRadeau(etat) : null),
     };
   };
   canvas.addEventListener('pointerdown', (e) => {
@@ -758,9 +761,13 @@ export async function lancerNiveau(
   const mettreAJourMenu = (): void => {
     const mode = interaction.mode;
     const lieu = lieuDuMenu(mode);
-    // Sur le radeau, le menu suit la place à chaque image (au pas affiché, comme la tour) : il reste collé à ce qu'il commande.
-    const centre = !lieu ? null : lieu.place !== undefined ? placeAffichee(etat, pas.alpha, lieu.place) : caseExiste(etat.niveau.carte, lieu.cx, lieu.cy) ? centreCase(lieu.cx, lieu.cy) : null;
+    const cle = !lieu ? '' : lieu.place !== undefined ? `place:${String(lieu.place)}` : `${String(lieu.cx)},${String(lieu.cy)}`;
+    // Sur le radeau, le menu reste là où il s'est ouvert : des boutons qui glissent sous le doigt ou la souris (le radeau fait une
+    // tuile par seconde) se visent mal. L'anneau de la place et la portée, eux, suivent le radeau (Surbrillance.place).
+    if (lieu?.place !== undefined && (cle !== caseMenu || !ancreMenu)) ancreMenu = placeAffichee(etat, pas.alpha, lieu.place);
+    const centre = !lieu ? null : lieu.place !== undefined ? ancreMenu : caseExiste(etat.niveau.carte, lieu.cx, lieu.cy) ? centreCase(lieu.cx, lieu.cy) : null;
     if (!lieu || !centre || finie) {
+      ancreMenu = null;
       if (elementsDuMenu) {
         elementsDuMenu = null;
         caseMenu = '';
@@ -768,7 +775,6 @@ export async function lancerNiveau(
       }
       return;
     }
-    const cle = lieu.place !== undefined ? `place:${String(lieu.place)}` : `${String(lieu.cx)},${String(lieu.cy)}`;
     if (!elementsDuMenu || etat.pas !== pasMenu || cle !== caseMenu) {
       elementsDuMenu = elementsMenu(etat, lieu);
       pasMenu = etat.pas;

@@ -22,7 +22,7 @@ import { RenduCarteMonde } from '../render/carte-monde';
 import { DIFFICULTES_SAUVEGARDE, etoilesDisponibles, NOMBRE_NIVEAUX, totalEtoiles, type ChoixPartie, type DifficulteSauvegarde } from '../save';
 import { dessinerIconesDefis } from './carte-monde-defis';
 import { ennemisDeLaFiche } from './bestiaire-logique';
-import { ligneParticularite } from './particularites';
+import { contenuParticularite, ligneParticularite, nomParticularite, phraseParticularite } from './particularites';
 import { decouvertesDuNiveau } from './decouvertes';
 import {
   directionDeTouche,
@@ -39,7 +39,7 @@ import {
   type DeplacementRegion,
   type VueNoeud,
 } from './carte-monde-logique';
-import { attacherBulleEnnemi, attacherBulleTour, fermerBulle } from './bulle';
+import { attacherBulle, attacherBulleEnnemi, attacherBulleTour, fermerBulle } from './bulle';
 import { bossDuNiveau } from './bulle-contenus';
 import { bouton, el, image } from './dom';
 import { afficherConfirmation } from './ecrans';
@@ -453,10 +453,14 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     gauche.append(entete, el('h2', 'titre', textes.nom), el('p', 'ambiance', textes.ambiance));
     if (niveau.horde) gauche.append(el('p', 'horde-aide', t('fiche.horde_aide')));
     // La particularité du niveau (régions 11 à 15), tirée de son gimmick : une ligne, rien pour un niveau ordinaire.
-    const particularite = ligneParticularite(niveau.niveau);
-    if (particularite) {
-      const ligne = el('p', 'fiche-particularite-ligne', particularite);
-      if (niveau.niveau.gimmick) ligne.dataset.particularite = niveau.niveau.gimmick.type;
+    // Sur un écran bas, seul « Particularité : <nom> » reste (la phrase est dans sa bulle) : « Lancer » ne doit pas sortir de l'écran.
+    const gimmick = niveau.niveau.gimmick;
+    if (gimmick && ligneParticularite(niveau.niveau)) {
+      const ligne = el('p', 'fiche-particularite-ligne');
+      ligne.dataset.particularite = gimmick.type;
+      ligne.setAttribute('aria-label', ligneParticularite(niveau.niveau) ?? '');
+      ligne.append(el('strong', 'fiche-particularite-nom', t('gimmick.fiche_nom', { nom: nomParticularite(gimmick.type) })), el('span', 'fiche-particularite-suite', t('gimmick.fiche_suite', { phrase: phraseParticularite(gimmick.type) })));
+      attacherBulle(ligne, () => contenuParticularite(gimmick.type), { signal: signalFiche });
       gauche.append(ligne);
     }
     const ennemisNiveau = rangeeEnnemis(niveau, signalFiche);

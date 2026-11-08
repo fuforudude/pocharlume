@@ -84,8 +84,9 @@ export class DessinGimmicks {
       const x0 = Math.max(0, ox);
       const x1 = Math.min(largeurPx, ox + l);
       for (let x = x0 - ((((x0 - defile) % 8) + 8) % 8); x < x1; x += 8) {
-        ctx.fillRect(x - ox, y - 3, 3, 1);
-        ctx.fillRect(x - ox + 4, y + 3, 3, 1);
+        // Jamais hors de la carte : le premier et le dernier motif sont coupés au bord.
+        if (x >= 0 && x + 3 <= largeurPx) ctx.fillRect(x - ox, y - 3, 3, 1);
+        if (x + 4 >= 0 && x + 7 <= largeurPx) ctx.fillRect(x - ox + 4, y + 3, 3, 1);
       }
       for (const x of abscissesPlumes(largeurPx, reduit ? 0 : Math.floor(temps / (DEFILEMENT_MS / 4)))) {
         const px = x - ox;
