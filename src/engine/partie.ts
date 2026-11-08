@@ -92,6 +92,13 @@ function verifierVersionDonnees(version: unknown): void {
   }
 }
 
+/** Le niveau sans son gimmick (copie de surface) : l'infini joue les cartes d'après l'histoire sans leur particularité. */
+function sansGimmick(niveau: Niveau): Niveau {
+  const copie: { -readonly [K in keyof Niveau]: Niveau[K] } = { ...niveau };
+  delete copie.gimmick;
+  return copie;
+}
+
 export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
   const refus = verifierConfig(config);
   if (refus !== null) throw new Error(refus);
@@ -103,9 +110,10 @@ export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
   if (defi === 'fer' && !niveau.defiFer) throw new Error(`Défi Fer : le niveau ${niveau.id} n’a pas de familles imposées`);
   const copieBrute = JSON.parse(JSON.stringify(niveau)) as Niveau;
   const infini = config.infini ?? null;
-  // Infini : les vagues du niveau sont ignorées, le moteur génère les siennes (voir infini.ts) et la partie ne se gagne pas.
+  // Infini : les vagues du niveau sont ignorées, le moteur génère les siennes (voir infini.ts) et la partie ne se gagne pas. Les cartes
+  // d'après l'histoire s'y jouent sans leur gimmick (spec de l'après-histoire) : on retire celui du niveau de campagne qui les porte.
   const copie: Niveau = infini
-    ? { ...copieBrute, vagues: [] }
+    ? { ...sansGimmick(copieBrute), vagues: [] }
     : { ...copieBrute, vagues: vaguesAvecElites(vaguesDuDefi(copieBrute.vagues, defi), niveau.sansElites === true ? 0 : difficulte.vaguesElites) };
   const vies = defi === 'heroique' ? REGLES.heroique.vies : difficulte.vies;
   const etat: EtatPartie = {

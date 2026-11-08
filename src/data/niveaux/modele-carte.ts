@@ -1,6 +1,6 @@
 // Structure d'une carte dessinée à la main (32 × 18 tuiles) et petits constructeurs pour l'écrire. Les cartes
-// elles-mêmes sont dans cartes.ts (région 1) et cartes-region2.ts à cartes-region11.ts ; `CARTES` (cartes-toutes.ts) rassemble
-// celles des régions 1 à 10, `CARTES_REGION11` (cartes-region11.ts) celles de la région 11, pas encore branchées.
+// elles-mêmes sont dans cartes.ts (région 1) et cartes-region2.ts à cartes-region11.ts ; `CARTES` (cartes-toutes.ts) les rassemble
+// toutes.
 import type { CheminCarte, Point } from '../../engine/definitions';
 import type { Decor, ZoneSol } from '../visuel';
 

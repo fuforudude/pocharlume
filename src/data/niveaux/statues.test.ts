@@ -1,4 +1,4 @@
-// Les 31 statues cachées : chaque carte a la sienne, sur une case de décor valide (dans la carte, interdite à la construction par le
+// Les 41 statues cachées : chaque carte a la sienne, sur une case de décor valide (dans la carte, interdite à la construction par le
 // décor, hors chemin), sans rien recouvrir, et son inscription existe.
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
@@ -18,8 +18,8 @@ const PLANS = PLANS_REGIONS.flat();
 const TAILLE = REGLES.tailleCase;
 
 describe('statues : une par carte', () => {
-  it('il y a exactement 31 statues, une pour chaque carte, dans l’ordre de la campagne', () => {
-    expect(IDS_INSCRIPTIONS).toHaveLength(31);
+  it('il y a exactement 41 statues, une pour chaque carte, dans l’ordre de la campagne', () => {
+    expect(IDS_INSCRIPTIONS).toHaveLength(41);
     expect(Object.keys(STATUES)).toEqual(Object.keys(CARTES));
     expect([...IDS_INSCRIPTIONS]).toEqual(Object.keys(CARTES));
   });
@@ -39,10 +39,10 @@ describe('statues : une par carte', () => {
     }
   });
 
-  it('les origines se répartissent comme docs/lore.md : 8 pour chaque entité, 7 pour l’Église', () => {
+  it('les origines se répartissent comme docs/lore.md : 11 pour le Colosse et Trois-Pattes, 10 pour l’Ombre, 9 pour l’Église', () => {
     const parOrigine: Record<OrigineStatue, number> = { colosse: 0, ombre: 0, trois_pattes: 0, eglise: 0 };
     for (const id of IDS_INSCRIPTIONS) parOrigine[STATUES[id].origine]++;
-    expect(parOrigine).toEqual({ colosse: 8, ombre: 8, trois_pattes: 8, eglise: 7 });
+    expect(parOrigine).toEqual({ colosse: 11, ombre: 10, trois_pattes: 11, eglise: 9 });
     expect(Object.keys(SPRITE_STATUE).sort()).toEqual(Object.keys(parOrigine).sort());
   });
 
@@ -54,7 +54,7 @@ describe('statues : une par carte', () => {
 
 describe('statues : une case de décor valide dans chaque niveau', () => {
   it('chaque niveau de campagne porte la statue de sa carte, dessinée comme un décor', () => {
-    expect(CAMPAGNE).toHaveLength(100);
+    expect(CAMPAGNE).toHaveLength(110);
     for (const n of CAMPAGNE) {
       const carte = PLANS[n.numero - 1]?.carte;
       expect(carte, `niveau ${String(n.numero)}`).toBeDefined();

@@ -1,6 +1,6 @@
 // Règles d'habillage d'une carte : largeur supposée du chemin dessiné et emprises des sprites au sol.
 // Le moteur ne lit pas ce fichier ; il sert à écarter le décor du chemin, à calculer les cases interdites (grille-niveau.ts) et aux tests.
-import type { Decor } from '../visuel';
+import type { Decor, ZoneSol } from '../visuel';
 import { rectAutour, type Rect } from './geometrie';
 
 /** Le chemin est dessiné sur 2 tuiles de large : 1 tuile de chaque côté de son axe. */
@@ -81,3 +81,18 @@ export function empriseDecor(d: Pick<Decor, 'sprite' | 'x' | 'y'>): Rect {
  * les marges de quelques pixels d'un sprite de 32×32 ne condamnent pas la tuile voisine.
  */
 export const RECOUVREMENT_MIN_DECOR = 0.25;
+
+/**
+ * Sols où l'on ne construit pas, par région : la région 11 (les Grèves Grises) recolore la « boue » en eau morte, et l'eau bloque la
+ * construction (spec de l'après-histoire, décisions du jalon 1), étangs compris. Une case de la grille dont une tuile est dans une
+ * telle zone est interdite (grille-niveau.ts), comme une case de chemin. Ailleurs, aucun sol ne bloque : la boue reste constructible.
+ */
+export const SOLS_BLOQUANTS: Readonly<Partial<Record<number, readonly ZoneSol['sol'][]>>> = {
+  11: ['boue'],
+};
+
+/** Les zones de sol d'une carte où l'on ne construit pas (l'eau de la région 11), selon `SOLS_BLOQUANTS`. */
+export function zonesBloquantes(carte: { readonly region: number; readonly zones: readonly ZoneSol[] }): ZoneSol[] {
+  const sols = SOLS_BLOQUANTS[carte.region] ?? [];
+  return carte.zones.filter((z) => sols.includes(z.sol));
+}

@@ -70,8 +70,22 @@ export function ecartsBloquants(ecarts: readonly string[]): string[] {
   return SUSPENDUES_IMPOSEES ? [...ecarts] : [];
 }
 
-/** Vrai si un écart (phrase de `verifierBandes`) relève d'une famille suspendue. */
+/**
+ * Régions dont toutes les bandes sont suspendues : la région 11 (Vol de Corbeaux, Radeau) tant que les bots ne savent pas jouer ses
+ * gimmicks (stratégies et équilibrage : tâche 6 du jalon 1 de l'après-histoire). Ses écarts sont calculés et affichés, jamais
+ * bloquants (sauf `BANDES_SUSPENDUES_IMPOSEES=1`). Retirer la région d'ici quand ses bandes sont tenues.
+ */
+export const REGIONS_SUSPENDUES: readonly number[] = [11];
+
+/** Les écarts d'une région qui bloquent : tous, sauf pour une région suspendue (affichés seulement, comme `ecartsBloquants`). */
+export function ecartsSelonRegion(region: number, ecarts: readonly string[]): string[] {
+  return REGIONS_SUSPENDUES.includes(region) ? ecartsBloquants(ecarts) : [...ecarts];
+}
+
+/** Vrai si un écart (phrase de `verifierBandes`) relève d'une famille ou d'une région suspendue. */
 export function estSuspendu(ecart: string): boolean {
+  const region = /^Région (\d+) : /.exec(ecart);
+  if (region && REGIONS_SUSPENDUES.includes(Number(region[1]))) return true;
   const phrase = ecart.replace(/^Région \d+ : /, '');
   return FAMILLES_SUSPENDUES.some((f) => phrase.startsWith(f));
 }

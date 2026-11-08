@@ -3,6 +3,7 @@
 // formules de gain. Les effets en partie vivent ailleurs : héros et compétences dans `heros.ts`, objets dans
 // `objets.ts`, rangs de l'arbre dans `ameliorations.ts` ; un test de fusion vérifie qu'ils déclarent les mêmes ids.
 // Les fonctions de `src/save/` s'appuient sur ces valeurs, jamais l'inverse.
+import { INFINI } from './infini';
 
 // --- Dieux et héros -------------------------------------------------------------------------------------------
 
@@ -162,8 +163,12 @@ export const NOMBRE_REGIONS = 15;
 export const NIVEAU_MAX = NOMBRE_REGIONS * NIVEAUX_PAR_REGION;
 /** Premier niveau d'après l'histoire (région 11). */
 export const PREMIER_NIVEAU_APRES_HISTOIRE = NOMBRE_REGIONS_HISTOIRE * NIVEAUX_PAR_REGION + 1;
-/** Le mode infini ne connaît que les régions de l'histoire : les régions 11 à 15 n'ont pas encore de cartes d'infini. */
-export const NOMBRE_REGIONS_INFINI = NOMBRE_REGIONS_HISTOIRE;
+/**
+ * Régions du mode infini : les 10 de l'histoire, puis une par région d'après l'histoire livrée (la 11 : ses cartes d'infini, ennemis
+ * des régions 1 à 10 et le Passeur). Dérivé des paramètres de l'infini (`INFINI.regions`, que le moteur valide) pour que la sauvegarde
+ * (validation.ts) accepte exactement les mêmes régions que le moteur.
+ */
+export const NOMBRE_REGIONS_INFINI = INFINI.regions.length;
 
 /** Niveau d'après l'histoire (101 à 150). */
 export function estApresHistoire(niveau: number): boolean {

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { fr } from '../i18n/fr';
 import { importerCode, sauvegardeVide, exporterCode } from '../save';
+import { TAILLE_MAX_CODE } from '../save/code';
 import { CLES_IMPORT_REFUS, texteImportRefus } from './import-refus';
 
 describe('textes de refus d’import', () => {
@@ -17,7 +18,7 @@ describe('textes de refus d’import', () => {
 
   it('les raisons rendues par l’import ont une phrase distincte', async () => {
     const code = await exporterCode(sauvegardeVide());
-    const entrees = ['', 'x'.repeat(20_000), 'bonjour', code.slice(0, -1)];
+    const entrees = ['', 'x'.repeat(TAILLE_MAX_CODE + 1), 'bonjour', code.slice(0, -1)];
     const phrases = new Set<string>();
     for (const entree of entrees) {
       const resultat = await importerCode(entree);

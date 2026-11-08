@@ -103,7 +103,7 @@ describe('composition par chemin', () => {
         expect(compo).toHaveLength(chemins);
         for (let c = 0; c < chemins; c++) {
           const groupes = compo[c] ?? [];
-          expect(groupes.reduce((s, g) => s + g.nombre, 0)).toBe(vague.paquets.filter((p) => p.chemin === c).reduce((s, p) => s + p.nombre, 0));
+          expect(groupes.reduce((s, g) => s + g.nombre, 0)).toBe(vague.paquets.filter((p) => p.chemin === c && p.couloir === undefined).reduce((s, p) => s + p.nombre, 0));
           expect(new Set(groupes.map((g) => g.type)).size).toBe(groupes.length);
         }
       }

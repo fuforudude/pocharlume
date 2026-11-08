@@ -938,6 +938,19 @@ Spec : [après l'histoire](specs/2026-11-08-apres-histoire-gimmicks.md), jalon 1
   `positionPlace`, `gimmickRadeau`, `casesDuTrajet` et le type `LieuTour`.
 - **Versions** : `VERSION_ETAT` 8 → 9 (`Tour.place`). `VERSION_DONNEES` inchangée.
 
+### Région 11 dans la campagne (tâche 5)
+- **Plans** : `plan-region11.ts` (niveaux 101 à 110), vagues figées dans `vagues-region11.ts` ; `CARTES`, `PLANS_REGIONS`, `REGIONS` et
+  `CAMPAGNE` comptent 11 régions et 110 niveaux. Le boss de la région est le dernier de `BOSS_REGIONS` (le Passeur) ; `ENNEMIS_REGIONS`
+  s'arrête à la région 10 (après l'histoire, les plans choisissent parmi les ennemis existants).
+- **Eau** : `SOLS_BLOQUANTS` (habillage.ts) dit par région quels sols interdisent la construction (région 11 : la « boue », recolorée en
+  eau). `zonesBloquantes(carte)` les donne à `casesInterditesDuNiveau`, appelé par l'assemblage : le moteur ne connaît que les cases
+  interdites, rien n'y code « région 11 ».
+- **Infini** : `INFINI.regions` a une 11e région (aucun ennemi à elle, donc ceux des régions 1 à 10, et le Passeur en mini-boss) ;
+  `NOMBRE_REGIONS_INFINI` (meta.ts, borne de la sauvegarde) en est dérivé, pour rester égal à la borne du moteur. Seules les cartes de
+  `CARTES_INFINI_APRES_HISTOIRE` (la Grève, l'Eau Morte) s'ouvrent en infini (`carteInfiniDuNiveau`), et `creerPartie` retire le gimmick
+  d'un niveau joué en infini.
+- **Bandes** : la CI joue la région 11, mais `REGIONS_SUSPENDUES` (bandes.ts) rend ses écarts non bloquants tant que les bots ne
+  savent pas jouer les gimmicks.
 
 ## Migration de sauvegarde v7 → v8 (150 niveaux, 15 régions)
 

@@ -1,19 +1,20 @@
 import { describe, expect, it } from 'vitest';
 import { NIVEAUX_PAR_REGION } from '../data/meta';
-import { NOEUDS_REGION1 } from '../data/niveaux/carte-du-monde';
+import { NOEUDS_REGION1, NOEUDS_REGION11 } from '../data/niveaux/carte-du-monde';
 import { REGION1 } from '../data/niveaux/region1';
 import { tCle } from '../i18n';
 import { fr } from '../i18n/fr';
-import { contenuDeRegion, decalageDeRegion, niveauDeCampagne, REGIONS_MONDE, textesDuNiveau } from './regions-monde';
+import { contenuDeRegion, decalageDeRegion, niveauDeCampagne, nombreNiveauxLivres, REGIONS_MONDE, textesDuNiveau } from './regions-monde';
 
 describe('régions du monde', () => {
   it('montre les quinze régions, numérotées de 1 à 15, chacune avec son nom traduit', () => {
     expect(REGIONS_MONDE.map((r) => r.numero)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
     expect(tCle(REGIONS_MONDE[10]?.nom ?? 'region.1')).toBe('Les Grèves Grises');
     expect(tCle(REGIONS_MONDE[11]?.nom ?? 'region.1')).toBe('Région 12');
-    // Les régions 11 à 15 n'ont pas encore de niveaux, mais chacune a une ambiance ; celle de la région 11 est grise et brumeuse.
+    // Les régions 12 à 15 n'ont pas encore de niveaux (la 11 est livrée), mais chacune a une ambiance ; celle de la région 11 est grise
+    // et brumeuse.
     for (const r of REGIONS_MONDE.slice(10)) {
-      expect(r.contenu, `région ${String(r.numero)}`).toBeNull();
+      expect(r.contenu === null, `région ${String(r.numero)}`).toBe(r.numero > 11);
       expect(r.ambiance?.fond).toMatch(/^#[0-9a-f]{6}$/);
     }
     expect(REGIONS_MONDE[10]?.ambiance).not.toEqual(REGIONS_MONDE[11]?.ambiance);
@@ -48,19 +49,22 @@ describe('régions du monde', () => {
     expect(niveauDeCampagne(3)).toBe(REGION1[2]);
     expect(niveauDeCampagne(10)?.boss).toBe(true);
     expect(niveauDeCampagne(0)).toBeUndefined();
-    expect(niveauDeCampagne(101)).toBeUndefined();
+    expect(niveauDeCampagne(101)?.niveau.id).toBe('r11-01');
+    expect(niveauDeCampagne(111)).toBeUndefined();
   });
 
   it('retrouve le nom et l’ambiance d’un niveau', () => {
     expect(textesDuNiveau(1)).toEqual({ nom: 'La Porte Ouverte', ambiance: expect.stringContaining('porte ouverte') as string });
-    expect(textesDuNiveau(101)).toBeNull();
+    expect(textesDuNiveau(101)).toEqual({ nom: 'La Grève de Cendre', ambiance: expect.stringContaining('cendre') as string });
+    expect(textesDuNiveau(111)).toBeNull();
   });
 
   it('une région sans données (niveaux pas encore livrés) n’a pas de contenu, sans planter', () => {
     const vide = { niveaux: [], noeuds: [], traces: [], textes: [] };
     expect(contenuDeRegion(7, vide)).toBeNull();
     expect(contenuDeRegion(1, vide)).toBeNull();
-    expect(contenuDeRegion(11)).toBeNull();
+    expect(contenuDeRegion(12)).toBeNull();
+    expect(contenuDeRegion(11)?.noeuds).toBe(NOEUDS_REGION11);
     // Des données partielles (moins de dix niveaux) ne suffisent pas non plus.
     expect(contenuDeRegion(1, { niveaux: [REGION1.slice(0, 4)], noeuds: [NOEUDS_REGION1], traces: [[]], textes: [[]] })).toBeNull();
   });
@@ -71,7 +75,9 @@ describe('régions du monde', () => {
       expect(r.contenu !== null, `région ${String(r.numero)}`).toBe(livree);
     }
     expect(REGIONS_MONDE[0]?.contenu).not.toBeNull();
-    // Les dix régions de l'histoire sont livrées ; les régions 11 à 15 attendent leurs niveaux.
-    expect(REGIONS_MONDE.slice(0, 10).every((r) => r.contenu !== null)).toBe(true);
+    // Les dix régions de l'histoire et la région 11 sont livrées ; les régions 12 à 15 attendent leurs niveaux.
+    expect(REGIONS_MONDE.slice(0, 11).every((r) => r.contenu !== null)).toBe(true);
+    expect(REGIONS_MONDE.slice(11).every((r) => r.contenu === null)).toBe(true);
+    expect(nombreNiveauxLivres()).toBe(110);
   });
 });

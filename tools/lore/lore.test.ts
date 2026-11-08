@@ -27,8 +27,8 @@ describe('docs/lore.md et src/i18n/', () => {
     expect(ailleurs).toEqual([]);
   });
 
-  it('le jeu a son lot complet : 31 inscriptions, 10 paroles de boss, une description par ennemi', () => {
-    expect(Object.keys(frLore).filter((c) => c.startsWith('inscription.'))).toHaveLength(31);
+  it('le jeu a son lot complet : 41 inscriptions, 10 paroles de boss, une description par ennemi', () => {
+    expect(Object.keys(frLore).filter((c) => c.startsWith('inscription.'))).toHaveLength(41);
     for (let n = 1; n <= 10; n++) expect(frLore).toHaveProperty(`boss.r${String(n)}.parole`);
     const sansDescription = Object.keys(ENNEMIS).filter((id) => !Object.hasOwn(fr, `ennemi.${id}.desc`));
     expect(sansDescription).toEqual([]);

@@ -1,9 +1,10 @@
 // Cases interdites d'un niveau : le moteur ne lit pas l'habillage, alors on les calcule ici, à l'assemblage, depuis les
-// chemins du niveau et les grands décors qu'il affiche. Une case de la grille (2×2 tuiles) est interdite si l'une de ses
-// tuiles est du chemin ou porte un grand décor. L'herbe, les fleurs, les petits cailloux et tout décor de 16×16 ne bloquent pas.
+// chemins du niveau, les grands décors qu'il affiche et ses zones de sol bloquantes (l'eau de la région 11, `zonesBloquantes`).
+// Une case de la grille (2×2 tuiles) est interdite si l'une de ses tuiles est du chemin, porte un grand décor ou est dans une zone
+// bloquante. L'herbe, les fleurs, les petits cailloux et tout décor de 16×16 ne bloquent pas.
 import { REGLES } from '../regles';
 import type { Carte, CaseGrille } from '../../engine/definitions';
-import type { Decor } from '../visuel';
+import type { Decor, ZoneSol } from '../visuel';
 import { DEMI_LARGEUR_CHEMIN, GRANDS_DECORS, empriseDecor, RECOUVREMENT_MIN_DECOR } from './habillage';
 import type { Rect } from './geometrie';
 
@@ -59,12 +60,18 @@ function tuilesDeGrandDecor(emprise: Rect): [number, number][] {
 }
 
 /**
- * Les cases de la grille interdites : chemin du niveau ou grand décor visible sur l'une de leurs tuiles. Ordre : ligne
- * par ligne. Les décors passés doivent être ceux que le niveau affiche (`decorVisible`).
+ * Les cases de la grille interdites : chemin du niveau, grand décor visible ou zone bloquante sur l'une de leurs tuiles. Ordre :
+ * ligne par ligne. Les décors passés doivent être ceux que le niveau affiche (`decorVisible`), les zones celles de
+ * `zonesBloquantes` (aucune hors de la région 11).
  */
-export function casesInterditesDuNiveau(carte: CarteChemins, decors: readonly Decor[]): CaseGrille[] {
+export function casesInterditesDuNiveau(carte: CarteChemins, decors: readonly Decor[], zones: readonly ZoneSol[] = []): CaseGrille[] {
   const taille = REGLES.tailleCase;
   const bloquee = tuilesDeChemin(carte);
+  for (const z of zones) {
+    for (let y = Math.max(0, z.y); y < Math.min(carte.hauteur, z.y + z.hauteur); y++) {
+      for (let x = Math.max(0, z.x); x < Math.min(carte.largeur, z.x + z.largeur); x++) bloquee[y * carte.largeur + x] = 1;
+    }
+  }
   for (const d of decors) {
     if (!GRANDS_DECORS.has(d.sprite)) continue;
     for (const [x, y] of tuilesDeGrandDecor(empriseDecor(d))) {

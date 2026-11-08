@@ -1,9 +1,10 @@
 // Cartes dessinées à la main de la région 11, les Grèves Grises (32 × 18 tuiles), une par niveau (101 à 110). Même structure que
 // les cartes des régions 2 à 10 : chemins sans socles (les tours se posent sur la grille de construction, cases interdites tirées du
 // chemin et des grands décors par grille-niveau.ts). La zone « boue » est l’eau morte de la région, la zone « pavés » ses planches de ponton.
+// L’eau bloque la construction (`SOLS_BLOQUANTS` de habillage.ts) : toute case qui en touche une tuile est interdite.
 // Niveaux 101 à 105 (Vol de Corbeaux) : 2 ou 3 rangées de cases laissées libres d’un bord à l’autre pour les couloirs des volants ;
-// niveaux 106 à 110 (Radeau) : une étendue d’eau où passe le trajet du radeau. Couloirs et trajets sont proposés en commentaire, en
-// attendant le champ `gimmick` du niveau. Les 5es niveaux de chaque bloc (105, 110) ont trois entrées.
+// niveaux 106 à 110 (Radeau) : une étendue d’eau où passe le trajet du radeau. Couloirs et trajets, rappelés en commentaire, sont
+// les gimmicks des niveaux dans plan-region11.ts. Les 5es niveaux de chaque bloc (105, 110) ont trois entrées.
 import { chemin, decor, zone, type CarteModele } from './modele-carte';
 
 /**

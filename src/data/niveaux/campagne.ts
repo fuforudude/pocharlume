@@ -1,4 +1,4 @@
-// La campagne des régions 1 à 10 : 100 niveaux numérotés de 1 à 100, assemblés depuis leur plan (plans.ts), leur carte
+// La campagne des régions livrées, 1 à 11 : 110 niveaux numérotés de 1 à 110 (l'histoire, 1 à 100, puis la région 11), assemblés depuis leur plan (plans.ts), leur carte
 // (cartes-toutes.ts) et leurs vagues figées (vagues-region<N>.ts, générées par `npm run niveaux`). La région 1 est aussi
 // exportée par region1.ts avec son niveau de test.
 import type { Vague } from '../../engine/definitions';
@@ -17,6 +17,7 @@ import { VAGUES_REGION7 } from './vagues-region7';
 import { VAGUES_REGION8 } from './vagues-region8';
 import { VAGUES_REGION9 } from './vagues-region9';
 import { VAGUES_REGION10 } from './vagues-region10';
+import { VAGUES_REGION11 } from './vagues-region11';
 
 /** Les vagues figées de chaque région, dans l'ordre de leurs plans (indice 0 = région 1). */
 export const VAGUES_REGIONS: readonly (readonly (readonly Vague[])[])[] = [
@@ -30,6 +31,7 @@ export const VAGUES_REGIONS: readonly (readonly (readonly Vague[])[])[] = [
   VAGUES_REGION8,
   VAGUES_REGION9,
   VAGUES_REGION10,
+  VAGUES_REGION11,
 ];
 
 export function construireRegion(plans: readonly PlanNiveau[], vagues: readonly (readonly Vague[])[]): readonly NiveauCampagne[] {
@@ -43,10 +45,10 @@ export function construireRegion(plans: readonly PlanNiveau[], vagues: readonly 
 /** Les niveaux de chaque région, dans l'ordre (indice 0 = région 1), chacun avec son numéro de campagne. */
 export const REGIONS: readonly (readonly NiveauCampagne[])[] = PLANS_REGIONS.map((plans, i) => (i === 0 ? REGION1 : construireRegion(plans, VAGUES_REGIONS[i] ?? [])));
 
-/** Les 100 niveaux des régions 1 à 10, dans l'ordre. */
+/** Les 110 niveaux des régions 1 à 11, dans l'ordre. */
 export const CAMPAGNE: readonly NiveauCampagne[] = REGIONS.flat();
 
-/** Le niveau de campagne de ce numéro (1 à 150), ou `undefined`. */
+/** Le niveau de campagne de ce numéro (1 à 110 aujourd'hui, 150 avec toutes les régions livrées), ou `undefined`. */
 export function niveauDeCampagne(numero: number): NiveauCampagne | undefined {
   return CAMPAGNE[numero - 1];
 }

@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { INFINI } from './infini';
 import {
   AVATARS,
   aretesDeVictoire,
@@ -152,7 +153,9 @@ describe('gains', () => {
 
 describe('régions, défis et disciples offerts', () => {
   it('15 régions de 10 niveaux, 150 niveaux ; la fin de l’histoire reste le niveau 100', () => {
-    expect([NOMBRE_REGIONS, NOMBRE_REGIONS_HISTOIRE, NIVEAU_MAX, NIVEAU_FIN_CAMPAGNE, NOMBRE_REGIONS_INFINI]).toEqual([15, 10, 150, 100, 10]);
+    expect([NOMBRE_REGIONS, NOMBRE_REGIONS_HISTOIRE, NIVEAU_MAX, NIVEAU_FIN_CAMPAGNE, NOMBRE_REGIONS_INFINI]).toEqual([15, 10, 150, 100, 11]);
+    // La sauvegarde (validation.ts) borne la région d'infini par NOMBRE_REGIONS_INFINI, le moteur (config.ts) par INFINI.regions : mêmes bornes.
+    expect(NOMBRE_REGIONS_INFINI).toBe(INFINI.regions.length);
     expect([100, 101, 150, 151, 0].map(estApresHistoire)).toEqual([false, true, true, false, false]);
     expect([101, 104, 105, 110, 150].map(estFinDeBloc)).toEqual([false, false, true, true, true]);
     expect([95, 100].map(estFinDeBloc)).toEqual([false, false]);

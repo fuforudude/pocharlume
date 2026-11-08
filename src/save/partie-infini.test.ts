@@ -98,7 +98,7 @@ describe('partie infinie en cours', () => {
     expect(valide({ ...partie, carte: undefined })).toBe(false);
     expect(valide({ ...partie, carte: 'Pas Valide' })).toBe(false);
     expect(valide({ ...partie, carte: 3 })).toBe(false);
-    expect(valide({ ...partie, config: { ...partie.config, infini: { region: 11 } } })).toBe(false);
+    expect(valide({ ...partie, config: { ...partie.config, infini: { region: 12 } } })).toBe(false);
     expect(valide({ ...partie, config: { ...partie.config, infini: { region: 1, autre: 1 } } })).toBe(false);
     expect(valide({ ...partie, config: { ...partie.config, defi: 'fer' } })).toBe(false);
     const sansInfini: Record<string, unknown> = { ...partie.config };

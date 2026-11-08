@@ -12,10 +12,10 @@ import { DIEUX_EVALUES, GRAINES_ENTRAINEMENT, GRAINES_EVALUATION, type Evaluatio
  */
 export const GRAINES_TEST = GRAINES_EVALUATION;
 
-const TOUTES_LES_REGIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
+const TOUTES_LES_REGIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as const;
 
 /**
- * Les régions évaluées : les dix (jalon 4), ou celles de `BANDES_REGIONS` (ex. `3` ou `1,2`). La CI de déploiement s'en sert pour
+ * Les régions évaluées : les onze livrées (la 11 a ses bandes suspendues, `REGIONS_SUSPENDUES` de bandes.ts), ou celles de `BANDES_REGIONS` (ex. `3` ou `1,2`). La CI de déploiement s'en sert pour
  * jouer une région par machine : sur 2 cœurs, les dix d'un coup dépassent le quart d'heure. Une valeur invalide est refusée
  * plutôt que de laisser passer des tests qui n'évaluent rien.
  */
@@ -25,7 +25,7 @@ function lireRegions(valeur: string | undefined): readonly number[] {
   if (valeur === undefined || valeur.trim() === '') return TOUTES_LES_REGIONS;
   const regions = valeur.split(',').map((morceau) => Number(morceau.trim()));
   if (regions.some((r) => !(TOUTES_LES_REGIONS as readonly number[]).includes(r))) {
-    throw new Error(`BANDES_REGIONS invalide : « ${valeur} » (attendu : numéros de région de 1 à 10, séparés par des virgules)`);
+    throw new Error(`BANDES_REGIONS invalide : « ${valeur} » (attendu : numéros de région de 1 à 11, séparés par des virgules)`);
   }
   return [...new Set(regions)];
 }

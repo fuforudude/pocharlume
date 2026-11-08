@@ -1,4 +1,4 @@
-// Les statues cachées dans le décor des 31 cartes (jalon 5, « Les dieux sans visage »). Une vieille statue de chat par carte, posée
+// Les statues cachées dans le décor des 41 cartes (jalon 5, « Les dieux sans visage »). Une vieille statue de chat par carte, posée
 // sur une case de décor : hors chemin, sur une case que le décor interdit déjà à la construction (donc jamais une case où l'on
 // pourrait poser une tour), et sans rien recouvrir. La toucher pendant une partie révèle l'inscription de la carte
 // (`inscription.<id de carte>` dans src/i18n/fr-lore.ts), rangée dans le recueil. C'est de la méta : aucun effet sur la partie.
@@ -71,6 +71,17 @@ const POSITIONS: Readonly<Record<IdCarte, Omit<StatueCarte, 'id'>>> = {
   nef: { x: 29, y: 3, origine: 'ombre' },
   transept: { x: 3, y: 11, origine: 'trois_pattes' },
   choeur: { x: 20.5, y: 3, origine: 'ombre' },
+  // Région 11 : les Grèves Grises (après l'histoire). Sur l'eau ou sur une case de grand décor, toutes deux interdites.
+  greve: { x: 21, y: 5.5, origine: 'colosse' },
+  filets: { x: 13, y: 1.5, origine: 'trois_pattes' },
+  epaves: { x: 9, y: 5.5, origine: 'ombre' },
+  ponton_noir: { x: 3, y: 1.5, origine: 'eglise' },
+  cap_corbeaux: { x: 1, y: 5, origine: 'ombre' },
+  eau_morte: { x: 13, y: 1.5, origine: 'colosse' },
+  pontons: { x: 18.5, y: 1.5, origine: 'trois_pattes' },
+  passe_noyes: { x: 29, y: 3, origine: 'eglise' },
+  baie_morte: { x: 1, y: 7, origine: 'trois_pattes' },
+  naufrage: { x: 9, y: 3.5, origine: 'colosse' },
 };
 
 /** Les statues, par identifiant de carte. */
@@ -78,7 +89,7 @@ export const STATUES: Readonly<Record<IdCarte, StatueCarte>> = Object.fromEntrie
   (Object.keys(POSITIONS) as IdCarte[]).map((id) => [id, { id, ...POSITIONS[id] }]),
 ) as Record<IdCarte, StatueCarte>;
 
-/** Les identifiants des 31 inscriptions (ceux des cartes), dans l'ordre de la campagne : l'ordre du recueil et de la sauvegarde. */
+/** Les identifiants des 41 inscriptions (ceux des cartes), dans l'ordre de la campagne : l'ordre du recueil et de la sauvegarde. */
 export const IDS_INSCRIPTIONS: readonly IdCarte[] = Object.keys(CARTES) as IdCarte[];
 
 export type IdInscription = IdCarte;

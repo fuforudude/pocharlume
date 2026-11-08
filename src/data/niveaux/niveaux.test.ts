@@ -13,7 +13,7 @@ import type { NiveauCampagne } from '../visuel';
 import { CARTES } from './cartes-toutes';
 import { vaguesDuPlan } from './generation';
 import { distancePointChemin, distanceRectChemin, rectsSeChevauchent } from './geometrie';
-import { DEMI_LARGEUR_CHEMIN, empriseDecor, GRANDS_DECORS, MARGE_DECOR } from './habillage';
+import { DEMI_LARGEUR_CHEMIN, empriseDecor, GRANDS_DECORS, MARGE_DECOR, zonesBloquantes } from './habillage';
 import { casesInterditesDuNiveau, tuilesDeChemin } from './grille-niveau';
 import { CAMPAGNE, TEXTES_REGIONS, VAGUES_REGIONS } from './campagne';
 import { PLANS_REGION1 } from './plan-region1';
@@ -32,6 +32,9 @@ const PORTEE_TIR_MIN = Math.min(...FAMILLES.filter((f) => f !== 'caserne').map((
 
 /** Portée de ralliement d'une caserne (tuiles) : une case de caserne valide a un chemin à cette distance au plus de son centre. */
 const PORTEE_RALLIEMENT = 3.5;
+
+/** Les zones de sol où l'on ne construit pas sur ce niveau (l'eau de la région 11). */
+const zonesDe = (n: NiveauCampagne) => zonesBloquantes({ region: n.visuel.region, zones: n.visuel.zones });
 
 function dist(a: Point, b: Point): number {
   return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
@@ -102,13 +105,14 @@ function verifierCarte(niveau: Niveau): void {
   });
 }
 
-describe('grille de construction des 100 niveaux', () => {
+describe('grille de construction des 110 niveaux', () => {
   const taille = REGLES.tailleCase;
 
-  it('chaque niveau a ses cases interdites tirées de son chemin et de ses grands décors visibles', () => {
+  it('chaque niveau a ses cases interdites tirées de son chemin, de ses grands décors visibles et de son eau (région 11)', () => {
     for (const n of CAMPAGNE) {
       const { carte } = n.niveau;
-      expect(n.niveau.casesInterdites, `niveau ${String(n.numero)}`).toEqual(casesInterditesDuNiveau(carte, n.visuel.decor));
+      // Le trajet d'un radeau est sur l'eau : il n'ajoute aucune case à celles de l'eau.
+      expect(n.niveau.casesInterdites, `niveau ${String(n.numero)}`).toEqual(casesInterditesDuNiveau(carte, n.visuel.decor, zonesDe(n)));
       expect(n.niveau.casesInterdites.length, `niveau ${String(n.numero)}`).toBeGreaterThan(0);
     }
   });
@@ -133,12 +137,13 @@ describe('grille de construction des 100 niveaux', () => {
     expect(problemes).toEqual([]);
   });
 
-  it('une case interdite l’est pour une raison : chemin ou grand décor visible sur l’une de ses tuiles', () => {
+  it('une case interdite l’est pour une raison : chemin, grand décor visible ou eau (région 11) sur l’une de ses tuiles', () => {
     const problemes: string[] = [];
     for (const n of CAMPAGNE) {
       const { carte } = n.niveau;
       const chemin = tuilesDeChemin(carte);
-      const grands = n.visuel.decor.filter((d) => GRANDS_DECORS.has(d.sprite)).map(empriseDecor);
+      const eau = zonesDe(n).map((z) => ({ x0: z.x, y0: z.y, x1: z.x + z.largeur, y1: z.y + z.hauteur }));
+      const grands = [...n.visuel.decor.filter((d) => GRANDS_DECORS.has(d.sprite)).map(empriseDecor), ...eau];
       for (const c of n.niveau.casesInterdites) {
         const rect = { x0: c.cx * taille, y0: c.cy * taille, x1: (c.cx + 1) * taille, y1: (c.cy + 1) * taille };
         let surChemin = false;
@@ -153,7 +158,7 @@ describe('grille de construction des 100 niveaux', () => {
     for (const n of CAMPAGNE) {
       const petits = n.visuel.decor.filter((d) => !GRANDS_DECORS.has(d.sprite));
       expect(petits.length, `niveau ${String(n.numero)}`).toBeGreaterThan(0);
-      const sans = casesInterditesDuNiveau(n.niveau.carte, n.visuel.decor.filter((d) => GRANDS_DECORS.has(d.sprite)));
+      const sans = casesInterditesDuNiveau(n.niveau.carte, n.visuel.decor.filter((d) => GRANDS_DECORS.has(d.sprite)), zonesDe(n));
       expect(sans, `niveau ${String(n.numero)}`).toEqual(n.niveau.casesInterdites);
     }
   });
@@ -167,7 +172,7 @@ describe('grille de construction des 100 niveaux', () => {
     }
   });
 
-  it('laisse assez de cases de caserne valides : un chemin à portée de ralliement (3,5 tuiles), sur chacun des 100 niveaux', () => {
+  it('laisse assez de cases de caserne valides : un chemin à portée de ralliement (3,5 tuiles), sur chacun des 110 niveaux', () => {
     for (const n of CAMPAGNE) {
       const libres = casesLibres({ niveau: n.niveau, tours: [] });
       const valides = libres.filter((c) => distanceAuNiveau(n.niveau, centreCase(c.cx, c.cy)) <= PORTEE_RALLIEMENT);
@@ -392,7 +397,7 @@ describe('habillage', () => {
 
 describe('textes', () => {
   it('chaque niveau a un nom et une phrase d’ambiance en français, distincts', () => {
-    expect(TEXTES_REGIONS.map((t) => t.length)).toEqual([10, 10, 10, 10, 10, 10, 10, 10, 10, 10]);
+    expect(TEXTES_REGIONS.map((t) => t.length)).toEqual([10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]);
     const cles = new Set(Object.keys(fr));
     const textes = fr as Record<string, string>;
     const vus = new Set<string>();

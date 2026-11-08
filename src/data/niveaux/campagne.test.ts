@@ -1,5 +1,5 @@
-// La campagne des régions 1 à 10 : 100 niveaux, 31 cartes (3 nouvelles par région 2 à 10), ennemis et boss de chaque région,
-// essaims, vagues dans le budget de menace, défi Fer jouable. Les contrôles de géométrie des cartes et de l'habillage sont
+// La campagne des régions 1 à 11 : 110 niveaux, 41 cartes (3 nouvelles par région 2 à 10, une par niveau en région 11), ennemis et
+// boss de chaque région, essaims, vagues dans le budget de menace, défi Fer jouable, gimmicks de la région 11. Les contrôles de géométrie des cartes et de l'habillage sont
 // dans niveaux.test.ts, qui parcourt aussi toute la campagne.
 import { describe, expect, it } from 'vitest';
 import type { DefEnnemi, Niveau } from '../../engine/definitions';
@@ -12,6 +12,7 @@ import type { NiveauCampagne } from '../visuel';
 import { CAMPAGNE, REGIONS, niveauDeCampagne } from './campagne';
 import { CARTES } from './cartes-toutes';
 import { BOSS_REGIONS, ENNEMIS_REGIONS, ennemisDuNiveau, NIVEAUX_NOUVEAUX, NOUVEAUX_ENNEMIS_REGIONS, REPRISES_REGIONS } from './plan-niveau';
+import { PLANS_REGION11 } from './plan-region11';
 import { PLANS_REGIONS } from './plans';
 
 const REGIONS_NOUVELLES = [2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -20,11 +21,11 @@ const rang = (numero: number): number => ((numero - 1) % 10) + 1;
 const definition = (id: string): DefEnnemi => ENNEMIS[id as IdEnnemi];
 const ennemisDe = (n: NiveauCampagne): Set<string> => new Set(n.niveau.vagues.flatMap((v) => v.paquets.map((p) => p.ennemi)));
 
-describe('les 100 niveaux', () => {
-  it('sont numérotés de 1 à 100, par régions de 10, avec des identifiants distincts', () => {
-    expect(CAMPAGNE.map((n) => n.numero)).toEqual(Array.from({ length: 100 }, (_, i) => i + 1));
-    expect(REGIONS.map((r) => r.length)).toEqual([10, 10, 10, 10, 10, 10, 10, 10, 10, 10]);
-    expect(new Set(CAMPAGNE.map((n) => n.niveau.id)).size).toBe(100);
+describe('les 110 niveaux', () => {
+  it('sont numérotés de 1 à 110, par régions de 10, avec des identifiants distincts', () => {
+    expect(CAMPAGNE.map((n) => n.numero)).toEqual(Array.from({ length: 110 }, (_, i) => i + 1));
+    expect(REGIONS.map((r) => r.length)).toEqual([10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]);
+    expect(new Set(CAMPAGNE.map((n) => n.niveau.id)).size).toBe(110);
     for (const n of CAMPAGNE) expect(n.niveau.id).toBe(`r${String(region(n.numero))}-${String(rang(n.numero)).padStart(2, '0')}`);
   });
 
@@ -35,7 +36,9 @@ describe('les 100 niveaux', () => {
     expect(niveauDeCampagne(0)).toBeUndefined();
     expect(niveauDeCampagne(51)?.niveau.id).toBe('r6-01');
     expect(niveauDeCampagne(100)?.niveau.id).toBe('r10-10');
-    expect(niveauDeCampagne(101)).toBeUndefined();
+    expect(niveauDeCampagne(101)?.niveau.id).toBe('r11-01');
+    expect(niveauDeCampagne(110)?.niveau.id).toBe('r11-10');
+    expect(niveauDeCampagne(111)).toBeUndefined();
   });
 
   it('suivent leur plan : numéro, entrées, arêtes de départ', () => {
@@ -48,12 +51,14 @@ describe('les 100 niveaux', () => {
     });
   });
 
-  it('laissent de 40 à 110 cases libres sur 144, une ou deux entrées (trois au plus pour la région 1)', () => {
+  it('laissent de 40 à 110 cases libres sur 144, une ou deux entrées (trois au plus pour la région 1 et les 5es niveaux des blocs d’après l’histoire)', () => {
     for (const n of CAMPAGNE) {
       const libres = 144 - n.niveau.casesInterdites.length;
       expect(libres, `niveau ${String(n.numero)}`).toBeGreaterThanOrEqual(40);
       expect(libres, `niveau ${String(n.numero)}`).toBeLessThanOrEqual(110);
-      if (n.numero > 10) expect(n.niveau.carte.chemins.length, `niveau ${String(n.numero)}`).toBeLessThanOrEqual(2);
+      // Spec de l'après-histoire : le 5e niveau de chaque bloc (105, 110) a trois entrées.
+      const entreesMax = n.numero > 100 && n.numero % 5 === 0 ? 3 : 2;
+      if (n.numero > 10) expect(n.niveau.carte.chemins.length, `niveau ${String(n.numero)}`).toBeLessThanOrEqual(entreesMax);
     }
   });
 
@@ -68,7 +73,7 @@ describe('les 100 niveaux', () => {
 });
 
 describe('les 27 nouvelles cartes', () => {
-  const nouvelles = Object.values(CARTES).filter((c) => c.region >= 2);
+  const nouvelles = Object.values(CARTES).filter((c) => c.region >= 2 && c.region <= 10);
 
   it('sont trois par région 2 à 10, de 32 × 18 tuiles, avec un jeu de tuiles de leur région', () => {
     expect(nouvelles).toHaveLength(27);
@@ -94,12 +99,19 @@ describe('les 27 nouvelles cartes', () => {
     for (const c of nouvelles) expect(PLANS_REGIONS.flat().filter((p) => p.carte === c.id).length, c.id).toBeGreaterThanOrEqual(2);
   });
 
+  it('après l’histoire, chaque carte sert exactement une fois : une carte neuve par niveau (spec, 50 cartes pour 50 niveaux)', () => {
+    const region11 = Object.values(CARTES).filter((c) => c.region === 11);
+    expect(region11).toHaveLength(10);
+    for (const c of region11) expect(PLANS_REGIONS.flat().filter((p) => p.carte === c.id).length, c.id).toBe(1);
+  });
+
 });
 
 describe('ennemis des régions', () => {
   it('chaque région a trois ennemis ordinaires (deux pour la région 10) et un boss, tous dans les données', () => {
     expect(ENNEMIS_REGIONS).toHaveLength(10);
-    expect(BOSS_REGIONS).toHaveLength(10);
+    // Un boss de plus par région d'après l'histoire (la 11 : le Passeur), sans ennemi ordinaire à elle.
+    expect(BOSS_REGIONS).toHaveLength(11);
     ENNEMIS_REGIONS.forEach((liste, r) => {
       expect(liste).toHaveLength(r === 9 ? 2 : 3);
       for (const id of liste) expect(definition(id).boss, id).toBe(false);
@@ -327,5 +339,51 @@ describe('niveau de campagne et niveau d’essai', () => {
   it('un niveau de campagne est un niveau du moteur', () => {
     const niveau: Niveau = niveauDeCampagne(11)?.niveau ?? niveauEssai();
     expect(niveau.id).toBe('r2-01');
+  });
+});
+
+describe('région 11 : Vol de Corbeaux et Radeau', () => {
+  const niveaux = REGIONS[10] ?? [];
+  const anciens = new Set<string>([...ENNEMIS_REGIONS.flat(), ...NOUVEAUX_ENNEMIS_REGIONS.flat()]);
+
+  it('emploie seulement des ennemis ordinaires existants (aucun nouveau), ceux de son plan, et le Passeur au niveau 110', () => {
+    niveaux.forEach((n, i) => {
+      const plan = PLANS_REGION11[i];
+      for (const id of plan?.vagues.ennemis ?? []) expect(anciens.has(id), `niveau ${String(n.numero)} : ${id}`).toBe(true);
+      const permis = new Set<string>([...(plan?.vagues.ennemis ?? []), ...(i === 9 ? ['passeur'] : [])]);
+      for (const e of ennemisDe(n)) expect(permis.has(e), `niveau ${String(n.numero)} : ${e}`).toBe(true);
+    });
+    expect(BOSS_REGIONS[10]).toBe('passeur');
+  });
+
+  it('a de 8 à 15 vagues par niveau, et le dernier niveau de chaque bloc en a le plus', () => {
+    const nombres = niveaux.map((n) => n.niveau.vagues.length);
+    for (const nb of nombres) expect(nb >= 8 && nb <= 15).toBe(true);
+    for (const bloc of [nombres.slice(0, 5), nombres.slice(5)]) expect(bloc.at(-1)).toBe(Math.max(...bloc));
+  });
+
+  it('Vol de Corbeaux (101 à 105) : tous les groupes de volants traversent un couloir, chaque couloir sert, et les volants pèsent lourd', () => {
+    for (const n of niveaux.slice(0, 5)) {
+      const gimmick = n.niveau.gimmick;
+      if (gimmick?.type !== 'corbeaux') throw new Error(`niveau ${String(n.numero)} sans Vol de Corbeaux`);
+      const paquets = n.niveau.vagues.flatMap((v) => v.paquets);
+      for (const p of paquets) expect(p.couloir !== undefined, `niveau ${String(n.numero)} : ${p.ennemi}`).toBe(definition(p.ennemi).volant);
+      const servis = new Set(paquets.flatMap((p) => (p.couloir === undefined ? [] : [p.couloir])));
+      expect([...servis].sort(), `niveau ${String(n.numero)}`).toEqual(gimmick.couloirs.map((_, k) => k));
+      // Au moins un groupe sur six vole : le gimmick se voit à chaque niveau.
+      expect(paquets.filter((p) => p.couloir !== undefined).length / paquets.length, `niveau ${String(n.numero)}`).toBeGreaterThanOrEqual(1 / 6);
+    }
+  });
+
+  it('Radeau (106 à 110) : aucun couloir, un trajet de 8 à 12 cases à 0,5 case par seconde et 3 places distinctes à moins d’une tuile du centre', () => {
+    for (const n of niveaux.slice(5)) {
+      const gimmick = n.niveau.gimmick;
+      if (gimmick?.type !== 'radeau') throw new Error(`niveau ${String(n.numero)} sans radeau`);
+      expect(n.niveau.vagues.flatMap((v) => v.paquets).some((p) => p.couloir !== undefined)).toBe(false);
+      expect(gimmick.trajet.length >= 8 && gimmick.trajet.length <= 12, `niveau ${String(n.numero)}`).toBe(true);
+      expect(gimmick.vitesse).toBe(0.5);
+      expect(gimmick.places).toHaveLength(3);
+      for (const p of gimmick.places) expect(Math.abs(p.dx) <= 0.5 && Math.abs(p.dy) <= 0.5).toBe(true);
+    }
   });
 });

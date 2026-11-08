@@ -444,13 +444,25 @@ Ce ne sont plus les dieux qui parlent : un murmure, une inscription, une voix sa
 - `carte.nom.nef` : La Nef
 - `carte.nom.transept` : Le Transept
 - `carte.nom.choeur` : Le Chœur
+- `carte.nom.greve` : La Grève
+- `carte.nom.filets` : Les Filets
+- `carte.nom.epaves` : Les Épaves
+- `carte.nom.ponton_noir` : Le Ponton Noir
+- `carte.nom.cap_corbeaux` : Le Cap aux Corbeaux
+- `carte.nom.eau_morte` : L’Eau Morte
+- `carte.nom.pontons` : Les Pontons
+- `carte.nom.passe_noyes` : La Passe des Noyés
+- `carte.nom.baie_morte` : La Baie Morte
+- `carte.nom.naufrage` : Le Naufrage
 
 ## Inscriptions des statues
 
 Une vieille statue par carte. Répartition (pour la relecture, rien de cela n’est affiché) : le Colosse (chaumes,
-meules, beffroi, marche, fossoyage, bivouac, refectoire, pont_levis), l’Ombre (gue, aire, ruelles, etang, ossuaire,
-cloitre, nef, choeur), Trois-Pattes (carrefour, sillons, ponton, faubourg, tertres, palissade, douves, transept),
-les hommes et l’Église qui veulent effacer (pendus, place, saules, quarantaine, baliste, scriptorium, avenue).
+meules, beffroi, marche, fossoyage, bivouac, refectoire, pont_levis, greve, eau_morte, naufrage), l’Ombre (gue, aire,
+ruelles, etang, ossuaire, cloitre, nef, choeur, epaves, cap_corbeaux), Trois-Pattes (carrefour, sillons, ponton, faubourg,
+tertres, palissade, douves, transept, filets, pontons, baie_morte), les hommes et l’Église qui veulent effacer (pendus, place,
+saules, quarantaine, baliste, scriptorium, avenue, ponton_noir, passe_noyes). Les dix statues de la région 11 sont celles
+d’après l’histoire : la porte est fermée, il ne reste que l’eau, et ceux qui font payer le passage.
 Vrais noms : marche et avenue pour le Colosse, ruelles et avenue pour l’Ombre, ponton et avenue pour Trois-Pattes.
 
 - `inscription.chaumes` : Neuf jours il a tenu la porte. Derrière lui, on rentrait les foins, et des petits naissaient.
@@ -484,6 +496,16 @@ Vrais noms : marche et avenue pour le Colosse, ruelles et avenue pour l’Ombre,
 - `inscription.nef` : Ils ont bâti haut et clair, pour qu’aucune ombre n’y reste. Ce n’était pas l’ombre qu’ils craignaient.
 - `inscription.transept` : Le sol sonne creux. En dessous, un mécanisme armé attend depuis la vieille guerre. Un pas, un seul.
 - `inscription.choeur` : Quand la porte se rouvrira, un veilleur sans nom s’y tiendra. Il aura peur. Elle lui laissera son ombre.
+- `inscription.greve` : La marée monte jusqu’à ses pattes, puis redescend. Elle n’a jamais osé plus.
+- `inscription.filets` : Les filets sont noués à sa façon : un nœud qui tient, un qui lâche. Les corbeaux ne savent jamais lequel.
+- `inscription.epaves` : Chaque barque coulée garde une place vide à l’arrière. Personne ne l’a vue s’y asseoir.
+- `inscription.ponton_noir` : Par ordre du Soleil Blême : brûlez les pontons. Ce qui ne traverse pas ne revient pas.
+- `inscription.cap_corbeaux` : Les corbeaux volent en ligne, sans un cri, comme on le leur a appris. Qui le leur a appris, ils l’ont oublié.
+- `inscription.eau_morte` : Il s’est assis ici pour regarder l’eau, un soir de grande fatigue. Elle n’a plus bougé depuis.
+- `inscription.pontons` : Planche après planche, le ponton avance sur l’eau. Une sur trois est piégée. Une sur trois boite.
+- `inscription.passe_noyes` : Le passage se paie d’une obole. Qui porte un chat paie double, et ne passe pas.
+- `inscription.baie_morte` : Sous l’eau, des rouages verdis tournent sans bruit. Elle a toujours aimé les choses qui attendent.
+- `inscription.naufrage` : Le navire s’est brisé contre la porte, comme tous les autres. La porte n’a pas une rayure.
 
 ## Niveaux, région 1 : Le Village Affamé
 
@@ -715,36 +737,34 @@ Vrais noms : marche et avenue pour le Colosse, ruelles et avenue pour l’Ombre,
 - `niveau.r10.10.nom` : Le Soleil Blême
 - `niveau.r10.10.ambiance` : Il ne se lève plus, il pâlit. Sous sa lumière, tout ressemble déjà à de la cendre.
 
-## Après l’histoire, région 11 : Les Grèves Grises (pas encore dans le jeu)
+## Après l’histoire, région 11 : Les Grèves Grises
 
-Textes proposés pour la région 11 (niveaux 101 à 110, spec `docs/specs/2026-11-08-apres-histoire-gimmicks.md`), à retoucher.
-Ils sont écrits **sans accents graves** autour des clés : `npm run lore` refuse toute clé qui n’existe pas encore dans
-`src/i18n/`, et ces niveaux n’existent pas encore. Quand la région 11 sera dans le jeu, il suffira d’entourer chaque clé
-d’accents graves, comme pour les régions 1 à 10. Les niveaux 101 à 105 sont ceux du Vol de Corbeaux, 106 à 110 ceux du Radeau.
-La clé `region.11.ambiance` est une proposition : aucune région n’a encore d’ambiance affichée.
+Textes de la région 11 (niveaux 101 à 110, spec `docs/specs/2026-11-08-apres-histoire-gimmicks.md`), à retoucher.
+Les niveaux 101 à 105 sont ceux du Vol de Corbeaux, 106 à 110 ceux du Radeau. La clé region.11.ambiance (sans accents
+graves) est une proposition : aucune région n’a encore d’ambiance affichée, `npm run lore` la laisse de côté.
 
 - `region.11` : Les Grèves Grises
 - region.11.ambiance : Derrière la cathédrale, la cendre descend jusqu’à l’eau. Les corbeaux y attendent. Un passeur aussi, la main ouverte.
-- niveau.r11.01.nom : La Grève de Cendre
-- niveau.r11.01.ambiance : La cendre descend jusqu’à l’eau. L’eau ne l’emporte pas.
-- niveau.r11.02.nom : Les Filets Pendus
-- niveau.r11.02.ambiance : Les pêcheurs ont laissé leurs filets. Les corbeaux comptent ce qui s’y est pris.
-- niveau.r11.03.nom : Le Vol Bas
-- niveau.r11.03.ambiance : Ils rasent la grève sans un cri. On n’entend que les ailes, et c’est déjà trop tard.
-- niveau.r11.04.nom : La Coque Retournée
-- niveau.r11.04.ambiance : Une barque sur le dos, comme une bête morte. Quelque chose gratte encore dessous.
-- niveau.r11.05.nom : Le Perchoir
-- niveau.r11.05.ambiance : Un arbre sans feuilles, noir de plumes. Quand il s’envole, le ciel s’éteint.
-- niveau.r11.06.nom : L’Embarcadère
-- niveau.r11.06.ambiance : Le ponton s’arrête au milieu de l’eau. Le reste du chemin se paie.
-- niveau.r11.07.nom : Le Radeau
-- niveau.r11.07.ambiance : Des planches liées avec des cordes de pendus. Elles flottent mieux que ceux qui les portaient.
-- niveau.r11.08.nom : Les Eaux sans Fond
-- niveau.r11.08.ambiance : Ni courant, ni fond. Le radeau avance pourtant, et personne ne rame.
-- niveau.r11.09.nom : Le Gué des Oboles
-- niveau.r11.09.ambiance : Une pièce sur chaque pierre du gué. Personne n’est revenu les reprendre.
-- niveau.r11.10.nom : Le Passeur
-- niveau.r11.10.ambiance : Il attend sur la grève, la main ouverte. Ce qu’on lui donne ne revient pas.
+- `niveau.r11.01.nom` : La Grève de Cendre
+- `niveau.r11.01.ambiance` : La cendre descend jusqu’à l’eau. L’eau ne l’emporte pas.
+- `niveau.r11.02.nom` : Les Filets Pendus
+- `niveau.r11.02.ambiance` : Les pêcheurs ont laissé leurs filets. Les corbeaux comptent ce qui s’y est pris.
+- `niveau.r11.03.nom` : Le Vol Bas
+- `niveau.r11.03.ambiance` : Ils rasent la grève sans un cri. On n’entend que les ailes, et c’est déjà trop tard.
+- `niveau.r11.04.nom` : La Coque Retournée
+- `niveau.r11.04.ambiance` : Une barque sur le dos, comme une bête morte. Quelque chose gratte encore dessous.
+- `niveau.r11.05.nom` : Le Perchoir
+- `niveau.r11.05.ambiance` : Un arbre sans feuilles, noir de plumes. Quand il s’envole, le ciel s’éteint.
+- `niveau.r11.06.nom` : L’Embarcadère
+- `niveau.r11.06.ambiance` : Le ponton s’arrête au milieu de l’eau. Le reste du chemin se paie.
+- `niveau.r11.07.nom` : Le Radeau
+- `niveau.r11.07.ambiance` : Des planches liées avec des cordes de pendus. Elles flottent mieux que ceux qui les portaient.
+- `niveau.r11.08.nom` : Les Eaux sans Fond
+- `niveau.r11.08.ambiance` : Ni courant, ni fond. Le radeau avance pourtant, et personne ne rame.
+- `niveau.r11.09.nom` : Le Gué des Oboles
+- `niveau.r11.09.ambiance` : Une pièce sur chaque pierre du gué. Personne n’est revenu les reprendre.
+- `niveau.r11.10.nom` : Le Passeur
+- `niveau.r11.10.ambiance` : Il attend sur la grève, la main ouverte. Ce qu’on lui donne ne revient pas.
 
 ## Objets
 
