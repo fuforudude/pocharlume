@@ -84,6 +84,15 @@ describe('comment le contrer', () => {
     }
   });
 
+  it('le Passeur (boss de la région 11) : péage, plongée, corbeaux et tours gelées, tirés de ses données', () => {
+    const texte = conseilsContre('passeur').join(' ');
+    for (const cle of ['bestiaire.contre.vol', 'bestiaire.contre.intouchable', 'bestiaire.contre.renforts', 'bestiaire.contre.tours_gelees', 'bestiaire.contre.boss'] as const) {
+      expect(texte).toContain(t(cle));
+    }
+    expect(tCle(ENNEMIS.passeur.nom)).toBe('Le Passeur');
+    expect(ficheEnnemi('passeur').lore).not.toBeNull();
+  });
+
   it('un identifiant inconnu n’a aucun conseil', () => {
     expect(conseilsContre('ennemi_imaginaire')).toEqual([]);
   });

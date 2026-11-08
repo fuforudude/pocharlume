@@ -778,6 +778,38 @@ export const ENNEMIS = {
     prime: 22,
     pouvoirs: { derniereLueur: { rayon: 3, quantite: 0.35 } },
   }),
+
+  // --- Après l'histoire : boss des régions 11 à 15 (docs/specs/2026-11-08-apres-histoire-gimmicks.md) ---------------------
+  // Région 11 : les Grèves Grises. Pensé pour le gimmick Radeau (niveaux 106 à 110), mais jouable sans lui.
+  /**
+   * Fait payer le passage : au premier soldat qui le retient (ou à la sortie), prend 100 arêtes et passe sans s'arrêter 3 s ;
+   * tué, il rend le péage. Toutes les 12 s, plonge sous l'eau (intouchable 2 s) et remonte 3 tuiles plus loin. À 66 et 33 % de PV,
+   * appelle 4 Corbeaux Noirs et gèle les 2 tours les plus proches pendant 3 s.
+   */
+  passeur: ennemi({
+    nom: 'ennemi.passeur',
+    pv: 18000,
+    vitesse: 0.4,
+    armure: 0.3,
+    resistance: 0.3,
+    degats: [40, 60],
+    cadence: 1.6,
+    coutVies: 12,
+    prime: 480,
+    boss: true,
+    insensibleEtourdissement: true,
+    pouvoirs: {
+      vol: { aretes: 100, vitesse: 1.5, duree: 3 },
+      periodiques: [{ cadence: 12, actions: [{ type: 'plonger', duree: 2, saut: 3 }] }],
+      paliers: [0.66, 0.33].map((pv) => ({
+        pv,
+        actions: [
+          { type: 'invoquer', ennemi: 'corbeau_noir', nombre: 4, ecart: 0.5 },
+          { type: 'figer_tour', nombre: 2, duree: 3 },
+        ],
+      })),
+    },
+  }),
 } as const satisfies Record<string, DefEnnemi>;
 
 export type IdEnnemi = keyof typeof ENNEMIS;

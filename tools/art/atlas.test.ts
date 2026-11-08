@@ -8,7 +8,7 @@ import { construire, DOSSIER_SORTIE, lireSources, type Construction } from './co
 import { decoderPng } from './png.ts';
 
 /** Les cinq boss des régions 1 à 5 : cadres de 64×64. */
-const BOSS = ['boucher-vaudrelle', 'la-faim', 'juge-flammes', 'dame-puits', 'mere-rats', 'roi-fosses', 'prince-croise', 'grand-inquisiteur', 'roi-fou', 'soleil-bleme'];
+const BOSS = ['boucher-vaudrelle', 'la-faim', 'juge-flammes', 'dame-puits', 'mere-rats', 'roi-fosses', 'prince-croise', 'grand-inquisiteur', 'roi-fou', 'soleil-bleme', 'passeur'];
 
 let resultat: Construction;
 let commite: AtlasJson;
