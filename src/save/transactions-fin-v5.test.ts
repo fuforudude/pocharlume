@@ -154,10 +154,10 @@ describe('fin de campagne', () => {
     const r = reussie(avant, { niveau: NIVEAU_FIN_CAMPAGNE });
     expect(r.bilan.campagneTerminee).toBe(true);
     expect(campagneTerminee(r.sauvegarde)).toBe(true);
-    // Il n'y a pas de région 11 : rien n'est ouvert, le plafond reste le niveau 100 et la région 10.
-    expect(r.bilan.regionDebloquee).toBeUndefined();
-    expect(r.sauvegarde.progression.niveauMax).toBe(100);
-    expect(r.sauvegarde.meta.regionMax).toBe(10);
+    // La fin de l'histoire ouvre l'après-histoire : le niveau 101 et la région 11.
+    expect(r.bilan.regionDebloquee).toBe(11);
+    expect(r.sauvegarde.progression.niveauMax).toBe(101);
+    expect(r.sauvegarde.meta.regionMax).toBe(11);
   });
 
   it('l’écran de fin n’est annoncé qu’une fois : rejouer le Soleil Blême ne le refait pas', () => {

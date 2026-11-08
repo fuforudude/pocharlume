@@ -1,6 +1,6 @@
 // Ce que l'écran du mode infini montre, d'après la sauvegarde : les cartes jouables avec leur record, les paliers et ce
 // qu'ils rapportent, le bilan d'une partie. Des fonctions pures, sans DOM : l'écran (ecran-infini.ts) ne fait que les dessiner.
-import { NOMBRE_REGIONS, PALIERS_INFINI, RECOMPENSES_PALIERS_INFINI, regionDuNiveau, type PalierInfini } from '../data/meta';
+import { NOMBRE_REGIONS_INFINI, PALIERS_INFINI, RECOMPENSES_PALIERS_INFINI, regionDuNiveau, type PalierInfini } from '../data/meta';
 import { OBJETS } from '../data/objets';
 import { PLANS_REGIONS } from '../data/niveaux/plans';
 import type { NiveauCampagne } from '../data/visuel';
@@ -60,7 +60,7 @@ export function vueCartesInfini(s: Sauvegarde, donnees: DonneesInfini = {}): Vue
     for (let n = 1; n <= NOMBRE_NIVEAUX; n++) {
       if (!niveauReussi(s, n) || livree(n) !== id) continue;
       const niveau = niveauDe(n);
-      if (niveau) vues.push({ id, nom: nomDeCarte(id), region: Math.min(NOMBRE_REGIONS, Math.max(1, regionDuNiveau(n))), niveau, record: recordDeLaCarte(s, id) });
+      if (niveau) vues.push({ id, nom: nomDeCarte(id), region: Math.min(NOMBRE_REGIONS_INFINI, Math.max(1, regionDuNiveau(n))), niveau, record: recordDeLaCarte(s, id) });
       break;
     }
   }

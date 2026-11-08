@@ -13,7 +13,7 @@
 // fermeture d'un dialogue) ; les nœuds de la carte sont lus à l'ouverture d'une région : pour voir une victoire ou un
 // import, on rouvre la carte.
 import { ENNEMIS } from '../data/ennemis';
-import { BRAISES_DEFI, type IdDieu } from '../data/meta';
+import { braisesDeDefi, type IdDieu } from '../data/meta';
 import type { NiveauCampagne } from '../data/visuel';
 import type { DefiPartie } from '../engine';
 import { t, tCle } from '../i18n';
@@ -242,7 +242,11 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   });
   const nomRegion = el('div', 'region-nom');
   nomRegion.setAttribute('role', 'status');
-  rangeeRegions.append(flechePrecedente, ...puces, flecheSuivante, nomRegion);
+  // Quinze pastilles ne tiennent pas sur une ligne en 740 px : elles défilent dans leur propre bande, entre les deux flèches, et la
+  // pastille de la région montrée est ramenée dans la bande (voir `majRegionsUI`).
+  const bandePuces = el('div', 'region-puces');
+  bandePuces.append(...puces);
+  rangeeRegions.append(flechePrecedente, bandePuces, flecheSuivante, nomRegion);
   haut.append(rangeeRegions);
 
   /** Texte à côté des pastilles : le nom de la région montrée, ou pourquoi une région touchée reste fermée. */
@@ -264,6 +268,8 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
       b.setAttribute('aria-disabled', String(!vr.ouverte));
       b.querySelector('img.cadenas')?.remove();
       if (!vr.ouverte) b.append(image(atlas.iconeUrl('icone-cadenas', 1), 'cadenas'));
+      // La pastille de la région montrée au milieu de la bande (la bande ne défile que si elle déborde).
+      if (courante) bandePuces.scrollLeft = Math.max(0, b.offsetLeft - (bandePuces.clientWidth - b.offsetWidth) / 2);
     });
     const precedenteOuverte = indiceRegion > 0;
     const suivanteOuverte = vuesRegions[indiceRegion + 1]?.ouverte ?? false;
@@ -285,6 +291,13 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     selection = noeudInitial(vues);
     rendu = contenu ? new RenduCarteMonde(canvas, atlas, contenu.trace, contenu.decor, nombreTroncons(vues)) : null;
     regionVide.hidden = contenu !== null;
+    if (region.ambiance) {
+      racine.style.setProperty('--region-fond', region.ambiance.fond);
+      racine.style.setProperty('--region-brume', region.ambiance.brume);
+    } else {
+      racine.style.removeProperty('--region-fond');
+      racine.style.removeProperty('--region-brume');
+    }
     if (rendu) {
       // La vue montre les niveaux débloqués et le premier qui ne l'est pas encore (on devine où mène la route).
       const premierCache = vues.findIndex((v) => !v.visible);
@@ -476,7 +489,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
       const lignes = [t(defi === 'fer' ? 'fiche.defi_fer' : 'fiche.defi_heroique'), t('fiche.defi_regles')];
       const familles = famillesDuFer(niveau);
       if (defi === 'fer' && familles) lignes.push(t('fiche.defi_familles', { noms: familles.map((f) => tCle(`famille.${f}`)).join(', ') }));
-      lignes.push(vm?.reussi === true ? t('fiche.defi_deja') : t('fiche.defi_prime', { n: BRAISES_DEFI }));
+      lignes.push(vm?.reussi === true ? t('fiche.defi_deja') : t('fiche.defi_prime', { n: braisesDeDefi(niveau.numero) }));
       regles.replaceChildren(...lignes.map((ligne, k) => el('p', k === lignes.length - 1 ? 'defi-prime' : '', ligne)));
     };
 

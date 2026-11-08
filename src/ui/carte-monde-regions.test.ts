@@ -10,7 +10,7 @@ import { t } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
 import { sauvegardeVide, type RaisonChoix, type RaisonEquipement, type Sauvegarde } from '../save';
 import { afficherCarteMonde, type OptionsCarteMonde } from './carte-monde';
-import type { RegionMonde } from './regions-monde';
+import { REGIONS_MONDE, type RegionMonde } from './regions-monde';
 
 const rendus = vi.hoisted(() => ({ crees: [] as { trace: unknown; troncons: number }[] }));
 
@@ -212,6 +212,26 @@ describe('carte du monde : régions', () => {
     expect(puce(2).classList.contains('actif')).toBe(true);
     appuyer('PageDown');
     expect(puce(2).classList.contains('actif')).toBe(true);
+  });
+
+  it('les quinze régions : la 11 s’ouvre avec le niveau 100 gagné, les 12 à 15 restent verrouillées', () => {
+    const s = sauvegardeVide();
+    monter({ ...s, progression: { ...s.progression, niveauMax: 101 }, meta: { ...s.meta, regionMax: 11 } }, { regions: REGIONS_MONDE });
+    expect(document.querySelectorAll('.region-puce')).toHaveLength(15);
+    // Les quinze pastilles sont dans leur bande défilante, entre les deux flèches.
+    expect(document.querySelector('.region-puces')?.children).toHaveLength(15);
+    expect(puce(11).classList.contains('actif')).toBe(true);
+    expect(nomRegion()).toBe(t('carte.region_nom', { n: 11, nom: 'Les Grèves Grises' }));
+    expect((document.querySelector('.carte-region-vide') as HTMLElement).hidden).toBe(false);
+    expect(document.querySelector<HTMLElement>('.carte-monde')?.style.getPropertyValue('--region-brume')).not.toBe('');
+    for (let n = 1; n <= 11; n++) expect(puce(n).classList.contains('grise'), `région ${String(n)}`).toBe(false);
+    for (let n = 12; n <= 15; n++) {
+      expect(puce(n).classList.contains('grise'), `région ${String(n)}`).toBe(true);
+      expect(puce(n).querySelector('img.cadenas')).not.toBeNull();
+    }
+    puce(12).click();
+    expect(nomRegion()).toBe(t('carte.region_fermee', { n: 12, m: 11 }));
+    expect(puce(11).classList.contains('actif')).toBe(true);
   });
 
   it('une région ouverte dont les niveaux ne sont pas livrés l’annonce, sans nœud ni fiche', () => {

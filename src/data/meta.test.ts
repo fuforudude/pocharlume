@@ -17,7 +17,16 @@ import {
   dieuDuHeros,
   ECLATS_DOUBLON,
   estIdDefi,
+  braisesDeDefi,
+  BRAISES_APRES_HISTOIRE,
+  estApresHistoire,
+  estFinDeBloc,
   estNiveauBoss,
+  NIVEAU_FIN_CAMPAGNE,
+  NIVEAU_MAX,
+  NOMBRE_REGIONS,
+  NOMBRE_REGIONS_HISTOIRE,
+  NOMBRE_REGIONS_INFINI,
   estRarete,
   estTypeCaisse,
   HEROS_PAR_DIEU,
@@ -88,6 +97,39 @@ describe('gains', () => {
     expect(braisesDeVictoire(20, true, false)).toBe(15);
   });
 
+  it('braises après l’histoire : 15 la première victoire, +30 au 5e niveau du bloc, +6 aux premières 3 étoiles', () => {
+    expect(braisesDeVictoire(101, true, false)).toBe(BRAISES_APRES_HISTOIRE.premiereVictoire);
+    expect(braisesDeVictoire(101, true, false)).toBe(15);
+    expect(braisesDeVictoire(101, true, true)).toBe(21);
+    expect(braisesDeVictoire(101, false, true)).toBe(6);
+    expect(braisesDeVictoire(101, false, false)).toBe(0);
+    // 105 et 110 sont les 5es niveaux de leur bloc : +30, à la place du bonus de boss (le 110 est aussi un boss).
+    expect(braisesDeVictoire(105, true, false)).toBe(45);
+    expect(braisesDeVictoire(110, true, false)).toBe(45);
+    expect(braisesDeVictoire(110, true, true)).toBe(51);
+    expect(braisesDeVictoire(110, false, false)).toBe(0);
+    expect(braisesDeVictoire(150, true, false)).toBe(45);
+    expect(braisesDeVictoire(106, true, false)).toBe(15);
+    // Les niveaux 1 à 100 ne changent pas.
+    expect(braisesDeVictoire(50, true, false)).toBe(15);
+    expect(braisesDeVictoire(50, true, true)).toBe(17);
+    expect(braisesDeVictoire(45, true, false)).toBe(5);
+    expect(braisesDeVictoire(100, true, false)).toBe(15);
+    expect(braisesDeVictoire(100, true, true)).toBe(17);
+    expect(braisesDeVictoire(95, true, false)).toBe(5);
+  });
+
+  it('braises de la première réussite d’un défi : 4 jusqu’au niveau 100, 12 ensuite', () => {
+    expect([1, 50, 100].map(braisesDeDefi)).toEqual([4, 4, 4]);
+    expect([101, 110, 150].map(braisesDeDefi)).toEqual([12, 12, 12]);
+  });
+
+  it('un tour complet des niveaux 101 à 150 rapporte 50 × 15 + 10 × 30 + 50 × 6 de braises avant les défis', () => {
+    let total = 0;
+    for (let n = 101; n <= 150; n++) total += braisesDeVictoire(n, true, true);
+    expect(total).toBe(50 * 15 + 10 * 30 + 50 * 6);
+  });
+
   it('la région 1 rapporte 80 braises au plus (50 + 10 + 20), soit deux disciples à 30', () => {
     let total = 0;
     for (let n = 1; n <= 10; n++) total += braisesDeVictoire(n, true, true);
@@ -109,10 +151,23 @@ describe('gains', () => {
 });
 
 describe('régions, défis et disciples offerts', () => {
-  it('10 régions de 10 niveaux ; la région r + 1 s’ouvre quand le boss de la région r est battu', () => {
-    expect([0, 1, 10, 11, 20, 50, 100, 101, 1.5].map(regionDuNiveau)).toEqual([0, 1, 1, 2, 2, 5, 10, 0, 0]);
+  it('15 régions de 10 niveaux, 150 niveaux ; la fin de l’histoire reste le niveau 100', () => {
+    expect([NOMBRE_REGIONS, NOMBRE_REGIONS_HISTOIRE, NIVEAU_MAX, NIVEAU_FIN_CAMPAGNE, NOMBRE_REGIONS_INFINI]).toEqual([15, 10, 150, 100, 10]);
+    expect([100, 101, 150, 151, 0].map(estApresHistoire)).toEqual([false, true, true, false, false]);
+    expect([101, 104, 105, 110, 150].map(estFinDeBloc)).toEqual([false, false, true, true, true]);
+    expect([95, 100].map(estFinDeBloc)).toEqual([false, false]);
+  });
+
+  it('la région r + 1 s’ouvre quand le boss de la région r est battu, jusqu’à la région 15', () => {
+    expect([0, 1, 10, 11, 20, 50, 100, 101, 150, 151, 1.5].map(regionDuNiveau)).toEqual([0, 1, 1, 2, 2, 5, 10, 11, 15, 0, 0]);
+    // Gagner le niveau 100 débloque le 101 : la région 11 s'ouvre. Le niveau 150 est le dernier : la région 15 est la plus haute.
+    expect([100, 101, 110, 111, 141, 150].map(regionOuverte)).toEqual([10, 11, 11, 12, 15, 15]);
     // niveauMax passe à 11 quand le niveau 10 (le boss) est gagné.
     expect([1, 9, 10, 11, 20, 21, 50, 51, 100].map(regionOuverte)).toEqual([1, 1, 1, 2, 2, 3, 5, 6, 10]);
+  });
+
+  it('la région d’un niveau d’avant l’après-histoire n’a pas changé', () => {
+    expect(Array.from({ length: 100 }, (_, i) => regionDuNiveau(i + 1))).toEqual(Array.from({ length: 100 }, (_, i) => Math.floor(i / 10) + 1));
   });
 
   it('deux défis, 4 braises la première réussite', () => {

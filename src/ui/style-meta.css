@@ -639,12 +639,35 @@
   pointer-events: auto;
 }
 
+.carte-regions .region-nom {
+  flex: 0 1 auto;
+}
+
 .bouton.region-fleche {
   font-size: 26px;
   padding: 0;
 }
 
+.region-puces {
+  position: relative;
+  display: flex;
+  gap: 4px;
+  /* 15 pastilles en une seule rangée débordent d'un écran de 740 px : la bande en montre sept et défile, sans barre. */
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: calc(7 * var(--cible) + 6 * 4px + 4px);
+  padding: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  pointer-events: auto;
+}
+
+.region-puces::-webkit-scrollbar {
+  display: none;
+}
+
 .bouton.region-puce {
+  flex: none;
   min-width: var(--cible);
   padding: 0;
   font-size: 16px;
@@ -685,7 +708,7 @@
   max-width: min(420px, calc(100% - 32px));
   margin: 0;
   padding: 10px 14px;
-  background: var(--panneau);
+  background: linear-gradient(var(--region-brume, transparent), var(--region-fond, transparent)), var(--panneau);
   border: 2px solid var(--bord);
   border-radius: 6px;
   font-size: 14px;

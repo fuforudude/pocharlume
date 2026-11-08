@@ -6,7 +6,7 @@
 import {
   aretesDeVictoire,
   braisesDeVictoire,
-  BRAISES_DEFI,
+  braisesDeDefi,
   coutRangArbre,
   DISCIPLES_OFFERTS,
   EMPLACEMENTS_OBJETS,
@@ -257,6 +257,8 @@ export interface BilanPartie {
   readonly objetsRendus: readonly IdObjet[];
   /** Le défi réussi pour la première fois sur ce niveau (ses braises sont comprises dans `braises`). */
   readonly defiReussi?: IdDefi;
+  /** Braises de ce défi (4 jusqu'au niveau 100, 12 après l'histoire) : présent avec `defiReussi`. */
+  readonly braisesDefi?: number;
   /** Le disciple offert par la première victoire sur le boss de la région 2, 4, 6 ou 8 : le premier non possédé dans l'ordre fixé. */
   readonly discipleOffert?: IdHeros;
   /** La région que cette victoire a ouverte (le boss de la région précédente vient d'être battu). */
@@ -333,7 +335,7 @@ export function enregistrerFinDePartie(s: Sauvegarde, fin: FinDePartieMeta, defs
     victoire && defi === null
       ? braisesDeVictoire(fin.niveau, etoilesAvant === 0, etoilesAvant < 3 && etoilesApres === 3)
       : defiReussi !== null
-        ? BRAISES_DEFI
+        ? braisesDeDefi(fin.niveau)
         : 0;
   const aretes = Math.min(PLAFOND_MONNAIE, s.meta.monnaies.aretes + aretesGagnees);
   const braises = Math.min(PLAFOND_MONNAIE, s.meta.monnaies.braises + braisesGagnees);
@@ -388,7 +390,7 @@ export function enregistrerFinDePartie(s: Sauvegarde, fin: FinDePartieMeta, defs
       niveauHeros,
       objetsConsommes: utilises,
       objetsRendus: rendus,
-      ...(defiReussi !== null ? { defiReussi } : {}),
+      ...(defiReussi !== null ? { defiReussi, braisesDefi: braisesDeDefi(fin.niveau) } : {}),
       ...(discipleOffert !== undefined ? { discipleOffert } : {}),
       ...(regionDebloquee !== undefined ? { regionDebloquee } : {}),
       ...(campagneTerminee ? { campagneTerminee: true as const } : {}),

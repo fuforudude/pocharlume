@@ -22,7 +22,7 @@ import {
   IDS_HEROS,
   IDS_OBJETS,
   NIVEAU_OUVERTURE_INFINI,
-  NOMBRE_REGIONS,
+  NOMBRE_REGIONS_INFINI,
   PLAFOND_MONNAIE,
   PLAFOND_XP,
   RANG_MAX_ARBRE,
@@ -82,7 +82,7 @@ function validerProgression(x: unknown): Resultat<Progression> {
   const base = avecCles(x, ['niveauMax', 'etoiles'], 'progression');
   if (!base.ok) return base;
   const niveauMax = valeur(base.valeur, 'niveauMax');
-  if (!estEntierEntre(niveauMax, 1, NOMBRE_NIVEAUX)) return echec('progression.niveauMax : entier de 1 à 100 attendu');
+  if (!estEntierEntre(niveauMax, 1, NOMBRE_NIVEAUX)) return echec('progression.niveauMax : entier de 1 à 150 attendu');
   const brutes = valeur(base.valeur, 'etoiles');
   if (!estEnregistrement(brutes)) return echec('progression.etoiles : objet attendu');
   const etoiles: Record<string, EtoilesNiveau> = {};
@@ -289,7 +289,7 @@ function validerConfig(x: unknown): Resultat<ConfigPartie> {
   if (avecInfini) {
     const brut = valeur(base.valeur, 'infini');
     const region = estEnregistrement(brut) && Object.keys(brut).length === 1 ? valeur(brut, 'region') : null;
-    if (!estEntierEntre(region, 1, NOMBRE_REGIONS)) return echec('partie.config.infini : { region } de 1 à 10 attendu');
+    if (!estEntierEntre(region, 1, NOMBRE_REGIONS_INFINI)) return echec(`partie.config.infini : { region } de 1 à ${String(NOMBRE_REGIONS_INFINI)} attendu`);
     infini = { region };
   }
   if (!avecDefiEtBonus) return ok({ ...config, ...extension.valeur, ...(infini ? { infini } : {}) });

@@ -130,7 +130,19 @@ function v6versV7(v6: Brut): Brut {
 }
 
 /** `MIGRATIONS[n]` fait passer une sauvegarde de la version n à la version n + 1. */
-export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: v1versV2, 2: v2versV3, 3: v3versV4, 4: v4versV5, 5: v5versV6, 6: v6versV7 };
+/**
+ * v7 vers v8 : la campagne passe de 100 à 150 niveaux (régions 11 à 15). Avant, le niveau 100 gagné laissait `niveauMax` à 100 ;
+ * désormais il débloque le niveau 101 et la région 11. Une sauvegarde dont le niveau 100 est déjà gagné reçoit ce déblocage
+ * (`niveauMax` 101, `regionMax` 11) ; tout le reste est gardé tel quel.
+ */
+function v7versV8(v7: Brut): Brut {
+  const progression = objet(v7.progression);
+  const finDeLHistoire = progression.niveauMax === 100 && estObjet(objet(progression.etoiles)['100']);
+  if (!finDeLHistoire) return { ...v7, version: 8 };
+  return { ...v7, version: 8, progression: { ...progression, niveauMax: 101 }, meta: { ...objet(v7.meta), regionMax: 11 } };
+}
+
+export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: v1versV2, 2: v2versV3, 3: v3versV4, 4: v4versV5, 5: v5versV6, 6: v6versV7, 7: v7versV8 };
 
 /**
  * Migre une sauvegarde brute (n'importe quelle version connue) vers la version courante et la valide. `defs`

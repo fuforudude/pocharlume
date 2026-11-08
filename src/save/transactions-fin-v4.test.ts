@@ -1,6 +1,6 @@
 // Fin de partie, jalon 3 : récompense d'un défi (une fois), disciple offert au boss des régions 2 et 4, région débloquée.
 import { describe, expect, it } from 'vitest';
-import { BRAISES_DEFI, DISCIPLES_OFFERTS, PLAFOND_MONNAIE, braisesDeVictoire, xpDePartie, type IdHeros } from '../data/meta';
+import { BRAISES_APRES_HISTOIRE, BRAISES_DEFI, DISCIPLES_OFFERTS, PLAFOND_MONNAIE, braisesDeVictoire, xpDePartie, type IdHeros } from '../data/meta';
 import { DEFS_TEST } from './aides.test-utils';
 import { sauvegardeVide, type Sauvegarde } from './format';
 import { enregistrerVictoire } from './progression';
@@ -109,6 +109,40 @@ describe('récompense d’un défi', () => {
   });
 });
 
+describe('braises après l’histoire (niveaux 101 à 150)', () => {
+  it('un niveau 50 rapporte comme avant (boss : 5 + 10, 2 aux premières 3 étoiles), un niveau 45 aussi (5, 2)', () => {
+    expect(reussie(joueur(49), { niveau: 50, etoiles: 1 }).bilan.braises).toBe(15);
+    expect(reussie(joueur(49), { niveau: 50 }).bilan.braises).toBe(17);
+    expect(reussie(joueur(44), { niveau: 45, etoiles: 1 }).bilan.braises).toBe(5);
+    expect(reussie(joueur(44), { niveau: 45 }).bilan.braises).toBe(7);
+  });
+
+  it('un niveau 101 rapporte 15, plus 6 aux premières 3 étoiles', () => {
+    expect(reussie(joueur(100), { niveau: 101, etoiles: 1 }).bilan.braises).toBe(BRAISES_APRES_HISTOIRE.premiereVictoire);
+    const r = reussie(joueur(100), { niveau: 101 });
+    expect(r.bilan.braises).toBe(21);
+    expect(r.sauvegarde.meta.monnaies.braises).toBe(21);
+  });
+
+  it('les niveaux 105 et 110, 5es de leur bloc, rapportent 30 de plus à la première victoire seulement', () => {
+    expect(reussie(joueur(104), { niveau: 105, etoiles: 1 }).bilan.braises).toBe(45);
+    expect(reussie(joueur(109), { niveau: 110, etoiles: 1 }).bilan.braises).toBe(45);
+    expect(reussie(joueur(109), { niveau: 110 }).bilan.braises).toBe(51);
+    // Rejouer le niveau 110 déjà gagné : rien de plus que les 3 étoiles qui manquaient.
+    const une = reussie(joueur(109), { niveau: 110, etoiles: 1 }).sauvegarde;
+    expect(reussie(une, { niveau: 110 }).bilan.braises).toBe(6);
+  });
+
+  it('un défi réussi au-delà du niveau 100 rapporte 12 braises, une seule fois ; au niveau 50, toujours 4', () => {
+    const r = reussie(joueur(104), { niveau: 101, defi: 'heroique' });
+    expect(r.bilan.braises).toBe(12);
+    expect(r.bilan.braisesDefi).toBe(12);
+    expect(reussie(r.sauvegarde, { niveau: 101, defi: 'heroique' }).bilan.braises).toBe(0);
+    const ancien = reussie(joueur(60), { niveau: 50, defi: 'fer' });
+    expect([ancien.bilan.braises, ancien.bilan.braisesDefi]).toEqual([BRAISES_DEFI, BRAISES_DEFI]);
+  });
+});
+
 describe('disciple offert au boss des régions 2 et 4', () => {
   it('la première victoire sur le niveau 20 offre Suie ; sur le niveau 40, Mastoc', () => {
     const r20 = reussie(joueur(19), { niveau: 20 });
@@ -192,10 +226,10 @@ describe('région débloquée', () => {
     expect(reussie(joueur(10), { niveau: 10 }).bilan.regionDebloquee).toBeUndefined();
   });
 
-  it('la région 10 est la dernière : gagner le niveau 100 n’ouvre rien', () => {
+  it('gagner le niveau 100 ouvre la région 11', () => {
     const r = reussie(joueur(99), { niveau: 100 });
-    expect(r.bilan.regionDebloquee).toBeUndefined();
-    expect(r.sauvegarde.meta.regionMax).toBe(10);
+    expect(r.bilan.regionDebloquee).toBe(11);
+    expect(r.sauvegarde.meta.regionMax).toBe(11);
   });
 
   it('les régions 2 à 5 s’ouvrent l’une après l’autre, et le boss de la région 2 offre Suie en même temps', () => {

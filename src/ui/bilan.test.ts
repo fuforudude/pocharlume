@@ -43,7 +43,8 @@ describe('bilan de fin : défi, disciple offert, région ouverte', () => {
   });
 
   it('une région que l’écran ne connaît pas est annoncée par son numéro', () => {
-    expect(lignesBilan({ ...BILAN, regionDebloquee: 11 })).toEqual([t('fin.bilan_region_numero', { n: 11 })]);
+    expect(lignesBilan({ ...BILAN, regionDebloquee: 16 })).toEqual([t('fin.bilan_region_numero', { n: 16 })]);
+    expect(lignesBilan({ ...BILAN, regionDebloquee: 11 })).toEqual([t('fin.bilan_region', { nom: 'Les Grèves Grises' })]);
     expect(lignesBilan({ ...BILAN, regionDebloquee: 7 })).toEqual([t('fin.bilan_region', { nom: 'La Croisade' })]);
   });
 

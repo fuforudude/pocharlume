@@ -36,8 +36,8 @@ export type RaisonRefus =
   | 'case_vide'
   /** Le niveau n'a pas de radeau, ou pas de place de ce numéro. */
   | 'place_inconnue'
-  /** Une tour à soldats (caserne, tour divine à soldats) ne se pose pas sur le radeau, ni n'y devient une. */
-  | 'radeau_sans_caserne'
+  /** Une tour qui pose quelque chose au sol (soldats, assassins, tourelles, pièges) ne se pose pas sur le radeau, ni n'y devient une. */
+  | 'radeau_sol_requis'
   /** Une caserne (ou une tour divine à soldats) ne se pose que là où un chemin est à portée de son ralliement. */
   | 'caserne_sans_chemin'
   | 'tour_inconnue'

@@ -11,7 +11,7 @@ export const CLES_REFUS: Readonly<Record<RaisonRefus, CleTexte>> = {
   case_occupee: 'refus.case_occupee',
   case_vide: 'refus.case_vide',
   place_inconnue: 'refus.place_inconnue',
-  radeau_sans_caserne: 'refus.radeau_sans_caserne',
+  radeau_sol_requis: 'refus.radeau_sol_requis',
   caserne_sans_chemin: 'refus.caserne_sans_chemin',
   tour_inconnue: 'refus.tour_inconnue',
   aretes_insuffisantes: 'refus.aretes_insuffisantes',
