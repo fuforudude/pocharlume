@@ -48,7 +48,8 @@ export function casesDuTrajet(gimmick: GimmickRadeau): CaseGrille[] {
 
 /**
  * Vérifie le radeau : trajet d'au moins 2 cases de la grille qui se suivent et toutes interdites à la construction (intermédiaires
- * comprises), vitesse positive, nombre de places des règles, places à des décalages distincts.
+ * comprises), vitesse positive, nombre de places des règles, places à au moins une case l'une de l'autre (`REGLES.tailleCase`
+ * tuiles, la largeur d'une tour : deux tours voisines ne se chevauchent pas).
  */
 export function verifierRadeau(niveau: Niveau, gimmick: GimmickRadeau): void {
   if (gimmick.trajet.length < 2) throw new Error('Radeau : le trajet doit compter au moins 2 cases');
@@ -62,6 +63,11 @@ export function verifierRadeau(niveau: Niveau, gimmick: GimmickRadeau): void {
   for (const p of gimmick.places) if (!Number.isFinite(p.dx) || !Number.isFinite(p.dy)) throw new Error('Radeau : décalage de place invalide');
   const decalages = new Set(gimmick.places.map((p) => `${String(p.dx)},${String(p.dy)}`));
   if (decalages.size !== gimmick.places.length) throw new Error('Radeau : deux places au même décalage');
+  gimmick.places.forEach((a, i) => {
+    for (const b of gimmick.places.slice(i + 1)) {
+      if ((a.dx - b.dx) * (a.dx - b.dx) + (a.dy - b.dy) * (a.dy - b.dy) < REGLES.tailleCase * REGLES.tailleCase) throw new Error(`Radeau : deux places à moins d'une case l'une de l'autre (${String(REGLES.tailleCase)} tuiles)`);
+    }
+  });
   for (const c of casesDuTrajet(gimmick)) {
     if (!estCaseInterdite(niveau, c.cx, c.cy)) throw new Error(`Radeau : la case (${String(c.cx)}, ${String(c.cy)}) du trajet n'est pas interdite à la construction`);
   }

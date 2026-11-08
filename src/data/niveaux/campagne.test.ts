@@ -375,7 +375,7 @@ describe('région 11 : Vol de Corbeaux et Radeau', () => {
     }
   });
 
-  it('Radeau (106 à 110) : aucun couloir, un trajet de 8 à 12 cases à 0,5 case par seconde et 3 places distinctes à moins d’une tuile du centre', () => {
+  it('Radeau (106 à 110) : aucun couloir, un trajet de 8 à 12 cases à 0,5 case par seconde et 3 places en ligne, à une case l’une de l’autre, sur le radeau dessiné', () => {
     for (const n of niveaux.slice(5)) {
       const gimmick = n.niveau.gimmick;
       if (gimmick?.type !== 'radeau') throw new Error(`niveau ${String(n.numero)} sans radeau`);
@@ -383,7 +383,11 @@ describe('région 11 : Vol de Corbeaux et Radeau', () => {
       expect(gimmick.trajet.length >= 8 && gimmick.trajet.length <= 12, `niveau ${String(n.numero)}`).toBe(true);
       expect(gimmick.vitesse).toBe(0.5);
       expect(gimmick.places).toHaveLength(3);
-      for (const p of gimmick.places) expect(Math.abs(p.dx) <= 0.5 && Math.abs(p.dy) <= 0.5).toBe(true);
+      // Le radeau dessiné fait 88 px (5,5 tuiles) : les places restent à 2 tuiles au plus du centre en largeur, sur sa ligne médiane.
+      for (const p of gimmick.places) expect(Math.abs(p.dx) <= 2 && p.dy === 0, `niveau ${String(n.numero)}`).toBe(true);
+      // Une case (la largeur d'une tour) entre deux places voisines : les trois tours se voient entières.
+      const xs = gimmick.places.map((p) => p.dx).sort((a, b) => a - b);
+      expect(xs.slice(1).every((x, i) => x - (xs[i] ?? x) >= 2), `niveau ${String(n.numero)}`).toBe(true);
     }
   });
 });

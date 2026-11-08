@@ -4,7 +4,7 @@
 // construction : aucune case d'eau n'est constructible, le trajet du radeau compris.
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import type { Niveau, Point } from '../../engine/definitions';
+import type { Niveau, PlaceRadeau, Point } from '../../engine/definitions';
 import { casesDuTrajet } from '../../engine/gimmicks/radeau';
 import { casesLibres, centreCase, estCaseInterdite } from '../../engine/grille';
 import { REGLES } from '../regles';
@@ -31,6 +31,19 @@ const COULOIRS: Readonly<Record<string, readonly number[]>> = Object.fromEntries
 const TRAJETS: Readonly<Record<string, readonly (readonly [number, number])[]>> = Object.fromEntries(
   PLANS_REGION11.flatMap((p) => (p.gimmick?.type === 'radeau' ? [[p.carte, p.gimmick.trajet.map((c) => [c.cx, c.cy] as const)]] : [])),
 );
+
+/** Places du radeau de chaque carte (niveaux 106 à 110), en tuiles autour de son centre, d'après les plans. */
+const PLACES: Readonly<Record<string, readonly PlaceRadeau[]>> = Object.fromEntries(
+  PLANS_REGION11.flatMap((p) => (p.gimmick?.type === 'radeau' ? [[p.carte, p.gimmick.places]] : [])),
+);
+
+/** Cadre dessiné du radeau dans l'atlas (contour compris) et son ancre, en pixels. */
+const EMPRISE_RADEAU = (() => {
+  const s = (JSON.parse(readFileSync(new URL('../../../public/sprites/atlas.json', import.meta.url), 'utf8')) as { sprites: Record<string, { ancre: { x: number; y: number }; animations: Record<string, { cadres: { largeur: number; hauteur: number; dx: number; dy: number }[] }> }> }).sprites.radeau;
+  const cadre = s?.animations.repos?.cadres[0];
+  if (!s || !cadre) throw new Error('sprite radeau absent de l’atlas');
+  return { ax: s.ancre.x, ay: s.ancre.y, dx: cadre.dx, dy: cadre.dy, largeur: cadre.largeur, hauteur: cadre.hauteur };
+})();
 
 /** Portée d'une tour de tir de base, et de ralliement d'une caserne : ce qui compte pour dire qu'une case « voit » le chemin. */
 const PORTEE = 3.5;
@@ -163,23 +176,28 @@ describe('Radeau (niveaux 106 à 110) : trajet sur l’eau', () => {
     });
   });
 
-  it.each(Object.entries(TRAJETS))('%s : ses deux bouts sont à portée de deux endroits éloignés du chemin', (id, trajet) => {
+  it.each(Object.entries(TRAJETS))('%s : à chaque bout, une place du radeau est à portée du chemin, à deux endroits éloignés', (id, trajet) => {
     const m = CARTES_REGION11[id as keyof typeof CARTES_REGION11];
-    /** Le point du chemin le plus proche du centre de la case. */
+    const places = PLACES[id] ?? [];
+    expect(places.length).toBeGreaterThan(0);
+    /** La place la plus proche du chemin quand le radeau est au centre de la case, et le point du chemin le plus proche d'elle. */
     const plusProche = ([cx, cy]: readonly [number, number]): { d: number; p: Point } => {
       const centre = centreCase(cx, cy);
       let meilleur = { d: Infinity, p: { x: 0, y: 0 } };
-      for (const c of m.chemins) {
-        c.points.forEach((b, i) => {
-          const a = c.points[i - 1];
-          if (!a) return;
-          const pas = longueur([a, b]) * 4;
-          for (let k = 0; k <= pas; k++) {
-            const p = { x: a.x + ((b.x - a.x) * k) / pas, y: a.y + ((b.y - a.y) * k) / pas };
-            const d = distance(p, centre);
-            if (d < meilleur.d) meilleur = { d, p };
-          }
-        });
+      for (const place of places) {
+        const depuis = { x: centre.x + place.dx, y: centre.y + place.dy };
+        for (const c of m.chemins) {
+          c.points.forEach((b, i) => {
+            const a = c.points[i - 1];
+            if (!a) return;
+            const pas = longueur([a, b]) * 4;
+            for (let k = 0; k <= pas; k++) {
+              const p = { x: a.x + ((b.x - a.x) * k) / pas, y: a.y + ((b.y - a.y) * k) / pas };
+              const d = distance(p, depuis);
+              if (d < meilleur.d) meilleur = { d, p };
+            }
+          });
+        }
       }
       return meilleur;
     };
@@ -188,6 +206,32 @@ describe('Radeau (niveaux 106 à 110) : trajet sur l’eau', () => {
     expect(debut.d).toBeLessThanOrEqual(PORTEE);
     expect(fin.d).toBeLessThanOrEqual(PORTEE);
     expect(distance(debut.p, fin.p)).toBeGreaterThanOrEqual(8);
+  });
+
+  it.each(Object.entries(TRAJETS))('%s : le radeau dessiné reste sur l’eau, hors du chemin, tout le long de son trajet', (id, trajet) => {
+    const m = CARTES_REGION11[id as keyof typeof CARTES_REGION11];
+    const tuiles = tuilesDeChemin(m);
+    const eau = (tx: number, ty: number): boolean => m.zones.some((z) => z.sol === 'boue' && tx >= z.x && tx < z.x + z.largeur && ty >= z.y && ty < z.y + z.hauteur);
+    // L'emprise dessinée du radeau (cadre de l'atlas, contour compris) autour de son centre, en tuiles.
+    const x0 = (EMPRISE_RADEAU.dx - EMPRISE_RADEAU.ax) / 16;
+    const y0 = (EMPRISE_RADEAU.dy - EMPRISE_RADEAU.ay) / 16;
+    const x1 = x0 + EMPRISE_RADEAU.largeur / 16;
+    const y1 = y0 + EMPRISE_RADEAU.hauteur / 16;
+    const problemes = new Set<string>();
+    // Le radeau va en ligne droite d'un centre de case au suivant : un huitième de case suffit, aucune tuile n'est sautée.
+    trajet.forEach(([cx, cy], i) => {
+      const [px, py] = trajet[i - 1] ?? [cx, cy];
+      for (let k = 0; k <= 8; k++) {
+        const c = centreCase(px + ((cx - px) * k) / 8, py + ((cy - py) * k) / 8);
+        for (let ty = Math.floor(c.y + y0); ty < Math.ceil(c.y + y1); ty++) {
+          for (let tx = Math.floor(c.x + x0); tx < Math.ceil(c.x + x1); tx++) {
+            if (!eau(tx, ty)) problemes.add(`rive en (${String(tx)}, ${String(ty)})`);
+            else if (tuiles[ty * m.largeur + tx]) problemes.add(`chemin en (${String(tx)}, ${String(ty)})`);
+          }
+        }
+      }
+    });
+    expect([...problemes]).toEqual([]);
   });
 });
 

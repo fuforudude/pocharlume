@@ -20,7 +20,7 @@ const SPRITE = { ancre: { x: 0, y: 0 }, largeur: 16, hauteur: 16 } as unknown as
 const NOMS: string[] = [];
 const ATLAS = { sprite: (nom: string) => { NOMS.push(nom); return SPRITE; }, animation: () => undefined } as unknown as AtlasRendu;
 const CONFIG: ConfigPartie = { graine: 3, difficulte: 'matou', dieu: 'charlie', heros: 'charlie', niveauHeros: 1, competencesHeros: {}, ameliorations: {}, objets: [], versionDonnees: VERSION_DONNEES };
-const RADEAU: GimmickRadeau = { type: 'radeau', trajet: [{ cx: 2, cy: 4 }, { cx: 10, cy: 4 }], vitesse: 0.5, places: [{ dx: 0, dy: -1 }, { dx: -1, dy: 0 }, { dx: 1, dy: 0 }] };
+const RADEAU: GimmickRadeau = { type: 'radeau', trajet: [{ cx: 2, cy: 4 }, { cx: 10, cy: 4 }], vitesse: 0.5, places: [{ dx: -2, dy: 0 }, { dx: 0, dy: 0 }, { dx: 2, dy: 0 }] };
 const VAGUE_LOINTAINE: Vague = { paquets: [{ ennemi: 'paysan_affame', nombre: 1, intervalle: 1, chemin: 0, delai: 60 }] };
 
 function niveau(vagues: readonly Vague[] = [VAGUE_LOINTAINE], gimmick: Niveau['gimmick'] | null = RADEAU): Niveau {
@@ -170,7 +170,7 @@ describe('sprite du radeau et places des données', () => {
   it('sur chaque niveau à radeau (106 à 110), les nattes des trois places tiennent sur la plateforme, hors des cordes', () => {
     const plateforme = sprite('radeau');
     const natte = sprite('radeau-place');
-    expect([plateforme.largeur, plateforme.hauteur, natte.largeur, natte.hauteur]).toEqual([48, 40, 14, 10]);
+    expect([plateforme.largeur, plateforme.hauteur, natte.largeur, natte.hauteur]).toEqual([88, 32, 14, 10]);
     for (let numero = 106; numero <= 110; numero++) {
       const niveau = niveauDeCampagne(numero)?.niveau;
       const g = niveau ? gimmickRadeau(niveau) : undefined;

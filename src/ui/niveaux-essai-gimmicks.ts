@@ -31,7 +31,7 @@ const couloir = (k: number, ennemi: string, nombre: number, delai = 0): Paquet =
 /** Couloirs proposés par la carte de la Grève (lignes de cases 1 et 6). */
 const CORBEAUX: GimmickCorbeaux = { type: 'corbeaux', couloirs: [{ cy: 1 }, { cy: 6 }] };
 /** Trajet proposé par la carte de l'Eau Morte (ligne 4, de la colonne 5 à la colonne 13), trois places en triangle. */
-const RADEAU: GimmickRadeau = { type: 'radeau', trajet: [{ cx: 5, cy: 4 }, { cx: 13, cy: 4 }], vitesse: 0.5, places: [{ dx: 0, dy: -1 }, { dx: -1, dy: 0 }, { dx: 1, dy: 0 }] };
+const RADEAU: GimmickRadeau = { type: 'radeau', trajet: [{ cx: 5, cy: 4 }, { cx: 13, cy: 4 }], vitesse: 0.5, places: [{ dx: -2, dy: 0 }, { dx: 0, dy: 0 }, { dx: 2, dy: 0 }] };
 
 const VAGUES_CORBEAUX: Vague[] = [
   { paquets: [chemin('paysan_affame', 4), couloir(1, 'corbeau_noir', 3, 2)] },

@@ -8,7 +8,7 @@ import { VAGUES_REGION1 } from './vagues-region1';
 
 const PLAN = PLANS_REGIONS[0]?.[0];
 const VAGUES = VAGUES_REGION1[0];
-const RADEAU: GimmickRadeau = { type: 'radeau', trajet: [{ cx: 1, cy: 1 }, { cx: 6, cy: 1 }], vitesse: 0.5, places: [{ dx: 0, dy: -1 }, { dx: -1, dy: 0 }, { dx: 1, dy: 0 }] };
+const RADEAU: GimmickRadeau = { type: 'radeau', trajet: [{ cx: 1, cy: 1 }, { cx: 6, cy: 1 }], vitesse: 0.5, places: [{ dx: -2, dy: 0 }, { dx: 0, dy: 0 }, { dx: 2, dy: 0 }] };
 const cle = (c: { cx: number; cy: number }): string => `${String(c.cx)},${String(c.cy)}`;
 
 describe('assemblage : radeau', () => {

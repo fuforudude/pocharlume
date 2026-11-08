@@ -18,7 +18,7 @@ const RADEAU: GimmickRadeau = {
   type: 'radeau',
   trajet: [{ cx: 1, cy: 4 }, { cx: 14, cy: 4 }, { cx: 14, cy: 7 }],
   vitesse: 0.5,
-  places: [{ dx: 0, dy: -1 }, { dx: -1, dy: 0 }, { dx: 1, dy: 0 }],
+  places: [{ dx: 0, dy: -2 }, { dx: -2, dy: 0 }, { dx: 2, dy: 0 }],
 };
 const PAS_BOUT = 960;
 
@@ -66,9 +66,9 @@ describe('Radeau : position, fonction pure du pas', () => {
   });
 
   it('chaque place suit le radeau avec son décalage', () => {
-    expect(positionPlace(RADEAU, 0, 0)).toEqual({ x: 3, y: 8 });
-    expect(positionPlace(RADEAU, 0, 1)).toEqual({ x: 2, y: 9 });
-    expect(positionPlace(RADEAU, PAS_BOUT, 2)).toEqual({ x: 30, y: 15 });
+    expect(positionPlace(RADEAU, 0, 0)).toEqual({ x: 3, y: 7 });
+    expect(positionPlace(RADEAU, 0, 1)).toEqual({ x: 1, y: 9 });
+    expect(positionPlace(RADEAU, PAS_BOUT, 2)).toEqual({ x: 31, y: 15 });
   });
 
   it('un radeau mal formé est refusé à la création de la partie', () => {
@@ -86,6 +86,16 @@ describe('Radeau : position, fonction pure du pas', () => {
   it('refuse deux places au même décalage', () => {
     const places = [{ dx: 0, dy: -1 }, { dx: -1, dy: 0 }, { dx: 0, dy: -1 }];
     expect(() => creerPartie(niveauRadeau([VAGUE_LOINTAINE], { ...RADEAU, places }), CONFIG)).toThrow(/même décalage/);
+  });
+
+  it('refuse deux places à moins d’une case (la largeur d’une tour) l’une de l’autre, accepte une case tout juste', () => {
+    const avecPlaces = (places: GimmickRadeau['places']): Niveau => niveauRadeau([VAGUE_LOINTAINE], { ...RADEAU, places });
+    // L'ancien triangle serré : une tuile entre les deux places du bas, les tours se chevauchaient.
+    expect(() => creerPartie(avecPlaces([{ dx: -0.5, dy: 0.25 }, { dx: 0.5, dy: 0.25 }, { dx: 0, dy: -0.5 }]), CONFIG)).toThrow(/moins d'une case/);
+    // En diagonale aussi : (0 ; -1) et (-1 ; 0) sont à 1,41 tuile.
+    expect(() => creerPartie(avecPlaces([{ dx: 0, dy: -1 }, { dx: -1, dy: 0 }, { dx: 3, dy: 0 }]), CONFIG)).toThrow(/moins d'une case/);
+    expect(() => creerPartie(avecPlaces([{ dx: -2, dy: 0 }, { dx: 0, dy: 0 }, { dx: 2, dy: 0 }]), CONFIG)).not.toThrow();
+    expect(() => creerPartie(avecPlaces([{ dx: -1.99, dy: 0 }, { dx: 0, dy: 0 }, { dx: 2, dy: 0 }]), CONFIG)).toThrow(/moins d'une case/);
   });
 
   it('refuse un trajet dont une case, intermédiaire comprise, n’est pas interdite à la construction', () => {
@@ -139,7 +149,7 @@ describe('Radeau : construire sur une place', () => {
     const t = tourDeLaPlace(etat, 2);
     // La position est celle du dernier pas simulé (etat.pas a déjà avancé d'un cran).
     expect({ x: t.x, y: t.y }).toEqual(positionPlace(RADEAU, etat.pas - 1, 2));
-    expect(t.x).toBeCloseTo(3 + 1 + (2 * 0.5 * (etat.pas - 1)) / 30, 9);
+    expect(t.x).toBeCloseTo(3 + 2 + (2 * 0.5 * (etat.pas - 1)) / 30, 9);
   });
 
   it('une caserne est refusée sur le radeau, avec sa raison', () => {
@@ -264,7 +274,7 @@ describe('Radeau : tir depuis la position courante', () => {
     accepter(etat, { type: 'construire', place: 0, tour: 'tir' });
     const id = tourDeLaPlace(etat, 0).id;
     const tirs = (secondes: number): number => evenementsPendant(etat, secondes).filter((v) => v.type === 'tir' && v.tour === id).length;
-    // Au départ, la place 0 est en (3, 8), à 3 tuiles de l'ennemi en (3, 5) : portée 3,5.
+    // Au départ, la place 0 est en (3, 7), à 2 tuiles de l'ennemi en (3, 5) : portée 3,5.
     expect(distance(3, 8, e.x, e.y)).toBeLessThan(3.5);
     expect(tirs(2)).toBeGreaterThan(0);
     // 30 s plus tard, le radeau a passé le virage, vers (29, 13) : bien trop loin.

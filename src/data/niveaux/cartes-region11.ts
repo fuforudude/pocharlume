@@ -329,8 +329,8 @@ export const EAU_MORTE: CarteModele = {
   region: 11,
   largeur: 32,
   hauteur: 18,
-  // Niveau 106, Radeau : trajet proposé (cases cx, cy, 9 cases), tout entier sur l’eau, sans décor :
-  // (5, 4) (6, 4) (7, 4) (8, 4) (9, 4) (10, 4) (11, 4) (12, 4) (13, 4)
+  // Niveau 106, Radeau : trajet proposé (cases cx, cy, 8 cases), tout entier sur l’eau, sans décor, à une case de la rive : le radeau (88 px) ne recouvre ni rive ni chemin :
+  // (6, 3) (6, 4) (7, 4) (8, 4) (9, 4) (10, 4) (11, 4) (12, 4)
   chemins: [
     chemin([-1, 3], [9, 3], [9, 15], [29, 15], [29, 3], [33, 3]),
   ],
@@ -393,8 +393,8 @@ export const PONTONS: CarteModele = {
   region: 11,
   largeur: 32,
   hauteur: 18,
-  // Niveau 107, Radeau : trajet proposé (cases cx, cy, 8 cases), tout entier sur l’eau, sans décor :
-  // (3, 7) (4, 7) (5, 7) (6, 7) (7, 7) (7, 6) (7, 5) (7, 4)
+  // Niveau 107, Radeau : trajet proposé (cases cx, cy, 8 cases), tout entier sur l’eau, sans décor, à une case de la rive : le radeau (88 px) ne recouvre ni rive ni chemin :
+  // (4, 8) (4, 7) (4, 6) (5, 6) (6, 6) (6, 5) (6, 4) (6, 3)
   chemins: [
     chemin([-1, 15], [5, 15], [5, 3], [17, 3], [17, 11], [27, 11], [27, 3], [33, 3]),
   ],
@@ -420,7 +420,7 @@ export const PONTONS: CarteModele = {
     decor('roseaux-morts', 31.5, 5.5),
     decor('roseaux-morts', 20, 6.5, true),
     decor('cloche-naufrage', 2, 7),
-    decor('roseaux-morts', 12.5, 7),
+    decor('roseaux-morts', 14.5, 9),
     decor('epave-coque', 9.5, 7.5, true),
     decor('roseaux-morts', 22, 7.5),
     decor('roseaux-morts', 19.5, 8, true),
@@ -431,8 +431,8 @@ export const PONTONS: CarteModele = {
     decor('nappe-brume', 2.5, 11.5, true),
     decor('roseaux-morts', 8.5, 11.5, true),
     decor('roseaux-morts', 7, 12),
-    decor('nappe-brume', 10, 13, true),
-    decor('ponton-pourri', 12.5, 13, true),
+    decor('nappe-brume', 12, 16, true),
+    decor('ponton-pourri', 14.5, 17, true),
     decor('epave-mat', 30, 13, true),
     decor('nappe-brume', 17, 13.5),
     decor('cailloux', 27, 13.5),
@@ -457,8 +457,8 @@ export const PASSE_NOYES: CarteModele = {
   region: 11,
   largeur: 32,
   hauteur: 18,
-  // Niveau 108, Radeau : trajet proposé (cases cx, cy, 11 cases), tout entier sur l’eau, sans décor :
-  // (5, 6) (6, 6) (7, 6) (8, 6) (9, 6) (10, 6) (11, 6) (12, 6) (12, 5) (12, 4) (12, 3)
+  // Niveau 108, Radeau : trajet proposé (cases cx, cy, 12 cases), tout entier sur l’eau, sans décor, à une case de la rive : le radeau (88 px) ne recouvre ni rive ni chemin :
+  // (5, 6) (6, 6) (7, 6) (8, 6) (9, 6) (10, 6) (11, 6) (12, 6) (13, 6) (13, 5) (13, 4) (13, 3)
   chemins: [
     chemin([-1, 3], [23, 3], [23, 9], [7, 9], [7, 15], [33, 15]),
   ],
@@ -488,15 +488,12 @@ export const PASSE_NOYES: CarteModele = {
     decor('nappe-brume', 12, 7, true),
     decor('roseaux-morts', 14, 7, true),
     decor('ancre-rouillee', 17, 7),
-    decor('nappe-brume', 28, 7),
     decor('filets-perches', 6, 7.5),
     decor('roseaux-morts', 29.5, 7.5),
     decor('cailloux', 1, 8.5),
     decor('epave-mat', 3.5, 9.5),
-    decor('nappe-brume', 27.5, 9.5, true),
     decor('epave-coque', 31, 10),
     decor('cailloux', 1.5, 11.5, true),
-    decor('nappe-brume', 27, 11.5, true),
     decor('aretes-poisson', 4.5, 12),
     decor('roseaux-morts', 28.5, 12),
     decor('roseaux-morts', 31, 12),
@@ -521,8 +518,8 @@ export const BAIE_MORTE: CarteModele = {
   region: 11,
   largeur: 32,
   hauteur: 18,
-  // Niveau 109, Radeau : trajet proposé (cases cx, cy, 10 cases), tout entier sur l’eau, sans décor :
-  // (3, 5) (4, 5) (5, 5) (5, 4) (6, 4) (7, 4) (8, 4) (9, 4) (9, 5) (9, 6)
+  // Niveau 109, Radeau : trajet proposé (cases cx, cy, 8 cases), tout entier sur l’eau, sans décor, à une case de la rive : le radeau (88 px) ne recouvre ni rive ni chemin :
+  // (4, 5) (5, 5) (5, 4) (6, 4) (7, 4) (8, 4) (8, 5) (8, 6)
   chemins: [
     chemin([-1, 15], [5, 15], [5, 3], [29, 3], [29, 9], [21, 9], [21, 15], [13, 15], [13, 19]),
   ],
@@ -554,7 +551,7 @@ export const BAIE_MORTE: CarteModele = {
     decor('nappe-brume', 28.5, 11.5),
     decor('nappe-brume', 31.5, 11.5),
     decor('crane', 3, 12, true),
-    decor('nappe-brume', 16.5, 12.5, true),
+    decor('nappe-brume', 10.5, 14.5, true),
     decor('epave-coque', 23.5, 12.5),
     decor('pieu-amarre', 1, 13),
     decor('nappe-brume', 13.5, 13),
@@ -585,8 +582,8 @@ export const NAUFRAGE: CarteModele = {
   region: 11,
   largeur: 32,
   hauteur: 18,
-  // Niveau 110, Radeau : trajet proposé (cases cx, cy, 12 cases), tout entier sur l’eau, sans décor :
-  // (4, 5) (4, 4) (4, 3) (5, 3) (6, 3) (7, 3) (8, 3) (9, 3) (10, 3) (10, 4) (10, 5) (10, 6)
+  // Niveau 110, Radeau : trajet proposé (cases cx, cy, 11 cases), tout entier sur l’eau, sans décor, à une case de la rive : le radeau (88 px) ne recouvre ni rive ni chemin :
+  // (5, 6) (5, 5) (5, 4) (5, 3) (6, 3) (7, 3) (8, 3) (9, 3) (9, 4) (9, 5) (9, 6)
   chemins: [
     chemin([-1, 15], [3, 15], [3, 3], [7, 3], [7, 15], [23, 15], [23, 9], [33, 9]),
     chemin([15, -1], [15, 3], [23, 3], [23, 9], [33, 9]),
@@ -621,18 +618,18 @@ export const NAUFRAGE: CarteModele = {
     decor('crane', 31, 7, true),
     decor('ponton-pourri', 26.5, 7.5),
     decor('cailloux', 1, 8, true),
-    decor('roseaux-morts', 12, 9.5),
+    decor('roseaux-morts', 13, 10.5),
     decor('roseaux-morts', 14.5, 9.5, true),
     decor('cailloux', 1, 10.5),
     decor('epave-coque', 17, 10.5, true),
     decor('aretes-poisson', 5, 11, true),
-    decor('roseaux-morts', 11, 11.5),
+    decor('roseaux-morts', 14.5, 11.5),
     decor('roseaux-morts', 25, 11.5),
     decor('roseaux-morts', 1, 12.5),
     decor('epave-coque', 27.5, 12.5),
     decor('epave-mat', 13.5, 13.5, true),
     decor('ponton-pourri', 16.5, 13.5, true),
-    decor('roseaux-morts', 18.5, 13.5, true),
+    decor('roseaux-morts', 12.5, 12.5, true),
     decor('nappe-brume', 29.5, 13.5, true),
     decor('roseaux-morts', 31.5, 13.5),
     decor('roseaux-morts', 25.5, 14),

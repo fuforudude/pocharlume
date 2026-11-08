@@ -18,7 +18,7 @@ const CARTE_COULOIRS = { largeur: 32, hauteur: 18, chemins: [{ points: [{ x: 17,
 const CORBEAUX: GimmickCorbeaux = { type: 'corbeaux', couloirs: [{ cy: 6 }] };
 
 function niveauCouloirs(vagues: readonly Vague[]): Niveau {
-  return { id: 'essai-couloirs', aretesDepart: 900, carte: CARTE_COULOIRS, casesInterdites: casesInterditesDuNiveau(CARTE_COULOIRS, []), vagues, gimmick: CORBEAUX };
+  return { id: 'essai-couloirs', aretesDepart: 900, carte: CARTE_COULOIRS, casesInterdites: casesInterditesDuNiveau(CARTE_COULOIRS, [], []), vagues, gimmick: CORBEAUX };
 }
 
 /** Des corbeaux dans le couloir, et quelques paysans sur le chemin. */
@@ -32,7 +32,7 @@ function vaguesCouloir(fois = 6): Vague[] {
 }
 
 /** Radeau le long du chemin (y = 5) : de la case (1, 3) à la case (14, 3), centres (3, 7) → (29, 7). */
-const RADEAU: GimmickRadeau = { type: 'radeau', trajet: [{ cx: 1, cy: 3 }, { cx: 14, cy: 3 }], vitesse: 0.5, places: [{ dx: -0.5, dy: 0.25 }, { dx: 0.5, dy: 0.25 }, { dx: 0, dy: -0.5 }] };
+const RADEAU: GimmickRadeau = { type: 'radeau', trajet: [{ cx: 1, cy: 3 }, { cx: 14, cy: 3 }], vitesse: 0.5, places: [{ dx: -2, dy: 0 }, { dx: 0, dy: 0 }, { dx: 2, dy: 0 }] };
 const CARTE_RADEAU = { largeur: 32, hauteur: 18, chemins: [{ points: [{ x: 0, y: 5 }, { x: 32, y: 5 }] }], departHeros: { x: 28, y: 1 } };
 
 /**
