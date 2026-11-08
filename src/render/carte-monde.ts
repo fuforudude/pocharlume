@@ -144,6 +144,42 @@ function etoile(ctx: CanvasRenderingContext2D, x: number, y: number, couleur: st
   });
 }
 
+/**
+ * Le plus grand zoom entier, entre `plancher` et `prefere`, auquel une boîte de `largeur` × `hauteur` pixels du fond (plus la
+ * marge de cadrage de chaque côté) tient dans la zone libre de `libreL` × `libreH` pixels physiques ; `null` si elle n'y tient
+ * à aucun de ces zooms.
+ */
+export function zoomQuiFait(largeur: number, hauteur: number, libreL: number, libreH: number, prefere: number, plancher: number): number | null {
+  for (let z = Math.floor(prefere); z >= Math.max(1, plancher); z--) {
+    if ((largeur + 2 * MARGE_CADRAGE) * z <= libreL && (hauteur + 2 * MARGE_CADRAGE) * z <= libreH) return z;
+  }
+  return null;
+}
+
+/**
+ * Le calcul du cadrage, sans caméra : le zoom et le point du fond à mettre au milieu de la zone libre (l'écran de
+ * `ecranL` × `ecranH` pixels physiques, moins `margeHaut` pixels en haut). Si la boîte des `points` tient à un zoom entier
+ * entre `plancher` et `prefere`, on la centre ; sinon on centre sur `focus` au zoom préféré.
+ */
+export function calculerCadrage(
+  points: readonly Point[], focus: Point, ecranL: number, ecranH: number, margeHaut: number, prefere: number, plancher: number,
+): { zoom: number; x: number; y: number } {
+  const premier = points[0];
+  if (!premier) return { zoom: prefere, x: focus.x, y: focus.y };
+  let xMin = premier.x;
+  let xMax = premier.x;
+  let yMin = premier.y;
+  let yMax = premier.y;
+  for (const p of points) {
+    xMin = Math.min(xMin, p.x);
+    xMax = Math.max(xMax, p.x);
+    yMin = Math.min(yMin, p.y);
+    yMax = Math.max(yMax, p.y);
+  }
+  const zoom = zoomQuiFait(xMax - xMin, yMax - yMin, ecranL, ecranH - margeHaut, prefere, plancher);
+  return zoom === null ? { zoom: prefere, x: focus.x, y: focus.y } : { zoom, x: (xMin + xMax) / 2, y: (yMin + yMax) / 2 };
+}
+
 export class RenduCarteMonde {
   readonly camera: Camera;
   /** Pixels physiques par pixel CSS. */
@@ -190,39 +226,36 @@ export class RenduCarteMonde {
     this.camera.redimensionner(l, h);
   }
 
-  /** Met le point (x, y) du fond au milieu de la vue (la caméra reste dans les bornes du fond). */
+  /**
+   * Réserve en haut du canvas la bande que l'en-tête de l'écran recouvre (pixels CSS, mesurés à l'affichage) : le cadrage
+   * se fait dans la place restante, et la vue peut être glissée jusqu'à amener n'importe quel nœud sous l'en-tête.
+   */
+  definirMargeHaut(cssPx: number): void {
+    this.camera.definirMarges(Math.max(0, cssPx) * this.ratio, 0, 0, 0);
+  }
+
+  /** Met le point (x, y) du fond au milieu de la zone libre de la vue (la caméra reste dans les bornes du fond). */
   centrerSur(x: number, y: number): void {
-    this.camera.x = x - this.camera.vueL / 2;
-    this.camera.y = y - this.camera.vueH / 2;
-    this.camera.contraindre();
+    const cam = this.camera;
+    cam.x = x - (cam.vueL / 2);
+    cam.y = y - (cam.vueH + cam.margeHautLogique) / 2;
+    cam.contraindre();
   }
 
   /**
    * Cadre la vue à 2 pixels CSS par pixel du fond (jamais plus : le pixel art deviendrait grossier, jamais moins
    * que le plus petit zoom entier). Si tous les `points` y tiennent, la vue se centre sur leur boîte ; sinon sur
-   * `focus`, le nœud que le joueur va jouer. Pincer ou tourner la molette montre la région en entier.
+   * `focus`, le nœud que le joueur va jouer. Pincer ou tourner la molette montre la région en entier. Tout se calcule dans
+   * la zone libre sous l'en-tête ; pour que les `points` y tiennent, le zoom descend d'un cran à la fois, jamais en dessous
+   * d'un pixel CSS par pixel du fond (les chiffres des nœuds deviendraient illisibles).
    */
   cadrer(points: readonly Point[], focus: Point): void {
     const cam = this.camera;
-    cam.zoom = Math.min(cam.zoomMax, Math.max(cam.zoomMin, Math.round(ZOOM_CSS_MAX * this.ratio)));
-    const premier = points[0];
-    if (!premier) {
-      this.centrerSur(focus.x, focus.y);
-      return;
-    }
-    let xMin = premier.x;
-    let xMax = premier.x;
-    let yMin = premier.y;
-    let yMax = premier.y;
-    for (const p of points) {
-      xMin = Math.min(xMin, p.x);
-      xMax = Math.max(xMax, p.x);
-      yMin = Math.min(yMin, p.y);
-      yMax = Math.max(yMax, p.y);
-    }
-    const tient = (xMax - xMin + 2 * MARGE_CADRAGE) * cam.zoom <= cam.ecranL && (yMax - yMin + 2 * MARGE_CADRAGE) * cam.zoom <= cam.ecranH;
-    if (tient) this.centrerSur((xMin + xMax) / 2, (yMin + yMax) / 2);
-    else this.centrerSur(focus.x, focus.y);
+    const prefere = Math.min(cam.zoomMax, Math.max(cam.zoomMin, Math.round(ZOOM_CSS_MAX * this.ratio)));
+    const plancher = Math.min(prefere, Math.max(cam.zoomMin, Math.ceil(this.ratio)));
+    const cadrage = calculerCadrage(points, focus, cam.ecranL, cam.ecranH, cam.margeHautLogique * cam.zoom, prefere, plancher);
+    cam.zoom = cadrage.zoom;
+    this.centrerSur(cadrage.x, cadrage.y);
   }
 
   /** Rayon, en pixels du fond, de la zone qui répond au toucher autour d'un nœud (26 px CSS au moins). */

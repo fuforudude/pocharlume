@@ -29,7 +29,10 @@ export interface AmbianceRegion {
   readonly brume: string;
 }
 
-/** Ambiance des régions qui n'ont pas encore la leur : un gris neutre. */
+/**
+ * Ambiance des régions de `AMBIANCES` absentes : un gris neutre. Elle s'applique donc aussi aux régions 1 à 10 et 12 à 15 ; ce n'est
+ * visible que sur le panneau « à venir » d'une région sans niveaux, que seules les régions 12 à 15 montrent aujourd'hui.
+ */
 const AMBIANCE_PROVISOIRE: AmbianceRegion = { fond: '#16161a', brume: '#2a2a31' };
 /** Les Grèves Grises (région 11) : cendre et brume sur l'eau, du gris-bleu terne. */
 const AMBIANCE_GREVES_GRISES: AmbianceRegion = { fond: '#15181b', brume: '#4b5258' };

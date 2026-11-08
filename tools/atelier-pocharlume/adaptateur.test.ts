@@ -40,8 +40,8 @@ async function sauverCarte(id: string, deplaces: Record<string, { x: number; y: 
 }
 
 describe('sources de sprites : aller-retour sans perte', () => {
-  it('compte les 91 fichiers de sprites (dont statues.txt, jalon 5, les 20 nouveaux ennemis, indications.txt, le décor et les tuiles de la région 11, et le Passeur)', () => {
-    expect(FICHIERS).toHaveLength(91);
+  it('compte les 92 fichiers de sprites (dont statues.txt, jalon 5, les 20 nouveaux ennemis, indications.txt, le décor et les tuiles de la région 11, le Passeur, et radeau.txt)', () => {
+    expect(FICHIERS).toHaveLength(92);
   });
 
   it('réécrire toutes les grilles de chaque fichier avec leur propre contenu le laisse identique à l\'octet près', () => {

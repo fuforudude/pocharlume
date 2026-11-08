@@ -39,6 +39,8 @@ export class Effet {
   /** Nombre affiché (texte) ou rayon en pixels (ordre). */
   valeur = 0;
   couleur = '#ffffff';
+  /** Identifiant de la tour que l'effet suit (une tour du radeau, qui bouge), -1 : l'effet reste où il est né. */
+  suitTour = -1;
 }
 
 export class PoolEffets {
@@ -81,6 +83,7 @@ export class PoolEffets {
     choisi.duree = duree;
     choisi.valeur = 0;
     choisi.couleur = '#ffffff';
+    choisi.suitTour = -1;
     return choisi;
   }
 

@@ -129,7 +129,6 @@ function v6versV7(v6: Brut): Brut {
   return { ...v6, version: 7, meta: { ...objet(v6.meta), bestiaire: { rencontres: [], fiches: true } } };
 }
 
-/** `MIGRATIONS[n]` fait passer une sauvegarde de la version n à la version n + 1. */
 /**
  * v7 vers v8 : la campagne passe de 100 à 150 niveaux (régions 11 à 15). Avant, le niveau 100 gagné laissait `niveauMax` à 100 ;
  * désormais il débloque le niveau 101 et la région 11. Une sauvegarde dont le niveau 100 est déjà gagné reçoit ce déblocage
@@ -142,6 +141,7 @@ function v7versV8(v7: Brut): Brut {
   return { ...v7, version: 8, progression: { ...progression, niveauMax: 101 }, meta: { ...objet(v7.meta), regionMax: 11 } };
 }
 
+/** `MIGRATIONS[n]` fait passer une sauvegarde de la version n à la version n + 1. */
 export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: v1versV2, 2: v2versV3, 3: v3versV4, 4: v4versV5, 5: v5versV6, 6: v6versV7, 7: v7versV8 };
 
 /**

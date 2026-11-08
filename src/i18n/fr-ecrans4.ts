@@ -76,7 +76,7 @@ export const frEcrans4 = {
 
   // Bilan de campagne : déblocage du mode infini, fin de campagne
   'fin.bilan_infini_debloque': 'Mode infini débloqué : il t’attend sur l’accueil.',
-  'fin.bilan_campagne': 'Campagne terminée.',
+  'fin.bilan_campagne': 'Histoire terminée.',
 
   // Écran de fin de campagne (victoire sur le Soleil Blême)
   'campagne.fin_titre': 'Les Cendres Retombent',

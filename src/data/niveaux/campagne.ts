@@ -48,7 +48,7 @@ export const REGIONS: readonly (readonly NiveauCampagne[])[] = PLANS_REGIONS.map
 /** Les 110 niveaux des régions 1 à 11, dans l'ordre. */
 export const CAMPAGNE: readonly NiveauCampagne[] = REGIONS.flat();
 
-/** Le niveau de campagne de ce numéro (1 à 110), ou `undefined`. */
+/** Le niveau de campagne de ce numéro (1 à 110 aujourd'hui, 150 avec toutes les régions livrées), ou `undefined`. */
 export function niveauDeCampagne(numero: number): NiveauCampagne | undefined {
   return CAMPAGNE[numero - 1];
 }

@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ENNEMIS } from '../data/ennemis';
-import { FIXTURE_V1, sauvegardeRemplie } from './aides.test-utils';
+import { FIXTURE_V1, FIXTURE_V7, sauvegardeRemplie } from './aides.test-utils';
 import { crc32, depuisBase64Url, exporterCode, importerCode, PREFIXE_CODE, remplacerProgression, TAILLE_MAX_CODE, versBase64Url } from './code';
 import { sauvegardeVide, type Sauvegarde } from './format';
 import { enregistrerVictoire } from './progression';
@@ -15,6 +15,8 @@ async function fabriquerCode(json: string, mode: 'j' | 'z' = 'j'): Promise<strin
   const corps = `${mode}.${versBase64Url(octets)}`;
   return `${PREFIXE_CODE}.${corps}.${crc32(new TextEncoder().encode(corps)).toString(16).padStart(8, '0')}`;
 }
+
+afterEach(() => { vi.unstubAllGlobals(); });
 
 function campagneComplete(): Sauvegarde {
   let s = sauvegardeVide();
@@ -101,6 +103,33 @@ describe('export et import d’un code', () => {
     const json = JSON.stringify({ version: source.version, progression: source.progression, reglages: source.reglages, meta: source.meta });
     const r = await importerCode(await fabriquerCode(json, 'j'));
     expect(r.ok && r.sauvegarde.progression).toEqual(source.progression);
+  });
+
+  it('un joueur complet exporté sans compression (mode j, plus de 16 Ko) se réimporte', async () => {
+    // Safari avant 16.4, Firefox avant 113 : pas de CompressionStream, le code est le JSON en base64url.
+    vi.stubGlobal('CompressionStream', undefined);
+    vi.stubGlobal('DecompressionStream', undefined);
+    const complete = campagneComplete();
+    const defis = Object.fromEntries(Array.from({ length: 150 }, (_, i) => [String(i + 1), { heroique: true as const, fer: true as const }]));
+    const source: Sauvegarde = { ...complete, meta: { ...sauvegardeRemplie().meta, regionMax: 15, defis, bestiaire: { rencontres: Object.keys(ENNEMIS).sort(), fiches: true } } };
+    const code = await exporterCode(source);
+    expect(code.startsWith(`${PREFIXE_CODE}.j.`)).toBe(true);
+    expect(code.length).toBeGreaterThan(16 * 1024);
+    expect(code.length).toBeLessThanOrEqual(TAILLE_MAX_CODE);
+    const r = await importerCode(code);
+    if (!r.ok) throw new Error(r.detail);
+    expect(r.sauvegarde.progression).toEqual(source.progression);
+    expect(r.sauvegarde.progression.niveauMax).toBe(150);
+  });
+
+  it('importe le code d’une v7 qui a fini l’histoire : niveau 101 et région 11', async () => {
+    const v7 = JSON.parse(FIXTURE_V7) as Record<string, unknown>;
+    Reflect.deleteProperty(v7, 'partie');
+    const r = await importerCode(await fabriquerCode(JSON.stringify(v7), 'z'));
+    if (!r.ok) throw new Error(r.detail);
+    expect(r.depuis).toBe(7);
+    expect(r.sauvegarde.progression.niveauMax).toBe(101);
+    expect(r.sauvegarde.meta.regionMax).toBe(11);
   });
 
   it('importe un code d’une ancienne version en le migrant', async () => {

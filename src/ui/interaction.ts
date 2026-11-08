@@ -3,9 +3,9 @@
 // jamais l'état de la partie, elle renvoie l'action à envoyer au moteur (qui la valide et la met au journal).
 import { DIEUX } from '../data/dieux';
 import { OBJETS } from '../data/objets';
-import type { Action, EtatPartie, RaisonRefus } from '../engine';
+import type { Action, EtatPartie, LieuTour, RaisonRefus } from '../engine';
 import type { CaseGrille } from '../engine/definitions';
-import { caseSousPoint, estCaseDeChemin, estCaseInterdite, tourSurCase, validerAction } from '../engine';
+import { caseSousPoint, estCaseDeChemin, estCaseInterdite, gimmickRadeau, positionPlace, tourDuLieu, tourSurCase, validerAction } from '../engine';
 import type { FamilleTour } from '../engine/etat';
 import { chercherParId } from '../engine/recherche';
 import { tCle } from '../i18n';
@@ -14,8 +14,11 @@ import type { ApercuConstruction, ElementMenu } from './menu-cercle';
 
 export type Mode =
   | { readonly type: 'libre' }
-  /** Le menu en cercle d'une case (libre, ou portant une tour) est ouvert. */
-  | { readonly type: 'menu'; readonly cx: number; readonly cy: number }
+  /**
+   * Le menu en cercle d'une case (libre, ou portant une tour) est ouvert ; ou celui d'une place du radeau : `place` est alors son
+   * numéro et `cx`, `cy` valent -1 (comme pour une tour du radeau dans le moteur).
+   */
+  | { readonly type: 'menu'; readonly cx: number; readonly cy: number; readonly place?: number }
   /** Le héros est sélectionné : le prochain point touché est son ordre. */
   | { readonly type: 'heros' }
   | { readonly type: 'sort'; readonly emplacement: number }
@@ -39,6 +42,43 @@ export type CibleTouchee = { readonly type: 'heros' } | { readonly type: 'case';
 
 /** Décalage entre le pied d'une tour ou d'un personnage et le centre de son sprite, en tuiles : on touche le corps. */
 const CENTRE_SPRITE = 0.5;
+/**
+ * Rayon (tuiles) dans lequel on touche une place du radeau : le rayon du doigt, borné. Assez large pour viser une place qui bouge,
+ * assez étroit pour ne pas avaler les cases de la rive ; les places sont à une tuile l'une de l'autre, la plus proche l'emporte.
+ */
+const RAYON_PLACE_MIN = 0.6;
+const RAYON_PLACE_MAX = 0.9;
+
+/** Le lieu (case ou place du radeau) dont le menu est ouvert, au format des actions du moteur ; null hors du menu. */
+export function lieuDuMenu(mode: Mode): LieuTour | null {
+  if (mode.type !== 'menu') return null;
+  return mode.place === undefined ? { cx: mode.cx, cy: mode.cy } : { place: mode.place };
+}
+
+/**
+ * La place du radeau touchée en (x, y) (tuiles), ou -1 : la plus proche dans le rayon du doigt (borné), mesuré au pied de la
+ * place et, si une tour l'occupe, aussi au corps de la tour. La position est celle du dernier pas joué (celle des tours) : le
+ * rendu montre le radeau au plus un pas plus tôt, quelques centièmes de tuile d'écart.
+ */
+export function placeTouchee(etat: EtatPartie, x: number, y: number, rayon: number): number {
+  const g = gimmickRadeau(etat.niveau);
+  if (!g) return -1;
+  const r = Math.min(Math.max(rayon, RAYON_PLACE_MIN), RAYON_PLACE_MAX);
+  const pas = Math.max(0, etat.pas - 1);
+  let meilleure = -1;
+  let meilleureDistance = r * r;
+  for (let n = 0; n < g.places.length; n++) {
+    const p = positionPlace(g, pas, n);
+    const dx = p.x - x;
+    let d = dx * dx + (p.y - y) * (p.y - y);
+    if (tourDuLieu(etat, { place: n })) d = Math.min(d, dx * dx + (p.y - CENTRE_SPRITE - y) * (p.y - CENTRE_SPRITE - y));
+    if (d <= meilleureDistance) {
+      meilleure = n;
+      meilleureDistance = d;
+    }
+  }
+  return meilleure;
+}
 
 /**
  * Ce qui est touché en (x, y) (tuiles) : le héros s'il est dans `rayon` tuiles (la taille de la cible tactile, 44 px CSS,
@@ -71,6 +111,8 @@ export class Interaction {
   mode: Mode = LIBRE;
   /** La case sous le pointeur (survol de la souris, ou doigt posé), null si on ne vise rien. */
   visee: CaseGrille | null = null;
+  /** La place du radeau sous le pointeur, -1 si aucune (elle passe avant la case d'eau dessous). */
+  viseePlace = -1;
   /** Le pointeur survole une case du chemin (qui ne s'éclaire pas) : une touche de construction ne doit pas se rabattre sur le menu ouvert. */
   private surChemin = false;
   /** Le bouton « construire » du menu survolé : sa portée et son ralliement sont montrés sur la carte. */
@@ -96,13 +138,19 @@ export class Interaction {
       default:
         break;
     }
+    if (cible?.type === 'heros') return this.selectionnerHeros(etat);
+    // Une place du radeau passe avant la case d'eau sous elle : on y construit comme sur une case libre.
+    const place = placeTouchee(etat, x, y, rayon);
+    if (place >= 0) {
+      this.mode = mode.type === 'menu' && mode.place === place ? LIBRE : { type: 'menu', cx: -1, cy: -1, place };
+      return RIEN;
+    }
     if (!cible) return this.annuler();
-    if (cible.type === 'heros') return this.selectionnerHeros(etat);
     // Une case du chemin n'offre aucune pose : le toucher referme seulement le menu ouvert (le héros s'y envoie par son mode).
     if (estCaseDeChemin(etat.niveau.carte, cible.cx, cible.cy)) return this.annuler();
     // Une case interdite (décor) sans tour ne s'ouvre pas : le joueur sait pourquoi.
     if (estCaseInterdite(etat.niveau, cible.cx, cible.cy) && !tourSurCase(etat, cible.cx, cible.cy)) return { action: null, refus: 'case_interdite' };
-    this.mode = mode.type === 'menu' && mode.cx === cible.cx && mode.cy === cible.cy ? LIBRE : { type: 'menu', cx: cible.cx, cy: cible.cy };
+    this.mode = mode.type === 'menu' && mode.place === undefined && mode.cx === cible.cx && mode.cy === cible.cy ? LIBRE : { type: 'menu', cx: cible.cx, cy: cible.cy };
     return RIEN;
   }
 
@@ -112,7 +160,9 @@ export class Interaction {
    */
   viser(etat: EtatPartie, x: number, y: number): void {
     const mode = this.mode.type;
-    const sous = mode === 'libre' || mode === 'menu' ? caseSousPoint(etat.niveau.carte, x, y) : null;
+    const libre = mode === 'libre' || mode === 'menu';
+    this.viseePlace = libre ? placeTouchee(etat, x, y, 0) : -1;
+    const sous = libre && this.viseePlace < 0 ? caseSousPoint(etat.niveau.carte, x, y) : null;
     // Le chemin ne s'éclaire pas : on n'y construit rien.
     this.surChemin = sous !== null && estCaseDeChemin(etat.niveau.carte, sous.cx, sous.cy);
     this.visee = this.surChemin ? null : sous;
@@ -121,6 +171,7 @@ export class Interaction {
   /** Le pointeur a quitté la carte, ou le doigt s'est levé : plus aucune case n'est éclairée. */
   cesserDeViser(): void {
     this.visee = null;
+    this.viseePlace = -1;
     this.surChemin = false;
   }
 
@@ -197,9 +248,9 @@ export class Interaction {
     const mode = this.mode;
     // Souris sur le chemin : rien ne se construit, ni là ni sur la case du menu ouvert ailleurs.
     if (this.surChemin) return { action: null, refus: 'case_interdite' };
-    const cible = this.visee ?? (mode.type === 'menu' ? mode : null);
-    if (!cible || tourSurCase(etat, cible.cx, cible.cy)) return RIEN;
-    return this.ordonner(etat, { type: 'construire', cx: cible.cx, cy: cible.cy, tour: famille });
+    const lieu: LieuTour | null = this.viseePlace >= 0 ? { place: this.viseePlace } : this.visee ? { cx: this.visee.cx, cy: this.visee.cy } : lieuDuMenu(mode);
+    if (!lieu || tourDuLieu(etat, lieu)) return RIEN;
+    return this.ordonner(etat, { type: 'construire', tour: famille, ...lieu });
   }
 
   /** Échap, ou un toucher dans le vide : ferme les menus et abandonne la visée. */
@@ -233,6 +284,8 @@ export class Interaction {
     const mode = this.mode;
     surb.cx = -1;
     surb.cy = -1;
+    surb.place = -1;
+    surb.viseePlace = -1;
     surb.portee = 0;
     surb.viseeCx = -1;
     surb.viseeCy = -1;
@@ -241,11 +294,16 @@ export class Interaction {
     surb.apercuRalliement = false;
     surb.heros = mode.type === 'heros';
     surb.sortRayon = mode.type === 'sort' ? rayonSort(etat, mode.emplacement) : mode.type === 'objet' ? rayonObjet(etat, mode.emplacement) : 0;
-    if (mode.type === 'menu' || mode.type === 'ralliement') {
+    const lieu = lieuDuMenu(mode);
+    if (mode.type === 'menu' && lieu?.place !== undefined) {
+      surb.place = lieu.place;
+      surb.portee = tourDuLieu(etat, lieu)?.stats.portee ?? 0;
+    } else if (mode.type === 'menu' || mode.type === 'ralliement') {
       surb.cx = mode.cx;
       surb.cy = mode.cy;
       surb.portee = tourSurCase(etat, mode.cx, mode.cy)?.stats.portee ?? 0;
     }
+    if (this.viseePlace >= 0 && etat.statut === 'en_cours') surb.viseePlace = this.viseePlace;
     const visee = this.visee;
     if (visee && etat.statut === 'en_cours') {
       surb.viseeCx = visee.cx;
@@ -253,8 +311,8 @@ export class Interaction {
       // Rouge : un grand décor (le chemin, lui, ne s'éclaire pas). Une case qui porte une tour s'ouvre (améliorer, vendre) : elle reste claire.
       surb.viseeInterdite = estCaseInterdite(etat.niveau, visee.cx, visee.cy) && !tourSurCase(etat, visee.cx, visee.cy);
     }
-    // La portée d'une tour qu'on s'apprête à construire se mesure depuis la case du menu, qui l'accueillerait.
-    const apercu = mode.type === 'menu' && !tourSurCase(etat, mode.cx, mode.cy) ? this.apercu : null;
+    // La portée d'une tour qu'on s'apprête à construire se mesure depuis la case (ou la place) du menu, qui l'accueillerait.
+    const apercu = lieu && !tourDuLieu(etat, lieu) ? this.apercu : null;
     if (apercu) {
       surb.apercuPortee = apercu.portee;
       if (apercu.ralliement) {

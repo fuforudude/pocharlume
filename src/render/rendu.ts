@@ -24,6 +24,7 @@ import { construireSol, peindreSol } from './sol';
 import { tuileTouchee } from './zones';
 import { zoomPourCase } from './zoom-tactile';
 import { CATEGORIE, DECALAGE_BASE_TOUR, DEPLOIEMENT_NUAGE, Suivi, type OptionsCollection, type Visuel, type VisuelProjectile } from './suivi';
+import { DEMI_VISEE_PLACE, DessinGimmicks, placeAffichee } from './gimmicks';
 
 export type { OptionsCollection } from './suivi';
 
@@ -77,6 +78,10 @@ export class Surbrillance {
   /** Case (colonne, ligne) dont le menu est ouvert, -1 si aucune. */
   cx = -1;
   cy = -1;
+  /** Place du radeau dont le menu est ouvert, -1 si aucune : la portée et l'anneau suivent le radeau. */
+  place = -1;
+  /** Place du radeau sous le pointeur, -1 si aucune : elle s'éclaire comme une case libre. */
+  viseePlace = -1;
   /** Portée à tracer autour du centre de cette case (tuiles), 0 si aucune. */
   portee = 0;
   /** Case sous le pointeur (souris ou doigt posé), -1 si aucune : elle s'éclaire, en rouge sombre si on ne peut pas y construire. */
@@ -171,6 +176,7 @@ export class Rendu {
   private readonly tourAffamee: SpriteAtlas | undefined;
   private readonly nuage: SpriteAtlas | undefined;
   private readonly ondulation: SpriteAtlas | undefined;
+  private readonly gimmicks: DessinGimmicks;
 
   /**
    * `collection` : les skins et le familier équipés par le joueur (voir `OptionsCollection`) ; on peut aussi les donner ou les
@@ -192,6 +198,7 @@ export class Rendu {
     this.camera = new Camera(carte.largeur * TUILE, carte.hauteur * TUILE);
     this.sol = peindreSol(construireSol(carte, visuel), atlas);
     this.suivi = new Suivi(atlas, this.effets);
+    this.gimmicks = new DessinGimmicks(atlas, ctx);
     this.etourdi = atlas.sprite('etourdi');
     this.piege = atlas.sprite('piege');
     this.tuileVoile = atlas.sprite('effet-voile-nuit-tuile');
@@ -305,20 +312,24 @@ export class Rendu {
     ctx.fillStyle = FOND;
     ctx.fillRect(0, 0, l, h);
     ctx.drawImage(this.sol, -ox, -oy);
+    // Les couloirs du Vol de Corbeaux, tracés sur le sol toute la partie.
+    this.gimmicks.dessinerCouloirs(etat, temps, this.suivi.animationsReduites(), ox, oy, l);
 
     this.dessinerCadavres(temps, ox, oy);
     this.dessinerAuSol(etat, temps, ox, oy);
+    // Le radeau flotte sous les entités : ses tours sont dessinées par-dessus, à la position de leur place.
+    this.gimmicks.dessinerRadeau(etat, alpha, ox, oy);
     this.interpoler(alpha, ox, oy);
     this.trier();
     this.dessinerOmbres(l, h);
     this.dessinerHalos(temps, l, h);
     this.dessinerAnneauxArriere(temps, ox, oy);
     this.dessinerProfondeur(temps, l, h);
-    this.dessinerVisee(etat, surb, ox, oy);
+    this.dessinerVisee(etat, surb, alpha, ox, oy);
     this.dessinerProjectiles(alpha, temps, ox, oy);
     this.dessinerEffets(temps, ox, oy);
     this.dessinerBarres(temps, l, h);
-    this.dessinerSurbrillance(etat, surb, temps, ox, oy);
+    this.dessinerSurbrillance(etat, surb, alpha, temps, ox, oy);
 
     const ecran = this.ecran;
     ecran.imageSmoothingEnabled = false;
@@ -686,8 +697,9 @@ export class Rendu {
    */
   private dessinerAnneau(e: Effet, t: number, ox: number, oy: number, arriere: boolean): void {
     const ctx = this.ctx;
-    const cx = e.x - ox;
-    const cy = e.y - oy - 1;
+    const suivie = this.tourSuivie(e);
+    const cx = suivie ? suivie.px : e.x - ox;
+    const cy = (suivie ? suivie.py : e.y - oy) - 1;
     const rx = rayonAnneau(t, e.valeur);
     const ry = rx * 0.45;
     const n = Math.max(16, Math.ceil(rx * 5));
@@ -710,17 +722,25 @@ export class Rendu {
     ctx.globalAlpha = 1;
   }
 
+  /** La tour qu'un effet suit (tour du radeau, qui bouge) : son visuel, à sa position interpolée de cette image. */
+  private tourSuivie(e: Effet): Visuel | undefined {
+    return e.suitTour >= 0 ? this.suivi.tours.get(e.suitTour) : undefined;
+  }
+
   /** Poussière et éclats aux deux coins de la base d'une tour améliorée. */
   private dessinerPoussiere(e: Effet, t: number, ox: number, oy: number): void {
     const ctx = this.ctx;
     const s = this.particuleTemp;
+    const suivie = this.tourSuivie(e);
+    const bx = suivie ? suivie.px : e.x - ox;
+    const by = suivie ? suivie.py : e.y - oy;
     for (let cote = -1; cote <= 1; cote += 2) {
       for (let i = 0; i < PARTICULES.length; i++) {
         if (e.echelle === 0 && PARTICULES[i]?.eclat) continue;
         if (!particule(i, cote as -1 | 1, t, e.valeur, s)) continue;
         ctx.globalAlpha = s.alpha;
         ctx.fillStyle = s.eclat ? (i % 2 === 0 ? ECLAT_BOIS : ECLAT_OR) : POUSSIERE_COULEUR;
-        ctx.fillRect(e.x - ox + s.x, e.y - oy + s.y - 1, s.taille, s.taille);
+        ctx.fillRect(bx + s.x, by + s.y - 1, s.taille, s.taille);
       }
     }
     ctx.globalAlpha = 1;
@@ -866,15 +886,25 @@ export class Rendu {
    * La case sous le pointeur : un voile et quatre coins. Dessinée par-dessus le décor et les tours (un grand décor qui interdit
    * la case la cacherait sinon), mais en voile léger. Rien n'est dessiné tant qu'on ne vise pas.
    */
-  private dessinerVisee(etat: EtatPartie, surb: Surbrillance, ox: number, oy: number): void {
+  private dessinerVisee(etat: EtatPartie, surb: Surbrillance, alpha: number, ox: number, oy: number): void {
+    const place = surb.viseePlace >= 0 ? placeAffichee(etat, alpha, surb.viseePlace) : null;
+    if (place) {
+      // Une place du radeau visée : un cadre d'une tuile autour d'elle, qui suit le radeau.
+      const demi = DEMI_VISEE_PLACE;
+      this.cadreVisee(Math.round(place.x * TUILE) - ox - demi, Math.round(place.y * TUILE) - oy - demi, demi * 2, false);
+      return;
+    }
     if (surb.viseeCx < 0 || surb.viseeCy < 0 || !caseExiste(etat.niveau.carte, surb.viseeCx, surb.viseeCy)) return;
-    const ctx = this.ctx;
     const cote = REGLES.tailleCase * TUILE;
-    const x = surb.viseeCx * cote - ox;
-    const y = surb.viseeCy * cote - oy;
-    ctx.fillStyle = surb.viseeInterdite ? VISEE_INTERDITE_VOILE : VISEE_LIBRE_VOILE;
+    this.cadreVisee(surb.viseeCx * cote - ox, surb.viseeCy * cote - oy, cote, surb.viseeInterdite);
+  }
+
+  /** Un voile et quatre coins sur le carré de côté `cote` dont le coin haut gauche est (x, y) du tampon. */
+  private cadreVisee(x: number, y: number, cote: number, interdite: boolean): void {
+    const ctx = this.ctx;
+    ctx.fillStyle = interdite ? VISEE_INTERDITE_VOILE : VISEE_LIBRE_VOILE;
     ctx.fillRect(x + 1, y + 1, cote - 2, cote - 2);
-    ctx.fillStyle = surb.viseeInterdite ? VISEE_INTERDITE_COIN : VISEE_LIBRE_COIN;
+    ctx.fillStyle = interdite ? VISEE_INTERDITE_COIN : VISEE_LIBRE_COIN;
     const fin = cote - 1;
     for (const [px, py, sx, sy] of [[1, 1, 1, 1], [fin, 1, -1, 1], [1, fin, 1, -1], [fin, fin, -1, -1]] as const) {
       // Un coin : deux traits d'un pixel, l'un horizontal et l'autre vertical.
@@ -883,11 +913,12 @@ export class Rendu {
     }
   }
 
-  private dessinerSurbrillance(etat: EtatPartie, surb: Surbrillance, temps: number, ox: number, oy: number): void {
+  private dessinerSurbrillance(etat: EtatPartie, surb: Surbrillance, alpha: number, temps: number, ox: number, oy: number): void {
     const ctx = this.ctx;
     const phase = Math.floor(temps / 90);
-    if (surb.cx >= 0 && surb.cy >= 0) {
-      const s = caseExiste(etat.niveau.carte, surb.cx, surb.cy) ? centreCase(surb.cx, surb.cy) : null;
+    if (surb.place >= 0 || (surb.cx >= 0 && surb.cy >= 0)) {
+      // Une place du radeau se lit au pas affiché : la portée et l'anneau de sélection suivent la tour qui bouge.
+      const s = surb.place >= 0 ? placeAffichee(etat, alpha, surb.place) : caseExiste(etat.niveau.carte, surb.cx, surb.cy) ? centreCase(surb.cx, surb.cy) : null;
       if (s) {
         const cx = Math.round(s.x * TUILE) - ox;
         const cy = Math.round(s.y * TUILE) - oy;

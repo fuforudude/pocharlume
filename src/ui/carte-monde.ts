@@ -22,6 +22,7 @@ import { RenduCarteMonde } from '../render/carte-monde';
 import { DIFFICULTES_SAUVEGARDE, etoilesDisponibles, totalEtoiles, type ChoixPartie, type DifficulteSauvegarde } from '../save';
 import { dessinerIconesDefis } from './carte-monde-defis';
 import { ennemisDeLaFiche } from './bestiaire-logique';
+import { contenuParticularite, ligneParticularite, nomParticularite, phraseParticularite } from './particularites';
 import { decouvertesDuNiveau } from './decouvertes';
 import {
   directionDeTouche,
@@ -38,7 +39,7 @@ import {
   type DeplacementRegion,
   type VueNoeud,
 } from './carte-monde-logique';
-import { attacherBulleEnnemi, attacherBulleTour, fermerBulle } from './bulle';
+import { attacherBulle, attacherBulleEnnemi, attacherBulleTour, fermerBulle } from './bulle';
 import { bossDuNiveau } from './bulle-contenus';
 import { bouton, el, image } from './dom';
 import { afficherConfirmation } from './ecrans';
@@ -246,6 +247,19 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   // pastille de la région montrée est ramenée dans la bande (voir `majRegionsUI`).
   const bandePuces = el('div', 'region-puces');
   bandePuces.append(...puces);
+  // La molette fait défiler la bande de côté (un défilement vertical devient horizontal), sans faire défiler la page quand la bande
+  // ne déborde pas ou qu'elle est déjà au bout.
+  bandePuces.addEventListener('wheel', (e) => {
+    if (e.deltaX !== 0 || e.deltaY === 0) return;
+    const avant = bandePuces.scrollLeft;
+    bandePuces.scrollLeft += e.deltaY;
+    if (bandePuces.scrollLeft !== avant) e.preventDefault();
+  }, { passive: false, signal });
+  /** Ramène la pastille de la région montrée au milieu de la bande (la bande ne défile que si elle déborde). */
+  const centrerPuceCourante = (): void => {
+    const b = puces[indiceRegion];
+    if (b) bandePuces.scrollLeft = Math.max(0, b.offsetLeft - (bandePuces.clientWidth - b.offsetWidth) / 2);
+  };
   rangeeRegions.append(flechePrecedente, bandePuces, flecheSuivante, nomRegion);
   haut.append(rangeeRegions);
 
@@ -268,9 +282,8 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
       b.setAttribute('aria-disabled', String(!vr.ouverte));
       b.querySelector('img.cadenas')?.remove();
       if (!vr.ouverte) b.append(image(atlas.iconeUrl('icone-cadenas', 1), 'cadenas'));
-      // La pastille de la région montrée au milieu de la bande (la bande ne défile que si elle déborde).
-      if (courante) bandePuces.scrollLeft = Math.max(0, b.offsetLeft - (bandePuces.clientWidth - b.offsetWidth) / 2);
     });
+    centrerPuceCourante();
     const precedenteOuverte = indiceRegion > 0;
     const suivanteOuverte = vuesRegions[indiceRegion + 1]?.ouverte ?? false;
     flechePrecedente.classList.toggle('grise', !precedenteOuverte);
@@ -279,6 +292,22 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     flecheSuivante.setAttribute('aria-disabled', String(!suivanteOuverte));
     const region = regionCourante();
     direRegion(region ? t('carte.region_nom', { n: region.numero, nom: tCle(region.nom) }) : '', false);
+  };
+
+  /** Hauteur de l'en-tête (barre, niveau, régions) à partir du haut de l'écran, en pixels CSS : la carte se place dessous. */
+  const hauteurEntete = (): number => Math.ceil(haut.getBoundingClientRect().bottom - racine.getBoundingClientRect().top) + 6;
+
+  /**
+   * Cadre la vue dans la place que l'en-tête laisse libre, mesurée à l'instant : les niveaux débloqués et le premier qui ne
+   * l'est pas encore (on devine où mène la route) y tiennent si le zoom le permet, sinon la vue se centre sur le nœud choisi.
+   */
+  const cadrerRegion = (): void => {
+    if (!rendu) return;
+    rendu.redimensionner();
+    rendu.definirMargeHaut(hauteurEntete());
+    const premierCache = vues.findIndex((v) => !v.visible);
+    const aVoir = premierCache === -1 ? vues : vues.slice(0, premierCache + 1);
+    rendu.cadrer(aVoir, vues[selection] ?? aVoir[0] ?? { x: 0, y: 0 });
   };
 
   /** Montre la région d'indice `i` : ses nœuds d'après la sauvegarde, son fond, la sélection. */
@@ -298,16 +327,11 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
       racine.style.removeProperty('--region-fond');
       racine.style.removeProperty('--region-brume');
     }
-    if (rendu) {
-      // La vue montre les niveaux débloqués et le premier qui ne l'est pas encore (on devine où mène la route).
-      const premierCache = vues.findIndex((v) => !v.visible);
-      const aVoir = premierCache === -1 ? vues : vues.slice(0, premierCache + 1);
-      rendu.cadrer(aVoir, vues[selection] ?? aVoir[0] ?? { x: 0, y: 0 });
-    } else {
-      contexte?.clearRect(0, 0, canvas.width, canvas.height);
-    }
+    // L'en-tête se mesure une fois rempli (titre et régions), avant le cadrage.
     majTitre();
     majRegionsUI();
+    if (rendu) cadrerRegion();
+    else contexte?.clearRect(0, 0, canvas.width, canvas.height);
   };
 
   /** Va là où la demande mène ; une région fermée reste fermée et dit comment l'ouvrir. */
@@ -338,7 +362,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     majTitre();
     const cam = rendu.camera;
     const marge = 28;
-    if (vue.x - cam.decalageX < marge || vue.x - cam.decalageX > cam.vueL - marge || vue.y - cam.decalageY < marge + 20 || vue.y - cam.decalageY > cam.vueH - marge) {
+    if (vue.x - cam.decalageX < marge || vue.x - cam.decalageX > cam.vueL - marge || vue.y - cam.decalageY < cam.margeHautLogique + marge || vue.y - cam.decalageY > cam.vueH - marge) {
       rendu.centrerSur(vue.x, vue.y);
     }
   };
@@ -464,6 +488,17 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     if (niveau.horde) entete.append(el('span', 'etiquette-horde', t('fiche.horde')));
     gauche.append(entete, el('h2', 'titre', textes.nom), el('p', 'ambiance', textes.ambiance));
     if (niveau.horde) gauche.append(el('p', 'horde-aide', t('fiche.horde_aide')));
+    // La particularité du niveau (régions 11 à 15), tirée de son gimmick : une ligne, rien pour un niveau ordinaire.
+    // Sur un écran bas, seul « Particularité : <nom> » reste (la phrase est dans sa bulle) : « Lancer » ne doit pas sortir de l'écran.
+    const gimmick = niveau.niveau.gimmick;
+    if (gimmick && ligneParticularite(niveau.niveau)) {
+      const ligne = el('p', 'fiche-particularite-ligne');
+      ligne.dataset.particularite = gimmick.type;
+      ligne.setAttribute('aria-label', ligneParticularite(niveau.niveau) ?? '');
+      ligne.append(el('strong', 'fiche-particularite-nom', t('gimmick.fiche_nom', { nom: nomParticularite(gimmick.type) })), el('span', 'fiche-particularite-suite', t('gimmick.fiche_suite', { phrase: phraseParticularite(gimmick.type) })));
+      attacherBulle(ligne, () => contenuParticularite(gimmick.type), { signal: signalFiche });
+      gauche.append(ligne);
+    }
     const ennemisNiveau = rangeeEnnemis(niveau, signalFiche);
     const choisir = creerChoixFiche(atlas, session, signalFiche);
     droite.append(choisir.racine);
@@ -687,8 +722,23 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
       ouvrirFiche(selection);
     }
   }, { signal });
-  window.addEventListener('resize', () => { rendu?.redimensionner(); }, { signal });
-  window.addEventListener('orientationchange', () => { rendu?.redimensionner(); }, { signal });
+  window.addEventListener('resize', cadrerRegion, { signal });
+  window.addEventListener('resize', centrerPuceCourante, { signal });
+  window.addEventListener('orientationchange', cadrerRegion, { signal });
+  window.addEventListener('orientationchange', centrerPuceCourante, { signal });
+  // L'en-tête change de hauteur sans que la fenêtre bouge (police chargée, nom de région sur deux lignes) : la carte suit,
+  // sans reprendre le cadrage (le joueur a pu déplacer la vue).
+  if (typeof ResizeObserver !== 'undefined') {
+    let derniere = 0;
+    const observateur = new ResizeObserver(() => {
+      const h = hauteurEntete();
+      if (h === derniere) return;
+      derniere = h;
+      rendu?.definirMargeHaut(h);
+    });
+    observateur.observe(haut);
+    signal.addEventListener('abort', () => { observateur.disconnect(); }, { once: true });
+  }
 
   // --- Boucle : le clignotement du prochain niveau et le chevron de sélection bougent à chaque image ---
 

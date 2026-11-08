@@ -158,28 +158,28 @@ describe('bulles du menu de construction', () => {
   if (!libre) throw new Error('aucune case libre');
 
   it('une tour à construire montre ses stats effectives (bonus du dieu compris)', () => {
-    const elements = elementsMenu(etat, libre.cx, libre.cy);
+    const elements = elementsMenu(etat, libre);
     const tir = elements.find((e) => e.id === 'construire:tir');
     if (!tir) throw new Error('pas de tir');
-    const contenu = contenuElementMenu(etat, libre.cx, libre.cy, tir);
+    const contenu = contenuElementMenu(etat, libre, tir);
     const def = TOURS.tir.niveaux[0];
     expect(valeur(contenu, t('bulle.tour.portee'))).toBe(t('bulle.cases', { n: nombre(def.portee) }));
     expect(valeur(contenu, t('bulle.tour.degats'))).toContain(fourchette(def.degats[0], def.degats[1]));
   });
 
   it('la tour divine du menu est celle du dieu de la partie', () => {
-    const divine = elementsMenu(etat, libre.cx, libre.cy).find((e) => e.id === 'construire:divine');
+    const divine = elementsMenu(etat, libre).find((e) => e.id === 'construire:divine');
     if (!divine) throw new Error('pas de divine');
-    expect(contenuElementMenu(etat, libre.cx, libre.cy, divine)?.titre).toBe(tCle(DIEUX.charlie.tourDivine.nom));
+    expect(contenuElementMenu(etat, libre, divine)?.titre).toBe(tCle(DIEUX.charlie.tourDivine.nom));
   });
 
   it('une amélioration dit ce qui change, avant → après', () => {
     const e = partie();
     e.aretes = 5000;
     appliquerAction(e, { type: 'construire', ...libre, tour: 'tir' });
-    const ameliorer = elementsMenu(e, libre.cx, libre.cy).find((x) => x.id === 'ameliorer');
+    const ameliorer = elementsMenu(e, libre).find((x) => x.id === 'ameliorer');
     if (!ameliorer) throw new Error('pas d’amélioration');
-    const contenu = contenuElementMenu(e, libre.cx, libre.cy, ameliorer);
+    const contenu = contenuElementMenu(e, libre, ameliorer);
     const [n1, n2] = TOURS.tir.niveaux;
     expect(contenu?.titre).toBe(t('bulle.amelioration', { n: 2 }));
     expect(valeur(contenu, t('bulle.tour.degats'))).toBe(
@@ -201,16 +201,16 @@ describe('bulles du menu de construction', () => {
     appliquerAction(e, { type: 'construire', ...libre, tour: 'tir' });
     appliquerAction(e, { type: 'ameliorer', ...libre });
     appliquerAction(e, { type: 'ameliorer', ...libre });
-    const voieB = elementsMenu(e, libre.cx, libre.cy).find((x) => x.id === 'specialiser:B');
+    const voieB = elementsMenu(e, libre).find((x) => x.id === 'specialiser:B');
     if (!voieB) throw new Error('pas de spécialisation');
-    const spec = contenuElementMenu(e, libre.cx, libre.cy, voieB);
+    const spec = contenuElementMenu(e, libre, voieB);
     expect(spec?.titre).toBe(tCle(TOURS.tir.specialisations.B.nom));
     expect(aLigne(spec, t('bulle.tour.critique'))).toBe(true);
 
     appliquerAction(e, { type: 'specialiser', ...libre, voie: 'B' });
-    const tete = elementsMenu(e, libre.cx, libre.cy).find((x) => x.id === 'competence:tir_a_la_tete');
+    const tete = elementsMenu(e, libre).find((x) => x.id === 'competence:tir_a_la_tete');
     if (!tete) throw new Error('pas de compétence');
-    const comp = contenuElementMenu(e, libre.cx, libre.cy, tete);
+    const comp = contenuElementMenu(e, libre, tete);
     const def = TOURS.tir.specialisations.B;
     const rang1 = def.competences[0]?.rangs[0].critique ?? 0;
     const avant = def.critique?.chance ?? 0;
@@ -228,14 +228,14 @@ describe('bulles du menu de construction', () => {
     const ici = casesLibres(e).find((c) => validerAction(e, { type: 'construire', ...c, tour: 'caserne' }) === null);
     if (!ici) throw new Error('aucune case pour une caserne');
     appliquerAction(e, { type: 'construire', ...ici, tour: 'caserne' });
-    const elements = elementsMenu(e, ici.cx, ici.cy);
+    const elements = elementsMenu(e, ici);
     const vendre = elements.find((x) => x.id === 'vendre');
     const ralliement = elements.find((x) => x.id === 'ralliement');
     if (!vendre || !ralliement) throw new Error('vendre ou ralliement absent');
     const rendu = valeurRevente(e, ici);
     expect(rendu).toBeGreaterThan(1);
-    expect(valeur(contenuElementMenu(e, ici.cx, ici.cy, vendre), t('bulle.vendre.rendu'))).toBe(t('bulle.aretes', { n: rendu }));
-    const contenu = contenuElementMenu(e, ici.cx, ici.cy, ralliement);
+    expect(valeur(contenuElementMenu(e, ici, vendre), t('bulle.vendre.rendu'))).toBe(t('bulle.aretes', { n: rendu }));
+    const contenu = contenuElementMenu(e, ici, ralliement);
     expect(valeur(contenu, t('bulle.tour.portee_ralliement'))).toBe(cases(TOURS.caserne.niveaux[0].portee));
     expect(contenu?.notes).toContain(t('bulle.ralliement.note'));
   });
@@ -243,14 +243,14 @@ describe('bulles du menu de construction', () => {
   it('un bouton refusé dit pourquoi, et plus rien quand il redevient permis', () => {
     const e = partie();
     e.aretes = 0;
-    const tir = elementsMenu(e, libre.cx, libre.cy).find((x) => x.id === 'construire:tir');
+    const tir = elementsMenu(e, libre).find((x) => x.id === 'construire:tir');
     expect(tir?.refus).toBe('aretes_insuffisantes');
     if (!tir) throw new Error('pas de tir');
-    expect(contenuElementMenu(e, libre.cx, libre.cy, tir)?.notes).toContain(texteRefus('aretes_insuffisantes'));
+    expect(contenuElementMenu(e, libre, tir)?.notes).toContain(texteRefus('aretes_insuffisantes'));
     e.aretes = 5000;
-    const permis = elementsMenu(e, libre.cx, libre.cy).find((x) => x.id === 'construire:tir');
+    const permis = elementsMenu(e, libre).find((x) => x.id === 'construire:tir');
     if (!permis) throw new Error('pas de tir');
-    expect(contenuElementMenu(e, libre.cx, libre.cy, permis)?.notes).not.toContain(texteRefus('aretes_insuffisantes'));
+    expect(contenuElementMenu(e, libre, permis)?.notes).not.toContain(texteRefus('aretes_insuffisantes'));
   });
 });
 

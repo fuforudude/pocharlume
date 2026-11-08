@@ -1,6 +1,8 @@
 // Indications de départ et d'arrivée en partie : à chaque entrée de chemin un panneau (fanion à crâne) qui annonce les
 // ennemis de la prochaine vague, à chaque sortie la porte de ce qu'on défend (elle tremble et rougit quand un ennemi
 // passe), et une traînée lumineuse qui parcourt chaque chemin au début du niveau puis la première fois qu'il sert.
+// Vol de Corbeaux : un panneau par couloir au bord gauche (à la hauteur du couloir), et au bord droit une marque qui
+// rougit et tremble comme la porte quand un corbeau sort.
 //
 // Affichage seulement : rien ici n'écrit dans l'état ni dans le journal, et le moteur n'est pas modifié. La composition
 // annoncée est lue dans les vagues figées du niveau (ou, en mode infini, dans la vague que le générateur produira).
@@ -30,6 +32,8 @@ export const TYPES_MAX_PAR_PANNEAU = 4;
 const QUEUE_TUILES = 5;
 const TRANCHES_TRAINEE = 14;
 const MARGE_BORD = 6;
+/** Écart entre un panneau de couloir et ce qu'il évite (panneau d'entrée, autre couloir), pixels CSS. */
+const ECART_PANNEAUX = 2;
 /** Les pastilles se touchent un peu à côté : un doigt n'est pas précis. */
 const TOLERANCE_PUCE = 4;
 
@@ -50,31 +54,89 @@ export interface MargesEcran {
   readonly droite: number;
 }
 
-/** Une pastille d'ennemi sous le pointeur : de quoi ouvrir sa bulle depuis le canvas. */
+/** Une pastille sous le pointeur : de quoi ouvrir sa bulle depuis le canvas. */
 export interface PuceSous {
   /** Négatif, pour ne jamais se confondre avec l'id d'un ennemi du canvas. */
   readonly cle: number;
+  /** `ennemi` : une pastille d'ennemi (`type` est son identifiant) ; `couloir` : le repère d'un couloir du Vol de Corbeaux. */
+  readonly genre: 'ennemi' | 'couloir';
   readonly type: string;
   ancre(): { readonly left: number; readonly top: number; readonly right: number; readonly bottom: number };
   /** Faux dès que la pastille a disparu (vague partie, panneau masqué) : la bulle se referme. */
   encore(): boolean;
 }
 
+/** Un rectangle de l'écran, pixels CSS. */
+export interface RectEcran {
+  readonly gauche: number;
+  readonly haut: number;
+  readonly droite: number;
+  readonly bas: number;
+}
+
+function ajouterGroupe(groupes: GroupeEntree[], type: string, nombre: number): void {
+  const i = groupes.findIndex((g) => g.type === type);
+  const present = groupes[i];
+  if (present) groupes[i] = { type: present.type, nombre: present.nombre + nombre };
+  else groupes.push({ type, nombre });
+}
+
 /**
  * La composition d'une vague par chemin : pour chaque indice de chemin, les types d'ennemis qui y sortent et leur
- * nombre, dans l'ordre d'apparition. Les élites comptent avec leur type.
+ * nombre, dans l'ordre d'apparition. Les élites comptent avec leur type. Un groupe d'un couloir (Vol de Corbeaux) ne
+ * suit aucun chemin : il n'est pas compté ici (voir `compositionParCouloir`).
  */
 export function compositionParChemin(vague: Vague, chemins: number): GroupeEntree[][] {
   const resultat: GroupeEntree[][] = Array.from({ length: chemins }, () => []);
   for (const paquet of vague.paquets) {
+    if (paquet.couloir !== undefined) continue;
     const groupes = resultat[paquet.chemin];
-    if (!groupes) continue;
-    const i = groupes.findIndex((g) => g.type === paquet.ennemi);
-    const present = groupes[i];
-    if (present) groupes[i] = { type: present.type, nombre: present.nombre + paquet.nombre };
-    else groupes.push({ type: paquet.ennemi, nombre: paquet.nombre });
+    if (groupes) ajouterGroupe(groupes, paquet.ennemi, paquet.nombre);
   }
   return resultat;
+}
+
+/** La composition d'une vague par couloir du Vol de Corbeaux : pour chaque indice de couloir, ses types d'ennemis et leur nombre. */
+export function compositionParCouloir(vague: Vague, couloirs: number): GroupeEntree[][] {
+  const resultat: GroupeEntree[][] = Array.from({ length: couloirs }, () => []);
+  for (const paquet of vague.paquets) {
+    if (paquet.couloir === undefined) continue;
+    const groupes = resultat[paquet.couloir];
+    if (groupes) ajouterGroupe(groupes, paquet.ennemi, paquet.nombre);
+  }
+  return resultat;
+}
+
+/** Les chemins qu'une vague emprunte (ses groupes de couloir n'en suivent aucun). */
+export function cheminsDeLaVague(vague: Vague | null): number[] {
+  const chemins = new Set<number>();
+  for (const paquet of vague?.paquets ?? []) if (paquet.couloir === undefined) chemins.add(paquet.chemin);
+  return [...chemins];
+}
+
+/**
+ * Où poser un panneau de couloir (coin haut gauche, pixels CSS) : collé au bord gauche de la zone libre, centré sur la hauteur
+ * `y` du couloir. S'il chevauche un obstacle (panneau d'entrée, panneau d'un autre couloir déjà posé), il se pousse juste en
+ * dessous, ou juste au-dessus si la place manque en bas ; il reste toujours dans la zone libre.
+ */
+export function placerPanneauCouloir(y: number, largeur: number, hauteur: number, zone: RectEcran, obstacles: readonly RectEcran[]): { gauche: number; haut: number } {
+  const gauche = zone.gauche;
+  const borner = (h: number): number => Math.min(Math.max(h, zone.haut), Math.max(zone.haut, zone.bas - hauteur));
+  const chevauche = (haut: number): RectEcran | undefined =>
+    obstacles.find((o) => gauche < o.droite && gauche + largeur > o.gauche && haut < o.bas && haut + hauteur > o.haut);
+  let haut = borner(y - hauteur / 2);
+  for (let essai = 0; essai < obstacles.length * 2 + 1; essai++) {
+    const obstacle = chevauche(haut);
+    if (!obstacle) return { gauche, haut };
+    const dessous = obstacle.bas + ECART_PANNEAUX;
+    const dessus = obstacle.haut - hauteur - ECART_PANNEAUX;
+    // On garde le côté où le couloir reste le plus proche, tant qu'il tient dans la zone.
+    const candidats = [dessous, dessus].filter((h) => h >= zone.haut && h + hauteur <= zone.bas).sort((a, b) => Math.abs(a + hauteur / 2 - y) - Math.abs(b + hauteur / 2 - y));
+    const choisi = candidats.find((h) => !chevauche(h)) ?? candidats[0];
+    if (choisi === undefined) return { gauche, haut };
+    haut = choisi;
+  }
+  return { gauche, haut };
 }
 
 /** La vague d'indice `index` (0 pour la première), lue dans sa définition : les vagues figées, ou le générateur en infini. */
@@ -100,28 +162,49 @@ interface Point {
 
 interface PuceAffichee {
   readonly noeud: HTMLElement;
+  readonly genre: 'ennemi' | 'couloir';
   readonly type: string;
 }
 
-interface Entree {
+/** Un panneau d'annonce : à une entrée de chemin, ou au bord gauche pour un couloir. */
+interface Panneau {
   readonly noeud: HTMLElement;
-  readonly point: Point;
-  /** Indices des chemins qui partent de ce point. */
-  readonly chemins: readonly number[];
   readonly puces: PuceAffichee[];
   signature: string;
   largeur: number;
   hauteur: number;
 }
 
-interface Sortie {
+interface Entree extends Panneau {
+  readonly point: Point;
+  /** Indices des chemins qui partent de ce point. */
+  readonly chemins: readonly number[];
+}
+
+interface PanneauCouloir extends Panneau {
+  /** Indice du couloir (`etat.couloirs`). */
+  readonly couloir: number;
+  /** Hauteur du couloir, en tuiles. */
+  readonly y: number;
+}
+
+/** Une marque qui réagit aux fuites : la porte d'un chemin, ou le bout d'un couloir au bord droit. */
+interface Reaction {
   readonly noeud: HTMLElement;
   readonly image: HTMLImageElement;
-  readonly point: Point;
-  readonly chemins: readonly number[];
   /** Fin de la réaction, en ms de l'horloge réelle ; -1 : calme. */
   secoueJusque: number;
   etat: string;
+}
+
+interface Sortie extends Reaction {
+  readonly point: Point;
+  readonly chemins: readonly number[];
+}
+
+interface SortieCouloir extends Reaction {
+  readonly couloir: number;
+  readonly y: number;
 }
 
 interface Trainee {
@@ -146,6 +229,10 @@ function groupesParPoint(etat: EtatPartie, bout: 'debut' | 'fin'): { point: Poin
   return [...resultat.values()];
 }
 
+function nomEnnemi(type: string): string {
+  return Object.hasOwn(ENNEMIS, type) ? tCle(ENNEMIS[type as keyof typeof ENNEMIS].nom) : type;
+}
+
 export interface OptionsIndications {
   /** Vrai : pas de mouvement (ni traînée, ni pulsation, ni tremblement). Par défaut, la préférence du système. */
   readonly reduit?: () => boolean;
@@ -158,16 +245,21 @@ export class Indications {
   private readonly canvas: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D | null;
   private readonly entrees: Entree[] = [];
+  private readonly couloirs: PanneauCouloir[] = [];
   private readonly sorties: Sortie[] = [];
+  private readonly sortiesCouloirs: SortieCouloir[] = [];
   private readonly trainees: Trainee[] = [];
   /** Chemins déjà annoncés ou utilisés : leur traînée a eu lieu. */
   private readonly servis = new Set<number>();
   /** Chemin de chaque ennemi vivant au dernier pas : à la fuite, l'ennemi n'est déjà plus dans `etat.ennemis`. */
   private readonly cheminDe = new Map<number, number>();
+  /** Couloir de chaque ennemi vivant qui vole dans un couloir (Vol de Corbeaux), au dernier pas. */
+  private readonly couloirDe = new Map<number, number>();
   private readonly reduit: () => boolean;
   private readonly maintenant: () => number;
   private compositionIndex = -2;
   private composition: GroupeEntree[][] = [];
+  private compositionCouloirs: GroupeEntree[][] = [];
   private tailleCanvas = '';
   private canvasDessine = false;
   private largeur: number;
@@ -211,6 +303,26 @@ export class Indications {
       this.racine.append(noeud);
       this.sorties.push({ noeud, image, point, chemins, secoueJusque: -1, etat: '' });
     }
+    etat.couloirs.forEach((couloir, k) => {
+      const y = couloir.points[0]?.y ?? 0;
+      // Le bout du couloir : rien tant qu'aucun corbeau ne sort, puis une marque qui rougit et tremble comme la porte.
+      const noeud = el('div', 'sortie-couloir');
+      noeud.setAttribute('role', 'img');
+      noeud.setAttribute('aria-label', t('indications.sortie_couloir', { n: k + 1 }));
+      noeud.style.pointerEvents = 'none';
+      noeud.hidden = true;
+      const image = el('img', 'marque');
+      image.alt = '';
+      image.src = atlas.iconeUrl('icone-sortie-couloir', 2);
+      noeud.append(image);
+      this.racine.append(noeud);
+      this.sortiesCouloirs.push({ noeud, image, couloir: k, y, secoueJusque: -1, etat: '' });
+      const panneau = el('div', 'entree-couloir');
+      panneau.style.pointerEvents = 'none';
+      panneau.hidden = true;
+      this.racine.append(panneau);
+      this.couloirs.push({ noeud: panneau, couloir: k, y, puces: [], signature: '', largeur: 0, hauteur: 0 });
+    });
     for (const { point, chemins } of groupesParPoint(etat, 'debut')) {
       const noeud = el('div', 'entree-chemin');
       noeud.style.pointerEvents = 'none';
@@ -223,7 +335,7 @@ export class Indications {
 
     // Une partie reprise ne rejoue pas l'annonce des chemins déjà servis ; une nouvelle partie annonce ceux de la 1re vague.
     if (etat.vagues.lancees > 0) etat.chemins.forEach((_, i) => this.servis.add(i));
-    else prochaineVague(etat)?.paquets.forEach((p) => this.servis.add(p.chemin));
+    else for (const chemin of cheminsDeLaVague(prochaineVague(etat))) this.servis.add(chemin);
     this.lancerTrainees(etat.chemins.map((_, i) => i), temps);
     signal.addEventListener('abort', () => { this.detruire(); }, { once: true });
   }
@@ -244,25 +356,33 @@ export class Indications {
 
   private memoriserEnnemis(etat: EtatPartie): void {
     this.cheminDe.clear();
-    for (const e of etat.ennemis) this.cheminDe.set(e.id, e.chemin);
+    this.couloirDe.clear();
+    for (const e of etat.ennemis) {
+      // Un ennemi en couloir garde `chemin` à 0 par convention : on ne le prend pas pour un ennemi du chemin 0.
+      if (e.couloir >= 0) this.couloirDe.set(e.id, e.couloir);
+      else this.cheminDe.set(e.id, e.chemin);
+    }
   }
 
   /**
    * À appeler pour chaque événement du pas, puis `apresPas` une fois le pas fini : une vague qui part annonce ses chemins
-   * neufs, une fuite fait réagir la porte.
+   * neufs, une fuite fait réagir la porte (ou le bout du couloir, pour un corbeau).
    */
   evenement(etat: EtatPartie, evenement: Evenement, temps: number): void {
     if (evenement.type === 'vague') {
       // Lue dans sa définition : un paquet d'un seul ennemi sans délai est déjà sorti de `etat.vagues.paquets` à ce pas.
-      const vague = vagueDefinie(etat, evenement.index);
-      const neufs = new Set<number>();
-      for (const paquet of vague?.paquets ?? []) if (!this.servis.has(paquet.chemin)) neufs.add(paquet.chemin);
+      const neufs = cheminsDeLaVague(vagueDefinie(etat, evenement.index)).filter((chemin) => !this.servis.has(chemin));
       for (const chemin of neufs) this.servis.add(chemin);
-      this.lancerTrainees([...neufs], temps);
+      this.lancerTrainees(neufs, temps);
     } else if (evenement.type === 'fuite') {
+      const fin = this.maintenant() + DUREE_SECOUSSE_MS;
+      const couloir = this.couloirDe.get(evenement.ennemi);
+      if (couloir !== undefined) {
+        for (const sortie of this.sortiesCouloirs) if (sortie.couloir === couloir) sortie.secoueJusque = fin;
+        return;
+      }
       // L'ennemi a déjà quitté `etat.ennemis` : son chemin vient de la table du pas précédent. Inconnu : toutes les portes réagissent.
       const chemin = this.cheminDe.get(evenement.ennemi);
-      const fin = this.maintenant() + DUREE_SECOUSSE_MS;
       for (const sortie of this.sorties) {
         if (chemin === undefined || sortie.chemins.includes(chemin)) sortie.secoueJusque = fin;
       }
@@ -284,17 +404,19 @@ export class Indications {
     this.largeur = this.parent.clientWidth || window.innerWidth;
     this.hauteur = this.parent.clientHeight || window.innerHeight;
     for (const entree of this.entrees) entree.signature = '';
+    for (const panneau of this.couloirs) panneau.signature = '';
   }
 
   mettreAJour(etat: EtatPartie, temps: number): void {
     const reduit = this.reduit();
     this.racine.classList.toggle('animations-reduites', reduit);
-    this.mettreAJourEntrees(etat);
+    const obstacles = this.mettreAJourEntrees(etat);
+    this.mettreAJourCouloirs(etat, obstacles);
     this.mettreAJourSorties(reduit);
     this.dessinerTrainees(etat, temps, reduit);
   }
 
-  private zone(): { gauche: number; haut: number; droite: number; bas: number } {
+  private zone(): RectEcran {
     const m = this.marges;
     return {
       gauche: m.gauche + MARGE_BORD,
@@ -304,39 +426,40 @@ export class Indications {
     };
   }
 
-  private compositionCourante(etat: EtatPartie): GroupeEntree[][] {
+  private compositionCourante(etat: EtatPartie): void {
     const index = etat.vagues.lancees;
-    if (index !== this.compositionIndex) {
-      const vague = prochaineVague(etat);
-      this.composition = vague ? compositionParChemin(vague, etat.chemins.length) : [];
-      this.compositionIndex = index;
-    }
-    return this.composition;
+    if (index === this.compositionIndex) return;
+    const vague = prochaineVague(etat);
+    this.composition = vague ? compositionParChemin(vague, etat.chemins.length) : [];
+    this.compositionCouloirs = vague ? compositionParCouloir(vague, etat.couloirs.length) : [];
+    this.compositionIndex = index;
   }
 
   /** Les groupes annoncés à une entrée (les chemins qui partent du même point sont réunis). */
-  private groupesDe(entree: Entree, composition: readonly GroupeEntree[][]): GroupeEntree[] {
+  private groupesDe(entree: Entree): GroupeEntree[] {
     const cumul = new Map<string, number>();
     for (const chemin of entree.chemins) {
-      for (const g of composition[chemin] ?? []) cumul.set(g.type, (cumul.get(g.type) ?? 0) + g.nombre);
+      for (const g of this.composition[chemin] ?? []) cumul.set(g.type, (cumul.get(g.type) ?? 0) + g.nombre);
     }
     return [...cumul.entries()].map(([type, nombre]) => ({ type, nombre }));
   }
 
-  private mettreAJourEntrees(etat: EtatPartie): void {
+  /** Place les panneaux d'entrée ; rend leurs rectangles, que les panneaux de couloir évitent. */
+  private mettreAJourEntrees(etat: EtatPartie): RectEcran[] {
     const visible = panneauxVisibles(etat);
-    const composition = visible ? this.compositionCourante(etat) : [];
+    if (visible) this.compositionCourante(etat);
     const zone = this.zone();
+    const rects: RectEcran[] = [];
     for (const entree of this.entrees) {
-      const groupes = visible ? this.groupesDe(entree, composition) : [];
+      const groupes = visible ? this.groupesDe(entree) : [];
       if (groupes.length === 0) {
-        entree.noeud.hidden = true;
-        entree.puces.length = 0;
-        entree.signature = '';
+        this.masquer(entree);
         continue;
       }
       const signature = groupes.map((g) => `${g.type}:${String(g.nombre)}`).join('|');
-      if (signature !== entree.signature) this.reconstruire(entree, groupes, signature);
+      if (signature !== entree.signature) {
+        this.reconstruire(entree, groupes, signature, 'icone-entree', t('indications.entree', { n: entree.chemins.map((c) => c + 1).join(', ') }), 'indications.entree_ennemi');
+      }
       const x = this.projection.enCssX(entree.point.x);
       const y = this.projection.enCssY(entree.point.y);
       // Posé au-dessus du point d'entrée ; sans place au-dessus (entrée en haut de la carte, sous la barre du HUD),
@@ -349,35 +472,67 @@ export class Indications {
       haut = Math.min(Math.max(haut, zone.haut), Math.max(zone.haut, zone.bas - h));
       entree.noeud.style.left = `${String(Math.round(gauche))}px`;
       entree.noeud.style.top = `${String(Math.round(haut))}px`;
+      rects.push({ gauche, haut, droite: gauche + w, bas: haut + h });
+    }
+    return rects;
+  }
+
+  /** Les panneaux des couloirs, au bord gauche à la hauteur de chaque couloir que la prochaine vague emprunte. */
+  private mettreAJourCouloirs(etat: EtatPartie, obstacles: RectEcran[]): void {
+    if (this.couloirs.length === 0) return;
+    const visible = panneauxVisibles(etat);
+    if (visible) this.compositionCourante(etat);
+    const zone = this.zone();
+    for (const panneau of this.couloirs) {
+      const groupes = visible ? (this.compositionCouloirs[panneau.couloir] ?? []) : [];
+      if (groupes.length === 0) {
+        this.masquer(panneau);
+        continue;
+      }
+      const signature = groupes.map((g) => `${g.type}:${String(g.nombre)}`).join('|');
+      if (signature !== panneau.signature) {
+        this.reconstruire(panneau, groupes, signature, 'icone-couloir', t('indications.couloir', { n: panneau.couloir + 1 }), 'indications.couloir_ennemi');
+      }
+      const { gauche, haut } = placerPanneauCouloir(this.projection.enCssY(panneau.y), panneau.largeur, panneau.hauteur, zone, obstacles);
+      panneau.noeud.style.left = `${String(Math.round(gauche))}px`;
+      panneau.noeud.style.top = `${String(Math.round(haut))}px`;
+      obstacles.push({ gauche, haut, droite: gauche + panneau.largeur, bas: haut + panneau.hauteur });
     }
   }
 
-  private reconstruire(entree: Entree, groupes: readonly GroupeEntree[], signature: string): void {
-    entree.signature = signature;
-    entree.puces.length = 0;
-    const noeud = entree.noeud;
+  private masquer(panneau: Panneau): void {
+    panneau.noeud.hidden = true;
+    panneau.puces.length = 0;
+    panneau.signature = '';
+  }
+
+  private reconstruire(panneau: Panneau, groupes: readonly GroupeEntree[], signature: string, repere: string, libelle: string, cleEnnemi: 'indications.entree_ennemi' | 'indications.couloir_ennemi'): void {
+    panneau.signature = signature;
+    panneau.puces.length = 0;
+    const noeud = panneau.noeud;
     noeud.replaceChildren();
     noeud.setAttribute('role', 'group');
-    noeud.setAttribute('aria-label', t('indications.entree', { n: entree.chemins.map((c) => c + 1).join(', ') }));
-    const fanion = el('img', 'fanion');
+    noeud.setAttribute('aria-label', libelle);
+    const fanion = el('img', repere === 'icone-entree' ? 'fanion' : 'fanion repere-couloir');
     fanion.alt = '';
-    fanion.src = this.atlas.iconeUrl('icone-entree', 2);
+    fanion.src = this.atlas.iconeUrl(repere, 2);
     noeud.append(fanion);
+    // Le repère d'un couloir a sa bulle (ce qu'est un couloir de corbeaux) ; le fanion d'une entrée n'en a pas.
+    if (repere !== 'icone-entree') panneau.puces.push({ noeud: fanion, genre: 'couloir', type: '' });
     const puces = el('div', 'puces-entree');
     const montres = groupes.slice(0, TYPES_MAX_PAR_PANNEAU);
     for (const groupe of montres) {
       const puce = el('span', 'puce-ennemi');
       puce.dataset['type'] = groupe.type;
       puce.dataset['nombre'] = String(groupe.nombre);
-      const nom = Object.hasOwn(ENNEMIS, groupe.type) ? tCle(ENNEMIS[groupe.type as keyof typeof ENNEMIS].nom) : groupe.type;
       puce.setAttribute('role', 'img');
-      puce.setAttribute('aria-label', t('indications.entree_ennemi', { nom, nombre: groupe.nombre }));
+      puce.setAttribute('aria-label', t(cleEnnemi, { nom: nomEnnemi(groupe.type), nombre: groupe.nombre }));
       const icone = el('img', 'icone-ennemi');
       icone.alt = '';
       icone.src = this.atlas.iconeUrl(spriteEnnemi(groupe.type), 2);
       puce.append(icone, el('span', 'nombre-ennemi', `×${String(groupe.nombre)}`));
       puces.append(puce);
-      entree.puces.push({ noeud: puce, type: groupe.type });
+      panneau.puces.push({ noeud: puce, genre: 'ennemi', type: groupe.type });
     }
     if (groupes.length > montres.length) {
       const autres = el('span', 'puce-ennemi autres', `+${String(groupes.length - montres.length)}`);
@@ -388,33 +543,50 @@ export class Indications {
     noeud.append(puces);
     // Mesuré une fois par contenu (et à chaque redimensionnement) : sert à placer le panneau sans lire le DOM à chaque image.
     noeud.hidden = false;
-    entree.largeur = noeud.offsetWidth || 24 + 36 * montres.length;
-    entree.hauteur = noeud.offsetHeight || 34;
+    panneau.largeur = noeud.offsetWidth || 24 + 36 * montres.length;
+    panneau.hauteur = noeud.offsetHeight || 34;
   }
 
   /**
-   * La pastille d'ennemi sous le point (x, y) de l'écran (pixels CSS), ou null. Les pastilles ne captent aucun événement :
-   * la partie interroge ce test depuis les événements du canvas pour ouvrir la bulle (survol, appui long).
+   * La pastille d'ennemi (ou le repère d'un couloir) sous le point (x, y) de l'écran (pixels CSS), ou null. Les pastilles ne
+   * captent aucun événement : la partie interroge ce test depuis les événements du canvas pour ouvrir la bulle (survol, appui long).
    */
   puceSous(x: number, y: number): PuceSous | null {
-    for (let e = 0; e < this.entrees.length; e++) {
-      const entree = this.entrees[e];
-      if (!entree || entree.noeud.hidden) continue;
-      for (let i = 0; i < entree.puces.length; i++) {
-        const puce = entree.puces[i];
+    const panneaux: Panneau[] = [...this.entrees, ...this.couloirs];
+    // Un panneau a au plus TYPES_MAX pastilles et un repère : les clés ne se chevauchent pas d'un panneau à l'autre.
+    const parPanneau = TYPES_MAX_PAR_PANNEAU + 1;
+    for (let p = 0; p < panneaux.length; p++) {
+      const panneau = panneaux[p];
+      if (!panneau || panneau.noeud.hidden) continue;
+      for (let i = 0; i < panneau.puces.length; i++) {
+        const puce = panneau.puces[i];
         if (!puce) continue;
         const r = puce.noeud.getBoundingClientRect();
         if (r.right <= r.left || r.bottom <= r.top) continue;
         if (x < r.left - TOLERANCE_PUCE || x > r.right + TOLERANCE_PUCE || y < r.top - TOLERANCE_PUCE || y > r.bottom + TOLERANCE_PUCE) continue;
         return {
-          cle: -(1 + e * TYPES_MAX_PAR_PANNEAU + i),
+          cle: -(1 + p * parPanneau + i),
+          genre: puce.genre,
           type: puce.type,
           ancre: () => puce.noeud.getBoundingClientRect(),
-          encore: () => !entree.noeud.hidden && entree.puces.includes(puce) && puce.noeud.isConnected,
+          encore: () => !panneau.noeud.hidden && panneau.puces.includes(puce) && puce.noeud.isConnected,
         };
       }
     }
     return null;
+  }
+
+  private reagir(reaction: Reaction, maintenant: number, reduit: boolean, cote: number): boolean {
+    const secoue = maintenant < reaction.secoueJusque;
+    const etat = `${secoue ? 'r' : '-'}${reduit ? 'm' : '-'}${String(cote)}`;
+    if (etat !== reaction.etat) {
+      reaction.etat = etat;
+      reaction.noeud.classList.toggle('rougit', secoue);
+      reaction.noeud.classList.toggle('secoue', secoue && !reduit);
+      reaction.image.style.width = `${String(cote)}px`;
+      reaction.image.style.height = `${String(cote)}px`;
+    }
+    return secoue;
   }
 
   private mettreAJourSorties(reduit: boolean): void {
@@ -423,17 +595,21 @@ export class Indications {
     const zone = this.zone();
     const maintenant = this.maintenant();
     for (const sortie of this.sorties) {
-      const secoue = maintenant < sortie.secoueJusque;
-      const etat = `${secoue ? 'r' : '-'}${reduit ? 'm' : '-'}${String(cote)}`;
-      if (etat !== sortie.etat) {
-        sortie.etat = etat;
-        sortie.noeud.classList.toggle('rougit', secoue);
-        sortie.noeud.classList.toggle('secoue', secoue && !reduit);
-        sortie.image.style.width = `${String(cote)}px`;
-        sortie.image.style.height = `${String(cote)}px`;
-      }
+      this.reagir(sortie, maintenant, reduit, cote);
       const x = Math.min(Math.max(this.projection.enCssX(sortie.point.x), zone.gauche + demi), Math.max(zone.gauche + demi, zone.droite - demi));
       const y = Math.min(Math.max(this.projection.enCssY(sortie.point.y), zone.haut + demi), Math.max(zone.haut + demi, zone.bas - demi));
+      sortie.noeud.style.left = `${String(Math.round(x))}px`;
+      sortie.noeud.style.top = `${String(Math.round(y))}px`;
+    }
+    // Le bout d'un couloir ne se montre que le temps de la réaction, au bord droit de la zone libre, à la hauteur du couloir.
+    const coteCouloir = Math.round(cote * 0.75);
+    const demiCouloir = coteCouloir / 2;
+    for (const sortie of this.sortiesCouloirs) {
+      const secoue = this.reagir(sortie, maintenant, reduit, coteCouloir);
+      sortie.noeud.hidden = !secoue;
+      if (!secoue) continue;
+      const x = Math.max(zone.gauche + demiCouloir, zone.droite - demiCouloir);
+      const y = Math.min(Math.max(this.projection.enCssY(sortie.y), zone.haut + demiCouloir), Math.max(zone.haut + demiCouloir, zone.bas - demiCouloir));
       sortie.noeud.style.left = `${String(Math.round(x))}px`;
       sortie.noeud.style.top = `${String(Math.round(y))}px`;
     }

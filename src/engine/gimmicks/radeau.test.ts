@@ -151,6 +151,10 @@ describe('Radeau : construire sur une place', () => {
   it('une tour divine se pose sur le radeau, sauf celles qui posent quelque chose au sol', () => {
     // Charlie (onde de choc) : rien ne l'interdit.
     expect(refus(creerPartie(niveauRadeau(), CONFIG), { type: 'construire', place: 0, tour: 'divine' })).toBeNull();
+    // Pollen : son atelier pose tourelles et pièges, qui resteraient sur l'eau (décision de jeu du jalon 1).
+    expect(refus(creerPartie(niveauRadeau(), configDe('pollen')), { type: 'construire', place: 0, tour: 'divine' })).toBe('radeau_sol_requis');
+    // Sur une case, l'atelier se pose comme avant.
+    expect(refus(creerPartie(niveauRadeau(), configDe('pollen')), { type: 'construire', cx: 1, cy: 7, tour: 'divine' })).toBeNull();
     // Plume : son sanctuaire a des assassins, c'est une caserne.
     expect(refus(creerPartie(niveauRadeau(), configDe('plume')), { type: 'construire', place: 0, tour: 'divine' })).toBe('radeau_sol_requis');
     // Pollen : son atelier construit des tourelles et des pièges au sol.

@@ -20,6 +20,7 @@ vi.mock('../render/carte-monde', () => ({
     ratio = 1;
     rayonToucher = 20;
     cadrer = vi.fn();
+    definirMargeHaut = vi.fn();
     centrerSur = vi.fn();
     redimensionner = vi.fn();
     dessiner = vi.fn();
@@ -245,6 +246,23 @@ describe('carte du monde : régions', () => {
     expect(fiche()).toBeNull();
     puce(2).click();
     expect((document.querySelector('.carte-region-vide') as HTMLElement).hidden).toBe(true);
+  });
+
+  it('la molette fait défiler la bande des pastilles de côté, et un redimensionnement recentre la pastille courante', () => {
+    const s = sauvegardeVide();
+    monter({ ...s, progression: { ...s.progression, niveauMax: 101 }, meta: { ...s.meta, regionMax: 11 } }, { regions: REGIONS_MONDE });
+    const bande = document.querySelector<HTMLElement>('.region-puces');
+    if (!bande) throw new Error('bande absente');
+    // happy-dom ne fait pas de mise en page : on donne à la bande et à la pastille courante les mesures d'un écran étroit.
+    Object.defineProperty(bande, 'clientWidth', { value: 300, configurable: true });
+    Object.defineProperty(puce(11), 'offsetLeft', { value: 1000, configurable: true });
+    Object.defineProperty(puce(11), 'offsetWidth', { value: 40, configurable: true });
+    const molette = new WheelEvent('wheel', { deltaY: 120, cancelable: true, bubbles: true });
+    bande.dispatchEvent(molette);
+    expect(bande.scrollLeft).toBe(120);
+    expect(molette.defaultPrevented).toBe(true);
+    window.dispatchEvent(new Event('resize'));
+    expect(bande.scrollLeft).toBe(1000 - (300 - 40) / 2);
   });
 
   it('pas de changement de région pendant qu’une fiche est ouverte', () => {

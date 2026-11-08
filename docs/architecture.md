@@ -952,3 +952,15 @@ Spec : [après l'histoire](specs/2026-11-08-apres-histoire-gimmicks.md), jalon 1
 - **Bandes** : la CI joue la région 11, mais `REGIONS_SUSPENDUES` (bandes.ts) rend ses écarts non bloquants tant que les bots ne
   savent pas jouer les gimmicks.
 
+## Migration de sauvegarde v7 → v8 (150 niveaux, 15 régions)
+
+Voir `v7versV8` dans `src/save/migrations.ts`. La campagne passe de 100 à 150 niveaux (régions 11 à 15) : `VERSION_SAUVEGARDE` 7 → 8.
+- **Avant** : le niveau 100 gagné laissait `progression.niveauMax` à 100 et `meta.regionMax` à 10 (fin de l'histoire, rien après).
+- **Règle** : une v7 dont `niveauMax` vaut 100 **et** dont le niveau 100 figure dans `etoiles` (donc gagné) reçoit le déblocage de l'après-histoire :
+  `niveauMax` 101 et `regionMax` 11. Toute autre v7 (niveau 100 atteint mais pas gagné, ou plus bas) est gardée telle quelle, version 8 seulement.
+  La partie en cours, les réglages et le reste de `meta` ne sont jamais touchés.
+- **Validation** : la v8 accepte `niveauMax` jusqu'à 150 et `regionMax` jusqu'à 15 ; `regionMax` doit rester celui que donne `niveauMax` (région N dès le
+  niveau 10 × (N − 1) + 1). Les clés de `etoiles` et de `defis` vont de « 1 » à « 150 » (`CLE_NIVEAU`).
+- **Code d'export** : un joueur complet fait environ 18 400 caractères quand le navigateur ne sait pas compresser (mode `j`). `TAILLE_MAX_CODE` est donc
+  de 32 Ko ; les 64 Ko de données décompressées restent la protection contre les codes démesurés.
+- **Tests** : `migrations.test.ts` (fixture figée `sauvegarde-v7.json`, avec ou sans partie en cours), `code.test.ts` (import d'un code v7, export complet sans compression).
