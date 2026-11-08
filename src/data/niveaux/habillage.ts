@@ -60,6 +60,13 @@ export const GRANDS_DECORS: ReadonlySet<string> = new Set([
   'vitrail-brise',
   'autel-bleme',
   'statue-ange',
+  // Région 11 (art/sprites/decor-region11.txt)
+  'epave-coque',
+  'epave-mat',
+  'ponton-pourri',
+  'cloche-naufrage',
+  'filets-perches',
+  'ancre-rouillee',
 ]);
 
 /** Emprise d'un décor : tout le sprite (le rectangle de pixels, ancre comprise). */

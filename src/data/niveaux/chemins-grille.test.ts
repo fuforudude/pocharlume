@@ -4,10 +4,13 @@
 import { describe, expect, it } from 'vitest';
 import { REGLES } from '../regles';
 import { CARTES } from './cartes-toutes';
+import { CARTES_REGION11 } from './cartes-region11';
 import { casesInterditesDuNiveau, tuilesDeChemin } from './grille-niveau';
+import type { CarteModele } from './modele-carte';
 
 const T = REGLES.tailleCase;
-const cartes = Object.entries(CARTES);
+/** Les cartes de la campagne et celles de la région 11, pas encore branchées dans CARTES. */
+const cartes: [string, CarteModele][] = [...Object.entries(CARTES), ...Object.entries(CARTES_REGION11)];
 
 /** Cases traversées par l'axe des chemins, calculées sans passer par le masque de tuiles. */
 function casesDeLAxe(modele: (typeof cartes)[number][1]): Set<string> {
@@ -32,9 +35,11 @@ function casesDeLAxe(modele: (typeof cartes)[number][1]): Set<string> {
   return cases;
 }
 
-describe('chemins alignés sur la grille des cases, 31 cartes', () => {
-  it('compte bien 31 cartes', () => {
-    expect(cartes).toHaveLength(31);
+describe('chemins alignés sur la grille des cases, 41 cartes', () => {
+  it('compte bien 41 cartes : 31 de la campagne et 10 de la région 11', () => {
+    expect(Object.keys(CARTES)).toHaveLength(31);
+    expect(Object.keys(CARTES_REGION11)).toHaveLength(10);
+    expect(new Set(cartes.map(([id]) => id)).size).toBe(41);
   });
 
   it.each(cartes)('%s : segments horizontaux ou verticaux, virages au centre d’une case', (_id, modele) => {
