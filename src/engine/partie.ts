@@ -15,6 +15,8 @@ import { resoudreHeros } from './modificateurs';
 import { laisserEffetsDesMorts, laisserNuagesDesMorts, mettreAJourNuages, mettreAJourPouvoirsEnnemis } from './pouvoirs-ennemis';
 import { mettreAJourSorts, rechargeSort } from './sorts';
 import { mettreAJourPieges, mettreAJourStructures, mettreAJourZones } from './structures';
+import { calculerCouloirs, verifierPaquetEnCouloir } from './gimmicks/corbeaux';
+import { mettreAJourGimmick, verifierGimmick } from './gimmicks';
 import { enPas, PAS_PAR_SECONDE } from './temps';
 import { mettreAJourProjectiles, mettreAJourTours } from './tours';
 import { creerUnite, estRetiree, mettreAJourUnites } from './unites';
@@ -36,10 +38,13 @@ export function etoilesPour(vies: number, viesDepart: number, viePerdue: boolean
 }
 
 function verifierNiveau(niveau: Niveau): void {
+  verifierGimmick(niveau);
   niveau.vagues.forEach((vague, i) => {
     for (const p of vague.paquets) {
-      if (!defEnnemi(p.ennemi)) throw new Error(`Vague ${String(i + 1)} : ennemi inconnu ${p.ennemi}`);
-      if (!Number.isInteger(p.chemin) || p.chemin < 0 || p.chemin >= niveau.carte.chemins.length) throw new Error(`Vague ${String(i + 1)} : chemin inconnu ${String(p.chemin)}`);
+      const def = defEnnemi(p.ennemi);
+      if (!def) throw new Error(`Vague ${String(i + 1)} : ennemi inconnu ${p.ennemi}`);
+      if (p.couloir !== undefined) verifierPaquetEnCouloir(niveau, p, def, i + 1);
+      else if (!Number.isInteger(p.chemin) || p.chemin < 0 || p.chemin >= niveau.carte.chemins.length) throw new Error(`Vague ${String(i + 1)} : chemin inconnu ${String(p.chemin)}`);
     }
   });
   const fer = niveau.defiFer;
@@ -109,6 +114,7 @@ export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
     niveau: copie,
     config: copierConfig(config),
     chemins: copie.carte.chemins.map(calculerChemin),
+    couloirs: calculerCouloirs(copie),
     pas: 0,
     rng: config.graine >>> 0,
     statut: 'en_cours',
@@ -182,6 +188,7 @@ function verifierFin(etat: EtatPartie): void {
 /** Le pas de simulation lui-même, dans un ordre fixe. */
 function simuler(etat: EtatPartie): void {
   ouvrirPas(etat);
+  mettreAJourGimmick(etat);
   mettreAJourVagues(etat);
   mettreAJourPouvoirsEnnemis(etat);
   mettreAJourNuages(etat);

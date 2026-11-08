@@ -80,7 +80,7 @@ function partieAvecVagues(chemins: readonly (readonly number[])[]): EtatPartie {
 }
 
 function paquet(vague: number, chemin: number, ennemi = 'paysan_affame'): EtatPartie['vagues']['paquets'][number] {
-  return { vague, ennemi, chemin, restants: 1, intervalle: 1, prochain: 0, elite: false, facteurPv: 1 };
+  return { vague, ennemi, chemin, restants: 1, intervalle: 1, prochain: 0, elite: false, facteurPv: 1, couloir: -1 };
 }
 
 beforeEach(() => {

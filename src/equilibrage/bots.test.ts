@@ -81,7 +81,7 @@ describe('bot naïf', () => {
     const echantillons = echantillonner(etat);
     const libres = casesLibres(etat);
     const proximite = (c: { cx: number; cy: number }): number => Math.min(...echantillons.map((e) => distance(e, centreCase(c.cx, c.cy))));
-    const premiers = actionsJouees(creerBotNaif({ graine: 3 }), 4).flatMap((a) => (a.type === 'construire' ? [{ cx: a.cx, cy: a.cy }] : [])).slice(0, 2);
+    const premiers = actionsJouees(creerBotNaif({ graine: 3 }), 4).flatMap((a) => (a.type === 'construire' && a.place === undefined ? [{ cx: a.cx, cy: a.cy }] : [])).slice(0, 2);
     const mediane = libres.map(proximite).sort((a, b) => a - b)[Math.floor(libres.length / 2)] ?? 0;
     expect(premiers.length).toBe(2);
     for (const c of premiers) {

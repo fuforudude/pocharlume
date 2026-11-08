@@ -74,17 +74,17 @@ describe('compétences des spécialisations (16)', () => {
       const aretes = etat.aretes;
       const cumul = tour.coutCumule;
       const cout = competence.cout[rang - 1] ?? Number.NaN;
-      expect(coutCompetence(etat, ce(0).cx, ce(0).cy, id)).toBe(cout);
+      expect(coutCompetence(etat, ce(0), id)).toBe(cout);
       expect(appliquerAction(etat, { type: 'ameliorerCompetence', ...ce(0), competence: id })).toEqual({ ok: true });
       expect(etat.aretes).toBe(aretes - cout);
       expect(tour.coutCumule).toBe(cumul + cout);
       expect(tour.rangs[indice]).toBe(rang);
-      expect(etat.evenements).toContainEqual({ type: 'competence_tour', tour: tour.id, ...ce(0), competence: id, rang });
+      expect(etat.evenements).toContainEqual(expect.objectContaining({ type: 'competence_tour', tour: tour.id, ...ce(0), place: -1, competence: id, rang }));
       verifier(avant, tour.stats, rang);
     }
     expect(tour.rangs[1 - indice]).toBe(0);
     expect(appliquerAction(etat, { type: 'ameliorerCompetence', ...ce(0), competence: id })).toEqual({ ok: false, raison: 'competence_au_maximum' });
-    expect(coutCompetence(etat, ce(0).cx, ce(0).cy, id)).toBeUndefined();
+    expect(coutCompetence(etat, ce(0), id)).toBeUndefined();
   });
 
   it('les deux compétences d’une tour s’ajoutent', () => {
@@ -126,7 +126,7 @@ describe('achat d’une compétence : refus', () => {
   it('la remise de Pollen sur l’artillerie vaut aussi pour les compétences', () => {
     const etat = tourSpecialisee('artillerie', 'A', configDe('pollen'));
     const prix = TOURS.artillerie.specialisations.A.competences[1]?.cout[0] ?? 0;
-    expect(coutCompetence(etat, ce(0).cx, ce(0).cy, 'charge_lourde')).toBe(Math.round(prix * (1 + DIEUX.pollen.bonus.prix)));
+    expect(coutCompetence(etat, ce(0), 'charge_lourde')).toBe(Math.round(prix * (1 + DIEUX.pollen.bonus.prix)));
   });
 
   it('le prix des compétences entre dans la valeur de revente', () => {

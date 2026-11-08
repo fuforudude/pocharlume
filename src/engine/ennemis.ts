@@ -2,11 +2,12 @@
 import { REGLES } from '../data/regles';
 import { tirer, tirerEntre } from './aleatoire';
 import { ajusterMontant } from './argent';
-import { placerSurChemin, segmentPour } from './chemins';
+import { placerSurChemin, segmentPour, trajetEnnemi } from './chemins';
 import { difficulteDe } from './contenu';
 import { infligerDegats, libererEnnemi } from './degats';
 import type { Bond, BrulureContact, DefEnnemi, Drain, Explosion, Noyade, Rage, Renversement, Vol } from './definitions';
 import { EFFET, type Ennemi, type EtatPartie, type Unite } from './etat';
+import { coutViesCouloir, peutVolerEnCouloir } from './gimmicks/corbeaux';
 import { chercherParId, distance2 } from './recherche';
 import { enPas, PAS_PAR_SECONDE } from './temps';
 import { blesserUnite, libererBloques, mourir } from './unites';
@@ -23,17 +24,21 @@ export interface OptionsApparition {
   facteurPv?: number;
   /** Index (de 0) de la vague dont il fait partie ; par défaut la dernière vague lancée. */
   vague?: number;
+  /** Couloir du Vol de Corbeaux où il vole à la place de son chemin (volant seulement) ; absent ou -1 = il suit son chemin. */
+  couloir?: number;
 }
 
 /**
- * Fait apparaître un ennemi sur un chemin, à une distance parcourue donnée. Les stats sont copiées dans
+ * Fait apparaître un ennemi sur un chemin (ou dans un couloir, `options.couloir`), à une distance parcourue donnée. Les stats sont copiées dans
  * l'état (PV et prime ajustés par la difficulté) : le moteur ne relit plus les données ensuite.
  * `elite` : version d'élite (PV, un palier d'armure et de résistance de plus, prime, une vie de plus) ; sans effet
  * sur un boss.
  */
 export function ajouterEnnemi(etat: EtatPartie, def: DefEnnemi, type: string, chemin: number, distance = 0, elite = false, options: OptionsApparition = {}): Ennemi {
-  const c = etat.chemins[chemin];
-  if (!c) throw new Error(`Chemin inconnu : ${String(chemin)}`);
+  const couloir = options.couloir ?? -1;
+  const c = trajetEnnemi(etat, { chemin, couloir });
+  if (!c) throw new Error(couloir >= 0 ? `Couloir inconnu : ${String(couloir)}` : `Chemin inconnu : ${String(chemin)}`);
+  if (couloir >= 0 && !peutVolerEnCouloir(def)) throw new Error(`${type} ne vole pas, il ne peut pas traverser un couloir`);
   const difficulte = difficulteDe(etat);
   const estElite = elite && !def.boss;
   const facteurPv = options.facteurPv ?? 1;
@@ -43,6 +48,7 @@ export function ajouterEnnemi(etat: EtatPartie, def: DefEnnemi, type: string, ch
     id: etat.prochainId++,
     type,
     chemin,
+    couloir,
     distance,
     segment: segmentPour(c, distance, 0),
     decalage: (tirer(etat) * 2 - 1) * REGLES.decalageLateralMax,
@@ -62,7 +68,8 @@ export function ajouterEnnemi(etat: EtatPartie, def: DefEnnemi, type: string, ch
     recharge: 0,
     distanceAttaque: def.distance,
     rechargeDistance: 0,
-    coutVies: estElite ? def.coutVies + REGLES.elite.viesEnPlus : def.coutVies,
+    // Un volant sorti d'un couloir coûte ce que dit le gimmick, quels que soient son rang et ses propres coûts.
+    coutVies: couloir >= 0 ? coutViesCouloir(etat) : estElite ? def.coutVies + REGLES.elite.viesEnPlus : def.coutVies,
     prime: estElite ? ajusterMontant(prime, REGLES.elite.facteurPrime) : prime,
     boss: def.boss,
     insensibleEtourdissement: def.insensibleEtourdissement,
@@ -265,7 +272,7 @@ function attaquerADistance(etat: EtatPartie, e: Ennemi): void {
 
 /** Le sauteur franchit l'unité qui le retient : il se retrouve `distance` tuiles plus loin sur son chemin et ne bondira pas avant `recharge` s. */
 function bondir(etat: EtatPartie, e: Ennemi, bond: Bond): void {
-  const c = etat.chemins[e.chemin];
+  const c = trajetEnnemi(etat, e);
   if (!c) return;
   const departX = e.x;
   const departY = e.y;
@@ -324,7 +331,7 @@ export function mettreAJourEnnemis(etat: EtatPartie): void {
       attaquerAuContact(etat, e, bloqueur);
       continue;
     }
-    const c = etat.chemins[e.chemin];
+    const c = trajetEnnemi(etat, e);
     if (!c) continue;
     e.distance += e.vitesse * facteur;
     if (e.distance >= c.longueur) {

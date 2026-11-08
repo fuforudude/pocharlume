@@ -27,6 +27,7 @@ export function lancerVague(etat: EtatPartie, bonus: number): void {
       prochain: etat.pas + debut,
       elite: p.elite === true,
       facteurPv: p.facteurPv ?? 1,
+      couloir: p.couloir ?? -1,
     });
     duree = Math.max(duree, debut + intervalle * Math.max(0, p.nombre - 1));
   }
@@ -52,7 +53,7 @@ export function mettreAJourVagues(etat: EtatPartie): void {
     while (p.restants > 0 && etat.pas >= p.prochain) {
       const def = defEnnemi(p.ennemi);
       if (!def) throw new Error(`Ennemi inconnu : ${p.ennemi}`);
-      ajouterEnnemi(etat, def, p.ennemi, p.chemin, 0, p.elite, { facteurPv: p.facteurPv, vague: p.vague });
+      ajouterEnnemi(etat, def, p.ennemi, p.chemin, 0, p.elite, { facteurPv: p.facteurPv, vague: p.vague, couloir: p.couloir });
       p.restants--;
       p.prochain += p.intervalle;
     }

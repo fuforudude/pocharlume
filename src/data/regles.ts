@@ -31,6 +31,8 @@ export const REGLES: Regles = {
   heroique: { vies: 1, facteurAretes: 3 },
   fer: { facteurEffectifs: 0.36, facteurAretes: 6 },
   memoireMorts: 8,
+  coutViesCouloir: 1,
+  placesRadeau: 3,
   plafondBonus: 0.1,
   regenerationBonusHeros: 20,
 };

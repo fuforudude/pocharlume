@@ -1,6 +1,7 @@
 // Dégâts infligés aux ennemis, protections et effets (ralentissement, étourdissement, dégâts sur la durée).
 import { REGLES } from '../data/regles';
 import { tirer } from './aleatoire';
+import { trajetEnnemi } from './chemins';
 import type { EffetCoup, Relevement, TypeDegats } from './definitions';
 import { EFFET, type Ennemi, type EtatPartie } from './etat';
 import { chercherParId } from './recherche';
@@ -30,7 +31,8 @@ function tuer(etat: EtatPartie, e: Ennemi): void {
   // Un voleur tué rend le butin qu'il portait en plus de sa prime.
   etat.aretes += e.prime + e.butin;
   libererEnnemi(etat, e);
-  if (!e.boss) {
+  // Un volant tombé dans un couloir n'est pas gardé : le relever le poserait sur un chemin.
+  if (!e.boss && e.couloir < 0) {
     etat.morts.push({ type: e.type, chemin: e.chemin, distance: e.distance, elite: e.elite, vague: e.vague });
     if (etat.morts.length > REGLES.memoireMorts) etat.morts.shift();
   }
@@ -74,7 +76,7 @@ export function infligerDegats(etat: EtatPartie, e: Ennemi, montant: number, typ
 export function partApresBouclier(etat: EtatPartie, e: Ennemi, x: number, y: number): number {
   const bouclier = e.pouvoirs?.bouclier;
   if (!bouclier) return 1;
-  const chemin = etat.chemins[e.chemin];
+  const chemin = trajetEnnemi(etat, e);
   if (!chemin) return 1;
   const devant = (x - e.x) * (chemin.dirX[e.segment] ?? 0) + (y - e.y) * (chemin.dirY[e.segment] ?? 0) > 0;
   return devant ? 1 - bouclier.reduction : 1;

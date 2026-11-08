@@ -2,7 +2,7 @@
 // familles de tours pour le défi Fer. Les vagues elles-mêmes ne sont pas ici : `npm run niveaux` les génère depuis le
 // plan et les fige dans vagues-region<N>.ts. Changer un plan (ennemis, nombre de vagues, graine, nombre de chemins)
 // demande de relancer `npm run niveaux`, un test le rappelle.
-import type { DefiFer } from '../../engine/definitions';
+import type { DefiFer, Gimmick } from '../../engine/definitions';
 import type { IdEnnemi } from '../ennemis';
 import type { IdCarte } from './cartes-toutes';
 import type { BossDeVague } from './generation';
@@ -16,6 +16,8 @@ export interface PlanNiveau {
   readonly aretesDepart: number;
   /** Les deux seules familles de tours du défi Fer sur ce niveau (choisies pour que le niveau reste jouable). */
   readonly defiFer: DefiFer;
+  /** Particularité du niveau (régions 11 à 15), copiée telle quelle dans le `Niveau` ; absente = niveau ordinaire. */
+  readonly gimmick?: Gimmick;
   /** Clés de src/i18n/fr.ts. */
   readonly nom: string;
   readonly ambiance: string;

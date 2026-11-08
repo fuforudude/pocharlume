@@ -202,7 +202,7 @@ describe('fichiers de public/sons', () => {
 });
 
 describe('son d’amélioration', () => {
-  const evenement = (niveau: number, voie: 'a' | null) => ({ type: 'amelioration', tour: 1, cx: 0, cy: 0, niveau, voie }) as never;
+  const evenement = (niveau: number, voie: 'a' | null) => ({ type: 'amelioration', tour: 1, cx: 0, cy: 0, place: -1, x: 0.5, y: 0.5, niveau, voie }) as never;
   const notes = (niveau: number, voie: 'a' | null) => (lectureDe(evenement(niveau, voie))?.suite ?? []).filter((n) => n.cle === 'carillon');
 
   it('une note de carillon par niveau gagné : 1, 2, puis 3 pour la spécialisation', () => {

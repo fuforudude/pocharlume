@@ -47,7 +47,7 @@ describe('construction, amélioration, revente', () => {
     expect(etat.aretes).toBe(5000 - TOURS.tir.niveaux[0].cout);
     expect(etat.tours).toHaveLength(1);
     expect(etat.tours[0]).toMatchObject({ ...ce(0), famille: 'tir', niveau: 1, voie: null, x: 5, y: 7 });
-    expect(etat.evenements).toContainEqual({ type: 'construction', tour: etat.tours[0]?.id, ...ce(0), famille: 'tir' });
+    expect(etat.evenements).toContainEqual(expect.objectContaining({ type: 'construction', tour: etat.tours[0]?.id, ...ce(0), place: -1, famille: 'tir' }));
   });
 
   it('refuse une case occupée, hors de la grille, ou sans assez d’arêtes', () => {
@@ -93,10 +93,10 @@ describe('construction, amélioration, revente', () => {
     construire(etat, 0, 'caserne');
     appliquerAction(etat, { type: 'ameliorer', ...ce(0) });
     expect(etat.tours[0]?.coutCumule).toBe(180);
-    expect(valeurRevente(etat, ce(0).cx, ce(0).cy)).toBe(126);
+    expect(valeurRevente(etat, ce(0))).toBe(126);
     appliquerAction(etat, { type: 'ameliorer', ...ce(0) });
     expect(etat.tours[0]?.coutCumule).toBe(340);
-    expect(valeurRevente(etat, ce(0).cx, ce(0).cy)).toBe(238);
+    expect(valeurRevente(etat, ce(0))).toBe(238);
     const avant = etat.aretes;
     appliquerAction(etat, { type: 'vendre', ...ce(0) });
     expect(etat.aretes).toBe(avant + 238);

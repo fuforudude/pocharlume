@@ -1,7 +1,7 @@
 // Génération des vagues d'un niveau de campagne avec le générateur d'équilibrage. Appelée seulement par
 // `npm run niveaux` (tools/niveaux/generer.ts), qui fige le résultat dans vagues-region1.ts : le jeu ne génère
 // jamais de vague à l'exécution. Les tests vérifient que le fichier figé correspond à ce que ce code produit.
-import type { DefEnnemi, Vague } from '../../engine/definitions';
+import type { DefEnnemi, Paquet, Vague } from '../../engine/definitions';
 import { ENNEMIS, type IdEnnemi } from '../ennemis';
 import { budgetVague, EQUILIBRAGE, genererVague } from '../equilibrage';
 import type { PlanNiveau } from './plan-niveau';
@@ -32,11 +32,30 @@ export interface PlanVagues {
   readonly horde?: boolean;
   /** Écart minimal entre deux ennemis d'un paquet (tuiles), à la place de `EQUILIBRAGE.ecartMinimalTuiles` : réglage fin d'un niveau. */
   readonly ecart?: number;
+  /**
+   * Nombre de couloirs du Vol de Corbeaux du niveau (0 ou absent : aucun). Présent, chaque groupe de volants tiré pour une vague vole
+   * dans un couloir au lieu de suivre un chemin, à tour de rôle dans l'ordre des groupes (le 1er au couloir 0, le 2e au couloir 1…).
+   * Les tirages du générateur ne changent pas : seul le trajet des groupes de volants est réécrit.
+   */
+  readonly couloirs?: number;
+}
+
+/** Réécrit le trajet des groupes de volants d'une vague : le k-ième va dans le couloir k modulo `couloirs`. */
+function volantsEnCouloirs(paquets: readonly Paquet[], couloirs: number): Paquet[] {
+  let k = 0;
+  return paquets.map((p) => {
+    if (!(ENNEMIS[p.ennemi as IdEnnemi] as DefEnnemi | undefined)?.volant) return p;
+    const { ennemi, nombre, intervalle, delai, facteurPv } = p;
+    const couloir = k++ % couloirs;
+    return facteurPv === undefined ? { ennemi, nombre, intervalle, chemin: 0, couloir, delai } : { ennemi, nombre, intervalle, chemin: 0, couloir, delai, facteurPv };
+  });
 }
 
 /** Les vagues d'un niveau, telles que son plan les demande. */
 export function vaguesDuPlan(plan: PlanNiveau): Vague[] {
-  return genererVaguesNiveau({ niveau: plan.numero, chemins: plan.chemins.length, ...plan.vagues });
+  // Un niveau du Vol de Corbeaux envoie ses volants dans ses couloirs.
+  const couloirs = plan.gimmick?.type === 'corbeaux' ? plan.gimmick.couloirs.length : 0;
+  return genererVaguesNiveau({ niveau: plan.numero, chemins: plan.chemins.length, ...plan.vagues, ...(couloirs > 0 ? { couloirs } : {}) });
 }
 
 export function genererVaguesNiveau(plan: PlanVagues): Vague[] {
@@ -59,6 +78,8 @@ export function genererVaguesNiveau(plan: PlanVagues): Vague[] {
         ...(plan.horde === true ? { horde: true } : {}),
         ...(plan.ecart === undefined ? {} : { ecart: plan.ecart }),
       }).paquets];
+    const couloirs = plan.couloirs ?? 0;
+    if (couloirs > 0) paquets.splice(0, paquets.length, ...volantsEnCouloirs(paquets, couloirs));
     const boss = plan.boss;
     if (boss && boss.vague === w) {
       paquets.push({ ennemi: boss.ennemi, nombre: 1, intervalle: 0, chemin: boss.chemin, delai: boss.delai });
