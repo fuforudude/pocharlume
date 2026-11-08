@@ -54,6 +54,12 @@ Les détails chiffrés des gimmicks 3 à 10 (cadences, coûts, nombres) se déci
 4. **Bots** : chaque gimmick vient avec sa stratégie de bot (utiliser le radeau, couvrir les couloirs annoncés…), pour que les bandes
    imposées aient un sens sur ces régions.
 
+### Décisions de jeu du jalon 1 (2026-11-08, après les relectures)
+- **L'eau bloque** la construction sur les cartes de la région 11 (étangs compris), sauf sur le radeau : les cases d'eau sont des cases interdites.
+- **Radeau** : seules les tours sans rien posé au sol y vont. Casernes, divine de Plume (assassins) **et divine de Pollen (tourelles)** sont refusées (`radeau_sans_caserne` ou raison dédiée).
+- **Héros** : placement inchangé (près d'un chemin). Chaque couloir croise un chemin, le héros tireur se poste au croisement.
+- **Corbeau** : un corbeau qui sort coûte **au moins 1 cœur** ; `coutVies: 0` est refusé à la validation.
+
 ### Livraison
 Région par région : **5 jalons**, chacun mis en ligne. Le jalon 1 = base commune + région 11. Cette spec détaille le jalon 1 ; les
 jalons 2 à 5 y ajouteront leur section après leur entretien.
