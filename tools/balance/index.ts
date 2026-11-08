@@ -33,7 +33,7 @@ import { CARTES_INFINI_AUTRES, CARTES_INFINI_REGION1, ecartsInfini, mediane, red
 import { redigerRapport } from '../../src/equilibrage/rapport.ts';
 import { moyennesZone, NIVEAUX_ZONE_HORDE, NIVEAUX_ZONE_ORDINAIRES, redigerZone } from '../../src/equilibrage/zone.ts';
 import { niveauDeCampagne } from '../../src/data/niveaux/campagne.ts';
-import { ecartsDeLaRegion, evaluationsDeRegion, redigerDefis, redigerRegions } from '../../src/equilibrage/rapport-regions.ts';
+import { ecartsDeLaRegion, evaluationsDeRegion, redigerDefis, redigerRegions, REGIONS_EVALUEES } from '../../src/equilibrage/rapport-regions.ts';
 import type { TacheBandes, TacheInfini, TacheProfil } from './travailleur.ts';
 
 const SORTIE = fileURLToPath(new URL('../../balance-report.md', import.meta.url));
@@ -155,9 +155,9 @@ taches.forEach((tache, i) => {
   }
 });
 
-/** Les écarts aux bandes de toutes les régions évaluées (1 à 10), ceux de la région 1 avec la puissance des tours. */
+/** Les écarts aux bandes de toutes les régions évaluées (1 à 11), ceux de la région 1 avec la puissance des tours. */
 function ecartsDeTout(): string[] {
-  const regions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].filter((r) => evaluationsDeRegion(evaluations, r).length > 0);
+  const regions = REGIONS_EVALUEES.filter((r) => evaluationsDeRegion(evaluations, r).length > 0);
   return [
     ...regions.flatMap((r) => (r === 1 ? verifierBandes(evaluationsDeRegion(evaluations, 1)) : ecartsDeLaRegion(evaluations, r))),
     ...ecartsInfini(mesuresInfini),
@@ -198,7 +198,7 @@ if (miseAuPoint) {
   }
   // Défis : part de réussites du soigneux par région et par défi (bande 40 à 90 %), trois dieux ensemble.
   for (const defi of difficultesJouees.filter(estDefi)) {
-    const parRegion = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].flatMap((r) => {
+    const parRegion = REGIONS_EVALUEES.flatMap((r) => {
       const deLaRegion = evaluationsDeRegion(evaluations, r).filter((e) => e.difficulte === defi && e.bot === 'soigneux');
       return deLaRegion.length === 0 ? [] : [`R${String(r)} ${pct(synthetiser(deLaRegion.flatMap((e) => [...e.parties])).tauxVictoire)} %`];
     });
@@ -231,9 +231,9 @@ if (miseAuPoint) {
     SORTIE,
     `${redigerRapport(region1, graines, profils).trimEnd()}
 
-${redigerRegions(evaluations, [2, 3, 4, 5, 6, 7, 8, 9, 10]).trimEnd()}
+${redigerRegions(evaluations, REGIONS_EVALUEES.filter((r) => r > 1)).trimEnd()}
 
-${redigerDefis(evaluations, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]).trimEnd()}
+${redigerDefis(evaluations, REGIONS_EVALUEES).trimEnd()}
 
 ${redigerInfini(mesuresInfini).trimEnd()}
 

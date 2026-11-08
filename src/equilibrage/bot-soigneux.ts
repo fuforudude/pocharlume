@@ -18,14 +18,24 @@
 // virage. La puissance qui couvre un point du chemin est donc comptée avec un rendement décroissant (`SATURATION_DPS`) : une nouvelle
 // tour, ou le niveau suivant d'une tour, vaut ce qu'elle ajoute à ce que les tours posées couvrent déjà, comme le fait un joueur
 // qui répartit sa défense sur le chemin plutôt que de tout miser sur une seule tour.
-import { ajusterMontant, casesLibres, centreCase, niveauDeblocage, ralliementParDefaut, tourSurCase, validerAction } from '../engine';
-import type { Action, BonusFamille, CaseGrille, DefDieu, DefNiveauTour, DefSort, Ennemi, EtatPartie, IdFamille, Niveau, Point, Tour, Voie } from '../engine';
+//
+// Gimmicks de l'après-histoire (spec du 2026-11-08, décision technique 4) :
+// - Vol de Corbeaux : les couloirs sont échantillonnés comme des trajets à part (geometrie.ts), pesés par la menace des groupes qui
+//   les traversent. Sur un point de couloir, seule une tour qui vise les volants compte : le bot pose donc ses tours de tir et de magie
+//   à portée des couloirs. Un héros qui tire sur les volants se poste au croisement du chemin et du couloir le plus menacé de la vague
+//   en cours (ou de la prochaine, celle que le panneau annonce).
+// - Radeau : une tour s'identifie par son lieu (`LieuTour`, la case ou la place du radeau). Le bot construit sur les places libres les
+//   tours qui ne posent rien au sol (tir, magie, artillerie, tour divine de Charlie) et les estime par la couverture moyenne de leur
+//   place sur un aller-retour du radeau (`POSITIONS_RADEAU` positions réparties, chacune pour sa part du temps).
+import { PAS_PAR_SECONDE, ajusterMontant, casesLibres, centreCase, gimmickRadeau, niveauDeblocage, positionPlace, ralliementParDefaut, tourSurCase, tourSurPlace, validerAction } from '../engine';
+import type { Action, BonusFamille, CaseGrille, DefDieu, DefHeros, DefNiveauTour, DefSort, Ennemi, EtatPartie, GimmickRadeau, IdFamille, LieuTour, Niveau, Point, Tour, Voie } from '../engine';
 import { DIEUX } from '../data/dieux';
+import { HEROS } from '../data/heros';
 import { dpsEfficace, EQUILIBRAGE, estTourDeZone } from '../data/equilibrage';
 import { REGLES } from '../data/regles';
 import { FAMILLES, TOURS } from '../data/tours';
-import { distance, echantillonner, longueurVue, niveauLu, PAS_ECHANTILLON, partsSpeciales, poidsDesChemins, premiereVagueFurtifs, type Echantillon } from './geometrie';
-import { jouerPartie, type Bot, type Joueur, type ResultatPartie } from './simulation';
+import { distance, echantillonner, longueurVue, menacePaquet, niveauLu, PAS_ECHANTILLON, partsSpeciales, poidsDesChemins, premiereVagueFurtifs, trajetDuPaquet, type Echantillon } from './geometrie';
+import { jouerPartie, lieuDeLaTour, type Bot, type Joueur, type ResultatPartie } from './simulation';
 
 /** Une préférence de famille : le poids multiplie la valeur d'une tour de cette famille. */
 export interface VarianteSoigneux {
@@ -83,6 +93,27 @@ interface Candidat {
 }
 
 const dieux: Readonly<Record<string, DefDieu>> = DIEUX;
+const heros: Readonly<Record<string, DefHeros>> = HEROS;
+
+/** Positions du radeau (réparties sur un aller-retour) avec lesquelles le bot estime la couverture d'une place. */
+const POSITIONS_RADEAU = 8;
+
+/** Une tour qui pose quelque chose au sol (soldats, tourelles, pièges) : le radeau la refuse (`radeau_sol_requis`). */
+function poseAuSol(def: DefNiveauTour): boolean {
+  return def.soldats !== null || def.atelier !== null;
+}
+
+/** Les pas d'un aller-retour du radeau, `POSITIONS_RADEAU` fois répartis : de quoi moyenner la couverture d'une place. */
+function pasRepartis(gimmick: GimmickRadeau): number[] {
+  // Durée d'un aller-retour : la longueur du trajet (somme des segments entre centres de cases) faite deux fois à `vitesse`.
+  let longueur = 0;
+  gimmick.trajet.forEach((c, i) => {
+    const avant = gimmick.trajet[i - 1];
+    if (avant) longueur += distance(centreCase(avant.cx, avant.cy), centreCase(c.cx, c.cy));
+  });
+  const periode = (2 * longueur * PAS_PAR_SECONDE) / (gimmick.vitesse * REGLES.tailleCase);
+  return Array.from({ length: POSITIONS_RADEAU }, (_, k) => Math.round(((k + 0.5) * periode) / POSITIONS_RADEAU));
+}
 
 /** Nombre de cases libres examinées par famille à chaque achat (les mieux classées d'abord). */
 const CASES_PAR_FAMILLE = 30;
@@ -149,6 +180,14 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
 
   let echantillons: Echantillon[] = [];
   let poids: number[] = [];
+  /** Nombre de chemins de la partie : un échantillon d'indice de trajet au moins égal est sur un couloir. */
+  let nombreChemins = 0;
+  /** 1 pour un point d'échantillonnage sur un couloir du Vol de Corbeaux (seules les tours qui visent les volants y touchent). */
+  let enCouloir = new Uint8Array(0);
+  /** Hauteur (y) de chaque couloir. */
+  let hauteursCouloirs: number[] = [];
+  /** Positions de chaque place du radeau sur un aller-retour (vide sans radeau). */
+  let positionsPlaces: Point[][] = [];
   let parts = { volants: 0, furtifs: 0 };
   /** Numéro (1 à N) de la première vague qui compte un furtif, 0 s'il n'y en a pas. */
   let vagueFurtifs = 0;
@@ -183,10 +222,14 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
   }
 
   function alentoursDe(cx: number, cy: number, portee: number): Int32Array {
-    const clef = `${String(cx)},${String(cy)}:${String(portee)}`;
+    return alentoursDuPoint(`${String(cx)},${String(cy)}`, centreCase(cx, cy), portee);
+  }
+
+  /** Indices des points d'échantillonnage à moins de `portee` du point, gardés sous la clé donnée. */
+  function alentoursDuPoint(nom: string, centre: Point, portee: number): Int32Array {
+    const clef = `${nom}:${String(portee)}`;
     let indices = alentours.get(clef);
     if (!indices) {
-      const centre = centreCase(cx, cy);
       const trouves: number[] = [];
       echantillons.forEach((e, i) => {
         if (distance(e, centre) <= portee) trouves.push(i);
@@ -195,6 +238,17 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
       alentours.set(clef, indices);
     }
     return indices;
+  }
+
+  /**
+   * Ce qu'une tour couvre depuis son lieu : sur une case, ses alentours en entier ; sur une place du radeau, les alentours de chacune
+   * des `POSITIONS_RADEAU` positions de l'aller-retour, chacune pour sa part du temps (poids 1 / POSITIONS_RADEAU).
+   */
+  function couvertureDuLieu(lieu: LieuTour, portee: number): { indices: Int32Array; part: number }[] {
+    if (lieu.place === undefined) return [{ indices: alentoursDe(lieu.cx, lieu.cy, portee), part: 1 }];
+    const place = lieu.place;
+    const positions = positionsPlaces[place] ?? [];
+    return positions.map((p, k) => ({ indices: alentoursDuPoint(`radeau ${String(place)}.${String(k)}`, p, portee), part: 1 / positions.length }));
   }
 
   /** Recompte les tours qui couvrent chaque point d'échantillonnage quand la défense a changé (tour posée, vendue ou améliorée). */
@@ -210,14 +264,17 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
       if (!t.stats.soldats || t.stats.soldats.nombre <= 0) continue;
       const rallie = { x: t.ralliementX, y: t.ralliementY };
       echantillons.forEach((e, i) => {
-        if (distance(e, rallie) <= RAYON_BLOCAGE) bloque[i] = 1;
+        // Les soldats n'arrêtent pas les volants d'un couloir.
+        if (enCouloir[i] !== 1 && distance(e, rallie) <= RAYON_BLOCAGE) bloque[i] = 1;
       });
     }
     for (const t of etat.tours) {
       deplacerCouverture(t, 1);
       if (estTourDeZone(t.stats)) {
         const surplus = dpsBloque(t.stats) - dps(t.stats);
-        for (const i of alentoursDe(t.cx, t.cy, t.stats.portee)) gainBlocage[i] = (gainBlocage[i] ?? 0) + surplus;
+        for (const { indices, part } of couvertureDuLieu(lieuDeLaTour(t), t.stats.portee)) {
+          for (const i of indices) if (enCouloir[i] !== 1) gainBlocage[i] = (gainBlocage[i] ?? 0) + surplus * part;
+        }
       }
     }
   }
@@ -226,22 +283,29 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
   function deplacerCouverture(t: Tour, signe: number): void {
     const libre = signe * dps(t.stats);
     const arrete = estTourDeZone(t.stats) ? signe * dpsBloque(t.stats) : libre;
-    for (const i of alentoursDe(t.cx, t.cy, t.stats.portee)) couverture[i] = (couverture[i] ?? 0) + (bloque[i] === 1 ? arrete : libre);
+    // Sur un couloir, seule une tour qui vise les volants compte.
+    const couloir = t.stats.volants ? libre : 0;
+    for (const { indices, part } of couvertureDuLieu(lieuDeLaTour(t), t.stats.portee)) {
+      for (const i of indices) couverture[i] = (couverture[i] ?? 0) + part * (enCouloir[i] === 1 ? couloir : bloque[i] === 1 ? arrete : libre);
+    }
   }
 
   /**
    * Ce qu'une tour de cette portée et de cette puissance ajoute aux tours posées : sur chaque point du chemin à sa portée, le gain
    * d'utilité (rendement décroissant), pesé par la menace du chemin et la longueur de chemin que le point représente. Une tour de
-   * zone a une puissance de plus là où des soldats arrêtent les ennemis (`puissanceBloquee`).
+   * zone a une puissance de plus là où des soldats arrêtent les ennemis (`puissanceBloquee`) ; sur un couloir, elle vaut
+   * `puissanceCouloir` (celle d'une tour qui vise les volants, 0 sinon). Sur le radeau, chaque position compte pour sa part du temps.
    */
-  function utiliteAjoutee(cx: number, cy: number, portee: number, puissance: number, puissanceBloquee = puissance): number {
+  function utiliteAjoutee(lieu: LieuTour, portee: number, puissance: number, puissanceBloquee = puissance, puissanceCouloir = puissance): number {
     let total = 0;
-    for (const i of alentoursDe(cx, cy, portee)) {
-      const e = echantillons[i];
-      if (!e) continue;
-      const deja = couverture[i] ?? 0;
-      const p = bloque[i] === 1 ? puissanceBloquee : puissance;
-      total += (poids[e.chemin] ?? 0) * PAS_ECHANTILLON * (utilite(deja + p) - utilite(deja));
+    for (const { indices, part } of couvertureDuLieu(lieu, portee)) {
+      for (const i of indices) {
+        const e = echantillons[i];
+        if (!e) continue;
+        const deja = couverture[i] ?? 0;
+        const p = part * (enCouloir[i] === 1 ? puissanceCouloir : bloque[i] === 1 ? puissanceBloquee : puissance);
+        total += (poids[e.chemin] ?? 0) * PAS_ECHANTILLON * (utilite(deja + p) - utilite(deja));
+      }
     }
     return total;
   }
@@ -254,7 +318,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
   function utiliteBlocage(rallie: Point, zoneAttendue: number): number {
     let total = 0;
     echantillons.forEach((e, i) => {
-      if (bloque[i] === 1 || distance(e, rallie) > RAYON_BLOCAGE) return;
+      if (bloque[i] === 1 || enCouloir[i] === 1 || distance(e, rallie) > RAYON_BLOCAGE) return;
       const gain = Math.max(gainBlocage[i] ?? 0, zoneAttendue);
       if (gain <= 0) return;
       const deja = couverture[i] ?? 0;
@@ -357,31 +421,48 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     return bonus ? prixDe(def, famille, bonus) : def.cout;
   }
 
-  /** La case libre qui apporte le plus de couverture, parmi les mieux classées pour cette famille. */
-  function meilleureCase(etat: EtatPartie, famille: IdFamille | 'divine', portee: number): CaseGrille | undefined {
-    majCouverture(etat);
-    let meilleure: CaseGrille | undefined;
-    let meilleureVue = -1;
-    for (const c of meilleuresCasesLibres(etat, famille, CASES_PAR_FAMILLE)) {
-      const v = utiliteAjoutee(c.cx, c.cy, portee, SATURATION_DPS / 2);
-      if (v > meilleureVue) {
-        meilleureVue = v;
-        meilleure = c;
-      }
-    }
-    return meilleure;
+  /** Les places libres du radeau (aucune sans radeau). */
+  function placesLibres(etat: EtatPartie): LieuTour[] {
+    return positionsPlaces.flatMap((_, place) => (tourSurPlace(etat, place) ? [] : [{ place }]));
   }
 
-  function valeur(etat: EtatPartie, cx: number, cy: number, def: DefNiveauTour, famille: IdFamille): number {
-    const memeFamille = etat.tours.filter((t) => t.famille === famille && (t.cx !== cx || t.cy !== cy)).length;
+  /**
+   * Le lieu libre qui apporte le plus de couverture : parmi les cases les mieux classées pour cette famille et, si la tour peut y aller
+   * (`surRadeau`), les places libres du radeau.
+   */
+  function meilleurLieu(etat: EtatPartie, famille: IdFamille | 'divine', portee: number, surRadeau = false): LieuTour | undefined {
+    majCouverture(etat);
+    let meilleur: LieuTour | undefined;
+    let meilleureVue = -1;
+    const lieux: LieuTour[] = meilleuresCasesLibres(etat, famille, CASES_PAR_FAMILLE).map((c) => ({ cx: c.cx, cy: c.cy }));
+    if (surRadeau) lieux.push(...placesLibres(etat));
+    for (const lieu of lieux) {
+      const v = utiliteAjoutee(lieu, portee, SATURATION_DPS / 2);
+      if (v > meilleureVue) {
+        meilleureVue = v;
+        meilleur = lieu;
+      }
+    }
+    return meilleur;
+  }
+
+  /** Vrai si la tour posée est celle de ce lieu. */
+  function estAuLieu(t: Tour, lieu: LieuTour): boolean {
+    return lieu.place !== undefined ? t.place === lieu.place : t.place < 0 && t.cx === lieu.cx && t.cy === lieu.cy;
+  }
+
+  function valeur(etat: EtatPartie, lieu: LieuTour, def: DefNiveauTour, famille: IdFamille): number {
+    const memeFamille = etat.tours.filter((t) => t.famille === famille && !estAuLieu(t, lieu)).length;
     // Une tour qui ne touche pas les volants perd la part de menace qu'ils représentent (rien à retrancher quand il n'y en a pas).
     const touchee = def.volants ? 1 : 1 - parts.volants;
-    const libre = dpsFamille(etat, def, famille) * touchee;
+    const pleine = dpsFamille(etat, def, famille);
+    const libre = pleine * touchee;
     const arrete = estTourDeZone(def) ? dpsFamille(etat, def, famille, true) * touchee : libre;
-    let utilite_ = utiliteAjoutee(cx, cy, def.portee, libre, arrete);
+    // Sur un couloir, seuls des volants passent : une tour qui les vise y compte en entier, une autre pas du tout.
+    let utilite_ = utiliteAjoutee(lieu, def.portee, libre, arrete, def.volants ? pleine : 0);
     // Des soldats qui arrêtent les ennemis valent aussi ce qu'ils apportent à la zone posée (ou à celle qu'on prépare).
-    if (def.soldats && def.soldats.nombre > 0) {
-      const rallie = ralliementParDefaut(etat.chemins, cx, cy, def.portee);
+    if (def.soldats && def.soldats.nombre > 0 && lieu.place === undefined) {
+      const rallie = ralliementParDefaut(etat.chemins, lieu.cx, lieu.cy, def.portee);
       if (rallie) utilite_ += utiliteBlocage(rallie, (variante.blocage ?? 0) * zoneAttendue(etat));
     }
     return (utilite_ * variante.poids[famille]) / (1 + (variante.diversite ?? 0) * memeFamille);
@@ -394,24 +475,32 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     for (const famille of FAMILLES.filter((f) => famillePermise(etat, f, options.familles))) {
       const def = TOURS[famille].niveaux[0];
       for (const { cx, cy } of meilleuresCasesLibres(etat, famille, CASES_PAR_FAMILLE)) {
-        liste.push({ action: { type: 'construire', cx, cy, tour: famille }, ratio: valeur(etat, cx, cy, def, famille) / cout(etat, def, famille) });
+        liste.push({ action: { type: 'construire', cx, cy, tour: famille }, ratio: valeur(etat, { cx, cy }, def, famille) / cout(etat, def, famille) });
+      }
+      // Radeau : les places libres, pour les tours qui ne posent rien au sol.
+      if (!poseAuSol(def)) {
+        for (const lieu of placesLibres(etat)) {
+          liste.push({ action: { type: 'construire', tour: famille, ...lieu }, ratio: valeur(etat, lieu, def, famille) / cout(etat, def, famille) });
+        }
       }
     }
     for (const tour of etat.tours) {
-      const { cx, cy } = tour;
+      const lieu = lieuDeLaTour(tour);
       const actuelle = defCourante(tour);
       if (tour.famille === 'divine' || !actuelle || tour.niveau >= 4) continue;
       const famille = TOURS[tour.famille];
       // La tour ne compte pas dans la couverture qu'elle améliore.
       deplacerCouverture(tour, -1);
-      const avant = valeur(etat, cx, cy, actuelle, tour.famille);
+      const avant = valeur(etat, lieu, actuelle, tour.famille);
+      // Sur le radeau, un niveau qui poserait quelque chose au sol serait refusé : ce n'est pas un achat.
+      const permis = (def: DefNiveauTour): boolean => tour.place < 0 || !poseAuSol(def);
       if (tour.niveau < 3) {
         const suivante = famille.niveaux[tour.niveau];
-        if (suivante) liste.push({ action: { type: 'ameliorer', cx, cy }, ratio: (valeur(etat, cx, cy, suivante, tour.famille) - avant) / cout(etat, suivante, tour.famille) });
+        if (suivante && permis(suivante)) liste.push({ action: { type: 'ameliorer', ...lieu }, ratio: (valeur(etat, lieu, suivante, tour.famille) - avant) / cout(etat, suivante, tour.famille) });
       } else {
         for (const voie of ['A', 'B'] as const satisfies readonly Voie[]) {
           const spe = famille.specialisations[voie];
-          liste.push({ action: { type: 'specialiser', cx, cy, voie }, ratio: (valeur(etat, cx, cy, spe, tour.famille) - avant) / cout(etat, spe, tour.famille) });
+          if (permis(spe)) liste.push({ action: { type: 'specialiser', voie, ...lieu }, ratio: (valeur(etat, lieu, spe, tour.famille) - avant) / cout(etat, spe, tour.famille) });
         }
       }
       deplacerCouverture(tour, 1);
@@ -441,12 +530,12 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     const tir = etat.tours.filter((t) => t.famille === 'tir' && t.niveau < 4).sort((a, b) => b.niveau - a.niveau)[0];
     const ratio = meilleurRatio * 1.02;
     if (tir) {
-      const action: Action = tir.niveau >= 3 ? { type: 'specialiser', cx: tir.cx, cy: tir.cy, voie: 'A' } : { type: 'ameliorer', cx: tir.cx, cy: tir.cy };
+      const action: Action = tir.niveau >= 3 ? { type: 'specialiser', voie: 'A', ...lieuDeLaTour(tir) } : { type: 'ameliorer', ...lieuDeLaTour(tir) };
       // Pas encore débloqués à ce niveau : on ne bloque pas les arêtes pour des Guetteurs impossibles.
       return niveauDeblocage(etat, action) === null ? { action, ratio, imperatif: true } : null;
     }
-    const meilleure = meilleureCase(etat, 'tir', TOURS.tir.niveaux[0].portee);
-    return meilleure ? { action: { type: 'construire', cx: meilleure.cx, cy: meilleure.cy, tour: 'tir' }, ratio, imperatif: true } : null;
+    const meilleur = meilleurLieu(etat, 'tir', TOURS.tir.niveaux[0].portee);
+    return meilleur ? { action: { type: 'construire', tour: 'tir', ...meilleur }, ratio, imperatif: true } : null;
   }
 
   /**
@@ -460,8 +549,9 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     if (niveauDeblocage(etat, { type: 'construire', cx: 0, cy: 0, tour: 'divine' }) !== null) return null;
     // Au défi Fer, la tour divine suit la famille de son dieu : elle n'est permise que si cette famille l'est.
     if (!famillePermise(etat, dieu.bonus.famille, options.familles)) return null;
-    const meilleure = meilleureCase(etat, 'divine', dieu.tourDivine.portee);
-    return meilleure ? { action: { type: 'construire', cx: meilleure.cx, cy: meilleure.cy, tour: 'divine' }, ratio: meilleurRatio * 1.01 } : null;
+    // Sur le radeau aussi quand elle ne pose rien au sol (celle de Charlie).
+    const meilleur = meilleurLieu(etat, 'divine', dieu.tourDivine.portee, !poseAuSol(dieu.tourDivine));
+    return meilleur ? { action: { type: 'construire', tour: 'divine', ...meilleur }, ratio: meilleurRatio * 1.01 } : null;
   }
 
   /** Achat de ce tour-ci : le meilleur s'il est payable, sinon un presque aussi bon qui l'est, sinon on économise. */
@@ -480,7 +570,8 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
 
   /** Point de chaque chemin où les tours posées concentrent le plus de feu. */
   function calculerZones(etat: EtatPartie): void {
-    const clef = etat.tours.reduce((a, t) => a + t.coutCumule + 1000 * (t.cx + 100 * t.cy), 0);
+    // Une tour du radeau (cx = cy = -1) compte par sa place ; une tour sur une case, comme avant.
+    const clef = etat.tours.reduce((a, t) => a + t.coutCumule + 1000 * (t.place >= 0 ? -100000 * (t.place + 1) : t.cx + 100 * t.cy), 0);
     if (clef === clefZones) return;
     clefZones = clef;
     zones = etat.chemins.map((_, chemin) => {
@@ -499,13 +590,57 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     });
   }
 
+  /**
+   * Vol de Corbeaux : le couloir que le héros doit couvrir, s'il tire sur les volants et que les volants d'un couloir pèsent plus que
+   * le chemin le plus menacé, dans la vague en cours (ennemis vivants) ou, terrain vide, dans la prochaine (celle que le panneau annonce).
+   */
+  function couloirAGarder(etat: EtatPartie): number | null {
+    if (etat.couloirs.length === 0 || heros[etat.config.heros]?.capacites.distance?.volants !== true) return null;
+    const menaces = poids.map(() => 0);
+    const vivants = etat.ennemis.filter((e) => e.vivant);
+    if (vivants.length > 0) {
+      for (const e of vivants) {
+        const t = e.couloir >= 0 ? nombreChemins + e.couloir : e.chemin;
+        menaces[t] = (menaces[t] ?? 0) + e.pv;
+      }
+    } else {
+      for (const p of etat.niveau.vagues[etat.vagues.lancees]?.paquets ?? []) {
+        const t = trajetDuPaquet(etat.niveau, p);
+        menaces[t] = (menaces[t] ?? 0) + menacePaquet(p);
+      }
+    }
+    let couloir: number | null = null;
+    let max = Math.max(0, ...menaces.slice(0, nombreChemins));
+    for (let k = 0; k < etat.couloirs.length; k++) {
+      const m = menaces[nombreChemins + k] ?? 0;
+      if (m > max) {
+        max = m;
+        couloir = k;
+      }
+    }
+    return couloir;
+  }
+
+  /** Le point des chemins le plus proche de la hauteur du couloir : le croisement où le héros tireur se poste. */
+  function croisement(couloir: number): Echantillon | undefined {
+    const y = hauteursCouloirs[couloir];
+    if (y === undefined) return undefined;
+    let meilleur: Echantillon | undefined;
+    for (const e of echantillons) {
+      if (e.chemin >= nombreChemins) continue;
+      if (!meilleur || Math.abs(e.y - y) < Math.abs(meilleur.y - y)) meilleur = e;
+    }
+    return meilleur;
+  }
+
   function ordreHeros(etat: EtatPartie): Action | null {
     calculerZones(etat);
     let cheminCle = 0;
     poids.forEach((p, i) => {
-      if (p > (poids[cheminCle] ?? 0)) cheminCle = i;
+      if (i < nombreChemins && p > (poids[cheminCle] ?? 0)) cheminCle = i;
     });
-    const zone = zones[cheminCle];
+    const couloir = couloirAGarder(etat);
+    const zone = couloir !== null ? croisement(couloir) : zones[cheminCle];
     if (!zone) return null;
     if (dernierOrdreHeros && distance(dernierOrdreHeros, zone) < 0.3) return null;
     const action: Action = { type: 'deplacerHeros', x: zone.x, y: zone.y };
@@ -520,7 +655,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     for (let chemin = 0; chemin < zones.length; chemin++) {
       const zone = zones[chemin];
       if (!zone) continue;
-      const venant = etat.ennemis.some((e) => e.vivant && e.chemin === chemin && e.distance >= zone.distance - 7 && e.distance <= zone.distance - 1);
+      const venant = etat.ennemis.some((e) => e.vivant && e.couloir < 0 && e.chemin === chemin && e.distance >= zone.distance - 7 && e.distance <= zone.distance - 1);
       if (!venant) continue;
       // Le point du chemin deux tuiles avant la zone de feu.
       let devant: Echantillon | undefined;
@@ -581,7 +716,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
       if (!zone) continue;
       let nombre = 0;
       for (const e of ennemis) {
-        if (e.chemin === chemin && e.distance >= zone.distance - 3 && e.distance <= zone.distance + 1.5) nombre++;
+        if (e.couloir < 0 && e.chemin === chemin && e.distance >= zone.distance - 3 && e.distance <= zone.distance + 1.5) nombre++;
       }
       if (nombre >= 3) return { type: 'lancerSort', emplacement, x: zone.x, y: zone.y };
     }
@@ -613,7 +748,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
       if (!zone) continue;
       let nombre = 0;
       for (const e of ennemis) {
-        if (e.chemin === chemin && e.distance >= zone.distance - 4 && e.distance <= zone.distance + 1) nombre++;
+        if (e.couloir < 0 && e.chemin === chemin && e.distance >= zone.distance - 4 && e.distance <= zone.distance + 1) nombre++;
       }
       if (nombre >= 2) return { type: 'lancerSort', emplacement, x: zone.x, y: zone.y };
     }
@@ -640,6 +775,11 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     decider(etat) {
       if (echantillons.length === 0) {
         echantillons = echantillonner(etat);
+        nombreChemins = etat.chemins.length;
+        enCouloir = Uint8Array.from(echantillons, (e) => (e.chemin >= nombreChemins ? 1 : 0));
+        hauteursCouloirs = etat.couloirs.map((c) => c.points[0]?.y ?? 0);
+        const radeau = gimmickRadeau(etat.niveau);
+        positionsPlaces = radeau ? radeau.places.map((_, n) => pasRepartis(radeau).map((pas) => positionPlace(radeau, pas, n))) : [];
         const lu = niveauLu(etat);
         horde = etat.niveau.horde === true;
         poids = poidsDesChemins(lu);

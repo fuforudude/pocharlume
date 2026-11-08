@@ -7,7 +7,7 @@ import type { Action, CaseGrille, EtatPartie, Generateur, IdFamille, Tour, Voie 
 import { ENNEMIS } from '../data/ennemis';
 import { FAMILLES } from '../data/tours';
 import { distance, echantillonner, PAS_ECHANTILLON, type Echantillon } from './geometrie';
-import type { Bot } from './simulation';
+import { lieuDeLaTour, type Bot } from './simulation';
 
 export interface OptionsNaif {
   /** Graine des choix du bot (indépendante de celle de la partie). */
@@ -42,7 +42,7 @@ function ordreDesCases(etat: EtatPartie, g: Generateur, echantillons: readonly E
 
 /** Le pas suivant d'une tour : l'améliorer, ou la spécialiser (voie `voie`) au niveau 3. */
 function actionSuivante(tour: Tour, voie: Voie): Action {
-  return tour.niveau === 3 ? { type: 'specialiser', cx: tour.cx, cy: tour.cy, voie } : { type: 'ameliorer', cx: tour.cx, cy: tour.cy };
+  return tour.niveau === 3 ? { type: 'specialiser', voie, ...lieuDeLaTour(tour) } : { type: 'ameliorer', ...lieuDeLaTour(tour) };
 }
 
 export function creerBotNaif(options: OptionsNaif): Bot {
@@ -63,7 +63,7 @@ export function creerBotNaif(options: OptionsNaif): Bot {
     if (tirs.filter((t) => t.voie === 'A').length >= etat.niveau.carte.chemins.length) return null;
     const tour = tirs.filter((t) => t.niveau < 4).sort((a, b) => b.niveau - a.niveau)[0];
     if (tour) {
-      const action: Action = tour.niveau === 3 ? { type: 'specialiser', cx: tour.cx, cy: tour.cy, voie: 'A' } : { type: 'ameliorer', cx: tour.cx, cy: tour.cy };
+      const action = actionSuivante(tour, 'A');
       // Pas encore débloqué à ce niveau : il joue comme sans furtifs.
       return niveauDeblocage(etat, action) === null ? action : null;
     }
