@@ -283,6 +283,52 @@
   align-self: center;
 }
 
+/* --- Particularités (gimmicks) : ligne de la fiche d'un niveau, fiche « Nouvelle particularité », onglet du Bestiaire --- */
+
+.fiche-particularite-ligne {
+  margin: 0;
+  padding: 4px 8px;
+  border-left: 3px solid var(--or);
+  background: rgba(0, 0, 0, 0.22);
+  font-size: 13px;
+  line-height: 1.3;
+}
+
+.fiche-particularite .fiche-particularite-icone {
+  width: 64px;
+  height: 64px;
+  flex: none;
+  image-rendering: pixelated;
+}
+
+.fiche-particularite-phrase {
+  margin: 4px 0 0;
+  line-height: 1.35;
+}
+
+.fiche-particularite-titre {
+  margin: 8px 0 2px;
+  font-size: 14px;
+  color: var(--or);
+}
+
+.fiche-particularite-conseil {
+  margin: 0;
+  line-height: 1.35;
+}
+
+@media (max-height: 460px) {
+  .fiche-particularite-ligne {
+    font-size: 12px;
+    padding: 2px 6px;
+  }
+
+  .fiche-particularite .fiche-particularite-icone {
+    width: 40px;
+    height: 40px;
+  }
+}
+
 /* --- Ennemis de la fiche d'un niveau --- */
 
 /* Les ennemis et les découvertes du niveau partagent une rangée. */

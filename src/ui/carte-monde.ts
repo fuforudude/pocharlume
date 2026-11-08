@@ -22,6 +22,7 @@ import { RenduCarteMonde } from '../render/carte-monde';
 import { DIFFICULTES_SAUVEGARDE, etoilesDisponibles, NOMBRE_NIVEAUX, totalEtoiles, type ChoixPartie, type DifficulteSauvegarde } from '../save';
 import { dessinerIconesDefis } from './carte-monde-defis';
 import { ennemisDeLaFiche } from './bestiaire-logique';
+import { ligneParticularite } from './particularites';
 import { decouvertesDuNiveau } from './decouvertes';
 import {
   directionDeTouche,
@@ -451,6 +452,13 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     if (niveau.horde) entete.append(el('span', 'etiquette-horde', t('fiche.horde')));
     gauche.append(entete, el('h2', 'titre', textes.nom), el('p', 'ambiance', textes.ambiance));
     if (niveau.horde) gauche.append(el('p', 'horde-aide', t('fiche.horde_aide')));
+    // La particularité du niveau (régions 11 à 15), tirée de son gimmick : une ligne, rien pour un niveau ordinaire.
+    const particularite = ligneParticularite(niveau.niveau);
+    if (particularite) {
+      const ligne = el('p', 'fiche-particularite-ligne', particularite);
+      if (niveau.niveau.gimmick) ligne.dataset.particularite = niveau.niveau.gimmick.type;
+      gauche.append(ligne);
+    }
     const ennemisNiveau = rangeeEnnemis(niveau, signalFiche);
     const choisir = creerChoixFiche(atlas, session, signalFiche);
     droite.append(choisir.racine);

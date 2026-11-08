@@ -9,7 +9,7 @@ import { elementsMenu as menuDe } from './menu-cercle';
 
 const RAYON = 0.9;
 
-const elementsMenu = (etat: EtatPartie, i: number) => menuDe(etat, ct(i).cx, ct(i).cy);
+const elementsMenu = (etat: EtatPartie, i: number) => menuDe(etat, ct(i));
 
 /** Un point au centre de la case de test numéro `i` (voir `CASES_TEST`), décalé de (dx, dy) tuiles. */
 function pt(i: number, dx = 0, dy = 0): [number, number] {

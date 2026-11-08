@@ -1,6 +1,6 @@
-// L'écran « Bestiaire », ouvert depuis la carte du monde et depuis la pause : deux onglets, Ennemis (classés par région, ceux jamais
-// rencontrés en silhouette et « ??? ») et Tours (chaque famille, ses niveaux et ses spécialisations, la tour divine de chaque dieu, ce que la
-// campagne n'a pas encore ouvert montré verrouillé). À gauche la liste, à droite la fiche de ce qu'on a touché. Tout est lu dans les données
+// L'écran « Bestiaire », ouvert depuis la carte du monde et depuis la pause : trois onglets, Ennemis (classés par région, ceux jamais
+// rencontrés en silhouette et « ??? »), Tours (chaque famille, ses niveaux et ses spécialisations, la tour divine de chaque dieu, ce que la
+// campagne n'a pas encore ouvert montré verrouillé) et Particularités (les gimmicks de l'après-histoire, et comment s'y prendre). À gauche la liste, à droite la fiche de ce qu'on a touché. Tout est lu dans les données
 // par `bestiaire-logique.ts` ; l'écran ne calcule rien. Même contrat que les Options : il couvre l'écran dessous, Échap le ferme.
 import { ENNEMIS } from '../data/ennemis';
 import { t, tCle } from '../i18n';
@@ -11,6 +11,8 @@ import { bouton, el, image } from './dom';
 import { construireChiffres, construireFicheEnnemi, construireFicheInconnue } from './fiche-ennemi';
 import { REGIONS_MONDE } from './regions-monde';
 import { creerSpriteAnime } from './sprite-anime';
+import { construireFicheParticularite } from './nouvelle-particularite';
+import { iconeParticularite, nomParticularite, vueParticularites, type TypeParticularite } from './particularites';
 
 export interface OptionsBestiaire {
   readonly atlas: AtlasRendu;
@@ -19,7 +21,7 @@ export interface OptionsBestiaire {
   /** Appelée une fois, quand l'écran se ferme (bouton Fermer ou Échap). */
   readonly surFermer: () => void;
   /** Onglet ouvert au départ ; Ennemis par défaut. */
-  readonly onglet?: 'ennemis' | 'tours';
+  readonly onglet?: Onglet;
 }
 
 export interface EcranBestiaire {
@@ -28,7 +30,9 @@ export interface EcranBestiaire {
   arreter(): void;
 }
 
-type Onglet = 'ennemis' | 'tours';
+type Onglet = 'ennemis' | 'tours' | 'particularites';
+const ONGLETS: readonly Onglet[] = ['ennemis', 'tours', 'particularites'];
+const LIBELLES_ONGLETS = { ennemis: 'bestiaire.onglet_ennemis', tours: 'bestiaire.onglet_tours', particularites: 'bestiaire.onglet_particularites' } as const;
 
 function nomDeRegion(groupe: GroupeEnnemis): string {
   if (groupe.region === 0) return t('bestiaire.region_autres');
@@ -101,18 +105,19 @@ export function afficherBestiaire(parent: HTMLElement, options: OptionsBestiaire
   onglets.setAttribute('role', 'tablist');
   onglets.setAttribute('aria-label', t('bestiaire.onglets'));
   const boutonsOnglets = new Map<Onglet, HTMLButtonElement>();
-  for (const id of ['ennemis', 'tours'] as const) {
-    const libelle = t(id === 'ennemis' ? 'bestiaire.onglet_ennemis' : 'bestiaire.onglet_tours');
+  for (const id of ONGLETS) {
+    const libelle = t(LIBELLES_ONGLETS[id]);
     const b = bouton('bouton onglet', libelle, () => { choisirOnglet(id); }, signal);
     b.textContent = libelle;
     b.setAttribute('role', 'tab');
     b.dataset.onglet = id;
     b.setAttribute('aria-controls', 'bestiaire-panneau');
-    // Flèches gauche et droite : d'un onglet à l'autre, comme un groupe d'onglets.
+    // Flèches gauche et droite : d'un onglet à l'autre, en boucle, comme un groupe d'onglets.
     b.addEventListener('keydown', (e) => {
       if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
       e.preventDefault();
-      const autre = id === 'ennemis' ? 'tours' : 'ennemis';
+      const i = ONGLETS.indexOf(id) + (e.key === 'ArrowRight' ? 1 : -1);
+      const autre = ONGLETS[(i + ONGLETS.length) % ONGLETS.length] ?? 'ennemis';
       choisirOnglet(autre);
       boutonsOnglets.get(autre)?.focus({ preventScroll: true });
     }, { signal });
@@ -256,6 +261,34 @@ export function afficherBestiaire(parent: HTMLElement, options: OptionsBestiaire
     if (premiere) choisir(premiere);
   };
 
+  // --- Onglet Particularités ---
+
+  const dessinerParticularites = (): void => {
+    const vues = vueParticularites(session.sauvegarde);
+    compte.textContent = t('bestiaire.compte_particularites', { n: vues.filter((v) => v.rencontree).length, m: vues.length });
+    liste.setAttribute('aria-label', t('bestiaire.liste_particularites'));
+    const tuiles = new Map<string, HTMLElement>();
+    const choisir = (type: TypeParticularite, rencontree: boolean): void => {
+      marquerActif(tuiles, type);
+      montrer(() => (rencontree ? construireFicheParticularite(atlas, type) : el('p', 'detail', t('gimmick.inconnue'))));
+    };
+    const grille = el('div', 'bestiaire-grille');
+    for (const v of vues) {
+      const libelle = v.rencontree ? nomParticularite(v.type) : t('gimmick.inconnue_libelle');
+      const b = bouton(v.rencontree ? 'bestiaire-tuile' : 'bestiaire-tuile inconnue', libelle, () => { choisir(v.type, v.rencontree); }, signal);
+      b.dataset.particularite = v.type;
+      b.dataset.rencontree = String(v.rencontree);
+      b.append(image(atlas.iconeUrl(iconeParticularite(v.type), 2), 'bestiaire-icone'));
+      tuiles.set(v.type, b);
+      grille.append(b);
+    }
+    const section = el('section', 'bestiaire-groupe');
+    section.append(el('h3', 'bestiaire-groupe-titre', t('bestiaire.liste_particularites')), grille);
+    liste.replaceChildren(section);
+    const premiere = vues.find((v) => v.rencontree) ?? vues[0];
+    if (premiere) choisir(premiere.type, premiere.rencontree);
+  };
+
   function choisirOnglet(id: Onglet): void {
     onglet = id;
     for (const [cle, b] of boutonsOnglets) {
@@ -265,7 +298,8 @@ export function afficherBestiaire(parent: HTMLElement, options: OptionsBestiaire
     ecran.dataset.onglet = id;
     liste.scrollTop = 0;
     if (id === 'ennemis') dessinerEnnemis();
-    else dessinerTours();
+    else if (id === 'tours') dessinerTours();
+    else dessinerParticularites();
   }
 
   choisirOnglet(onglet);

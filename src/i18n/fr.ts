@@ -8,6 +8,7 @@ import { frEcrans4 } from './fr-ecrans4';
 import { frEnnemis } from './fr-ennemis';
 import { frDeblocage } from './fr-deblocage';
 import { frHorde } from './fr-horde';
+import { frGimmicks } from './fr-gimmicks';
 import { frIndications } from './fr-indications';
 import { frInscriptions } from './fr-inscriptions';
 import { frEnnemisRegions6a10 } from './fr-ennemis-regions-6-10';
@@ -67,6 +68,8 @@ export const fr = {
   'accueil.reprendre': 'Reprendre à la vague {n}',
   'accueil.niveau': 'Niveau {n}',
   'accueil.niveau_test': 'Niveau de test',
+  'accueil.essai_corbeaux': 'Essai : Vol de Corbeaux',
+  'accueil.essai_radeau': 'Essai : Radeau',
   'accueil.options': 'Options',
 
   // Chargement raté
@@ -233,6 +236,7 @@ export const fr = {
   ...frHorde,
   // Indications de départ et d'arrivée en partie (fr-indications.ts)
   ...frIndications,
+  ...frGimmicks,
   // Déblocage progressif des tours (fr-deblocage.ts)
   ...frDeblocage,
 

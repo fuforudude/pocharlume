@@ -7,7 +7,7 @@ import { ENNEMIS } from '../data/ennemis';
 import { HEROS, type IdHeros } from '../data/heros';
 import { RANG_MAX_COMPETENCE } from '../data/meta';
 import { TOURS } from '../data/tours';
-import { tourSurCase, valeurRevente } from '../engine';
+import { tourDuLieu, valeurRevente, type LieuTour } from '../engine';
 import type {
   ActionEnnemi,
   CapacitesUnite,
@@ -260,20 +260,20 @@ export function contenuTourDeDonnees(famille: IdFamille | 'divine', choix: Choix
  * qu'une amélioration ou une compétence change, le pouvoir d'une spécialisation, ce que rend la vente, le ralliement.
  * Un bouton refusé dit aussi pourquoi (le même texte que le message de refus).
  */
-export function contenuElementMenu(etat: EtatPartie, cx: number, cy: number, element: ElementMenu): ContenuBulle | null {
-  const contenu = contenuSansRefus(etat, cx, cy, element);
+export function contenuElementMenu(etat: EtatPartie, lieu: LieuTour, element: ElementMenu): ContenuBulle | null {
+  const contenu = contenuSansRefus(etat, lieu, element);
   if (!contenu || element.refus === null || element.refus === 'competence_au_maximum') return contenu;
   return { ...contenu, notes: [...contenu.notes, texteRefus(element.refus, element.deblocage)] };
 }
 
-function contenuSansRefus(etat: EtatPartie, cx: number, cy: number, element: ElementMenu): ContenuBulle | null {
+function contenuSansRefus(etat: EtatPartie, lieu: LieuTour, element: ElementMenu): ContenuBulle | null {
   const [genre, detail] = element.id.split(':');
   if (genre === 'construire') {
     const famille = detail as FamilleTour;
     const def = defNiveau(etat, famille, 1, null);
     return def ? contenuTour(statsTour(etat, famille, def), famille) : null;
   }
-  const tour = tourSurCase(etat, cx, cy);
+  const tour = tourDuLieu(etat, lieu);
   if (!tour) return null;
   const famille = tour.famille;
   if (genre === 'ameliorer') {
@@ -300,7 +300,7 @@ function contenuSansRefus(etat: EtatPartie, cx: number, cy: number, element: Ele
     return { ...entete, lignes: difference(caracsTour(avant), caracsTour(apres)), notes: [] };
   }
   if (genre === 'vendre') {
-    const rendu = valeurRevente(etat, { cx, cy });
+    const rendu = valeurRevente(etat, lieu);
     return {
       titre: t('menu.vendre'),
       sousTitre: tCle(tour.stats.nom),
