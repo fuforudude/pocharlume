@@ -169,6 +169,8 @@ export function validerAction(etat: EtatPartie, action: Action): RaisonRefus | n
       if (!t) return 'case_vide';
       const suivant = niveauSuivant(etat, t, action);
       if (typeof suivant === 'string') return suivant;
+      // Branche défensive : aucune donnée actuelle ne la déclenche (aucune amélioration d'une tour du radeau ne pose quelque chose au sol),
+      // mais un futur niveau de tour qui le ferait doit rester refusé sur le radeau.
       if (t.place >= 0 && poseAuSol(suivant)) return 'radeau_sol_requis';
       if (niveauDeblocage(etat, action) !== null) return 'non_debloque';
       return prix(etat, t.famille, suivant) > etat.aretes ? 'aretes_insuffisantes' : null;

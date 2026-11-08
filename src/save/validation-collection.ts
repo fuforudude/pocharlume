@@ -22,7 +22,7 @@ import { avecCles, CLE_NIVEAU, echec, estEnregistrement, estEntierEntre, ok, par
 
 // --- Région ouverte et défis -----------------------------------------------------------------------------------
 
-/** La région la plus haute ouverte : un entier de 1 à 10, égal à celui que donne le niveau le plus haut débloqué. */
+/** La région la plus haute ouverte : un entier de 1 à 15, égal à celui que donne le niveau le plus haut débloqué. */
 export function validerRegionMax(x: unknown, niveauMax: number): Resultat<number> {
   if (!estEntierEntre(x, 1, NOMBRE_REGIONS)) return echec(`meta.regionMax : entier de 1 à ${String(NOMBRE_REGIONS)} attendu`);
   if (x !== regionOuverte(niveauMax)) return echec(`meta.regionMax : la région ${String(regionOuverte(niveauMax))} est la plus haute ouverte avec le niveau ${String(niveauMax)} débloqué`);

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { FIXTURE_V1, FIXTURE_V2, FIXTURE_V3, FIXTURE_V4, FIXTURE_V5, FIXTURE_V6, FIXTURE_V7, sauvegardeRemplie, variante } from './aides.test-utils';
+import { PARTIE, FIXTURE_V1, FIXTURE_V2, FIXTURE_V3, FIXTURE_V4, FIXTURE_V5, FIXTURE_V6, FIXTURE_V7, sauvegardeRemplie, variante } from './aides.test-utils';
 import { etoilesDepensees, etoilesGagnees, metaParDefaut, VERSION_SAUVEGARDE } from './format';
 import { MIGRATIONS, migrer } from './migrations';
 
@@ -147,6 +147,15 @@ describe('migrations de format', () => {
     expect(r.sauvegarde.reglages).toEqual(v7.reglages);
     expect(r.sauvegarde.partie).toEqual(v7.partie);
     expect(r.sauvegarde.meta).toEqual({ ...v7.meta, regionMax: 11 });
+  });
+
+  it('une v7 avec une partie en cours est migrée en gardant la partie, et la fin de l’histoire gagnée est débloquée', () => {
+    const v7 = { ...(JSON.parse(FIXTURE_V7) as Record<string, unknown>), partie: PARTIE };
+    const r = migrer(v7);
+    if (!r.ok) throw new Error(r.raison);
+    expect(r.sauvegarde.partie).toEqual(PARTIE);
+    expect(r.sauvegarde.progression.niveauMax).toBe(101);
+    expect(r.sauvegarde.meta.regionMax).toBe(11);
   });
 
   it('une v7 dont le niveau 100 n’est pas gagné ne change pas de progression', () => {

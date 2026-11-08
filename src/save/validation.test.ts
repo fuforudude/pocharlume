@@ -101,7 +101,7 @@ describe('validation d’une sauvegarde', () => {
       'meta.regionMax': 1,
     };
 
-    it('niveau max : entier de 1 à 100', () => {
+    it('niveau max : entier de 1 à 150', () => {
       for (const v of [0, -1, 151, 2.5, '3', null, Number.POSITIVE_INFINITY]) refusee(variante({ ...sansPartie, 'progression.niveauMax': v }));
       // La région ouverte suit : 1 jusqu'au niveau 10, 5 au niveau 50, 10 au niveau 99, 11 au niveau 101, 15 au niveau 150.
       for (const [niveauMax, region] of [[1, 1], [50, 5], [100, 10], [101, 11], [150, 15]] as const) acceptee(variante({ ...sansPartie, 'meta.regionMax': region, 'progression.niveauMax': niveauMax }));

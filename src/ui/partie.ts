@@ -38,7 +38,7 @@ import { el } from './dom';
 
 /** Résultat d'une partie terminée, transmis à `surFin` (étoiles, vies, journal pour une future vérification). */
 export interface ResultatPartie {
-  /** Numéro du niveau de campagne (1 à 100). */
+  /** Numéro du niveau de campagne (1 à 150). */
   readonly niveau: number;
   /** `abandon` : le joueur a quitté avant la fin (rendu seulement à `surQuitter`, jamais à `surFin`). */
   readonly statut: 'victoire' | 'defaite' | 'abandon';
