@@ -5,6 +5,7 @@ import { REGLES } from '../../src/data/regles';
 import { FAMILLES, TOURS } from '../../src/data/tours';
 import type { Decor } from '../../src/data/visuel';
 import { decorVisible } from '../../src/data/niveaux/assemblage';
+import { zonesBloquantes } from '../../src/data/niveaux/habillage';
 import type { CarteModele } from '../../src/data/niveaux/cartes-toutes';
 import { distancePointChemin } from '../../src/data/niveaux/geometrie';
 import { casesInterditesDuNiveau } from '../../src/data/niveaux/grille-niveau';
@@ -33,7 +34,7 @@ export function niveauAvecDecors(modele: CarteModele, plan: Pick<PlanNiveau, 'ch
   const chemins = plan.chemins.flatMap((i) => { const c = modele.chemins[i]; return c ? [c] : []; });
   const carte: Carte = { largeur: modele.largeur, hauteur: modele.hauteur, chemins, departHeros: modele.departHeros };
   const visibles = decorVisible({ ...modele, decor: decors }, carte);
-  return { id: 'atelier', aretesDepart: 0, carte, casesInterdites: casesInterditesDuNiveau(carte, visibles), vagues: [] };
+  return { id: 'atelier', aretesDepart: 0, carte, casesInterdites: casesInterditesDuNiveau(carte, visibles, zonesBloquantes(modele)), vagues: [] };
 }
 
 const distanceAuNiveau = (niveau: Niveau, x: number, y: number): number =>

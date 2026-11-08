@@ -15,7 +15,7 @@ import { decorVisible } from '../../src/data/niveaux/assemblage';
 import { CARTES, type CarteModele } from '../../src/data/niveaux/cartes-toutes';
 import { distanceRectChemin } from '../../src/data/niveaux/geometrie';
 import { casesInterditesDuNiveau } from '../../src/data/niveaux/grille-niveau';
-import { DEMI_LARGEUR_CHEMIN, empriseDecor, GRANDS_DECORS, MARGE_DECOR } from '../../src/data/niveaux/habillage';
+import { DEMI_LARGEUR_CHEMIN, empriseDecor, GRANDS_DECORS, MARGE_DECOR, zonesBloquantes } from '../../src/data/niveaux/habillage';
 import { PLANS_REGIONS } from '../../src/data/niveaux/plans';
 import { empreinte } from '../atelier/empreinte.ts';
 import { ErreurConflit, ErreurIntrouvable, ErreurRequete, type Ecriture, type ErreurCarte, type LigneBilan, type ModuleCartes, type ObjetCarte, type Positions, type VerificationCarte } from '../atelier/types.ts';
@@ -95,7 +95,7 @@ function constructibles(modele: CarteModele, chemins: Carte['chemins'], decors: 
   const taille = REGLES.tailleCase;
   const carte: Carte = { largeur: modele.largeur, hauteur: modele.hauteur, chemins, departHeros: modele.departHeros };
   const visibles = decorVisible({ ...modele, decor: decors }, carte);
-  const interdites = casesInterditesDuNiveau(carte, visibles);
+  const interdites = casesInterditesDuNiveau(carte, visibles, zonesBloquantes(modele));
   const colonnes = Math.floor(modele.largeur / taille);
   const total = colonnes * Math.floor(modele.hauteur / taille);
   return { libres: total - interdites.length, bloquees: interdites.map((c) => c.cy * colonnes + c.cx) };

@@ -27,7 +27,7 @@ function niveauRadeau(vagues: readonly Vague[] = [VAGUE_LOINTAINE], gimmick: Gim
   const carte = { largeur: 32, hauteur: 18, chemins: [{ points: [{ x: 0, y: 5 }, { x: 30, y: 5 }] }], departHeros: { x: 28, y: 1 } };
   // Comme l'assemblage d'un niveau : les cases du trajet du radeau s'ajoutent aux cases interdites.
   const trajet = trajetInterdit && gimmick?.type === 'radeau' ? casesDuTrajet(gimmick) : [];
-  return { id: 'essai-radeau', aretesDepart: 5000, carte, casesInterdites: [...casesInterditesDuNiveau(carte, []), ...trajet], vagues, ...(gimmick ? { gimmick } : {}) };
+  return { id: 'essai-radeau', aretesDepart: 5000, carte, casesInterdites: [...casesInterditesDuNiveau(carte, [], []), ...trajet], vagues, ...(gimmick ? { gimmick } : {}) };
 }
 
 function accepter(etat: EtatPartie, ...actions: Action[]): void {

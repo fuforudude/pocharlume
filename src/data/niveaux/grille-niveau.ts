@@ -62,9 +62,9 @@ function tuilesDeGrandDecor(emprise: Rect): [number, number][] {
 /**
  * Les cases de la grille interdites : chemin du niveau, grand décor visible ou zone bloquante sur l'une de leurs tuiles. Ordre :
  * ligne par ligne. Les décors passés doivent être ceux que le niveau affiche (`decorVisible`), les zones celles de
- * `zonesBloquantes` (aucune hors de la région 11).
+ * `zonesBloquantes` (aucune hors de la région 11) : obligatoires, pour qu'un appelant ne puisse pas oublier l'eau.
  */
-export function casesInterditesDuNiveau(carte: CarteChemins, decors: readonly Decor[], zones: readonly ZoneSol[] = []): CaseGrille[] {
+export function casesInterditesDuNiveau(carte: CarteChemins, decors: readonly Decor[], zones: readonly ZoneSol[]): CaseGrille[] {
   const taille = REGLES.tailleCase;
   const bloquee = tuilesDeChemin(carte);
   for (const z of zones) {

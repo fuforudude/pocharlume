@@ -96,7 +96,7 @@ export function niveauEssai(vagues: readonly Vague[] = [VAGUE_LOINTAINE], aretes
     ],
     departHeros: { x: 28, y: 16 },
   };
-  return { id: 'essai', aretesDepart, carte, casesInterdites: casesInterditesDuNiveau(carte, []), vagues };
+  return { id: 'essai', aretesDepart, carte, casesInterdites: casesInterditesDuNiveau(carte, [], []), vagues };
 }
 
 export function ennemiEssai(surcharges: Partial<DefEnnemi> = {}): DefEnnemi {

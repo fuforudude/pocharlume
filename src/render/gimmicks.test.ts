@@ -22,7 +22,7 @@ const VAGUE_LOINTAINE: Vague = { paquets: [{ ennemi: 'paysan_affame', nombre: 1,
 function niveau(vagues: readonly Vague[] = [VAGUE_LOINTAINE], gimmick: Niveau['gimmick'] | null = RADEAU): Niveau {
   const carte = { largeur: 32, hauteur: 18, chemins: [{ points: [{ x: 0, y: 1 }, { x: 31, y: 1 }] }], departHeros: { x: 28, y: 3 } };
   const trajet = gimmick?.type === 'radeau' ? casesDuTrajet(gimmick) : [];
-  return { id: 'essai', aretesDepart: 5000, carte, casesInterdites: [...casesInterditesDuNiveau(carte, []), ...trajet], vagues, ...(gimmick ? { gimmick } : {}) };
+  return { id: 'essai', aretesDepart: 5000, carte, casesInterdites: [...casesInterditesDuNiveau(carte, [], []), ...trajet], vagues, ...(gimmick ? { gimmick } : {}) };
 }
 
 function partieRadeau(): EtatPartie {

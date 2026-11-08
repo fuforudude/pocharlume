@@ -31,7 +31,7 @@ export const NIVEAU_TEST: Niveau = {
   id: 'r1-test',
   aretesDepart: 260,
   carte: CARTE_TEST,
-  casesInterdites: casesInterditesDuNiveau(CARTE_TEST, []),
+  casesInterdites: casesInterditesDuNiveau(CARTE_TEST, [], []),
   vagues: [
     { paquets: [{ ennemi: 'paysan_affame', nombre: 6, intervalle: 1.5, chemin: 0, delai: 0 }] },
     {

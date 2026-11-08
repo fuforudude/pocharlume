@@ -236,6 +236,18 @@ describe('carte du monde : régions', () => {
     expect(puce(11).classList.contains('actif')).toBe(true);
   });
 
+  it('la ligne « Particularité » d’un niveau à gimmick se lit en texte, nom et phrase, sans aria-label sur le paragraphe', () => {
+    const s = sauvegardeVide();
+    monter({ ...s, progression: { ...s.progression, niveauMax: 101 }, meta: { ...s.meta, regionMax: 11 } }, { regions: REGIONS_MONDE });
+    appuyer('Enter');
+    const ligne = document.querySelector<HTMLElement>('.fiche-particularite-ligne');
+    if (!ligne) throw new Error('ligne absente');
+    expect(ligne.hasAttribute('aria-label')).toBe(false);
+    // La phrase reste dans le texte du paragraphe (sur écran bas, elle n'est masquée que visuellement).
+    expect(ligne.textContent).toBe(t('gimmick.fiche_ligne', { nom: t('gimmick.corbeaux.nom'), phrase: t('gimmick.corbeaux.phrase') }));
+    expect(ligne.querySelector('.fiche-particularite-suite')?.getAttribute('aria-hidden')).toBeNull();
+  });
+
   it('une région ouverte dont les niveaux ne sont pas livrés l’annonce, sans nœud ni fiche', () => {
     const s = apresLeBoss();
     monter({ ...s, progression: { ...s.progression, niveauMax: 22 }, meta: { ...s.meta, regionMax: 3 } });

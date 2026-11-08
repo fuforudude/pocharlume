@@ -62,7 +62,7 @@ describe('chemins alignés sur la grille des cases, 41 cartes', () => {
 
   it.each(cartes)('%s : les cases du chemin sont exactement les cases traversées par l’axe, entières', (_id, modele) => {
     const carte = { largeur: modele.largeur, hauteur: modele.hauteur, chemins: modele.chemins };
-    const interdites = new Set(casesInterditesDuNiveau(carte, []).map((c) => `${String(c.cx)},${String(c.cy)}`));
+    const interdites = new Set(casesInterditesDuNiveau(carte, [], []).map((c) => `${String(c.cx)},${String(c.cy)}`));
     expect([...interdites].sort()).toEqual([...casesDeLAxe(modele)].sort());
     // Aucune case à moitié chemin : chaque case est entièrement du chemin ou entièrement libre.
     const masque = tuilesDeChemin(carte);

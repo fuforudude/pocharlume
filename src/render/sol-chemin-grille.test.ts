@@ -12,7 +12,7 @@ const T = REGLES.tailleCase;
 
 describe.each(Object.entries(CARTES))('sol et cases interdites, carte %s', (_id, modele) => {
   const carte = { largeur: modele.largeur, hauteur: modele.hauteur, chemins: modele.chemins, departHeros: modele.departHeros };
-  const interdites = new Set(casesInterditesDuNiveau(carte, []).map((c) => `${String(c.cx)},${String(c.cy)}`));
+  const interdites = new Set(casesInterditesDuNiveau(carte, [], []).map((c) => `${String(c.cx)},${String(c.cy)}`));
   const sol = construireSol(carte, { region: modele.region, zones: modele.zones, decor: modele.decor });
 
   it('l’ensemble des cases interdites par le chemin est celui des cases dont le sol est dessiné en chemin', () => {
@@ -31,7 +31,7 @@ describe.each(Object.entries(CARTES))('sol et cases interdites, carte %s', (_id,
 
   it('toute case voisine du chemin est constructible, sauf si un grand décor visible la recouvre (décor réel de la carte)', () => {
     const decor = decorVisible(modele, carte);
-    const reelles = new Set(casesInterditesDuNiveau(carte, decor).map((c) => `${String(c.cx)},${String(c.cy)}`));
+    const reelles = new Set(casesInterditesDuNiveau(carte, decor, []).map((c) => `${String(c.cx)},${String(c.cy)}`));
     const grands = decor.filter((d) => GRANDS_DECORS.has(d.sprite)).map((d) => empriseDecor(d));
     const recouverte = (cx: number, cy: number): boolean => grands.some((e) => e.x0 < (cx + 1) * T && e.x1 > cx * T && e.y0 < (cy + 1) * T && e.y1 > cy * T);
     for (const clef of interdites) {

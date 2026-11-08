@@ -32,54 +32,54 @@ describe('tuiles du chemin', () => {
 
 describe('cases interdites', () => {
   it('un chemin sur un axe impair n’interdit qu’une ligne de cases, sur un axe pair il en interdit deux', () => {
-    expect(cles(casesInterditesDuNiveau(carteAvec([[-1, 5], [33, 5]]), [])).filter((c) => c.startsWith('7,'))).toEqual(['7,2']);
-    expect(cles(casesInterditesDuNiveau(carteAvec([[-1, 4], [33, 4]]), [])).filter((c) => c.startsWith('7,'))).toEqual(['7,1', '7,2']);
+    expect(cles(casesInterditesDuNiveau(carteAvec([[-1, 5], [33, 5]]), [], [])).filter((c) => c.startsWith('7,'))).toEqual(['7,2']);
+    expect(cles(casesInterditesDuNiveau(carteAvec([[-1, 4], [33, 4]]), [], [])).filter((c) => c.startsWith('7,'))).toEqual(['7,1', '7,2']);
   });
 
   it('une carte sans chemin ni décor n’interdit rien', () => {
-    expect(casesInterditesDuNiveau(CARTE_VIDE, [])).toEqual([]);
+    expect(casesInterditesDuNiveau(CARTE_VIDE, [], [])).toEqual([]);
   });
 
   it('les cases sortent ligne par ligne, du nord au sud', () => {
-    const interdites = casesInterditesDuNiveau(carteAvec([[-1, 4], [12, 4], [12, 13]]), []);
+    const interdites = casesInterditesDuNiveau(carteAvec([[-1, 4], [12, 4], [12, 13]]), [], []);
     const ordre = interdites.map((c) => c.cy * 100 + c.cx);
     expect(ordre).toEqual([...ordre].sort((a, b) => a - b));
   });
 
   it('un grand décor bloque les cases de ses tuiles (puits 32×32 ancré à (9, 9) : tuiles 8-9 × 7-8)', () => {
     const decor: Decor[] = [{ sprite: 'puits', x: 9, y: 9 }];
-    expect(cles(casesInterditesDuNiveau(CARTE_VIDE, decor))).toEqual(['4,3', '4,4']);
+    expect(cles(casesInterditesDuNiveau(CARTE_VIDE, decor, []))).toEqual(['4,3', '4,4']);
   });
 
   it('un grand décor à cheval sur plusieurs cases les bloque toutes, une marge de quelques pixels non', () => {
     // Arbre ancré à (19.5, 6) : emprise 18,5 à 20,5 × 4,125 à 6,125 : tuiles 18, 19, 20 × 4, 5 (la rangée 6 n'est mordue que de 0,125).
-    expect(cles(casesInterditesDuNiveau(CARTE_VIDE, [{ sprite: 'arbre-mort-1', x: 19.5, y: 6 }]))).toEqual(['9,2', '10,2']);
+    expect(cles(casesInterditesDuNiveau(CARTE_VIDE, [{ sprite: 'arbre-mort-1', x: 19.5, y: 6 }], []))).toEqual(['9,2', '10,2']);
   });
 
   it('les petits décors ne bloquent rien : cailloux, touffes, tonneaux, croix, clôtures, souches', () => {
     const petits = ['cailloux', 'touffe', 'tonneau', 'croix', 'cloture-h', 'cloture-v', 'souche', 'crane'];
     for (const sprite of petits) expect(GRANDS_DECORS.has(sprite), sprite).toBe(false);
     const decor: Decor[] = petits.map((sprite, i) => ({ sprite, x: 3 + i * 3, y: 8 }));
-    expect(casesInterditesDuNiveau(CARTE_VIDE, decor)).toEqual([]);
+    expect(casesInterditesDuNiveau(CARTE_VIDE, decor, [])).toEqual([]);
   });
 
   it('chacun des grands décors du jeu bloque au moins une case, jamais plus de quatre', () => {
     for (const sprite of GRANDS_DECORS) {
-      const interdites = casesInterditesDuNiveau(CARTE_VIDE, [{ sprite, x: 15, y: 9 }]);
+      const interdites = casesInterditesDuNiveau(CARTE_VIDE, [{ sprite, x: 15, y: 9 }], []);
       expect(interdites.length, sprite).toBeGreaterThanOrEqual(1);
       expect(interdites.length, sprite).toBeLessThanOrEqual(4);
     }
   });
 
   it('un décor qui dépasse de la carte ne bloque que les cases de la carte', () => {
-    expect(cles(casesInterditesDuNiveau(CARTE_VIDE, [{ sprite: 'puits', x: 1, y: 2 }]))).toEqual(['0,0']);
-    expect(casesInterditesDuNiveau(CARTE_VIDE, [{ sprite: 'puits', x: -5, y: -5 }])).toEqual([]);
-    expect(cles(casesInterditesDuNiveau(CARTE_VIDE, [{ sprite: 'puits', x: 32, y: 18 }]))).toEqual(['15,8']);
+    expect(cles(casesInterditesDuNiveau(CARTE_VIDE, [{ sprite: 'puits', x: 1, y: 2 }], []))).toEqual(['0,0']);
+    expect(casesInterditesDuNiveau(CARTE_VIDE, [{ sprite: 'puits', x: -5, y: -5 }], [])).toEqual([]);
+    expect(cles(casesInterditesDuNiveau(CARTE_VIDE, [{ sprite: 'puits', x: 32, y: 18 }], []))).toEqual(['15,8']);
   });
 
   it('le chemin et le décor s’ajoutent sans doublon', () => {
     // Le puits ancré à (9, 6) mord le chemin (rangées 4 et 5, case 2) : il n'ajoute rien ; ancré à (9, 8), il ajoute la case (4, 3).
-    const interdites = casesInterditesDuNiveau(carteAvec([[-1, 5], [33, 5]]), [{ sprite: 'puits', x: 9, y: 6 }, { sprite: 'puits', x: 9, y: 8 }]);
+    const interdites = casesInterditesDuNiveau(carteAvec([[-1, 5], [33, 5]]), [{ sprite: 'puits', x: 9, y: 6 }, { sprite: 'puits', x: 9, y: 8 }], []);
     expect(new Set(cles(interdites)).size).toBe(interdites.length);
     expect(interdites).toHaveLength(16 + 1);
     expect(cles(interdites)).toContain('4,2');

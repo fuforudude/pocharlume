@@ -489,12 +489,12 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     gauche.append(entete, el('h2', 'titre', textes.nom), el('p', 'ambiance', textes.ambiance));
     if (niveau.horde) gauche.append(el('p', 'horde-aide', t('fiche.horde_aide')));
     // La particularité du niveau (régions 11 à 15), tirée de son gimmick : une ligne, rien pour un niveau ordinaire.
-    // Sur un écran bas, seul « Particularité : <nom> » reste (la phrase est dans sa bulle) : « Lancer » ne doit pas sortir de l'écran.
+    // Sur un écran bas, seul « Particularité : <nom> » se voit (la phrase est dans sa bulle) : « Lancer » ne doit pas sortir de
+    // l'écran. La phrase y est masquée visuellement, pas retirée (style-bestiaire.css) : un lecteur d'écran lit toujours la ligne entière.
     const gimmick = niveau.niveau.gimmick;
     if (gimmick && ligneParticularite(niveau.niveau)) {
       const ligne = el('p', 'fiche-particularite-ligne');
       ligne.dataset.particularite = gimmick.type;
-      ligne.setAttribute('aria-label', ligneParticularite(niveau.niveau) ?? '');
       ligne.append(el('strong', 'fiche-particularite-nom', t('gimmick.fiche_nom', { nom: nomParticularite(gimmick.type) })), el('span', 'fiche-particularite-suite', t('gimmick.fiche_suite', { phrase: phraseParticularite(gimmick.type) })));
       attacherBulle(ligne, () => contenuParticularite(gimmick.type), { signal: signalFiche });
       gauche.append(ligne);

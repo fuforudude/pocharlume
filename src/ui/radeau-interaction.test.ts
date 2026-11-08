@@ -21,7 +21,7 @@ function partie(dieu = 'charlie'): EtatPartie {
     id: 'essai',
     aretesDepart: 5000,
     carte,
-    casesInterdites: [...casesInterditesDuNiveau(carte, []), ...casesDuTrajet(RADEAU)],
+    casesInterdites: [...casesInterditesDuNiveau(carte, [], []), ...casesDuTrajet(RADEAU)],
     vagues: [{ paquets: [{ ennemi: 'paysan_affame', nombre: 1, intervalle: 1, chemin: 0, delai: 60 }] }],
     gimmick: RADEAU,
   };

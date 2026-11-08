@@ -29,7 +29,7 @@ function niveauCorbeaux(vagues: readonly Vague[], gimmick: Gimmick | null = CORB
     chemins: [{ points: [{ x: 0, y: 5 }, { x: 30, y: 5 }] }, { points: [{ x: 0, y: 15 }, { x: 30, y: 15 }] }],
     departHeros: { x: 28, y: 1 },
   };
-  return { id: 'essai-corbeaux', aretesDepart: 5000, carte, casesInterdites: casesInterditesDuNiveau(carte, []), vagues, ...(gimmick ? { gimmick } : {}) };
+  return { id: 'essai-corbeaux', aretesDepart: 5000, carte, casesInterdites: casesInterditesDuNiveau(carte, [], []), vagues, ...(gimmick ? { gimmick } : {}) };
 }
 
 const APPEL: Action = { type: 'appelerVague' };
