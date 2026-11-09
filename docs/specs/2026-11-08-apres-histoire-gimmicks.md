@@ -108,7 +108,7 @@ Outils : `npm run balance -- --niveaux=101-110 --difficultes=chaton,heroique,fer
 chiffres que la passe complète : 10 graines = les graines d'évaluation), un niveau isolé pour chercher la cause, puis une seule passe
 complète. Bandes imposées : Chaton (le naïf gagne tout), sans défense, défis Héroïque et Fer (40 à 90 % sur la région). Matou et Vieux
 Sage restent suspendues, comme ailleurs. `npm run balance` jetait jusqu'ici les écarts de la région 11 (`ecartsDeTout` s'arrêtait à la
-région 10) : `REGIONS_EVALUEES` (rapport-regions.ts) va maintenant de 1 à 11.
+région 10) : les régions évaluées vont maintenant de 1 à 11, dérivées de la campagne (`REGIONS_DE_LA_CAMPAGNE`, rapport-regions.ts).
 
 **Stratégies de bot** (décision technique 4) :
 - *Vol de Corbeaux* : pour la géométrie des bots, un couloir est un trajet comme un chemin (indice N + k), jamais compté sur le chemin 0.
@@ -117,7 +117,7 @@ région 10) : `REGIONS_EVALUEES` (rapport-regions.ts) va maintenant de 1 à 11.
   s'il tire sur les volants, se poste au croisement du chemin et du couloir le plus menacé. Le naïf, sur une case qui voit plus de couloir
   que de chemin, tire sa famille parmi celles qui touchent les volants.
 - *Radeau* : une tour s'identifie par son lieu (case ou place), jamais par sa case. Le soigneux construit sur les places libres tir,
-  magie, artillerie et la tour divine de Charlie. Une place vaut sa couverture moyenne sur 8 positions de l'aller-retour.
+  magie, artillerie et la tour divine de Charlie. Une place vaut sa couverture moyenne sur 8 positions distinctes d'un aller.
 
 **Premier passage** : **4 écarts** aux bandes imposées avec les bots d'avant la tâche (Chaton pour les trois dieux, Défi Héroïque), **3**
 avec les bots des gimmicks sans réglage des plans (Chaton de Plume et de Charlie, Défi Héroïque). Après les réglages : **0 écart**.
@@ -142,14 +142,72 @@ d'essaims. Le radeau, la vitesse du radeau, le nombre de couloirs et le Passeur 
 | Héroïque par niveau (Pollen) | 0, 0, 0, 0, 0, 70, 40, 30, 0, 0 | 0, 0, 0, 0, 0, 70, 40, 70, 0, 0 | 0, 90, 0, 0, 0, 100, 100, 100, 0, 0 |
 | Fer par niveau (trois dieux) | 100 sauf 101 Pollen (0) et 110 (0) | idem | 100 sauf 110 (0) |
 
-Signalé, sans réglage (les bandes imposées n'y obligent pas) :
-- **Niveau 110 (le Passeur)** : 0 % en Héroïque et en Fer pour les trois dieux. En Chaton, le soigneux de Pollen y perd toujours (Charlie
-  50 %) alors que le naïf gagne : le Passeur pèse à lui seul 95 % de la menace du niveau, et le soigneux délaisse les chemins 1 et 2,
-  d'où sortent Acolytes et Creux. Corriger ce poids du boss changerait le jeu du soigneux sur les niveaux de boss des régions 1 à 10. Le
-  Fer de la région (90 %, borne incluse) ne tient que parce que le 110 y reste perdu.
-- **Écart entre dieux en Héroïque** : Plume 78 %, Charlie 32 %, Pollen 39 %. Charlie et Pollen ne gagnent aucun niveau à couloirs sauf le
-  102. Le héros de Charlie ne tire pas sur les volants ; pour Pollen, la cause n'est pas chiffrée.
-- `VERSION_DONNEES` reste 16 : elle a déjà été montée dans ce jalon, qui n'est pas encore en ligne.
+#### Second équilibrage (2026-11-09) : bots relus, Passeur par le chemin nord, Fer réglé par niveau
+
+Après le premier équilibrage, le radeau a été agrandi : 3 places en ligne, et les trajets des niveaux 106 à 110 recentrés dans l'eau.
+Avec les bots d'alors, le Fer de la région montait à **93 %**, hors bande, et le niveau 110 restait perdu en Matou (0 sur 30 pour les deux
+bots). L'étudiant a décidé de « rééquilibrer les deux » : le Passeur doit être gagnable en Matou, et le Fer de la région doit revenir
+vers 70 %.
+
+**Bots** (relecture de la tâche 6), sans effet sur les régions 1 à 10 :
+- Dégâts au volant calculés contre sa protection réelle, élites comprises (interpolation de `dpsEfficace` au palier rencontré).
+- 8 positions distinctes du radeau, prises sur un aller.
+- Classement des cases : les couloirs ne comptent pas pour la caserne et l'artillerie.
+- Zone de feu d'une tour du radeau : couverture moyenne de sa place.
+
+Sur un échantillon de 13 niveaux des régions 1 à 10, joués dans les cinq modes, la sortie `--detail` est identique ligne à ligne.
+
+**Décision 1 : le Passeur arrive par le chemin nord.** Au niveau 110, le Passeur faisait à lui seul 93 % de la menace du niveau
+(`menaceEnnemi` compte ses 12 vies). Le soigneux défendait donc toute la partie haute du chemin 0 et laissait passer les Creux et les
+Acolytes des chemins 1 et 2. Ces chemins ne rejoignent le chemin 0 qu'à la sortie, et ces ennemis suffisaient à le battre avant même le
+boss. Corriger ce poids dans le bot aurait changé les niveaux de boss des régions 1 à 10. Avec les seuls PV et vies du Passeur, le
+soigneux de Charlie et de Pollen ne gagnait qu'avec un boss de 2500 à 4000 PV et de 3 à 4 vies, plus faible que celui de la région 1.
+Choix retenu (option B) :
+- `boss.chemin` 0 → 1 : le chemin nord, qui rejoint le chemin 0 près de la sortie, si bien que défendre la jonction couvre tout ;
+- Passeur à 15 000 PV au lieu de 18 000, `coutVies` 12 gardé, pouvoirs inchangés ;
+- arêtes de départ du 110 : 2700 → 3600 ;
+- `facteurBudget` du 110 : 0,1 → 0,07.
+
+Le test du boss accepte maintenant au moins 0,9 fois les PV du Soleil Blême.
+
+**Limite assumée** : le soigneux gagne le 110 en Matou avec 6 à 7 vies sur 20, et le naïf en Chaton avec 13 vies sur 25. Le Passeur
+n'y est pas tué : **il sort (12 vies)**, et la partie est gagnée parce qu'il est le dernier ennemi.
+
+**Décision 2 : le Fer se règle par niveau.** Avec le Passeur gagnable, le Fer de la région montait à 100 %. Aucun levier du niveau n'y
+changeait rien :
+- toutes les paires permises donnent 100 % sur chacun des niveaux 101 à 110 ;
+- un budget × 2,2, ou des arêtes × 0,35 avec un budget × 2, laissent le Fer à 100 % ;
+- le Fer ne tombait qu'en même temps que le Chaton du naïf et que l'Héroïque.
+
+Cause : la difficulté de la région vient des couloirs et du radeau, où un seul volant coûte la partie en Héroïque (une vie). Au Fer, on
+a 20 vies et les arêtes sont multipliées par 6. Choix retenu (option A) : `DefiFer` reçoit `facteurAretes` et `facteurEffectifs`,
+facultatifs (finis et strictement positifs, vérifiés par `creerPartie`), qui remplacent `REGLES.fer` pour ce niveau. Les régions 1 à 10
+ne les utilisent pas, et leur Fer ne change pas. Réglages de la région 11 :
+- 4 et 0,8 sur les niveaux 101, 102, 105, 106, 108 et 110 ;
+- 3,5 et 0,9 sur les niveaux 103, 104, 107 et 109, où les trois dieux gagnaient encore avec leurs 20 vies.
+
+`VERSION_DONNEES` reste 16. Elle a déjà été montée dans ce jalon, qui n'est pas en ligne : aucune partie de la région 11 n'existe chez un
+joueur. De plus, une partie en cours garde dans son état les vagues et les arêtes calculées à sa création.
+
+| Mesure de la région 11 (10 graines) | Bots d'avant, radeau agrandi | Bots relus | Passeur par le nord | + Fer par niveau (final) |
+| --- | --- | --- | --- | --- |
+| Chaton, soigneux (Plume / Charlie / Pollen) | 100 / 92 / 90 % | 100 / 97 / 90 % | 100 / 100 / 100 % | 100 / 100 / 100 % |
+| Chaton, naïf | 100 / 100 / 100 % | 100 / 100 / 100 % | 100 / 100 / 100 % | 100 / 100 / 100 % |
+| Matou, soigneux | 90 / 90 / 90 % | 90 / 84 / 87 % | 100 / 94 / 97 % | 100 / 94 / 97 % |
+| Niveau 110 en Matou, soigneux / naïf | 0 / 0 % | 0 / 0 % | 100 % / 47 % (70 / 0 / 70) | 100 % / 47 % |
+| Défi Héroïque, région (bande 40 à 90 %) | 49 % | 47 % | 47 % | 47 % (73 / 29 / 39) |
+| Défi Fer, région (bande 40 à 90 %) | **93 %** | 90 % | **100 %** | **73 %** (97 / 78 / 44) |
+| Fer par niveau, 101 à 110 (trois dieux) | 100 sauf 110 (33 %) | 100 sauf 110 (0 %) | 100 partout | 57, 73, 100, 90, 60, 33, 67, 63, 60, 87 % |
+
+Passe complète finale (`npm run balance`, 2108 s) : **0 écart aux bandes imposées**. Dans `balance-report.md`, seules les sections de
+la région 11 changent. Les bandes de la région 11 (`BANDES_REGIONS=11`) passent en 123 s. Marges : en Chaton, le naïf gagne tout ; le
+Fer est à 13 points de la borne haute (90 %) et de la cible basse (60 %) ; l'Héroïque n'est qu'à **7 points** de sa borne basse (40 %).
+
+Signalé, sans réglage :
+- **Marge de l'Héroïque** : à 47 %, aucun levier propre à l'Héroïque ne le relève sans relever aussi les autres modes. Plume est à 73 %,
+  Charlie à 29 % et Pollen à 39 %. Le héros de Charlie ne tire pas sur les volants ; pour Pollen, la cause n'est pas chiffrée.
+- **Matou de la région 11** (bande suspendue) : 15 écarts au lieu de 17. Le naïf gagne trop (79 et 86 % pour Plume et Pollen), et sa
+  courbe de difficulté ne monte pas.
 
 ## Impacts
 - Données : `meta.ts` (régions, braises), `Niveau.gimmick`, format des vagues (couloir), ennemis (boss de région), `VERSION_DONNEES`, `VERSION_ETAT`.
