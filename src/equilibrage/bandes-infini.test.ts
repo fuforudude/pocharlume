@@ -4,6 +4,7 @@
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { Worker } from 'node:worker_threads';
 import { beforeAll, describe, expect, it } from 'vitest';
+import { DELAI_EVALUATION } from './bandes.test-utils';
 import { DIEUX_EVALUES } from './campagne';
 import { BANDES_INFINI, CARTES_INFINI_REGION1, ecartsInfini, GRAINES_INFINI, mediane, type CarteInfini, type MesureInfini } from './infini';
 
@@ -23,7 +24,7 @@ function mesurer(bot: 'naif' | 'soigneux', dieu: string, carte: CarteInfini): Pr
 let mesures: MesureInfini[] = [];
 beforeAll(async () => {
   mesures = await Promise.all(DIEUX_EVALUES.flatMap((dieu) => CARTES_INFINI_REGION1.flatMap((carte) => (['naif', 'soigneux'] as const).map((bot) => mesurer(bot, dieu, carte)))));
-}, 300_000);
+}, DELAI_EVALUATION);
 
 describe.each(DIEUX_EVALUES)('bandes de l’infini, %s', (dieu) => {
   it(`le soigneux tient en médiane entre la vague ${String(BANDES_INFINI.soigneuxMin)} et la vague ${String(BANDES_INFINI.soigneuxMax)} sur chaque carte de la région 1`, () => {

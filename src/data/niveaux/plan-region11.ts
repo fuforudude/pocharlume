@@ -14,7 +14,9 @@
 // Ennemis : seulement les 59 existants (pas d'ennemi ordinaire nouveau), en mélanges plus durs que ceux de la région 10. Le niveau 110
 // est le combat contre le Passeur, avec le Radeau. `defiFer` : deux familles qui touchent les volants (tir ou magie) quand le niveau
 // en compte, la tour de tir dès qu'un Délateur (furtif) est là, jamais la même paire deux niveaux de suite (le niveau 100 finit sur
-// magie + tir). `aretesDepart` et `facteurBudget` sont réglés par `npm run balance` avec les stratégies de bot des gimmicks (tâche 6,
+// magie + tir). Le Fer y a ses propres facteurs (`facteurAretes`, `facteurEffectifs`, au lieu de 6 et 0,36) : avec 20 vies, les couloirs
+// et le radeau ne punissent qu'en Héroïque, et le Fer ordinaire était gagné à 100 % (décision de l'étudiant, option A).
+// `aretesDepart` et `facteurBudget` sont réglés par `npm run balance` avec les stratégies de bot des gimmicks (tâche 6,
 // « Équilibrage de la région 11 » dans docs/specs/2026-11-08-apres-histoire-gimmicks.md).
 import type { GimmickRadeau, PlaceRadeau } from '../../engine/definitions';
 import type { PlanNiveau } from './plan-niveau';
@@ -43,7 +45,7 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
     carte: 'greve',
     chemins: [0],
     aretesDepart: 1820,
-    defiFer: { familles: ['caserne', 'tir'] },
+    defiFer: { familles: ['caserne', 'tir'], facteurAretes: 4, facteurEffectifs: 0.8 },
     gimmick: { type: 'corbeaux', couloirs: [{ cy: 1 }, { cy: 6 }] },
     nom: 'niveau.r11.01.nom',
     ambiance: 'niveau.r11.01.ambiance',
@@ -59,7 +61,7 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
     carte: 'filets',
     chemins: [0],
     aretesDepart: 1890,
-    defiFer: { familles: ['artillerie', 'magie'] },
+    defiFer: { familles: ['artillerie', 'magie'], facteurAretes: 4, facteurEffectifs: 0.8 },
     gimmick: { type: 'corbeaux', couloirs: [{ cy: 2 }, { cy: 6 }] },
     nom: 'niveau.r11.02.nom',
     ambiance: 'niveau.r11.02.ambiance',
@@ -75,7 +77,7 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
     carte: 'epaves',
     chemins: [0],
     aretesDepart: 1960,
-    defiFer: { familles: ['tir', 'artillerie'] },
+    defiFer: { familles: ['tir', 'artillerie'], facteurAretes: 3.5, facteurEffectifs: 0.9 },
     gimmick: { type: 'corbeaux', couloirs: [{ cy: 1 }, { cy: 4 }, { cy: 7 }] },
     nom: 'niveau.r11.03.nom',
     ambiance: 'niveau.r11.03.ambiance',
@@ -92,7 +94,7 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
     carte: 'ponton_noir',
     chemins: [0],
     aretesDepart: 2030,
-    defiFer: { familles: ['caserne', 'magie'] },
+    defiFer: { familles: ['caserne', 'magie'], facteurAretes: 3.5, facteurEffectifs: 0.9 },
     gimmick: { type: 'corbeaux', couloirs: [{ cy: 2 }, { cy: 5 }, { cy: 8 }] },
     nom: 'niveau.r11.04.nom',
     ambiance: 'niveau.r11.04.ambiance',
@@ -108,7 +110,7 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
     carte: 'cap_corbeaux',
     chemins: [0, 1, 2],
     aretesDepart: 2170,
-    defiFer: { familles: ['magie', 'tir'] },
+    defiFer: { familles: ['magie', 'tir'], facteurAretes: 4, facteurEffectifs: 0.8 },
     gimmick: { type: 'corbeaux', couloirs: [{ cy: 1 }, { cy: 4 }, { cy: 7 }] },
     nom: 'niveau.r11.05.nom',
     ambiance: 'niveau.r11.05.ambiance',
@@ -124,7 +126,7 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
     carte: 'eau_morte',
     chemins: [0],
     aretesDepart: 1690,
-    defiFer: { familles: ['artillerie', 'tir'] },
+    defiFer: { familles: ['artillerie', 'tir'], facteurAretes: 4, facteurEffectifs: 0.8 },
     gimmick: radeau([6, 3], [6, 4], [7, 4], [8, 4], [9, 4], [10, 4], [11, 4], [12, 4]),
     nom: 'niveau.r11.06.nom',
     ambiance: 'niveau.r11.06.ambiance',
@@ -140,7 +142,7 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
     carte: 'pontons',
     chemins: [0],
     aretesDepart: 1750,
-    defiFer: { familles: ['caserne', 'magie'] },
+    defiFer: { familles: ['caserne', 'magie'], facteurAretes: 3.5, facteurEffectifs: 0.9 },
     gimmick: radeau([4, 8], [4, 7], [4, 6], [5, 6], [6, 6], [6, 5], [6, 4], [6, 3]),
     nom: 'niveau.r11.07.nom',
     ambiance: 'niveau.r11.07.ambiance',
@@ -157,7 +159,7 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
     carte: 'passe_noyes',
     chemins: [0],
     aretesDepart: 1810,
-    defiFer: { familles: ['tir', 'caserne'] },
+    defiFer: { familles: ['tir', 'caserne'], facteurAretes: 4, facteurEffectifs: 0.8 },
     gimmick: radeau([5, 6], [6, 6], [7, 6], [8, 6], [9, 6], [10, 6], [11, 6], [12, 6], [13, 6], [13, 5], [13, 4], [13, 3]),
     nom: 'niveau.r11.08.nom',
     ambiance: 'niveau.r11.08.ambiance',
@@ -173,7 +175,7 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
     carte: 'baie_morte',
     chemins: [0],
     aretesDepart: 1875,
-    defiFer: { familles: ['magie', 'artillerie'] },
+    defiFer: { familles: ['magie', 'artillerie'], facteurAretes: 3.5, facteurEffectifs: 0.9 },
     gimmick: radeau([4, 5], [5, 5], [5, 4], [6, 4], [7, 4], [8, 4], [8, 5], [8, 6]),
     nom: 'niveau.r11.09.nom',
     ambiance: 'niveau.r11.09.ambiance',
@@ -188,8 +190,8 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
     numero: 110,
     carte: 'naufrage',
     chemins: [0, 1, 2],
-    aretesDepart: 2700,
-    defiFer: { familles: ['tir', 'magie'] },
+    aretesDepart: 3600,
+    defiFer: { familles: ['tir', 'magie'], facteurAretes: 4, facteurEffectifs: 0.8 },
     gimmick: radeau([5, 6], [5, 5], [5, 4], [5, 3], [6, 3], [7, 3], [8, 3], [9, 3], [9, 4], [9, 5], [9, 6]),
     nom: 'niveau.r11.10.nom',
     ambiance: 'niveau.r11.10.ambiance',
@@ -197,9 +199,11 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
       nombre: 15,
       ennemis: ['noyeur', 'sangsue', 'gargouille', 'martyr_bleme', 'chevalier', 'acolyte_cendre', 'delateur', 'corbeau_noir'],
       graine: 1110,
-      facteurBudget: 0.1,
+      facteurBudget: 0.07,
       ecart: 0.8,
-      boss: { vague: 15, ennemi: 'passeur', chemin: 0, delai: 12 },
+      // Le Passeur arrive par le chemin nord (1), qui rejoint le chemin 0 près de la sortie : sur le chemin 0, il pesait 93 % de la
+      // menace et le bot soigneux délaissait les chemins 1 et 2 (décision de l'étudiant, « Équilibrage de la région 11 » dans la spec).
+      boss: { vague: 15, ennemi: 'passeur', chemin: 1, delai: 12 },
     },
   },
 ];

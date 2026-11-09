@@ -5,7 +5,7 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { SUSPENDUES_IMPOSEES, ecartsBloquants, ecartsCourbe, ecartsSelonRegion, ecartsEntreDieux, ecartsMatou, ecartsSansDefense } from './bandes';
 import type { Evaluation } from './campagne';
-import { DELAI_EVALUATION, evaluerRegions, REGIONS_EVALUEES } from './bandes.test-utils';
+import { DELAI_EVALUATION, evaluerRegions, REGIONS_DES_BANDES } from './bandes.test-utils';
 
 let parRegion: Evaluation[][] = [];
 // Les bandes de cette difficulté sont suspendues (bandes.ts) : sans `BANDES_SUSPENDUES_IMPOSEES=1`, seul le héros sans défense est joué.
@@ -13,7 +13,7 @@ beforeAll(async () => {
   parRegion = await evaluerRegions('matou', SUSPENDUES_IMPOSEES ? undefined : ['inactif']);
 }, DELAI_EVALUATION);
 
-describe.each(REGIONS_EVALUEES)('bandes en Matou, région %i', (region) => {
+describe.each(REGIONS_DES_BANDES)('bandes en Matou, région %i', (region) => {
   it.skipIf(!SUSPENDUES_IMPOSEES)('le soigneux gagne tout en perdant des vies sans laisser d’arêtes, le naïf gagne entre 30 et 70 %', () => {
     expect(ecartsSelonRegion(region, ecartsBloquants(ecartsMatou(parRegion[region - 1] ?? [])))).toEqual([]);
   });

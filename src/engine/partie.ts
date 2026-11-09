@@ -7,7 +7,7 @@ import { calculerChemin } from './chemins';
 import { appliquerAction } from './commandes';
 import { copierConfig, verifierConfig } from './config';
 import { defDieu, defEnnemi, defFamille, difficulteDeConfig } from './contenu';
-import type { Niveau, Vague } from './definitions';
+import type { DefiFer, Niveau, Vague } from './definitions';
 import { mettreAJourEnnemis } from './ennemis';
 import { VERSION_ETAT, type ConfigPartie, type DefiPartie, type EntreeJournal, type EtatPartie } from './etat';
 import { ouvrirPas } from './evenements';
@@ -52,7 +52,15 @@ function verifierNiveau(niveau: Niveau): void {
     const [a, b] = fer.familles;
     for (const famille of fer.familles) if (!defFamille(famille)) throw new Error(`Défi Fer : famille inconnue ${famille}`);
     if (a === b) throw new Error('Défi Fer : deux familles différentes sont attendues');
+    for (const [nom, valeur] of [['facteurAretes', fer.facteurAretes], ['facteurEffectifs', fer.facteurEffectifs]] as const) {
+      if (valeur !== undefined && !(Number.isFinite(valeur) && valeur > 0)) throw new Error(`Défi Fer : ${nom} doit être un nombre fini strictement positif (${String(valeur)})`);
+    }
   }
+}
+
+/** Les facteurs du défi Fer pour ce niveau : ceux de son `defiFer` quand il en donne, sinon ceux de `REGLES.fer`. */
+function facteursFer(fer: DefiFer | undefined): { facteurAretes: number; facteurEffectifs: number } {
+  return { facteurAretes: fer?.facteurAretes ?? REGLES.fer.facteurAretes, facteurEffectifs: fer?.facteurEffectifs ?? REGLES.fer.facteurEffectifs };
 }
 
 function estBoss(ennemi: string): boolean {
@@ -61,16 +69,17 @@ function estBoss(ennemi: string): boolean {
 
 /**
  * Les vagues telles que le défi les joue. Héroïque : chaque groupe (hors boss) est d'élite. Fer : toutes les vagues
- * n'en font qu'une (les groupes gardent leurs délais), les effectifs sont multipliés (arrondi au-dessus), sauf ceux d'un
- * boss. Sans défi, les vagues du niveau.
+ * n'en font qu'une (les groupes gardent leurs délais), les effectifs sont multipliés (`facteurEffectifs` du niveau, sinon
+ * celui de `REGLES.fer` ; arrondi au-dessus), sauf ceux d'un boss. Sans défi, les vagues du niveau.
  */
-function vaguesDuDefi(vagues: readonly Vague[], defi: DefiPartie | null): readonly Vague[] {
+function vaguesDuDefi(vagues: readonly Vague[], defi: DefiPartie | null, fer?: DefiFer): readonly Vague[] {
   if (defi === 'heroique') {
     return vagues.map((v) => ({ paquets: v.paquets.map((p) => (estBoss(p.ennemi) ? p : { ...p, elite: true })) }));
   }
   if (defi === 'fer' && vagues.length > 0) {
     // La tolérance évite qu'un produit juste (4 × 1,5) monte d'un cran à cause des flottants.
-    const effectif = (p: Vague['paquets'][number]): number => (estBoss(p.ennemi) ? p.nombre : Math.ceil(p.nombre * REGLES.fer.facteurEffectifs - 1e-9));
+    const { facteurEffectifs } = facteursFer(fer);
+    const effectif = (p: Vague['paquets'][number]): number => (estBoss(p.ennemi) ? p.nombre : Math.ceil(p.nombre * facteurEffectifs - 1e-9));
     return [{ paquets: vagues.flatMap((v) => v.paquets.map((p) => ({ ...p, nombre: effectif(p) }))) }];
   }
   return vagues;
@@ -114,7 +123,7 @@ export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
   // d'après l'histoire s'y jouent sans leur gimmick (spec de l'après-histoire) : on retire celui du niveau de campagne qui les porte.
   const copie: Niveau = infini
     ? { ...sansGimmick(copieBrute), vagues: [] }
-    : { ...copieBrute, vagues: vaguesAvecElites(vaguesDuDefi(copieBrute.vagues, defi), niveau.sansElites === true ? 0 : difficulte.vaguesElites) };
+    : { ...copieBrute, vagues: vaguesAvecElites(vaguesDuDefi(copieBrute.vagues, defi, niveau.defiFer), niveau.sansElites === true ? 0 : difficulte.vaguesElites) };
   const vies = defi === 'heroique' ? REGLES.heroique.vies : difficulte.vies;
   const etat: EtatPartie = {
     version: VERSION_ETAT,
@@ -130,7 +139,7 @@ export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
     vies,
     viesDepart: vies,
     viePerdue: false,
-    aretes: ajusterMontant(niveau.aretesDepart, difficulte.aretesDepart * (defi === 'heroique' ? REGLES.heroique.facteurAretes : defi === 'fer' ? REGLES.fer.facteurAretes : 1)),
+    aretes: ajusterMontant(niveau.aretesDepart, difficulte.aretesDepart * (defi === 'heroique' ? REGLES.heroique.facteurAretes : defi === 'fer' ? facteursFer(niveau.defiFer).facteurAretes : 1)),
     vagues: { lancees: 0, prochaine: infini || copie.vagues.length > 0 ? enPas(REGLES.delaiPremiereVague) : -1, paquets: [] },
     ennemis: [],
     unites: [],

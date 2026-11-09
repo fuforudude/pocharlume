@@ -1,8 +1,10 @@
 // Section du rapport pour les régions 2 à 10 : chiffres par région, difficulté et dieu, écarts
 // aux bandes à titre d'information. Les évaluations sont fabriquées ici : le test ne joue aucune partie.
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { CAMPAGNE } from '../data/niveaux/campagne';
 import type { Evaluation } from './campagne';
-import { evaluationsDeRegion, redigerRegions } from './rapport-regions';
+import { evaluationsDeRegion, redigerRegions, REGIONS_DE_LA_CAMPAGNE } from './rapport-regions';
 import type { ResultatPartie } from './simulation';
 
 function partie(gagnee: boolean, vies = 20): ResultatPartie {
@@ -77,5 +79,18 @@ describe('redigerRegions', () => {
     const seulement2 = redigerRegions(evaluationsDeRegion(toutesLesEvaluations(), 2), [2, 3]);
     expect(seulement2).toContain('### Région 3 : le Bourg des Bûchers');
     expect(seulement2).toContain('Pas d’évaluation');
+  });
+});
+
+describe('régions de la campagne', () => {
+  it('se déduisent des niveaux : 1 à N, sans trou, 10 niveaux chacune', () => {
+    const derniere = Math.ceil(CAMPAGNE.length / 10);
+    expect(REGIONS_DE_LA_CAMPAGNE).toEqual(Array.from({ length: derniere }, (_, i) => i + 1));
+  });
+
+  it('chacune a sa machine dans la matrice des bandes de la CI de déploiement', () => {
+    const flux = readFileSync(new URL('../../.github/workflows/deploiement.yml', import.meta.url), 'utf8');
+    const matrice = /region:\s*\[([^\]]*)\]/.exec(flux)?.[1] ?? '';
+    expect(matrice.split(',').map((r) => Number(r.trim()))).toEqual([...REGIONS_DE_LA_CAMPAGNE]);
   });
 });

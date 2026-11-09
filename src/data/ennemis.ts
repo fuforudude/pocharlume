@@ -788,7 +788,7 @@ export const ENNEMIS = {
    */
   passeur: ennemi({
     nom: 'ennemi.passeur',
-    pv: 18000,
+    pv: 15000,
     vitesse: 0.4,
     armure: 0.3,
     resistance: 0.3,

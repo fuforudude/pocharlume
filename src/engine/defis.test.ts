@@ -59,6 +59,41 @@ describe('défi Héroïque', () => {
   });
 });
 
+describe('défi Fer réglé par le niveau (facteurAretes, facteurEffectifs)', () => {
+  const VAGUE = [{ paquets: [groupe('paysan_affame', 10)] }];
+
+  it('remplace les facteurs de REGLES.fer pour ce niveau seulement', () => {
+    const niveau: Niveau = { ...niveauEssai(VAGUE, 1000), defiFer: { familles: ['caserne', 'tir'], facteurAretes: 4, facteurEffectifs: 0.8 } };
+    const etat = creerPartie(niveau, config({ defi: 'fer' }));
+    expect(etat.niveau.vagues[0]?.paquets[0]?.nombre).toBe(8);
+    expect(etat.aretes).toBe(Math.round(1000 * DIFFICULTES.matou.aretesDepart * 4));
+  });
+
+  it('un seul des deux facteurs : l’autre reste celui de REGLES.fer', () => {
+    const niveau: Niveau = { ...niveauEssai(VAGUE, 1000), defiFer: { familles: ['caserne', 'tir'], facteurEffectifs: 0.5 } };
+    const etat = creerPartie(niveau, config({ defi: 'fer' }));
+    expect(etat.niveau.vagues[0]?.paquets[0]?.nombre).toBe(5);
+    expect(etat.aretes).toBe(creerPartie(niveauFer(VAGUE, ['caserne', 'tir'], 1000), config({ defi: 'fer' })).aretes);
+  });
+
+  it('sans défi Fer, les facteurs du niveau ne changent rien', () => {
+    const regle: Niveau = { ...niveauEssai(VAGUE, 1000), defiFer: { familles: ['caserne', 'tir'], facteurAretes: 4, facteurEffectifs: 0.8 } };
+    for (const defi of [undefined, 'heroique'] as const) {
+      const avec = creerPartie(regle, config(defi ? { defi } : {}));
+      const sans = creerPartie(niveauFer(VAGUE, ['caserne', 'tir'], 1000), config(defi ? { defi } : {}));
+      expect(avec.aretes, String(defi)).toBe(sans.aretes);
+      expect(avec.niveau.vagues, String(defi)).toEqual(sans.niveau.vagues);
+    }
+  });
+
+  it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY])('refuse un facteur qui n’est pas fini et strictement positif (%s)', (valeur) => {
+    for (const champ of ['facteurAretes', 'facteurEffectifs'] as const) {
+      const niveau: Niveau = { ...niveauEssai(VAGUE, 1000), defiFer: { familles: ['caserne', 'tir'], [champ]: valeur } };
+      expect(() => creerPartie(niveau, config({ defi: 'fer' })), champ).toThrow(champ);
+    }
+  });
+});
+
 describe('défi Fer : une seule vague', () => {
   it('fusionne toutes les vagues en une, effectifs multipliés (REGLES.fer) arrondis au-dessus, boss à 1', () => {
     const eff = (n: number): number => Math.ceil(n * REGLES.fer.facteurEffectifs - 1e-9);

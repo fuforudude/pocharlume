@@ -30,11 +30,12 @@ function passeur(etat: EtatPartie, x: number, surcharges: Parameters<typeof enne
 const PEAGE = ENNEMIS.passeur.pouvoirs?.vol?.aretes ?? 0;
 
 describe('Le Passeur (région 11) : boss du niveau 110, cohérent avec le Soleil Blême', () => {
-  it('est un boss un peu plus robuste que le boss de la région 10, insensible à l’étourdissement', () => {
+  it('est un boss de la robustesse du boss de la région 10, insensible à l’étourdissement', () => {
     const p = ENNEMIS.passeur;
     expect(p.boss).toBe(true);
     expect(p.insensibleEtourdissement).toBe(true);
-    expect(p.pv).toBeGreaterThan(ENNEMIS.soleil_bleme.pv);
+    // 15 000 PV, un peu moins que le Soleil Blême : le niveau 110 compte trois chemins et le Radeau (équilibrage de la région 11).
+    expect(p.pv).toBeGreaterThanOrEqual(ENNEMIS.soleil_bleme.pv * 0.9);
     expect(p.pv).toBeLessThanOrEqual(ENNEMIS.soleil_bleme.pv * 1.25);
     expect(p.prime).toBeGreaterThan(ENNEMIS.soleil_bleme.prime);
     expect(p.coutVies).toBe(ENNEMIS.soleil_bleme.coutVies);
