@@ -12,6 +12,16 @@ Capacitor plus tard.
 - Reporter le lore : `npm run lore` (reporte `docs/lore.md` dans `src/i18n/` ; `-- --verifier` compare sans écrire). `fr-lore.ts` est généré : corriger `lore.md`, jamais ce fichier.
 - Retoucher les designs : `npm run editeur` (atelier local sur http://127.0.0.1:5199, `-- --port N` pour un autre port ; sprites, palette, décors des cartes ; écrit dans `art/` et les fichiers de cartes, jamais commite). Usage dans `tools/atelier/README.md`, adaptateur Pocharlume dans `tools/atelier-pocharlume/README.md`.
 - Tout vérifier : `npm run verifier` (lint, types, tests, build). Doit être vert avant tout commit.
+- **Tests lourds sur la CI, jamais en local** : la vérification complète (`npm run verifier`) et les passes d'équilibrage
+  (`npm run balance`) rendent le PC de l'auteur inutilisable. On pousse sa branche (jamais `main`) : chaque push lance
+  `.github/workflows/tests.yml` (vérification complète) ; avec `[equilibrage]` dans le message du commit, la passe
+  complète part aussi, répartie par région, rapport en artefact. Puis `npm run ci:attendre` attend la fin du run de la
+  branche, affiche le résultat par job et télécharge les artefacts dans `ci-artefacts/`. En local, seulement des tests
+  ciblés (`npx vitest run <fichiers>`, `npx eslint <fichiers>`, `npx tsc --noEmit`). Le job décide seul s'il tourne sur
+  GitHub ou sur le runner du VPS (quota de minutes sous 10 %). Si `ci:attendre` s'arrête avec le code 2 (aucune machine
+  depuis 15 min, runner du VPS hors ligne, ou 6 h dépassées), suivre la commande affichée : `gh run cancel <run>` puis
+  `gh workflow run tests.yml --ref <branche> -f machine=github`. Étapes de l'auteur (installer et connecter `gh`, jeton
+  `QUOTA_GITHUB`, environnement `production`, enregistrement du runner) : `infra/vps/README.md`, section « Tests distants ».
 
 ## Architecture
 Voir [docs/architecture.md](docs/architecture.md) (dossiers et frontières) et
@@ -47,7 +57,8 @@ En bref :
 ## Git et déploiement
 - Un push sur `main` lance `npm run verifier` puis déploie le site sur GitHub Pages
   (`.github/workflows/pages.yml`).
-- En fin de session de dev, une fois `npm run verifier` vert : commit puis `git pull --rebase` et push sur `main`.
+- En fin de session de dev, une fois la vérification complète verte (sur la CI de la branche, `npm run ci:attendre`) : commit puis
+  `git pull --rebase` et push sur `main`.
   Ne jamais pousser un état qui ne compile pas ou dont les tests échouent.
 - Dans un worktree, pousser sur sa branche, jamais sur `main`.
 
