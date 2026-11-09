@@ -1,6 +1,6 @@
 // Lecture des sorties JSON de `gh run list` et `gh run view` pour `npm run ci:attendre`.
 import { describe, expect, it } from 'vitest';
-import { lireRun, resumerJobs } from './resultats.ts';
+import { lireEtatRun, lireRun, resumerJobs } from './resultats.ts';
 
 describe('lireRun (gh run list --json databaseId,headSha,status,conclusion,url)', () => {
   it('rend le premier run de la liste', () => {
@@ -38,5 +38,21 @@ describe('resumerJobs (gh run view --json jobs)', () => {
     expect(resumerJobs('{}').reussi).toBe(false);
     expect(resumerJobs('{"jobs":[]}').reussi).toBe(false);
     expect(resumerJobs('<html>').lignes).toEqual([]);
+  });
+});
+
+describe('lireEtatRun (gh run view --json status,jobs)', () => {
+  it('statut du run et de chaque job', () => {
+    const texte = JSON.stringify({ status: 'in_progress', jobs: [{ name: 'Choix de la machine', status: 'completed' }, { name: 'Vérification complète', status: 'queued' }] });
+    expect(lireEtatRun(texte)).toEqual({ statut: 'in_progress', jobs: [{ nom: 'Choix de la machine', statut: 'completed' }, { nom: 'Vérification complète', statut: 'queued' }] });
+  });
+
+  it('sans liste de jobs : liste vide', () => {
+    expect(lireEtatRun('{"status":"queued"}')).toEqual({ statut: 'queued', jobs: [] });
+  });
+
+  it('sortie illisible ou sans statut : null', () => {
+    expect(lireEtatRun('<html>')).toBeNull();
+    expect(lireEtatRun('{"jobs":[]}')).toBeNull();
   });
 });

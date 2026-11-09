@@ -1,7 +1,7 @@
 // Choix de la machine des tests distants à partir de la réponse de l'API de facturation de GitHub.
 // Les réponses sont fabriquées ici : aucun appel réseau.
 import { describe, expect, it } from 'vitest';
-import { choisirRunner, MINUTES_INCLUSES_PAR_DEFAUT, minutesIncluses, type ReponseApi } from './quota.ts';
+import { choisirRunner, machineDemandee, MINUTES_INCLUSES_PAR_DEFAUT, minutesIncluses, type ReponseApi } from './quota.ts';
 
 /** Une ligne du rapport d'usage (`GET /users/{username}/settings/billing/usage`) pour des minutes Linux. */
 function ligneActions(minutes: number, netAmount = 0): Record<string, unknown> {
@@ -158,5 +158,43 @@ describe('minutesIncluses (variable MINUTES_INCLUSES)', () => {
   it('une valeur invalide retombe sur le défaut', () => {
     expect(minutesIncluses('beaucoup')).toBe(MINUTES_INCLUSES_PAR_DEFAUT);
     expect(minutesIncluses('-4')).toBe(MINUTES_INCLUSES_PAR_DEFAUT);
+  });
+});
+
+describe('machineDemandee (entrée machine de workflow_dispatch)', () => {
+  it('auto, github ou vps, sans tenir compte de la casse ni des espaces', () => {
+    expect(machineDemandee('auto', 'fuforudude')).toBe('auto');
+    expect(machineDemandee(' GitHub ', 'fuforudude')).toBe('github');
+    expect(machineDemandee('vps', 'fuforudude')).toBe('vps');
+  });
+
+  it('absente (push) ou invalide : auto', () => {
+    expect(machineDemandee(undefined, 'fuforudude')).toBe('auto');
+    expect(machineDemandee('', 'fuforudude')).toBe('auto');
+    expect(machineDemandee('ailleurs', 'fuforudude')).toBe('auto');
+  });
+
+  it('Dependabot ne part jamais sur le VPS, même forcé', () => {
+    expect(machineDemandee('vps', 'dependabot[bot]')).toBe('github');
+    expect(machineDemandee(undefined, 'dependabot[bot]')).toBe('github');
+  });
+});
+
+describe('choisirRunner : machine choisie à la main', () => {
+  const peuDeMinutes = reponse({ usageItems: [ligneActions(1990)] });
+
+  it('github : GitHub même si le quota est presque épuisé, sans avertissement', () => {
+    const choix = choisirRunner({ ...AVEC_JETON, machine: 'github', reponse: peuDeMinutes });
+    expect(choix).toEqual({ runner: 'ubuntu-latest', restant: null, avertissement: null });
+  });
+
+  it('vps : le VPS même avec tout le quota, et même sans secret', () => {
+    expect(choisirRunner({ ...AVEC_JETON, machine: 'vps', reponse: reponse({ usageItems: [] }) }).runner).toBe('vps');
+    expect(choisirRunner({ jetonPresent: false, minutesIncluses: 2000, machine: 'vps', reponse: null })).toEqual({ runner: 'vps', restant: null, avertissement: null });
+  });
+
+  it('auto : le quota décide, comme sans entrée', () => {
+    expect(choisirRunner({ ...AVEC_JETON, machine: 'auto', reponse: peuDeMinutes }).runner).toBe('vps');
+    expect(choisirRunner({ ...AVEC_JETON, machine: 'auto', reponse: reponse({ usageItems: [] }) }).runner).toBe('ubuntu-latest');
   });
 });

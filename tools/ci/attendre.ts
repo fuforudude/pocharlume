@@ -1,10 +1,12 @@
 // `npm run ci:attendre` : attend la fin du dernier run de .github/workflows/tests.yml pour la branche courante,
 // affiche le résultat de chaque job et télécharge les artefacts dans ci-artefacts/<numéro du run>/ (ignoré par git).
-// Code de sortie 0 si tous les jobs ont réussi (ou ont été sautés), 1 sinon.
+// Code de sortie 0 si tous les jobs ont réussi (ou ont été sautés), 1 sinon. S'arrête de lui-même (code 2) si aucune
+// machine ne prend les jobs pendant 15 min (runner du VPS hors ligne) ou après 6 h d'attente : voir attente.ts.
 // Prérequis : l'outil `gh`, installé et connecté par l'auteur (voir infra/vps/README.md).
 import { spawnSync, type SpawnSyncReturns } from 'node:child_process';
 import { setTimeout as attendre } from 'node:timers/promises';
-import { lireRun, resumerJobs, type Run } from './resultats.ts';
+import { commencerSuivi, messageSansMachine, suivre, ATTENTE_TOTALE_MAX_MS } from './attente.ts';
+import { lireEtatRun, lireRun, resumerJobs, type Run } from './resultats.ts';
 
 const WORKFLOW = 'tests.yml';
 const DOSSIER = 'ci-artefacts';
@@ -16,6 +18,13 @@ function lancer(commande: string, args: readonly string[], afficher = false): Sp
 function arreter(message: string): never {
   console.error(message);
   process.exit(1);
+}
+
+/** Fin de l'attente sans résultat (pas un échec des tests) : code 2. */
+function arreterAttente(message: string): never {
+  console.error(`
+${message}`);
+  process.exit(2);
 }
 
 const version = lancer('gh', ['--version']);
@@ -53,7 +62,27 @@ if (run === null) arreter(`Aucun run de ${WORKFLOW} pour la branche ${branche}. 
 if (run.sha !== tete) console.log(`Attention : le dernier run porte sur ${run.sha.slice(0, 7)}, pas sur le commit local ${tete.slice(0, 7)} (pas encore poussé ?).`);
 
 console.log(`Run ${String(run.id)} : ${run.url}`);
-if (run.statut !== 'completed') lancer('gh', ['run', 'watch', String(run.id), '--interval', '30'], true);
+// Attente par interrogations successives (pas `gh run watch`, qui attendrait jusqu'à 24 h un job sans machine).
+const id = run.id;
+let suivi = commencerSuivi(Date.now());
+let dernier = '';
+for (;;) {
+  const vueEtat = lancer('gh', ['run', 'view', String(id), '--json', 'status,jobs']);
+  const etat = vueEtat.status === 0 ? lireEtatRun(vueEtat.stdout) : null;
+  if (etat !== null) {
+    const pas = suivre(suivi, etat, Date.now());
+    suivi = pas.suivi;
+    if (pas.decision === 'termine') break;
+    if (pas.decision === 'sans-machine') arreterAttente(messageSansMachine(branche, id));
+    if (pas.decision === 'trop-long') arreterAttente(`Attente arrêtée après ${String(ATTENTE_TOTALE_MAX_MS / 3_600_000)} h : le run ${String(id)} n’est pas terminé (${run.url}).`);
+    const ligne = etat.jobs.map((job) => `${job.nom} : ${job.statut}`).join(' | ') || etat.statut;
+    if (ligne !== dernier) console.log(`[${new Date().toLocaleTimeString('fr-FR')}] ${ligne}`);
+    dernier = ligne;
+  } else if (Date.now() - suivi.debut >= ATTENTE_TOTALE_MAX_MS) {
+    arreterAttente(`Attente arrêtée : impossible de lire l’état du run ${String(id)} avec gh.`);
+  }
+  await attendre(30_000);
+}
 
 const vue = lancer('gh', ['run', 'view', String(run.id), '--json', 'jobs']);
 const resume = resumerJobs(vue.stdout);

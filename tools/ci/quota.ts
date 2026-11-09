@@ -12,6 +12,12 @@
 // avec le passage à la nouvelle facturation.
 // Tout ce qui n'est pas compris retombe sur GitHub avec un avertissement : on ne bascule sur le VPS que sur une
 // réponse claire.
+//
+// Dépôts publics : chaque ligne porte `repositoryName`, mais rien n'y dit si le dépôt est public ou privé, et les
+// montants ne les distinguent pas non plus (les minutes d'un dépôt public comme celles du forfait inclus sont remises
+// en entier : `discountAmount` = `grossAmount`, `netAmount` = 0). On compte donc toutes les lignes de minutes Actions
+// du compte : avec des dépôts publics actifs, le relais peut partir un peu trop tôt (jamais trop tard). Le dépôt
+// pocharlume est le seul consommateur de minutes du compte aujourd'hui ; si ça change, voir infra/vps/README.md.
 
 /** Sous cette part de minutes restantes, les jobs partent sur le VPS. */
 export const SEUIL_RELAIS = 0.1;
@@ -20,6 +26,8 @@ export const SEUIL_RELAIS = 0.1;
 export const MINUTES_INCLUSES_PAR_DEFAUT = 2000;
 
 export type Runner = 'vps' | 'ubuntu-latest';
+/** Entrée `machine` du lancement à la main : `auto` laisse le quota décider. */
+export type Machine = 'auto' | 'github' | 'vps';
 export type Quota = number | 'illimite';
 
 /** Ce que l'appel à l'API a donné : un statut HTTP et un corps, ou une erreur réseau. */
@@ -28,8 +36,10 @@ export type ReponseApi = { readonly statut: number; readonly corps: string } | {
 export interface EntreeChoix {
   readonly jetonPresent: boolean;
   readonly minutesIncluses: Quota;
-  /** `null` quand l'API n'a pas été appelée (pas de jeton). */
+  /** `null` quand l'API n'a pas été appelée (pas de jeton, ou machine choisie à la main). */
   readonly reponse: ReponseApi | null;
+  /** Machine choisie à la main (`auto` par défaut). */
+  readonly machine?: Machine;
 }
 
 export interface Choix {
@@ -46,6 +56,16 @@ export function minutesIncluses(valeur: string | undefined): Quota {
   if (texte === 'illimite') return 'illimite';
   if (/^\d+$/.test(texte) && Number(texte) > 0) return Number(texte);
   return MINUTES_INCLUSES_PAR_DEFAUT;
+}
+
+/**
+ * La machine demandée : l'entrée `machine` de workflow_dispatch (vide sur un push : `auto`). Les branches de
+ * Dependabot ne partent jamais sur le VPS : elles installent des versions de paquets que personne n'a relues.
+ */
+export function machineDemandee(valeur: string | undefined, acteur: string | undefined): Machine {
+  if ((acteur ?? '').trim() === 'dependabot[bot]') return 'github';
+  const texte = (valeur ?? '').trim().toLowerCase();
+  return texte === 'github' || texte === 'vps' ? texte : 'auto';
 }
 
 function parDefaut(avertissement: string): Choix {
@@ -88,6 +108,8 @@ function lireConsommation(corps: unknown, quota: Quota): { utilisees: number; qu
 
 /** Le choix du runner à partir de la réponse de l'API (voir l'en-tête du fichier pour l'endpoint). */
 export function choisirRunner(entree: EntreeChoix): Choix {
+  if (entree.machine === 'github') return { runner: 'ubuntu-latest', restant: null, avertissement: null };
+  if (entree.machine === 'vps') return { runner: 'vps', restant: null, avertissement: null };
   if (!entree.jetonPresent) return parDefaut('Secret QUOTA_GITHUB absent : quota non lu, les jobs partent sur GitHub.');
   if (entree.minutesIncluses === 'illimite') return { runner: 'ubuntu-latest', restant: 1, avertissement: null };
   if (entree.minutesIncluses <= 0) return parDefaut('Quota de minutes inclus invalide (MINUTES_INCLUSES) : les jobs partent sur GitHub.');

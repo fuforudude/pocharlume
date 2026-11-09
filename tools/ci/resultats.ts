@@ -33,6 +33,20 @@ export function lireRun(sortie: string): Run | null {
   return { id: premier['databaseId'], sha: texte(premier['headSha']), statut: texte(premier['status']), conclusion: texte(premier['conclusion']), url: texte(premier['url']) };
 }
 
+/** Statut d'un run et de ses jobs, lu dans `gh run view --json status,jobs`. */
+export interface EtatRun {
+  readonly statut: string;
+  readonly jobs: readonly { readonly nom: string; readonly statut: string }[];
+}
+
+/** L'état du run, ou `null` si la sortie n'a pas de statut. */
+export function lireEtatRun(sortie: string): EtatRun | null {
+  const donnees = lireJson(sortie);
+  if (!estObjet(donnees) || typeof donnees['status'] !== 'string') return null;
+  const jobs = Array.isArray(donnees['jobs']) ? (donnees['jobs'] as unknown[]).filter(estObjet) : [];
+  return { statut: donnees['status'], jobs: jobs.map((job) => ({ nom: texte(job['name']), statut: texte(job['status']) })) };
+}
+
 const LIBELLES: Readonly<Record<string, string>> = {
   success: 'réussi',
   failure: 'ÉCHEC',

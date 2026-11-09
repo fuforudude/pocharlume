@@ -18,8 +18,10 @@ Capacitor plus tard.
   complète part aussi, répartie par région, rapport en artefact. Puis `npm run ci:attendre` attend la fin du run de la
   branche, affiche le résultat par job et télécharge les artefacts dans `ci-artefacts/`. En local, seulement des tests
   ciblés (`npx vitest run <fichiers>`, `npx eslint <fichiers>`, `npx tsc --noEmit`). Le job décide seul s'il tourne sur
-  GitHub ou sur le runner du VPS (quota de minutes sous 10 %). Étapes de l'auteur (installer et connecter `gh`, jeton
-  `QUOTA_GITHUB`, enregistrement du runner) : `infra/vps/README.md`, section « Tests distants ».
+  GitHub ou sur le runner du VPS (quota de minutes sous 10 %). Si `ci:attendre` s'arrête avec le code 2 (aucune machine
+  depuis 15 min, runner du VPS hors ligne, ou 6 h dépassées), suivre la commande affichée : `gh run cancel <run>` puis
+  `gh workflow run tests.yml --ref <branche> -f machine=github`. Étapes de l'auteur (installer et connecter `gh`, jeton
+  `QUOTA_GITHUB`, environnement `production`, enregistrement du runner) : `infra/vps/README.md`, section « Tests distants ».
 
 ## Architecture
 Voir [docs/architecture.md](docs/architecture.md) (dossiers et frontières) et
