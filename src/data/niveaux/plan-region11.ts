@@ -188,7 +188,7 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
     numero: 110,
     carte: 'naufrage',
     chemins: [0, 1, 2],
-    aretesDepart: 2700,
+    aretesDepart: 3600,
     defiFer: { familles: ['tir', 'magie'] },
     gimmick: radeau([5, 6], [5, 5], [5, 4], [5, 3], [6, 3], [7, 3], [8, 3], [9, 3], [9, 4], [9, 5], [9, 6]),
     nom: 'niveau.r11.10.nom',
@@ -197,9 +197,11 @@ export const PLANS_REGION11: readonly PlanNiveau[] = [
       nombre: 15,
       ennemis: ['noyeur', 'sangsue', 'gargouille', 'martyr_bleme', 'chevalier', 'acolyte_cendre', 'delateur', 'corbeau_noir'],
       graine: 1110,
-      facteurBudget: 0.1,
+      facteurBudget: 0.07,
       ecart: 0.8,
-      boss: { vague: 15, ennemi: 'passeur', chemin: 0, delai: 12 },
+      // Le Passeur arrive par le chemin nord (1), qui rejoint le chemin 0 près de la sortie : sur le chemin 0, il pesait 93 % de la
+      // menace et le bot soigneux délaissait les chemins 1 et 2 (décision de l'étudiant, « Équilibrage de la région 11 » dans la spec).
+      boss: { vague: 15, ennemi: 'passeur', chemin: 1, delai: 12 },
     },
   },
 ];
