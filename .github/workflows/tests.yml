@@ -1,0 +1,172 @@
+name: Tests distants
+
+# Vérification complète (et, sur demande, passe d'équilibrage) hors de la machine de dev : voir
+# docs/specs/2026-11-09-tests-distants.md. Les agents poussent leur branche puis attendent avec `npm run ci:attendre`.
+# main n'est pas concernée : son push lance deploiement.yml.
+on:
+  push:
+    branches-ignore: [main]
+  workflow_dispatch:
+    inputs:
+      equilibrage:
+        description: Lancer aussi la passe d'équilibrage complète, répartie par région
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# Un nouveau push sur la même branche annule le run en cours : pas de quota gaspillé sur un état dépassé.
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Lit le quota de minutes Actions du compte (tools/ci/quota.ts) : sous 10 % restants, les jobs suivants partent sur
+  # le runner auto-hébergé du VPS (labels self-hosted, vps ; infra/vps/runner-github.sh). Sans secret QUOTA_GITHUB ou si
+  # l'API échoue : GitHub, avec un avertissement dans le résumé. Si ce pas plante quand même, la sortie est vide et les
+  # jobs suivants partent sur GitHub.
+  choisir:
+    name: Choix de la machine
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      runner: ${{ steps.choix.outputs.runner }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: tools/ci
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - id: choix
+        name: Quota de minutes et choix du runner
+        continue-on-error: true
+        env:
+          QUOTA_GITHUB: ${{ secrets.QUOTA_GITHUB }}
+          PROPRIETAIRE: ${{ github.repository_owner }}
+          MINUTES_INCLUSES: ${{ vars.MINUTES_INCLUSES }}
+        run: node tools/ci/choisir-runner.ts
+
+  verifier:
+    name: Vérification complète
+    needs: choisir
+    runs-on: ${{ needs.choisir.outputs.runner == 'vps' && fromJSON('["self-hosted","vps"]') || 'ubuntu-latest' }}
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run verifier
+
+  # Passe d'équilibrage, une machine par région : `[equilibrage]` dans le message du commit poussé, ou lancement à la
+  # main avec la case cochée. La matrice est la même que celle des bandes de deploiement.yml (vérifié par
+  # tools/ci/workflows.test.ts). `npm run balance` n'assemble pas de rapport complet à partir de morceaux : chaque région
+  # publie ses journaux (mise au point `--niveaux=…`, avec les écarts aux bandes de la région), et le job final les réunit.
+  equilibrage:
+    name: Équilibrage, région ${{ matrix.region }}
+    needs: choisir
+    if: contains(github.event.head_commit.message, '[equilibrage]') || (github.event_name == 'workflow_dispatch' && inputs.equilibrage)
+    runs-on: ${{ needs.choisir.outputs.runner == 'vps' && fromJSON('["self-hosted","vps"]') || 'ubuntu-latest' }}
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        region: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Passe de la région ${{ matrix.region }}
+        shell: bash
+        env:
+          REGION: ${{ matrix.region }}
+        run: |
+          mkdir -p equilibrage
+          niveaux="$(( (REGION - 1) * 10 + 1 ))-$(( REGION * 10 ))"
+          # La région 1 porte aussi les vérifications supplémentaires (disciples, progression, sans tour divine).
+          profils=()
+          if [ "$REGION" = 1 ]; then profils=(--profils=disciples,progression,divine); fi
+          # Les compteurs de progression (retours chariot) n'ont pas leur place dans un journal.
+          propre() { tr '\r' '\n' | sed -e '/tâches calculées/d' -e '/^ *$/d'; }
+          npm run --silent balance -- "--niveaux=$niveaux" --detail "${profils[@]}" 2>&1 | propre | tee "equilibrage/region-$(printf %02d "$REGION").log"
+          npm run --silent balance -- "--niveaux=$niveaux" --difficultes=heroique,fer --detail 2>&1 | propre | tee "equilibrage/region-$(printf %02d "$REGION")-defis.log"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: equilibrage-region-${{ matrix.region }}
+          path: equilibrage/
+          if-no-files-found: warn
+
+  equilibrage-infini:
+    name: Équilibrage, mode infini
+    needs: choisir
+    if: contains(github.event.head_commit.message, '[equilibrage]') || (github.event_name == 'workflow_dispatch' && inputs.equilibrage)
+    runs-on: ${{ needs.choisir.outputs.runner == 'vps' && fromJSON('["self-hosted","vps"]') || 'ubuntu-latest' }}
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Passe du mode infini
+        shell: bash
+        run: |
+          mkdir -p equilibrage
+          npm run --silent balance -- --infini 2>&1 | tr '\r' '\n' | sed -e '/tâches calculées/d' -e '/^ *$/d' | tee equilibrage/infini.log
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: equilibrage-infini
+          path: equilibrage/
+          if-no-files-found: warn
+
+  rapport-equilibrage:
+    name: Rapport d'équilibrage
+    needs: [choisir, equilibrage, equilibrage-infini]
+    if: ${{ !cancelled() && needs.equilibrage.result != 'skipped' }}
+    runs-on: ${{ needs.choisir.outputs.runner == 'vps' && fromJSON('["self-hosted","vps"]') || 'ubuntu-latest' }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: equilibrage-*
+          path: morceaux
+          merge-multiple: true
+      - name: Assemblage des journaux
+        shell: bash
+        env:
+          REGIONS: ${{ needs.equilibrage.result }}
+          INFINI: ${{ needs.equilibrage-infini.result }}
+          SHA: ${{ github.sha }}
+        run: |
+          {
+            echo "# Rapport d'équilibrage (journaux assemblés)"
+            echo
+            echo "Commit \`$SHA\`. Régions : $REGIONS ; mode infini : $INFINI."
+            echo "Assemblé à partir des journaux de \`npm run balance -- --niveaux=…\` de chaque région : ce n'est pas le"
+            echo "\`balance-report.md\` complet de \`npm run balance\` (pas de section zone, pas de tableau d'ensemble)."
+            for f in $(ls morceaux/*.log 2>/dev/null | sort); do
+              echo
+              echo "## $(basename "$f" .log)"
+              echo
+              echo '```text'
+              cat "$f"
+              echo '```'
+            done
+          } > rapport-equilibrage.md
+          cat rapport-equilibrage.md >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: rapport-equilibrage
+          path: |
+            rapport-equilibrage.md
+            morceaux/
