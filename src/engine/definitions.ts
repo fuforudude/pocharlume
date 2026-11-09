@@ -847,10 +847,15 @@ export interface Carte {
 
 /**
  * Défi Fer d'un niveau : les deux seules familles de tours constructibles (ids de IdFamille, vérifiés à la création
- * de la partie). La tour divine est permise si la famille de son dieu en fait partie.
+ * de la partie). La tour divine est permise si la famille de son dieu en fait partie. `facteurAretes` et `facteurEffectifs`,
+ * facultatifs, remplacent pour ce niveau ceux de `REGLES.fer` (finis et strictement positifs, vérifiés à la création de la partie) :
+ * le Fer d'un niveau dont la difficulté ne tient qu'à une règle punitive en Héroïque (une seule vie) se règle ainsi sans toucher aux
+ * autres modes ni aux autres niveaux.
  */
 export interface DefiFer {
   readonly familles: readonly [string, string];
+  readonly facteurAretes?: number;
+  readonly facteurEffectifs?: number;
 }
 
 export interface Niveau {
