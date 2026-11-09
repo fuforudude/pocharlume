@@ -9,7 +9,8 @@ Le serveur ne se configure jamais à la main : tout passe par les scripts de ce 
 | Script | Rôle |
 |---|---|
 | `securiser.sh` | SSH par clé seulement (pas de root), pare-feu (SSH limité, HTTP, HTTPS), fail2ban, mises à jour de sécurité automatiques avec redémarrage à 04:30, nginx et certbot. |
-| `site-pocharlume.sh` | Utilisateur `deploy`, dossier `/var/www/pocharlume`, nginx (HTTPS, redirections vers `https://pocharlume.fr`, en-têtes de sécurité, cache), et le même site sous `travail.pocharlume.fr` (son propre certificat, redirection HTTP vers son propre HTTPS, jamais vers `pocharlume.fr`). |
+| `site-pocharlume.sh` | Utilisateur `deploy`, dossier `/var/www/pocharlume`, nginx (HTTPS, redirections vers `https://pocharlume.fr`, en-têtes de sécurité, cache), et le même site sous `travail.pocharlume.fr` (son propre certificat, redirection HTTP vers son propre HTTPS, jamais vers `pocharlume.fr`). Pose aussi le mot de passe d'accès (voir plus bas). |
+| `verifier-acces.sh` | Contrôle, depuis le VPS, que le mot de passe protège bien les deux domaines (`bash -s` en SSH, voir plus bas). |
 
 ```bash
 ssh -i ~/.ssh/vps_ovh ubuntu@145.239.83.184 'sudo bash -s' < infra/vps/securiser.sh
@@ -48,3 +49,30 @@ sudo certbot certonly --webroot -w /var/www/acme -d travail.pocharlume.fr   --no
 Le script sert chaque nom indépendamment : sans certificat, `travail.pocharlume.fr` est en HTTP seul (qui sert le défi
 ACME) ; une fois le certificat obtenu, relancer `site-pocharlume.sh` passe en HTTPS. Les sauvegardes (`localStorage`,
 IndexedDB) sont propres à chaque origine : une partie commencée sur `pocharlume.fr` n'apparaît pas sur `travail.pocharlume.fr`.
+
+## Mot de passe d'accès
+Des robots récupéraient la page du jeu : tout le site, sur `pocharlume.fr` comme sur `travail.pocharlume.fr`, est derrière
+un mot de passe fixe, vérifié par nginx. Sans le bon cookie, nginx n'envoie que la page de connexion (statut 401) :
+jamais `index.html`, ni `/assets/`, ni les sprites ou les sons. Restent publics : `/.well-known/acme-challenge/` (en HTTP,
+pour Let's Encrypt), `/robots.txt` (`Disallow: /`) et `/__acces/` (les fichiers de la page de connexion).
+
+- Le mot de passe est la variable `MOT_DE_PASSE` en tête de `site-pocharlume.sh`. Il n'existe que dans la configuration
+  nginx (`/etc/nginx/conf.d/pocharlume-acces.conf`, une `map` sur le cookie `pocharlume_acces`), jamais dans du code envoyé au navigateur.
+- La page de connexion est posée dans `/var/www/pocharlume-acces`, hors de `/var/www/pocharlume` : le déploiement rsync
+  (qui efface ce qui n'est pas dans `dist/`) ne l'emporte donc pas. Elle pose le cookie avec la valeur tapée puis recharge ;
+  si elle s'affiche alors que le cookie existe, elle écrit « Mot de passe incorrect. ». Le script est externe (`/__acces/acces.js`) :
+  la politique de sécurité du site (`script-src 'self'`) est inchangée.
+
+**Changer le mot de passe** : modifier `MOT_DE_PASSE` (lettres, chiffres, `-`, `_`, `.`), puis relancer le script. Les
+navigateurs qui ont l'ancien cookie retombent sur la page de connexion.
+
+```bash
+ssh -i ~/.ssh/vps_ovh ubuntu@145.239.83.184 'sudo bash -s' < infra/vps/site-pocharlume.sh
+ssh -i ~/.ssh/vps_ovh ubuntu@145.239.83.184 'bash -s -- NOUVEAU_MOT_DE_PASSE' < infra/vps/verifier-acces.sh
+```
+
+**Enlever le mot de passe** : mettre `MOT_DE_PASSE=` (vide) et relancer le script : la `map` laisse alors tout passer et le site
+redevient public (`robots.txt` et `/__acces/` restent servis, sans effet). `verifier-acces.sh` n'a plus de sens dans ce cas.
+
+Le script sauvegarde `/etc/nginx/sites-available/pocharlume` en `.bak` horodaté avant d'écrire ; si `nginx -t` échoue, il
+remet la sauvegarde, retire la `map` et s'arrête. Une seule connexion SSH par commande : fail2ban bannit les rafales.

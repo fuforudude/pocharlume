@@ -13,6 +13,12 @@ CERT=/etc/letsencrypt/live/$DOMAINE
 # Second nom, jamais redirigé vers $DOMAINE : c'est justement lui qui peut être bloqué.
 DOMAINE_TRAVAIL=travail.pocharlume.fr
 CERT_TRAVAIL=/etc/letsencrypt/live/$DOMAINE_TRAVAIL
+# Mot de passe d'accès au site (des robots récupéraient la page). Il n'existe que dans la configuration nginx :
+# jamais dans du code envoyé au navigateur. Pour le changer : modifier cette ligne et relancer le script.
+# Chaîne vide = pas de mot de passe (le site redevient public). Caractères permis : lettres, chiffres, - _ .
+MOT_DE_PASSE=1234567890
+# La page de connexion vit HORS de $RACINE : chaque déploiement (rsync --delete) effacerait ce qu'on y poserait.
+ACCES=/var/www/pocharlume-acces
 # Clé publique du déploiement GitHub Actions : elle ne peut que synchroniser le dossier du site (rrsync).
 CLE_DEPLOIEMENT='ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBX5Ef/BWBLRfj1tXzPPGq5yltjVBDvd7s9xX81BOwQO github-actions pocharlume deploy'
 
@@ -32,6 +38,79 @@ install -d -m 755 -o deploy -g deploy "$RACINE"
 install -d -m 755 "$ACME"
 [ -e "$RACINE/index.html" ] || echo '<!doctype html><meta charset="utf-8"><title>Pocharlume</title><p>Bientôt.</p>' > "$RACINE/index.html"
 chown -R deploy:deploy "$RACINE"
+
+echo '== Mot de passe : page de connexion (hors du dossier déployé) et contrôle du cookie'
+case "$MOT_DE_PASSE" in *[!A-Za-z0-9._-]*) echo 'MOT_DE_PASSE : caractères non permis'; exit 1;; esac
+install -d -m 755 "$ACCES" "$ACCES/__acces"
+ecrire "$ACCES/robots.txt" <<'EOF'
+User-agent: *
+Disallow: /
+EOF
+ecrire "$ACCES/__acces/index.html" <<'EOF'
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Accès</title>
+<link rel="stylesheet" href="/__acces/acces.css">
+</head>
+<body>
+<form id="acces" autocomplete="off">
+  <input id="mot" type="password" aria-label="Mot de passe" placeholder="Mot de passe" autofocus>
+  <button type="submit">Entrer</button>
+  <p id="erreur" role="alert" hidden>Mot de passe incorrect.</p>
+</form>
+<script src="/__acces/acces.js"></script>
+</body>
+</html>
+EOF
+ecrire "$ACCES/__acces/acces.css" <<'EOF'
+html, body { height: 100%; margin: 0; }
+body { display: flex; align-items: center; justify-content: center; background: #0e0f12; color: #d8dae0; font: 16px system-ui, sans-serif; }
+form { display: flex; flex-direction: column; gap: 12px; width: min(260px, 80vw); }
+input, button { font: inherit; padding: 10px 12px; border-radius: 6px; border: 1px solid #2c2f38; background: #171920; color: inherit; }
+input:focus-visible, button:focus-visible { outline: 2px solid #6d8cff; outline-offset: 1px; }
+button { cursor: pointer; background: #232738; }
+button:hover { background: #2c3148; }
+#erreur { margin: 0; color: #ff7b7b; font-size: 14px; text-align: center; }
+EOF
+ecrire "$ACCES/__acces/acces.js" <<'EOF'
+// Pose le cookie « pocharlume_acces » avec la valeur tapée, puis recharge : c'est nginx qui compare au mot de passe.
+(function () {
+  var NOM = 'pocharlume_acces';
+  var formulaire = document.getElementById('acces');
+  var champ = document.getElementById('mot');
+  var erreur = document.getElementById('erreur');
+  // Cette page ne s'affiche avec un cookie présent que si nginx l'a refusé : le mot de passe était faux.
+  if (document.cookie.split('; ').some(function (c) { return c.indexOf(NOM + '=') === 0 && c.length > NOM.length + 1; })) {
+    erreur.hidden = false;
+  }
+  formulaire.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (!champ.value) return;
+    document.cookie = NOM + '=' + champ.value + '; Path=/; Max-Age=31536000; Secure; SameSite=Lax';
+    location.reload();
+  });
+})();
+EOF
+chmod -R a+rX "$ACCES"
+# Hors de tout serveur : la map est lue dans le contexte http (conf.d). 1 si le cookie égale le mot de passe.
+if [ -n "$MOT_DE_PASSE" ]; then
+  ecrire /etc/nginx/conf.d/pocharlume-acces.conf <<EOF
+map \$cookie_pocharlume_acces \$pocharlume_acces_ok {
+    default 0;
+    "$MOT_DE_PASSE" 1;
+}
+EOF
+else
+  ecrire /etc/nginx/conf.d/pocharlume-acces.conf <<'EOF'
+map $cookie_pocharlume_acces $pocharlume_acces_ok {
+    default 1;
+}
+EOF
+fi
 
 echo '== En-têtes de sécurité et de cache'
 ecrire /etc/nginx/snippets/pocharlume-securite.conf <<'EOF'
@@ -68,12 +147,28 @@ SITE=$(cat <<EOF
     gzip_types text/css application/javascript application/json image/svg+xml;
     include snippets/pocharlume-securite.conf;
 
+    # Sans le bon cookie : la page de connexion (statut 401) à la place de tout le reste. Elle vit hors de \$RACINE.
+    error_page 401 /__acces/index.html;
+    location /__acces/ {
+        root $ACCES;
+        include snippets/pocharlume-securite.conf;
+        add_header Cache-Control "no-store" always;
+        try_files \$uri =404;
+    }
+    location = /robots.txt {
+        root $ACCES;
+        default_type text/plain;
+        include snippets/pocharlume-securite.conf;
+        add_header Cache-Control "no-cache" always;
+    }
     location /assets/ {
+        if (\$pocharlume_acces_ok = 0) { return 401; }
         include snippets/pocharlume-securite.conf;
         add_header Cache-Control "public, max-age=31536000, immutable" always;
         try_files \$uri =404;
     }
     location / {
+        if (\$pocharlume_acces_ok = 0) { return 401; }
         include snippets/pocharlume-securite.conf;
         add_header Cache-Control "no-cache" always;
         try_files \$uri \$uri/ =404;
@@ -82,6 +177,8 @@ EOF
 )
 
 echo '== nginx'
+SAUVEGARDE=/etc/nginx/sites-available/pocharlume.$(date +%Y%m%d-%H%M%S).bak
+if [ -e /etc/nginx/sites-available/pocharlume ]; then cp -p /etc/nginx/sites-available/pocharlume "$SAUVEGARDE"; echo "   sauvegarde : $SAUVEGARDE"; fi
 CONF=/tmp/pocharlume.conf.$$
 : > "$CONF"
 if [ -e "$CERT/fullchain.pem" ]; then
@@ -164,7 +261,13 @@ ecrire /etc/nginx/sites-available/pocharlume < "$CONF"
 rm -f "$CONF"
 ln -sf /etc/nginx/sites-available/pocharlume /etc/nginx/sites-enabled/pocharlume
 rm -f /etc/nginx/sites-enabled/default
-nginx -t
+if ! nginx -t; then
+  echo 'nginx -t a échoué : retour à la configuration précédente'
+  if [ -e "$SAUVEGARDE" ]; then cp -p "$SAUVEGARDE" /etc/nginx/sites-available/pocharlume; fi
+  rm -f /etc/nginx/conf.d/pocharlume-acces.conf
+  nginx -t || true
+  exit 1
+fi
 systemctl reload nginx
 
 echo '== Fait'
