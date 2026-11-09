@@ -2,13 +2,14 @@
 
 VPS OVH sous Ubuntu 26.04 LTS : IPv4 `145.239.83.184`, IPv6 `2001:41d0:601:1100::8457`.
 Domaine `pocharlume.fr` chez OVH : `@` A et AAAA vers le VPS, `www` en CNAME vers `pocharlume.fr.`
+Second nom du même site : `travail.pocharlume.fr` (A et AAAA vers le VPS), pour les réseaux qui bloquent `pocharlume.fr`.
 
 Le serveur ne se configure jamais à la main : tout passe par les scripts de ce dossier, rejouables sans risque.
 
 | Script | Rôle |
 |---|---|
 | `securiser.sh` | SSH par clé seulement (pas de root), pare-feu (SSH limité, HTTP, HTTPS), fail2ban, mises à jour de sécurité automatiques avec redémarrage à 04:30, nginx et certbot. |
-| `site-pocharlume.sh` | Utilisateur `deploy`, dossier `/var/www/pocharlume`, nginx (HTTPS, redirections vers `https://pocharlume.fr`, en-têtes de sécurité, cache). |
+| `site-pocharlume.sh` | Utilisateur `deploy`, dossier `/var/www/pocharlume`, nginx (HTTPS, redirections vers `https://pocharlume.fr`, en-têtes de sécurité, cache), et le même site sous `travail.pocharlume.fr` (son propre certificat, redirection HTTP vers son propre HTTPS, jamais vers `pocharlume.fr`). |
 
 ```bash
 ssh -i ~/.ssh/vps_ovh ubuntu@145.239.83.184 'sudo bash -s' < infra/vps/securiser.sh
@@ -36,3 +37,14 @@ sudo certbot certonly --webroot -w /var/www/acme -d pocharlume.fr -d www.pocharl
 ```
 
 puis relancer `site-pocharlume.sh`, qui passe alors en HTTPS.
+
+Le nom `travail.pocharlume.fr` a son propre certificat (`/etc/letsencrypt/live/travail.pocharlume.fr`), demandé de la même
+façon, sans toucher à celui de `pocharlume.fr` :
+
+```bash
+sudo certbot certonly --webroot -w /var/www/acme -d travail.pocharlume.fr   --non-interactive --agree-tos --register-unsafely-without-email --deploy-hook "systemctl reload nginx"
+```
+
+Le script sert chaque nom indépendamment : sans certificat, `travail.pocharlume.fr` est en HTTP seul (qui sert le défi
+ACME) ; une fois le certificat obtenu, relancer `site-pocharlume.sh` passe en HTTPS. Les sauvegardes (`localStorage`,
+IndexedDB) sont propres à chaque origine : une partie commencée sur `pocharlume.fr` n'apparaît pas sur `travail.pocharlume.fr`.

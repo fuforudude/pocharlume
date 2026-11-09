@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
 # Site pocharlume.fr sur le VPS : utilisateur de déploiement, dossier du site, configuration nginx.
 # À lancer en root : ssh … 'sudo bash -s' < infra/vps/site-pocharlume.sh. Rejouable sans risque.
-# Tant qu'il n'y a pas de certificat, le site est servi en HTTP seul ; une fois le certificat obtenu
-# (voir infra/vps/README.md), relancer ce script passe en HTTPS.
+# Deux noms servent le même site : pocharlume.fr (avec www) et travail.pocharlume.fr (pour les réseaux qui
+# bloquent pocharlume.fr), chacun avec son certificat. Tant qu'un nom n'a pas de certificat, il est servi en
+# HTTP seul ; une fois le certificat obtenu (voir infra/vps/README.md), relancer ce script passe en HTTPS.
 set -euo pipefail
 
 DOMAINE=pocharlume.fr
 RACINE=/var/www/pocharlume
 ACME=/var/www/acme
 CERT=/etc/letsencrypt/live/$DOMAINE
+# Second nom, jamais redirigé vers $DOMAINE : c'est justement lui qui peut être bloqué.
+DOMAINE_TRAVAIL=travail.pocharlume.fr
+CERT_TRAVAIL=/etc/letsencrypt/live/$DOMAINE_TRAVAIL
 # Clé publique du déploiement GitHub Actions : elle ne peut que synchroniser le dossier du site (rrsync).
 CLE_DEPLOIEMENT='ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBX5Ef/BWBLRfj1tXzPPGq5yltjVBDvd7s9xX81BOwQO github-actions pocharlume deploy'
 
@@ -78,9 +82,11 @@ EOF
 )
 
 echo '== nginx'
+CONF=/tmp/pocharlume.conf.$$
+: > "$CONF"
 if [ -e "$CERT/fullchain.pem" ]; then
-  echo "   certificat présent : HTTPS"
-  ecrire /etc/nginx/sites-available/pocharlume <<EOF
+  echo "   $DOMAINE : certificat présent, HTTPS"
+  cat >> "$CONF" <<EOF
 server {
     listen 80;
     listen [::]:80;
@@ -110,8 +116,8 @@ $SITE
 }
 EOF
 else
-  echo "   pas encore de certificat : HTTP seul"
-  ecrire /etc/nginx/sites-available/pocharlume <<EOF
+  echo "   $DOMAINE : pas encore de certificat, HTTP seul"
+  cat >> "$CONF" <<EOF
 server {
     listen 80;
     listen [::]:80;
@@ -121,6 +127,41 @@ $SITE
 }
 EOF
 fi
+if [ -e "$CERT_TRAVAIL/fullchain.pem" ]; then
+  echo "   $DOMAINE_TRAVAIL : certificat présent, HTTPS"
+  cat >> "$CONF" <<EOF
+server {
+    listen 80;
+    listen [::]:80;
+    server_name $DOMAINE_TRAVAIL;
+    include snippets/pocharlume-acme.conf;
+    location / { return 301 https://$DOMAINE_TRAVAIL\$request_uri; }
+}
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
+    server_name $DOMAINE_TRAVAIL;
+    ssl_certificate $CERT_TRAVAIL/fullchain.pem;
+    ssl_certificate_key $CERT_TRAVAIL/privkey.pem;
+    include snippets/pocharlume-tls.conf;
+$SITE
+}
+EOF
+else
+  echo "   $DOMAINE_TRAVAIL : pas encore de certificat, HTTP seul"
+  cat >> "$CONF" <<EOF
+server {
+    listen 80;
+    listen [::]:80;
+    server_name $DOMAINE_TRAVAIL;
+    include snippets/pocharlume-acme.conf;
+$SITE
+}
+EOF
+fi
+ecrire /etc/nginx/sites-available/pocharlume < "$CONF"
+rm -f "$CONF"
 ln -sf /etc/nginx/sites-available/pocharlume /etc/nginx/sites-enabled/pocharlume
 rm -f /etc/nginx/sites-enabled/default
 nginx -t
