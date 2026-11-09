@@ -45,7 +45,7 @@ jobs:
     timeout-minutes: 90
     strategy:
       fail-fast: true
-      # Même matrice que tests.yml (tools/ci/workflows.test.ts) ; à la fusion du jalon région 11, passer les deux matrices à 11.
+      # Même matrice que tests.yml (tools/ci/workflows.test.ts), égale aux régions de la campagne (rapport-regions.test.ts).
       matrix:
         # Une machine par région de la campagne (REGIONS_DE_LA_CAMPAGNE de src/equilibrage/rapport-regions.ts), toutes avec leurs
         # bandes imposées. Une région ajoutée à la campagne doit aussi être ajoutée ici.

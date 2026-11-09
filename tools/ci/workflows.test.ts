@@ -46,10 +46,6 @@ describe('workflow des tests distants', () => {
     expect(regions(tests)).toEqual(attendue);
   });
 
-  it('les deux matrices rappellent le passage à 11 régions à la fusion du jalon', () => {
-    for (const flux of [tests, deploiement]) expect(flux).toContain('à la fusion du jalon région 11, passer les deux matrices à 11');
-  });
-
   it('part sur tout push sauf main, et à la demande', () => {
     expect(tests).toMatch(/branches-ignore:\s*\[main\]/);
     expect(tests).toContain('workflow_dispatch:');

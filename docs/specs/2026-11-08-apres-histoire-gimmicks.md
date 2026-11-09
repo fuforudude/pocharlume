@@ -1,6 +1,6 @@
 # Après l'histoire : 50 niveaux à gimmicks (régions 11 à 15)
 
-Statut : validée le 2026-11-08
+Statut : en cours, jalon 1 (région 11) livré le 2026-11-09
 Date : 2026-11-08
 
 ## Besoin
@@ -67,28 +67,28 @@ jalons 2 à 5 y ajouteront leur section après leur entretien.
 ## Jalon 1 : base commune et région 11 « Les Grèves Grises » (nom proposé, à retoucher)
 
 ### Critères d'acceptation
-- [ ] Le niveau 100 gagné ouvre la région 11 ; la carte du monde montre les régions 11 à 15 (onglets), 12 à 15 verrouillées tant que
+- [x] Le niveau 100 gagné ouvre la région 11 ; la carte du monde montre les régions 11 à 15 (onglets), 12 à 15 verrouillées tant que
   la précédente n'est pas finie ; la sauvegarde accepte les niveaux jusqu'à 150 et les régions jusqu'à 15 (tests de validation et de
   migration si le format change).
-- [ ] Braises : un niveau ≥ 101 rapporte 15 / +30 (5e du bloc) / +6 (3 étoiles) / 12 (défi) ; les niveaux 1 à 100 rapportent comme avant
+- [x] Braises : un niveau ≥ 101 rapporte 15 / +30 (5e du bloc) / +6 (3 étoiles) / 12 (défi) ; les niveaux 1 à 100 rapportent comme avant
   (tests de `meta.ts` et des transactions).
-- [ ] Moteur, Corbeaux : un ennemi apparu dans un couloir avance en ligne droite du bord gauche au bord droit, ignore le chemin, les
+- [x] Moteur, Corbeaux : un ennemi apparu dans un couloir avance en ligne droite du bord gauche au bord droit, ignore le chemin, les
   soldats et ce qui ne vise pas les volants, et retire 1 cœur en sortant à droite ; déterministe au rejeu (tests du moteur).
-- [ ] Moteur, Radeau : 3 places dont la position suit le trajet aller-retour en fonction du seul pas ; construire, améliorer,
+- [x] Moteur, Radeau : 3 places dont la position suit le trajet aller-retour en fonction du seul pas ; construire, améliorer,
   vendre y marche ; une caserne y est refusée (raison dédiée) ; une tour du radeau vise depuis la position courante ; une sauvegarde en
   pleine partie puis reprise redonne le même état (tests du moteur).
-- [ ] Rendu : les couloirs et le panneau d'annonce au bord gauche avant chaque vague (icônes, nombre, couloir) ; le radeau et ses tours
+- [x] Rendu : les couloirs et le panneau d'annonce au bord gauche avant chaque vague (icônes, nombre, couloir) ; le radeau et ses tours
   se déplacent de façon fluide (interpolés entre deux pas) ; bulle sur le panneau et sur le radeau.
-- [ ] Le gimmick est présenté : sur la fiche du niveau (« Particularité : … », une ligne tirée des données) et par une fiche en partie
+- [x] Le gimmick est présenté : sur la fiche du niveau (« Particularité : … », une ligne tirée des données) et par une fiche en partie
   la première fois qu'on le rencontre (comme « Nouvel ennemi », même option pour la couper) ; il figure dans le Bestiaire (onglet ou
   section « Particularités »).
-- [ ] 10 cartes neuves de la région 11 (eau et rivages pour le radeau, bandes dégagées pour les couloirs), décor et ambiance de région,
+- [x] 10 cartes neuves de la région 11 (eau et rivages pour le radeau, bandes dégagées pour les couloirs), décor et ambiance de région,
   lore (nom de région, nom et phrase de chaque niveau) dans `docs/lore.md`, boss inédit au niveau 110 (sprite, capacités pensées pour le
   radeau, phrase de lore, conseils du Bestiaire).
-- [ ] 1 ou 2 cartes de la région 11 dans l'infini, sans gimmick.
-- [ ] Bots : stratégies Corbeaux et Radeau ; `npm run balance` sans écart aux bandes imposées sur la région 11 (Chaton, défis 40–90 %,
+- [x] 1 ou 2 cartes de la région 11 dans l'infini, sans gimmick.
+- [x] Bots : stratégies Corbeaux et Radeau ; `npm run balance` sans écart aux bandes imposées sur la région 11 (Chaton, défis 40–90 %,
   infini) et toujours 0 écart ailleurs ; la CI teste les bandes de la région 11 (matrice du déploiement).
-- [ ] QA navigateur 1280×720 et 740×360 : tout tient, 0 erreur en console.
+- [x] QA navigateur 1280×720 et 740×360 : tout tient, 0 erreur en console.
 
 ### Tâches
 1. **Base commune** (données, sauvegarde, carte du monde) : régions 11–15 dans `meta.ts` en distinguant fin de l'histoire (100) et dernier
@@ -208,6 +208,15 @@ Signalé, sans réglage :
   Charlie à 29 % et Pollen à 39 %. Le héros de Charlie ne tire pas sur les volants ; pour Pollen, la cause n'est pas chiffrée.
 - **Matou de la région 11** (bande suspendue) : 15 écarts au lieu de 17. Le naïf gagne trop (79 et 86 % pour Plume et Pollen), et sa
   courbe de difficulté ne monte pas.
+
+## Livraison du jalon 1 (2026-11-09)
+- Vérification complète verte (lint, types, 182 fichiers de tests dont 10 relancés seuls faute de place sur la machine, build).
+  QA navigateur PC 1280×720 et téléphone 740×360 acceptée, 0 erreur en console.
+- Écarts : le Passeur passe par le chemin nord (décision B) et les bots gagnent le 110 en Matou en le laissant sortir ; le défi
+  Fer a ses facteurs par niveau (décision A) ; le radeau a 3 places en ligne à une case d'écart, trajets recentrés.
+- Remarques de QA laissées en l'état : le total d'étoiles (« sur 330 ») n'est que dans l'infobulle du compteur ; en téléphone,
+  avec la région 11 avancée, le cadrage initial laisse 106 à 108 sous l'en-tête jusqu'à la première sélection ; la bulle du
+  Passeur en partie montre ses PV de difficulté (16 200 en Matou), le Bestiaire ses PV de base (15 000).
 
 ## Impacts
 - Données : `meta.ts` (régions, braises), `Niveau.gimmick`, format des vagues (couloir), ennemis (boss de région), `VERSION_DONNEES`, `VERSION_ETAT`.

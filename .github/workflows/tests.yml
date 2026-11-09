@@ -79,7 +79,7 @@ jobs:
 
   # Passe d'équilibrage, une machine par région : `[equilibrage]` dans le message du commit poussé, ou lancement à la
   # main avec la case cochée. La matrice est la même que celle des bandes de deploiement.yml (vérifié par
-  # tools/ci/workflows.test.ts ; à la fusion du jalon région 11, passer les deux matrices à 11). `npm run balance` n'assemble pas de rapport complet à partir de morceaux : chaque région
+  # tools/ci/workflows.test.ts ; celle de deploiement.yml suit les régions de la campagne, rapport-regions.test.ts). `npm run balance` n'assemble pas de rapport complet à partir de morceaux : chaque région
   # publie ses journaux (mise au point `--niveaux=…`, avec les écarts aux bandes de la région), et le job final les réunit.
   equilibrage:
     name: Équilibrage, région ${{ matrix.region }}
@@ -90,7 +90,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        region: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        region: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
