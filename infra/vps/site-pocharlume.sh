@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
-# Site pocharlume.fr sur le VPS : utilisateur de déploiement, dossier du site, configuration nginx.
+# Site pocharlume.pocharlumetravail.fr sur le VPS : utilisateur de déploiement, dossier du site, configuration nginx.
 # À lancer en root : ssh … 'sudo bash -s' < infra/vps/site-pocharlume.sh. Rejouable sans risque.
-# Deux noms servent le même site : pocharlume.fr (avec www) et travail.pocharlume.fr (pour les réseaux qui
-# bloquent pocharlume.fr), chacun avec son certificat. Tant qu'un nom n'a pas de certificat, il est servi en
+# Deux noms servent le même site : pocharlume.pocharlumetravail.fr et travail.pocharlumetravail.fr (pour les réseaux qui
+# bloquent le premier), chacun avec son certificat. Tant qu'un nom n'a pas de certificat, il est servi en
 # HTTP seul ; une fois le certificat obtenu (voir infra/vps/README.md), relancer ce script passe en HTTPS.
 set -euo pipefail
 
-DOMAINE=pocharlume.fr
+DOMAINE=pocharlume.pocharlumetravail.fr
 RACINE=/var/www/pocharlume
 ACME=/var/www/acme
 CERT=/etc/letsencrypt/live/$DOMAINE
 # Second nom, jamais redirigé vers $DOMAINE : c'est justement lui qui peut être bloqué.
-DOMAINE_TRAVAIL=travail.pocharlume.fr
+DOMAINE_TRAVAIL=travail.pocharlumetravail.fr
 CERT_TRAVAIL=/etc/letsencrypt/live/$DOMAINE_TRAVAIL
 # Mot de passe d'accès au site (des robots récupéraient la page). Il n'existe que dans la configuration nginx :
 # jamais dans du code envoyé au navigateur. Pour le changer : modifier cette ligne et relancer le script.
@@ -187,19 +187,9 @@ if [ -e "$CERT/fullchain.pem" ]; then
 server {
     listen 80;
     listen [::]:80;
-    server_name $DOMAINE www.$DOMAINE;
+    server_name $DOMAINE;
     include snippets/pocharlume-acme.conf;
     location / { return 301 https://$DOMAINE\$request_uri; }
-}
-server {
-    listen 443 ssl;
-    listen [::]:443 ssl;
-    http2 on;
-    server_name www.$DOMAINE;
-    ssl_certificate $CERT/fullchain.pem;
-    ssl_certificate_key $CERT/privkey.pem;
-    include snippets/pocharlume-tls.conf;
-    return 301 https://$DOMAINE\$request_uri;
 }
 server {
     listen 443 ssl;
@@ -218,7 +208,7 @@ else
 server {
     listen 80;
     listen [::]:80;
-    server_name $DOMAINE www.$DOMAINE;
+    server_name $DOMAINE;
     include snippets/pocharlume-acme.conf;
 $SITE
 }
@@ -257,6 +247,21 @@ $SITE
 }
 EOF
 fi
+# Tout nom que personne ne revendique (apex, ancien domaine non redirigé) est coupé net, au lieu de tomber sur le premier site.
+cat >> "$CONF" <<'EOF'
+server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    server_name _;
+    return 444;
+}
+server {
+    listen 443 ssl default_server;
+    listen [::]:443 ssl default_server;
+    server_name _;
+    ssl_reject_handshake on;
+}
+EOF
 ecrire /etc/nginx/sites-available/pocharlume < "$CONF"
 rm -f "$CONF"
 ln -sf /etc/nginx/sites-available/pocharlume /etc/nginx/sites-enabled/pocharlume

@@ -1,0 +1,38 @@
+/* Écran de secours « Notes » : un éditeur de texte sobre, clair, qui recouvre le jeu. */
+#app[hidden] { display: none !important; }
+.notes {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  color: #1f2328;
+  font: 16px/1.55 system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+.notes[hidden] { display: none; }
+.notes-barre {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 10px 20px;
+  border-bottom: 1px solid #d8dce2;
+  background: #f6f8fa;
+  font-size: 14px;
+  color: #59636e;
+}
+.notes-barre b { color: #1f2328; font-weight: 600; }
+.notes-texte {
+  flex: 1;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 20px;
+  border: 0;
+  outline: none;
+  resize: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
