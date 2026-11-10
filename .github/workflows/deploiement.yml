@@ -62,7 +62,7 @@ jobs:
           BANDES_REGIONS: ${{ matrix.region }}
         run: npx vitest run $BANDES
 
-  # Le site sur le VPS (pocharlume.fr). La clé ne peut que synchroniser /var/www/pocharlume (rrsync côté serveur,
+  # Le site sur le VPS (pocharlume.pocharlumetravail.fr). La clé ne peut que synchroniser /var/www/pocharlume (rrsync côté serveur,
   # voir infra/vps/site-pocharlume.sh) ; l'empreinte du serveur est vérifiée (ED25519 SHA256:DEhyO4…8Pts).
   # Le secret VPS_DEPLOY_KEY est rangé dans l'environnement `production`, réservé à main (infra/vps/README.md) : un
   # workflow de branche ne peut pas le lire. Tant que l'environnement n'existe pas, GitHub le crée sans règle au premier

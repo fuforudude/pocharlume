@@ -7,6 +7,7 @@ import './ui/style-inscriptions.css';
 import './ui/style-bestiaire.css';
 import './ui/style-bulles.css';
 import './ui/style-indications.css';
+import './ui/style-notes.css';
 import { installerAudio } from './audio';
 import { DEFS_META } from './data/heros';
 import { REGION1 } from './data/niveaux/region1';
@@ -30,6 +31,7 @@ import { configDeRelance, configDuChoix, configInfini, debiterAuLancement, nouve
 import { choixJouable } from './ui/meta-vues';
 import { NIVEAU_CAMPAGNE_TEST } from './ui/niveau-test';
 import { installerIndicationsClavier } from './ui/indications-clavier';
+import { installerNotes } from './ui/notes';
 import { afficherOptions } from './ui/options';
 import { lancerNiveau, graineSuivante, type PartieEnCours, type ResultatPartie, type RetourFin } from './ui/partie';
 import { texteRefusMeta } from './ui/raisons-meta';
@@ -39,6 +41,8 @@ import { particulariteAMontrer } from './ui/particularites';
 const conteneur = document.querySelector<HTMLElement>('#app');
 if (!conteneur) throw new Error('Conteneur #app introuvable');
 const app: HTMLElement = conteneur;
+// L'éditeur de notes s'affiche d'abord : le jeu se prépare dessous, la touche de secours bascule de l'un à l'autre.
+installerNotes(app);
 
 let session: Session;
 let carteOuverte: EcranCarteMonde | null = null;

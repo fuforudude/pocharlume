@@ -38,6 +38,7 @@ import { cleParoleBoss } from './parole-boss';
 import { texteRefus } from './refus';
 import { statueTouchee } from './statue';
 import { el } from './dom';
+import { EVENEMENT_SECOURS } from './notes';
 
 /** Résultat d'une partie terminée, transmis à `surFin` (étoiles, vies, journal pour une future vérification). */
 export interface ResultatPartie {
@@ -612,6 +613,10 @@ export async function lancerNiveau(
 
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) definirPause(true);
+  }, { signal });
+  // L'éditeur de notes (touche de secours) recouvre le jeu : la partie s'arrête.
+  document.addEventListener(EVENEMENT_SECOURS, (e) => {
+    if ((e as CustomEvent<{ notes: boolean }>).detail.notes) definirPause(true);
   }, { signal });
   window.addEventListener('blur', () => {
     gestes.reinitialiser();

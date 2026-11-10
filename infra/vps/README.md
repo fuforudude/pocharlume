@@ -1,8 +1,8 @@
-# VPS de pocharlume.fr
+# VPS de pocharlumetravail.fr
 
 VPS OVH sous Ubuntu 26.04 LTS : IPv4 `145.239.83.184`, IPv6 `2001:41d0:601:1100::8457`.
-Domaine `pocharlume.fr` chez OVH : `@` A et AAAA vers le VPS, `www` en CNAME vers `pocharlume.fr.`
-Second nom du même site : `travail.pocharlume.fr` (A et AAAA vers le VPS), pour les réseaux qui bloquent `pocharlume.fr`.
+Domaine `pocharlumetravail.fr` chez OVH (le jeu est sur `pocharlume.pocharlumetravail.fr` : A et AAAA vers le VPS). L'ancien domaine `pocharlume.fr` ne sert plus que de redirection (`taches/infra/vps/redirection-ancien-domaine.sh`).
+Second nom du même site : `travail.pocharlumetravail.fr` (A et AAAA vers le VPS), pour les réseaux qui bloquent `pocharlume.pocharlumetravail.fr`.
 
 Le serveur ne se configure jamais à la main : tout passe par les scripts de ce dossier, rejouables sans risque.
 
@@ -10,7 +10,7 @@ Le serveur ne se configure jamais à la main : tout passe par les scripts de ce 
 |---|---|
 | `securiser.sh` | SSH par clé seulement (pas de root), pare-feu (SSH limité, HTTP, HTTPS), fail2ban, mises à jour de sécurité automatiques avec redémarrage à 04:30, nginx et certbot. |
 | `runner-github.sh` | Runner GitHub Actions auto-hébergé (relais des tests distants quand le quota de minutes passe sous 10 %) : utilisateur `ghrunner` sans sudo ni shell, agent `actions/runner` épinglé et vérifié (SHA-256), extrait par root hors de portée de `ghrunner`, sans Node système (`setup-node` le fournit). Service systemd `github-runner` cloisonné (ni boucle locale ni réseaux privés, dossiers des autres services invisibles, aucune capacité) et en priorité basse (`CPUWeight=idle`, débit disque borné, 4 cœurs, `MemoryMax=4G` sans swap, purge du disque en fin de job). N'enregistre pas le runner : voir « Tests distants ». |
-| `site-pocharlume.sh` | Utilisateur `deploy`, dossier `/var/www/pocharlume`, nginx (HTTPS, redirections vers `https://pocharlume.fr`, en-têtes de sécurité, cache), et le même site sous `travail.pocharlume.fr` (son propre certificat, redirection HTTP vers son propre HTTPS, jamais vers `pocharlume.fr`). Pose aussi le mot de passe d'accès (voir plus bas). |
+| `site-pocharlume.sh` | Utilisateur `deploy`, dossier `/var/www/pocharlume`, nginx (HTTPS, redirections vers `https://pocharlume.pocharlumetravail.fr`, en-têtes de sécurité, cache), et le même site sous `travail.pocharlumetravail.fr` (son propre certificat, redirection HTTP vers son propre HTTPS, jamais vers `pocharlume.pocharlumetravail.fr`). Pose aussi le mot de passe d'accès (voir plus bas). |
 | `verifier-acces.sh` | Contrôle, depuis le VPS, que le mot de passe protège bien les deux domaines (`bash -s` en SSH, voir plus bas). |
 
 ```bash
@@ -36,25 +36,25 @@ Let's Encrypt, sans e-mail, obtenu par la méthode webroot (`/var/www/acme`) : c
 configuration nginx. Renouvellement automatique par `certbot.timer`, qui recharge nginx. Première demande :
 
 ```bash
-sudo certbot certonly --webroot -w /var/www/acme -d pocharlume.fr -d www.pocharlume.fr \
+sudo certbot certonly --webroot -w /var/www/acme -d pocharlume.pocharlumetravail.fr \
   --non-interactive --agree-tos --register-unsafely-without-email --deploy-hook "systemctl reload nginx"
 ```
 
 puis relancer `site-pocharlume.sh`, qui passe alors en HTTPS.
 
-Le nom `travail.pocharlume.fr` a son propre certificat (`/etc/letsencrypt/live/travail.pocharlume.fr`), demandé de la même
-façon, sans toucher à celui de `pocharlume.fr` :
+Le nom `travail.pocharlumetravail.fr` a son propre certificat (`/etc/letsencrypt/live/travail.pocharlumetravail.fr`), demandé de la même
+façon, sans toucher à celui de `pocharlume.pocharlumetravail.fr` :
 
 ```bash
-sudo certbot certonly --webroot -w /var/www/acme -d travail.pocharlume.fr   --non-interactive --agree-tos --register-unsafely-without-email --deploy-hook "systemctl reload nginx"
+sudo certbot certonly --webroot -w /var/www/acme -d travail.pocharlumetravail.fr   --non-interactive --agree-tos --register-unsafely-without-email --deploy-hook "systemctl reload nginx"
 ```
 
-Le script sert chaque nom indépendamment : sans certificat, `travail.pocharlume.fr` est en HTTP seul (qui sert le défi
+Le script sert chaque nom indépendamment : sans certificat, `travail.pocharlumetravail.fr` est en HTTP seul (qui sert le défi
 ACME) ; une fois le certificat obtenu, relancer `site-pocharlume.sh` passe en HTTPS. Les sauvegardes (`localStorage`,
-IndexedDB) sont propres à chaque origine : une partie commencée sur `pocharlume.fr` n'apparaît pas sur `travail.pocharlume.fr`.
+IndexedDB) sont propres à chaque origine : une partie commencée sur `pocharlume.pocharlumetravail.fr` n'apparaît pas sur `travail.pocharlumetravail.fr`.
 
 ## Mot de passe d'accès
-Des robots récupéraient la page du jeu : tout le site, sur `pocharlume.fr` comme sur `travail.pocharlume.fr`, est derrière
+Des robots récupéraient la page du jeu : tout le site, sur `pocharlume.pocharlumetravail.fr` comme sur `travail.pocharlumetravail.fr`, est derrière
 un mot de passe fixe, vérifié par nginx. Sans le bon cookie, nginx n'envoie que la page de connexion (statut 401) :
 jamais `index.html`, ni `/assets/`, ni les sprites ou les sons. Restent publics : `/.well-known/acme-challenge/` (en HTTP,
 pour Let's Encrypt), `/robots.txt` (`Disallow: /`) et `/__acces/` (les fichiers de la page de connexion).

@@ -25,7 +25,7 @@ verifier() {
   rm -f /tmp/acces-corps.$$
 }
 
-for d in pocharlume.fr travail.pocharlume.fr; do
+for d in pocharlume.pocharlumetravail.fr travail.pocharlumetravail.fr; do
   # Le jeu : repère le point de montage de index.html, présent seulement dans le vrai jeu.
   MARQUE=$(grep -o '<title>[^<]*</title>' "$RACINE/index.html" | head -1)
   verifier 'sans cookie : page de connexion' 401 oui 'Mot de passe' "$d" /
@@ -42,12 +42,12 @@ done
 
 # Les défis Let's Encrypt restent publics (en HTTP) : un 404 nginx, pas la page de connexion.
 mkdir -p /var/www/acme/.well-known/acme-challenge 2>/dev/null
-for d in pocharlume.fr travail.pocharlume.fr; do
+for d in pocharlume.pocharlumetravail.fr travail.pocharlumetravail.fr; do
   code=$(curl -s -o /dev/null -w '%{http_code}' --resolve "$d:80:127.0.0.1" "http://$d/.well-known/acme-challenge/absent")
   if [ "$code" = 404 ]; then echo "OK   $d acme-challenge -> 404 (pas de mot de passe)"; else echo "ECHEC $d acme-challenge -> $code (attendu 404)"; ECHECS=$((ECHECS + 1)); fi
 done
 # Redirection HTTP -> HTTPS inchangée
-for d in pocharlume.fr travail.pocharlume.fr; do
+for d in pocharlume.pocharlumetravail.fr travail.pocharlumetravail.fr; do
   loc=$(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' --resolve "$d:80:127.0.0.1" "http://$d/x")
   echo "INFO $d http://$d/x -> $loc"
 done

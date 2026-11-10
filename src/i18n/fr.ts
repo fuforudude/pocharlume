@@ -21,6 +21,11 @@ import { frNiveaux } from './fr-niveaux';
 export const fr = {
   'jeu.titre': 'Pocharlume',
 
+  // Écran de secours (éditeur de notes)
+  'notes.titre': 'Notes',
+  'notes.enregistre': 'Enregistré dans ce navigateur',
+  'notes.vide': 'Écrivez ici…',
+
   // Difficultés
   'difficulte.chaton': 'Chaton',
   'difficulte.matou': 'Matou',
