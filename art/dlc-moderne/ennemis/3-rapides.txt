@@ -233,50 +233,49 @@ calque blesse-1 3 22
 G.1.................G.1
 
 calque mort-0 1 16
-............u
-...........uUu
-............u
+..............u
+.............uUu
+..............u
 .
 _
 ._
 
-calque mort-1 11 9
-......k
+calque mort-1 13 9
+....k
 .
-......_
+...._
 .
-......1
+....1
 ..u
 .uuu
 uuUuu
 .uuu
-..ukkkk
-...aaaa
-...AA
-...GGGG
-...pkkk
-...____
+.kukk
+.aaaa
+.AA
+.GGGG
+.pkkk
+.____
 
 calque mort-2 6 7
 ..____
 ._kkkk_......____
-....1Uk_...__kkkk_
-....UUU.....k..11k
-.k3UUvUU...k
-._kSUUU.....111444
-_1...U._..._kSSSk_
-......u.u...1.....__
-.....u.U.u
-12222.U.U.........2S
-.....u.U.u..222222
-.1....u.u..1....._
+....11kU...__kkkk_
+......UUU...k..11k
+.k314UUvUU.k
+._kSSSUUU...111444
+_1.....U..._kSSSk_
+.......2u.u.1.....__
+......2u.U.u
+122222..U.U.......2S
+......_u.U.u222222
+.1......u.u1....._
 
-calque mort-3 8 2
+calque mort-3 10 3
+....UU
+....U.UU
+......U
 .....U
-....U.U
-....U.U
-....U
-.
 ...U
 .UUUUU
 .UvvvU
@@ -284,51 +283,50 @@ UUvvvUU
 ..v.v
 .U...U
 .
-....2..u
-...2.uU.u
-...2u..Uu
-...1.uU.u
-....1..u
+...._..u
+..._.uU.u
+..._u..Uu
+..._.uU.u
+....k..u
 
-calque mort-4 7 0
-...U
-.UUU.U
-.Uvv.U_
-U.vvv_U_
-.U....._
-.U..U
-...U
+calque mort-4 9 1
+.U.UUU
+.U.vv
+UUv.v_
+...vv..__
+..UUU.._
+...U.._
 .....UU
 ..k.vvvU
 ......vvU
-.3....vvU
+.4....vvU
 ......vvU
 ..S.vvvU
 .....UU
-......2._
-.....2.u._
+......_.1
+....._.u.2
 ......u.u
-....._.u._
-......k.k
+....._.u.2
+......k.1
 
-calque mort-5 8 2
-.U...U
-..vvvU
-U...v.U
-.U.v
-.UUUUU
-...U
+calque mort-5 11 2
+..U
+Uvvv
+.v.v
+U..v
+UUUUU
+..U
 .
-...1UUU
-..44..UU
-.14UvvvU
-..SS.v.U
-...2UUU
-....22_
-...22u
-...2_u
-...1_u
-....1kk
+.._UUU
+.4k.vUU
+44Uvvv
+.k._vUU
+.._UUU
+...___
+..__u
+..__u
+..__u
+...kkk
 
 anim repos 180
 cadre pose
