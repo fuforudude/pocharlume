@@ -4,6 +4,8 @@
 //   <id>.png et <id>-original.png                           la pose de repos (premier cadre) ;
 //   <id>--<animation>.gif et <id>--<animation>-original.gif chaque animation, à sa cadence, en boucle (une animation
 //                                                           jouée une fois finit sur une courte pause) ;
+//   <id>--<animation>-miroir.gif                            skin à tireur : repos et attaque avec le tireur retourné,
+//                                                           comme en jeu quand la cible est à gauche ;
 // puis l'index docs/dlc-moderne/index.json, et la liste des écarts d'animations avec les originaux.
 // La planche des tours se compose ensuite avec : python tools/dlc/planche.py tour docs/dlc-moderne/planche-tours.png
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
@@ -60,8 +62,9 @@ const index = apercus.map((a) => {
   const animations = a.animations.map((an) => {
     const gif = ecrireGif(an.skin, `${id}--${an.nom}.gif`);
     const gifOriginal = ecrireGif(an.original, `${id}--${an.nom}-original.gif`);
-    gifs += (gif ? 1 : 0) + (gifOriginal ? 1 : 0);
-    return { nom: an.nom, boucle: (an.skin ?? an.original)?.boucle ?? true, gif, gifOriginal };
+    const gifMiroir = ecrireGif(an.miroir, `${id}--${an.nom}-miroir.gif`);
+    gifs += (gif ? 1 : 0) + (gifOriginal ? 1 : 0) + (gifMiroir ? 1 : 0);
+    return { nom: an.nom, boucle: (an.skin ?? an.original)?.boucle ?? true, gif, gifOriginal, gifMiroir };
   });
   return {
     id,

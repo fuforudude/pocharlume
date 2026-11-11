@@ -15,31 +15,36 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-gendarme--repos.gif",
-     "gifOriginal": "apercus/moderne-gendarme--repos-original.gif"
+     "gifOriginal": "apercus/moderne-gendarme--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "marche",
      "boucle": true,
      "gif": "apercus/moderne-gendarme--marche.gif",
-     "gifOriginal": "apercus/moderne-gendarme--marche-original.gif"
+     "gifOriginal": "apercus/moderne-gendarme--marche-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-gendarme--attaque.gif",
-     "gifOriginal": "apercus/moderne-gendarme--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-gendarme--attaque-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "blesse",
      "boucle": false,
      "gif": "apercus/moderne-gendarme--blesse.gif",
-     "gifOriginal": "apercus/moderne-gendarme--blesse-original.gif"
+     "gifOriginal": "apercus/moderne-gendarme--blesse-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
      "gif": "apercus/moderne-gendarme--mort.gif",
-     "gifOriginal": "apercus/moderne-gendarme--mort-original.gif"
+     "gifOriginal": "apercus/moderne-gendarme--mort-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -57,31 +62,36 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-crs--repos.gif",
-     "gifOriginal": "apercus/moderne-crs--repos-original.gif"
+     "gifOriginal": "apercus/moderne-crs--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "marche",
      "boucle": true,
      "gif": "apercus/moderne-crs--marche.gif",
-     "gifOriginal": "apercus/moderne-crs--marche-original.gif"
+     "gifOriginal": "apercus/moderne-crs--marche-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-crs--attaque.gif",
-     "gifOriginal": "apercus/moderne-crs--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-crs--attaque-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "blesse",
      "boucle": false,
      "gif": "apercus/moderne-crs--blesse.gif",
-     "gifOriginal": "apercus/moderne-crs--blesse-original.gif"
+     "gifOriginal": "apercus/moderne-crs--blesse-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
      "gif": "apercus/moderne-crs--mort.gif",
-     "gifOriginal": "apercus/moderne-crs--mort-original.gif"
+     "gifOriginal": "apercus/moderne-crs--mort-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -99,31 +109,36 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-gendarme-mobile--repos.gif",
-     "gifOriginal": "apercus/moderne-gendarme-mobile--repos-original.gif"
+     "gifOriginal": "apercus/moderne-gendarme-mobile--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "marche",
      "boucle": true,
      "gif": "apercus/moderne-gendarme-mobile--marche.gif",
-     "gifOriginal": "apercus/moderne-gendarme-mobile--marche-original.gif"
+     "gifOriginal": "apercus/moderne-gendarme-mobile--marche-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-gendarme-mobile--attaque.gif",
-     "gifOriginal": "apercus/moderne-gendarme-mobile--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-gendarme-mobile--attaque-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "blesse",
      "boucle": false,
      "gif": "apercus/moderne-gendarme-mobile--blesse.gif",
-     "gifOriginal": "apercus/moderne-gendarme-mobile--blesse-original.gif"
+     "gifOriginal": "apercus/moderne-gendarme-mobile--blesse-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
      "gif": "apercus/moderne-gendarme-mobile--mort.gif",
-     "gifOriginal": "apercus/moderne-gendarme-mobile--mort-original.gif"
+     "gifOriginal": "apercus/moderne-gendarme-mobile--mort-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -141,31 +156,36 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-bouclier-anti-emeute--repos.gif",
-     "gifOriginal": "apercus/moderne-bouclier-anti-emeute--repos-original.gif"
+     "gifOriginal": "apercus/moderne-bouclier-anti-emeute--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "marche",
      "boucle": true,
      "gif": "apercus/moderne-bouclier-anti-emeute--marche.gif",
-     "gifOriginal": "apercus/moderne-bouclier-anti-emeute--marche-original.gif"
+     "gifOriginal": "apercus/moderne-bouclier-anti-emeute--marche-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-bouclier-anti-emeute--attaque.gif",
-     "gifOriginal": "apercus/moderne-bouclier-anti-emeute--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-bouclier-anti-emeute--attaque-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "blesse",
      "boucle": false,
      "gif": "apercus/moderne-bouclier-anti-emeute--blesse.gif",
-     "gifOriginal": "apercus/moderne-bouclier-anti-emeute--blesse-original.gif"
+     "gifOriginal": "apercus/moderne-bouclier-anti-emeute--blesse-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
      "gif": "apercus/moderne-bouclier-anti-emeute--mort.gif",
-     "gifOriginal": "apercus/moderne-bouclier-anti-emeute--mort-original.gif"
+     "gifOriginal": "apercus/moderne-bouclier-anti-emeute--mort-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -183,31 +203,36 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-tireur-lbd--repos.gif",
-     "gifOriginal": "apercus/moderne-tireur-lbd--repos-original.gif"
+     "gifOriginal": "apercus/moderne-tireur-lbd--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "marche",
      "boucle": true,
      "gif": "apercus/moderne-tireur-lbd--marche.gif",
-     "gifOriginal": "apercus/moderne-tireur-lbd--marche-original.gif"
+     "gifOriginal": "apercus/moderne-tireur-lbd--marche-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-tireur-lbd--attaque.gif",
-     "gifOriginal": "apercus/moderne-tireur-lbd--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-tireur-lbd--attaque-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "blesse",
      "boucle": false,
      "gif": "apercus/moderne-tireur-lbd--blesse.gif",
-     "gifOriginal": "apercus/moderne-tireur-lbd--blesse-original.gif"
+     "gifOriginal": "apercus/moderne-tireur-lbd--blesse-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
      "gif": "apercus/moderne-tireur-lbd--mort.gif",
-     "gifOriginal": "apercus/moderne-tireur-lbd--mort-original.gif"
+     "gifOriginal": "apercus/moderne-tireur-lbd--mort-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -225,31 +250,36 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-grenadier-lacrymo--repos.gif",
-     "gifOriginal": "apercus/moderne-grenadier-lacrymo--repos-original.gif"
+     "gifOriginal": "apercus/moderne-grenadier-lacrymo--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "marche",
      "boucle": true,
      "gif": "apercus/moderne-grenadier-lacrymo--marche.gif",
-     "gifOriginal": "apercus/moderne-grenadier-lacrymo--marche-original.gif"
+     "gifOriginal": "apercus/moderne-grenadier-lacrymo--marche-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-grenadier-lacrymo--attaque.gif",
-     "gifOriginal": "apercus/moderne-grenadier-lacrymo--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-grenadier-lacrymo--attaque-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "blesse",
      "boucle": false,
      "gif": "apercus/moderne-grenadier-lacrymo--blesse.gif",
-     "gifOriginal": "apercus/moderne-grenadier-lacrymo--blesse-original.gif"
+     "gifOriginal": "apercus/moderne-grenadier-lacrymo--blesse-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
      "gif": "apercus/moderne-grenadier-lacrymo--mort.gif",
-     "gifOriginal": "apercus/moderne-grenadier-lacrymo--mort-original.gif"
+     "gifOriginal": "apercus/moderne-grenadier-lacrymo--mort-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -267,31 +297,36 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-bac--repos.gif",
-     "gifOriginal": "apercus/moderne-bac--repos-original.gif"
+     "gifOriginal": "apercus/moderne-bac--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "marche",
      "boucle": true,
      "gif": "apercus/moderne-bac--marche.gif",
-     "gifOriginal": "apercus/moderne-bac--marche-original.gif"
+     "gifOriginal": "apercus/moderne-bac--marche-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-bac--attaque.gif",
-     "gifOriginal": "apercus/moderne-bac--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-bac--attaque-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "blesse",
      "boucle": false,
      "gif": "apercus/moderne-bac--blesse.gif",
-     "gifOriginal": "apercus/moderne-bac--blesse-original.gif"
+     "gifOriginal": "apercus/moderne-bac--blesse-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
      "gif": "apercus/moderne-bac--mort.gif",
-     "gifOriginal": "apercus/moderne-bac--mort-original.gif"
+     "gifOriginal": "apercus/moderne-bac--mort-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -309,31 +344,36 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-commissaire--repos.gif",
-     "gifOriginal": "apercus/moderne-commissaire--repos-original.gif"
+     "gifOriginal": "apercus/moderne-commissaire--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "marche",
      "boucle": true,
      "gif": "apercus/moderne-commissaire--marche.gif",
-     "gifOriginal": "apercus/moderne-commissaire--marche-original.gif"
+     "gifOriginal": "apercus/moderne-commissaire--marche-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-commissaire--attaque.gif",
-     "gifOriginal": "apercus/moderne-commissaire--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-commissaire--attaque-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "blesse",
      "boucle": false,
      "gif": "apercus/moderne-commissaire--blesse.gif",
-     "gifOriginal": "apercus/moderne-commissaire--blesse-original.gif"
+     "gifOriginal": "apercus/moderne-commissaire--blesse-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
      "gif": "apercus/moderne-commissaire--mort.gif",
-     "gifOriginal": "apercus/moderne-commissaire--mort-original.gif"
+     "gifOriginal": "apercus/moderne-commissaire--mort-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -351,31 +391,36 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-bravm--repos.gif",
-     "gifOriginal": "apercus/moderne-bravm--repos-original.gif"
+     "gifOriginal": "apercus/moderne-bravm--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "marche",
      "boucle": true,
      "gif": "apercus/moderne-bravm--marche.gif",
-     "gifOriginal": "apercus/moderne-bravm--marche-original.gif"
+     "gifOriginal": "apercus/moderne-bravm--marche-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-bravm--attaque.gif",
-     "gifOriginal": "apercus/moderne-bravm--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-bravm--attaque-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "blesse",
      "boucle": false,
      "gif": "apercus/moderne-bravm--blesse.gif",
-     "gifOriginal": "apercus/moderne-bravm--blesse-original.gif"
+     "gifOriginal": "apercus/moderne-bravm--blesse-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
      "gif": "apercus/moderne-bravm--mort.gif",
-     "gifOriginal": "apercus/moderne-bravm--mort-original.gif"
+     "gifOriginal": "apercus/moderne-bravm--mort-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -393,31 +438,36 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-cavalier-monte--repos.gif",
-     "gifOriginal": "apercus/moderne-cavalier-monte--repos-original.gif"
+     "gifOriginal": "apercus/moderne-cavalier-monte--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "marche",
      "boucle": true,
      "gif": "apercus/moderne-cavalier-monte--marche.gif",
-     "gifOriginal": "apercus/moderne-cavalier-monte--marche-original.gif"
+     "gifOriginal": "apercus/moderne-cavalier-monte--marche-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-cavalier-monte--attaque.gif",
-     "gifOriginal": "apercus/moderne-cavalier-monte--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-cavalier-monte--attaque-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "blesse",
      "boucle": false,
      "gif": "apercus/moderne-cavalier-monte--blesse.gif",
-     "gifOriginal": "apercus/moderne-cavalier-monte--blesse-original.gif"
+     "gifOriginal": "apercus/moderne-cavalier-monte--blesse-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
      "gif": "apercus/moderne-cavalier-monte--mort.gif",
-     "gifOriginal": "apercus/moderne-cavalier-monte--mort-original.gif"
+     "gifOriginal": "apercus/moderne-cavalier-monte--mort-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -435,31 +485,36 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-drone--repos.gif",
-     "gifOriginal": "apercus/moderne-drone--repos-original.gif"
+     "gifOriginal": "apercus/moderne-drone--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "marche",
      "boucle": true,
      "gif": "apercus/moderne-drone--marche.gif",
-     "gifOriginal": "apercus/moderne-drone--marche-original.gif"
+     "gifOriginal": "apercus/moderne-drone--marche-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-drone--attaque.gif",
-     "gifOriginal": "apercus/moderne-drone--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-drone--attaque-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "blesse",
      "boucle": false,
      "gif": "apercus/moderne-drone--blesse.gif",
-     "gifOriginal": "apercus/moderne-drone--blesse-original.gif"
+     "gifOriginal": "apercus/moderne-drone--blesse-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
      "gif": "apercus/moderne-drone--mort.gif",
-     "gifOriginal": "apercus/moderne-drone--mort-original.gif"
+     "gifOriginal": "apercus/moderne-drone--mort-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -477,31 +532,36 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-helicoptere--repos.gif",
-     "gifOriginal": "apercus/moderne-helicoptere--repos-original.gif"
+     "gifOriginal": "apercus/moderne-helicoptere--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "marche",
      "boucle": true,
      "gif": "apercus/moderne-helicoptere--marche.gif",
-     "gifOriginal": "apercus/moderne-helicoptere--marche-original.gif"
+     "gifOriginal": "apercus/moderne-helicoptere--marche-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-helicoptere--attaque.gif",
-     "gifOriginal": "apercus/moderne-helicoptere--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-helicoptere--attaque-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "blesse",
      "boucle": false,
      "gif": "apercus/moderne-helicoptere--blesse.gif",
-     "gifOriginal": "apercus/moderne-helicoptere--blesse-original.gif"
+     "gifOriginal": "apercus/moderne-helicoptere--blesse-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
      "gif": "apercus/moderne-helicoptere--mort.gif",
-     "gifOriginal": "apercus/moderne-helicoptere--mort-original.gif"
+     "gifOriginal": "apercus/moderne-helicoptere--mort-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -519,31 +579,36 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-canon-a-eau--repos.gif",
-     "gifOriginal": "apercus/moderne-canon-a-eau--repos-original.gif"
+     "gifOriginal": "apercus/moderne-canon-a-eau--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "marche",
      "boucle": true,
      "gif": "apercus/moderne-canon-a-eau--marche.gif",
-     "gifOriginal": "apercus/moderne-canon-a-eau--marche-original.gif"
+     "gifOriginal": "apercus/moderne-canon-a-eau--marche-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-canon-a-eau--attaque.gif",
-     "gifOriginal": "apercus/moderne-canon-a-eau--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-canon-a-eau--attaque-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "blesse",
      "boucle": false,
      "gif": "apercus/moderne-canon-a-eau--blesse.gif",
-     "gifOriginal": "apercus/moderne-canon-a-eau--blesse-original.gif"
+     "gifOriginal": "apercus/moderne-canon-a-eau--blesse-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
      "gif": "apercus/moderne-canon-a-eau--mort.gif",
-     "gifOriginal": "apercus/moderne-canon-a-eau--mort-original.gif"
+     "gifOriginal": "apercus/moderne-canon-a-eau--mort-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -561,31 +626,36 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-centaure--repos.gif",
-     "gifOriginal": "apercus/moderne-centaure--repos-original.gif"
+     "gifOriginal": "apercus/moderne-centaure--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "marche",
      "boucle": true,
      "gif": "apercus/moderne-centaure--marche.gif",
-     "gifOriginal": "apercus/moderne-centaure--marche-original.gif"
+     "gifOriginal": "apercus/moderne-centaure--marche-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-centaure--attaque.gif",
-     "gifOriginal": "apercus/moderne-centaure--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-centaure--attaque-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "blesse",
      "boucle": false,
      "gif": "apercus/moderne-centaure--blesse.gif",
-     "gifOriginal": "apercus/moderne-centaure--blesse-original.gif"
+     "gifOriginal": "apercus/moderne-centaure--blesse-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
      "gif": "apercus/moderne-centaure--mort.gif",
-     "gifOriginal": "apercus/moderne-centaure--mort-original.gif"
+     "gifOriginal": "apercus/moderne-centaure--mort-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -603,31 +673,36 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-prefet--repos.gif",
-     "gifOriginal": "apercus/moderne-prefet--repos-original.gif"
+     "gifOriginal": "apercus/moderne-prefet--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "marche",
      "boucle": true,
      "gif": "apercus/moderne-prefet--marche.gif",
-     "gifOriginal": "apercus/moderne-prefet--marche-original.gif"
+     "gifOriginal": "apercus/moderne-prefet--marche-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-prefet--attaque.gif",
-     "gifOriginal": "apercus/moderne-prefet--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-prefet--attaque-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "blesse",
      "boucle": false,
      "gif": "apercus/moderne-prefet--blesse.gif",
-     "gifOriginal": "apercus/moderne-prefet--blesse-original.gif"
+     "gifOriginal": "apercus/moderne-prefet--blesse-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
      "gif": "apercus/moderne-prefet--mort.gif",
-     "gifOriginal": "apercus/moderne-prefet--mort-original.gif"
+     "gifOriginal": "apercus/moderne-prefet--mort-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -645,13 +720,15 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-caserne-1--repos.gif",
-     "gifOriginal": "apercus/moderne-caserne-1--repos-original.gif"
+     "gifOriginal": "apercus/moderne-caserne-1--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-caserne-1--attaque.gif",
-     "gifOriginal": "apercus/moderne-caserne-1--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-caserne-1--attaque-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -669,13 +746,15 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-caserne-2--repos.gif",
-     "gifOriginal": "apercus/moderne-caserne-2--repos-original.gif"
+     "gifOriginal": "apercus/moderne-caserne-2--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-caserne-2--attaque.gif",
-     "gifOriginal": "apercus/moderne-caserne-2--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-caserne-2--attaque-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -693,13 +772,15 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-caserne-3--repos.gif",
-     "gifOriginal": "apercus/moderne-caserne-3--repos-original.gif"
+     "gifOriginal": "apercus/moderne-caserne-3--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-caserne-3--attaque.gif",
-     "gifOriginal": "apercus/moderne-caserne-3--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-caserne-3--attaque-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -717,13 +798,15 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-caserne-amphi--repos.gif",
-     "gifOriginal": "apercus/moderne-caserne-amphi--repos-original.gif"
+     "gifOriginal": "apercus/moderne-caserne-amphi--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-caserne-amphi--attaque.gif",
-     "gifOriginal": "apercus/moderne-caserne-amphi--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-caserne-amphi--attaque-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -741,13 +824,15 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-caserne-zad--repos.gif",
-     "gifOriginal": "apercus/moderne-caserne-zad--repos-original.gif"
+     "gifOriginal": "apercus/moderne-caserne-zad--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-caserne-zad--attaque.gif",
-     "gifOriginal": "apercus/moderne-caserne-zad--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-caserne-zad--attaque-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -765,31 +850,36 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-tir-1--repos.gif",
-     "gifOriginal": "apercus/moderne-tir-1--repos-original.gif"
+     "gifOriginal": "apercus/moderne-tir-1--repos-original.gif",
+     "gifMiroir": "apercus/moderne-tir-1--repos-miroir.gif"
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-tir-1--attaque.gif",
-     "gifOriginal": "apercus/moderne-tir-1--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-tir-1--attaque-original.gif",
+     "gifMiroir": "apercus/moderne-tir-1--attaque-miroir.gif"
     },
     {
      "nom": "blesse",
      "boucle": false,
      "gif": "apercus/moderne-tir-1--blesse.gif",
-     "gifOriginal": "apercus/moderne-tir-1--blesse-original.gif"
+     "gifOriginal": "apercus/moderne-tir-1--blesse-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
      "gif": "apercus/moderne-tir-1--mort.gif",
-     "gifOriginal": "apercus/moderne-tir-1--mort-original.gif"
+     "gifOriginal": "apercus/moderne-tir-1--mort-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "marche",
      "boucle": true,
      "gif": "apercus/moderne-tir-1--marche.gif",
-     "gifOriginal": "apercus/moderne-tir-1--marche-original.gif"
+     "gifOriginal": "apercus/moderne-tir-1--marche-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -807,31 +897,36 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-tir-2--repos.gif",
-     "gifOriginal": "apercus/moderne-tir-2--repos-original.gif"
+     "gifOriginal": "apercus/moderne-tir-2--repos-original.gif",
+     "gifMiroir": "apercus/moderne-tir-2--repos-miroir.gif"
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-tir-2--attaque.gif",
-     "gifOriginal": "apercus/moderne-tir-2--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-tir-2--attaque-original.gif",
+     "gifMiroir": "apercus/moderne-tir-2--attaque-miroir.gif"
     },
     {
      "nom": "blesse",
      "boucle": false,
      "gif": "apercus/moderne-tir-2--blesse.gif",
-     "gifOriginal": "apercus/moderne-tir-2--blesse-original.gif"
+     "gifOriginal": "apercus/moderne-tir-2--blesse-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
      "gif": "apercus/moderne-tir-2--mort.gif",
-     "gifOriginal": "apercus/moderne-tir-2--mort-original.gif"
+     "gifOriginal": "apercus/moderne-tir-2--mort-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "marche",
      "boucle": true,
      "gif": "apercus/moderne-tir-2--marche.gif",
-     "gifOriginal": "apercus/moderne-tir-2--marche-original.gif"
+     "gifOriginal": "apercus/moderne-tir-2--marche-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -849,31 +944,36 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-tir-3--repos.gif",
-     "gifOriginal": "apercus/moderne-tir-3--repos-original.gif"
+     "gifOriginal": "apercus/moderne-tir-3--repos-original.gif",
+     "gifMiroir": "apercus/moderne-tir-3--repos-miroir.gif"
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-tir-3--attaque.gif",
-     "gifOriginal": "apercus/moderne-tir-3--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-tir-3--attaque-original.gif",
+     "gifMiroir": "apercus/moderne-tir-3--attaque-miroir.gif"
     },
     {
      "nom": "blesse",
      "boucle": false,
      "gif": "apercus/moderne-tir-3--blesse.gif",
-     "gifOriginal": "apercus/moderne-tir-3--blesse-original.gif"
+     "gifOriginal": "apercus/moderne-tir-3--blesse-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
      "gif": "apercus/moderne-tir-3--mort.gif",
-     "gifOriginal": "apercus/moderne-tir-3--mort-original.gif"
+     "gifOriginal": "apercus/moderne-tir-3--mort-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "marche",
      "boucle": true,
      "gif": "apercus/moderne-tir-3--marche.gif",
-     "gifOriginal": "apercus/moderne-tir-3--marche-original.gif"
+     "gifOriginal": "apercus/moderne-tir-3--marche-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -891,31 +991,36 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-tir-vigies--repos.gif",
-     "gifOriginal": "apercus/moderne-tir-vigies--repos-original.gif"
+     "gifOriginal": "apercus/moderne-tir-vigies--repos-original.gif",
+     "gifMiroir": "apercus/moderne-tir-vigies--repos-miroir.gif"
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-tir-vigies--attaque.gif",
-     "gifOriginal": "apercus/moderne-tir-vigies--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-tir-vigies--attaque-original.gif",
+     "gifMiroir": "apercus/moderne-tir-vigies--attaque-miroir.gif"
     },
     {
      "nom": "blesse",
      "boucle": false,
      "gif": "apercus/moderne-tir-vigies--blesse.gif",
-     "gifOriginal": "apercus/moderne-tir-vigies--blesse-original.gif"
+     "gifOriginal": "apercus/moderne-tir-vigies--blesse-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
      "gif": "apercus/moderne-tir-vigies--mort.gif",
-     "gifOriginal": "apercus/moderne-tir-vigies--mort-original.gif"
+     "gifOriginal": "apercus/moderne-tir-vigies--mort-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "marche",
      "boucle": true,
      "gif": "apercus/moderne-tir-vigies--marche.gif",
-     "gifOriginal": "apercus/moderne-tir-vigies--marche-original.gif"
+     "gifOriginal": "apercus/moderne-tir-vigies--marche-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -933,31 +1038,36 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-tir-renvoyeurs--repos.gif",
-     "gifOriginal": "apercus/moderne-tir-renvoyeurs--repos-original.gif"
+     "gifOriginal": "apercus/moderne-tir-renvoyeurs--repos-original.gif",
+     "gifMiroir": "apercus/moderne-tir-renvoyeurs--repos-miroir.gif"
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-tir-renvoyeurs--attaque.gif",
-     "gifOriginal": "apercus/moderne-tir-renvoyeurs--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-tir-renvoyeurs--attaque-original.gif",
+     "gifMiroir": "apercus/moderne-tir-renvoyeurs--attaque-miroir.gif"
     },
     {
      "nom": "blesse",
      "boucle": false,
      "gif": "apercus/moderne-tir-renvoyeurs--blesse.gif",
-     "gifOriginal": "apercus/moderne-tir-renvoyeurs--blesse-original.gif"
+     "gifOriginal": "apercus/moderne-tir-renvoyeurs--blesse-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
      "gif": "apercus/moderne-tir-renvoyeurs--mort.gif",
-     "gifOriginal": "apercus/moderne-tir-renvoyeurs--mort-original.gif"
+     "gifOriginal": "apercus/moderne-tir-renvoyeurs--mort-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "marche",
      "boucle": true,
      "gif": "apercus/moderne-tir-renvoyeurs--marche.gif",
-     "gifOriginal": "apercus/moderne-tir-renvoyeurs--marche-original.gif"
+     "gifOriginal": "apercus/moderne-tir-renvoyeurs--marche-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -975,13 +1085,15 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-magie-1--repos.gif",
-     "gifOriginal": "apercus/moderne-magie-1--repos-original.gif"
+     "gifOriginal": "apercus/moderne-magie-1--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-magie-1--attaque.gif",
-     "gifOriginal": "apercus/moderne-magie-1--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-magie-1--attaque-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -999,13 +1111,15 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-magie-2--repos.gif",
-     "gifOriginal": "apercus/moderne-magie-2--repos-original.gif"
+     "gifOriginal": "apercus/moderne-magie-2--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-magie-2--attaque.gif",
-     "gifOriginal": "apercus/moderne-magie-2--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-magie-2--attaque-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -1023,13 +1137,15 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-magie-3--repos.gif",
-     "gifOriginal": "apercus/moderne-magie-3--repos-original.gif"
+     "gifOriginal": "apercus/moderne-magie-3--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-magie-3--attaque.gif",
-     "gifOriginal": "apercus/moderne-magie-3--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-magie-3--attaque-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -1047,13 +1163,15 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-magie-megaphone--repos.gif",
-     "gifOriginal": "apercus/moderne-magie-megaphone--repos-original.gif"
+     "gifOriginal": "apercus/moderne-magie-megaphone--repos-original.gif",
+     "gifMiroir": "apercus/moderne-magie-megaphone--repos-miroir.gif"
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-magie-megaphone--attaque.gif",
-     "gifOriginal": "apercus/moderne-magie-megaphone--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-magie-megaphone--attaque-original.gif",
+     "gifMiroir": "apercus/moderne-magie-megaphone--attaque-miroir.gif"
     }
    ],
    "complet": true
@@ -1071,13 +1189,15 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-magie-graffeurs--repos.gif",
-     "gifOriginal": "apercus/moderne-magie-graffeurs--repos-original.gif"
+     "gifOriginal": "apercus/moderne-magie-graffeurs--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-magie-graffeurs--attaque.gif",
-     "gifOriginal": "apercus/moderne-magie-graffeurs--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-magie-graffeurs--attaque-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -1095,13 +1215,15 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-artillerie-1--repos.gif",
-     "gifOriginal": "apercus/moderne-artillerie-1--repos-original.gif"
+     "gifOriginal": "apercus/moderne-artillerie-1--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-artillerie-1--attaque.gif",
-     "gifOriginal": "apercus/moderne-artillerie-1--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-artillerie-1--attaque-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -1119,13 +1241,15 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-artillerie-2--repos.gif",
-     "gifOriginal": "apercus/moderne-artillerie-2--repos-original.gif"
+     "gifOriginal": "apercus/moderne-artillerie-2--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-artillerie-2--attaque.gif",
-     "gifOriginal": "apercus/moderne-artillerie-2--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-artillerie-2--attaque-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -1143,13 +1267,15 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-artillerie-3--repos.gif",
-     "gifOriginal": "apercus/moderne-artillerie-3--repos-original.gif"
+     "gifOriginal": "apercus/moderne-artillerie-3--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-artillerie-3--attaque.gif",
-     "gifOriginal": "apercus/moderne-artillerie-3--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-artillerie-3--attaque-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -1167,13 +1293,15 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-artillerie-trebuchet--repos.gif",
-     "gifOriginal": "apercus/moderne-artillerie-trebuchet--repos-original.gif"
+     "gifOriginal": "apercus/moderne-artillerie-trebuchet--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-artillerie-trebuchet--attaque.gif",
-     "gifOriginal": "apercus/moderne-artillerie-trebuchet--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-artillerie-trebuchet--attaque-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -1191,13 +1319,15 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-artillerie-canon-paves--repos.gif",
-     "gifOriginal": "apercus/moderne-artillerie-canon-paves--repos-original.gif"
+     "gifOriginal": "apercus/moderne-artillerie-canon-paves--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-artillerie-canon-paves--attaque.gif",
-     "gifOriginal": "apercus/moderne-artillerie-canon-paves--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-artillerie-canon-paves--attaque-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -1215,13 +1345,15 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-plume--repos.gif",
-     "gifOriginal": "apercus/moderne-plume--repos-original.gif"
+     "gifOriginal": "apercus/moderne-plume--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-plume--attaque.gif",
-     "gifOriginal": "apercus/moderne-plume--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-plume--attaque-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -1239,13 +1371,15 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-charlie--repos.gif",
-     "gifOriginal": "apercus/moderne-charlie--repos-original.gif"
+     "gifOriginal": "apercus/moderne-charlie--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-charlie--attaque.gif",
-     "gifOriginal": "apercus/moderne-charlie--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-charlie--attaque-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true
@@ -1263,13 +1397,15 @@
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-pollen--repos.gif",
-     "gifOriginal": "apercus/moderne-pollen--repos-original.gif"
+     "gifOriginal": "apercus/moderne-pollen--repos-original.gif",
+     "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
      "gif": "apercus/moderne-pollen--attaque.gif",
-     "gifOriginal": "apercus/moderne-pollen--attaque-original.gif"
+     "gifOriginal": "apercus/moderne-pollen--attaque-original.gif",
+     "gifMiroir": null
     }
    ],
    "complet": true

@@ -4,7 +4,7 @@
 #: moderne-magie-1 | Caisse à fumigène | tour-magie-1
 #: moderne-magie-2 | Enceintes | tour-magie-2
 #: moderne-magie-3 | Char sono | tour-magie-3
-#: moderne-magie-megaphone | Mégaphone d'or | tour-magie-oracle
+#: moderne-magie-megaphone + moderne-megaphone-chat@tireur | Mégaphone d'or | tour-magie-oracle
 #: moderne-magie-graffeurs | Graffeurs | tour-magie-necromancien
 # Couleurs propres au DLC (en plus de la palette commune) : 1 magenta (tags, fumigène), 2 cyan, 3 vert fluo,
 # 4 violet, 5 fumée rose, 6 sweat marine, 7 kaki, 8 orange chantier, 9 fumée grise, 0 jaune fluo, C plastique bleu,
@@ -476,8 +476,64 @@ b.b
 
 sprite moderne-magie-megaphone
 point tir 16 13
-# A : un étudiant debout sur une estrade (caisse de plastique bleu), le grand mégaphone d'or tourné vers la droite.
-# Dessiné tourné à droite : l'orientation vers la cible reste à décider (voir la spec de l'animation).
+point tireur 16 13
+# A : l'estrade seule (caisse de plastique bleu, centrée sous l'ancre) ; l'étudiant au mégaphone d'or est le tireur
+# `moderne-megaphone-chat`, posé au point `tireur`. Décision de l'auteur du 2026-11-11 : il doit pouvoir se tourner
+# vers sa cible, ce que le rendu fait déjà pour un tireur (retournement en miroir autour de son ancre).
+# `tireur` et `tir` sont au même endroit : le rendu pose le tireur d'une tour de magie au point `tir`, sans toucher
+# au point de tir de l'original (16 13).
+# L'estrade ne bouge pas, mais garde les animations de l'original (repos 6 images, attaque 3) pour jouer avec le tireur.
+anim repos 140
+cadre
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+..........kkAkkAAAAAAA
+..........CCCCCCCCCCCC
+..........CCXXCXXCXXCC
+..........CCXXCXXCXXCC
+..........CCCCCCCCCCCC
+..........XXXXXXXXXXXX
+.
+.
+.
+.
+.
+.
+cadre repos.0
+cadre repos.0
+cadre repos.0
+cadre repos.0
+cadre repos.0
+anim attaque 90
+cadre repos.0
+cadre repos.0 duree 140
+cadre repos.0
+
+sprite moderne-megaphone-chat
+categorie unite
+taille 32 20
+ancre 8 13
+# L'étudiant au mégaphone d'or, tourné vers la droite (le rendu le retourne quand la cible est à gauche). L'ancre est
+# au milieu de son corps, à hauteur du point de tir de l'estrade (16 13) : ses pieds tombent sur la caisse et le
+# retournement le garde à sa place. Mêmes animations que l'original de la tour (repos 6 images, attaque 3).
 anim repos 140
 cadre
 .
@@ -500,28 +556,16 @@ cadre
 ......66666..........y
 .......X.X
 .......X.X
-......kkAkkAAAAAAA
-......CCCCCCCCCCCC
-......CCXXCXXCXXCC
-......CCXXCXXCXXCC
-......CCCCCCCCCCCC
-......XXXXXXXXXXXX
-.
-.
-.
-.
-.
-.
-# Le son part du pavillon en arcs (l'intérieur naît, les deux, puis l'extérieur s'éloigne).
+# Le son part du pavillon en arcs (l'intérieur naît, les deux, puis l'extérieur s'éloigne), il cligne.
 cadre repos.0 + arc-int-off
 cadre repos.0 + arc-ext-off
 cadre repos.0 + cligne
 cadre repos.0 + arc-int-off
 cadre repos.0 + arc-ext-off
-# Attaque : le pavillon s'éclaire et lance un grand arc.
+# Attaque : il se dresse et lève le mégaphone, le pavillon s'éclaire et lance un grand arc.
 anim attaque 90
-cadre repos.0 + arc-ext-off + pavillon
-cadre repos.0 + pavillon + arc-large duree 140
+cadre repos.0 decale 0 -1 + arc-ext-off decale 0 -1 + pavillon decale 0 -1 + pieds
+cadre repos.0 decale 0 -1 + pavillon decale 0 -1 + arc-large decale 0 -1 + pieds duree 140
 cadre repos.0 + arc-int-off
 calque cligne 10 9
 b
@@ -553,6 +597,8 @@ y
 y
 y
 y
+calque pieds 7 19
+X.X
 
 sprite moderne-magie-graffeurs
 point tir 16 13

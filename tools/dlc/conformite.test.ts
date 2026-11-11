@@ -1,6 +1,9 @@
 // Conformité des skins du DLC « Temps modernes » à leurs originaux : chaque skin (et chacun de ses tireurs) doit avoir
 // exactement les mêmes noms d'animations et le même nombre d'images que le sprite du jeu dont il reprend la place
 // (art/sprites/), pour pouvoir être branché plus tard sans toucher au moteur.
+// Un tireur que l'original n'a pas est un écart bloquant, sauf exception documentée dans TIREURS_SANS_ORIGINAL
+// (skins.ts) : l'étudiant au mégaphone de `moderne-magie-megaphone` (décision de l'auteur du 2026-11-11, pour qu'il se
+// tourne vers sa cible) ; il est alors comparé à la tour de l'original, `tour-magie-oracle`.
 //
 // Les catégories de CATEGORIES_BLOQUANTES échouent au moindre écart ; les autres apparaissent en « à faire » (todo) dans le
 // résumé de vitest tant qu'un skin n'est pas complet. Une catégorie entre dans la liste une fois tous ses skins animés.

@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { lirePalette, lireSprites } from '../art/format.ts';
 import { decoderPng, encoderPng, nouvelleImage } from '../art/png.ts';
-import { FACTEUR, MARGE, PAUSE_UNIQUE, decrireEcart, estBloquant, lireEntetes, rendreApercus } from './skins.ts';
+import { FACTEUR, MARGE, PAUSE_UNIQUE, TIREURS_SANS_ORIGINAL, decrireEcart, estBloquant, lireEntetes, rendreApercus } from './skins.ts';
 
 const PALETTES = new Map([['commune', lirePalette('a ff0000\nb 00ff00\n', 'p.txt')]]);
 const planche = (): ReturnType<typeof nouvelleImage> => nouvelleImage(8, 8);
@@ -198,5 +198,55 @@ describe('animations des skins du DLC', () => {
     const [a] = rendre(complet);
     expect(a?.ecarts.filter(estBloquant)).toEqual([]);
     expect(a?.ecarts[1]?.cadences.map((c) => c.nom)).toEqual(['repos']);
+  });
+});
+
+describe('tireur ajouté par un skin', () => {
+  // Original sans tireur (tour-essai) ; le skin pose un tireur dessus.
+  const avecTireur = (id: string): string => `#: ${id} + moderne-tireur@tireur | Skin à tireur | tour-essai
+palette commune
+contour non
+sprite ${id}
+categorie tour
+taille 6 8
+ancre 3 7
+point tireur 3 2
+bbbbbb
+
+sprite moderne-tireur
+taille 3 2
+ancre 1 1
+ab.
+ab.
+`;
+  const rendre = (texte: string): ReturnType<typeof rendreApercus> =>
+    rendreApercus({ jeu: JEU, dlc: [{ texte, fichier: 'essai.txt' }], palettes: PALETTES, planche, facteur: 1 });
+
+  it('est un écart bloquant quand aucune décision ne l’autorise', () => {
+    const [a] = rendre(avecTireur('moderne-sans-decision'));
+    expect(a?.ecarts.map(decrireEcart)).toContain('moderne-sans-decision (moderne-tireur / -) : en trop repos');
+    expect(a?.ecarts.some(estBloquant)).toBe(true);
+  });
+
+  it('est comparé à la tour de l’original quand une décision l’autorise', () => {
+    expect(TIREURS_SANS_ORIGINAL.get('moderne-magie-megaphone')).toMatch(/2026-11-11/);
+    const [a] = rendre(avecTireur('moderne-magie-megaphone'));
+    expect(a?.ecarts.map((e) => [e.sprite, e.original])).toEqual([['moderne-magie-megaphone', 'tour-essai'], ['moderne-tireur', 'tour-essai']]);
+    expect(a?.ecarts.some(estBloquant)).toBe(false);
+  });
+
+  it('montre aussi le tireur retourné autour de son ancre, comme en jeu face à une cible à gauche', () => {
+    const [a] = rendre(avecTireur('moderne-magie-megaphone'));
+    const repos = a?.animations.find((x) => x.nom === 'repos');
+    const droit = repos?.skin?.images[0]?.image;
+    const retourne = repos?.miroir?.images[0]?.image;
+    if (!droit || !retourne) throw new Error('aperçus manquants');
+    const pixel = (im: typeof droit, x: number, y: number): number[] => [...im.pixels.slice(((y + MARGE) * im.largeur + x + MARGE) * 4, ((y + MARGE) * im.largeur + x + MARGE) * 4 + 4)];
+    // Ancre (1, 1) sur le point 3 2 : à l'endroit, rouge en x 2 et vert en x 3 ; retourné, vert en x 2 et rouge en x 3.
+    expect(pixel(droit, 2, 1)).toEqual([255, 0, 0, 255]);
+    expect(pixel(droit, 3, 1)).toEqual([0, 255, 0, 255]);
+    expect(pixel(retourne, 3, 1)).toEqual([255, 0, 0, 255]);
+    expect(pixel(retourne, 2, 1)).toEqual([0, 255, 0, 255]);
+    expect(a?.animations.find((x) => x.nom === 'repos')?.original).not.toBeNull();
   });
 });

@@ -14,6 +14,7 @@ import { dessinerSprites, type AnimDessinee, type CadreDessine, type SpriteDessi
 import { ErreurFormat, lireSprites, type SpriteSource } from '../art/format.ts';
 import { agrandirImage, poser } from '../art/apercu.ts';
 import { nouvelleImage, type Image } from '../art/png.ts';
+import { miroir } from '../art/couche.ts';
 import type { ImageGif } from './gif.ts';
 
 export interface Pose {
@@ -46,6 +47,8 @@ export interface AnimationApercu {
   /** Animation du skin (null si le skin ne l'a pas encore alors que l'original l'a). */
   readonly skin: ImageAnimee | null;
   readonly original: ImageAnimee | null;
+  /** Animation du skin avec son tireur retourné (cible à gauche), pour un skin à tireur ; null sinon. */
+  readonly miroir: ImageAnimee | null;
 }
 
 export interface Apercu {
@@ -106,6 +109,8 @@ interface Couche {
   readonly s: SpriteDessine;
   readonly x: number;
   readonly y: number;
+  /** Retourné de gauche à droite autour de son ancre (le tireur tourné vers une cible à gauche). */
+  readonly miroir: boolean;
 }
 
 function trouverSprite(sprites: ReadonlyMap<string, SpriteDessine>, nom: string): SpriteDessine {
@@ -114,15 +119,19 @@ function trouverSprite(sprites: ReadonlyMap<string, SpriteDessine>, nom: string)
   return s;
 }
 
-/** Sprites de la composition, chacun à sa place (la base en 0 0, les poses par leur ancre sur le point nommé). */
-function couchesComposition(c: Composition, sprites: ReadonlyMap<string, SpriteDessine>): Couche[] {
+/**
+ * Sprites de la composition, chacun à sa place (la base en 0 0, les poses par leur ancre sur le point nommé). Avec
+ * `miroirPoses`, les poses sont retournées autour de leur ancre, comme le jeu retourne un tireur vers une cible à gauche.
+ */
+function couchesComposition(c: Composition, sprites: ReadonlyMap<string, SpriteDessine>, miroirPoses = false): Couche[] {
   const base = trouverSprite(sprites, c.base);
-  const couches: Couche[] = [{ s: base, x: 0, y: 0 }];
+  const couches: Couche[] = [{ s: base, x: 0, y: 0, miroir: false }];
   for (const p of c.poses) {
     const s = trouverSprite(sprites, p.sprite);
     const point = base.points.get(p.point);
     if (!point) throw new Error(`le sprite « ${base.nom} » n’a pas de point « ${p.point} »`);
-    couches.push({ s, x: point[0] - s.ancre[0], y: point[1] - s.ancre[1] });
+    const ancreX = miroirPoses ? s.largeur - s.ancre[0] : s.ancre[0];
+    couches.push({ s, x: point[0] - ancreX, y: point[1] - s.ancre[1], miroir: miroirPoses });
   }
   return couches;
 }
@@ -142,7 +151,7 @@ function poserCouches(couches: readonly Couche[], cadre: (k: Couche) => CadreDes
   }
   for (const k of couches) {
     const couche = cadre(k)?.couche;
-    if (couche) poser(image, couche, k.x - x0 + MARGE, k.y - y0 + MARGE);
+    if (couche) poser(image, k.miroir ? miroir(couche) : couche, k.x - x0 + MARGE, k.y - y0 + MARGE);
   }
   return facteur === 1 ? image : agrandirImage(image, facteur);
 }
@@ -210,8 +219,14 @@ function memesPixels(a: Image, b: Image): boolean {
  * Les boucles de durées différentes tournent jusqu'à se retrouver ; une animation jouée une fois finit sur sa dernière image,
  * tenue PAUSE_UNIQUE ms de plus.
  */
-export function rendreAnimation(c: Composition, sprites: ReadonlyMap<string, SpriteDessine>, nom: string, facteur = FACTEUR): ImageAnimee | null {
-  let couches = couchesComposition(c, sprites);
+export function rendreAnimation(
+  c: Composition,
+  sprites: ReadonlyMap<string, SpriteDessine>,
+  nom: string,
+  facteur = FACTEUR,
+  miroirPoses = false,
+): ImageAnimee | null {
+  let couches = couchesComposition(c, sprites, miroirPoses);
   if (!couches[0]?.s.anims.some((a) => a.nom === nom)) {
     couches = couches.slice(1).filter((k) => k.s.anims.some((a) => a.nom === nom));
     if (couches.length === 0) return null;
@@ -323,16 +338,44 @@ export function estEcart(e: Ecart): boolean {
   return estBloquant(e) || e.cadences.length > 0;
 }
 
-/** Compare la base du skin à celle de l'original, puis chaque tireur à celui de l'original, dans l'ordre. */
+/**
+ * Skins qui ont un tireur alors que leur original n'en a pas, avec la décision qui l'autorise. Un tel tireur joue avec
+ * la tour : il est comparé à la tour de l'original (mêmes animations, même nombre d'images). Tout autre tireur sans
+ * équivalent dans l'original, ou tireur de l'original absent du skin, reste un écart bloquant.
+ */
+export const TIREURS_SANS_ORIGINAL: ReadonlyMap<string, string> = new Map([
+  [
+    'moderne-magie-megaphone',
+    'décision de l’auteur du 2026-11-11 : l’étudiant au mégaphone se tourne vers sa cible, il devient donc un tireur que le '
+      + 'rendu retourne (tour-magie-oracle n’a pas de tireur)',
+  ],
+]);
+
+/** Écart d'un sprite présent d'un seul côté : toutes ses animations manquent (côté original) ou sont en trop (côté skin). */
+function ecartSansEquivalent(id: string, sprite: string, original: string, s: SpriteDessine, cote: 'skin' | 'original'): Ecart {
+  const noms = animationsSprite(s).map((a) => a.nom);
+  return { id, sprite, original, manquantes: cote === 'original' ? noms : [], enTrop: cote === 'skin' ? noms : [], images: [], cadences: [] };
+}
+
+/**
+ * Compare la base du skin à celle de l'original, puis chaque tireur à celui de l'original, dans l'ordre. Un tireur
+ * présent d'un seul côté est un écart, sauf exception de TIREURS_SANS_ORIGINAL.
+ */
 export function comparerEntete(en: Entete, sprites: ReadonlyMap<string, SpriteDessine>): Ecart[] {
   const original = en.original;
   if (!original) return [];
-  const paires: [string, string][] = [[en.skin.base, original.base]];
-  en.skin.poses.forEach((p, i) => {
+  const ecarts = [comparerSprites(en.id, trouverSprite(sprites, en.skin.base), trouverSprite(sprites, original.base))];
+  const n = Math.max(en.skin.poses.length, original.poses.length);
+  for (let i = 0; i < n; i++) {
+    const p = en.skin.poses[i];
     const o = original.poses[i];
-    if (o) paires.push([p.sprite, o.sprite]);
-  });
-  return paires.map(([s, o]) => comparerSprites(en.id, trouverSprite(sprites, s), trouverSprite(sprites, o)));
+    if (p && o) ecarts.push(comparerSprites(en.id, trouverSprite(sprites, p.sprite), trouverSprite(sprites, o.sprite)));
+    else if (p && TIREURS_SANS_ORIGINAL.has(en.id)) {
+      ecarts.push(comparerSprites(en.id, trouverSprite(sprites, p.sprite), trouverSprite(sprites, original.base)));
+    } else if (p) ecarts.push(ecartSansEquivalent(en.id, p.sprite, '-', trouverSprite(sprites, p.sprite), 'skin'));
+    else if (o) ecarts.push(ecartSansEquivalent(en.id, '-', o.sprite, trouverSprite(sprites, o.sprite), 'original'));
+  }
+  return ecarts;
 }
 
 /** Écart lisible en une ligne. */
@@ -355,6 +398,9 @@ export interface Entrees {
   /** false : seulement les poses de repos et les écarts, sans dessiner les animations (tests de conformité). */
   readonly animations?: boolean;
 }
+
+/** Animations montrées aussi avec le tireur retourné : celles où il fait face à sa cible. */
+const ANIMATIONS_MIROIR = new Set(['repos', 'attaque']);
 
 /** Dessine les sprites du jeu et du DLC ensemble et produit l'aperçu de chaque skin déclaré, animations comprises. */
 export function rendreApercus(e: Entrees): Apercu[] {
@@ -381,6 +427,7 @@ export function rendreApercus(e: Entrees): Apercu[] {
         nom,
         skin: rendreAnimation(en.skin, parNom, nom, facteur),
         original: en.original ? rendreAnimation(en.original, parNom, nom, facteur) : null,
+        miroir: en.skin.poses.length > 0 && ANIMATIONS_MIROIR.has(nom) ? rendreAnimation(en.skin, parNom, nom, facteur, true) : null,
       })),
       ecarts: comparerEntete(en, parNom),
     };
