@@ -33,6 +33,8 @@ sprite moderne-plume
 point assassin 16 46
 point ombre 16 30
 # Colonne d'affichage, affiches collées de nuit, porte d'ombre aux yeux jaunes, Plume en capuche sur le dôme.
+anim repos 260
+cadre
 .............k.....k
 .............kkXXXkk
 ............XXkkkkkXX
@@ -79,9 +81,38 @@ point ombre 16 30
 ...UvU.ukkkkkkkkkkkkkkkku
 ...UUU.uuuuuuuuuuuuuuuuuu
 .......uuuuuuuuuuuuuuuuuu
+# Les yeux de la porte d'ombre clignent, une affiche se décolle au coin, Plume cligne sous sa capuche.
+cadre repos.0 + yeux-haut-clos
+cadre repos.0 + affiche-coin
+cadre repos.0 + cligne duree 200
+cadre repos.0 + yeux-bas-clos
+# Attaque : d'autres yeux s'allument dans la porte, ceux de Plume flamboient, les affiches claquent.
+anim attaque 90
+cadre repos.0 + yeux-a
+cadre repos.0 + yeux-a + yeux-b + plume-flamboie duree 110
+cadre repos.0 + yeux-a + yeux-b + plume-flamboie + affiche-coin + affiche-coin-b duree 130
+cadre repos.0 + yeux-a duree 100
+calque yeux-haut-clos 14 29
+k..k
+calque yeux-bas-clos 15 35
+kk
+calque cligne 15 3
+k..k
+calque plume-flamboie 15 3
+F..F
+calque affiche-coin 15 16
+q
+calque affiche-coin-b 21 34
+q
+calque yeux-a 14 27
+y.y
+calque yeux-b 15 38
+y.y
 
 sprite moderne-charlie
 # Grosse tête de Charlie en papier mâché sur le toit de la voiture de tête, enceintes, banderole MIAOU.
+anim repos 300
+cadre
 .
 .
 .
@@ -130,11 +161,43 @@ sprite moderne-charlie
 .....kkk..............kkk
 .
 .
+# Les enceintes de la voiture pulsent, les roues tournent, Charlie plisse les yeux.
+cadre repos.0 + woofers-G + paupieres + roues duree 450
+# Attaque : les yeux s'embrasent, la bouche s'ouvre, les enceintes envoient des ondes.
+anim attaque 90
+cadre repos.0 + woofers-G + yeux-braise + roues
+cadre repos.0 + woofers-M + yeux-braise + bouche + ondes duree 200
+cadre repos.0 + woofers-G + roues duree 160
+calque woofers-G 0 30
+...vwv....................vwv
+...wWw....................wWw
+...vwv....................vwv
+calque woofers-M 0 30
+...uvu....................uvu
+...vwv....................vwv
+...uvu....................uvu
+calque paupieres 10 13
+UUU....UUU
+calque yeux-braise 11 14
+xx....xx
+calque bouche 14 21
+kk
+calque ondes 0 30
+w
+w..............................w
+w..............................w
+...............................w
+calque roues 4 42
+kUkUk............kUkUk
+kkvkk............kkvkk
+kUkUk............kUkUk
 
 sprite moderne-pollen
 point porte 17 43
 point marteau 20 36
 # Atelier de palettes sous une bâche, poêle qui fume, pancarte « AG », banderole qui sèche, Pollen à la lucarne.
+anim repos 170
+cadre
 .
 ........................99
 .......................9w99v
@@ -183,3 +246,36 @@ point marteau 20 36
 ......dddddddkkkkkkkkdddoBoB
 .......................w...o.o
 ............................B.B
+# Le poêle fume (la fumée monte et dérive), le feu danse dans la fenêtre, Pollen cligne.
+cadre repos.0 + fumee-off + fumee decale 1 0
+cadre repos.0 couleurs f=y y=f dans 14 20 18 25 + fumee-off + fumee decale 1 -1 + bouffee
+cadre repos.0 + fumee-off + fumee decale 0 -1 + bouffee + cligne duree 120
+cadre repos.0 + fumee-off + fumee decale 1 0 duree 120
+cadre repos.0 couleurs f=y y=f dans 14 20 18 25 duree 120
+# Attaque : le feu s'emballe, des étincelles jaillissent, et des yeux s'allument derrière la porte de l'atelier.
+anim attaque 80
+cadre repos.0 couleurs f=y y=f dans 14 20 18 25 + fumee-off + fumee decale 1 -1 + bouffee
+cadre repos.0 + fumee-off + fumee decale 1 -2 + bouffee decale 0 -1 + etincelles duree 100
+cadre repos.0 couleurs f=y y=f dans 14 20 18 25 + yeux-porte + etincelles decale 1 0 duree 100
+cadre repos.0 + yeux-porte duree 90
+calque fumee 22 1
+..99...
+.9w99v.
+.999vU.
+9vvU...
+v......
+calque fumee-off 22 1
+..__...
+._____.
+._____.
+____...
+_......
+calque bouffee 22 5
+9
+calque cligne 27 39
+b.b
+calque etincelles 12 33
+y......F
+...F
+calque yeux-porte 14 37
+y.y..y.y

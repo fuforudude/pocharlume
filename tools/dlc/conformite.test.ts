@@ -12,7 +12,7 @@ import { RACINE, lireSources } from '../art/construire.ts';
 import { decoderPng } from '../art/png.ts';
 import { decrireEcart, estBloquant, rendreApercus } from './skins.ts';
 
-const CATEGORIES_BLOQUANTES = new Set<string>([]);
+const CATEGORIES_BLOQUANTES = new Set<string>(['tour', 'ennemi']);
 
 const dossier = join(RACINE, 'art', 'dlc-moderne');
 const dlc = readdirSync(dossier, { recursive: true, encoding: 'utf8' })

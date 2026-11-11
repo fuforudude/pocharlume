@@ -34,6 +34,8 @@ couleur Q 4a5868
 
 sprite moderne-caserne-1
 # Deux tables renversées, une pancarte, des chaises empilées.
+anim repos 400
+cadre
 .
 .
 .
@@ -60,9 +62,34 @@ sprite moderne-caserne-1
 .....BDDwwwwwDDB..tBDDDDDDDB
 .....BDDDDDDDDDB..tBDDDDDDDB
 .....BnnnnnnnnnB..tBnnnnnnnB
+cadre repos.0 + coin-bas
+cadre repos.0
+cadre repos.0 + coin-haut
+# Attaque : un étudiant surgit entre les deux tables, poing levé, puis replonge.
+anim attaque 120
+cadre repos.0 + tete-basse
+cadre repos.0 + tete-haute
+cadre repos.0 + tete-haute + poing duree 300
+cadre repos.0 + tete-basse
+# La pancarte frémit au vent (un coin qui se soulève).
+calque coin-bas 12 23
+q
+calque coin-haut 12 20
+q
+calque tete-basse 15 18
+oo
+calque tete-haute 15 15
+oo
+ss
+66
+calque poing 16 13
+s
+6
 
 sprite moderne-caserne-2
 # Rangée de tables avec le passage, palettes et chaises au-dessus, un chat guette.
+anim repos 400
+cadre
 .
 .
 .
@@ -89,9 +116,30 @@ sprite moderne-caserne-2
 ...BwwwwwwwDBkkkkkkBDwwwwwwwB
 ...BwwwwwwwDBkkkkkkBDwwwwwwwB
 ...BnnnnnnnnBkkkkkkBnnnnnnnnB
+cadre repos.0 + cligne
+cadre repos.0
+cadre repos.0 + coin
+anim attaque 120
+cadre repos.0 + yeux-sombres
+cadre repos.0 + yeux
+cadre repos.0 + yeux decale 1 0 duree 300
+cadre repos.0 + yeux-sombres
+# Le chat guetteur cligne, la pancarte frémit ; à l'attaque, des yeux s'allument dans le passage.
+calque cligne 16 16
+b.b
+calque coin 10 24
+q
+calque yeux 13 21
+y.y
+...
+...y.y
+calque yeux-sombres 13 21
+f.f
 
 sprite moderne-caserne-3
 # Barricade à deux étages, drapeau, banderoles, fûts allumés, un étudiant monte la garde.
+anim repos 400
+cadre
 .
 ...dxxxxxxx.o.xxx.o
 ...dxxxxxxx.oxxxxxo
@@ -119,9 +167,51 @@ sprite moderne-caserne-3
 ...BDDDDDuuuBkkkkkkBuuuDDDDDB
 ...BnnnnnUvUBkkkkkkBUvUnnnnnB
 .........uuu........uuu
+cadre repos.0 + cligne + feu-b + feu-b-droit + drapeau-b
+cadre repos.0 + feu-c + feu-c-droit
+cadre repos.0 + feu-b + feu-b-droit + drapeau-b
+# Attaque : des yeux s'allument dans le passage sombre (sortie des étudiants), comme la porte de la grange.
+anim attaque 120
+cadre repos.0 + yeux-sombres + feu-b + feu-b-droit
+cadre repos.0 + yeux + feu-c + feu-c-droit + drapeau-b
+cadre repos.0 + yeux decale 1 0 + feu-b + feu-b-droit duree 300
+cadre repos.0 + yeux-sombres + drapeau-b
+# Le guetteur cligne, le drapeau claque, le feu des fûts danse.
+calque cligne 16 3
+b.b
+calque drapeau-b 9 1
+__
+._
+..
+..R
+.RR
+calque feu-b 10 19
+F
+y
+F
+calque feu-c 10 19
+x
+f
+F
+calque feu-b-droit 21 19
+F
+y
+F
+calque feu-c-droit 21 19
+x
+f
+F
+calque yeux 13 21
+y.y
+...
+...y.y
+calque yeux-sombres 13 21
+f.f
 
 sprite moderne-caserne-amphi
 # A : la fac de pierre claire, fronton à horloge, banderole « AG ».
+anim repos 400
+cadre
 .
 ...dwwwwwww.o.xxx.o
 ...dwwwwwww.oxxxxxo
@@ -149,9 +239,51 @@ sprite moderne-caserne-amphi
 ...gPPPPPuuugkkkkkkguuuPPPPPg
 ...gpppppUvUgkkkkkkgUvUpppppg
 .........uuu........uuu
+cadre repos.0 + cligne + feu-b + feu-b-droit + drapeau-b
+cadre repos.0 + feu-c + feu-c-droit
+cadre repos.0 + feu-b + feu-b-droit + drapeau-b
+# Attaque : des yeux s'allument dans le passage sombre (sortie des étudiants), comme la porte de la grange.
+anim attaque 120
+cadre repos.0 + yeux-sombres + feu-b + feu-b-droit
+cadre repos.0 + yeux + feu-c + feu-c-droit + drapeau-b
+cadre repos.0 + yeux decale 1 0 + feu-b + feu-b-droit duree 300
+cadre repos.0 + yeux-sombres + drapeau-b
+# Le guetteur cligne, le drapeau claque, le feu des fûts danse.
+calque cligne 16 3
+b.b
+calque drapeau-b 9 1
+__
+._
+..
+..z
+.zz
+calque feu-b 10 19
+F
+y
+F
+calque feu-c 10 19
+x
+f
+F
+calque feu-b-droit 21 19
+F
+y
+F
+calque feu-c-droit 21 19
+x
+f
+F
+calque yeux 13 21
+y.y
+...
+...y.y
+calque yeux-sombres 13 21
+f.f
 
 sprite moderne-caserne-zad
 # B : palettes noircies, pneus, tags fluo, drapeau noir.
+anim repos 400
+cadre
 .
 ...dkkkkkkk.okkkkko
 ...dkkkkkkk.kkoookk
@@ -179,3 +311,41 @@ sprite moderne-caserne-zad
 ...BbbbbbuuuBkkkkkkBuuubbbbbB
 ...BdddddUvUBkkkkkkBUvUdddddB
 .........uuu........uuu
+cadre repos.0 + cligne + feu-b + feu-b-droit + drapeau-b
+cadre repos.0 + feu-c + feu-c-droit
+cadre repos.0 + feu-b + feu-b-droit + drapeau-b
+# Attaque : des yeux s'allument dans le passage sombre (sortie des étudiants), comme la porte de la grange.
+anim attaque 120
+cadre repos.0 + yeux-sombres + feu-b + feu-b-droit
+cadre repos.0 + yeux + feu-c + feu-c-droit + drapeau-b
+cadre repos.0 + yeux decale 1 0 + feu-b + feu-b-droit duree 300
+cadre repos.0 + yeux-sombres + drapeau-b
+# Le guetteur cligne, le drapeau claque, le feu des fûts danse.
+calque cligne 16 3
+b.b
+calque drapeau-b 9 1
+__
+._
+..
+..u
+.uu
+calque feu-b 10 19
+F
+y
+F
+calque feu-c 10 19
+x
+f
+F
+calque feu-b-droit 21 19
+F
+y
+calque feu-c-droit 21 19
+x
+f
+calque yeux 13 21
+y.y
+...
+...y.y
+calque yeux-sombres 13 21
+f.f

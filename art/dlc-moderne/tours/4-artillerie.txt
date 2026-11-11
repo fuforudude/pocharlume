@@ -4,8 +4,8 @@
 #: moderne-artillerie-1 | Bascule à pavés | tour-artillerie-1
 #: moderne-artillerie-2 | Caddie lance-pavés | tour-artillerie-2
 #: moderne-artillerie-3 | Rempart lance-pavés | tour-artillerie-3
-#: moderne-artillerie-bidon | Trébuchet à caddie | tour-artillerie-mortier
-#: moderne-artillerie-lance-pierre | Canon à pavés | tour-artillerie-baliste
+#: moderne-artillerie-trebuchet | Trébuchet à caddie | tour-artillerie-mortier
+#: moderne-artillerie-canon-paves | Canon à pavés | tour-artillerie-baliste
 # Couleurs propres au DLC (en plus de la palette commune) : 1 magenta (tags, fumigène), 2 cyan, 3 vert fluo,
 # 4 violet, 5 fumée rose, 6 sweat marine, 7 kaki, 8 orange chantier, 9 fumée grise, 0 jaune fluo, C plastique bleu,
 # D carton, S fumée verte, V fumée violette, X marine sombre, Q bâche ardoise.
@@ -34,6 +34,8 @@ couleur Q 4a5868
 sprite moderne-artillerie-1
 point tir 4 18
 # Une bascule sur chevalet lance les pavés ; le caddie sert de réserve, le servant à côté.
+anim repos 400
+cadre
 .
 .
 .
@@ -66,10 +68,47 @@ point tir 4 18
 .
 .
 .
+cadre repos.0 + cligne duree 150
+# Attaque : la bascule se redresse d'un coup, le pavé quitte le godet, puis le bras retombe.
+anim attaque 80
+cadre repos.0 + bras-off + bras-leve + godet + pave-charge
+cadre repos.0 + bras-off + bras-leve + godet + pave-vol
+cadre repos.0 + bras-off + bras-leve + godet duree 300
+cadre repos.0 duree 200
+calque bras-off 2 17
+.___.........
+.___.........
+_____........
+______.......
+....____.....
+......____...
+........____.
+..........__.
+calque bras-leve 9 17
+.BO
+.BO
+.BO
+.BO
+.BO
+.BO
+calque godet 8 15
+T...T
+TTTTT
+calque pave-charge 9 13
+qqP
+PPp
+calque pave-vol 9 9
+qqP
+PPp
+ppg
+calque cligne 28 22
+b.b
 
 sprite moderne-artillerie-2
 point tir 4 15
 # La bascule grandit, le caddie déborde de pavés, le tout sur une palette.
+anim repos 200
+cadre
 .
 .
 .
@@ -102,10 +141,53 @@ point tir 4 15
 .
 .
 .
+# Le servant dresse l'oreille, puis cligne.
+cadre repos.0 + oreille
+cadre repos.0
+cadre repos.0 + cligne duree 150
+# Attaque : la bascule se redresse d'un coup, le pavé quitte le godet, puis le bras retombe.
+anim attaque 80
+cadre repos.0 + bras-off + bras-leve + godet + pave-charge
+cadre repos.0 + bras-off + bras-leve + godet + pave-vol
+cadre repos.0 + bras-off + bras-leve + godet duree 300
+cadre repos.0 duree 200
+calque bras-off 2 14
+.___.........
+.___.........
+_____........
+______.......
+....____.....
+......_____..
+........_____
+...........__
+calque bras-leve 10 15
+.BO
+.BO
+.BO
+.BO
+.BO
+.BO
+calque godet 9 13
+T...T
+TTTTT
+calque pave-charge 10 11
+qqP
+PPp
+calque pave-vol 10 7
+qqP
+PPp
+ppg
+calque cligne 28 19
+b.b
+calque oreille 27 17
+_
+.o
 
 sprite moderne-artillerie-3
 point tir 4 11
 # Sur le rempart de pneus : grande bascule, caddie comble de pavés, drapeau.
+anim repos 200
+cadre
 .
 .
 ................qqP.qqP...xxxxd
@@ -138,10 +220,53 @@ point tir 4 11
 .
 .
 .
+# Le drapeau claque, le servant cligne.
+cadre repos.0 + drapeau-b
+cadre repos.0
+cadre repos.0 + drapeau-b + cligne duree 150
+# Attaque : la bascule se redresse d'un coup, le pavé quitte le godet, puis le bras retombe.
+anim attaque 80
+cadre repos.0 + bras-off + bras-leve + godet + pave-charge
+cadre repos.0 + bras-off + bras-leve + godet + pave-vol
+cadre repos.0 + bras-off + bras-leve + godet duree 300
+cadre repos.0 duree 200
+calque bras-off 2 10
+.___........
+.___........
+_____.......
+______......
+....______..
+......______
+..........__
+calque bras-leve 9 10
+.BO
+.BO
+.BO
+.BO
+.BO
+.BO
+calque godet 8 8
+T...T
+TTTTT
+calque pave-charge 9 6
+qqP
+PPp
+calque pave-vol 9 2
+qqP
+PPp
+ppg
+calque cligne 28 12
+b.b
+calque drapeau-b 26 2
+_
+.
+x
 
-sprite moderne-artillerie-bidon
+sprite moderne-artillerie-trebuchet
 point tir 11 3
 # A : trébuchet dont le contrepoids est un caddie de pavés ; tir en cloche, pavés hors champ.
+anim repos 400
+cadre
 .
 .
 .
@@ -174,10 +299,64 @@ point tir 11 3
 .
 .
 .
+# Le drapeau claque, le servant cligne.
+cadre repos.0 + drapeau-b + cligne duree 150
+# Attaque : le caddie contrepoids tombe d'un pixel et le bras fouette vers le haut ; le pavé part hors champ (tir en cloche).
+anim attaque 90
+cadre repos.0 + caddie-off + bras-off + caddie decale 0 1 + bras decale 0 -1
+cadre repos.0 + caddie-off + bras-off + caddie decale 0 1 + bras decale 1 -2 duree 200
+cadre repos.0 + bras-off + bras decale 0 -1 duree 200
+calque caddie 19 9
+.qqP.qqP
+.PPp.PPp
+.ppg.ppg
+..k.....
+TTTTTTTT
+TPtPtPtT
+TtPtPtPT
+.TPtPtT.
+calque caddie-off 19 9
+.___.___
+.___.___
+.___.___
+.._.....
+________
+________
+________
+.______.
+calque bras 9 4
+T...T.......
+TTTTT.......
+....BO......
+.....BT.....
+.......OO...
+.......BBO..
+.......B.BO.
+........B.B.
+........B..B
+calque bras-off 9 4
+_..._.......
+_____.......
+....__......
+.....__.....
+.......__...
+.......___..
+......._.__.
+........_._.
+........_.._
+calque cligne 6 12
+b.b
+calque drapeau-b 29 4
+.._
+.
+.
+xx
 
-sprite moderne-artillerie-lance-pierre
+sprite moderne-artillerie-canon-paves
 point tir 24 8
 # B : canon à pavés horizontal, nourri par une trémie ; tir tendu, pavés en rafale.
+anim repos 400
+cadre
 ...........PPp.PPp
 ...........ppg.ppg
 ...........dDDDDDDDd
@@ -210,3 +389,46 @@ point tir 24 8
 .
 .
 .
+cadre repos.0 + cligne duree 150
+# Attaque : le canon recule d'un pixel dans un nuage de poussière, la rafale de pavés file, puis la trémie en redonne.
+anim attaque 80
+cadre repos.0 + canon-off + canon decale -1 0 + paves-off + paves decale 1 0 + poussiere
+cadre repos.0 + paves-off + paves decale 3 0 + poussiere-large duree 300
+cadre repos.0 + tremie-off + tremie decale 0 1 duree 200
+calque paves 26 7
+qqP...
+PPp.qP
+ppg.pg
+calque paves-off 26 7
+___...
+___.__
+___.__
+calque canon 8 5
+...............tt.
+g..............Tkw
+giiiiiiiiii8iiiTk.
+gTTTTTTTTTT8TTTTk.
+gtttttttttt8ttttt.
+calque canon-off 8 5
+...............__.
+_..............___
+_________________.
+_________________.
+_________________.
+calque tremie 11 0
+PPp.PPp
+ppg.ppg
+calque tremie-off 11 0
+___.___
+___.___
+calque poussiere 25 6
+9
+.9
+9
+calque poussiere-large 24 5
+.9
+9.9
+.9.
+9.9
+calque cligne 4 12
+b.b

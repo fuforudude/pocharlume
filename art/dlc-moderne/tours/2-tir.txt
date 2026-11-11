@@ -35,6 +35,8 @@ couleur Q 4a5868
 sprite moderne-tir-1
 point tireur 16 19
 # Échafaudage de tubes, plancher de planches, rubalise.
+anim repos 300
+cadre
 .
 .
 .
@@ -81,10 +83,21 @@ point tireur 16 19
 .......Tt....to..o.....Tt
 .......Tt..t..oOOo.....Tt
 .......TTTTTTTTTTTTTTTTTT
+cadre repos.0 + fanion-b
+# Attaque : le fanion claque au tir, comme sur le Clocher.
+anim attaque 100
+cadre repos.0 + fanion-b
+cadre repos.0 duree 200
+# La rubalise du poteau se tend dans le vent.
+calque fanion-b 26 13
+xwxw_
+..__
 
 sprite moderne-tir-2
 point tireur 16 16
 # Tour de palettes empilées, caisses en créneaux, tags.
+anim repos 300
+cadre
 .
 .
 .
@@ -131,12 +144,23 @@ point tireur 16 16
 .......OOOOOOOkkkkOOOOOOO
 .......obboobbkkkkoobboob
 .......BBBBBBBkkkkBBBBBBB
+cadre repos.0 + fanion-b
+# Attaque : le fanion claque au tir, comme sur le Clocher.
+anim attaque 100
+cadre repos.0 + fanion-b
+cadre repos.0 duree 200
+# La rubalise du poteau se tend dans le vent.
+calque fanion-b 26 11
+xwxw_
+..__
 
 sprite moderne-tir-3
 taille 32 52
 ancre 16 49
 point tireur 16 24
 # Palettes, échafaudage bâché, cône de chantier au sommet, banderole.
+anim repos 300
+cadre
 ...............w
 ..............888
 ..............www
@@ -187,12 +211,26 @@ wx.d......uuuuuUuuuuuu......d.xw
 .......obboobbkkkkoobboob
 .......BBBBBBBkkkkBBBBBBB
 ..............kkkk
+cadre repos.0 + fanion-g + fanion-d
+# Attaque : le fanion claque au tir, comme sur le Clocher.
+anim attaque 100
+cadre repos.0 + fanion-g + fanion-d
+cadre repos.0 duree 200
+# Les deux fanions claquent.
+calque fanion-g 0 5
+.xw
+__
+calque fanion-d 29 5
+wx
+.__
 
 sprite moderne-tir-vigies
 taille 32 52
 ancre 16 49
 point tireur 16 24
 # A : bâche kaki, lierre, antenne de radio libre.
+anim repos 300
+cadre
 .............T.T.T
 ..............TTT
 ...............T
@@ -243,12 +281,29 @@ zE.d......hhhhhjhhhhhh......d.Ez
 .......obboobbkkkkoobboob
 .......BBBBBBBkkkkBBBBBBB
 ..............kkkk
+cadre repos.0 + fanion-g + fanion-d + voyant
+# Attaque : le fanion claque au tir, comme sur le Clocher.
+anim attaque 100
+cadre repos.0 + fanion-g + fanion-d + voyant
+cadre repos.0 duree 200
+# Les deux fanions claquent.
+calque fanion-g 0 5
+.Ez
+__
+calque fanion-d 29 5
+zE
+.__
+# La radio libre émet : le voyant de l'antenne clignote.
+calque voyant 15 0
+x
 
 sprite moderne-tir-renvoyeurs
 taille 32 52
 ancre 16 49
 point tireur 16 24
 # B : bâche bleue, tôles, grande banderole rouge.
+anim repos 300
+cadre
 ...............w
 ..............888
 ..............www
@@ -299,12 +354,26 @@ wx.d......XXXXXUXXXXXX......d.xw
 .......vggvvggkkkkvvggvvg
 .......uuuuuuukkkkuuuuuuu
 ..............kkkk
+cadre repos.0 + fanion-g + fanion-d
+# Attaque : le fanion claque au tir, comme sur le Clocher.
+anim attaque 100
+cadre repos.0 + fanion-g + fanion-d
+cadre repos.0 duree 200
+# Les deux fanions claquent.
+calque fanion-g 0 5
+.xw
+__
+calque fanion-d 29 5
+wx
+.__
 
 sprite moderne-lanceur-chat
 categorie unite
 taille 32 32
 ancre 16 30
 # Lanceur : bonnet rouge, keffieh, sweat marine, lance-pierre.
+anim repos 220
+cadre
 .
 .
 .
@@ -336,12 +405,54 @@ ancre 16 30
 ............b66666
 .............o..o
 .............B..B
+cadre repos.0 + oreille
+cadre repos.0 + clos
+cadre repos.0
+# Attaque : il arme le lance-pierre (recul), puis le pavé part.
+anim attaque 90
+cadre repos.0 decale -1 0
+cadre repos.0 + jet duree 180
+cadre repos.0 duree 140
+# Blessé : il recule d'un pixel, les yeux plissés. Mort : il chancelle puis tombe sur le dos.
+anim blesse 120
+cadre repos.0 decale -1 0 + clos decale -1 0
+cadre repos.0 + clos
+anim mort 140
+cadre repos.0 decale -1 0 + clos decale -1 0
+cadre repos.0 decale -1 1 + clos decale -1 1
+cadre blesse.1 tourne 270 decale -10 10 duree 300
+cadre blesse.1 tourne 270 decale -10 11 duree 600
+# Marche : les pattes alternent et le corps sautille.
+anim marche 110
+cadre repos.0 + pattes-a
+cadre repos.0 decale 0 -1 + pattes-serrees decale 0 -1
+cadre repos.0 + pattes-c
+cadre repos.0 decale 0 -1 + pattes-serrees decale 0 -1
+calque clos 15 22
+b
+calque pattes-a 12 29
+o____o
+B____B
+calque pattes-serrees 12 29
+_oo___
+_BB___
+calque pattes-c 12 29
+__o_o_
+__B_B_
+# L'oreille frémit sous le bonnet.
+calque oreille 11 20
+_o
+calque jet 20 21
+.qP
+x
 
 sprite moderne-vigie-chat
 categorie unite
 taille 32 32
 ancre 16 30
 # Vigie : capuche kaki, écharpe verte, fronde qui tourne.
+anim repos 220
+cadre
 .
 .
 .
@@ -373,12 +484,64 @@ ancre 16 30
 ............b77777
 .............o..o
 .............B..B
+cadre repos.0 + fronde-off + fronde-droite
+cadre repos.0 + clos
+cadre repos.0 + fronde-off + fronde-bas
+# Attaque : la fronde tourne au-dessus de la tête, puis lâche sa pierre.
+anim attaque 90
+cadre repos.0 decale -1 0
+cadre repos.0 + fronde-off + fronde-lachee duree 180
+cadre repos.0 duree 140
+# Blessé : il recule d'un pixel, les yeux plissés. Mort : il chancelle puis tombe sur le dos.
+anim blesse 120
+cadre repos.0 decale -1 0 + clos decale -1 0
+cadre repos.0 + clos
+anim mort 140
+cadre repos.0 decale -1 0 + clos decale -1 0
+cadre repos.0 decale -1 1 + clos decale -1 1
+cadre blesse.1 tourne 270 decale -10 10 duree 300
+cadre blesse.1 tourne 270 decale -10 11 duree 600
+# Marche : les pattes alternent et le corps sautille.
+anim marche 110
+cadre repos.0 + pattes-a
+cadre repos.0 decale 0 -1 + pattes-serrees decale 0 -1
+cadre repos.0 + pattes-c
+cadre repos.0 decale 0 -1 + pattes-serrees decale 0 -1
+calque clos 15 22
+b.b
+calque pattes-a 12 29
+o____o
+B____B
+calque pattes-serrees 12 29
+_oo___
+_BB___
+calque pattes-c 12 29
+__o_o_
+__B_B_
+# La fronde tourne : levée, tendue devant, pendante.
+calque fronde-off 17 17
+..._
+.._
+._
+_
+calque fronde-droite 20 20
+xxxxk
+calque fronde-bas 20 22
+x
+.x
+..x
+...k
+calque fronde-lachee 20 19
+.....k
+xxx
 
 sprite moderne-renvoyeur-chat
 categorie unite
 taille 32 32
 ancre 16 30
 # Renvoyeur : bonnet bleu, sweat rouge, raquette de tennis et sa balle.
+anim repos 220
+cadre
 .
 .
 .
@@ -410,3 +573,48 @@ ancre 16 30
 ............bxxxxx
 .............o..o
 .............B..B
+cadre repos.0 + balle-off + balle-haute
+cadre repos.0 + balle-off + balle-sommet + clos
+cadre repos.0 + balle-off + balle-mi
+# Attaque : il recule, puis renvoie le palet d'un coup de raquette.
+anim attaque 90
+cadre repos.0 decale -1 0
+cadre repos.0 + balle-off + renvoi duree 180
+cadre repos.0 duree 140
+# Blessé : il recule d'un pixel, les yeux plissés. Mort : il chancelle puis tombe sur le dos.
+anim blesse 120
+cadre repos.0 decale -1 0 + clos decale -1 0
+cadre repos.0 + clos
+anim mort 140
+cadre repos.0 decale -1 0 + clos decale -1 0
+cadre repos.0 decale -1 1 + clos decale -1 1
+cadre blesse.1 tourne 270 decale -10 10 duree 300
+cadre blesse.1 tourne 270 decale -10 11 duree 600
+# Marche : les pattes alternent et le corps sautille.
+anim marche 110
+cadre repos.0 + pattes-a
+cadre repos.0 decale 0 -1 + pattes-serrees decale 0 -1
+cadre repos.0 + pattes-c
+cadre repos.0 decale 0 -1 + pattes-serrees decale 0 -1
+calque clos 15 22
+b.b
+calque pattes-a 12 29
+o____o
+B____B
+calque pattes-serrees 12 29
+_oo___
+_BB___
+calque pattes-c 12 29
+__o_o_
+__B_B_
+# Il jongle avec la balle sur sa raquette.
+calque balle-off 23 16
+_
+calque balle-haute 23 14
+0
+calque balle-sommet 23 13
+0
+calque balle-mi 23 15
+0
+calque renvoi 23 17
+99.0

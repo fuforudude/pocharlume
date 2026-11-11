@@ -1,5 +1,6 @@
 {
  "facteur": 6,
+ "pauseUnique": 500,
  "skins": [
   {
    "id": "moderne-gendarme",
@@ -8,7 +9,40 @@
    "original": "paysan-affame",
    "apercu": "apercus/moderne-gendarme.png",
    "apercuOriginal": "apercus/moderne-gendarme-original.png",
-   "source": "art/dlc-moderne/ennemis/1-a-pied.txt"
+   "source": "art/dlc-moderne/ennemis/1-a-pied.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-gendarme--repos.gif",
+     "gifOriginal": "apercus/moderne-gendarme--repos-original.gif"
+    },
+    {
+     "nom": "marche",
+     "boucle": true,
+     "gif": "apercus/moderne-gendarme--marche.gif",
+     "gifOriginal": "apercus/moderne-gendarme--marche-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-gendarme--attaque.gif",
+     "gifOriginal": "apercus/moderne-gendarme--attaque-original.gif"
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-gendarme--blesse.gif",
+     "gifOriginal": "apercus/moderne-gendarme--blesse-original.gif"
+    },
+    {
+     "nom": "mort",
+     "boucle": false,
+     "gif": "apercus/moderne-gendarme--mort.gif",
+     "gifOriginal": "apercus/moderne-gendarme--mort-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-crs",
@@ -17,7 +51,40 @@
    "original": "fantassin",
    "apercu": "apercus/moderne-crs.png",
    "apercuOriginal": "apercus/moderne-crs-original.png",
-   "source": "art/dlc-moderne/ennemis/1-a-pied.txt"
+   "source": "art/dlc-moderne/ennemis/1-a-pied.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-crs--repos.gif",
+     "gifOriginal": "apercus/moderne-crs--repos-original.gif"
+    },
+    {
+     "nom": "marche",
+     "boucle": true,
+     "gif": "apercus/moderne-crs--marche.gif",
+     "gifOriginal": "apercus/moderne-crs--marche-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-crs--attaque.gif",
+     "gifOriginal": "apercus/moderne-crs--attaque-original.gif"
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-crs--blesse.gif",
+     "gifOriginal": "apercus/moderne-crs--blesse-original.gif"
+    },
+    {
+     "nom": "mort",
+     "boucle": false,
+     "gif": "apercus/moderne-crs--mort.gif",
+     "gifOriginal": "apercus/moderne-crs--mort-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-gendarme-mobile",
@@ -26,7 +93,40 @@
    "original": "chasseur-sorcieres",
    "apercu": "apercus/moderne-gendarme-mobile.png",
    "apercuOriginal": "apercus/moderne-gendarme-mobile-original.png",
-   "source": "art/dlc-moderne/ennemis/1-a-pied.txt"
+   "source": "art/dlc-moderne/ennemis/1-a-pied.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-gendarme-mobile--repos.gif",
+     "gifOriginal": "apercus/moderne-gendarme-mobile--repos-original.gif"
+    },
+    {
+     "nom": "marche",
+     "boucle": true,
+     "gif": "apercus/moderne-gendarme-mobile--marche.gif",
+     "gifOriginal": "apercus/moderne-gendarme-mobile--marche-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-gendarme-mobile--attaque.gif",
+     "gifOriginal": "apercus/moderne-gendarme-mobile--attaque-original.gif"
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-gendarme-mobile--blesse.gif",
+     "gifOriginal": "apercus/moderne-gendarme-mobile--blesse-original.gif"
+    },
+    {
+     "nom": "mort",
+     "boucle": false,
+     "gif": "apercus/moderne-gendarme-mobile--mort.gif",
+     "gifOriginal": "apercus/moderne-gendarme-mobile--mort-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-bouclier-anti-emeute",
@@ -35,7 +135,40 @@
    "original": "porte-herse",
    "apercu": "apercus/moderne-bouclier-anti-emeute.png",
    "apercuOriginal": "apercus/moderne-bouclier-anti-emeute-original.png",
-   "source": "art/dlc-moderne/ennemis/1-a-pied.txt"
+   "source": "art/dlc-moderne/ennemis/1-a-pied.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-bouclier-anti-emeute--repos.gif",
+     "gifOriginal": "apercus/moderne-bouclier-anti-emeute--repos-original.gif"
+    },
+    {
+     "nom": "marche",
+     "boucle": true,
+     "gif": "apercus/moderne-bouclier-anti-emeute--marche.gif",
+     "gifOriginal": "apercus/moderne-bouclier-anti-emeute--marche-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-bouclier-anti-emeute--attaque.gif",
+     "gifOriginal": "apercus/moderne-bouclier-anti-emeute--attaque-original.gif"
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-bouclier-anti-emeute--blesse.gif",
+     "gifOriginal": "apercus/moderne-bouclier-anti-emeute--blesse-original.gif"
+    },
+    {
+     "nom": "mort",
+     "boucle": false,
+     "gif": "apercus/moderne-bouclier-anti-emeute--mort.gif",
+     "gifOriginal": "apercus/moderne-bouclier-anti-emeute--mort-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-tireur-lbd",
@@ -44,7 +177,40 @@
    "original": "fagotier",
    "apercu": "apercus/moderne-tireur-lbd.png",
    "apercuOriginal": "apercus/moderne-tireur-lbd-original.png",
-   "source": "art/dlc-moderne/ennemis/2-specialistes.txt"
+   "source": "art/dlc-moderne/ennemis/2-specialistes.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-tireur-lbd--repos.gif",
+     "gifOriginal": "apercus/moderne-tireur-lbd--repos-original.gif"
+    },
+    {
+     "nom": "marche",
+     "boucle": true,
+     "gif": "apercus/moderne-tireur-lbd--marche.gif",
+     "gifOriginal": "apercus/moderne-tireur-lbd--marche-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-tireur-lbd--attaque.gif",
+     "gifOriginal": "apercus/moderne-tireur-lbd--attaque-original.gif"
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-tireur-lbd--blesse.gif",
+     "gifOriginal": "apercus/moderne-tireur-lbd--blesse-original.gif"
+    },
+    {
+     "nom": "mort",
+     "boucle": false,
+     "gif": "apercus/moderne-tireur-lbd--mort.gif",
+     "gifOriginal": "apercus/moderne-tireur-lbd--mort-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-grenadier-lacrymo",
@@ -53,7 +219,40 @@
    "original": "pestifere",
    "apercu": "apercus/moderne-grenadier-lacrymo.png",
    "apercuOriginal": "apercus/moderne-grenadier-lacrymo-original.png",
-   "source": "art/dlc-moderne/ennemis/2-specialistes.txt"
+   "source": "art/dlc-moderne/ennemis/2-specialistes.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-grenadier-lacrymo--repos.gif",
+     "gifOriginal": "apercus/moderne-grenadier-lacrymo--repos-original.gif"
+    },
+    {
+     "nom": "marche",
+     "boucle": true,
+     "gif": "apercus/moderne-grenadier-lacrymo--marche.gif",
+     "gifOriginal": "apercus/moderne-grenadier-lacrymo--marche-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-grenadier-lacrymo--attaque.gif",
+     "gifOriginal": "apercus/moderne-grenadier-lacrymo--attaque-original.gif"
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-grenadier-lacrymo--blesse.gif",
+     "gifOriginal": "apercus/moderne-grenadier-lacrymo--blesse-original.gif"
+    },
+    {
+     "nom": "mort",
+     "boucle": false,
+     "gif": "apercus/moderne-grenadier-lacrymo--mort.gif",
+     "gifOriginal": "apercus/moderne-grenadier-lacrymo--mort-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-bac",
@@ -62,7 +261,40 @@
    "original": "delateur",
    "apercu": "apercus/moderne-bac.png",
    "apercuOriginal": "apercus/moderne-bac-original.png",
-   "source": "art/dlc-moderne/ennemis/2-specialistes.txt"
+   "source": "art/dlc-moderne/ennemis/2-specialistes.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-bac--repos.gif",
+     "gifOriginal": "apercus/moderne-bac--repos-original.gif"
+    },
+    {
+     "nom": "marche",
+     "boucle": true,
+     "gif": "apercus/moderne-bac--marche.gif",
+     "gifOriginal": "apercus/moderne-bac--marche-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-bac--attaque.gif",
+     "gifOriginal": "apercus/moderne-bac--attaque-original.gif"
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-bac--blesse.gif",
+     "gifOriginal": "apercus/moderne-bac--blesse-original.gif"
+    },
+    {
+     "nom": "mort",
+     "boucle": false,
+     "gif": "apercus/moderne-bac--mort.gif",
+     "gifOriginal": "apercus/moderne-bac--mort-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-commissaire",
@@ -71,7 +303,40 @@
    "original": "porte-banniere",
    "apercu": "apercus/moderne-commissaire.png",
    "apercuOriginal": "apercus/moderne-commissaire-original.png",
-   "source": "art/dlc-moderne/ennemis/2-specialistes.txt"
+   "source": "art/dlc-moderne/ennemis/2-specialistes.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-commissaire--repos.gif",
+     "gifOriginal": "apercus/moderne-commissaire--repos-original.gif"
+    },
+    {
+     "nom": "marche",
+     "boucle": true,
+     "gif": "apercus/moderne-commissaire--marche.gif",
+     "gifOriginal": "apercus/moderne-commissaire--marche-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-commissaire--attaque.gif",
+     "gifOriginal": "apercus/moderne-commissaire--attaque-original.gif"
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-commissaire--blesse.gif",
+     "gifOriginal": "apercus/moderne-commissaire--blesse-original.gif"
+    },
+    {
+     "nom": "mort",
+     "boucle": false,
+     "gif": "apercus/moderne-commissaire--mort.gif",
+     "gifOriginal": "apercus/moderne-commissaire--mort-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-bravm",
@@ -80,7 +345,40 @@
    "original": "chevalier",
    "apercu": "apercus/moderne-bravm.png",
    "apercuOriginal": "apercus/moderne-bravm-original.png",
-   "source": "art/dlc-moderne/ennemis/3-rapides.txt"
+   "source": "art/dlc-moderne/ennemis/3-rapides.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-bravm--repos.gif",
+     "gifOriginal": "apercus/moderne-bravm--repos-original.gif"
+    },
+    {
+     "nom": "marche",
+     "boucle": true,
+     "gif": "apercus/moderne-bravm--marche.gif",
+     "gifOriginal": "apercus/moderne-bravm--marche-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-bravm--attaque.gif",
+     "gifOriginal": "apercus/moderne-bravm--attaque-original.gif"
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-bravm--blesse.gif",
+     "gifOriginal": "apercus/moderne-bravm--blesse-original.gif"
+    },
+    {
+     "nom": "mort",
+     "boucle": false,
+     "gif": "apercus/moderne-bravm--mort.gif",
+     "gifOriginal": "apercus/moderne-bravm--mort-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-cavalier-monte",
@@ -89,7 +387,40 @@
    "original": "cavalier",
    "apercu": "apercus/moderne-cavalier-monte.png",
    "apercuOriginal": "apercus/moderne-cavalier-monte-original.png",
-   "source": "art/dlc-moderne/ennemis/3-rapides.txt"
+   "source": "art/dlc-moderne/ennemis/3-rapides.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-cavalier-monte--repos.gif",
+     "gifOriginal": "apercus/moderne-cavalier-monte--repos-original.gif"
+    },
+    {
+     "nom": "marche",
+     "boucle": true,
+     "gif": "apercus/moderne-cavalier-monte--marche.gif",
+     "gifOriginal": "apercus/moderne-cavalier-monte--marche-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-cavalier-monte--attaque.gif",
+     "gifOriginal": "apercus/moderne-cavalier-monte--attaque-original.gif"
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-cavalier-monte--blesse.gif",
+     "gifOriginal": "apercus/moderne-cavalier-monte--blesse-original.gif"
+    },
+    {
+     "nom": "mort",
+     "boucle": false,
+     "gif": "apercus/moderne-cavalier-monte--mort.gif",
+     "gifOriginal": "apercus/moderne-cavalier-monte--mort-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-drone",
@@ -98,7 +429,40 @@
    "original": "corbeau-noir",
    "apercu": "apercus/moderne-drone.png",
    "apercuOriginal": "apercus/moderne-drone-original.png",
-   "source": "art/dlc-moderne/ennemis/4-airs.txt"
+   "source": "art/dlc-moderne/ennemis/4-airs.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-drone--repos.gif",
+     "gifOriginal": "apercus/moderne-drone--repos-original.gif"
+    },
+    {
+     "nom": "marche",
+     "boucle": true,
+     "gif": "apercus/moderne-drone--marche.gif",
+     "gifOriginal": "apercus/moderne-drone--marche-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-drone--attaque.gif",
+     "gifOriginal": "apercus/moderne-drone--attaque-original.gif"
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-drone--blesse.gif",
+     "gifOriginal": "apercus/moderne-drone--blesse-original.gif"
+    },
+    {
+     "nom": "mort",
+     "boucle": false,
+     "gif": "apercus/moderne-drone--mort.gif",
+     "gifOriginal": "apercus/moderne-drone--mort-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-helicoptere",
@@ -107,7 +471,40 @@
    "original": "ange-cendre",
    "apercu": "apercus/moderne-helicoptere.png",
    "apercuOriginal": "apercus/moderne-helicoptere-original.png",
-   "source": "art/dlc-moderne/ennemis/4-airs.txt"
+   "source": "art/dlc-moderne/ennemis/4-airs.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-helicoptere--repos.gif",
+     "gifOriginal": "apercus/moderne-helicoptere--repos-original.gif"
+    },
+    {
+     "nom": "marche",
+     "boucle": true,
+     "gif": "apercus/moderne-helicoptere--marche.gif",
+     "gifOriginal": "apercus/moderne-helicoptere--marche-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-helicoptere--attaque.gif",
+     "gifOriginal": "apercus/moderne-helicoptere--attaque-original.gif"
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-helicoptere--blesse.gif",
+     "gifOriginal": "apercus/moderne-helicoptere--blesse-original.gif"
+    },
+    {
+     "nom": "mort",
+     "boucle": false,
+     "gif": "apercus/moderne-helicoptere--mort.gif",
+     "gifOriginal": "apercus/moderne-helicoptere--mort-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-canon-a-eau",
@@ -116,7 +513,40 @@
    "original": "gargouille",
    "apercu": "apercus/moderne-canon-a-eau.png",
    "apercuOriginal": "apercus/moderne-canon-a-eau-original.png",
-   "source": "art/dlc-moderne/ennemis/5-lourds.txt"
+   "source": "art/dlc-moderne/ennemis/5-lourds.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-canon-a-eau--repos.gif",
+     "gifOriginal": "apercus/moderne-canon-a-eau--repos-original.gif"
+    },
+    {
+     "nom": "marche",
+     "boucle": true,
+     "gif": "apercus/moderne-canon-a-eau--marche.gif",
+     "gifOriginal": "apercus/moderne-canon-a-eau--marche-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-canon-a-eau--attaque.gif",
+     "gifOriginal": "apercus/moderne-canon-a-eau--attaque-original.gif"
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-canon-a-eau--blesse.gif",
+     "gifOriginal": "apercus/moderne-canon-a-eau--blesse-original.gif"
+    },
+    {
+     "nom": "mort",
+     "boucle": false,
+     "gif": "apercus/moderne-canon-a-eau--mort.gif",
+     "gifOriginal": "apercus/moderne-canon-a-eau--mort-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-centaure",
@@ -125,7 +555,40 @@
    "original": "garde-royal",
    "apercu": "apercus/moderne-centaure.png",
    "apercuOriginal": "apercus/moderne-centaure-original.png",
-   "source": "art/dlc-moderne/ennemis/5-lourds.txt"
+   "source": "art/dlc-moderne/ennemis/5-lourds.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-centaure--repos.gif",
+     "gifOriginal": "apercus/moderne-centaure--repos-original.gif"
+    },
+    {
+     "nom": "marche",
+     "boucle": true,
+     "gif": "apercus/moderne-centaure--marche.gif",
+     "gifOriginal": "apercus/moderne-centaure--marche-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-centaure--attaque.gif",
+     "gifOriginal": "apercus/moderne-centaure--attaque-original.gif"
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-centaure--blesse.gif",
+     "gifOriginal": "apercus/moderne-centaure--blesse-original.gif"
+    },
+    {
+     "nom": "mort",
+     "boucle": false,
+     "gif": "apercus/moderne-centaure--mort.gif",
+     "gifOriginal": "apercus/moderne-centaure--mort-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-prefet",
@@ -134,7 +597,40 @@
    "original": "roi-fou",
    "apercu": "apercus/moderne-prefet.png",
    "apercuOriginal": "apercus/moderne-prefet-original.png",
-   "source": "art/dlc-moderne/ennemis/5-lourds.txt"
+   "source": "art/dlc-moderne/ennemis/5-lourds.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-prefet--repos.gif",
+     "gifOriginal": "apercus/moderne-prefet--repos-original.gif"
+    },
+    {
+     "nom": "marche",
+     "boucle": true,
+     "gif": "apercus/moderne-prefet--marche.gif",
+     "gifOriginal": "apercus/moderne-prefet--marche-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-prefet--attaque.gif",
+     "gifOriginal": "apercus/moderne-prefet--attaque-original.gif"
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-prefet--blesse.gif",
+     "gifOriginal": "apercus/moderne-prefet--blesse-original.gif"
+    },
+    {
+     "nom": "mort",
+     "boucle": false,
+     "gif": "apercus/moderne-prefet--mort.gif",
+     "gifOriginal": "apercus/moderne-prefet--mort-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-caserne-1",
@@ -143,7 +639,22 @@
    "original": "tour-caserne-1",
    "apercu": "apercus/moderne-caserne-1.png",
    "apercuOriginal": "apercus/moderne-caserne-1-original.png",
-   "source": "art/dlc-moderne/tours/1-caserne.txt"
+   "source": "art/dlc-moderne/tours/1-caserne.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-caserne-1--repos.gif",
+     "gifOriginal": "apercus/moderne-caserne-1--repos-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-caserne-1--attaque.gif",
+     "gifOriginal": "apercus/moderne-caserne-1--attaque-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-caserne-2",
@@ -152,7 +663,22 @@
    "original": "tour-caserne-2",
    "apercu": "apercus/moderne-caserne-2.png",
    "apercuOriginal": "apercus/moderne-caserne-2-original.png",
-   "source": "art/dlc-moderne/tours/1-caserne.txt"
+   "source": "art/dlc-moderne/tours/1-caserne.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-caserne-2--repos.gif",
+     "gifOriginal": "apercus/moderne-caserne-2--repos-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-caserne-2--attaque.gif",
+     "gifOriginal": "apercus/moderne-caserne-2--attaque-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-caserne-3",
@@ -161,7 +687,22 @@
    "original": "tour-caserne-3",
    "apercu": "apercus/moderne-caserne-3.png",
    "apercuOriginal": "apercus/moderne-caserne-3-original.png",
-   "source": "art/dlc-moderne/tours/1-caserne.txt"
+   "source": "art/dlc-moderne/tours/1-caserne.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-caserne-3--repos.gif",
+     "gifOriginal": "apercus/moderne-caserne-3--repos-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-caserne-3--attaque.gif",
+     "gifOriginal": "apercus/moderne-caserne-3--attaque-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-caserne-amphi",
@@ -170,7 +711,22 @@
    "original": "tour-caserne-cloitre",
    "apercu": "apercus/moderne-caserne-amphi.png",
    "apercuOriginal": "apercus/moderne-caserne-amphi-original.png",
-   "source": "art/dlc-moderne/tours/1-caserne.txt"
+   "source": "art/dlc-moderne/tours/1-caserne.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-caserne-amphi--repos.gif",
+     "gifOriginal": "apercus/moderne-caserne-amphi--repos-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-caserne-amphi--attaque.gif",
+     "gifOriginal": "apercus/moderne-caserne-amphi--attaque-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-caserne-zad",
@@ -179,7 +735,22 @@
    "original": "tour-caserne-ecorcheurs",
    "apercu": "apercus/moderne-caserne-zad.png",
    "apercuOriginal": "apercus/moderne-caserne-zad-original.png",
-   "source": "art/dlc-moderne/tours/1-caserne.txt"
+   "source": "art/dlc-moderne/tours/1-caserne.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-caserne-zad--repos.gif",
+     "gifOriginal": "apercus/moderne-caserne-zad--repos-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-caserne-zad--attaque.gif",
+     "gifOriginal": "apercus/moderne-caserne-zad--attaque-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-tir-1",
@@ -188,7 +759,40 @@
    "original": "tour-tir-1",
    "apercu": "apercus/moderne-tir-1.png",
    "apercuOriginal": "apercus/moderne-tir-1-original.png",
-   "source": "art/dlc-moderne/tours/2-tir.txt"
+   "source": "art/dlc-moderne/tours/2-tir.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-tir-1--repos.gif",
+     "gifOriginal": "apercus/moderne-tir-1--repos-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-tir-1--attaque.gif",
+     "gifOriginal": "apercus/moderne-tir-1--attaque-original.gif"
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-tir-1--blesse.gif",
+     "gifOriginal": "apercus/moderne-tir-1--blesse-original.gif"
+    },
+    {
+     "nom": "mort",
+     "boucle": false,
+     "gif": "apercus/moderne-tir-1--mort.gif",
+     "gifOriginal": "apercus/moderne-tir-1--mort-original.gif"
+    },
+    {
+     "nom": "marche",
+     "boucle": true,
+     "gif": "apercus/moderne-tir-1--marche.gif",
+     "gifOriginal": "apercus/moderne-tir-1--marche-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-tir-2",
@@ -197,7 +801,40 @@
    "original": "tour-tir-2",
    "apercu": "apercus/moderne-tir-2.png",
    "apercuOriginal": "apercus/moderne-tir-2-original.png",
-   "source": "art/dlc-moderne/tours/2-tir.txt"
+   "source": "art/dlc-moderne/tours/2-tir.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-tir-2--repos.gif",
+     "gifOriginal": "apercus/moderne-tir-2--repos-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-tir-2--attaque.gif",
+     "gifOriginal": "apercus/moderne-tir-2--attaque-original.gif"
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-tir-2--blesse.gif",
+     "gifOriginal": "apercus/moderne-tir-2--blesse-original.gif"
+    },
+    {
+     "nom": "mort",
+     "boucle": false,
+     "gif": "apercus/moderne-tir-2--mort.gif",
+     "gifOriginal": "apercus/moderne-tir-2--mort-original.gif"
+    },
+    {
+     "nom": "marche",
+     "boucle": true,
+     "gif": "apercus/moderne-tir-2--marche.gif",
+     "gifOriginal": "apercus/moderne-tir-2--marche-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-tir-3",
@@ -206,7 +843,40 @@
    "original": "tour-tir-3",
    "apercu": "apercus/moderne-tir-3.png",
    "apercuOriginal": "apercus/moderne-tir-3-original.png",
-   "source": "art/dlc-moderne/tours/2-tir.txt"
+   "source": "art/dlc-moderne/tours/2-tir.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-tir-3--repos.gif",
+     "gifOriginal": "apercus/moderne-tir-3--repos-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-tir-3--attaque.gif",
+     "gifOriginal": "apercus/moderne-tir-3--attaque-original.gif"
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-tir-3--blesse.gif",
+     "gifOriginal": "apercus/moderne-tir-3--blesse-original.gif"
+    },
+    {
+     "nom": "mort",
+     "boucle": false,
+     "gif": "apercus/moderne-tir-3--mort.gif",
+     "gifOriginal": "apercus/moderne-tir-3--mort-original.gif"
+    },
+    {
+     "nom": "marche",
+     "boucle": true,
+     "gif": "apercus/moderne-tir-3--marche.gif",
+     "gifOriginal": "apercus/moderne-tir-3--marche-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-tir-vigies",
@@ -215,7 +885,40 @@
    "original": "tour-tir-guetteurs",
    "apercu": "apercus/moderne-tir-vigies.png",
    "apercuOriginal": "apercus/moderne-tir-vigies-original.png",
-   "source": "art/dlc-moderne/tours/2-tir.txt"
+   "source": "art/dlc-moderne/tours/2-tir.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-tir-vigies--repos.gif",
+     "gifOriginal": "apercus/moderne-tir-vigies--repos-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-tir-vigies--attaque.gif",
+     "gifOriginal": "apercus/moderne-tir-vigies--attaque-original.gif"
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-tir-vigies--blesse.gif",
+     "gifOriginal": "apercus/moderne-tir-vigies--blesse-original.gif"
+    },
+    {
+     "nom": "mort",
+     "boucle": false,
+     "gif": "apercus/moderne-tir-vigies--mort.gif",
+     "gifOriginal": "apercus/moderne-tir-vigies--mort-original.gif"
+    },
+    {
+     "nom": "marche",
+     "boucle": true,
+     "gif": "apercus/moderne-tir-vigies--marche.gif",
+     "gifOriginal": "apercus/moderne-tir-vigies--marche-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-tir-renvoyeurs",
@@ -224,7 +927,40 @@
    "original": "tour-tir-beffroi",
    "apercu": "apercus/moderne-tir-renvoyeurs.png",
    "apercuOriginal": "apercus/moderne-tir-renvoyeurs-original.png",
-   "source": "art/dlc-moderne/tours/2-tir.txt"
+   "source": "art/dlc-moderne/tours/2-tir.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-tir-renvoyeurs--repos.gif",
+     "gifOriginal": "apercus/moderne-tir-renvoyeurs--repos-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-tir-renvoyeurs--attaque.gif",
+     "gifOriginal": "apercus/moderne-tir-renvoyeurs--attaque-original.gif"
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-tir-renvoyeurs--blesse.gif",
+     "gifOriginal": "apercus/moderne-tir-renvoyeurs--blesse-original.gif"
+    },
+    {
+     "nom": "mort",
+     "boucle": false,
+     "gif": "apercus/moderne-tir-renvoyeurs--mort.gif",
+     "gifOriginal": "apercus/moderne-tir-renvoyeurs--mort-original.gif"
+    },
+    {
+     "nom": "marche",
+     "boucle": true,
+     "gif": "apercus/moderne-tir-renvoyeurs--marche.gif",
+     "gifOriginal": "apercus/moderne-tir-renvoyeurs--marche-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-magie-1",
@@ -233,7 +969,22 @@
    "original": "tour-magie-1",
    "apercu": "apercus/moderne-magie-1.png",
    "apercuOriginal": "apercus/moderne-magie-1-original.png",
-   "source": "art/dlc-moderne/tours/3-magie.txt"
+   "source": "art/dlc-moderne/tours/3-magie.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-magie-1--repos.gif",
+     "gifOriginal": "apercus/moderne-magie-1--repos-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-magie-1--attaque.gif",
+     "gifOriginal": "apercus/moderne-magie-1--attaque-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-magie-2",
@@ -242,7 +993,22 @@
    "original": "tour-magie-2",
    "apercu": "apercus/moderne-magie-2.png",
    "apercuOriginal": "apercus/moderne-magie-2-original.png",
-   "source": "art/dlc-moderne/tours/3-magie.txt"
+   "source": "art/dlc-moderne/tours/3-magie.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-magie-2--repos.gif",
+     "gifOriginal": "apercus/moderne-magie-2--repos-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-magie-2--attaque.gif",
+     "gifOriginal": "apercus/moderne-magie-2--attaque-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-magie-3",
@@ -251,7 +1017,22 @@
    "original": "tour-magie-3",
    "apercu": "apercus/moderne-magie-3.png",
    "apercuOriginal": "apercus/moderne-magie-3-original.png",
-   "source": "art/dlc-moderne/tours/3-magie.txt"
+   "source": "art/dlc-moderne/tours/3-magie.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-magie-3--repos.gif",
+     "gifOriginal": "apercus/moderne-magie-3--repos-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-magie-3--attaque.gif",
+     "gifOriginal": "apercus/moderne-magie-3--attaque-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-magie-megaphone",
@@ -260,7 +1041,22 @@
    "original": "tour-magie-oracle",
    "apercu": "apercus/moderne-magie-megaphone.png",
    "apercuOriginal": "apercus/moderne-magie-megaphone-original.png",
-   "source": "art/dlc-moderne/tours/3-magie.txt"
+   "source": "art/dlc-moderne/tours/3-magie.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-magie-megaphone--repos.gif",
+     "gifOriginal": "apercus/moderne-magie-megaphone--repos-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-magie-megaphone--attaque.gif",
+     "gifOriginal": "apercus/moderne-magie-megaphone--attaque-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-magie-graffeurs",
@@ -269,7 +1065,22 @@
    "original": "tour-magie-necromancien",
    "apercu": "apercus/moderne-magie-graffeurs.png",
    "apercuOriginal": "apercus/moderne-magie-graffeurs-original.png",
-   "source": "art/dlc-moderne/tours/3-magie.txt"
+   "source": "art/dlc-moderne/tours/3-magie.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-magie-graffeurs--repos.gif",
+     "gifOriginal": "apercus/moderne-magie-graffeurs--repos-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-magie-graffeurs--attaque.gif",
+     "gifOriginal": "apercus/moderne-magie-graffeurs--attaque-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-artillerie-1",
@@ -278,7 +1089,22 @@
    "original": "tour-artillerie-1",
    "apercu": "apercus/moderne-artillerie-1.png",
    "apercuOriginal": "apercus/moderne-artillerie-1-original.png",
-   "source": "art/dlc-moderne/tours/4-artillerie.txt"
+   "source": "art/dlc-moderne/tours/4-artillerie.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-artillerie-1--repos.gif",
+     "gifOriginal": "apercus/moderne-artillerie-1--repos-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-artillerie-1--attaque.gif",
+     "gifOriginal": "apercus/moderne-artillerie-1--attaque-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-artillerie-2",
@@ -287,7 +1113,22 @@
    "original": "tour-artillerie-2",
    "apercu": "apercus/moderne-artillerie-2.png",
    "apercuOriginal": "apercus/moderne-artillerie-2-original.png",
-   "source": "art/dlc-moderne/tours/4-artillerie.txt"
+   "source": "art/dlc-moderne/tours/4-artillerie.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-artillerie-2--repos.gif",
+     "gifOriginal": "apercus/moderne-artillerie-2--repos-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-artillerie-2--attaque.gif",
+     "gifOriginal": "apercus/moderne-artillerie-2--attaque-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-artillerie-3",
@@ -296,25 +1137,70 @@
    "original": "tour-artillerie-3",
    "apercu": "apercus/moderne-artillerie-3.png",
    "apercuOriginal": "apercus/moderne-artillerie-3-original.png",
-   "source": "art/dlc-moderne/tours/4-artillerie.txt"
+   "source": "art/dlc-moderne/tours/4-artillerie.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-artillerie-3--repos.gif",
+     "gifOriginal": "apercus/moderne-artillerie-3--repos-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-artillerie-3--attaque.gif",
+     "gifOriginal": "apercus/moderne-artillerie-3--attaque-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
-   "id": "moderne-artillerie-bidon",
+   "id": "moderne-artillerie-trebuchet",
    "nom": "Trébuchet à caddie",
    "categorie": "tour",
    "original": "tour-artillerie-mortier",
-   "apercu": "apercus/moderne-artillerie-bidon.png",
-   "apercuOriginal": "apercus/moderne-artillerie-bidon-original.png",
-   "source": "art/dlc-moderne/tours/4-artillerie.txt"
+   "apercu": "apercus/moderne-artillerie-trebuchet.png",
+   "apercuOriginal": "apercus/moderne-artillerie-trebuchet-original.png",
+   "source": "art/dlc-moderne/tours/4-artillerie.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-artillerie-trebuchet--repos.gif",
+     "gifOriginal": "apercus/moderne-artillerie-trebuchet--repos-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-artillerie-trebuchet--attaque.gif",
+     "gifOriginal": "apercus/moderne-artillerie-trebuchet--attaque-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
-   "id": "moderne-artillerie-lance-pierre",
+   "id": "moderne-artillerie-canon-paves",
    "nom": "Canon à pavés",
    "categorie": "tour",
    "original": "tour-artillerie-baliste",
-   "apercu": "apercus/moderne-artillerie-lance-pierre.png",
-   "apercuOriginal": "apercus/moderne-artillerie-lance-pierre-original.png",
-   "source": "art/dlc-moderne/tours/4-artillerie.txt"
+   "apercu": "apercus/moderne-artillerie-canon-paves.png",
+   "apercuOriginal": "apercus/moderne-artillerie-canon-paves-original.png",
+   "source": "art/dlc-moderne/tours/4-artillerie.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-artillerie-canon-paves--repos.gif",
+     "gifOriginal": "apercus/moderne-artillerie-canon-paves--repos-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-artillerie-canon-paves--attaque.gif",
+     "gifOriginal": "apercus/moderne-artillerie-canon-paves--attaque-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-plume",
@@ -323,7 +1209,22 @@
    "original": "tour-sanctuaire",
    "apercu": "apercus/moderne-plume.png",
    "apercuOriginal": "apercus/moderne-plume-original.png",
-   "source": "art/dlc-moderne/tours/5-divines.txt"
+   "source": "art/dlc-moderne/tours/5-divines.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-plume--repos.gif",
+     "gifOriginal": "apercus/moderne-plume--repos-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-plume--attaque.gif",
+     "gifOriginal": "apercus/moderne-plume--attaque-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-charlie",
@@ -332,7 +1233,22 @@
    "original": "tour-totem",
    "apercu": "apercus/moderne-charlie.png",
    "apercuOriginal": "apercus/moderne-charlie-original.png",
-   "source": "art/dlc-moderne/tours/5-divines.txt"
+   "source": "art/dlc-moderne/tours/5-divines.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-charlie--repos.gif",
+     "gifOriginal": "apercus/moderne-charlie--repos-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-charlie--attaque.gif",
+     "gifOriginal": "apercus/moderne-charlie--attaque-original.gif"
+    }
+   ],
+   "complet": true
   },
   {
    "id": "moderne-pollen",
@@ -341,7 +1257,22 @@
    "original": "tour-atelier",
    "apercu": "apercus/moderne-pollen.png",
    "apercuOriginal": "apercus/moderne-pollen-original.png",
-   "source": "art/dlc-moderne/tours/5-divines.txt"
+   "source": "art/dlc-moderne/tours/5-divines.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-pollen--repos.gif",
+     "gifOriginal": "apercus/moderne-pollen--repos-original.gif"
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-pollen--attaque.gif",
+     "gifOriginal": "apercus/moderne-pollen--attaque-original.gif"
+    }
+   ],
+   "complet": true
   }
  ]
 }
