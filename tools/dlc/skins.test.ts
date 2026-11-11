@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import { lirePalette, lireSprites } from '../art/format.ts';
 import { decoderPng, encoderPng, nouvelleImage } from '../art/png.ts';
-import { FACTEUR, MARGE, lireEntetes, rendreApercus } from './skins.ts';
+import { FACTEUR, MARGE, PAUSE_UNIQUE, decrireEcart, estBloquant, lireEntetes, rendreApercus } from './skins.ts';
 
 const PALETTES = new Map([['commune', lirePalette('a ff0000\nb 00ff00\n', 'p.txt')]]);
 const planche = (): ReturnType<typeof nouvelleImage> => nouvelleImage(8, 8);
@@ -84,5 +84,119 @@ describe('aperçus des skins du DLC', () => {
   it('signale un skin déclaré sans sprite', () => {
     const texte = '#: moderne-absent | Absent | -\npalette commune\nsprite autre\na\n';
     expect(() => rendreApercus({ jeu: JEU, dlc: [{ texte, fichier: 'essai.txt' }], palettes: PALETTES, planche })).toThrow(/aucun sprite/);
+  });
+});
+
+/** Original animé : une tour à repos de 2 images (300 ms) et attaque de 2 images, un tireur à repos de 3 images. */
+const JEU_ANIME = lireSprites(`palette commune
+contour non
+sprite tour-anim
+categorie tour
+taille 4 4
+ancre 2 3
+point tireur 2 1
+anim repos 300
+cadre
+aaaa
+cadre
+bbbb
+anim attaque 100
+cadre
+aaaa
+cadre
+aaaa
+....
+aaaa
+
+sprite tireur-anim
+taille 2 2
+ancre 1 1
+anim repos 200
+cadre
+bb
+cadre
+aa
+cadre
+bb
+anim mort 100
+cadre
+aa
+`, 'jeu.txt');
+
+const SKIN_ANIME = `#: moderne-anim + moderne-tireur@tireur | Skin animé | tour-anim + tireur-anim@tireur
+palette commune
+contour non
+sprite moderne-anim
+categorie tour
+taille 4 4
+ancre 2 3
+point tireur 2 1
+anim repos 300
+cadre
+bbbb
+cadre
+aaaa
+
+sprite moderne-tireur
+taille 2 2
+ancre 1 1
+anim repos 200
+cadre
+aa
+cadre
+bb
+`;
+
+describe('animations des skins du DLC', () => {
+  const rendre = (texte: string): ReturnType<typeof rendreApercus> =>
+    rendreApercus({ jeu: JEU_ANIME, dlc: [{ texte, fichier: 'essai.txt' }], palettes: PALETTES, planche, facteur: 1 });
+
+  it('liste les animations du skin puis celles de l’original qui lui manquent, tireur compris', () => {
+    const [a] = rendre(SKIN_ANIME);
+    expect(a?.animations.map((x) => [x.nom, x.skin !== null, x.original !== null])).toEqual([
+      ['repos', true, true], ['attaque', false, true], ['mort', false, true],
+    ]);
+  });
+
+  it('compose les boucles de cadences différentes jusqu’à ce qu’elles se retrouvent', () => {
+    const [a] = rendre(SKIN_ANIME);
+    const original = a?.animations[0]?.original;
+    // Tour 2 × 300 ms, tireur 3 × 200 ms : une boucle commune de 600 ms, changements à 0, 200, 300, 400.
+    expect(original?.boucle).toBe(true);
+    expect(original?.images.map((i) => i.duree)).toEqual([200, 100, 100, 200]);
+    // Le skin : tour 600 ms, tireur 400 ms → 1200 ms.
+    expect(a?.animations[0]?.skin?.images.reduce((t, i) => t + i.duree, 0)).toBe(1200);
+  });
+
+  it('joue une animation unique une fois, la tour seule avec le tireur en repos, puis marque une pause', () => {
+    const [a] = rendre(SKIN_ANIME);
+    const attaque = a?.animations[1]?.original;
+    expect(attaque?.boucle).toBe(false);
+    // Attaque 2 × 100 ms ; le tireur reste en repos (son image change à 200 ms, après la fin).
+    expect(attaque?.images.map((i) => i.duree)).toEqual([100, 100 + PAUSE_UNIQUE]);
+  });
+
+  it('montre seul le tireur pour une animation que la tour n’a pas', () => {
+    const [a] = rendre(SKIN_ANIME);
+    const mort = a?.animations[2]?.original;
+    expect([mort?.images[0]?.image.largeur, mort?.images[0]?.image.hauteur]).toEqual([2 + 2 * MARGE, 2 + 2 * MARGE]);
+  });
+
+  it('relève les écarts d’animations avec l’original, sprite par sprite', () => {
+    const [a] = rendre(SKIN_ANIME);
+    expect(a?.ecarts.map(decrireEcart)).toEqual([
+      'moderne-anim (moderne-anim / tour-anim) : manque attaque',
+      'moderne-anim (moderne-tireur / tireur-anim) : manque mort ; repos : 2 images au lieu de 3',
+    ]);
+    expect(a?.ecarts.every(estBloquant)).toBe(true);
+  });
+
+  it('ne signale rien quand le skin a les mêmes animations, et la cadence à part', () => {
+    const complet = SKIN_ANIME
+      .replace('anim repos 300\ncadre\nbbbb\ncadre\naaaa\n', 'anim repos 300\ncadre\nbbbb\ncadre\naaaa\nanim attaque 100\ncadre\nbbbb\ncadre\nbbbb\n')
+      .replace('anim repos 200\ncadre\naa\ncadre\nbb\n', 'anim repos 250\ncadre\naa\ncadre\nbb\ncadre\naa\nanim mort 100\ncadre\nbb\n');
+    const [a] = rendre(complet);
+    expect(a?.ecarts.filter(estBloquant)).toEqual([]);
+    expect(a?.ecarts[1]?.cadences.map((c) => c.nom)).toEqual(['repos']);
   });
 });
