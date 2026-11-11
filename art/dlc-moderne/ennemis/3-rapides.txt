@@ -47,16 +47,16 @@ origine 0 7
 #: moderne-cavalier-monte | Cavalier de la police montée | cavalier
 sprite moderne-cavalier-monte
 origine 0 5
-.............kkkk..Pp
-............k3111k.kp
-............k31444.kp
-............k1SSSS.kp
-.............kSSS..kp
-............22222..kp
-...........1222222Skp
-...........122222SSkp
-...........122222..kp
-............11111
+........Pp...kkkk..
+........kP..k3111k.
+........kP..k31444.
+........kP..k1SSSS.
+........kP...kSSS..
+........kP..22222..
+........kPS1222222
+........kP.122222
+........kP.122222..
+........kP..11111
 ............111111........oo
 .............11.11.......oBBo
 .......b..bbb11bkbbbbbbbbBBBBo
