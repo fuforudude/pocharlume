@@ -1,6 +1,6 @@
 # DLC « Temps modernes » : premiers skins (tours et ennemis), en revue
 
-Statut : validée le 2026-11-11
+Statut : livrée le 2026-11-11 (étape skins en pose fixe)
 Date : 2026-11-11
 
 ## Besoin
@@ -30,10 +30,21 @@ avant d'aller plus loin. Aucune règle de jeu, aucun niveau, aucun équilibrage 
   n'entrent ni dans l'atlas du jeu ni dans les tests de sprites tant qu'elles ne sont pas validées.
 
 ## Critères d'acceptation
-- [ ] 23 skins de tours et environ 15 ennemis DLC dessinés, sources dans `art/dlc-moderne/`, aperçus PNG générés.
-- [ ] Le jeu ne change pas : atlas, tests de sprites et `npm run verifier` inchangés.
-- [ ] Page de revue publiée : chaque skin agrandi, son original à côté, un champ de commentaire par skin, lisible sur téléphone.
-- [ ] Les commentaires de l'auteur sont relevés et traités dans une passe suivante.
+- [x] 23 skins de tours et environ 15 ennemis DLC dessinés, sources dans `art/dlc-moderne/`, aperçus PNG générés.
+- [x] Le jeu ne change pas : atlas, tests de sprites et `npm run verifier` inchangés.
+- [x] Page de revue publiée : chaque skin agrandi, son original à côté, un champ de commentaire par skin, lisible sur téléphone.
+- [x] Les commentaires de l'auteur sont relevés et traités dans une passe suivante.
+
+## Livraison (2026-11-11)
+- 41 skins validés par l'auteur en quatre passes de revue sur la page https://claude.ai/artifact/VWMGWvx8m6pycg5zHBPYcD
+  (23 tours, 3 chats tireurs, 15 ennemis).
+- Changements demandés en revue : artillerie devenue lanceur de pavés (caddie gardé, A trébuchet en cloche, B canon à pavés
+  en tir tendu), vraies enceintes de sono (membranes prévues pour pulser à l'animation), mégaphone d'or tenu par l'étudiant,
+  Charlie sur une voiture de tête avec enceintes, matraque dans la main gauche pour gendarme, gendarme mobile, CRS, bouclier,
+  BAC, commissaire et cavalier, canon à eau et Centaure redessinés en 64×64 plus réalistes.
+- Les identifiants `moderne-artillerie-bidon` et `moderne-artillerie-lance-pierre` ne correspondent plus aux dessins (gardés
+  pour ne rien casser) : à renommer si on veut, avant de brancher les skins dans le jeu.
+- Suite : animer les 41 skins (cinq animations du jeu), puis les règles du DLC.
 
 ## Hors périmètre
 - Règles, niveaux, équilibrage, animations, vente ou déblocage du DLC.
