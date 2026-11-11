@@ -86,12 +86,13 @@ cadre repos.0 + yeux-haut-clos
 cadre repos.0 + affiche-coin
 cadre repos.0 + cligne duree 200
 cadre repos.0 + yeux-bas-clos
-# Attaque : d'autres yeux s'allument dans la porte, ceux de Plume flamboient, les affiches claquent.
+# Attaque : des yeux s'allument dans la porte d'ombre, un souffle sombre en sort et arrache les affiches, qui se
+# décollent de la colonne et s'envolent en tourbillonnant (gauche et droite) ; les yeux de Plume flamboient.
 anim attaque 90
-cadre repos.0 + yeux-a
-cadre repos.0 + yeux-a + yeux-b + plume-flamboie duree 110
-cadre repos.0 + yeux-a + yeux-b + plume-flamboie + affiche-coin + affiche-coin-b duree 130
-cadre repos.0 + yeux-a duree 100
+cadre repos.0 + yeux-a + nu-1 + souffle-1 + p-rose decale 7 25
+cadre repos.0 + yeux-a + yeux-b + plume-flamboie + nu-2 + souffle-2 + p-rose-t decale 4 20 + p-cyan decale 23 27 + p-blanc-t decale 6 13 + p-jaune decale 24 17 duree 110
+cadre repos.0 + yeux-a + yeux-b + plume-flamboie + nu-2 + souffle-3 + p-rose decale 1 14 + p-cyan-t decale 26 21 + p-blanc decale 3 7 + p-jaune-t decale 26 11 duree 130
+cadre repos.0 + yeux-a + nu-2 + p-rose-t decale 0 8 + p-cyan decale 28 15 + p-blanc-t decale 1 1 + p-jaune decale 28 5 duree 100
 calque yeux-haut-clos 14 29
 k..k
 calque yeux-bas-clos 15 35
@@ -108,6 +109,66 @@ calque yeux-a 14 27
 y.y
 calque yeux-b 15 38
 y.y
+# Les affiches arrachées : la colonne nue là où elles étaient, puis chaque affiche en vol, à plat ou de biais.
+calque nu-1 10 26
+hhhh
+hhhh
+hhh
+calque nu-2 10 16
+hhh
+hhh......hhh
+.........hhh
+.
+.
+.
+.
+hhhh
+hhhh
+hhhh
+hhhh....hhhh
+hhhh....hhhh
+hhh.....hhhh
+calque p-rose 0 0
+111
+1w1
+calque p-rose-t 0 0
+.11
+1w1
+11
+calque p-cyan 0 0
+222
+2k2
+calque p-cyan-t 0 0
+22
+2k2
+.22
+calque p-blanc 0 0
+www
+xxw
+calque p-blanc-t 0 0
+.ww
+wxw
+ww
+calque p-jaune 0 0
+000
+0k0
+calque p-jaune-t 0 0
+00
+0k0
+.00
+# Le souffle d'ombre qui sort de la porte et pousse les affiches.
+calque souffle-1 12 28
+.X....X
+X......X
+calque souffle-2 7 24
+.4..............4
+..X............X
+...X..........X
+....X........X
+calque souffle-3 4 20
+4......................4
+.X....................X
+..X..................X
 
 sprite moderne-charlie
 # Grosse tête de Charlie en papier mâché sur le toit de la voiture de tête, enceintes, banderole MIAOU.
@@ -212,10 +273,10 @@ cadre
 .........d............tt
 .........d....CCCC....tt
 .........d...AAAAAA...tt
-............CCCCCCCC
-...........AAAAAAAAAA
-..........CCCCCCCCCCCC
-.........AAAAAAAAAAAAAA
+.........d..CCCCCCCC..tt
+.........d.AAAAAAAAAA.tt
+.........dCCCCCCCCCCCCtt
+.........AAAAAAAAAAAAAAt
 ........CCCCCCCCCCCCCCCC
 ....XXXXXXXXXXXXXXXXXXXXXXXX
 ......obboobbkkkkkkkboobbo

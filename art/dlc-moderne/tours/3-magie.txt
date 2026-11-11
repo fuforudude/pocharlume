@@ -31,6 +31,62 @@ couleur V b9a0e6
 couleur X 1e2a44
 couleur Q 4a5868
 
+# Ondes sonores qui sortent des enceintes vers l'extérieur (calques communs à la Sono, en bleu pâle au repos,
+# recolorés en blanc à l'attaque) : arcs autour des woofers, sur les flancs, du plus proche au plus loin ;
+# au-dessus des colonnes des Enceintes ; autour des petites enceintes perchées du char.
+calque son-ext-1 0 12
+.
+.
+..L..........................L
+.L............................L
+.L............................L
+.L............................L
+..L..........................L
+.
+..L..........................L
+.L............................L
+.L............................L
+.L............................L
+..L..........................L
+.
+.
+calque son-ext-2 0 12
+.
+.L............................L
+L..............................L
+L..............................L
+L..............................L
+L..............................L
+L..............................L
+.L............................L
+L..............................L
+L..............................L
+L..............................L
+L..............................L
+L..............................L
+.L............................L
+.
+calque son-haut-1 0 4
+.
+.
+....LL....................LL
+...L........................L
+..L..........................L
+calque son-haut-2 0 4
+...LLL....................LLL
+..L..........................L
+.L............................L
+L..............................L
+L..............................L
+calque son-petites 0 0
+..LLLL....................LLLL
+.
+.
+L..............................L
+L..............................L
+L..............................L
+L..............................L
+
 sprite moderne-magie-1
 point tir 16 13
 # Une caisse de récupération, un fumigène et son nuage rose.
@@ -138,16 +194,18 @@ cadre
 .
 .
 .
-# Les membranes pulsent en rythme (woofers sur le temps, tweeters à contretemps), le nuage ondule.
-cadre repos.0 + nuage-haut-off + nuage-haut decale 1 0 + woofers-G + tweeters-M
-cadre repos.0 + nuage-haut-off + nuage-bas-off + nuage-haut decale 1 0 + nuage-bas decale 1 0 + woofers-M + tweeters-G + flamme-vive decale -1 0
-cadre repos.0 + nuage-bas-off + nuage-bas decale 1 0
-cadre repos.0 + nuage-haut-off + nuage-haut decale 1 0 + woofers-G + tweeters-M
-cadre repos.0 + nuage-haut-off + nuage-bas-off + nuage-haut decale 1 0 + nuage-bas decale 1 0 + woofers-M + tweeters-G + flamme-vive decale -1 0
+# Les membranes pulsent en rythme (woofers sur le temps, tweeters à contretemps), le nuage ondule ; à chaque battement,
+# des ondes sortent des enceintes et s'éloignent vers l'extérieur (flancs et dessus des colonnes).
+cadre repos.0 + nuage-haut-off + nuage-haut decale 1 0 + woofers-G + tweeters-M + son-ext-1 + son-haut-1
+cadre repos.0 + nuage-haut-off + nuage-bas-off + nuage-haut decale 1 0 + nuage-bas decale 1 0 + woofers-M + tweeters-G + flamme-vive decale -1 0 + son-ext-2 + son-haut-2
+cadre repos.0 + nuage-bas-off + nuage-bas decale 1 0 + son-ext-1 + son-haut-1
+cadre repos.0 + nuage-haut-off + nuage-haut decale 1 0 + woofers-G + tweeters-M + son-ext-2 + son-haut-2
+cadre repos.0 + nuage-haut-off + nuage-bas-off + nuage-haut decale 1 0 + nuage-bas decale 1 0 + woofers-M + tweeters-G + flamme-vive decale -1 0 + son-ext-1 + son-haut-1
+# Attaque : les ondes, blanches, partent en double vers l'extérieur, et vers le centre où part le tir.
 anim attaque 90
-cadre repos.0 + nuage-haut-off + nuage-haut decale 1 0 + bouffee decale -1 0 + flamme-vive decale -1 0 + woofers-G + tweeters-G + onde-g + onde-d
-cadre repos.0 + nuage-haut-off + nuage-bas-off + nuage-haut decale 1 0 + nuage-bas decale 1 0 + bouffee decale 0 -1 + woofers-M + tweeters-M + onde-g decale 2 0 + onde-d decale -2 0 duree 140
-cadre repos.0 + nuage-bas-off + nuage-bas decale 1 0 + woofers-G
+cadre repos.0 + nuage-haut-off + nuage-haut decale 1 0 + bouffee decale -1 0 + flamme-vive decale -1 0 + woofers-G + tweeters-G + onde-g + onde-d + son-ext-1 couleurs L=W + son-haut-1 couleurs L=W
+cadre repos.0 + nuage-haut-off + nuage-bas-off + nuage-haut decale 1 0 + nuage-bas decale 1 0 + bouffee decale 0 -1 + woofers-M + tweeters-M + onde-g decale 2 0 + onde-d decale -2 0 + son-ext-1 couleurs L=W + son-ext-2 couleurs L=W + son-haut-1 couleurs L=W + son-haut-2 couleurs L=W duree 140
+cadre repos.0 + nuage-bas-off + nuage-bas decale 1 0 + woofers-G + son-ext-2 couleurs L=W + son-haut-2 couleurs L=W
 # Le nuage du fumigène ondule : le haut puis le bas glissent d'un pixel.
 calque nuage-haut 16 0
 ..........
@@ -309,15 +367,17 @@ cadre
 .
 .
 # Les membranes pulsent en rythme (woofers et petites enceintes sur le temps, tweeters à contretemps) ; la fumée roule.
-cadre repos.0 couleurs 5=1 1=5 dans 13 8 24 15 + woofers-G + tweeters-M
-cadre repos.0 + woofers-M + tweeters-G
-cadre repos.0 couleurs 5=1 1=5 dans 13 8 24 15 + cligne
-cadre repos.0 + woofers-G + tweeters-M
-cadre repos.0 couleurs 5=1 1=5 dans 13 8 24 15 + woofers-M + tweeters-G
+# Des ondes sortent des enceintes et s'éloignent vers l'extérieur (flancs des colonnes, autour des petites enceintes).
+cadre repos.0 couleurs 5=1 1=5 dans 13 8 24 15 + woofers-G + tweeters-M + son-ext-1 + son-petites
+cadre repos.0 + woofers-M + tweeters-G + son-ext-2
+cadre repos.0 couleurs 5=1 1=5 dans 13 8 24 15 + cligne + son-ext-1 + son-petites
+cadre repos.0 + woofers-G + tweeters-M + son-ext-2
+cadre repos.0 couleurs 5=1 1=5 dans 13 8 24 15 + woofers-M + tweeters-G + son-ext-1 + son-petites
+# Attaque : les ondes, blanches, partent en double vers l'extérieur, et vers le centre où part le tir.
 anim attaque 90
-cadre repos.0 couleurs 5=1 1=5 dans 13 8 24 15 + woofers-G + tweeters-G + onde-g + onde-d
-cadre repos.0 + woofers-M + tweeters-M + onde-g decale 2 0 + onde-d decale -2 0 duree 140
-cadre repos.0 couleurs 5=1 1=5 dans 13 8 24 15 + woofers-G
+cadre repos.0 couleurs 5=1 1=5 dans 13 8 24 15 + woofers-G + tweeters-G + onde-g + onde-d + son-ext-1 couleurs L=W + son-petites couleurs L=W
+cadre repos.0 + woofers-M + tweeters-M + onde-g decale 2 0 + onde-d decale -2 0 + son-ext-1 couleurs L=W + son-ext-2 couleurs L=W + son-petites couleurs L=W duree 140
+cadre repos.0 couleurs 5=1 1=5 dans 13 8 24 15 + woofers-G + son-ext-2 couleurs L=W
 calque woofers-G
 .
 .
@@ -416,7 +476,8 @@ b.b
 
 sprite moderne-magie-megaphone
 point tir 16 13
-# A : l'étudiant tient le grand mégaphone d'or, ondes sonores ; une colonne d'enceintes derrière.
+# A : un étudiant debout sur une estrade (caisse de plastique bleu), le grand mégaphone d'or tourné vers la droite.
+# Dessiné tourné à droite : l'orientation vers la cible reste à décider (voir la spec de l'animation).
 anim repos 140
 cadre
 .
@@ -424,54 +485,54 @@ cadre
 .
 .
 .
-..........0000
-..........o..o..........y...F
-..........oo.oo.......yFy....F
-.........oooooo.....yFFYy.y...F
-.........ooookoo..yFFYYYy..y..F
-.ggggggg.ooocccxFFYYYYYYw..y..F
-.gkkvkkg..ocrccFYYYYYYYYw..y..F
-.gkvwvkg...ccc.fYYYYYYYYw..y.F
-.gkkvkkg..66666.ffYYYYYYw.y.F
-.gkvvvkg.666666o..ffYYYYy
-.gvuuuvg.6666oo.o...ffYYy
-.gvuwuvg.66666..k.....ffy
-.gvuuuvg.66666..........y
-.gkvvvkg..X.X
-.ggggggg..X.X
-.gkvvvkg.kkAkkAAAAAAA
-.gvuuuvg.CCCCCCCCCCCC
-.gvuwuvg.CCXXCXXCXXCC
-.gvuuuvg.CCXXCXXCXXCC
-.gkvvvkg.CCCCCCCCCCCC
-.ggggggg.XXXXXXXXXXXX
+.......0000
+.......o..o..........y...F
+.......oo.oo.......yFy....F
+......oooooo.....yFFYy.y...F
+......ooookoo..yFFYYYy..y..F
+......ooocccxFFYYYYYYw..y..F
+.......ocrccFYYYYYYYYw..y..F
+........ccc.fYYYYYYYYw..y.F
+.......66666.ffYYYYYYw.y.F
+......666666o..ffYYYYy
+......6666oo.o...ffYYy
+......66666..k.....ffy
+......66666..........y
+.......X.X
+.......X.X
+......kkAkkAAAAAAA
+......CCCCCCCCCCCC
+......CCXXCXXCXXCC
+......CCXXCXXCXXCC
+......CCCCCCCCCCCC
+......XXXXXXXXXXXX
 .
 .
 .
 .
 .
 .
-# Le son part du pavillon en arcs (l'intérieur naît, les deux, puis l'extérieur s'éloigne) ; l'enceinte pulse.
-cadre repos.0 + arc-int-off + woofers-G + tweeters-M
-cadre repos.0 + arc-ext-off + woofers-M + tweeters-G
+# Le son part du pavillon en arcs (l'intérieur naît, les deux, puis l'extérieur s'éloigne).
+cadre repos.0 + arc-int-off
+cadre repos.0 + arc-ext-off
 cadre repos.0 + cligne
-cadre repos.0 + arc-int-off + woofers-G + tweeters-M
-cadre repos.0 + arc-ext-off + woofers-M + tweeters-G
+cadre repos.0 + arc-int-off
+cadre repos.0 + arc-ext-off
 # Attaque : le pavillon s'éclaire et lance un grand arc.
 anim attaque 90
-cadre repos.0 + arc-ext-off + pavillon + woofers-G + tweeters-G
-cadre repos.0 + pavillon + arc-large + woofers-M + tweeters-M duree 140
-cadre repos.0 + arc-int-off + woofers-G
-calque cligne 13 9
+cadre repos.0 + arc-ext-off + pavillon
+cadre repos.0 + pavillon + arc-large duree 140
+cadre repos.0 + arc-int-off
+calque cligne 10 9
 b
-calque arc-int-off 26 8
+calque arc-int-off 23 8
 _
 ._
 ._
 ._
 ._
 _
-calque arc-ext-off 28 6
+calque arc-ext-off 25 6
 _
 ._
 .._
@@ -480,98 +541,18 @@ _
 .._
 ._
 _
-calque pavillon 24 10
+calque pavillon 21 10
 W
 W
 W
 W
-calque arc-large 31 8
+calque arc-large 28 8
 y
 y
 y
 y
 y
 y
-calque woofers-G
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-...vwv
-...wWw
-...vwv
-.
-.
-.
-...vwv
-...wWw
-...vwv
-calque tweeters-G
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-...vwv
-...wWw
-...vwv
-calque woofers-M
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-...uvu
-...vwv
-...uvu
-.
-.
-.
-...uvu
-...vwv
-...uvu
-calque tweeters-M
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-.
-...kvk
-...vWv
-...kvk
 
 sprite moderne-magie-graffeurs
 point tir 16 13
@@ -611,15 +592,17 @@ cadre
 .
 .
 # Les membranes pulsent en rythme (woofers et petites enceintes sur le temps, tweeters à contretemps) ; la fumée roule.
-cadre repos.0 couleurs S=3 3=S dans 13 8 24 15 + woofers-G + tweeters-M + spray-b
-cadre repos.0 + woofers-M + tweeters-G
-cadre repos.0 couleurs S=3 3=S dans 13 8 24 15 + cligne + spray-b
-cadre repos.0 + woofers-G + tweeters-M
-cadre repos.0 couleurs S=3 3=S dans 13 8 24 15 + woofers-M + tweeters-G + spray-b
+# Des ondes sortent des enceintes et s'éloignent vers l'extérieur (flancs des colonnes, autour des petites enceintes).
+cadre repos.0 couleurs S=3 3=S dans 13 8 24 15 + woofers-G + tweeters-M + spray-b + son-ext-1 + son-petites
+cadre repos.0 + woofers-M + tweeters-G + son-ext-2
+cadre repos.0 couleurs S=3 3=S dans 13 8 24 15 + cligne + spray-b + son-ext-1 + son-petites
+cadre repos.0 + woofers-G + tweeters-M + son-ext-2
+cadre repos.0 couleurs S=3 3=S dans 13 8 24 15 + woofers-M + tweeters-G + spray-b + son-ext-1 + son-petites
+# Attaque : les ondes, blanches, partent en double vers l'extérieur, et vers le centre où part le tir.
 anim attaque 90
-cadre repos.0 couleurs S=3 3=S dans 13 8 24 15 + woofers-G + tweeters-G + onde-g + onde-d + spray-b
-cadre repos.0 + woofers-M + tweeters-M + onde-g decale 2 0 + onde-d decale -2 0 + jet duree 140
-cadre repos.0 couleurs S=3 3=S dans 13 8 24 15 + woofers-G
+cadre repos.0 couleurs S=3 3=S dans 13 8 24 15 + woofers-G + tweeters-G + onde-g + onde-d + spray-b + son-ext-1 couleurs L=W + son-petites couleurs L=W
+cadre repos.0 + woofers-M + tweeters-M + onde-g decale 2 0 + onde-d decale -2 0 + jet + son-ext-1 couleurs L=W + son-ext-2 couleurs L=W + son-petites couleurs L=W duree 140
+cadre repos.0 couleurs S=3 3=S dans 13 8 24 15 + woofers-G + son-ext-2 couleurs L=W
 calque woofers-G
 .
 .

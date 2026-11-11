@@ -484,12 +484,14 @@ cadre
 ............b77777
 .............o..o
 .............B..B
-cadre repos.0 + fronde-off + fronde-droite
-cadre repos.0 + clos
-cadre repos.0 + fronde-off + fronde-bas
-# Attaque : la fronde tourne au-dessus de la tête, puis lâche sa pierre.
+# La fronde fait un tour complet au-dessus de la tête, patte levée : devant à droite (la pose), derrière, à gauche,
+# devant ; une traînée claire suit la poche.
+cadre repos.0 + fronde-off + tour-derriere
+cadre repos.0 + fronde-off + tour-gauche + clos
+cadre repos.0 + fronde-off + tour-devant
+# Attaque : la fronde tourne plus vite (traînée sur un demi-tour), puis lâche sa pierre.
 anim attaque 90
-cadre repos.0 decale -1 0
+cadre repos.0 decale -1 0 + fronde-off decale -1 0 + tour-derriere decale -1 0 + tour-rapide decale -1 0
 cadre repos.0 + fronde-off + fronde-lachee duree 180
 cadre repos.0 duree 140
 # Blessé : il recule d'un pixel, les yeux plissés. Mort : il chancelle puis tombe sur le dos.
@@ -518,21 +520,65 @@ _BB___
 calque pattes-c 12 29
 __o_o_
 __B_B_
-# La fronde tourne : levée, tendue devant, pendante.
+# La fronde tourne au-dessus de la tête : la patte levée tient la corde, la poche (cuir sombre, pierre claire) fait le
+# tour, une traînée blanche marque le chemin parcouru.
 calque fronde-off 17 17
 ..._
 .._
 ._
 _
-calque fronde-droite 20 20
-xxxxk
-calque fronde-bas 20 22
-x
-.x
-..x
-...k
+calque tour-derriere 9 9
+.
+.
+.
+........Dq
+........DDww
+.........x..ww
+.........x....w
+..........x...w
+..........x
+..........x
+..........o
+..........b
+calque tour-gauche 9 9
+.
+.
+.
+.....wwww
+....w
+..Dq
+..DDx
+.....x
+......xx
+........xx
+.........xo
+..........b
+calque tour-devant 9 9
+.
+.
+.
+.
+.
+.
+..w
+..w
+...w
+....Dq
+....DDxxxxo
+..........b
+calque tour-rapide 9 9
+.
+.
+.
+.....wwww
+...ww......w
+..w.........w
+..w..........w
+..w..........w
+...ww.......w
+.....ww....w
 calque fronde-lachee 20 19
-.....k
+.ww..P
 xxx
 
 sprite moderne-renvoyeur-chat
@@ -573,12 +619,14 @@ cadre
 ............bxxxxx
 .............o..o
 .............B..B
-cadre repos.0 + balle-off + balle-haute
+# Il jongle : la balle part de la raquette (la pose), monte en arc, culmine au-dessus de sa tête et redescend ; un
+# trait clair la suit.
+cadre repos.0 + balle-off + balle-montee
 cadre repos.0 + balle-off + balle-sommet + clos
-cadre repos.0 + balle-off + balle-mi
-# Attaque : il recule, puis renvoie le palet d'un coup de raquette.
+cadre repos.0 + balle-off + balle-descente
+# Attaque : la balle redescend, il recule pour armer, puis renvoie le palet d'un coup de raquette.
 anim attaque 90
-cadre repos.0 decale -1 0
+cadre repos.0 decale -1 0 + balle-off decale -1 0 + balle-descente decale -1 0
 cadre repos.0 + balle-off + renvoi duree 180
 cadre repos.0 duree 140
 # Blessé : il recule d'un pixel, les yeux plissés. Mort : il chancelle puis tombe sur le dos.
@@ -607,14 +655,22 @@ _BB___
 calque pattes-c 12 29
 __o_o_
 __B_B_
-# Il jongle avec la balle sur sa raquette.
+# Il jongle avec la balle sur sa raquette : la balle (jaune fluo) monte, culmine, redescend.
 calque balle-off 23 16
 _
-calque balle-haute 23 14
-0
-calque balle-sommet 23 13
-0
-calque balle-mi 23 15
-0
+calque balle-montee 21 9
+.00
+.00
+..w
+..w
+calque balle-sommet 20 4
+.00
+.00
+..w
+calque balle-descente 20 9
+.w
+.w
+.00
+.00
 calque renvoi 23 17
 99.0
