@@ -273,7 +273,7 @@
   },
   {
    "id": "moderne-artillerie-1",
-   "nom": "Caddie-catapulte",
+   "nom": "Bascule à pavés",
    "categorie": "tour",
    "original": "tour-artillerie-1",
    "apercu": "apercus/moderne-artillerie-1.png",
@@ -282,7 +282,7 @@
   },
   {
    "id": "moderne-artillerie-2",
-   "nom": "Caddie sur palette",
+   "nom": "Caddie lance-pavés",
    "categorie": "tour",
    "original": "tour-artillerie-2",
    "apercu": "apercus/moderne-artillerie-2.png",
@@ -291,7 +291,7 @@
   },
   {
    "id": "moderne-artillerie-3",
-   "nom": "Rempart de pneus",
+   "nom": "Rempart lance-pavés",
    "categorie": "tour",
    "original": "tour-artillerie-3",
    "apercu": "apercus/moderne-artillerie-3.png",
@@ -300,7 +300,7 @@
   },
   {
    "id": "moderne-artillerie-bidon",
-   "nom": "Bidon-mortier",
+   "nom": "Trébuchet à caddie",
    "categorie": "tour",
    "original": "tour-artillerie-mortier",
    "apercu": "apercus/moderne-artillerie-bidon.png",
@@ -309,7 +309,7 @@
   },
   {
    "id": "moderne-artillerie-lance-pierre",
-   "nom": "Lance-pierre géant",
+   "nom": "Canon à pavés",
    "categorie": "tour",
    "original": "tour-artillerie-baliste",
    "apercu": "apercus/moderne-artillerie-lance-pierre.png",

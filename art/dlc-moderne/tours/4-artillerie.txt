@@ -1,11 +1,11 @@
 # DLC « Temps modernes » : la Catapulte du Rempart devient l'engin bricolé (caddie, palettes, pneus, bidon).
 #= L'Engin bricolé (artillerie)
 # Même emprise que tour-artillerie-* : 32×32, ancre au pied, socle de 26 px au plus, le projectile part du point `tir`.
-#: moderne-artillerie-1 | Caddie-catapulte | tour-artillerie-1
-#: moderne-artillerie-2 | Caddie sur palette | tour-artillerie-2
-#: moderne-artillerie-3 | Rempart de pneus | tour-artillerie-3
-#: moderne-artillerie-bidon | Bidon-mortier | tour-artillerie-mortier
-#: moderne-artillerie-lance-pierre | Lance-pierre géant | tour-artillerie-baliste
+#: moderne-artillerie-1 | Bascule à pavés | tour-artillerie-1
+#: moderne-artillerie-2 | Caddie lance-pavés | tour-artillerie-2
+#: moderne-artillerie-3 | Rempart lance-pavés | tour-artillerie-3
+#: moderne-artillerie-bidon | Trébuchet à caddie | tour-artillerie-mortier
+#: moderne-artillerie-lance-pierre | Canon à pavés | tour-artillerie-baliste
 # Couleurs propres au DLC (en plus de la palette commune) : 1 magenta (tags, fumigène), 2 cyan, 3 vert fluo,
 # 4 violet, 5 fumée rose, 6 sweat marine, 7 kaki, 8 orange chantier, 9 fumée grise, 0 jaune fluo, C plastique bleu,
 # D carton, S fumée verte, V fumée violette, X marine sombre, Q bâche ardoise.
@@ -32,87 +32,99 @@ couleur X 1e2a44
 couleur Q 4a5868
 
 sprite moderne-artillerie-1
-point tir 2 5
-# Un caddie, un bras de planche et un seau ; le servant à côté.
+point tir 4 18
+# Une bascule sur chevalet lance les pavés ; le caddie sert de réserve, le servant à côté.
 .
 .
 .
 .
 .
-.CCCC
-.CAAC
-..CC
-.....OB
-......OB
-.......OB
-........OB
-.........OB
-..........OB
-...........OB
-...xx.......ddd
-....xT......ddd
-.....TTTTTTTTTTTTTTT
-......T.t.t.t.t.t.tT
-.......T.t.t.t.t.t.T..oxxo
-.......Tt.t.t.t.t.tT..oooo
-........Tt.t.t.t.t.T..okok
-........TtTTTTTTTtTT...cco
-........ttttttttttt...w66o
-........kk......kk.....66
-........kk......kk.....oo
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+................qqP.qqP.qqP
+...qqP..........PPp.PPp.PPp
+...PPp.......xx.ppg.ppg.ppg
+..TppgT.......xTTTTTTTTTTTT
+..TTTTTO.......TtPtPtPtPtPToxxo
+......BBOO.....TPtPtPtPtPtToooo
+........BBOO....TptptptptpTokok
+.........dBBOO..TTTTTTTTTTT.cco
+.........d.dBB...ttttttttttw66o
+........d...d....kk......kk.66
+........d...d....kk......kk.oo
+.
+.
+.
+.
+.
 
 sprite moderne-artillerie-2
-point tir 3 3
-# Le caddie monté sur une palette, cône et fanion sur un manche à balai.
+point tir 4 15
+# La bascule grandit, le caddie déborde de pavés, le tout sur une palette.
 .
 .
 .
-..CCCC
-..CAAC
-...CC
-......OB
-.......OB
-........OB
-.........OB.............x
-..........OB...........xx
-...........OB..........dx
-............OB.........d
-....xx.......ddd.......d
-.....xT......ddd.......d
-......TTTTTTTTTTTTTTT..d
-.......Tt.t.t.t.t.t.T.oxxo
-........Tt.t.t.t.t.tT.oooo
-....8...T.t.t.t.t.t.T.okok
-....w....T.t.t.t.t.tT..cco
-...888...TtTTTTTTTtTT.w66o
-..88888..ttttttttttt...66
-.........kk......kk....oo
-...OOOOOOkkOOOOOOkkOOOOOOOO
-...obboobboobboobboobboobbo
-...BBBBBBBBBBBBBBBBBBBBBBBB
+.
+.
+.
+.
+.
+.
+.................qqP.qqP
+.................PPp.PPp
+.................ppg.ppg
+.
+...............qqP.qqP.qqP
+...qqP.........PPp.PPp.PPp
+...PPp.......xxppg.ppg.ppg
+..TppgT.......xTTTTTTTTTTTT
+..TTTTTO.......TPtPtPtPtPtToxxo
+......BBOO.....TtPtPtPtPtPToooo
+........BBOOO...TtptptptptTokok
+..........BBBOO.TTTTTTTTTTT.cco
+..........d.dBB..ttttttttttw66o
+.........d...d...kk......kk.66
+.........d...d...kk......kk.oo
+..OOOOOOOOOOOOOOOOOOOOOOOOOOO
+..obboobboobboobboobboobbooob
+..BBBBBBBBBBBBBBBBBBBBBBBBBBB
+.
+.
+.
+.
+.
 
 sprite moderne-artillerie-3
-point tir 6 1
-# Rempart de palettes et de pneus, drapeaux, banderole à tête de chat, fûts allumés.
+point tir 4 11
+# Sur le rempart de pneus : grande bascule, caddie comble de pavés, drapeau.
 .
-.....CCCC
-.....CAAC
-......CC
-.........OB
-....dxxxx.OB...........xxxxd
-....dxxxw..OB..........wxxxd
-....dxx.....OB.........xx..d
-....xx.......ddd...........d
-....dxT......ddd....oxxo...d
-....d.TTTTTTTTTTTTTToooo...d
-....d..T.t.t.t.t.t.tokok...d
-....d...T.t.t.t.t.t.Tcco...d
-....d...Tt.t.t.t.t.tw66o...d
-....d....Tt.t.t.t.t.T66....d
-....d....TtTTTTTTTtTToo....d
-....d....ttttttttttt.......d
-...kuuukOkkOOOOOOkkOOOOOkuuuk
-...ukkkufkkobboobkkobbofukkku
+.
+................qqP.qqP...xxxxd
+................PPp.PPp...wxxxd
+................ppg.ppg....xxxd
+..............................d
+..............qqP.qqP.qqP.....d
+..............PPp.PPp.PPp.....d
+............xxppg.ppg.ppg.....d
+.............xTTTTTTTTTTTT....d
+...qqP........TPtPtPtPtPtToxxod
+...PPp........TtPtPtPtPtPTooood
+..TppgT........TtptptptptTokokd
+..TTTTTO.......TTTTTTTTTTT.ccod
+......BBOOOO....ttttttttttw66od
+........BBBBOO..kk......kk.66.d
+........d...BB..kk......kk.oo.d
+...kuuukOOOOOOOOOOOOOOOOkuuuk
+...ukkkufboobboobboobbofukkku
 ...kuuufFfwwkwwwwwwkwwfFfuuuk
 ...ukkkfyfwwkkwwwwkkwwfyfkkku
 ...kuuuuuuwwkkkkkkkkwwuuuuuuk
@@ -120,28 +132,34 @@ point tir 6 1
 ...kuuuuuuwwkkkkkkkkwwuuuuuuk
 ...ukkkUvUwwwkkxxkkwwwUvUkkku
 ...BBBBuuuBBBBBBBBBBBBuuuBBBB
+.
+.
+.
+.
+.
+.
 
 sprite moderne-artillerie-bidon
-point tir 13 9
-# A : bidon de chantier pointé vers le ciel, fumées roses et vertes.
-...............55ww55.55
-..............5ww5555551
-.............5w55555551R
-.............5555515511R
-..............5511RSS1R
-....dxxxx.....151RSwSS3xxxxd
-....dxxxw....51R..SSS3Ewxxxd
-....dxx......51..S33E..xx..d
-....d.......51...3.........d
-....d.......ttttttt..oxxo..d
-....d......kkkkkkkkk.oooo..d
-....d......RxRRRRRRR.okok..d
-....d......rxrrrrrrr..cco..d
-....d......RxRRRRRRR.w66o..d
-....d......RxRRRRRRR..66...d
-....d....dddddddddddddoo...d
-....d....ddddddddddddd.....d
-...kuuukOOOOOOOOOOOOOOOOkuuuk
+point tir 11 3
+# A : trébuchet dont le contrepoids est un caddie de pavés ; tir en cloche, pavés en vol.
+...............w.qqP.w
+..............w..PPp..w
+..........qqP....ppg....qqP
+..........PPp...........PPp
+.........TppgT..........ppg.dxxx
+.........TTTTT..............dxxx
+.............BO.............dxxx
+..............BT............d
+...............kOO..........d
+...............dBBO.qqP.qqP.d
+.....oxxo......dB.BOPPp.PPp.d
+.....oooo.....d.dB.Bppg.ppg.d
+.....okok.....d.dB..Bk......d
+......cco....BBBBBBTTTTTTTT.d
+.....w66o....d...dBTPtPtPtT.d
+......66....d.....dTtPtPtPT.d
+......oo....d.....dBTPtPtT..d
+...kuuukOOOOOOOOOOOOTTTTTTuuk
 ...ukkkufboobboobboobbofukkku
 ...kuuufFfwwkwwwwwwkwwfFfuuuk
 ...ukkkfyfwwkkwwwwkkwwfyfkkku
@@ -150,27 +168,33 @@ point tir 13 9
 ...kuuuuuuwwkkkkkkkkwwuuuuuuk
 ...ukkkUvUwwwkkxxkkwwwUvUkkku
 ...BBBBuuuBBBBBBBBBBBBuuuBBBB
+.
+.
+.
+.
+.
+.
 
 sprite moderne-artillerie-lance-pierre
-point tir 15 8
-# B : lance-pierre géant en planches, chambre à air, balle de tennis.
-.
-.
-.
-........B..............B
-........kO............Ok
-....dxxxxkO..........Okxxxxd
-....dxxxw.kO........Ok.wxxxd
-....dxx....kO......Ok..xx..d
-....d.......kOk00kOk.......d
-....d........OO00OO..oxxo..d
-....d.........BOOO...oooo..d
-....d.........BOOO...okok..d
-....d.........BOOO....cco..d
-....d.........BOOO...w66o..d
-....d.........BOOO....66...d
-....d.........BOOO....oo...d
-....d.........BOOO.........d
+point tir 24 8
+# B : canon à pavés horizontal, nourri par une trémie ; tir tendu, pavés en rafale.
+...........PPp.PPp
+...........ppg.ppg
+...........dDDDDDDDd
+............dDDDDDd
+.............dDDDd
+..............ddd......tt
+........g.....ddd......Tkw
+........giiiiiiiiii8iiiTk.qqP
+........gTTTTTTTTTT8TTTTk.PPp.qP
+........gtttttttttt8ttttt.ppg.pg
+...oxxo.g......B.........w
+...oooo.......dBd
+...okok.......dBd
+....cco......d.B.d
+...w66o.....d..B..d
+....66......d..B..d
+....oo.....d...B...d
 ...kuuukOOOOOOOOOOOOOOOOkuuuk
 ...ukkkufboobboobboobbofukkku
 ...kuuufFfwwkwwwwwwkwwfFfuuuk
@@ -180,3 +204,9 @@ point tir 15 8
 ...kuuuuuuwwkkkkkkkkwwuuuuuuk
 ...ukkkUvUwwwkkxxkkwwwUvUkkku
 ...BBBBuuuBBBBBBBBBBBBuuuBBBB
+.
+.
+.
+.
+.
+.
