@@ -1109,8 +1109,8 @@ agrandi 2
 #   repos : agite son arrêté roulé de haut en bas, le ventre se soulève
 #   marche : se dandine à petits pas en secouant l'arrêté
 #   attaque : brandit l'arrêté au-dessus de lui, le déroule (feuille blanche, sans texte) et le secoue pour appeler des renforts
-#   blesse : recule d'un pas, offusqué
-#   mort : chancelle, lâche l'arrêté et tombe à la renverse, l'arrêté roulé à terre
+#   blesse : recule d'un pas, la tête et les épaules rejetées en arrière
+#   mort : il chancelle, plie les genoux en lâchant l'arrêté, tombe à genoux et s'affaisse en avant, l'arrêté à terre devant lui
 # Pose validée par l'auteur, inchangée : premier cadre du repos.
 calque pose 0 3
 ............11111
@@ -1256,125 +1256,152 @@ calque attaque-5 18 16
 ..wq
 wwq
 
-calque blesse-0 7 23
-._......1
-._.1.._.1
-._.1
-__kk
-__.kk
+calque blesse-0 6 3
+..11111
+.1111111
+.1i1i1i1
+.i1i1i1ikkk
+..SSSSSS
+..SSSSkS
+..SSSSSSS
+..SSuuuS
+...SSSS
+...1WWW1
+.12222222
+1222222222
+.12i222i2222
+.122222222222
+.12i2222222i2
+.122222222222
+.1222222222SS
+.12i222222wwwq
+.12222222.wwq
+..kkkkkkkkk
+...1111111
+...11...11
+...11...11
+...kk...kk
+...kkk..kkk
 
-calque mort-0 7 3
-.11...__
-11.....__
-1i.....__
-i1.....kk.__
-.SS....__
-..S...kS_
-..S......_
-..S.u..S_
-...S..._
-..1W..1_
-12......_
-.
-.
-.
-.
-.
-_1........2.S
-_12i.....2..wq
-_1......2_.wq
-._........k
-.
-.
-.._.1.._.1
-.._.k.._.k
-.._..k._..kk
+calque mort-0 7 4
+..11111
+.1111111
+.111i1111kk
+.i1i1i1ik
+..SSSSSS
+...SSSSSS
+...SSSSSS
+...SSuuu
+....SSSS
+...1WWW1
+.12222222
+.2222222222
+122222i22222
+122222222222
+1222222222222
+.1222222222SS
+.122222222....q
+.12222222..www
+.12222222.kwwq
+..kkkkkkkk
+..1111111
+...11...11
+...kkk..kkkk
 
-calque mort-1 5 5
-.1...._
-1......_
-1i1i1i1_
-.
-.
-..S...kS_
-.
-.
-.
-.
-._1......2
-.
-.
-.
-._12i......2i2
-._1..........2
-.
-.._12i.....2..wq
-.._1......2_.wq
-..._11...11.k
-..._..____11
-..._kk..__.kk
-....kkk..__kkk
-....__...__
-....___..____
+calque mort-1 8 5
+......111
+.....111111
+....1i11111
+....i1i1ii1
+.....SSSS1ikkk
+.....SSSSSS
+.....SSSSkS
+.....SSuuSSS
+......SSSu
+....1WWWS
+..12222222
+.1222222222
+.12i222i222
+.12222222222
+.122222222222
+.1222222222i2
+122222222222
+1222222222SS
+.22222222
+.kkkkkkk....www
+.1111111kk..wwwq
+..11...11
+..kkk..kkkk
 
-calque mort-2 2 5
-111..___
-11.....__
-1i.....__
-i1i1i1ikkk___
-..SS....__
-..SS..k.__
-...SS.....__
-...SSuu.S__
-.....S..._
-....1W..1_
-...12......_
-..12........_
-.
-.
-...12i2......i2_
-.
-.
-.
-.
-......_.1..k.1.k
-......_.1..._.1
-......_.k...._.k
-......_..k..._..k
+calque mort-2 7 7
+.............111
+............111111
+............ii1i11
+............Siii111
+............SSSi111
+...........SSSSSSik
+...........SSSSkS..kk
+...........SSuSSS
+......11221WSSuSSS
+......122222WWS
+.....122i22222
+.....1222222222
+....1222222i222
+....12222222222
+...12i222222222
+...2222222222222
+....kk2222222222
+.....kkk22222S2
+...1111kk2......ww
+k...11111kk.....ww
+kkk111111111....qw
+.................q
 
-calque mort-3 1 6
-............_____
-..........._______
-..........._______
-...........__________
-............______
-............______
-............_______
-............______
-...k.........222_
-...k........22i2_
-...k..S..._......_.k....k
-.11iSSSS._........_k....k
-11i1SkSuS..2...2...k111kk
-111iSSSuSW..i......k111kk
-11i1SSSuSW.2.......k1
-111iSSSSSW.........k1
-11i1SSSS..........2k1_..k
-.11i....._.2i.i..i2k111kk
-........._1......22k111kk
-.........._11111111
-..........__...__.....wwwq
-..........__...__
-..........___..__
-...............___
+calque mort-3 8 14
+....................111
+...................iii11
+..................SSi111
+..........1111..SSSSii11
+........112222..SSSSSi11
+......11222i222WSuSSSS11
+.....1122i22222WSuuSkSi1
+.....22i22222222WSuSSSkk
+.....k2222222i221SSSS..k
+.....kk2222222222
+......k222222222
+...111kk22222222
+k...111k22222222.wwwq
+kkk11111k1122i2..wwq
+........k..SS22
+............S
 
-calque mort-4 23 27
-wwwq
-____
+calque mort-4 5 16
+..........11111111
+.........k222222221......i1
+.........k2i22i2i22.....S1i
+.........k2222222221.SSSSi1
+.........k222222222WSSSSS1i
+......111k222222222WSuSSSi1
+.......11k222222i22WSuSSS1i
+........1k2222222221SuSkSi1
+.........k122222222..SSS.k
+.........k11222222.......k
+.nk........1S22221...wwwqn
+nNkkk1111111S222111..wwqnN
 
-calque mort-5 28 26
-N
-nN
+calque mort-5 7 16
+........11111111
+.......k222222221......i1
+.......k2i22i2i22.....S1i
+.......k2222222221.SSSSi1
+.......k222222222WSSSSS1i
+....111k222222222WSuSSSi1
+.....11k222222i22WSuSSS1i
+......1k2222222221SuSkSi1
+.......k122222222..SSS.k
+.......k11222222.......k
+k........1S22221...wwwqk
+kkk1111111S222111..wwq
 
 anim repos 200
 cadre pose
@@ -1398,13 +1425,13 @@ cadre attaque.2
 cadre attaque.0 + attaque-5
 
 anim blesse 140
-cadre marche.0 decale -2 0 + blesse-0
+cadre blesse-0
 cadre pose decale -1 0
 
 anim mort 180
-cadre blesse.0 + mort-0
-cadre mort.0 decale -1 2 + mort-1
-cadre mort.1 decale -1 0 + mort-2
-cadre marche.1 decale 1 2 + mort-3
-cadre mort.3 decale 0 2 + mort-4
-cadre mort.4 + mort-5 duree 900
+cadre mort-0
+cadre mort-1
+cadre mort-2
+cadre mort-3
+cadre mort-4
+cadre mort-5 duree 900

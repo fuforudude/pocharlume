@@ -24,8 +24,8 @@ sprite moderne-tireur-lbd
 #   repos : souffle, lanceur épaulé
 #   marche : avance au pas, lanceur épaulé
 #   attaque : vise, coup de départ (éclair blanc et fumée), recul du lanceur, fumée qui se dissipe
-#   blesse : recule d'un pas
-#   mort : part en arrière et tombe sur le dos, le lanceur lâché à terre
+#   blesse : recule d'un pas, la tête et les épaules rejetées en arrière
+#   mort : les genoux plient, le lanceur lui échappe et tombe derrière lui, il tombe à genoux et s'affaisse en avant
 # Pose validée par l'auteur, inchangée : premier cadre du repos.
 calque pose 0 7
 ............kkkk
@@ -120,81 +120,76 @@ v.v
 .v
 ..v
 
-calque blesse-0 8 21
-_.....1
-_..._.1
-_.1._.1
-_.1._.1
-_.1._.1
-_.k._.k
-_..k_..k
+calque blesse-0 6 7
+..kkkk
+.k3111k
+k311111k
+k311SSSS
+k31SSSkS
+.kSSSSSS
+..kSSS
+..22111111111kk
+.122GgggggggGkpk
+.122kkkSSkk.1kk
+..122222kSS
+..12222222
+..kkkkkkkk
+.
+...111111
+...11..11
+...11..11
+...11..11
+...11..11
+...kk..kk
+...kkk.kkk
 
-calque mort-0 7 7
-.kk..__
-.k31..k_
-k31....k_
-k31.S..._
-k31S..kS_
-.kS....._
-..kS.._
-.
-.
-.
-.
-.
-._.......k
-.
-.
-....1
-.
-.
-.._.1._.1
-.._.k._.k
-.._..k_..k
+calque mort-0 9 9
+....kkkk
+..kk311k
+..k31111k
+.k3111SSk
+..k1SSSSS
+..kSSSSSS
+...kSSS.S
+..22G11
+.12kkgg11
+.122kkggg11
+122222SSkgg11
+122222SSkkgGkk
+kkkkkkk2...1kpk
+.......k
+111111
+.11..11
+.11..11
+kk..kk
+kkk.kkk
 
-calque mort-1 3 9
-.kk..__
-k3111k___
-k311...k__
-k311SS..__
-.k31S..kS_
-..kS....._
-.
-...2.1........k._
-.
-.
-.
-..._1......2
-.
-.....11..11
-...._..__.1
-....__.1__11
-...._.1.__.11
-....__kk__..kk
-....._kkk__.kkk
-.....__..__
-.....___.___
+calque mort-1 3 14
+................kkkk
+...............k333kk
+...............31111kk
+..............kS11111
+.............2kSSSS11
+...........1222SSSSSkk
+..........122222SSSSS
+........kk2222222.SS
+....SSkkgkk222222
+....kSSg11kk2222
+...kkgg11..kk2SSS
+.11gg1111111kk2
+kkG1k...11111kk
+pkk1kkk11111111
+.k
 
-calque mort-2 0 11
-..____
-.______
-.________
-.________
-..________
-..._______
-.....____
-...._____________
-....______1.kS_____
-...._kSSS_1gSS2k__
-....k1SkS_1g.k2k.......k
-...k1.SSSS1gk22k.11111kk
-...k11SSSS1g.22k.11111kk
-...k11.SSS.Gk22k.1
-...k31..Sk22222k.11....k
-.N..k333k.22222k.111kkkkkkk..N
-Nn...kkk...1..1k.11kGgggggGk.nN
-.......__....__
-.......___...___
+calque mort-2 1 20
+..............k1111...kkk
+..............k22222.k333k
+..............k22222kS1113k
+..............k22222SSS111k
+......SSk.1111k22222SSSS11k
+.kk1.kkSSkk111k22222SSSS11k
+kpkGggkggggGn1k2S222.SkS1k
+.kk111kkk11nN1k21S1..SSSk
 
 anim repos 220
 cadre pose
@@ -213,13 +208,13 @@ cadre marche.2 decale -1 0 + attaque-2 duree 140
 cadre pose + attaque-3
 
 anim blesse 120
-cadre pose decale -2 0 + blesse-0
+cadre blesse-0
 cadre pose decale -1 0
 
 anim mort 160
-cadre blesse.0 + mort-0
-cadre mort.0 decale -2 2 + mort-1
-cadre mort.1 decale -2 2 + mort-2 duree 900
+cadre mort-0
+cadre mort-1
+cadre mort-2 duree 900
 
 # Grenadier lacrymogène (DLC, rôle du Pestiféré : laisse un nuage) : casque, masque à gaz à gros hublots et cartouche filtrante, lance-grenades court, petit nuage pâle à ses pieds.
 #: moderne-grenadier-lacrymo | Grenadier lacrymogène | pestifere
@@ -882,8 +877,8 @@ sprite moderne-commissaire
 #   repos : porte le talkie-walkie à la bouche pour donner ses ordres
 #   marche : avance d'un pas pressé, matraque qui balance
 #   attaque : lève la matraque, frappe devant en deux temps, revient
-#   blesse : recule d'un pas
-#   mort : part en arrière, plie et tombe sur le dos
+#   blesse : recule d'un pas, la tête et les épaules rejetées en arrière
+#   mort : les genoux plient, il tombe à genoux, s'affaisse en avant et reste recroquevillé ; la matraque glisse de sa main et tombe à côté
 # Pose validée par l'auteur, inchangée : premier cadre du repos.
 calque pose 0 7
 ...........11111
@@ -1078,85 +1073,108 @@ SS
 k_
 _
 
-calque blesse-0 8 22
-_..p_.p
-...._11
-...._11
-...._11
-._.k_.k
-._.....k
+calque blesse-0 5 7
+..11111
+.1111111
+..YYYYY1kk
+...SSSSS
+...SSSkS
+Pp.SSSSkk
+kp..SSS
+kp.ppPwPp
+kppppPwPpp
+kppppPkPpkk
+kp.pppPkPpkS
+SSpppppPpp
+k..pppkkpp
+...pppppppp
+...pppppp
+....ppp.pp
+.....11.11
+.....11.11
+.....11.11
+.....kk.kk
+.....kkkkkk
 
-calque mort-0 4 7
-...11...__
-...1......_
-....Y....1k._
-.....S...._
-.....S..kS_
-Pp_..S...k._
-kp_...S.._
-.
-.
-.
-.
-.
-._k._..p.k.p
-...._.......p
-...._.....p
-.
-.
-.
-......_.1_.1
-......_.k_.k
-......_.....k
+calque mort-0 4 9
+........11111
+.......111111
+........YYYYY1
+.........SSSS1kk
+.........SSSSS
+p.......SSSSSk
+kp.......SSSSk
+kp.....ppPwPp
+kp....pppPwPp
+kpp...pppPkPpp
+.kp..ppppPkPpkk
+.kp..pppppPppk
+.k...pppkkpp
+.....pppppppp
+.....pppppp.p
+.....ppp.pp
+......11.11
+.......11.11
+.......kkkkkk
 
-calque mort-1 1 9
-..11...__
-.111....___
-...YY...1kk__
-....SS...__
-.....S..kS_
-Pp_..S...k._
-.
-.kp_.p.PwPp_
-.
-.
-.
-.._.S....pP.p
-.
-......_.......p
-......_.11.11
-......___11_11
-......._.1__.11
-.......__kk_..kk
-........_kkk_.kkk
-........__.__
-........______
+calque mort-1 0 10
+.................111
+.................11111
+..................YY111
+..................SYYY1
+.................SSSSS1
+.................SSSkS.kk
+...............ppSSSSS
+.............ppppPSS.k
+.............pppPwPP
+p...........ppppPkPp
+kpp.........ppppkPppp
+.kkp.......pppppPPpkk
+..kkpp.....ppppkpppkS
+....kk.....ppppppp
+.....k......p.pppp
+...........111pp
+........k...11111
+........kkk1111111
 
-calque mort-2 5 8
-........_____
-......._______
-........________
-........._____
-........._____
-.........______
-..k.__...k.__
-..k._k...kk__
-.11SSk....ppp._.....k
-11YS.SSPPP.pp.pp111kk
-11YSSSSwwkkPk.pp111kk
-11YSSSSPPPPpk.p.....k
-11YS......pp..pp111kk
-11Y._..........p111kk
-.1....._.....ppp
-.........__p
-.....ppppppS
-.....PkkkkkSk
-.........___
-.........____
+calque mort-2 0 15
+.........................11
+.........................Y11
+........................SY11
+..................ppp..SSYY11
+................ppppp.SSSSY11
+...............ppppppPSSSSS11
+.............ppppppPPwwSSSS1
+.............ppppppkkPPSkS..k
+.............ppppkPkPPp..k
+...............pppppppp
+............11ppppppkkk
+pp.......k...11p1pp..S
+kkk......kkk1111111
 
-calque mort-4 2 26
-.N.......................N
-Nn.......................nN
+calque mort-3 0 18
+..................p
+..............pppppppp......11
+..............ppppppppp....Y11
+..............ppppppppp.SSSY11
+...............ppkpPPPPSSSSY11
+............11pppkPkkwwSSSSY11
+.............1pppppPPPPSSkSY1
+..............11ppppppp.kSS11
+pp....n.k......1p11kkp..k..k.n
+kkk..nN.kkk11111111Sk.......nN
+
+calque mort-4 0 18
+..................p
+..............pppppppp......11
+..............ppppppppp....Y11
+..............ppppppppp.SSSY11
+...............ppkpPPPPSSSSY11
+............11pppkPkkwwSSSSY11
+.............1pppppPPPPSSkSY1
+..............11ppppppp.kSS11
+pp......k......1p11kkp..k..k
+kkk.....kkk11111111Sk
 
 anim repos 160
 cadre pose
@@ -1182,12 +1200,12 @@ cadre pose + attaque-5
 cadre pose
 
 anim blesse 120
-cadre marche.3 decale -2 0 + blesse-0
+cadre blesse-0
 cadre pose decale -1 0
 
 anim mort 150
-cadre blesse.0 + mort-0
-cadre mort.0 decale -2 2 + mort-1
-cadre marche.4 decale 2 0 + mort-2
-cadre mort.2 decale 0 2
-cadre mort.3 + mort-4 duree 600
+cadre mort-0
+cadre mort-1
+cadre mort-2
+cadre mort-3
+cadre mort-4 duree 600

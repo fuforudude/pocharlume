@@ -25,7 +25,7 @@ sprite moderne-bravm
 #   marche : roule, roues à rayons qui tournent, cahots et échappement
 #   attaque : coup d'accélérateur, roue arrière, le passager lève la matraque, la moto retombe dans la poussière
 #   blesse : la moto pique du nez et recule
-#   mort : la moto s'arrête, les roues ne tournent plus, le moteur fume, l'équipage s'affaisse
+#   mort : éclair au moteur, la moto explose en boule de feu, grosse bouffée de fumée et débris qui volent ; la fumée se dissipe sur une carcasse fumante, les équipiers ont disparu dans l'explosion
 # Pose validée par l'auteur, inchangée : premier cadre du repos.
 calque pose 0 7
 ........kkkk.......kkkk
@@ -232,101 +232,161 @@ calque blesse-1 3 22
 .
 G.1.................G.1
 
-calque mort-0 1 16
-..............u
-.............uUu
-..............u
-.
-_
-._
+calque mort-0 2 7
+......kkkk.......kkkk
+.....k3111k.....k1111k
+.....k31444k...k111444
+.....k31444k...k111444
+......kSSSk.....kSSSk
+.....122222.....122222
+....12222222...12222222S
+....1222222....12222222S
+....122222...y.1222222
+.....11111...F.111111
+.....111111..F.1111111
+...kkk11111ykFky111111
+..kgggggaaaaWWWakk..tt
+...kkgggyFFFWWWFFFyktt
+..kkkkGGGGGGWWWGk..tk.kkk
+.kGGGkkkpppypFky...t.kGGGk
+k1...1k......F......k1...1k
+kG.p.Gk......F......kG.p.Gk
+k1...1k.............k1...1k
+.kGGGk...............kGGGk
+..kkk.................kkk
 
-calque mort-1 13 9
-....k
-.
-...._
-.
-....1
-..u
-.uuu
-uuUuu
-.uuu
-.kukk
-.aaaa
-.AA
-.GGGG
-.pkkk
-.____
+calque mort-1 2 6
+.................f..tt
+...............ffff
+..............fffff......GG
+.kk.....ffff..fFFFf......k
+.....fffffffffFFFFf
+....ffffFFFFfFFFFFff
+....ffFFFFFFFFyyFFff
+....ffFFFFFyyFyyFFFff
+.....ffFFyyyyyyyyFFff...kk
+......fFFyyyWyWyyFFFff
+...aa.ffFFyWWWWyyyFFFff
+...k.ffFFyyWWWWWyyyFFFff
+...kffFFyyyWWWWyyyyFFFFff
+..kfffFFFyyyyWWyyFFFFFfff
+...fffFFFyyyyyyyFFFfffff
+..kkffFFFFFFFyyyFFffk.kkk
+.kGGfffFFFFFFyyFFFff.kGGGk
+k....fffffffFFFFFFf.k.....k
+kG.p.Gfff..fFFFFfff.kG.p.Gk
+k.....k.....fFFFff..k.....k
+.kGGGk......fffff....kGGGk
+..kkk.......ffff......kkk
+.............ff
 
-calque mort-2 6 7
-..____
-._kkkk_......____
-....11kU...__kkkk_
-......UUU...k..11k
-.k314UUvUU.k
-._kSSSUUU...111444
-_1.....U..._kSSSk_
-.......2u.u.1.....__
-......2u.U.u
-122222..U.U.......2S
-......_u.U.u222222
-.1......u.u1....._
-
-calque mort-3 10 3
-....UU
-....U.UU
-......U
-.....U
-...U
-.UUUUU
-.UvvvU
-UUvvvUU
-..v.v
-.U...U
+calque mort-2 1 1
+......gg...............tt
 .
-...._..u
-..._.uU.u
-..._u..Uu
-..._.uU.u
-....k..u
+........U...................GG
+.....vvvvvvU........U.......k
+kk..vvvvvvvvU.U..vvvvvvU
+....vvwwvvvvvvvvvvvvvvvvU
+....vvwwvvvvvvvvvvwwvvvvU
+...UvvvvvvvvvvvvvvwwvvvvU
+....vvvvvwwwvvvvvvvvvvvvUU
+....vvvvwwwwwvvvvvvvvvvvU
+....UvvvwwwwwvvvvvvvvvvvU....kk
+.....vvvvwwwvvvvvvvvvvvUU
+.aa..vvvvvvvvvvvvvvvvvvU
+.k..UvvvvvvvvvvvvvvvvvvUU
+.....vvvvvvvvvvvvvvvvvvU
+.....vvvvvvvvvvvvvvvvvvU
+.....UvvvvvvvvvffvvvvvUU
+......vvvvvffffFfvvvvvU
+....kkUvvvvFFFFyfvvvvUU
+...kgggUvvvfFyyyFfvvUUg
+...kkkkgUUvfFyWWyFfUUkgkkk
+..kgggkkkgfFFyWyFFf.g.kgggk
+.k.....k.uufFFyFf....k.....k
+.kg.u.gk...ff.FFf....kg.u.gk
+.k.....k......ff.....k.....k
+..kgggk...............kgggk
+...kkk.................kkk
 
-calque mort-4 9 1
-.U.UUU
-.U.vv
-UUv.v_
-...vv..__
-..UUU.._
-...U.._
-.....UU
-..k.vvvU
-......vvU
-.4....vvU
-......vvU
-..S.vvvU
-.....UU
-......_.1
-....._.u.2
-......u.u
-....._.u.2
-......k.1
+calque mort-3 1 1
+..........U
+........vvvvU
+.......vwwvvvvU....U
+.......vwwvvvvvvvvvvvU
+......UvvvvvvvvvvvwvvU
+.......vvvwwvvvvvvvvvUU
+.......vvvwwwvvvvvvvvU
+.......vvvwwwvvvvvvvvU..tt
+.......vvvvvvvvvvvvvvU.......GG
+.....ggvvvvvvvvvvvvvvUU......k
+.......vvvvvvvvvvvvvvU
+.......vvvvvvvvvvvvvvU
+.......UvvvvvvvvvvvvUU
+........UvvvvvvvvvvUU
+kk.......UvvvvvvvvUU
+..........UUUUUUUUU
+..............U
+.............................kk
+....kkk.....kkkkk
+...kgggggggggggfgkk..gg
+.aakkkkgggGGeGGggekkgkgkkk
+.kkgggkkkggggggggk..g.kgggk
+.k.....k.uuuuukkk....k.....k
+.kg.u.gk.............kg.u.gk
+.k.....k.............k.....k
+..kgggk...............kgggk
+...kkk.................kkk
 
-calque mort-5 11 2
-..U
-Uvvv
-.v.v
-U..v
-UUUUU
-..U
+calque mort-4 0 2
+.................U
+...............vvvvU
+...............vwvvU
+..............UvvvvUU
+...............vvvvU
+..............vvvUUU
+.............vwvvU
+............vwwvvvU
+............vvvvvvU
+............vvvvvUU
+............vvvvvU
+...........vwvvvvU
+...........vwwvvvU
+..........UvvvvvvUU
+...........vvvvvvU
+...........UvvvvUU
+............UUUUU
+.....kkk.....kkkkk
+....kgggggggggggfgkk..gg
+....kkkkgggGGeGGggekkgkgkkk
+...kgggkkkggggggggk..g.kgggk
+..k.....k.uuuuukkk....k.....k
+..kg.u.gk.............kg.u.gk
+..k.....k.............k.....k
+.kkkgggk...............kgggk.GG
+aa..kkk....gg......tt...kkk..kkk
+k
+
+calque mort-5 0 10
+..............v
+...............v
+................U
+...............v
+..............v
+...............U
+...............v
+................U
 .
-.._UUU
-.4k.vUU
-44Uvvv
-.k._vUU
-.._UUU
-...___
-..__u
-..__u
-..__u
-...kkk
+.....kkk.....kkkkk
+....kgggggggggggggkk..gg
+....kkkkgggGGeGGggkkkgkgkkk
+...kgggkkkggggggggk..g.kgggk
+..k.....k.uuuuukkk....k.....k
+..kg.u.gk.............kg.u.gk
+..k.....k.............k.....k
+.kkkgggk...............kgggk.GG
+aa..kkk....gg......tt...kkk..kkk
+k
 
 anim repos 180
 cadre pose
@@ -355,12 +415,12 @@ cadre repos.2 decale -1 1 + blesse-0
 cadre attaque.5 decale -1 0 + blesse-1
 
 anim mort 150
-cadre marche.0 + mort-0
-cadre blesse.0 decale 1 0 + mort-1
-cadre mort.1 + mort-2
-cadre mort.2 + mort-3
-cadre mort.3 + mort-4
-cadre mort.2 + mort-5 duree 600
+cadre mort-0
+cadre mort-1
+cadre mort-2
+cadre mort-3
+cadre mort-4
+cadre mort-5 duree 600
 
 # Cavalier de la police montée (DLC, rôle du Cavalier : charge rapide, renverse le premier soldat) : cheval brun, cavalier casqué en bleu nuit.
 #: moderne-cavalier-monte | Cavalier de la police montée | cavalier
@@ -370,7 +430,7 @@ sprite moderne-cavalier-monte
 #   marche : galop en six temps, quatre jambes (celles du fond plus sombres), crinière et queue qui volent
 #   attaque : le cavalier lève le bâton et frappe devant, le cheval lève les antérieurs
 #   blesse : le cheval se cabre un peu et recule
-#   mort : le cheval se cabre, le cavalier tombe en arrière, le cheval s'enfuit au galop, le cavalier reste à terre
+#   mort : le cheval se cabre et s'enfuit au galop ; le cavalier glisse de la selle par l'arrière, roule au sol et finit couché sur le côté, recroquevillé, le bâton tombé près de lui
 # Pose validée par l'auteur, inchangée : premier cadre du repos.
 calque pose 0 5
 ........Pp...kkkk..
@@ -610,103 +670,88 @@ BB........._B..B
 ........._
 __
 
-calque mort-0 14 4
-k
-1
-.
-S
-.
-2
-.
-.
-.
-1
-.
-........bb
-........BB......B
-k..............._
-B
-.
-.
-_........_
-.
-.
-........k
-........_
+calque mort-0 2 4
+pp
+PP
+.kP......kk
+.kPP....kk114
+..kP...k3144S
+...kP..k31SSS
+...kkP.kk1SSS
+....kPP..k2222
+.....k...22222
+........122222..........oo
+.......S1222211........oBBo
+.........12111......bbbBBBBo
+..........111111111bBBBBBkBBB
+.....bBBbb111111111BBBBBBBBB
+....bbBbBBBBBB11B11BBBBBBBdd
+...bbBbBBBBBBBkkBkkBBBB
+...bBBbBBBBBBBkkkkkkBB
+......bBBBBB......bBB
+......bBBBB.......BBB
+......BBB..........BB
+......BB...........Bk
+......BB...........k
+......kk
 
-calque mort-1 0 3
-..............___
-........__..._____
-........__..______
-........__..______
-........__.._____
-p...kkkk__...____
-kP..k3111k..______
-.kP..k31444______
-.kP..k1SSSS______.........oo
-.kP...kSSS.______........oBBo
-..kP..22222.______.......B..Bo
-...kPS1222222__.__...b.....k.BB
-...kP.122222.___.....B...._B.._
-...kP.122222.bbb..........._dd
-....kP_.11111.k.........._..__
-.....__b_111111
-....._b...11.11
-.....bb...11..BB
-.....b
-........b..B
-..........B..........k
-....................._
+calque mort-1 0 11
+..........................oo
+..kk4S...................oBBo
+.k14SS222................BBBBo
+.k11SS22221..........bbbbBBkBBB
+.k11SS22221.....kbbbbBBBBBBBBB
+PP331k22221.bbbbBBBBBBBBBBBBdd
+kkkkkP22221111111BBBBBBBB
+..kkkk22221111111BBBBBBBB
+......S11BBB11B11BBBBBBB
+.....bbBbBBBkkBkkBBBbBB
+.....bBBbBBBkkkkkk..BBB
+........bBBB.........BB
+........BBB..........kk
+........BB
 ........BB
 ........kk
 
-calque mort-2 1 10
-_...____
-__..______
-.__..______
-.__..______...............__
-.__...____...............____
-..__.._____..b..........._____
-..._________bb..bbbbb.k..bbbbbb
-....4S__.__b11bbBBBkk.....B...B
-..k14SS....111.B..........BBBBB
-..k14SS2222..__..........BBBBBB
-..k11SS2222..............BBBBBB
-..k331k2222.1.._________
-...kkk_2222.1__bBB..___....bBB
-....._..111__..bBB..___....bBB
-........S___bBBB.....__......bB
-..pPPPPPPPPPB........__
-..Pkkkkkkkkkkk
-........__
-........__
+calque mort-2 0 14
+.......k
+.......k......b
+.....11kk....bbBBbbbbbbkbbbbbbbb
+....111kkk..bBBbbBBBkkBBBBBBBBBB
+....11111k.....bBBBBBBBBBBBBBBBB
+....2.21111.....BBBBBBBBBBBBBBBB
+....2222111.....BBBBBBBBBBBBBBBB
+.SSS22221111
+k4SS2222211.....bBB.........bBB
+144SS22221......bBB.........bBB
+k11Sk22211...bBBB.............bB
+kk33kP.1.....B
+kkkkkk.......k
 
-calque mort-3 12 15
-.._
-.__.._______._______
-_..________bb__bbbbb
-..._______bb_bb...kk
-....______b__b
-....__________
-.............bBBBBBB
-....___.......bBB__
-....___.......bBB__
-.____........BBB..__
-._..........Bb
-.__.........kkk
+calque mort-3 0 15
+.........1
+.......1111.............b
+......k111111..........bbBBbbbbb
+....kk1111221.........bbBbbBBBkk
+..kkkk11222221........bBBbBBBBBB
+....111222222.............BBBBBB
+....111.22222............bBBBBBB
+.....112222Skk............bBB
+.........SSSS3k...........bBB
+.........SS413k..........BBB
+PPPPPP...S4411k.........Bb
+kkkkkk....k1kk..........kk
 
-calque mort-4 1 16
-......................._
-......................__.._____
-.....................__._______
-....................._.._______
-.........................______
-........................_______
-.........................___
-.........................___
-........................___
-N......................__
-n...............nN.....___
+calque mort-4 0 18
+.........S
+.........111
+....kkk.22221
+...k331k22221
+...k11SS22221
+...k14SS2222111
+...k14SS2222111
+PPnPk4S.12111kk1kk
+knNkkk.....1kkkkkk
 
 anim repos 120
 cadre pose
@@ -740,8 +785,8 @@ cadre blesse.0 + blesse-1
 cadre pose decale -1 0
 
 anim mort 150
-cadre blesse.1 decale 1 0 + mort-0
-cadre mort.0 decale 0 -1 + mort-1
-cadre mort.1 decale 1 2 + mort-2
-cadre mort.2 + mort-3
-cadre mort.3 + mort-4 duree 700
+cadre mort-0
+cadre mort-1
+cadre mort-2
+cadre mort-3
+cadre mort-4 duree 700
