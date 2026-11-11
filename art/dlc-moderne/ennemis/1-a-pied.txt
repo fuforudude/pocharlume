@@ -17,7 +17,7 @@ couleur 3 46598f  marine éclairé : épaulières, reflets
 couleur 4 c4d6e2  plexiglas, visières, vitres
 couleur 5 8fa9bf  plexiglas devant le corps
 
-# Gendarme (DLC, rôle du Paysan Affamé : ennemi de base) : képi à bandeau clair, blouson bleu marine, ceinturon noir, pantalon bleu nuit.
+# Gendarme (DLC, rôle du Paysan Affamé : ennemi de base) : képi à bandeau clair, blouson bleu marine, ceinturon noir, pantalon bleu nuit, matraque noire dressée au poing.
 #: moderne-gendarme | Gendarme | paysan-affame
 sprite moderne-gendarme
 origine 0 7
@@ -25,17 +25,17 @@ origine 0 7
 ...........122221
 ...........122221
 ...........1PPPP1kk
-............SSSSS
-............SSSkS
-............SSSSS
-.............SSS
-...........2222222
-..........222222322
-..........222222332
-..........22222.332
-..........222222.SS
-..........kkkkkk
-..........111111
+............SSSSS..Pp
+............SSSkS..kp
+............SSSSS..kp
+.............SSS...kp
+...........2222222.kp
+..........222222322kp
+..........222222332kp
+..........22222.332kp
+..........222222.SSSS
+..........kkkkkk...k
+..........111111...k
 ..........111.11
 ..........11..11
 ..........11..11
@@ -43,23 +43,23 @@ origine 0 7
 ..........kk..kk
 ..........kkk.kkk
 
-# CRS (DLC, rôle du Fantassin : base solide, bouclier) : casque noir visière baissée, tenue bleu nuit à épaulières, bouclier rectangulaire sombre tenu devant.
+# CRS (DLC, rôle du Fantassin : base solide, bouclier) : casque noir visière baissée, tenue bleu nuit à épaulières, bouclier rectangulaire sombre tenu devant, matraque dans la main libre, dressée derrière l’épaule.
 #: moderne-crs | CRS | fantassin
 sprite moderne-crs
 origine 0 7
 ............kkkk
 ...........k3111k
-..........k311111k
-..........k3114444
-..........k31SS44KKKKKK
-...........kSSSSSKgGGgK
-............kSSS.KgGGgK
-..........3322223KgGGgK
-.........3322222SSggggK
-.........32222222KgGGgK
-.........32222222KgGGgK
-..........2222222KgGGgK
-..........kkkkkkkKgGGgK
+.......Pp.k311111k
+.......kp.k3114444
+.......kp.k31SS44KKKKKK
+.......kp..kSSSSSKgGGgK
+.......kp...kSSS.KgGGgK
+.......kp.3322223KgGGgK
+.......kp3322222SSggggK
+.......kp32222222KgGGgK
+.......SS32222222KgGGgK
+.......k..2222222KgGGgK
+.......k..kkkkkkkKgGGgK
 .................KgGGgK
 ..........111111.KggggK
 ..........111.11.KgGGgK
@@ -69,24 +69,24 @@ origine 0 7
 ..........kk..kk
 ..........kkk.kkk
 
-# Gendarme mobile (DLC, rôle du Chasseur de Sorcières : plus solide, armure) : casque bleu à visière relevée, gilet rembourré, épaulières et genouillères.
+# Gendarme mobile (DLC, rôle du Chasseur de Sorcières : plus solide, armure) : casque bleu à visière relevée, gilet rembourré, épaulières et genouillères, matraque noire dressée au poing.
 #: moderne-gendarme-mobile | Gendarme mobile | chasseur-sorcieres
 sprite moderne-gendarme-mobile
 origine 0 6
 ...........aaaaa
 ..........aAAAAAa
 .........aa44444a
-.........aaaSSSSS
-.........aaaSSSkS
-..........aaSSSSS
-............kSSS
-..........32222223
-.........3322332233
-.........3222332223
-.........3222332223
-.........22223322SS
-.........22222222SS
-.........kkkkkkkkk
+.........aaaSSSSS..Pp
+.........aaaSSSkS..kp
+..........aaSSSSS..kp
+............kSSS...kp
+..........32222223.kp
+.........3322332233kp
+.........3222332223kp
+.........3222332223kp
+.........22223322SSSS
+.........22222222SSk
+.........kkkkkkkkk.k
 .
 .........11111111
 .........111..111
@@ -96,23 +96,23 @@ origine 0 6
 .........kkk..kkk
 .........kkkk.kkkk
 
-# Bouclier anti-émeute (DLC, rôle du Porte-Herse : bouclier frontal) : grand bouclier de plexiglas cerclé d'acier, le porteur casqué se devine derrière.
+# Bouclier anti-émeute (DLC, rôle du Porte-Herse : bouclier frontal) : grand bouclier de plexiglas cerclé d'acier, le porteur casqué se devine derrière, matraque dans la main libre.
 #: moderne-bouclier-anti-emeute | Bouclier anti-émeute | porte-herse
 sprite moderne-bouclier-anti-emeute
 origine 0 7
 ..........kkkk
 .........k311tttttttt
-........k3114t544444t
-........k31SSt544444tt
-.........kSSSt544444t
-..........kSSt444444t
-.........2222t544444tt
-........12222t554444t
-........12222t554444t
-........12222t554444tt
-........12222t544444t
-........kkkkkt544444t
-.............t444444tt
+......Ppk3114t544444t
+......kpk31SSt544444tt
+......kp.kSSSt544444t
+......kp..kSSt444444t
+......kp.2222t544444tt
+......kp12222t554444t
+......kp12222t554444t
+......kp12222t554444tt
+......SS12222t544444t
+......k.kkkkkt544444t
+......k......t444444tt
 .............t444444t
 ........11111t444444t
 ........111.1t444444tt

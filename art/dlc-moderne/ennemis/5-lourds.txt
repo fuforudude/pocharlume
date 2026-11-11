@@ -1,7 +1,7 @@
 # Ennemis du DLC « Temps modernes » : Engins lourds et boss (64×64). Les humains deviennent les forces de l'ordre ; chaque ennemi reprend le
 # rôle d'un ennemi du jeu (l'original, dernier champ de sa ligne `#: id | nom | original`).
 # Pose de repos seulement (pas d'animation tant que le skin n'est pas validé). 32×32, ancre aux pieds, de profil vers la
-# droite ; les engins lourds et le boss sont dessinés en 32×32 puis agrandis ×2 (cadres de 64×64), comme les boss du jeu.
+# droite. Le préfet est dessiné en 32×32 puis agrandi ×2 (cadre de 64×64), comme les boss du jeu ; le canon à eau et le Centaure sont dessinés directement en 64×64 (taille 64 64, ancre 32 61).
 # Uniformes génériques, reconnaissables aux couleurs et à l'équipement : aucun insigne, logo ni inscription.
 # Hors atlas : ce dossier n'est lu que par l'outil d'aperçu du DLC (npm run dlc:apercu), jamais par npm run art.
 # Première version générée par un script, retouchée à la main : on la modifie ici.
@@ -17,54 +17,159 @@ couleur 3 46598f  marine éclairé : épaulières, reflets
 couleur 4 c4d6e2  plexiglas, visières, vitres
 couleur 5 8fa9bf  plexiglas devant le corps
 
-# Canon à eau (DLC, rôle de la Gargouille : blindé lent, insensible aux ralentissements) : camion bleu et blanc, cabine vitrée, tourelle sur le toit qui crache un jet d'eau.
+# Canon à eau (DLC, rôle de la Gargouille : blindé lent, insensible aux ralentissements), dessiné en 64×64 : porteur à cabine avancée (vitres grillagées, feux bleus), caisse-citerne massive blanche à bande bleue, deux essieux arrière à roues jumelées, deux lances orientables sur le toit, dont l’avant crache un jet d’eau. Sans inscription ni logo.
 #: moderne-canon-a-eau | Canon à eau | gargouille
 sprite moderne-canon-a-eau
-agrandi 2
-origine 0 9
-.........................AAA
-.......................A.....I
-.....................A.....A
-.............kkkkk
-............kTTTTTkkkkkkkk
-..........kkkkkkkkkkk..AAA.I
-..kkkkkkkkkkkkkkkkkkk.....A
-.kwwwwwwwwwwwwwwwwwwk.kkkkk
-.kwwwwwwwwwwwwwwwwwwkk44444k
-.kwwwwwwwwwwwwwwwwwwkk44444kk
-.kaaaaaaaaaaaaaaaaaakkaaaaaak
-.kaaaaaaaaaaaaaaaaaakkaaaaaak
-.kwwwwwwwwwwwwwwwwwwkkwwwwwwk
-.kwwwwwwwwwwwwwwwwwwkkwwwwwwk
-.kkkkkkkkkkkkkkkkkkkkkkkkkkkk
-..kgggk.....kgggk.....kgggk
-.kgGGGgk...kgGGGgk...kgGGGgk
-.kgGpGgk...kgGpGgk...kgGpGgk
-..kgggk.....kgggk.....kgggk
+taille 64 64
+ancre 32 61
+couleur 6 c9d1db  blanc dans l'ombre
+couleur 7 98a3b2  joints, ombre profonde du blanc
+couleur 8 2f62b8  bande bleue
+couleur 9 1d3d80  bande bleue, ombre
+couleur V 26323e  vitre sombre
+couleur L 3d7cff  feu bleu
+couleur M b0d8ff  feu bleu, éclat
+.
+.
+.
+.
+.
+.
+.
+.............................................kkkk
+............................................kkiik
+..........................................kkikTTkIIII.AA
+........................................kkiiTkTTkAAAAIIIAA
+......................................kkiiTTkkkkk....AAAIIAA
+...............................kkkkkkkiiTTkk............AAIIA
+...................kk..........kWWWWiiTTkk................AAIA.A
+..................kkk..........kwwwwTTkk..................aaAIA
+.................k.kk..........k6666kk......................aAI
+..............kkTTkkk.......kkkkkkkkkkkk...................A.aA
+........kkkkkk.T.k..........kqqqqqqqqqqk......................a
+........kqqqqTkkk...........kPPPPPPPPPPk.....................A.A
+........kPPPPk..............kPPPPPPPPPPk.....kLMLLkkkkLMLLk
+...pppppkPPPPkppppppppppppppkppppppppppk.....kLLLLggggLLLLk...A
+....p...kkkkkk..p...p...p...kkkkkkkkkkkk.....kkkkkkkkkkkkkk
+..kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk..kkkkkkkkkkkkkkkk
+..kWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWk..kWWWWWWWWWWWWWWkk
+..kWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWkkkkw6wwwwwwwwww6wwkk
+..k6wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww66kkkkw6kkkkkkkkkk6VVVkk
+..k6wwwwwwwww7wwwwwwwwww7wwwwwwwww7www66kkkkw6kVKVKVKVKk6V4VVkkk
+..k6wwwwwwwww7wwwwwwwwww7wwwwwwwww7www66kkkkw6k4K4KVKVKk6KKKKkkk
+.Kk6w6666666w7w66666666w7w6666666w7www66kkkkw6kVKVKVKVKk6VV4Vk.k
+.Kk6wwwwwwwww7wwwwwwwwww7wwwwwwwww7www66kkkkw6kKKKKKKKKk6VVVVk.k
+KKk6wwwwwwwww7wwwwwwwwww7wwwwwwwww7www66kkkkw6kVKVKVKVKk6KKKKk.k
+.Kk6w6666666w7w66666666w7w6666666w7www66kkkkw6kVKVKVKVKk6VVVVk.k
+.Kk6wwwwwwwww7wwwwwwwwww7wwwwwwwww7www66kkkkw6kVKVKVKVKk6VVVVk.k
+.Kk6wwwwwwwww7wwwwwwwwww7wwwwwwwww7www66kkkkw6kVKVKVKVKk6KKKKk
+KKk6w6666666w7w66666666w7w6666666w7www66kkkkw6kkkkkkkkkk6wwwwk
+.Kk6wwwwwwwww7wwwwwwwwww7wwwwwwwww7www66kkkkw6wwwwwwwwww6wwwwk
+.Kk6www777www7www7777www7www777www7www66kkkkw6KKKwwwwwww6wwwwk
+.Kk6wwwwwwwww7wwwwwwwwww7wwwwwwwww7www66kkkkw6wwwwwwwwww6wwwwk
+KKk6888888888888888888888888888888888866kkkk86888888888868888k
+.Kk6888888888888888888888888888888888866kkkk86888888888868888k
+.Kk6888888888888888888888888888888888866kkkk86888888888868888k
+.Kk6999999999999999999999999999999999966kkkk96999999999969999k
+KKk6wwwwwwwww7wwwwwwwwww7wwwwwwwww7www66kkkkw6wwwwwwwwww6wwFFk
+.Kk6wwwwwwwww7wwwwwwwwww7wwwwwwwww7www66kkkkw6wwwwwwwwww6wwFFk
+.Kk6666666666766666666667666666666766666kkkk6666666666666666fk
+.Kk6666666666766666666667666666666766666kkkk66666666666666666k
+.Kk6666kkkkkkkkkkkkkkkkkkkkkkkkkkkkk6666kkkkkkkkkkkkkkkkkkkkkkkk
+..k6666kkkkkkkkkkkkkkkkkkkkkkkkkkkkk6666kkkkkkkkkkkkkkkkkkkGGGGk
+..kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkggggk
+...kggkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkggggggkkkkkkkkkkkkkkkkkgggk
+...kggkkkkkkGGGGgkkkkkkkkkGGGGgkkkkkkggggggkkkkkkGGGGgkkkkkkgggk
+...kkkkkkkkGGGGgggkkkkkkkGGGGgggkkkkkkkkkkkkkkkkGGGGgggkkkkkkkkk
+.........kGGgKKKgggk...kGGgKKKgggk............kGGgKKKgggk
+........kGGgKPPPKgggk.kGGgKPPPKgggk..........kGGgKPgPKgggk
+........kGGKPGGGpKggk.kGGKPGGGpKggk..........kGGKPPPppKggk
+........kGGKPGKGpKggk.kGGKPGKGpKggk..........kGGKgPKpgKggk
+........kGgKPGGGpKggk.kGgKPGGGpKggk..........kGgKPppppKggk
+........kgggKpppKgggk.kgggKpppKgggk..........kgggKpgpKgggk
+.........kgggKKKgggk...kgggKKKgggk............kgggKKKgggk
+..........kgggggggk.....kgggggggk..............kgggggggk
+...........kgggggk.......kgggggk................kgggggk
+....KKKKKKKKkkkkkKKKKKKKKKkkkkkKKKKKKKKKKKKKKKKKKkkkkkKKKKKKK
+.
+.
 
-# Centaure (DLC, rôle du Garde Royal : blindé lourd et lent) : véhicule blindé bleu nuit, vitres étroites grillagées, pare-buffle à l'avant, grosses roues.
+# Centaure (DLC, rôle du Garde Royal : blindé lourd et lent), dessiné en 64×64 : caisse blindée gris-bleu sombre à facettes, vitres blindées en meurtrières grillagées, lame anti-barricade à l’avant, grosses roues à crampons, gyrophare et feux bleus. Sans inscription ni insigne.
 #: moderne-centaure | Centaure | garde-royal
 sprite moderne-centaure
-agrandi 2
-origine 0 11
-........kkkkkkkkkkkkkk
-.......k22222222222222k
-......k2222222222222222k
-.....kk3333333333333333kk
-....k2222222222222222224kk
-...k22k4k4k22k4k4k2222244kk
-...k22k4k4k22k4k4k22222244k
-...k222222222222222222222222k
-...k222222222222222222222222kK
-...k111111111111111111111111kKK
-...k222222222222222222222222kK.K
-...kkkkkkkkkkkkkkkkkkkkkkkkkkKKK
-....kkkk...........kkkk.....K
-...kgGGgk.........kgGGgk
-..kgGpGGgk.......kgGpGGgk
-..kgGGGGgk.......kgGGGGgk
-...kgGGgk.........kgGGgk
-....kkkk...........kkkk
+taille 64 64
+ancre 32 61
+couleur 6 263044  caisse gris-bleu sombre
+couleur 7 34405a  facette éclairée
+couleur 8 4e5d7c  arête vive, boulons
+couleur 9 181e2c  pan dans l'ombre
+couleur V 1c2630  vitre blindée
+couleur L 3d7cff  feu bleu
+couleur M b0d8ff  feu bleu, éclat
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.....K
+.....K..................k
+.....K................kLLLk
+......K...............kMLLk
+......K...............kLLLk...kkkkkkkkk
+......K......kkkkkkk..kLLLk...kMLLkMLLk
+......K......k88888k.ggggggg..kLLLkLLLk
+......K...kkkkkkkkkkkgggggggkkkkkkkkkkkk
+......K..kk8888888888888888888888888887kk
+.......Kkk787777777777777777777777777777kk
+.......Kk7877kkkkkkkkk77kkkkkkkkk77777777kk
+.......K78777kVK4KVKVk77kVK4KVKVk77kkkkkk6kk
+......kk87777kVKVKVKVk77kVKVKVKVk777k44VVk6kk
+.....kk877777kVKVKVKVk77kVKVKVKVk77774VVVVk6k
+....kk8777777kVKVKVKVk77kVKVKVKVk77777kKKKKkkk
+....k87777777kkkkkkkkk77kkkkkkkkk77777kVVVVk6kk
+....kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkVVVVkkkkkk
+....k88888888888888888888888888888888888kVVVVk8888
+....kkkkkkkkk66666666666666666kkkkkkkkkkkkKKKKkkk
+....kk666666k66866866866866866k888888888kkVVVVk6kk
+....kk666666k6666666666666666Pk666666666k6kVVVVk6kk
+....kk666666k6666666666666666Pk666666666k66kkkkkk6kkk
+....kk6PP666k666666kkkkkk66666k666666666k66666666887kkkkk
+....kk666666k666666kKKKKk66666k666666PPPk666666667788888kkk
+....kk666666k666666kkkkkk66666k666666666k66666666777777788kk..kk
+....kk666666k66666666666666666k666666666k6866866877777777LLk.kkk
+....kk666666k66666666666666666k666666666k6666666677777777LLkkkqk
+....kk666666k6666666666666666Pk666666666k6666666677777777777kqPk
+....kk666666k6686686686686686Pk666666666k66666666kkkkkkkkkkkkPPk
+....kkkkkkkkk66666666666666666kkkkkkkkkkk666666666666666fFFFkPPk
+....kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkFFFkPPk
+....k6666666666666666666666666666666666666666666666666666666kPPk
+....k99kkkkkkkkkkkkkkkkkkk99999999999kkkkkkkkkkkkkkkkkkk9999kppk
+....k99k99999999999999999k99999999999k99999999999999999k99kkkPPk
+....k9kkkkkkkkkkkkkkkkkkkkk969996999kkkkkkkkkkkkkkkkkkkkk9kpkPPk
+....k9kkkkkkkkkkkkkkkkkkkkk999999999kkkkkkkkkkkkkkkkkkkkk9kpkPPk
+....k9kkkkkkkkGGGGGkkkkkkkk999999999kkkkkkkkGGGGGkkkkkkkk9kkkPPk
+....k9kkkkkkGGGGGGgggkkkkkk999999999kkkkkkGGGGGGgggkkkkkk999kppk
+....k9kkkkkGGGKKKKKgggkkkkk999999999kkkkkGGGKKKKKgggkkkkk999kPPk
+......kkkkGGgKKPPPKKgggkkkk.........kkkkGGgKKPPPKKgggkkkk...kPPk
+.....kkkkkGGKPPPPPPpKggkkkkk.......kkkkkGGKPPPPPPpKggkkkkk..kPPk
+.....kkkkGGKKPPPgPppKKggkkkk.......kkkkGGKKPPPgPppKKggkkkk..kPPk
+........kGGKPPPPPppppKggk.............kGGKPPPPPppppKggk.....kppk
+.......kkGGKPPgPKpgppKggkk...........kkGGKPPgPKpgppKggkk....kPPk
+........kGGKPPPppppppKggk.............kGGKPPPppppppKggk.....kPPk
+........kGgKKPppgpppKKggk.............kGgKKPppgpppKKggk.....kPPk
+........kkggKpppppppKggkk.............kkggKpppppppKggkk.....kkkk
+.........kgggKKpppKKgggk...............kgggKKpppKKgggk......kkk
+..........kgggKKKKKgggk.................kgggKKKKKgggk
+..........kkgggggggggkk.................kkgggggggggkk
+............kkgggggkk.....................kkgggggkk
+.............kkkkkkk.......................kkkkkkk
+...KKKKKKKKKKKKKkKKKKKKKKKKKKKKKKKKKKKKKKKKKKKkKKKKKKKKKKKKKKK
+.
+.
 
 # Préfet (DLC, rôle du Roi Fou : boss qui appelle des renforts) : uniforme bleu nuit brodé d'argent, casquette à feuilles d'argent, ventre en avant, moustache et nez levé, un arrêté roulé à la main.
 #: moderne-prefet | Préfet | roi-fou
