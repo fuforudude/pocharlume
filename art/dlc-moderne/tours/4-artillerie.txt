@@ -141,12 +141,12 @@ point tir 4 11
 
 sprite moderne-artillerie-bidon
 point tir 11 3
-# A : trébuchet dont le contrepoids est un caddie de pavés ; tir en cloche, pavés en vol.
-...............w.qqP.w
-..............w..PPp..w
-..........qqP....ppg....qqP
-..........PPp...........PPp
-.........TppgT..........ppg.dxxx
+# A : trébuchet dont le contrepoids est un caddie de pavés ; tir en cloche, pavés hors champ.
+.
+.
+.
+.
+.........T...T..............dxxx
 .........TTTTT..............dxxx
 .............BO.............dxxx
 ..............BT............d
