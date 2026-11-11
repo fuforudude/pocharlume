@@ -1,0 +1,183 @@
+# DLC « Temps modernes » : les trois chats suprêmes en figures de la mobilisation.
+#= Les tours divines
+# Même emprise que les tours divines du jeu : 32×48, ancre au pied. Grilles en coordonnées de cadre (origine 0 0).
+#: moderne-plume | Le Collage de nuit (Plume) | tour-sanctuaire
+#: moderne-charlie | La Grosse Tête du cortège (Charlie) | tour-totem
+#: moderne-pollen | L'Atelier de l'AG (Pollen) | tour-atelier
+# Couleurs propres au DLC (en plus de la palette commune) : 1 magenta (tags, fumigène), 2 cyan, 3 vert fluo,
+# 4 violet, 5 fumée rose, 6 sweat marine, 7 kaki, 8 orange chantier, 9 fumée grise, 0 jaune fluo, C plastique bleu,
+# D carton, S fumée verte, V fumée violette, X marine sombre, Q bâche ardoise.
+categorie tour
+palette commune
+taille 32 48
+ancre 16 45
+origine 0 0
+couleur 1 e0508c
+couleur 2 40c8d8
+couleur 3 7ad040
+couleur 4 7a4ab0
+couleur 5 f4a8c8
+couleur 6 34467a
+couleur 7 5a6a3a
+couleur 8 f07a20
+couleur 9 cfcbc2
+couleur 0 d8f040
+couleur C 3070b0
+couleur D b08a58
+couleur S 9ad89a
+couleur V b9a0e6
+couleur X 1e2a44
+couleur Q 4a5868
+
+sprite moderne-plume
+point assassin 16 46
+point ombre 16 30
+# Colonne d'affichage, affiches collées de nuit, porte d'ombre aux yeux jaunes, Plume en capuche sur le dôme.
+.............k.....k
+.............kkXXXkk
+............XXkkkkkXX
+............XkkykkykX
+.............kkkkkkkkk
+.............XXXXXXX.k
+...............YY
+...............YY
+.............hhhhhh
+............hhhhhhhh
+...........hhhhhhhhhh
+..........hhhhhhhhhhhh
+..........HHHHHHHHHHHH
+........jjjjjjjjjjjjjjjj
+........HHHHHHHHHHHHHHHH
+.........khhhhhhhhhhhhH
+.........kwwwwwwhhhhhhH
+.........kwxxxxw000000H
+.........kwwwwww0kkk00H
+.........kwxxxxw000000H
+.........kwwwwww0kkkk0H
+.........kwxxxww000000H
+.........kwwwwww0kkkk0H
+.........k1111hh000000H
+.........k1w11hh000000H
+.........k1111KKKKhhhhH
+.........k1ww1kkkk2222H
+.........k1111kkkk2k22H
+.........k11h.kkkk2222H
+.........khhhhykky2kk2H
+.........khhhhkkkk2222H
+.........kzzzzkkkk2kk2H
+.........kz66zkkkk2222H
+.........kzzzzkkkkhhhhH
+.........kz66zkkkkwwwwH
+.........kzzzzkyykw11wH
+.........kz6zzkkkkwwwwH
+....b....kzzzzkkkkw11wH
+....b....kz66zkkkkwwwwH
+....b....kzzzzkkkkwwh.H
+....b....khhhhkkkkhhhhH
+....b..UUUUUUUUUUUUUUUUUU
+...vvv.uuuuuuuuuuuuuuuuuu
+...UvU.ukkkkkkkkkkkkkkkku
+...UUU.uuuuuuuuuuuuuuuuuu
+.......uuuuuuuuuuuuuuuuuu
+
+sprite moderne-charlie
+# Grosse tête de carnaval de Charlie au bout d'un mât, banderole, socle de palettes.
+..............xx
+............xxxxxx
+........U..xxxxxxxx..U
+.......UvU.wwwwwwww.UvU
+.......UvvUUUUUUUUUUvvU
+.......UUUUUUUUUUUUUUUU
+......UUUUUyyUUUUyyUUUUU
+......UUUUUykUUUUykUUUUU
+......UUUUUUUUUUUUUUUUUU
+......vUUUUUUUkkUUUUUUUv
+.......vvUUUUccccUUUUvv
+........vvvUccccccUvvv
+..........vvvvvvvvvv
+...............bd
+...............bd
+...............bd
+...............bd
+...............bd
+...............bd
+...............bd
+...dddddddddddddddddddddddddd
+...wwwwwwwwwwwwwwwwwwwwwwwwww
+...wwwxwwwxwxwxxxwxxxwxwxwwww
+...wwwxxwxxwxwxwxwxwxwxwxwwww
+...wwwxwxwxwxwxxxwxwxwxwxwwww
+...wwwxwwwxwxwxwxwxxxwxxxwwww
+...wwwwwwwwwwwwwwwwwwwwwwwwww
+...wwwwwwwwwwwwwwwwwwwwwwwwww
+...99999999999999999999999999
+....w..........bd..........w
+....w..........bd..........w
+...............bd
+...............bd
+...............bd
+...............bd
+...............bd
+...............bd
+......OOOOOOOOObdOOOOOOOOO
+......obboobboobboobboobbo
+......BBBBBBBBBBBBBBBBBBBB
+......OOOOOOOOOOOOOOOOOOOO
+......obboobboobboobboobbo
+......BBBBBBBBBBBBBBBBBBBB
+......OOOOOOOOOOOOOOOOOOOO
+......obboobboobboobboobbo
+.....MMMMMMMMMMMMMMMMMMMMMM
+
+sprite moderne-pollen
+point porte 17 43
+point marteau 20 36
+# Atelier de palettes sous une bâche, poêle qui fume, pancarte « AG », banderole qui sèche, Pollen à la lucarne.
+.
+........................99
+.......................9w99v
+.....000000000.........999vU
+.....0kkk0kkk0........9vvU
+.....0k0k0k000........v
+.....0kkk0k0k0.......TTTT
+.....0k0k0kkk0........tt
+.....000000000........tt
+.........d............tt
+.........d............tt
+.........d............tt
+.........d....CCCC....tt
+.........d...AAAAAA...tt
+............CCCCCCCC
+...........AAAAAAAAAA
+..........CCCCCCCCCCCC
+.........AAAAAAAAAAAAAA
+........CCCCCCCCCCCCCCCC
+....XXXXXXXXXXXXXXXXXXXXXXXX
+......obboobbkkkkkkkboobbo
+......BBBBBBBkffdffkBBBBBB
+......OOOOOOOkdddddkOOOOOO
+......obboobbkfydyfkboobbo
+......BBBBBBBkffdffkBBBBBB
+......OOOOOOOkkkkkkkOOOOOO
+......obboobboobboobboobbo
+......BBBBBBBBBBBBBBBBBBBB
+...dddddddddddddddddddddddddd
+....ww11w22w33ww1w22w3wwwwww
+....w1ww2ww3ww11w2ww33wwwwww
+....ww11w22w33ww1w22w3wwwwww
+....wwwwwwwwwwwwwwwwwwwwwwww
+......BBBBBBBBBBBBBBBBBBBB...ww
+......OOOOOOOOOOOOOOOOOOOO...ww
+......obboobbkkkkkkkkoobbo....b
+......BBBBBBBkkkkkkkkBBoB333.ob
+......OOOOOOOkkkkkkkkOOo33333ob
+......obboobbkkkkkkkkoooBoBoBob
+......BBBBBBBkkkkkkkkBBooookokb
+......OOOOOOOkkkkkkkkOOoooccrc
+......obboobbkkkkkkkkoobocccccb
+......BBBBBBBk1k2k3kkBBBYYYYYY
+......OOOOOOOkTxTCTkkOOBoBoBoo
+......obboobbkTTTTTkkoooBoBoB
+......dddddddkkkkkkkkdddoBoB
+.......................w...o.o
+............................B.B

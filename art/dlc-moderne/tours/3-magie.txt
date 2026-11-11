@@ -1,0 +1,182 @@
+# DLC « Temps modernes » : l'Autel des Cendres devient la sono de la manif (fumigènes, enceintes, mégaphone, tags).
+#= La Sono (magie)
+# Même emprise que tour-magie-* : 32×32, ancre au pied, le projectile part du point `tir`. Grilles en coordonnées de cadre.
+#: moderne-magie-1 | Caisse à fumigène | tour-magie-1
+#: moderne-magie-2 | Enceintes | tour-magie-2
+#: moderne-magie-3 | Char sono | tour-magie-3
+#: moderne-magie-megaphone | Mégaphone d'or | tour-magie-oracle
+#: moderne-magie-graffeurs | Graffeurs | tour-magie-necromancien
+# Couleurs propres au DLC (en plus de la palette commune) : 1 magenta (tags, fumigène), 2 cyan, 3 vert fluo,
+# 4 violet, 5 fumée rose, 6 sweat marine, 7 kaki, 8 orange chantier, 9 fumée grise, 0 jaune fluo, C plastique bleu,
+# D carton, S fumée verte, V fumée violette, X marine sombre, Q bâche ardoise.
+categorie tour
+palette commune
+taille 32 32
+ancre 16 26
+origine 0 0
+couleur 1 e0508c
+couleur 2 40c8d8
+couleur 3 7ad040
+couleur 4 7a4ab0
+couleur 5 f4a8c8
+couleur 6 34467a
+couleur 7 5a6a3a
+couleur 8 f07a20
+couleur 9 cfcbc2
+couleur 0 d8f040
+couleur C 3070b0
+couleur D b08a58
+couleur S 9ad89a
+couleur V b9a0e6
+couleur X 1e2a44
+couleur Q 4a5868
+
+sprite moderne-magie-1
+point tir 16 13
+# Une caisse de récupération, un fumigène et son nuage rose.
+.
+.
+.
+.
+.
+....................555
+..................55ww55.55
+.................5ww5555551
+................5w55555551R
+................5555515511R
+.................5511R511R
+.................151R..RR
+................51R
+................51
+...............51
+...............1
+...............F
+...............x
+...............x
+...............r
+..........AAAAAAAAAAAA
+..........CCCCCCCCCCCC
+..........CCXXCXXCXXCC
+..........CCXXCXXCXXCC
+..........CCCCCCCCCCCC
+..........XXXXXXXXXXXX
+
+sprite moderne-magie-2
+point tir 16 13
+# Deux colonnes d'enceintes coiffées de fumigènes violets, la caisse au centre.
+.......VV...................VV
+......VwVV4................VwVV4
+......VVV4X................VVV4X
+.....V44X.................V44X
+.....4....................4
+.....F....................F
+.....x..............555...x
+.....x............55ww55.55
+.....r...........5ww5555551
+...UUUUU........5w55555551RUU
+...uuuuu........5555515511Ruu
+...uuvuu.........5511R511Rvuu
+...uuuuu.........151R..RRuuuu
+...uUUUu........51R.....uUUUu
+...uUkUu........51......uUkUu
+...uUUUu.......51.......uUUUu
+...uuuuu.......1........uuuuu
+...uUUUu.......x........uUUUu
+...uUkUu.......x........uUkUu
+...uUUUu.......r........uUUUu
+...uuuuu..AAAAAAAAAAAA..uuuuu
+...uUUUu..CCCCCCCCCCCC..uUUUu
+...uUkUu..CCXXCXXCXXCC..uUkUu
+...uUUUu..CCXXCXXCXXCC..uUUUu
+...uuuuukkCCCCCCCCCCCCkkuuuuu
+...kkkkk..XXXXXXXXXXXX..kkkkk
+
+sprite moderne-magie-3
+point tir 16 13
+# Poutre de scène, tags, un étudiant au mégaphone, grand nuage rose.
+....VwVV4....................VwV
+....VVV4X..o.xxx.o..ww.......VVV
+...V44X....oxxxxxo.xww......V44X
+...4.......ooookokxxww......4
+...x.......oooccrccxww......x
+...x........occccc..ww......x
+...r........666666..555..55.r
+..TTTTTTTTTTTTTTTT55ww555555TT
+...t.t.t.t.t.t.t.5ww555555551t
+..TTTTTTTTTTTTTT5w55555555111T
+...uuuuu........555555551511R
+...uuvuu.........5551551111Ru
+...uuuuu.........1511R11RRRuu
+...uUUUu........511RR...uUUUu
+...uUkUu........51R.....u2k2u
+...uUUUu.......51.......u22Uu
+...uuuuu.......1........uuuuu
+...uUUUu.......x........uUUUu
+...1U1Uu.......x........uUkUu
+...u11Uu.......r........uUUUu
+...1uuuu..AAAAAAAAAAAA..uuuuu
+...uUUUu..CCCCCCCCCCCC..uUUUu
+...uUkUu..CCXXCXXCXXCC..uUkUu
+...uUUUu..CCXXCXXCXXCC..uUUUu
+...uuuuukkCCCCCCCCCCCCkkuuuuu
+...kkkkk..XXXXXXXXXXXX..kkkkk
+
+sprite moderne-magie-megaphone
+point tir 16 13
+# A : mégaphone d'or et ondes sonores.
+....ywyyF....................ywy
+....yyyFf..o.xxx.o..ww.......yyy
+...yFFf....oxxxxxo.xww......yFFf
+...F.......ooookokxxww......F
+...x.......oooccrccxww......x
+...x........occccc..ww......x
+...r........666666..........r
+..TTTTTTTTTTTTTTTTTTTTTTTTTTTT
+...t.t.t.t.t.t.t.t.t.t.t.t.t.t
+..TTTTTTTTTTTTTTTTTTTTTTTTTTTT
+...uuuuu............y..yuuuuu
+...uuvuu........YY...y..uuvuu
+...uuuuu......YYwY...y..yuuuu
+...uUUUu..kkYYYwwY...y..yUUUu
+...uUkUu..kkYYYwwY...y..u2k2u
+...uUUUu......YYwY..y..yu22Uu
+...uuuuu........YY......uuuuu
+...uUUUu....d...........uUUUu
+...1U1Uu....d...........uUkUu
+...u11Uu....d...........uUUUu
+...1uuuu..AAAAAAAAAAAA..uuuuu
+...uUUUu..CCCCCCCCCCCC..uUUUu
+...uUkUu..CCffCffCffCC..uUkUu
+...uUUUu..CCffCffCffCC..uUUUu
+...uuuuukkCCCCCCCCCCCCkkuuuuu
+...kkkkk..ffffffffffff..kkkkk
+
+sprite moderne-magie-graffeurs
+point tir 16 13
+# B : fumées vertes, tags partout, bombes de peinture.
+....SwSS3....................SwS
+....SSS3E..o.333.o..ww.......SSS
+...S33E....o33333o.3ww......S33E
+...3.......ooookok33ww......3
+...3.......oooccrcc3ww......3
+...3........occccc..ww......3
+...r........666666..SSS..SS.r
+..TTTTTTTTTTTTTTTTSSwwSSSSSSTT
+...t.t.t.t.t.t.t.SwwSSSSSSSS3t
+..TTTTTTTTTTTTTTSwSSSSSSSS333T
+...uuuuu........SSSSSSSS3S33E
+...uuvuu.........SSS3SS3333Eu
+...3u2uu.........3S33E33EEEuu
+...u32Uu........S33EE...uUUUu
+...23kUu........S3E.....u2k2u
+...uUUUu.......S3.......u22Uu
+...uuuuu.......3........uuuuu
+...uUUUu.......3........uUUUu
+...1U1Uu.......3........2U3Uu
+...u11Uu.......3........323Uu
+...1uuuu..AAAAAAAAAAAA..u3uuu
+...uUUUu..CCCCCCCCCCCC..uUUUu
+...uUkUu..CCEECEECEECC..uUkUu
+...uUUUu.TCTEECEECEECT..uUUUu
+...uuuuuk1C2CCCCCCCCC3kkuuuuu
+...kkkkk.1E2EEEEEEEEE3..kkkkk

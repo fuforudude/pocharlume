@@ -1,0 +1,181 @@
+# DLC « Temps modernes » : la caserne devient la barricade (Grenier des Griffes → occupation de la fac).
+#= La Barricade (caserne)
+# Pose fixe seulement (repos d'un cadre), même emprise que tour-caserne-* : 32×32, ancre au pied, passage sombre au
+# milieu d'où sortiront les étudiants. Grilles en coordonnées de cadre (origine 0 0).
+#: moderne-caserne-1 | Barricade de tables | tour-caserne-1
+#: moderne-caserne-2 | Piquet de grève | tour-caserne-2
+#: moderne-caserne-3 | Fac occupée | tour-caserne-3
+#: moderne-caserne-amphi | Amphi occupé | tour-caserne-cloitre
+#: moderne-caserne-zad | ZAD du parking | tour-caserne-ecorcheurs
+# Couleurs propres au DLC (en plus de la palette commune) : 1 magenta (tags, fumigène), 2 cyan, 3 vert fluo,
+# 4 violet, 5 fumée rose, 6 sweat marine, 7 kaki, 8 orange chantier, 9 fumée grise, 0 jaune fluo, C plastique bleu,
+# D carton, S fumée verte, V fumée violette, X marine sombre, Q bâche ardoise.
+categorie tour
+palette commune
+taille 32 32
+ancre 16 26
+origine 0 0
+couleur 1 e0508c
+couleur 2 40c8d8
+couleur 3 7ad040
+couleur 4 7a4ab0
+couleur 5 f4a8c8
+couleur 6 34467a
+couleur 7 5a6a3a
+couleur 8 f07a20
+couleur 9 cfcbc2
+couleur 0 d8f040
+couleur C 3070b0
+couleur D b08a58
+couleur S 9ad89a
+couleur V b9a0e6
+couleur X 1e2a44
+couleur Q 4a5868
+
+sprite moderne-caserne-1
+# Deux tables renversées, une pancarte, des chaises empilées.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.................CC
+......t.......t..CC
+......T.......T..CC
+......T.......T..CCCCCC
+......T.......T..CCXXXX
+.....BOOOOOOOOOB.CC.tt....t
+.....BDDwwwwwDDB.CC.Tt....T
+.....BDDwwxxwDDB.CCBOOOOOOOB
+.....BDDwwwwwDDB.XXBDDDDDDDB
+.....BDDwwwwwDDB..tBDDDDDDDB
+.....BDDDDDDDDDB..tBDDDDDDDB
+.....BnnnnnnnnnB..tBnnnnnnnB
+
+sprite moderne-caserne-2
+# Rangée de tables avec le passage, palettes et chaises au-dessus, un chat guette.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+....................CCCC
+....................CCCC
+....OOOOOOOOO.......CCCC
+....obboobboo.xxx.o.CCCCCCCC
+....BBBBBBBBoxxxxxo.XXXXXXXX
+....OOOOOOOOooookoko.t.tt.t
+....tbboobbtoooccrcctt.tt.tt
+....TBBBBBBTddddddddTt.tt.tT
+...BOOOOOOOOddddddddOOOOOOOOB
+...BDDDDDDDDBkkkkkkBDDDDDDDDB
+...BwwwwwwwDBkkkkkkBDwwwwwwwB
+...BwwxxwxwDBkkkkkkBDwkwkkwwB
+...BwwwwwwwDBkkkkkkBDwwwwwwwB
+...BwwwwwwwDBkkkkkkBDwwwwwwwB
+...BnnnnnnnnBkkkkkkBnnnnnnnnB
+
+sprite moderne-caserne-3
+# Barricade à deux étages, drapeau, banderoles, fûts allumés, un étudiant monte la garde.
+.
+...dxxxxxxx.o.xxx.o
+...dxxxxxxx.oxxxxxo
+...dxxxxxxx.ooookoko
+...dRRRRRRR.oooccrcc
+...dRRRRRR...occccc
+...d.........wkwkwk
+...d........bb66666
+...d........bb66666o
+...d.........b66666.CCCC
+...d..........o..o..CCCC
+...dOOOOOOOOO.B..B..CCCC
+...dobboobbotddddddtCCCCCCCC
+...dBBBBBBBBOOOOOOOOBCCXXXXX
+...dOOOOOOOBDDDDDDDDBCCtt.t
+...dobboobbBDDDDDDDDBCCtt.t
+...dBBBBBBBBDDDDDDDDBCCCCCC
+...dtOOOOOOtnnnnnnnntXXXXXXt
+...dTbboobbTo.......T.t..t.T
+...BOOOOOOfOddddddddOfOOOOOOB
+...wwwwwwfFfwkkkkkkwfFfwwwwww
+...wxxwxxfyfwkkkkkkwfyfxwxxww
+...wwwwwwuuuwkkkkkkwuuuwwwwww
+...wwwwwwUvUwkkkkkkwUvUwwwwww
+...BDDDDDuuuBkkkkkkBuuuDDDDDB
+...BnnnnnUvUBkkkkkkBUvUnnnnnB
+.........uuu........uuu
+
+sprite moderne-caserne-amphi
+# A : la fac de pierre claire, fronton à horloge, banderole « AG ».
+.
+...dwwwwwww.o.xxx.o
+...dwwwwwww.oxxxxxo
+...dwwwwwww.ooookoko
+...dzzzzzzz.oooccrcc
+...dzzzzzz...occccc
+...d......qqqwkwkwkYYq
+...d.....PPPbb66666YkPP
+...d....PPPPbb66666oPPPP
+...d...PPPPPPb66666PPPPPP
+...d..PPPPPPPPoPPoPPPPPPPP
+...dqpppppppppBppBppppppppp
+...dobboobbotddddddtCCCCCCCC
+...dggggggggqqqqqqqqgCCXXXXX
+...dqqqqqqqgPPPPPPPPgCCtt.t
+...dobboobbgPPPPPPPPgCCtt.t
+...dggggggggPPPPPPPPgCCCCCC
+...dtqqqqqqtpppppppptXXXXXXt
+...dTbboobbTo.......T.t..t.T
+...gqqqqqqfqddddddddqfqqqqqqg
+...zzkkkzkkkzkkkkkkwfFfwwwwww
+...zzkzkzkzzzkkkkkkwfyfzwzzww
+...zzkkkzkzkzkkkkkkwuuuwwwwww
+...zzkzkzkkkzkkkkkkwUvUwwwwww
+...gPPPPPuuugkkkkkkguuuPPPPPg
+...gpppppUvUgkkkkkkgUvUpppppg
+.........uuu........uuu
+
+sprite moderne-caserne-zad
+# B : palettes noircies, pneus, tags fluo, drapeau noir.
+.
+...dkkkkkkk.okkkkko
+...dkkkkkkk.kkoookk
+...dkkkkkkk.ooookoko
+...duuuuuuu.oooccrcc
+...duuuuuu...occccc
+...d.........1k1k1k
+...d........bbuuuuu
+...d........bbuuuuuo
+...d.........buuuuu.CCCC
+...d..........o..o..CCCC
+...dBBBBBBBBB.B..B..CCCC
+...do2bo2bbotddddddtCCCCCCCC
+...dBB22BBBBBBBBBBBBBCCXkuuuk
+...dBBBBBBBBbbbbbbbbBCCtukkku
+...dobboobbBbbbbbbbbBCCtkuuuk
+...dBBBBBBBBbbbbbbbbBCCCukkku
+...dtBBBBBBtddddddddtXXXkuuuk
+...dTbboobbTo.......T.t.ukkku
+...BBBBBBBfBddddddddBfBBBBBBB
+...u1u11u2Ffukkkkkku3F33u0uuu
+...u11u1k2yfukkkkkkuf33k30kuu
+...u1uu122uuukkkkkku33uu0uuuu
+...uuuuuuUvUukkkkkkuUvUuuuuuu
+...BbbbbbuuuBkkkkkkBuuubbbbbB
+...BdddddUvUBkkkkkkBUvUdddddB
+.........uuu........uuu

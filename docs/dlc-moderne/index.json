@@ -1,0 +1,347 @@
+{
+ "facteur": 6,
+ "skins": [
+  {
+   "id": "moderne-gendarme",
+   "nom": "Gendarme",
+   "categorie": "ennemi",
+   "original": "paysan-affame",
+   "apercu": "apercus/moderne-gendarme.png",
+   "apercuOriginal": "apercus/moderne-gendarme-original.png",
+   "source": "art/dlc-moderne/ennemis/1-a-pied.txt"
+  },
+  {
+   "id": "moderne-crs",
+   "nom": "CRS",
+   "categorie": "ennemi",
+   "original": "fantassin",
+   "apercu": "apercus/moderne-crs.png",
+   "apercuOriginal": "apercus/moderne-crs-original.png",
+   "source": "art/dlc-moderne/ennemis/1-a-pied.txt"
+  },
+  {
+   "id": "moderne-gendarme-mobile",
+   "nom": "Gendarme mobile",
+   "categorie": "ennemi",
+   "original": "chasseur-sorcieres",
+   "apercu": "apercus/moderne-gendarme-mobile.png",
+   "apercuOriginal": "apercus/moderne-gendarme-mobile-original.png",
+   "source": "art/dlc-moderne/ennemis/1-a-pied.txt"
+  },
+  {
+   "id": "moderne-bouclier-anti-emeute",
+   "nom": "Bouclier anti-émeute",
+   "categorie": "ennemi",
+   "original": "porte-herse",
+   "apercu": "apercus/moderne-bouclier-anti-emeute.png",
+   "apercuOriginal": "apercus/moderne-bouclier-anti-emeute-original.png",
+   "source": "art/dlc-moderne/ennemis/1-a-pied.txt"
+  },
+  {
+   "id": "moderne-tireur-lbd",
+   "nom": "Tireur de LBD",
+   "categorie": "ennemi",
+   "original": "fagotier",
+   "apercu": "apercus/moderne-tireur-lbd.png",
+   "apercuOriginal": "apercus/moderne-tireur-lbd-original.png",
+   "source": "art/dlc-moderne/ennemis/2-specialistes.txt"
+  },
+  {
+   "id": "moderne-grenadier-lacrymo",
+   "nom": "Grenadier lacrymogène",
+   "categorie": "ennemi",
+   "original": "pestifere",
+   "apercu": "apercus/moderne-grenadier-lacrymo.png",
+   "apercuOriginal": "apercus/moderne-grenadier-lacrymo-original.png",
+   "source": "art/dlc-moderne/ennemis/2-specialistes.txt"
+  },
+  {
+   "id": "moderne-bac",
+   "nom": "BAC",
+   "categorie": "ennemi",
+   "original": "delateur",
+   "apercu": "apercus/moderne-bac.png",
+   "apercuOriginal": "apercus/moderne-bac-original.png",
+   "source": "art/dlc-moderne/ennemis/2-specialistes.txt"
+  },
+  {
+   "id": "moderne-commissaire",
+   "nom": "Commissaire",
+   "categorie": "ennemi",
+   "original": "porte-banniere",
+   "apercu": "apercus/moderne-commissaire.png",
+   "apercuOriginal": "apercus/moderne-commissaire-original.png",
+   "source": "art/dlc-moderne/ennemis/2-specialistes.txt"
+  },
+  {
+   "id": "moderne-bravm",
+   "nom": "BRAV-M",
+   "categorie": "ennemi",
+   "original": "chevalier",
+   "apercu": "apercus/moderne-bravm.png",
+   "apercuOriginal": "apercus/moderne-bravm-original.png",
+   "source": "art/dlc-moderne/ennemis/3-rapides.txt"
+  },
+  {
+   "id": "moderne-cavalier-monte",
+   "nom": "Cavalier de la police montée",
+   "categorie": "ennemi",
+   "original": "cavalier",
+   "apercu": "apercus/moderne-cavalier-monte.png",
+   "apercuOriginal": "apercus/moderne-cavalier-monte-original.png",
+   "source": "art/dlc-moderne/ennemis/3-rapides.txt"
+  },
+  {
+   "id": "moderne-drone",
+   "nom": "Drone",
+   "categorie": "ennemi",
+   "original": "corbeau-noir",
+   "apercu": "apercus/moderne-drone.png",
+   "apercuOriginal": "apercus/moderne-drone-original.png",
+   "source": "art/dlc-moderne/ennemis/4-airs.txt"
+  },
+  {
+   "id": "moderne-helicoptere",
+   "nom": "Hélicoptère",
+   "categorie": "ennemi",
+   "original": "ange-cendre",
+   "apercu": "apercus/moderne-helicoptere.png",
+   "apercuOriginal": "apercus/moderne-helicoptere-original.png",
+   "source": "art/dlc-moderne/ennemis/4-airs.txt"
+  },
+  {
+   "id": "moderne-canon-a-eau",
+   "nom": "Canon à eau",
+   "categorie": "ennemi",
+   "original": "gargouille",
+   "apercu": "apercus/moderne-canon-a-eau.png",
+   "apercuOriginal": "apercus/moderne-canon-a-eau-original.png",
+   "source": "art/dlc-moderne/ennemis/5-lourds.txt"
+  },
+  {
+   "id": "moderne-centaure",
+   "nom": "Centaure",
+   "categorie": "ennemi",
+   "original": "garde-royal",
+   "apercu": "apercus/moderne-centaure.png",
+   "apercuOriginal": "apercus/moderne-centaure-original.png",
+   "source": "art/dlc-moderne/ennemis/5-lourds.txt"
+  },
+  {
+   "id": "moderne-prefet",
+   "nom": "Préfet",
+   "categorie": "ennemi",
+   "original": "roi-fou",
+   "apercu": "apercus/moderne-prefet.png",
+   "apercuOriginal": "apercus/moderne-prefet-original.png",
+   "source": "art/dlc-moderne/ennemis/5-lourds.txt"
+  },
+  {
+   "id": "moderne-caserne-1",
+   "nom": "Barricade de tables",
+   "categorie": "tour",
+   "original": "tour-caserne-1",
+   "apercu": "apercus/moderne-caserne-1.png",
+   "apercuOriginal": "apercus/moderne-caserne-1-original.png",
+   "source": "art/dlc-moderne/tours/1-caserne.txt"
+  },
+  {
+   "id": "moderne-caserne-2",
+   "nom": "Piquet de grève",
+   "categorie": "tour",
+   "original": "tour-caserne-2",
+   "apercu": "apercus/moderne-caserne-2.png",
+   "apercuOriginal": "apercus/moderne-caserne-2-original.png",
+   "source": "art/dlc-moderne/tours/1-caserne.txt"
+  },
+  {
+   "id": "moderne-caserne-3",
+   "nom": "Fac occupée",
+   "categorie": "tour",
+   "original": "tour-caserne-3",
+   "apercu": "apercus/moderne-caserne-3.png",
+   "apercuOriginal": "apercus/moderne-caserne-3-original.png",
+   "source": "art/dlc-moderne/tours/1-caserne.txt"
+  },
+  {
+   "id": "moderne-caserne-amphi",
+   "nom": "Amphi occupé",
+   "categorie": "tour",
+   "original": "tour-caserne-cloitre",
+   "apercu": "apercus/moderne-caserne-amphi.png",
+   "apercuOriginal": "apercus/moderne-caserne-amphi-original.png",
+   "source": "art/dlc-moderne/tours/1-caserne.txt"
+  },
+  {
+   "id": "moderne-caserne-zad",
+   "nom": "ZAD du parking",
+   "categorie": "tour",
+   "original": "tour-caserne-ecorcheurs",
+   "apercu": "apercus/moderne-caserne-zad.png",
+   "apercuOriginal": "apercus/moderne-caserne-zad-original.png",
+   "source": "art/dlc-moderne/tours/1-caserne.txt"
+  },
+  {
+   "id": "moderne-tir-1",
+   "nom": "Échafaudage",
+   "categorie": "tour",
+   "original": "tour-tir-1",
+   "apercu": "apercus/moderne-tir-1.png",
+   "apercuOriginal": "apercus/moderne-tir-1-original.png",
+   "source": "art/dlc-moderne/tours/2-tir.txt"
+  },
+  {
+   "id": "moderne-tir-2",
+   "nom": "Tour de palettes",
+   "categorie": "tour",
+   "original": "tour-tir-2",
+   "apercu": "apercus/moderne-tir-2.png",
+   "apercuOriginal": "apercus/moderne-tir-2-original.png",
+   "source": "art/dlc-moderne/tours/2-tir.txt"
+  },
+  {
+   "id": "moderne-tir-3",
+   "nom": "Mirador bâché",
+   "categorie": "tour",
+   "original": "tour-tir-3",
+   "apercu": "apercus/moderne-tir-3.png",
+   "apercuOriginal": "apercus/moderne-tir-3-original.png",
+   "source": "art/dlc-moderne/tours/2-tir.txt"
+  },
+  {
+   "id": "moderne-tir-vigies",
+   "nom": "Vigies des toits",
+   "categorie": "tour",
+   "original": "tour-tir-guetteurs",
+   "apercu": "apercus/moderne-tir-vigies.png",
+   "apercuOriginal": "apercus/moderne-tir-vigies-original.png",
+   "source": "art/dlc-moderne/tours/2-tir.txt"
+  },
+  {
+   "id": "moderne-tir-renvoyeurs",
+   "nom": "Renvoyeurs de palets",
+   "categorie": "tour",
+   "original": "tour-tir-beffroi",
+   "apercu": "apercus/moderne-tir-renvoyeurs.png",
+   "apercuOriginal": "apercus/moderne-tir-renvoyeurs-original.png",
+   "source": "art/dlc-moderne/tours/2-tir.txt"
+  },
+  {
+   "id": "moderne-magie-1",
+   "nom": "Caisse à fumigène",
+   "categorie": "tour",
+   "original": "tour-magie-1",
+   "apercu": "apercus/moderne-magie-1.png",
+   "apercuOriginal": "apercus/moderne-magie-1-original.png",
+   "source": "art/dlc-moderne/tours/3-magie.txt"
+  },
+  {
+   "id": "moderne-magie-2",
+   "nom": "Enceintes",
+   "categorie": "tour",
+   "original": "tour-magie-2",
+   "apercu": "apercus/moderne-magie-2.png",
+   "apercuOriginal": "apercus/moderne-magie-2-original.png",
+   "source": "art/dlc-moderne/tours/3-magie.txt"
+  },
+  {
+   "id": "moderne-magie-3",
+   "nom": "Char sono",
+   "categorie": "tour",
+   "original": "tour-magie-3",
+   "apercu": "apercus/moderne-magie-3.png",
+   "apercuOriginal": "apercus/moderne-magie-3-original.png",
+   "source": "art/dlc-moderne/tours/3-magie.txt"
+  },
+  {
+   "id": "moderne-magie-megaphone",
+   "nom": "Mégaphone d'or",
+   "categorie": "tour",
+   "original": "tour-magie-oracle",
+   "apercu": "apercus/moderne-magie-megaphone.png",
+   "apercuOriginal": "apercus/moderne-magie-megaphone-original.png",
+   "source": "art/dlc-moderne/tours/3-magie.txt"
+  },
+  {
+   "id": "moderne-magie-graffeurs",
+   "nom": "Graffeurs",
+   "categorie": "tour",
+   "original": "tour-magie-necromancien",
+   "apercu": "apercus/moderne-magie-graffeurs.png",
+   "apercuOriginal": "apercus/moderne-magie-graffeurs-original.png",
+   "source": "art/dlc-moderne/tours/3-magie.txt"
+  },
+  {
+   "id": "moderne-artillerie-1",
+   "nom": "Caddie-catapulte",
+   "categorie": "tour",
+   "original": "tour-artillerie-1",
+   "apercu": "apercus/moderne-artillerie-1.png",
+   "apercuOriginal": "apercus/moderne-artillerie-1-original.png",
+   "source": "art/dlc-moderne/tours/4-artillerie.txt"
+  },
+  {
+   "id": "moderne-artillerie-2",
+   "nom": "Caddie sur palette",
+   "categorie": "tour",
+   "original": "tour-artillerie-2",
+   "apercu": "apercus/moderne-artillerie-2.png",
+   "apercuOriginal": "apercus/moderne-artillerie-2-original.png",
+   "source": "art/dlc-moderne/tours/4-artillerie.txt"
+  },
+  {
+   "id": "moderne-artillerie-3",
+   "nom": "Rempart de pneus",
+   "categorie": "tour",
+   "original": "tour-artillerie-3",
+   "apercu": "apercus/moderne-artillerie-3.png",
+   "apercuOriginal": "apercus/moderne-artillerie-3-original.png",
+   "source": "art/dlc-moderne/tours/4-artillerie.txt"
+  },
+  {
+   "id": "moderne-artillerie-bidon",
+   "nom": "Bidon-mortier",
+   "categorie": "tour",
+   "original": "tour-artillerie-mortier",
+   "apercu": "apercus/moderne-artillerie-bidon.png",
+   "apercuOriginal": "apercus/moderne-artillerie-bidon-original.png",
+   "source": "art/dlc-moderne/tours/4-artillerie.txt"
+  },
+  {
+   "id": "moderne-artillerie-lance-pierre",
+   "nom": "Lance-pierre géant",
+   "categorie": "tour",
+   "original": "tour-artillerie-baliste",
+   "apercu": "apercus/moderne-artillerie-lance-pierre.png",
+   "apercuOriginal": "apercus/moderne-artillerie-lance-pierre-original.png",
+   "source": "art/dlc-moderne/tours/4-artillerie.txt"
+  },
+  {
+   "id": "moderne-plume",
+   "nom": "Le Collage de nuit (Plume)",
+   "categorie": "tour",
+   "original": "tour-sanctuaire",
+   "apercu": "apercus/moderne-plume.png",
+   "apercuOriginal": "apercus/moderne-plume-original.png",
+   "source": "art/dlc-moderne/tours/5-divines.txt"
+  },
+  {
+   "id": "moderne-charlie",
+   "nom": "La Grosse Tête du cortège (Charlie)",
+   "categorie": "tour",
+   "original": "tour-totem",
+   "apercu": "apercus/moderne-charlie.png",
+   "apercuOriginal": "apercus/moderne-charlie-original.png",
+   "source": "art/dlc-moderne/tours/5-divines.txt"
+  },
+  {
+   "id": "moderne-pollen",
+   "nom": "L'Atelier de l'AG (Pollen)",
+   "categorie": "tour",
+   "original": "tour-atelier",
+   "apercu": "apercus/moderne-pollen.png",
+   "apercuOriginal": "apercus/moderne-pollen-original.png",
+   "source": "art/dlc-moderne/tours/5-divines.txt"
+  }
+ ]
+}

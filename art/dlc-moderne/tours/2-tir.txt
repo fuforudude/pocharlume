@@ -1,0 +1,412 @@
+# DLC « Temps modernes » : le Clocher des Archers devient le perchoir des lanceurs (échafaudage, palettes, bâche).
+#= Le Perchoir (tir)
+# Même emprise que tour-tir-* : 32×48 (32×52 au niveau 3), ancre au pied ; le chat tireur est un sprite à part posé au
+# point `tireur` (lanceur-chat aux niveaux 1 à 3, vigie-chat et renvoyeur-chat pour les spécialisations).
+#: moderne-tir-1 + moderne-lanceur-chat@tireur | Échafaudage | tour-tir-1 + archer-chat@tireur
+#: moderne-tir-2 + moderne-lanceur-chat@tireur | Tour de palettes | tour-tir-2 + archer-chat@tireur
+#: moderne-tir-3 + moderne-lanceur-chat@tireur | Mirador bâché | tour-tir-3 + archer-chat@tireur
+#: moderne-tir-vigies + moderne-vigie-chat@tireur | Vigies des toits | tour-tir-guetteurs + guetteur-chat@tireur
+#: moderne-tir-renvoyeurs + moderne-renvoyeur-chat@tireur | Renvoyeurs de palets | tour-tir-beffroi + arbaletrier-chat@tireur
+# Couleurs propres au DLC (en plus de la palette commune) : 1 magenta (tags, fumigène), 2 cyan, 3 vert fluo,
+# 4 violet, 5 fumée rose, 6 sweat marine, 7 kaki, 8 orange chantier, 9 fumée grise, 0 jaune fluo, C plastique bleu,
+# D carton, S fumée verte, V fumée violette, X marine sombre, Q bâche ardoise.
+categorie tour
+palette commune
+taille 32 48
+ancre 16 45
+origine 0 0
+couleur 1 e0508c
+couleur 2 40c8d8
+couleur 3 7ad040
+couleur 4 7a4ab0
+couleur 5 f4a8c8
+couleur 6 34467a
+couleur 7 5a6a3a
+couleur 8 f07a20
+couleur 9 cfcbc2
+couleur 0 d8f040
+couleur C 3070b0
+couleur D b08a58
+couleur S 9ad89a
+couleur V b9a0e6
+couleur X 1e2a44
+couleur Q 4a5868
+
+sprite moderne-tir-1
+point tireur 16 19
+# Échafaudage de tubes, plancher de planches, rubalise.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+......T..................Txw..x
+......T..................T..xw
+......xwxxwxxwxxwxxwxxwxxx
+......T..................T
+......T..................T
+......T..................T
+......OOOOOOOOOOOOOOOOOOOO
+......BBBBBBBBBBBBBBBBBBBB
+.......dddddddddddddddddd
+.......Tt..t..oOOo.....Tt
+.......Tt....to..o.....Tt
+.......Tt.....oOOo.....Tt
+.......Tt.....o..ot....Tt
+.......Tt.....oOOo..t..Tt
+.......TTTTTTToTToTTTTTTT
+.......Tt.....oOOo..t..Tt
+.......Tt.....o..ot....Tt
+.......Tt.....oOOo.....Tt
+.......Tt....to..o.....Tt
+.......Tt..t..oOOo.....Tt
+.......TTTTTTToTToTTTTTTT
+.......Tt..t..oOOo.....Tt
+.......Tt....to..o.....Tt
+.......Tt.....oOOo.....Tt
+.......Tt.....o..ot....Tt
+.......Tt.....oOOo..t..Tt
+.......TTTTTTToTToTTTTTTT
+.......Tt.....oOOo..t..Tt
+.......Tt.....o..ot....Tt
+.......Tt.....oOOo.....Tt
+.......Tt....to..o.....Tt
+.......Tt..t..oOOo.....Tt
+.......TTTTTTTTTTTTTTTTTT
+
+sprite moderne-tir-2
+point tireur 16 16
+# Tour de palettes empilées, caisses en créneaux, tags.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.........................d
+.........................d
+.........................dxw..x
+.........................d..xw
+......OOOO............OOOd
+......DDDD............DDDD
+......bbbb............bbbb
+......OOOOOOOOOOOOOOOOOOOO
+......BBBBBBBBBBBBBBBBBBBB
+......BBBBBBBBBBBBBBBBBBBB
+.......OOOOOOOOOOOOOOOOOO
+.......obboobboobboobboob
+.......BBBBBBBBBBBBBBBBBB
+.......OOOOOOOOOOOOO22OOO
+.......obboobboobboo2boob
+.......BBBBBBBBBBBBBBBBBB
+.......OOOOOOOOOOOOOOOOOO
+.......obboobboobboobboob
+.......BBBBBBBBkkBBBBBBBB
+.......OOOOOOOOkkOOOOOOOO
+.......obboobbokkboobboob
+.......BBBBBBBBkkBBBBBBBB
+.......OOOOOOOOOOOOOOOOOO
+.......obboobboobboobboob
+.......BB1B1BBBBBBBBBBBBB
+.......OOO11OOOOOOOOOOOOO
+.......obboobboobboobboob
+.......BBBBBBBBBBBBBBBBBB
+.......OOOOOOOOOOOOOOOOOO
+.......obboobbkkkkoobboob
+.......BBBBBBBkkkkBBBBBBB
+.......OOOOOOOkkkkOOOOOOO
+.......obboobbkkkkoobboob
+.......BBBBBBBkkkkBBBBBBB
+.......OOOOOOOkkkkOOOOOOO
+.......obboobbkkkkoobboob
+.......BBBBBBBkkkkBBBBBBB
+
+sprite moderne-tir-3
+taille 32 52
+ancre 16 49
+point tireur 16 24
+# Palettes, échafaudage bâché, cône de chantier au sommet, banderole.
+...............w
+..............888
+..............www
+.............88888u
+............QQQUQQQQ
+..wd.......QQQQUQQQQQ.......dw
+wx.d......uuuuuUuuuuuu......d.xw
+...d.....QQQQQQUQQQQQQQ.....d
+...d....QQQQQQQUQQQQQQQQ....d
+...d...uuuuuuuuUuuuuuuuuu...d
+...d..QQQQQQQQQUQQQQQQQQQQ..d
+...d.QQQQQQQQQQUQQQQQQQQQQQ.d
+...duuuuuuuuuuuuuuuuuuuuuuuud
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....OOOOOOOOOOOOOOOOOOOOOO
+.....BBBBBBBBBBBBBBBBBBBBBB
+......dddddddddddddddddddd
+.......TtwwwwwwwwwwwwwwTt
+.......TtwxwxxwxwxxxwxwTt
+.......TtwwxwwxwxwwxxwwTt
+.......TtwwwwwwwwwwwwwwTt
+.......TtwwwwwwwwwwwwwwTt
+.......Tt...........t..Tt
+.......TTTTTTTTTTTTTTTTTT
+.......OOOOOOOOOOOOOOOOOO
+.......obboobboobboobboob
+.......BBBBBBBBBBBBBBBBBB
+.......OOOOOOOOOOOOOOOOOO
+.......obboobboobboobboob
+.......BBBBBBBBBBBBBBBBBB
+.......OOOOOOOOOOOOOOOOOO
+.......obboobboobboobboob
+.......BBBBBBBBBBBBBBBBBB
+.......OOOOOOOkkkkOOOOOOO
+.......obboobbkkkkoobboob
+.......BBBBBBBkkkkBBBBBBB
+.......OOOOOOOkkkkOOOOOOO
+.......obboobbkkkkoobboob
+.......BBBBBBBkkkkBBBBBBB
+..............kkkk
+
+sprite moderne-tir-vigies
+taille 32 52
+ancre 16 49
+point tireur 16 24
+# A : bâche kaki, lierre, antenne de radio libre.
+.............T.T.T
+..............TTT
+...............T
+.............77T777
+............77777777
+..zd.......7777777777.......dz
+zE.d......hhhhhjhhhhhh......d.Ez
+...d.....777777j7777777.....d
+...d....7777777j77777777....d
+...d...hhhhhhhhjhhhhhhhhh...d
+...d..777777777j7777777777..d
+...d.7777777777j77777777777.d
+...dhhhhhhhhhhhhhhhhhhhhhhhhd
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....OOOOOOOOOOOOOOOOOOOOOO
+.....BBBBBBBBBBBBBBBBBBBBBB
+......dddddddddddddddddddd
+.......TtzzzzzzzzzzzzzzTt
+.......TtzEzEEzEzEEEzEzTt
+.......TtzzEzzEzEzzEEzzTt
+.......TtzzzzzzzzzzzzzzTt
+.......TtzzzzzzzzzzzzzzTt
+.......Tt...........t..Tt
+.......TTTTTTTTTTTTTTTTTT
+.......OOOOOOOOOOOOOOOOOO
+.......obboobboobboobboEb
+.......BEBBBBBBBBBBBBBBBB
+.......OOEOOOOOOOOOOOOOOO
+.......oEboobboobboobboob
+.......BBBBBBBBBBBBBBBBBB
+.......OOOOOOOOOOOOOOOEOO
+.......obboobboobboobboEb
+.......BBBBBBBBBBBBBBBEBB
+.......OOOOOOOkkkkOOOOOOO
+.......obboobbkkkkoobboob
+.......BBEBBBBkkkkBBBBBBB
+.......OOOOOOOkkkkOOOOOOO
+.......obboobbkkkkoobboob
+.......BBBBBBBkkkkBBBBBBB
+..............kkkk
+
+sprite moderne-tir-renvoyeurs
+taille 32 52
+ancre 16 49
+point tireur 16 24
+# B : bâche bleue, tôles, grande banderole rouge.
+...............w
+..............888
+..............www
+.............88888X
+............CCCUCCCC
+..wd.......CCCCUCCCCC.......dw
+wx.d......XXXXXUXXXXXX......d.xw
+...d.....CCCCCCUCCCCCCC.....d
+...d....CCCCCCCUCCCCCCCC....d
+...d...XXXXXXXXUXXXXXXXXX...d
+...d..CCCCCCCCCUCCCCCCCCCC..d
+...d.CCCCCCCCCCUCCCCCCCCCCC.d
+...dXXXXXXXXXXXXXXXXXXXXXXXXd
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....T....................T
+.....UUUUUUUUUUUUUUUUUUUUUU
+.....uuuuuuuuuuuuuuuuuuuuuu
+......dddddddddddddddddddd
+.......TtxxxxxxxxxxxxxxTt
+.......TtxwxwwxwxwwwxwxTt
+.......TtxxwxxwxwxxwwxxTt
+.......TtxxxxxxxxxxxxxxTt
+.......TtxwwxwxwwwxwxwxTt
+.......TtxxxxxxxxxxxxxxTt
+.......TTRRRRRRRRRRRRRRTT
+.......UUUUUUUUUUUUUUUUUU
+.......vggvvggvvggvvggvvg
+.......uuuuuuuuuuuuuuuuuu
+.......UUUUUUUUUUUUUUUUUU
+.......vggvvggvvggvvggvvg
+.......uuuuuuuuuuuuuuuuuu
+.......UUUUUUUUUUUUUUUUUU
+.......vggvvggvvggvvggvvg
+.......uuuuuuuuuuuuuuuuuu
+.......UUUUUUUkkkkUUUUUUU
+.......vggvvggkkkkvvggvvg
+.......uuuuuuukkkkuuuuuuu
+.......UUUUUUUkkkkUUUUUUU
+.......vggvvggkkkkvvggvvg
+.......uuuuuuukkkkuuuuuuu
+..............kkkk
+
+sprite moderne-lanceur-chat
+categorie unite
+taille 32 32
+ancre 16 30
+# Lanceur : bonnet rouge, keffieh, sweat marine, lance-pierre.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+...........o.xxx.o
+...........oxxxxxb.b
+...........ooookoxxx
+...........oooccrbcb
+............occcccb
+............wkwkwkb
+...........bb66666bo
+...........bb66666o
+............b66666
+.............o..o
+.............B..B
+
+sprite moderne-vigie-chat
+categorie unite
+taille 32 32
+ancre 16 30
+# Vigie : capuche kaki, écharpe verte, fronde qui tourne.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+....................k
+...................x
+..................x
+............77777x
+...........77ooo77bb
+...........ooookokob
+...........oooccrccb
+............occccc.b
+............3h3h3h.o
+...........bb77777
+...........bb77777o
+............b77777
+.............o..o
+.............B..B
+
+sprite moderne-renvoyeur-chat
+categorie unite
+taille 32 32
+ancre 16 30
+# Renvoyeur : bonnet bleu, sweat rouge, raquette de tennis et sa balle.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.
+.......................0
+..................xxx
+.................xwkwx
+.................xkwkx
+...........o.CCC.xwkwx
+...........oCCCCCoxxx
+...........ooookokob
+...........oooccrccb
+............occccc.b
+............wCwCwC.o
+...........bbxxxxx
+...........bbxxxxxo
+............bxxxxx
+.............o..o
+.............B..B

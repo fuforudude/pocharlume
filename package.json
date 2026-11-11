@@ -23,7 +23,8 @@
     "niveaux:statues": "node --import ./tools/niveaux/enregistrer.ts tools/niveaux/statues.ts",
     "verifier": "npm run lint && tsc --noEmit && npm run test && npm run build",
     "ci:attendre": "node tools/ci/attendre.ts",
-    "editeur": "node --import ./tools/niveaux/enregistrer.ts tools/atelier/lancer.ts --config atelier.config.ts"
+    "editeur": "node --import ./tools/niveaux/enregistrer.ts tools/atelier/lancer.ts --config atelier.config.ts",
+    "dlc:apercu": "node tools/dlc/apercu.ts"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
