@@ -20,7 +20,14 @@ couleur 5 8fa9bf  plexiglas devant le corps
 # Gendarme (DLC, rôle du Paysan Affamé : ennemi de base) : képi à bandeau clair, blouson bleu marine, ceinturon noir, pantalon bleu nuit, matraque noire dressée au poing.
 #: moderne-gendarme | Gendarme | paysan-affame
 sprite moderne-gendarme
-origine 0 7
+# Animations (mêmes noms, nombre d'images et cadences que l'original) :
+#   repos : respire, les épaules descendent d'un pixel
+#   marche : pas alternés, matraque qui balance dans la main gauche
+#   attaque : lève la matraque, frappe devant lui, revient
+#   blesse : recule d'un pas en se penchant en arrière
+#   mort : part en arrière, plie les genoux et tombe sur le dos
+# Pose validée par l'auteur, inchangée : premier cadre du repos.
+calque pose 0 7
 ............1111
 ...........122221
 ...........122221
@@ -43,10 +50,313 @@ origine 0 7
 ..........kk..kk
 ..........kkk.kkk
 
+calque repos-1 12 22
+_
+
+calque repos-2 10 22
+..__
+.
+.
+.
+kk..kk
+..k...k
+___.___
+
+calque marche-0 8 23
+.1._.._.1
+.1._.._.1
+.1._.._.1
+kk__..__kk
+kk.__.__.kk
+
+calque marche-1 7 11
+Pp
+k
+.
+.
+.
+.
+.
+SS
+k_
+.
+_
+.
+.
+.
+..1._.._.1
+..k._.._.k
+..k.._._..k
+
+calque marche-2 7 10
+Pp
+k
+.
+.
+.
+.
+.
+SS
+k_
+.
+_
+.
+..._..1._
+..._.11._
+..._.11._
+..._kk1._
+..._.kk._
+...___k.._
+
+calque marche-3 7 10
+__
+P
+.
+.
+.
+.
+.
+kp
+SS
+.
+k
+.
+.
+...._.._
+...._.._
+...._1._
+.
+....kk
+
+calque marche-4 7 12
+__
+P
+.
+.
+.
+.
+.
+kp
+SS
+.
+k.._...._
+.
+.
+.
+.....kk
+...._
+...._____
+
+calque marche-5 7 11
+__
+P
+.
+.
+.
+.
+.
+kp
+SS
+.
+k
+.
+.
+.
+.......kk
+.........k
+.......___
+
+calque attaque-0 6 9
+Pp
+kp
+kp_
+kp_
+kp_
+kp_
+kp_
+SS_
+k__
+k__
+._
+._
+
+calque attaque-1 6 8
+Pp
+k
+.
+.
+.
+.
+.
+SS
+k_
+.
+_
+
+calque attaque-2 7 11
+__
+__
+__
+__................pppP
+__...........pppppkkkk
+__..........SSkkkk
+__
+__
+_
+_
+
+calque attaque-3 7 11
+__
+__
+__
+__
+__
+__...........p
+__..........SSp
+__............kp
+_..............kp
+_...............kp
+.................kp
+..................kP
+...................k
+
+calque attaque-4 7 10
+Pp
+k
+.
+.
+.
+.
+.
+SS
+k_
+.
+_
+
+calque blesse-0 8 21
+_.....1
+_..._.1
+_.1._.1
+_.1._.1
+_.1._.1
+_.k._.k
+_..k_..k
+
+calque mort-0 4 7
+....11..__
+....12...1_
+....12...1_
+....1P...1k._
+Pp_..S...._
+kp_..S..kS_
+kp_..S...._
+.
+.
+.
+.
+.
+._k._.....2_.S
+._k._.....k
+.
+.......1
+.
+.
+....._.1._.1
+....._.k._.k
+....._..k_..k
+
+calque mort-1 1 9
+...11..__
+..1222.1___
+...122..1__
+...1PP..1kk__
+Pp_..S...._
+kp_..S..kS_
+.
+.kp_...S.._
+.
+.
+.
+.._.S.....2_.32
+.
+..._k._11..11
+......_..__.1
+......__.1__11
+......_.1.__.11
+......__kk__..kk
+......._kkk__.kkk
+.......__..__
+.......___.___
+
+calque mort-2 5 9
+........____
+.......______
+.......______
+.......________
+........_____
+...k_..._222
+...._...2233
+.111SSS.2333........k
+122PSkSS..._.k11111kk
+122PSSSS....2k11111kk
+122PSSSS....2k1
+122PSSS_...22k11....k
+.111_.__....2k11111kk
+..._..___2222k11111kk
+..._...____2
+....pppppppS
+....PkkkkkkSkk
+........__
+........__
+........___
+
+calque mort-3 2 26
+.N.......................N
+Nn.......................nN
+
+anim repos 180
+cadre pose
+cadre pose + repos-1
+cadre repos.1 decale 0 1 + repos-2
+cadre repos.2
+
+anim marche 100
+cadre repos.1 + marche-0
+cadre repos.2 + marche-1
+cadre pose + marche-2
+cadre marche.2 + marche-3
+cadre marche.3 decale 0 1 + marche-4
+cadre repos.1 + marche-5
+
+anim attaque 90
+cadre pose + attaque-0
+cadre attaque.0 + attaque-1
+cadre pose + attaque-2 duree 150
+cadre pose + attaque-3
+cadre pose + attaque-4
+cadre pose
+
+anim blesse 120
+cadre pose decale -2 0 + blesse-0
+cadre pose decale -1 0
+
+anim mort 150
+cadre blesse.0 + mort-0
+cadre mort.0 decale -2 2 + mort-1
+cadre marche.4 decale 1 1 + mort-2
+cadre mort.2 decale 0 2 + mort-3 duree 600
+
 # CRS (DLC, rôle du Fantassin : base solide, bouclier) : casque noir visière baissée, tenue bleu nuit à épaulières, bouclier rectangulaire sombre tenu devant, matraque dans la main libre, dressée derrière l’épaule.
 #: moderne-crs | CRS | fantassin
 sprite moderne-crs
-origine 0 7
+# Animations (mêmes noms, nombre d'images et cadences que l'original) :
+#   repos : respire derrière son bouclier
+#   marche : avance au pas, bouclier tenu devant, matraque qui balance
+#   attaque : matraque levée puis abattue par-dessus le bouclier, qui pousse
+#   blesse : recule d'un pas, penché en arrière
+#   mort : part en arrière et tombe sur le dos, le bouclier à plat devant lui
+# Pose validée par l'auteur, inchangée : premier cadre du repos.
+calque pose 0 7
 ............kkkk
 ...........k3111k
 .......Pp.k311111k
@@ -69,10 +379,344 @@ origine 0 7
 ..........kk..kk
 ..........kkk.kkk
 
+calque repos-1 12 22
+_
+
+calque repos-2 10 21
+111111
+..__
+.
+.
+.
+kk..kk
+..k...k
+___.___
+
+calque marche-0 8 23
+.1._.._.1
+.1._.._.1
+.1._.._.1
+kk__..__kk
+kk.__.__.kk
+
+calque marche-1 7 9
+Pp
+k
+.
+.
+.
+.
+.
+.
+SS
+k_
+.
+_
+.
+.
+.
+.
+..1._.._.1
+..k._.._.k
+..k.._._..k
+
+calque marche-2 7 8
+Pp
+k
+.
+.
+.
+.
+.
+.
+SS
+k_
+.
+_
+.
+.
+..._..1._
+..._.11._
+..._.11._
+..._kk1._
+..._.kk._
+...___k.._
+
+calque marche-3 7 8
+__
+P
+.
+.
+.
+.
+.
+.
+kp
+SS
+.
+k
+.
+.
+.
+...._.._
+...._.._
+...._1._
+.
+....kk
+
+calque marche-4 7 10
+__
+P
+.
+.
+.
+.
+.
+.
+kp
+SS
+.
+k..111111
+..._...._
+.
+.
+.
+.....kk
+...._
+...._____
+
+calque marche-5 7 9
+__
+P
+.
+.
+.
+.
+.
+.
+kp
+SS
+.
+k
+.
+.
+.
+.
+.......kk
+.........k
+.......___
+
+calque attaque-0 6 7
+Pp
+kp
+kp_
+kp_
+kp_
+kp_
+kp_
+kp_
+SS_
+k__
+k__
+._
+._
+
+calque attaque-1 6 6
+Pp
+k
+.
+.
+.
+.
+.
+.
+SS
+k_
+.
+_
+
+calque attaque-2 7 5
+................pP
+.............pppkk
+..........pppkkk
+........ppkkk
+__.....SSk
+__
+__........_.....K
+__........_Kg.GgK
+__........_Kg.GgK
+__........_Kg.GgK
+__........._...gK
+__........_Kg.GgK
+__........_Kg.GgK
+_........._Kg.GgK
+_........._Kg.GgK
+.........._Kg.GgK
+.........._K...gK
+.........._Kg.GgK
+.........._.....K
+
+calque attaque-3 14 5
+.........__
+......_____
+...______
+.1k___
+11p
+.SSpp
+...kkpp_
+......kpp_
+........kpp
+..........kP
+...........k
+
+calque attaque-4 7 8
+Pp
+k
+.
+.
+.
+.
+.
+.
+SS
+k_
+.
+_
+
+calque blesse-0 5 7
+__...k..._
+__..k31..k_
+P..k31....k_
+...k31.4..._
+...k31S.4._
+....kS...._
+.....kS.._
+...3.2...3_
+kp3.2....S_
+.p32......_
+SS32......_
+k..2......_
+k..k......_
+.
+.
+......_
+
+calque mort-0 4 7
+....k..._
+.
+.
+.
+..........K....._
+..........KgG.gK_
+..........KgG.gK_
+_kp_.3...23
+_kp.3....2S
+_kp3......2
+_.S3......2
+_k._......2
+_.k__.....kkKg.GgK
+..........._Kg.GgK
+...._.....1_K...gK
+...._.11_.1_Kg.GgK
+...._.1._.1_.....K
+...._.1._.1
+....__11__11
+....__kk__kk
+....__.k._.kk
+
+calque mort-1 0 9
+....kk..__
+...k3111k___
+Pp_k311...k__
+kp_k31144..__
+.kp_k31S.4.K....._
+.kp_.kS....KgG.gK_
+.
+..kp_3.2...3KgG.gK_
+.
+.
+.
+..._k._......2Kg.GgK
+.
+........11..11_Kg.GgK
+......._..__.1_K...gK
+.......__.1__11_KgGGgK
+......._.1.__.11....KK
+.......__kk__..kk
+........_kkk__.kkk
+........__..__
+........___.___
+
+calque mort-2 3 10
+.......____
+......______
+.....________
+..__.________
+..__._____________
+...4..____________
+.k144S.3.222k_____..k
+k1144SS....2k_11111kk
+k114SSS....2k_11111kk
+k111SSS.....k_1___
+k3111Sk.....k_11__..k
+.k333k_3....k_11111kk
+...kk__33222k_11111kk
+.._..___333.______
+..ppppppppS.______
+..PkkkkkkkSkk__KK.KKKKKKKKKK
+.......__...___.gGGgGGgGGgGK
+.......__
+.......__
+.......___
+
+calque mort-3 0 26
+.N................KKKKKKKKKKKKK
+Nn.................gGGgGGgGGgG
+.................._____________
+
+anim repos 180
+cadre pose
+cadre pose + repos-1
+cadre repos.1 decale 0 1 + repos-2
+cadre repos.2
+
+anim marche 110
+cadre repos.1 + marche-0
+cadre repos.2 + marche-1
+cadre pose + marche-2
+cadre marche.2 + marche-3
+cadre marche.3 decale 0 1 + marche-4
+cadre repos.1 + marche-5
+
+anim attaque 100
+cadre pose + attaque-0
+cadre attaque.0 + attaque-1
+cadre pose + attaque-2
+cadre attaque.2 + attaque-3
+cadre pose + attaque-4
+cadre pose
+
+anim blesse 120
+cadre attaque.0 decale -1 0 + blesse-0
+cadre pose decale -1 0
+
+anim mort 150
+cadre blesse.0 decale -1 0 + mort-0
+cadre mort.0 decale -2 2 + mort-1
+cadre marche.4 decale -2 2 + mort-2
+cadre mort.2 decale 0 2 + mort-3 duree 600
+
 # Gendarme mobile (DLC, rôle du Chasseur de Sorcières : plus solide, armure) : casque bleu à visière relevée, gilet rembourré, épaulières et genouillères, matraque noire dressée au poing.
 #: moderne-gendarme-mobile | Gendarme mobile | chasseur-sorcieres
 sprite moderne-gendarme-mobile
-origine 0 6
+# Animations (mêmes noms, nombre d'images et cadences que l'original) :
+#   repos : respire, épaules rembourrées qui descendent
+#   marche : pas lourds avec genouillères, matraque qui balance
+#   attaque : lève la matraque et frappe devant
+#   blesse : recule d'un pas
+#   mort : part en arrière et tombe sur le dos
+# Pose validée par l'auteur, inchangée : premier cadre du repos.
+calque pose 0 6
 ...........aaaaa
 ..........aAAAAAa
 .........aa44444a
@@ -96,10 +740,325 @@ origine 0 6
 .........kkk..kkk
 .........kkkk.kkkk
 
+calque repos-2 9 21
+11111111
+...__
+.
+333..333
+111..111
+kkk..kkk
+...k....k
+____.____
+
+calque marche-0 7 23
+.1.._.._..1
+.3.._.._..3
+.1.._.._..1
+kk.__..__.kk
+kk..__.__..kk
+
+calque marche-1 6 9
+Pp
+k
+.
+.
+.
+.
+.
+.
+SS
+k_
+.
+_
+.
+.
+.
+..3.._
+..1.._.._..1
+..k.._.._..k
+..k..._._...k
+
+calque marche-2 6 8
+Pp
+k
+.
+.
+.
+.
+.
+.
+SS
+k_
+.
+_
+.
+.
+..._..11.._
+..._..11.._
+..._..33.._
+..._kkk1.._
+..._..kk.._
+...____k..._
+
+calque marche-3 6 8
+__
+P
+.
+.
+.
+.
+.
+.
+kp
+SS
+.
+k
+.
+.
+.
+...._...._
+...._...._
+...._11.._
+...._...._
+.....kk..._
+
+calque marche-4 6 10
+__
+P
+.
+.
+.
+.
+.
+.
+kp
+SS
+.
+k..11111111
+..._......_
+.
+....33333
+.....1111
+.....kkkk
+.........k
+....._____
+
+calque marche-5 6 9
+__
+P
+.
+.
+.
+.
+.
+.
+kp
+SS
+.
+k
+.
+.
+.
+.
+........kkk
+...........k
+........____
+
+calque attaque-0 5 7
+Pp
+kp
+kp_
+kp_
+kp_
+kp_
+kp_
+kp_
+SS_
+k__
+k__
+._
+._
+
+calque attaque-1 5 6
+Pp
+k
+.
+.
+.
+.
+.
+.
+SS
+k_
+.
+_
+
+calque attaque-2 6 9
+__
+__
+__
+__
+__................ppppP
+__............ppppkkkkk
+__...........SSkkk
+__
+__
+_
+_
+
+calque attaque-3 19 13
+....._____
+._________
+_p___
+SSp
+..kp
+...kp
+....kp
+.....kp
+......kP
+.......k
+
+calque attaque-4 6 8
+Pp
+k
+.
+.
+.
+.
+.
+.
+SS
+k_
+.
+_
+
+calque blesse-0 7 21
+_.......1
+_..1._..1
+_..1._..1
+_..3._..3
+_..1._..1
+_..k._..k
+_...k_...k
+
+calque mort-0 3 6
+....aa...__
+...aAA...a__
+...a.4....a_
+Pp_a..S...._
+kp_a..S..kS_
+kp_.a.S...._
+kp_...kS.._
+kp_.32.....3_
+.
+.
+.
+.
+.
+._k._........k
+.
+.
+.
+.
+.
+....._..1._..1
+....._..k._..k
+....._...k_...k
+
+calque mort-1 0 8
+..aaa..___
+..aAA...a__
+.aa444..a___
+p_aa.SS...__
+p_aa.SS.k.__
+kp_.a.S...._
+kp_...kS.._
+.
+.kp_3.2.3.2.3._
+.
+.
+.
+.._k._.......2.S
+.
+.......111..111
+......_...__..1
+......_333.__333
+......_..1.___111
+......__kkk___.kkk
+......._kkkk___kkkk
+.......___..___
+.......____.____
+
+calque mort-2 5 8
+......._____
+......_______
+.....________
+.....________
+..__.________
+..__..__333
+..__...3322.Sk.......k
+.aaSSS_......k.11131kk
+aA4SkSS..22..k_11131kk
+aA4SSSS.3..3.k_11131kk
+aA4SSSS.3..3.k_1
+aA4SSSk..22..k_1.....k
+aA4aaa_......k_11131kk
+.aaaaa_332222..11131kk
+..aaa___33322k.11131kk
+......_____2
+...ppppppppS
+...PkkkkkkkSkk
+.......____
+.......____
+......._____
+
+calque mort-3 2 26
+.N........................N
+Nn........................nN
+
+anim repos 180
+cadre pose
+cadre pose
+cadre pose decale 0 1 + repos-2
+cadre repos.2
+
+anim marche 100
+cadre pose + marche-0
+cadre repos.2 + marche-1
+cadre pose + marche-2
+cadre marche.2 + marche-3
+cadre marche.3 decale 0 1 + marche-4
+cadre pose + marche-5
+
+anim attaque 90
+cadre pose + attaque-0
+cadre attaque.0 + attaque-1
+cadre pose + attaque-2
+cadre attaque.2 + attaque-3
+cadre pose + attaque-4
+cadre pose
+
+anim blesse 120
+cadre pose decale -2 0 + blesse-0
+cadre pose decale -1 0
+
+anim mort 150
+cadre blesse.0 + mort-0
+cadre mort.0 decale -2 2 + mort-1
+cadre marche.4 decale 1 1 + mort-2
+cadre mort.2 decale 0 2 + mort-3 duree 600
+
 # Bouclier anti-émeute (DLC, rôle du Porte-Herse : bouclier frontal) : grand bouclier de plexiglas cerclé d'acier, le porteur casqué se devine derrière, matraque dans la main libre.
 #: moderne-bouclier-anti-emeute | Bouclier anti-émeute | porte-herse
 sprite moderne-bouclier-anti-emeute
-origine 0 7
+# Animations (mêmes noms, nombre d'images et cadences que l'original) :
+#   repos : souffle derrière le grand bouclier
+#   marche : avance pas à pas derrière son bouclier, qui suit le corps
+#   attaque : se ramasse, pousse le bouclier en avant et abat la matraque par-dessus
+#   blesse : recule d'un pas
+#   mort : le bouclier bascule en avant, il tombe sur le dos, le bouclier à plat devant lui
+# Pose validée par l'auteur, inchangée : premier cadre du repos.
+calque pose 0 7
 ..........kkkk
 .........k311tttttttt
 ......Ppk3114t544444t
@@ -121,3 +1080,263 @@ origine 0 7
 ........11..1t444444t
 ........kk..ktttttttt
 ........kkk.kkk
+
+calque repos-1 8 27
+11..1
+.._..._
+kkk.kkk
+
+calque marche-0 6 25
+.1._.._
+.11_.._
+.11__._11
+kk......kk
+kkk.....kkk
+
+calque marche-1 6 9
+Pp
+k
+.
+.
+.
+.
+.
+.
+SS
+k_
+.
+_
+.
+.
+.
+.._.11
+.._.11
+.._.11
+.._.k11
+.._..k.__
+.....kkk
+
+calque marche-2 8 24
+_.11
+__11_
+__11_
+__11__
+_..k.__
+.kkkkk
+
+calque marche-3 6 10
+__
+P
+.
+.
+.
+.
+.
+.
+kp
+SS
+.
+k
+.
+.
+.
+.
+.
+......k
+........k
+......___
+
+calque attaque-0 5 7
+Pp
+kp
+k
+.
+.
+.
+.
+.
+SS
+._
+k_
+_
+_
+
+calque attaque-1 6 6
+Pp
+kp..kk..__
+kp_k311__
+kp.3114__
+kp.31SS__
+kp_kSS.__
+kp__kSS__
+kp_22..__
+SS122..__
+k.122..__
+k.122..__
+..122..__
+...k...__
+.
+.
+..11...__
+..11._.._
+..11._.__
+..11._.__
+..11._.__
+..kk._.__
+..kkk_
+.......___
+
+calque attaque-2 7 5
+...........pP
+__.......ppkk
+__.k..pppkk
+__k3ppkkk___
+_k31Sk_
+_k31S._
+__kS.._
+__.kS._
+__2..._
+_12..._
+_12..._
+_12..._
+.12..._
+.k...._
+.
+.
+.1...._
+.1.._1_
+.1._.1_
+.1._.1_
+.1._.1_
+.k._.k_
+.k.._k.._
+
+calque attaque-3 13 8
+_.......t
+_t5....4t
+_t5....4.t
+_t5....4t
+_t.....4t
+_t5....4.t
+_t.5...4t
+_t.5...4t
+_t.5...4.t
+_t5....4t
+_t5....4t
+_t.....4.t
+_t.....4t
+_t.....4t
+_t.....4.t
+_t.....4t
+_t.....4t
+_t.....4t
+_.......t
+
+calque blesse-0 6 23
+_.1._1
+_.1._1
+_.1._1
+_11._1
+_11._11
+.kk..kk
+.kkk.kkk
+
+calque mort-0 2 7
+....k..._
+...k31.t......._
+Ppk31.4t54....t_
+.
+.
+.
+.
+.
+.
+._kp1...2t.5...4.t
+._.S1...2t5....4t
+._k_....kt5....4t
+._k....._t.....4.t
+........_t.....4t
+...__...11t....44t
+...__.1._1t....44tt
+...__11__1t....44t
+...__11__1t....44t
+...__11__1t....44t
+...__kk__k......tt
+...___k.._kkk
+
+calque mort-1 0 5
+....................__
+..................____
+............________
+..........._______........ttt
+.kkkk....._____...___t5..444t
+k311......_____...__t5...44tt
+k3114......____...__t5...44t
+k31SS.......___...__t....44t
+p.kSSS.....____..._t5....4.t
+p..kSS...._____..._t.5...4t
+kp.2222..._____..._t.5...4t
+kp12222..._____..._t.5...4.t
+.kp12222.._____
+.kp12222.._____
+..SS12222
+..k.kkkkk........t4.....t_
+..k......._____..t4.....t_
+..........___._..t4.....t._
+.....11111__.._..t4.....t_
+......111....._.t44....t__
+......11......_.t44....t__
+.......11._11._.tt......__
+......11..__11___
+.......kk....kk
+.......kkk...kkk
+
+calque mort-2 0 7
+...................__
+.................____
+...........________
+.........._______..._____
+........._____...________
+........._____..._________
+..........____...________
+...........___...________
+..........____..._________
+........._____...________
+........._____...________
+........._____..._________
+........._____...________
+........._____...________
+.................______k__
+...k.............______k_
+...k14SSS22222k..11111kk_
+...k11SSS22222k..1________
+...k311Sk22222k..11____k_
+....k33k.22222k..11111kk_
+.....kk.._.11.k..11111kk_
+.N...ppppppppS..t........ttttt.N
+Nn...Pkkk...kS..t44544454445tt.n
+
+anim repos 220
+cadre pose
+cadre pose decale 0 1 + repos-1
+
+anim marche 110
+cadre pose + marche-0
+cadre pose decale 0 1 + marche-1
+cadre repos.1 decale 0 -1 + marche-2
+cadre repos.1 + marche-3
+
+anim attaque 100
+cadre pose decale -1 0 + attaque-0 duree 170
+cadre marche.1 decale 2 -1 + attaque-1
+cadre attaque.1 decale 1 0 + attaque-2 duree 140
+cadre pose + attaque-3
+
+anim blesse 120
+cadre attaque.3 decale -2 0 + blesse-0
+cadre pose decale -1 0
+
+anim mort 160
+cadre blesse.1 decale -2 0 + mort-0
+cadre attaque.2 decale 2 0 + mort-1
+cadre attaque.2 decale 1 2 + mort-2 duree 900

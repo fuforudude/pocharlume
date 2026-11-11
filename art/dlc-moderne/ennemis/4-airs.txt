@@ -20,7 +20,14 @@ couleur 5 8fa9bf  plexiglas devant le corps
 # Drone (DLC, rôle du Corbeau Noir : volant et rapide) : quadricoptère noir aux rotors qui tournent, caméra sous le ventre, feux rouge et bleu.
 #: moderne-drone | Drone | corbeau-noir
 sprite moderne-drone
-origine 0 13
+# Animations (mêmes noms, nombre d'images et cadences que l'original) :
+#   repos : vol stationnaire : rotors qui tournent (pales vues de face puis de profil), feu bleu qui clignote
+#   marche : file en tanguant, rotors qui tournent, feux qui clignotent
+#   attaque : recule, pique en avant, flash de la caméra
+#   blesse : se cabre et décroche d'un pixel, feux éteints
+#   mort : étincelles et fumée, puis posé au sol de travers, une pale tordue, un filet de fumée
+# Pose validée par l'auteur, inchangée : premier cadre du repos.
+calque pose 0 13
 .....TTTTTTT.......TTTTTTT
 ........k..............k
 .......kgk............kgk
@@ -31,11 +38,110 @@ origine 0 13
 .............kk.kik
 ........x.....kkkk.....A
 
+calque repos-1 5 14
+_i...i_......._i...i_
+.
+.
+.
+.
+.
+.
+.
+...r..............a
+
+calque attaque-0 7 20
+x..............A
+
+calque attaque-1 17 22
+..W
+.IWI
+I.I.I
+..I
+
+calque attaque-2 18 22
+.W
+IWI
+.I
+
+calque blesse-0 4 12
+..................TTT
+_____.............k__
+TTTTT.............gk
+.._k_.............1
+...g..............__
+..k1
+....k
+.
+..................a
+..._.............._
+...r
+
+calque mort-0 6 12
+iTTTi
+__k__...uuu..._____
+.kgk....uUu...iTTTi
+..1.kF..uuu..F.._k_
+.__.G.........__.g
+..._k.........kk.1k
+...._.........GGk
+..............kk
+..r
+.._.............._
+.................a
+
+calque mort-1 6 14
+.........UU
+.
+.
+._____........._____
+..._.....U.......TTTTT
+..___..U.U.....TT__
+..__T__UUU________kgk
+..TT.____________.k1k
+.T.kg..kkkkkkk...Gk
+T..k1kGGGGGGGGGGGk
+.....kkkgggggggkk
+..._....k.._kkk..._
+.........kk.kik....a
+..........kkkk
+....r
+
+anim repos 140
+cadre pose
+cadre pose decale 0 1 + repos-1
+
+anim marche 90
+cadre pose
+cadre repos.1 decale 0 -2
+cadre pose decale 0 -1
+cadre repos.1 decale 0 -1
+
+anim attaque 90
+cadre marche.1 decale -1 0 + attaque-0 duree 140
+cadre pose decale 2 2 + attaque-1
+cadre repos.1 decale 2 1 + attaque-2 duree 130
+cadre pose decale 1 1
+
+anim blesse 110
+cadre pose decale -1 0 + blesse-0
+cadre marche.3 decale 1 0
+
+anim mort 900
+cadre marche.3 + mort-0 duree 140
+cadre attaque.2 decale -1 2 + mort-1
+
 # Hélicoptère (DLC, rôle de l'Ange de Cendre : volant lourd) : appareil bleu et blanc, verrière, rotor sur le toit, longue queue et patins.
 #: moderne-helicoptere | Hélicoptère | ange-cendre
 sprite moderne-helicoptere
 agrandi 2
-origine 0 8
+# Animations (mêmes noms, nombre d'images et cadences que l'original) :
+#   repos : vol stationnaire : grand rotor et rotor de queue qui tournent, feu bleu qui clignote
+#   marche : avance en tanguant, rotors qui tournent
+#   attaque : allume le projecteur : un faisceau de lumière balaie le sol devant lui
+#   blesse : tangue et recule
+#   mort : pique du nez en fumant, puis posé au sol, pales affaissées, colonne de fumée
+# Pose validée par l'auteur, inchangée : premier cadre du repos.
+calque pose 0 8
 ....kkkkkkkkkkkkkkkkkkkkkkkkkk
 .................kk
 ...............kkkkkk
@@ -50,3 +156,138 @@ origine 0 8
 .............kkkkkkkkkkkk
 ..............k.......k
 ...........kkkkkkkkkkkkkkk
+
+calque repos-1 0 9
+....____GGG..............GGG__
+.
+.
+.
+.._
+k.a
+
+calque attaque-0 20 20
+y
+
+calque attaque-1 15 20
+.....y
+.....I
+....I.I
+....I.I
+...I.I.I
+...II..I
+..II...II
+..I...I.I
+.I...I...I
+.I..I...II
+I..I...I..I
+I.I...I...I
+
+calque attaque-2 0 8
+....kkkkkkk..............kkkkk
+.
+.
+.
+..k
+_.A
+.
+.
+.
+.
+.
+.
+.
+.
+....................I
+.
+.
+.....................I
+....................I
+...................I
+..................I...I
+.................I...I
+................I...I...I
+...................I...I
+
+calque attaque-3 20 20
+y
+
+calque blesse-0 0 7
+...........................kk
+...___.....................__
+...kkk
+.
+.
+._
+_k_
+ka.___
+.k.kkk.....................k
+..kwww....................._
+...kkk
+
+calque mort-0 0 5
+..............uuu
+..............uUu
+........GGG...uuu
+........___...........______
+......................kkkGGG
+.
+kk....................__
+..ak......k...........k._
+__k.kkkkkk............2kk_
+.._.wwwwwww..............k_
+..._kkkkkkk...............k_
+....______.................k_
+.........._...........k44.44k
+.......................kk4.k
+......................wwwkk
+.......................kk
+.......................___
+......................kkkk
+
+calque mort-1 0 9
+...............U
+..............U..UU
+......___________U________
+.............U.U_
+............UUvUU__
+..........._Uvv_U_____
+.........___U_vUU______
+__......_____UUU________
+______________uuukk..kk__..k
+.__________kkuuUuu_k.__kk.k.kkk
+..________k___uuukkk.kk____
+.........k_____uk222222k
+.........____kk2222222222kkk
+....k......_.22222222222k444k
+...kak....kk.2222222222kk4444k
+....kkkkk.wwwwwwwwwwwwwwk44444k
+.....kwwwwkkkaaaaaaaaaaak444kk
+......kkkk..kwwwwwwwwwwwwkkkk
+.............kkwwwwwwwwwwww
+...............kkkkkkkkkkkk
+................k.......k..k
+.............kkkkkkkkkkkkkk
+
+anim repos 150
+cadre pose
+cadre pose decale 0 1 + repos-1
+
+anim marche 90
+cadre pose
+cadre repos.1 decale 0 -2
+cadre pose decale 0 -1
+cadre repos.1 decale 0 -1
+
+anim attaque 100
+cadre pose + attaque-0 duree 150
+cadre marche.3 + attaque-1
+cadre attaque.1 + attaque-2
+cadre marche.3 + attaque-3
+
+anim blesse 110
+cadre pose decale -1 0 + blesse-0
+cadre marche.3 decale 1 0
+
+anim mort 900
+cadre marche.3 + mort-0 duree 140
+cadre repos.1 decale -2 2 + mort-1
