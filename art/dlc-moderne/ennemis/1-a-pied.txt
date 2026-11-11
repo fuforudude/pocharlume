@@ -1,0 +1,123 @@
+# Ennemis du DLC « Temps modernes » : À pied : la piétaille. Les humains deviennent les forces de l'ordre ; chaque ennemi reprend le
+# rôle d'un ennemi du jeu (l'original, dernier champ de sa ligne `#: id | nom | original`).
+# Pose de repos seulement (pas d'animation tant que le skin n'est pas validé). 32×32, ancre aux pieds, de profil vers la
+# droite ; les engins lourds et le boss sont dessinés en 32×32 puis agrandis ×2 (cadres de 64×64), comme les boss du jeu.
+# Uniformes génériques, reconnaissables aux couleurs et à l'équipement : aucun insigne, logo ni inscription.
+# Hors atlas : ce dossier n'est lu que par l'outil d'aperçu du DLC (npm run dlc:apercu), jamais par npm run art.
+# Première version générée par un script, retouchée à la main : on la modifie ici.
+#= À pied : la piétaille
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+couleur S c8a884  chair
+couleur 1 1c2340  bleu nuit : pantalons, casques
+couleur 2 2c3a66  bleu marine : vestes
+couleur 3 46598f  marine éclairé : épaulières, reflets
+couleur 4 c4d6e2  plexiglas, visières, vitres
+couleur 5 8fa9bf  plexiglas devant le corps
+
+# Gendarme (DLC, rôle du Paysan Affamé : ennemi de base) : képi à bandeau clair, blouson bleu marine, ceinturon noir, pantalon bleu nuit.
+#: moderne-gendarme | Gendarme | paysan-affame
+sprite moderne-gendarme
+origine 0 7
+............1111
+...........122221
+...........122221
+...........1PPPP1kk
+............SSSSS
+............SSSkS
+............SSSSS
+.............SSS
+...........2222222
+..........222222322
+..........222222332
+..........22222.332
+..........222222.SS
+..........kkkkkk
+..........111111
+..........111.11
+..........11..11
+..........11..11
+..........11..11
+..........kk..kk
+..........kkk.kkk
+
+# CRS (DLC, rôle du Fantassin : base solide, bouclier) : casque noir visière baissée, tenue bleu nuit à épaulières, bouclier rectangulaire sombre tenu devant.
+#: moderne-crs | CRS | fantassin
+sprite moderne-crs
+origine 0 7
+............kkkk
+...........k3111k
+..........k311111k
+..........k3114444
+..........k31SS44KKKKKK
+...........kSSSSSKgGGgK
+............kSSS.KgGGgK
+..........3322223KgGGgK
+.........3322222SSggggK
+.........32222222KgGGgK
+.........32222222KgGGgK
+..........2222222KgGGgK
+..........kkkkkkkKgGGgK
+.................KgGGgK
+..........111111.KggggK
+..........111.11.KgGGgK
+..........11..11.KKKKKK
+..........11..11
+..........11..11
+..........kk..kk
+..........kkk.kkk
+
+# Gendarme mobile (DLC, rôle du Chasseur de Sorcières : plus solide, armure) : casque bleu à visière relevée, gilet rembourré, épaulières et genouillères.
+#: moderne-gendarme-mobile | Gendarme mobile | chasseur-sorcieres
+sprite moderne-gendarme-mobile
+origine 0 6
+...........aaaaa
+..........aAAAAAa
+.........aa44444a
+.........aaaSSSSS
+.........aaaSSSkS
+..........aaSSSSS
+............kSSS
+..........32222223
+.........3322332233
+.........3222332223
+.........3222332223
+.........22223322SS
+.........22222222SS
+.........kkkkkkkkk
+.
+.........11111111
+.........111..111
+.........111..111
+.........333..333
+.........111..111
+.........kkk..kkk
+.........kkkk.kkkk
+
+# Bouclier anti-émeute (DLC, rôle du Porte-Herse : bouclier frontal) : grand bouclier de plexiglas cerclé d'acier, le porteur casqué se devine derrière.
+#: moderne-bouclier-anti-emeute | Bouclier anti-émeute | porte-herse
+sprite moderne-bouclier-anti-emeute
+origine 0 7
+..........kkkk
+.........k311tttttttt
+........k3114t544444t
+........k31SSt544444tt
+.........kSSSt544444t
+..........kSSt444444t
+.........2222t544444tt
+........12222t554444t
+........12222t554444t
+........12222t554444tt
+........12222t544444t
+........kkkkkt544444t
+.............t444444tt
+.............t444444t
+........11111t444444t
+........111.1t444444tt
+........11..1t444444t
+........11..1t444444t
+........11..1t444444t
+........kk..ktttttttt
+........kkk.kkk

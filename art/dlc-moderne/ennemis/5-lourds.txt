@@ -1,0 +1,98 @@
+# Ennemis du DLC « Temps modernes » : Engins lourds et boss (64×64). Les humains deviennent les forces de l'ordre ; chaque ennemi reprend le
+# rôle d'un ennemi du jeu (l'original, dernier champ de sa ligne `#: id | nom | original`).
+# Pose de repos seulement (pas d'animation tant que le skin n'est pas validé). 32×32, ancre aux pieds, de profil vers la
+# droite ; les engins lourds et le boss sont dessinés en 32×32 puis agrandis ×2 (cadres de 64×64), comme les boss du jeu.
+# Uniformes génériques, reconnaissables aux couleurs et à l'équipement : aucun insigne, logo ni inscription.
+# Hors atlas : ce dossier n'est lu que par l'outil d'aperçu du DLC (npm run dlc:apercu), jamais par npm run art.
+# Première version générée par un script, retouchée à la main : on la modifie ici.
+#= Engins lourds et boss (64×64)
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+couleur S c8a884  chair
+couleur 1 1c2340  bleu nuit : pantalons, casques
+couleur 2 2c3a66  bleu marine : vestes
+couleur 3 46598f  marine éclairé : épaulières, reflets
+couleur 4 c4d6e2  plexiglas, visières, vitres
+couleur 5 8fa9bf  plexiglas devant le corps
+
+# Canon à eau (DLC, rôle de la Gargouille : blindé lent, insensible aux ralentissements) : camion bleu et blanc, cabine vitrée, tourelle sur le toit qui crache un jet d'eau.
+#: moderne-canon-a-eau | Canon à eau | gargouille
+sprite moderne-canon-a-eau
+agrandi 2
+origine 0 9
+.........................AAA
+.......................A.....I
+.....................A.....A
+.............kkkkk
+............kTTTTTkkkkkkkk
+..........kkkkkkkkkkk..AAA.I
+..kkkkkkkkkkkkkkkkkkk.....A
+.kwwwwwwwwwwwwwwwwwwk.kkkkk
+.kwwwwwwwwwwwwwwwwwwkk44444k
+.kwwwwwwwwwwwwwwwwwwkk44444kk
+.kaaaaaaaaaaaaaaaaaakkaaaaaak
+.kaaaaaaaaaaaaaaaaaakkaaaaaak
+.kwwwwwwwwwwwwwwwwwwkkwwwwwwk
+.kwwwwwwwwwwwwwwwwwwkkwwwwwwk
+.kkkkkkkkkkkkkkkkkkkkkkkkkkkk
+..kgggk.....kgggk.....kgggk
+.kgGGGgk...kgGGGgk...kgGGGgk
+.kgGpGgk...kgGpGgk...kgGpGgk
+..kgggk.....kgggk.....kgggk
+
+# Centaure (DLC, rôle du Garde Royal : blindé lourd et lent) : véhicule blindé bleu nuit, vitres étroites grillagées, pare-buffle à l'avant, grosses roues.
+#: moderne-centaure | Centaure | garde-royal
+sprite moderne-centaure
+agrandi 2
+origine 0 11
+........kkkkkkkkkkkkkk
+.......k22222222222222k
+......k2222222222222222k
+.....kk3333333333333333kk
+....k2222222222222222224kk
+...k22k4k4k22k4k4k2222244kk
+...k22k4k4k22k4k4k22222244k
+...k222222222222222222222222k
+...k222222222222222222222222kK
+...k111111111111111111111111kKK
+...k222222222222222222222222kK.K
+...kkkkkkkkkkkkkkkkkkkkkkkkkkKKK
+....kkkk...........kkkk.....K
+...kgGGgk.........kgGGgk
+..kgGpGGgk.......kgGpGGgk
+..kgGGGGgk.......kgGGGGgk
+...kgGGgk.........kgGGgk
+....kkkk...........kkkk
+
+# Préfet (DLC, rôle du Roi Fou : boss qui appelle des renforts) : uniforme bleu nuit brodé d'argent, casquette à feuilles d'argent, ventre en avant, moustache et nez levé, un arrêté roulé à la main.
+#: moderne-prefet | Préfet | roi-fou
+sprite moderne-prefet
+agrandi 2
+origine 0 3
+............11111
+...........1111111
+...........1i1i1i1
+...........i1i1i1ikkk
+............SSSSSS
+............SSSSkS
+............SSSSSSS
+............SSuuuS
+.............SSSS
+............1WWW1
+..........12222222
+.........1222222222
+.........12i222i2222
+.........122222222222
+.........12i2222222i2
+.........122222222222
+.........1222222222SS
+.........12i222222wwwq
+.........12222222.wwq
+..........kkkkkkkkk
+..........1111111
+..........11...11
+..........11...11
+..........kk...kk
+..........kkk..kkkk

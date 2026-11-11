@@ -1,0 +1,122 @@
+# Ennemis du DLC « Temps modernes » : Spécialistes. Les humains deviennent les forces de l'ordre ; chaque ennemi reprend le
+# rôle d'un ennemi du jeu (l'original, dernier champ de sa ligne `#: id | nom | original`).
+# Pose de repos seulement (pas d'animation tant que le skin n'est pas validé). 32×32, ancre aux pieds, de profil vers la
+# droite ; les engins lourds et le boss sont dessinés en 32×32 puis agrandis ×2 (cadres de 64×64), comme les boss du jeu.
+# Uniformes génériques, reconnaissables aux couleurs et à l'équipement : aucun insigne, logo ni inscription.
+# Hors atlas : ce dossier n'est lu que par l'outil d'aperçu du DLC (npm run dlc:apercu), jamais par npm run art.
+# Première version générée par un script, retouchée à la main : on la modifie ici.
+#= Spécialistes
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+couleur S c8a884  chair
+couleur 1 1c2340  bleu nuit : pantalons, casques
+couleur 2 2c3a66  bleu marine : vestes
+couleur 3 46598f  marine éclairé : épaulières, reflets
+couleur 4 c4d6e2  plexiglas, visières, vitres
+couleur 5 8fa9bf  plexiglas devant le corps
+
+# Tireur de LBD (DLC, rôle du Fagotier : met une tour hors service à distance) : casque, tenue bleu nuit, gros lanceur trapu épaulé, bouche ronde.
+#: moderne-tireur-lbd | Tireur de LBD | fagotier
+sprite moderne-tireur-lbd
+origine 0 7
+............kkkk
+...........k3111k
+..........k311111k
+..........k311SSSS
+..........k31SSSkS
+...........kSSSSSS
+............kSSS
+...........22111111111kk
+..........122GgggggggGkpk
+..........122kkkSSkk.1kk
+..........122222kSS
+..........12222222
+..........kkkkkkkk
+.
+..........111111
+..........111.11
+..........11..11
+..........11..11
+..........11..11
+..........kk..kk
+..........kkk.kkk
+
+# Grenadier lacrymogène (DLC, rôle du Pestiféré : laisse un nuage) : casque, masque à gaz à gros hublots et cartouche filtrante, lance-grenades court, petit nuage pâle à ses pieds.
+#: moderne-grenadier-lacrymo | Grenadier lacrymogène | pestifere
+sprite moderne-grenadier-lacrymo
+origine 0 7
+............kkkk
+...........k3111k
+..........k311111k
+..........k31uuuuu
+..........k1uuuiiu
+...........kuuuiiu
+............kuuu11
+............kuuu11
+...........2222222
+..........122222322
+..........122222pppp
+..........12222ppppP
+........vv12222222S
+....vv.vwwkkkkkkkk
+...vwwvwww111111
+..vwwwwwvw111w11
+.vwwvvwwww11ww11
+.vvwwwwvvw11vw11v
+..vvvvwwvv11vv11
+....vvvv..kkvvkk
+..........kkk.kkk
+
+# BAC (DLC, rôle du Délateur : furtif) : en civil, casquette, lunettes noires, sweat sombre, jean et baskets, seul repère un brassard orange.
+#: moderne-bac | BAC | delateur
+sprite moderne-bac
+origine 0 7
+............kkkk
+...........kkkkkkkk
+............SSSSS
+............SSkkkk
+............SSSSS
+.............SSS
+...........uuuuuuu
+..........uuuuuuUuu
+..........uuuuuffUu
+..........uuuuuffUu
+..........uuuuuuuSS
+..........uuuuuu
+.
+.
+..........tttttt
+..........ttt.tt
+..........tt..tt
+..........tt..tt
+..........tt..tt
+..........ww..ww
+..........www.www
+
+# Commissaire (DLC, rôle du Porte-Bannière : aura qui presse les autres) : casquette à galon doré, moustache, long imperméable gris, talkie-walkie levé.
+#: moderne-commissaire | Commissaire | porte-banniere
+sprite moderne-commissaire
+origine 0 7
+...........11111
+..........1111111
+...........YYYYY1kk
+............SSSSS
+............SSSkS
+............SSSSkk
+.............SSS
+...........ppPwPp
+..........pppPwPpp
+..........pppPkPpkk
+..........pppPkPpkS
+..........ppppPpp
+..........pppkkpp
+..........pppppppp
+..........pppppp
+..........ppp.pp
+...........11.11
+...........11.11
+...........11.11
+...........kk.kk
+...........kkkkkk

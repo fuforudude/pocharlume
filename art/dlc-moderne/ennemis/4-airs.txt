@@ -1,0 +1,52 @@
+# Ennemis du DLC « Temps modernes » : Dans les airs. Les humains deviennent les forces de l'ordre ; chaque ennemi reprend le
+# rôle d'un ennemi du jeu (l'original, dernier champ de sa ligne `#: id | nom | original`).
+# Pose de repos seulement (pas d'animation tant que le skin n'est pas validé). 32×32, ancre aux pieds, de profil vers la
+# droite ; les engins lourds et le boss sont dessinés en 32×32 puis agrandis ×2 (cadres de 64×64), comme les boss du jeu.
+# Uniformes génériques, reconnaissables aux couleurs et à l'équipement : aucun insigne, logo ni inscription.
+# Hors atlas : ce dossier n'est lu que par l'outil d'aperçu du DLC (npm run dlc:apercu), jamais par npm run art.
+# Première version générée par un script, retouchée à la main : on la modifie ici.
+#= Dans les airs
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+couleur S c8a884  chair
+couleur 1 1c2340  bleu nuit : pantalons, casques
+couleur 2 2c3a66  bleu marine : vestes
+couleur 3 46598f  marine éclairé : épaulières, reflets
+couleur 4 c4d6e2  plexiglas, visières, vitres
+couleur 5 8fa9bf  plexiglas devant le corps
+
+# Drone (DLC, rôle du Corbeau Noir : volant et rapide) : quadricoptère noir aux rotors qui tournent, caméra sous le ventre, feux rouge et bleu.
+#: moderne-drone | Drone | corbeau-noir
+sprite moderne-drone
+origine 0 13
+.....TTTTTTT.......TTTTTTT
+........k..............k
+.......kgk............kgk
+.......k1kkkkkkkkkkkkkk1k
+.........kGGGGGGGGGGGGk
+..........kkgggggggkkk
+............kkk.kkk
+.............kk.kik
+........x.....kkkk.....A
+
+# Hélicoptère (DLC, rôle de l'Ange de Cendre : volant lourd) : appareil bleu et blanc, verrière, rotor sur le toit, longue queue et patins.
+#: moderne-helicoptere | Hélicoptère | ange-cendre
+sprite moderne-helicoptere
+agrandi 2
+origine 0 8
+....kkkkkkkkkkkkkkkkkkkkkkkkkk
+.................kk
+...............kkkkkk
+.............kk222222kkk
+..k........kk2222222222kk
+.kAk......k22222222222k44k
+..kkkkkkkkk2222222222kk444k
+...kwwwwwwwwwwwwwwwwwwk4444k
+....kkkkkkkaaaaaaaaaaak44444k
+..........kwwwwwwwwwwwwkk4kk
+...........kkwwwwwwwwwwwwkk
+.............kkkkkkkkkkkk
+..............k.......k
+...........kkkkkkkkkkkkkkk

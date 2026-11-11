@@ -1,0 +1,71 @@
+# Ennemis du DLC « Temps modernes » : Rapides : moto et cheval. Les humains deviennent les forces de l'ordre ; chaque ennemi reprend le
+# rôle d'un ennemi du jeu (l'original, dernier champ de sa ligne `#: id | nom | original`).
+# Pose de repos seulement (pas d'animation tant que le skin n'est pas validé). 32×32, ancre aux pieds, de profil vers la
+# droite ; les engins lourds et le boss sont dessinés en 32×32 puis agrandis ×2 (cadres de 64×64), comme les boss du jeu.
+# Uniformes génériques, reconnaissables aux couleurs et à l'équipement : aucun insigne, logo ni inscription.
+# Hors atlas : ce dossier n'est lu que par l'outil d'aperçu du DLC (npm run dlc:apercu), jamais par npm run art.
+# Première version générée par un script, retouchée à la main : on la modifie ici.
+#= Rapides : moto et cheval
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+couleur S c8a884  chair
+couleur 1 1c2340  bleu nuit : pantalons, casques
+couleur 2 2c3a66  bleu marine : vestes
+couleur 3 46598f  marine éclairé : épaulières, reflets
+couleur 4 c4d6e2  plexiglas, visières, vitres
+couleur 5 8fa9bf  plexiglas devant le corps
+
+# BRAV-M (DLC, rôle du Chevalier : rapide et blindé) : binôme sur une moto noire et bleue, casques intégraux, passager derrière le pilote.
+#: moderne-bravm | BRAV-M | chevalier
+sprite moderne-bravm
+origine 0 7
+........kkkk.......kkkk
+.......k3111k.....k1111k
+.......k31444k...k111444
+.......k31444k...k111444
+........kSSSk.....kSSSk
+.......122222.....122222
+......12222222...12222222S
+......1222222....12222222S
+......122222.....1222222
+.......11111.....111111
+.......111111....1111111
+.....kkk11111kkkkk111111
+....kgggggaaaaaaaakk..tt
+.....kkgggaAAAAAaakkkktt
+....kkkkGGGGGGGGGGk..tk.kkk
+...kGGGkkkpppppkkk...t.kGGGk
+..k1...1k.............k1...1k
+..kG.p.Gk.............kG.p.Gk
+..k1...1k.............k1...1k
+...kGGGk...............kGGGk
+....kkk.................kkk
+
+# Cavalier de la police montée (DLC, rôle du Cavalier : charge rapide, renverse le premier soldat) : cheval brun, cavalier casqué en bleu nuit.
+#: moderne-cavalier-monte | Cavalier de la police montée | cavalier
+sprite moderne-cavalier-monte
+origine 0 5
+.............kkkk
+............k3111k
+............k31444
+............k1SSSS
+.............kSSS
+............22222
+...........1222222S
+...........122222SS
+...........122222
+............11111
+............111111........oo
+.............11.11.......oBBo
+.......b..bbb11bkbbbbbbbbBBBBo
+......bb.bBBBkkBBBBBBBBBBBBkBB
+.....bb.bBBBBBBBBBBBBBBBBB.BBBB
+.....b..bBBBBBBBBBBBBBBBBB..dd
+........bBBBBBBBBBBBBBBBB
+........bBBBB.......bBBB
+........BBB.........BBB
+........BB...........BB
+........BB...........BB
+........kk...........kk
