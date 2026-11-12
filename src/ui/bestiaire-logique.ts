@@ -20,6 +20,8 @@ import { contenuEnnemiDeDonnees, contenuTourDeDonnees, texteCapacite, type Conte
 const VITESSE_RAPIDE = 1.8;
 /** Armure ou résistance à partir de laquelle on conseille l'autre type de dégâts. */
 const PROTECTION_NOTABLE = 0.3;
+/** Armure à partir de laquelle les coups ordinaires n'entament presque plus l'ennemi : le conseil parle de percer l'armure. */
+const PROTECTION_FORTE = 0.7;
 
 // --- Comment le contrer -----------------------------------------------------------------------------------------
 
@@ -136,6 +138,8 @@ export function conseilsContre(id: string): string[] {
   if (d.volant) conseils.push(['bestiaire.contre.volant', { familles: ctx.volants }]);
   if (d.furtif) conseils.push(['bestiaire.contre.furtif', { tours: ctx.revelent }]);
   if (d.armure >= PROTECTION_NOTABLE) conseils.push(['bestiaire.contre.blinde', { familles: ctx.magiques }]);
+  // Les ennemis du DLC seulement : le Bestiaire de l'histoire reste celui d'avant.
+  if (d.armure >= PROTECTION_FORTE && id.startsWith('moderne_')) conseils.push(['bestiaire.contre.tres_blinde']);
   if (d.resistance >= PROTECTION_NOTABLE) conseils.push(['bestiaire.contre.resistant', { familles: ctx.physiques }]);
   // Un volant n'est pas retenu par des soldats : sa variante parle de ralentissement et de tours le long du chemin.
   if (d.vitesse >= VITESSE_RAPIDE) conseils.push([d.volant ? 'bestiaire.contre.rapide_volant' : 'bestiaire.contre.rapide']);

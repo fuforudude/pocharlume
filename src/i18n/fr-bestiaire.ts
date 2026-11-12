@@ -53,6 +53,7 @@ export const frBestiaire = {
   'bestiaire.contre.volant': 'Il vole par-dessus les soldats : seules les tours qui visent les volants l’atteignent ({familles}).',
   'bestiaire.contre.furtif': 'On ne le voit pas : seule une tour qui révèle le trouve ({tours}).',
   'bestiaire.contre.blinde': 'Son armure arrête les coups physiques : préfère les dégâts magiques ({familles}).',
+  'bestiaire.contre.tres_blinde': 'Blindé : il faut percer son armure. Cherche les tours et les compétences qui l’ignorent en partie.',
   'bestiaire.contre.resistant': 'Il encaisse la magie : préfère les dégâts physiques ({familles}).',
   'bestiaire.contre.rapide': 'Il file : un barrage de soldats ou un ralentissement lui fait perdre son avantage.',
   'bestiaire.contre.rapide_volant': 'Il file dans les airs : un ralentissement le retient, et plusieurs tours le long du chemin lui font payer chaque case.',

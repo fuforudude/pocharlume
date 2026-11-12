@@ -11,6 +11,22 @@ import type { DefEnnemi } from '../engine/definitions';
 import { CONSEILS_ACTIONS, CONSEILS_POUVOIRS, conseilsContre, contenuDeTour, libelleDeTour, ennemisDeLaFiche, ennemisDuNiveau, ennemisParRegion, ficheEnnemi, groupesDeTours, nomDeTour } from './bestiaire-logique';
 import { contenuEnnemiDeDonnees, contenuTourDeDonnees } from './bulle-contenus';
 
+describe('le conseil contre un ennemi très blindé du DLC', () => {
+  it('le Grand Centaure : il faut percer son armure, sans chiffre', () => {
+    const conseils = conseilsContre('moderne_centaure_boss');
+    const phrase = t('bestiaire.contre.tres_blinde');
+    expect(conseils).toContain(phrase);
+    expect(phrase).toContain('percer');
+    expect(phrase).not.toMatch(/\d/);
+  });
+
+  it('un ennemi peu blindé du DLC, ou un ennemi de l’histoire, n’a pas ce conseil', () => {
+    const phrase = t('bestiaire.contre.tres_blinde');
+    expect(conseilsContre('moderne_prefet')).not.toContain(phrase);
+    expect(conseilsContre('garde_royal')).not.toContain(phrase);
+  });
+});
+
 describe('les ennemis viennent des données', () => {
   it('chaque ennemi de la table figure une fois, et une seule, dans les groupes', () => {
     const ids = ennemisParRegion(sauvegardeVide()).flatMap((g) => g.ennemis.map((e) => e.id));
@@ -24,8 +40,13 @@ describe('les ennemis viennent des données', () => {
     expect(ids.length).toBeGreaterThan(0);
     expect(new Set(ids).size).toBe(ids.length);
     expect([...ids].sort()).toEqual(Object.keys(ENNEMIS).filter((id) => id.startsWith('moderne_')).sort());
-    // Leur contenu n'est pas encore dans les niveaux du DLC : tous dans le groupe « hors campagne ».
-    expect(ennemisParRegion(sauvegardeVide(), undefined, 'moderne').every((g) => g.region === 0)).toBe(true);
+    // Un Bestiaire par campagne : ces ennemis paraissent dans les niveaux du DLC (régions 1 à 3 : la Fac, la Manif, la Préfecture) ; les
+    // seuls du groupe « hors campagne » (région 0) sont ceux qu'aucun niveau ne place (renforts invoqués...).
+    const groupes = ennemisParRegion(sauvegardeVide(), undefined, 'moderne');
+    expect(groupes.map((g) => g.region).filter((r) => r > 0)).toEqual([1, 2, 3]);
+    expect(groupes.every((g) => g.region >= 0 && g.region <= 3)).toBe(true);
+    // Et le Bestiaire de l'histoire n'en montre aucun, dans aucun groupe.
+    expect(ennemisParRegion(sauvegardeVide()).some((g) => g.ennemis.some((e) => e.id.startsWith('moderne_')))).toBe(false);
   });
 
   it('un ennemi du DLC placé dans un niveau du DLC prend la région de ce niveau, et jamais celle de l’histoire', () => {
