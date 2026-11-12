@@ -157,3 +157,8 @@ avec ses propres récompenses.
   jouer une stratégie dédiée, et le bot générique ne doit plus gagner en laissant passer le boss.
 - **Scène vivante** : cortèges et figurants de décor suivent la même règle que les grands décors (cases sans valeur).
 - **Fermetures de chemin** : une fermeture dure quelques vagues puis le chemin rouvre avant la fin du niveau, sur les 30 niveaux.
+- **Renforts ennemis de la Préfecture** faits avec des charges (blindés qui enfoncent les lignes) : assumé, à contrer avec
+  nasses et foules qui bloquent.
+- **Niveau 20** : le Grand Centaure n'était tuable par aucune stratégie, faute de cases de tour le long du couloir final ; on
+  ouvre des cases le long de ce couloir et sur la moitié droite, armure gardée à 0,9.
+- **Scène vivante** : la règle stricte (aucune case de tour utile occupée) est gardée, même si quelques cortèges sont raccourcis.
