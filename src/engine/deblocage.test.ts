@@ -128,6 +128,20 @@ describe('le moteur refuse ce que le niveau n’a pas encore débloqué', () => 
     expect(validerAction(essai, { type: 'construire', ...ce(1), tour: 'divine' })).toBeNull();
   });
 
+  it.each([1, 2, 10])('niveau %i de la campagne Temps modernes (DLC) : tout est ouvert, comme après le niveau 11 de l’histoire', (numero) => {
+    const etat = creerPartie({ ...niveauEssai(), numero, campagne: 'moderne' }, configDe('charlie'));
+    FAMILLES.forEach((famille, i) => {
+      monter(etat, i, famille, 4);
+    });
+    expect(appliquerAction(etat, { type: 'construire', ...ce(4), tour: 'divine' })).toEqual({ ok: true });
+    expect(niveauDeblocage(etat, { type: 'ameliorer', ...ce(0) })).toBeNull();
+  });
+
+  it('la campagne histoire explicite garde le déblocage progressif', () => {
+    const etat = creerPartie({ ...niveauEssai(), numero: 1, campagne: 'histoire' }, configDe('charlie'));
+    expect(validerAction(etat, { type: 'construire', ...ce(0), tour: 'divine' })).toBe('non_debloque');
+  });
+
   it('les défis Héroïque et Fer suivent le rythme du niveau', () => {
     const heroique = partieNumero(2, configDe('charlie', { defi: 'heroique' }));
     monter(heroique, 0, 'tir', 2);

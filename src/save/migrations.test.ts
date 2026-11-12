@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { PARTIE, FIXTURE_V1, FIXTURE_V2, FIXTURE_V3, FIXTURE_V4, FIXTURE_V5, FIXTURE_V6, FIXTURE_V7, sauvegardeRemplie, variante } from './aides.test-utils';
-import { etoilesDepensees, etoilesGagnees, metaParDefaut, VERSION_SAUVEGARDE } from './format';
+import { PARTIE, FIXTURE_V1, FIXTURE_V2, FIXTURE_V3, FIXTURE_V4, FIXTURE_V5, FIXTURE_V6, FIXTURE_V7, FIXTURE_V8, sauvegardeRemplie, variante } from './aides.test-utils';
+import { etoilesDepensees, etoilesGagnees, metaParDefaut, moderneParDefaut, VERSION_SAUVEGARDE } from './format';
 import { MIGRATIONS, migrer } from './migrations';
 
 /** Le bestiaire d'une sauvegarde migrée : rien de rencontré, fiches « Nouvel ennemi » activées. */
@@ -28,6 +28,8 @@ describe('migrations de format', () => {
       meta: metaParDefaut(),
       // La partie en cours de la v1 ne se rejoue pas avec les données de la v2 : abandonnée.
       partie: null,
+      // Ajout de la v9 : la campagne Temps modernes, vide.
+      moderne: moderneParDefaut(),
     });
   });
 
@@ -142,7 +144,7 @@ describe('migrations de format', () => {
     const r = migrer(v7);
     if (!r.ok) throw new Error(r.raison);
     expect(r.depuis).toBe(7);
-    expect(r.sauvegarde.version).toBe(8);
+    expect(r.sauvegarde.version).toBe(VERSION_SAUVEGARDE);
     expect(r.sauvegarde.progression).toEqual({ ...v7.progression, niveauMax: 101 });
     expect(r.sauvegarde.reglages).toEqual(v7.reglages);
     expect(r.sauvegarde.partie).toEqual(v7.partie);
@@ -181,12 +183,53 @@ describe('migrations de format', () => {
     expect(migrer({ ...complete, progression: { niveauMax: 120, etoiles } })).toMatchObject({ ok: false, cause: 'invalide' });
   });
 
-  it('la chaîne complète v1 à v7 aboutit à la version courante valide', () => {
-    for (const fixture of [FIXTURE_V1, FIXTURE_V2, FIXTURE_V3, FIXTURE_V4, FIXTURE_V5, FIXTURE_V6, FIXTURE_V7]) {
+  it('la chaîne complète v1 à v8 aboutit à la version courante valide, avec la campagne du DLC vide', () => {
+    for (const fixture of [FIXTURE_V1, FIXTURE_V2, FIXTURE_V3, FIXTURE_V4, FIXTURE_V5, FIXTURE_V6, FIXTURE_V7, FIXTURE_V8]) {
       const r = migrer(JSON.parse(fixture));
       expect(r.ok && r.sauvegarde.version).toBe(VERSION_SAUVEGARDE);
-      expect(r.ok && r.sauvegarde.meta.bestiaire).toEqual({ rencontres: [], fiches: true });
+      expect(r.ok && r.sauvegarde.moderne).toEqual(moderneParDefaut());
+      if (fixture !== FIXTURE_V8) expect(r.ok && r.sauvegarde.meta.bestiaire).toEqual({ rencontres: [], fiches: true });
     }
+  });
+
+  it('la fixture v8 figée est bien une sauvegarde en version 8, au-delà de l’histoire, avec une partie en cours', () => {
+    const v8 = JSON.parse(FIXTURE_V8) as { version: number; progression: { niveauMax: number }; meta: { regionMax: number }; partie: { niveau: number } | null };
+    expect([v8.version, v8.progression.niveauMax, v8.meta.regionMax, v8.partie?.niveau]).toEqual([8, 112, 12, 105]);
+  });
+
+  it('migre la v8 figée en v9 sans rien perdre : tout est identique, la campagne Temps modernes est ajoutée vide', () => {
+    const v8 = JSON.parse(FIXTURE_V8) as { progression: unknown; reglages: unknown; meta: unknown; partie: unknown };
+    const r = migrer(v8);
+    if (!r.ok) throw new Error(r.raison);
+    expect(r.depuis).toBe(8);
+    expect(r.sauvegarde).toEqual({ version: 9, progression: v8.progression, reglages: v8.reglages, meta: v8.meta, partie: v8.partie, moderne: moderneParDefaut() });
+    // La campagne du DLC : sa progression vide (niveau 1 ouvert), 0 badge, rien en collection, aucun titre, sticker déplié.
+    expect(r.sauvegarde.moderne).toEqual({
+      progression: { niveauMax: 1, etoiles: {} },
+      defis: {},
+      records: {},
+      badges: 0,
+      collection: { skinsTours: [], skinsHeros: [], garantie: 0 },
+      titres: [],
+      stickerReplie: false,
+    });
+  });
+
+  it('la migration v8 vers v9 est idempotente : la v9 obtenue, relue, ressort identique', () => {
+    const r = migrer(JSON.parse(FIXTURE_V8));
+    if (!r.ok) throw new Error(r.raison);
+    const relue = migrer(JSON.parse(JSON.stringify(r.sauvegarde)));
+    expect(relue.ok && relue.depuis).toBe(VERSION_SAUVEGARDE);
+    expect(relue.ok && relue.sauvegarde).toEqual(r.sauvegarde);
+    // Appliquer la migration à une v9 déjà migrée ne change rien non plus (elle ne remplace pas une campagne existante).
+    const avecDlc = { ...r.sauvegarde, version: 8, moderne: { ...moderneParDefaut(), badges: 5 } };
+    expect(MIGRATIONS[8]?.(avecDlc)).toMatchObject({ version: 9, moderne: { badges: 5 } });
+  });
+
+  it('une v8 abîmée est refusée après migration', () => {
+    const v8 = JSON.parse(FIXTURE_V8) as Record<string, unknown>;
+    expect(migrer({ ...v8, extra: 1 })).toMatchObject({ ok: false, cause: 'invalide' });
+    expect(migrer({ ...v8, progression: { niveauMax: 151, etoiles: {} } })).toMatchObject({ ok: false, cause: 'invalide' });
   });
 
   it('une v4 abîmée est refusée après migration', () => {

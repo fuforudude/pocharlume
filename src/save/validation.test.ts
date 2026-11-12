@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DIFFICULTES } from '../data/difficultes';
 import { copie, PARTIE, sauvegardeRemplie, SUPPRIME, variante } from './aides.test-utils';
-import { DIFFICULTES_SAUVEGARDE, metaParDefaut, sauvegardeVide, VERSION_SAUVEGARDE } from './format';
+import { DIFFICULTES_SAUVEGARDE, metaParDefaut, moderneParDefaut, sauvegardeVide, VERSION_SAUVEGARDE } from './format';
 import { TAILLE_MAX_ETAT, validerSauvegarde } from './validation';
 
 function refusee(x: unknown): string {
@@ -47,7 +47,8 @@ describe('validation d’une sauvegarde', () => {
 
   it('refuse les clés héritées __proto__, constructor et prototype, sans polluer Object.prototype', () => {
     const meta = JSON.stringify(metaParDefaut());
-    const reglages = `"reglages":{"son":1,"musique":1,"vitesse":1},"meta":${meta},"partie":null`;
+    const moderne = JSON.stringify(moderneParDefaut());
+    const reglages = `"reglages":{"son":1,"musique":1,"vitesse":1},"meta":${meta},"partie":null,"moderne":${moderne}`;
     const v = String(VERSION_SAUVEGARDE);
     const sain = `{"version":${v},"progression":{"niveauMax":3,"etoiles":{"1":{"matou":3}}},${reglages}}`;
     acceptee(JSON.parse(sain));
@@ -57,8 +58,8 @@ describe('validation d’une sauvegarde', () => {
       `{"version":${v},"progression":{"niveauMax":3,"etoiles":{"1":{"__proto__":3,"matou":3}}},${reglages}}`,
       `{"version":${v},"progression":{"niveauMax":3,"etoiles":{"constructor":{"matou":3}}},${reglages}}`,
       `{"version":${v},"progression":{"niveauMax":3,"etoiles":{"1":{"constructor":3}}},${reglages}}`,
-      `{"version":${v},"progression":{"niveauMax":3,"etoiles":{}},"reglages":{"son":1,"musique":1,"vitesse":1,"constructor":{"prototype":{"x":1}}},"meta":${meta},"partie":null}`,
-      `{"version":${v},"progression":{"niveauMax":3,"etoiles":{}},"reglages":{"son":1,"musique":1,"vitesse":1,"prototype":1},"meta":${meta},"partie":null}`,
+      `{"version":${v},"progression":{"niveauMax":3,"etoiles":{}},"reglages":{"son":1,"musique":1,"vitesse":1,"constructor":{"prototype":{"x":1}}},"meta":${meta},"partie":null,"moderne":${moderne}}`,
+      `{"version":${v},"progression":{"niveauMax":3,"etoiles":{}},"reglages":{"son":1,"musique":1,"vitesse":1,"prototype":1},"meta":${meta},"partie":null,"moderne":${moderne}}`,
       sain.replace('"monnaies":{', '"monnaies":{"__proto__":{"polluee":true},'),
       sain.replace('"choix":{', '"choix":{"__proto__":{"polluee":true},'),
       sain.replace('"heros":{"plume"', '"heros":{"__proto__":{"xp":1,"competences":{}},"plume"'),

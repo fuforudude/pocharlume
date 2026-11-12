@@ -1,6 +1,8 @@
 // Déblocage progressif des tours : le palier visé par une construction, une amélioration ou une spécialisation doit être
 // ouvert par le niveau joué. La règle ne lit que le numéro du niveau (table de src/data/deblocage.ts) : le rejeu et le
-// déterminisme tiennent, défis compris. Le mode infini et un niveau sans numéro (essai) ont tout d'ouvert.
+// déterminisme tiennent, défis compris. Le mode infini, un niveau sans numéro (essai) et la campagne Temps modernes (DLC) ont tout
+// d'ouvert.
+import { toutEstOuvertDans } from '../data/campagnes';
 import { NIVEAU_TOUT_OUVERT, niveauOuverture } from '../data/deblocage';
 import type { Action } from './actions';
 import type { EtatPartie, FamilleTour } from './etat';
@@ -10,6 +12,7 @@ import { tourDuLieu } from './grille';
 export function niveauDeblocagePalier(etat: EtatPartie, famille: FamilleTour, palier: number): number | null {
   const numero = etat.niveau.numero;
   if (numero === undefined || numero >= NIVEAU_TOUT_OUVERT || etat.config.infini) return null;
+  if (etat.niveau.campagne !== undefined && toutEstOuvertDans(etat.niveau.campagne)) return null;
   const ouverture = niveauOuverture(famille, palier);
   return ouverture > numero ? ouverture : null;
 }

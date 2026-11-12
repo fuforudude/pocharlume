@@ -14,12 +14,15 @@
 // - v7 : (dans `meta`) bestiaire : ennemis déjà rencontrés en partie, et l'option « fiche Nouvel ennemi ».
 // - v8 : la campagne passe de 100 à 150 niveaux (régions 11 à 15) ; le niveau 100 gagné débloque le niveau 101 et la région 11
 //        (migration `v7versV8`).
+// - v9 : la campagne « Temps modernes » (le DLC) a sa propre progression (`moderne` : niveau débloqué et étoiles des niveaux 1 à 30,
+//        défis, records), ses badges, sa collection (skins de tours et de héros obtenus, garantie de sa caisse), les titres et la
+//        préférence « sticker replié ». L'histoire n'est pas touchée (migration `v8versV9`, qui ajoute la campagne du DLC vide).
 import { AVATARS, NIVEAU_MAX, BRANCHES_ARBRE, coutCumuleArbre, IDS_OBJETS, type IdBranche, type IdDefi, type IdDieu, type IdHeros, type IdObjet, type PalierInfini } from '../data/meta';
 import type { IdInscription } from '../data/niveaux/statues';
 import type { ConfigPartie } from '../engine/etat';
 import { collectionVide, type Collection } from '../meta/collection';
 
-export const VERSION_SAUVEGARDE = 8;
+export const VERSION_SAUVEGARDE = 9;
 
 /** Nombre de niveaux de la campagne entière : l'histoire (1 à 100) et l'après-histoire (101 à 150), soit 15 régions de 10. */
 export const NOMBRE_NIVEAUX = NIVEAU_MAX;
@@ -145,12 +148,44 @@ export interface Meta {
   bestiaire: Bestiaire;
 }
 
+/** Collection propre au DLC : les skins obtenus dans la caisse « Temps modernes » (apparence seulement) et sa garantie. */
+export interface CollectionModerne {
+  /** Skins de tours obtenus : identifiants sans doublon, dans l'ordre alphabétique. */
+  skinsTours: string[];
+  /** Skins de héros obtenus : identifiants sans doublon, dans l'ordre alphabétique. */
+  skinsHeros: string[];
+  /** Caisses « Temps modernes » ouvertes d'affilée sans Épique ou mieux (0 à 9), comme les compteurs de `meta.collection.garanties`. */
+  garantie: number;
+}
+
+/**
+ * La campagne « Temps modernes » (le DLC, niveaux 1 à 30 de sa propre numérotation), à part de l'histoire : sa progression, ses défis
+ * et ses records, et ce que le DLC ajoute à la méta. Les badges ne se gagnent qu'en jouant le DLC.
+ */
+export interface CampagneModerne {
+  /** Mêmes règles que la progression de l'histoire, niveaux 1 à 30 : réussir le niveau N débloque N + 1. */
+  progression: Progression;
+  /** Défis réussis, par numéro de niveau du DLC en chiffres. Seul un niveau à 3 étoiles peut en avoir. */
+  defis: Record<string, DefisNiveau>;
+  /** Record du mode infini sur les cartes du DLC (dernière vague terminée), par identifiant de carte ; seules les cartes jouées y figurent. */
+  records: Record<string, number>;
+  /** Badges, la monnaie du DLC (ouvre sa caisse). */
+  badges: number;
+  collection: CollectionModerne;
+  /** Titres de collection obtenus (« Fac occupée »…) : identifiants sans doublon, dans l'ordre alphabétique. */
+  titres: string[];
+  /** Vrai : le sticker « DLC disponible ! » des cartes du monde est replié en bouton « DLC » dans la barre du haut. */
+  stickerReplie: boolean;
+}
+
 export interface Sauvegarde {
   version: typeof VERSION_SAUVEGARDE;
   progression: Progression;
   reglages: Reglages;
   meta: Meta;
   partie: PartieEnCours | null;
+  /** La campagne du DLC (v9). L'histoire reste dans `progression` et `meta`, inchangés. */
+  moderne: CampagneModerne;
 }
 
 export const REGLAGES_PAR_DEFAUT: Readonly<Reglages> = { son: 80, musique: 60, vitesse: 1 };
@@ -174,6 +209,19 @@ export function metaParDefaut(): Meta {
   };
 }
 
+/** La campagne du DLC d'un nouveau joueur (et d'une sauvegarde v8 migrée) : niveau 1 ouvert, rien de gagné, sticker déplié. */
+export function moderneParDefaut(): CampagneModerne {
+  return {
+    progression: { niveauMax: 1, etoiles: {} },
+    defis: {},
+    records: {},
+    badges: 0,
+    collection: { skinsTours: [], skinsHeros: [], garantie: 0 },
+    titres: [],
+    stickerReplie: false,
+  };
+}
+
 /** Sauvegarde d'un nouveau joueur : le niveau 1 est ouvert, rien n'est réussi. */
 export function sauvegardeVide(): Sauvegarde {
   return {
@@ -182,6 +230,7 @@ export function sauvegardeVide(): Sauvegarde {
     reglages: { ...REGLAGES_PAR_DEFAUT },
     meta: metaParDefaut(),
     partie: null,
+    moderne: moderneParDefaut(),
   };
 }
 

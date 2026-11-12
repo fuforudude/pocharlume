@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ENNEMIS } from '../data/ennemis';
-import { FIXTURE_V1, FIXTURE_V7, sauvegardeRemplie } from './aides.test-utils';
+import { FIXTURE_V1, FIXTURE_V7, FIXTURE_V8, sauvegardeRemplie } from './aides.test-utils';
 import { crc32, depuisBase64Url, exporterCode, importerCode, PREFIXE_CODE, remplacerProgression, TAILLE_MAX_CODE, versBase64Url } from './code';
-import { sauvegardeVide, type Sauvegarde } from './format';
+import { moderneParDefaut, sauvegardeVide, type Sauvegarde } from './format';
+import { enregistrerVictoireModerne } from './moderne';
 import { enregistrerVictoire } from './progression';
 
 /** Fabrique un code valide (somme comprise) autour de données quelconques. */
@@ -26,6 +27,30 @@ function campagneComplete(): Sauvegarde {
     if (n % 2 === 0) s = enregistrerVictoire(s, n, 'vieux_sage', 1);
   }
   return s;
+}
+
+/** La campagne Temps modernes finie partout : 30 niveaux à 3 étoiles, tous les défis, badges, skins, titres, sticker replié. */
+function dlcComplet(s: Sauvegarde): Sauvegarde {
+  let d = s;
+  for (let n = 1; n <= 30; n++) {
+    d = enregistrerVictoireModerne(d, n, 'matou', 3);
+    d = enregistrerVictoireModerne(d, n, 'chaton', 3);
+    d = enregistrerVictoireModerne(d, n, 'vieux_sage', 2);
+  }
+  const defis = Object.fromEntries(Array.from({ length: 30 }, (_, i) => [String(i + 1), { heroique: true as const, fer: true as const }]));
+  const skins = (prefixe: string, n: number): string[] => Array.from({ length: n }, (_, i) => `${prefixe}_${String(i).padStart(2, '0')}`);
+  return {
+    ...d,
+    moderne: {
+      ...d.moderne,
+      defis,
+      records: { amphi: 120, cortege: 88, prefecture: 61 },
+      badges: 99_999,
+      collection: { skinsTours: skins('skin_moderne_tour', 29), skinsHeros: skins('skin_moderne_heros', 9), garantie: 9 },
+      titres: ['fac_occupee', 'manif_tenue', 'prefecture_tombee'],
+      stickerReplie: true,
+    },
+  };
 }
 
 describe('base64url et somme de contrôle', () => {
@@ -87,6 +112,53 @@ describe('export et import d’un code', () => {
     expect(relu.ok && relu.sauvegarde.meta.bestiaire).toEqual(plein.meta.bestiaire);
   });
 
+  it('la campagne Temps modernes voyage dans le code et revient intacte', async () => {
+    const source = dlcComplet(sauvegardeRemplie());
+    const r = await importerCode(await exporterCode(source));
+    if (!r.ok) throw new Error(r.detail);
+    expect(r.sauvegarde.moderne).toEqual(source.moderne);
+    expect(remplacerProgression(r.sauvegarde).moderne).toEqual(source.moderne);
+  });
+
+  it('reste sous ses plafonds avec l’histoire et le DLC finis : moins de 2200 caractères compressé, sous la limite sans compression', async () => {
+    const complet = dlcComplet(campagneComplete());
+    const code = await exporterCode(complet);
+    expect(code.length).toBeLessThan(2200);
+    vi.stubGlobal('CompressionStream', undefined);
+    vi.stubGlobal('DecompressionStream', undefined);
+    const defis = Object.fromEntries(Array.from({ length: 150 }, (_, i) => [String(i + 1), { heroique: true as const, fer: true as const }]));
+    const plein: Sauvegarde = { ...complet, meta: { ...sauvegardeRemplie().meta, regionMax: 15, defis, bestiaire: { rencontres: Object.keys(ENNEMIS).sort(), fiches: true } } };
+    const brut = await exporterCode(plein);
+    expect(brut.startsWith(`${PREFIXE_CODE}.j.`)).toBe(true);
+    expect(brut.length).toBeLessThanOrEqual(TAILLE_MAX_CODE);
+    const relu = await importerCode(brut);
+    expect(relu.ok && relu.sauvegarde.moderne).toEqual(plein.moderne);
+  });
+
+  it('le code d’un joueur qui n’a pas touché au DLC ne le transporte pas ; il revient vide à l’import', async () => {
+    const source = sauvegardeRemplie();
+    const code = await exporterCode(source);
+    const relu = await importerCode(code);
+    expect(relu.ok && relu.sauvegarde.moderne).toEqual(moderneParDefaut());
+    expect(relu.ok && relu.sauvegarde.version).toBe(9);
+    const json = JSON.stringify({ version: source.version, progression: source.progression, reglages: source.reglages, meta: source.meta });
+    expect(await importerCode(await fabriquerCode(json, 'j'))).toMatchObject({ ok: true, sauvegarde: { moderne: moderneParDefaut() } });
+    // Une campagne du DLC abîmée dans un code est refusée comme le reste.
+    const abime = JSON.stringify({ ...JSON.parse(json), moderne: { ...moderneParDefaut(), badges: -3 } });
+    expect(await importerCode(await fabriquerCode(abime, 'j'))).toMatchObject({ ok: false, raison: 'donnees' });
+  });
+
+  it('importe le code d’une v8 : tout est gardé, la campagne du DLC arrive vide', async () => {
+    const v8 = JSON.parse(FIXTURE_V8) as Record<string, unknown>;
+    Reflect.deleteProperty(v8, 'partie');
+    const r = await importerCode(await fabriquerCode(JSON.stringify(v8), 'z'));
+    if (!r.ok) throw new Error(r.detail);
+    expect(r.depuis).toBe(8);
+    expect(r.sauvegarde.progression).toEqual(v8.progression);
+    expect(r.sauvegarde.meta).toEqual(v8.meta);
+    expect(r.sauvegarde.moderne).toEqual(moderneParDefaut());
+  });
+
   it('produit le même code pour la même progression', async () => {
     expect(await exporterCode(sauvegardeRemplie())).toBe(await exporterCode(sauvegardeRemplie()));
   });
@@ -100,7 +172,7 @@ describe('export et import d’un code', () => {
 
   it('comprend aussi le mode sans compression', async () => {
     const source = sauvegardeRemplie();
-    const json = JSON.stringify({ version: source.version, progression: source.progression, reglages: source.reglages, meta: source.meta });
+    const json = JSON.stringify({ version: source.version, progression: source.progression, reglages: source.reglages, meta: source.meta, moderne: source.moderne });
     const r = await importerCode(await fabriquerCode(json, 'j'));
     expect(r.ok && r.sauvegarde.progression).toEqual(source.progression);
   });

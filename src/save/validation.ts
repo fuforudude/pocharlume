@@ -38,16 +38,15 @@ import { estIdCarteBienForme, validerInfini } from './validation-infini';
 import { validerBestiaire } from './validation-bestiaire';
 import { validerInscriptions } from './validation-inscriptions';
 import { validerCollection, validerDefis, validerExtensionConfigV4, validerRegionMax } from './validation-collection';
-import { avecCles, CLE_NIVEAU, echec, estEnregistrement, estEntierEntre, ok, parmi, poser, validerEntiersParCle, valeur, type Resultat } from './validation-base';
+import { validerModerne } from './validation-moderne';
+import { validerProgression } from './validation-progression';
+import { avecCles, echec, estEnregistrement, estEntierEntre, ok, parmi, poser, validerEntiersParCle, valeur, type Resultat } from './validation-base';
 import {
-  DIFFICULTES_SAUVEGARDE,
   etoilesDepensees,
   etoilesGagnees,
   NOMBRE_NIVEAUX,
   VERSION_SAUVEGARDE,
   type ChoixPartie,
-  type Etoiles,
-  type EtoilesNiveau,
   type Meta,
   type PartieEnCours,
   type Progression,
@@ -62,41 +61,6 @@ export { estEntierEntre, poser, type Resultat };
 export const TAILLE_MAX_ETAT = 4 * 1024 * 1024;
 const VAGUE_MAX = 1000;
 const GRAINE_MAX = 0xffffffff;
-
-function validerEtoilesNiveau(x: unknown, chemin: string): Resultat<EtoilesNiveau> {
-  if (!estEnregistrement(x)) return echec(`${chemin} : objet attendu`);
-  const copie: EtoilesNiveau = {};
-  const cles = Object.keys(x);
-  if (cles.length === 0) return echec(`${chemin} : aucune difficulté`);
-  for (const cle of cles) {
-    const difficulte = DIFFICULTES_SAUVEGARDE.find((d) => d === cle);
-    if (difficulte === undefined) return echec(`${chemin} : difficulté inconnue « ${cle} »`);
-    const etoiles = valeur(x, cle);
-    if (!estEntierEntre(etoiles, 1, 3)) return echec(`${chemin}.${cle} : 1 à 3 étoiles attendues`);
-    copie[difficulte] = etoiles as Etoiles;
-  }
-  return ok(copie);
-}
-
-function validerProgression(x: unknown): Resultat<Progression> {
-  const base = avecCles(x, ['niveauMax', 'etoiles'], 'progression');
-  if (!base.ok) return base;
-  const niveauMax = valeur(base.valeur, 'niveauMax');
-  if (!estEntierEntre(niveauMax, 1, NOMBRE_NIVEAUX)) return echec('progression.niveauMax : entier de 1 à 150 attendu');
-  const brutes = valeur(base.valeur, 'etoiles');
-  if (!estEnregistrement(brutes)) return echec('progression.etoiles : objet attendu');
-  const etoiles: Record<string, EtoilesNiveau> = {};
-  for (const cle of Object.keys(brutes)) {
-    if (!CLE_NIVEAU.test(cle)) return echec(`progression.etoiles : numéro de niveau invalide « ${cle} »`);
-    const numero = Number(cle);
-    // Réussir le niveau N débloque N + 1 : un niveau réussi ne peut pas dépasser le niveau max débloqué.
-    if (niveauMax < Math.min(numero + 1, NOMBRE_NIVEAUX)) return echec(`progression : le niveau ${cle} est réussi mais le suivant n'est pas débloqué`);
-    const niveau = validerEtoilesNiveau(valeur(brutes, cle), `progression.etoiles.${cle}`);
-    if (!niveau.ok) return niveau;
-    poser(etoiles, cle, niveau.valeur);
-  }
-  return ok({ niveauMax, etoiles });
-}
 
 function validerReglages(x: unknown): Resultat<Reglages> {
   const base = avecCles(x, ['son', 'musique', 'vitesse'], 'reglages');
@@ -331,7 +295,7 @@ function validerPartie(x: unknown, niveauMax: number): Resultat<PartieEnCours | 
  * vérifications qui dépendent des données de héros ; voir l'en-tête du fichier.
  */
 export function validerSauvegarde(x: unknown, defs?: DefsMeta): Resultat<Sauvegarde> {
-  const base = avecCles(x, ['version', 'progression', 'reglages', 'meta', 'partie'], 'sauvegarde');
+  const base = avecCles(x, ['version', 'progression', 'reglages', 'meta', 'partie', 'moderne'], 'sauvegarde');
   if (!base.ok) return base;
   if (valeur(base.valeur, 'version') !== VERSION_SAUVEGARDE) return echec(`sauvegarde.version : ${String(VERSION_SAUVEGARDE)} attendue`);
   const progression = validerProgression(valeur(base.valeur, 'progression'));
@@ -342,5 +306,7 @@ export function validerSauvegarde(x: unknown, defs?: DefsMeta): Resultat<Sauvega
   if (!meta.ok) return meta;
   const partie = validerPartie(valeur(base.valeur, 'partie'), progression.valeur.niveauMax);
   if (!partie.ok) return partie;
-  return ok({ version: VERSION_SAUVEGARDE, progression: progression.valeur, reglages: reglages.valeur, meta: meta.valeur, partie: partie.valeur });
+  const moderne = validerModerne(valeur(base.valeur, 'moderne'));
+  if (!moderne.ok) return moderne;
+  return ok({ version: VERSION_SAUVEGARDE, progression: progression.valeur, reglages: reglages.valeur, meta: meta.valeur, partie: partie.valeur, moderne: moderne.valeur });
 }

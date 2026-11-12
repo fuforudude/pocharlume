@@ -1,16 +1,17 @@
 // Règles de progression de la campagne, en fonctions pures : elles prennent une sauvegarde et en rendent une
 // nouvelle (jamais modifiée sur place), sans toucher au stockage.
-import { IDS_DEFIS, NIVEAU_FIN_CAMPAGNE, regionOuverte } from '../data/meta';
+import { NIVEAU_FIN_CAMPAGNE, regionOuverte } from '../data/meta';
 import {
   DIFFICULTES_SAUVEGARDE,
   NOMBRE_NIVEAUX,
-  type DefisNiveau,
   type DifficulteSauvegarde,
   type Etoiles,
   type EtoilesNiveau,
   type Reglages,
   type Sauvegarde,
 } from './format';
+import { reunirDefis, reunirEtoiles, reunirRecords } from './fusion-campagne';
+import { fusionnerModerne } from './moderne';
 import { reunirRencontres } from './transactions-bestiaire';
 import { reunirInscriptions } from './transactions-inscriptions';
 import { estEntierEntre } from './validation';
@@ -85,62 +86,33 @@ export function changerReglages(s: Sauvegarde, changements: Partial<Reglages>): 
 
 /**
  * Réunit la progression de `a` et celle de `b` : niveau débloqué le plus haut, meilleures étoiles par niveau et par
- * difficulté. Les réglages et la partie en cours sont ceux de `a`. Rend `a` lui-même si `b` n'apporte rien. Sert
+ * difficulté, de l'histoire comme de la campagne du DLC. Les réglages et la partie en cours sont ceux de `a`. Rend `a` lui-même si `b` n'apporte rien. Sert
  * quand deux onglets, ou une lecture qui avait échoué, ont chacun une part de la progression : aucune ne doit
  * effacer l'autre.
  */
 export function fusionnerProgressions(a: Sauvegarde, b: Sauvegarde): Sauvegarde {
-  let change = b.progression.niveauMax > a.progression.niveauMax;
-  const etoiles = { ...a.progression.etoiles };
-  for (const numero of Object.keys(b.progression.etoiles)) {
-    const autres = b.progression.etoiles[numero];
-    if (!autres) continue;
-    const miennes = Object.hasOwn(etoiles, numero) ? etoiles[numero] : undefined;
-    const reunies: EtoilesNiveau = { ...miennes };
-    for (const difficulte of DIFFICULTES_SAUVEGARDE) {
-      const avant = miennes?.[difficulte] ?? 0;
-      const apres = autres[difficulte] ?? 0;
-      if (apres > avant) {
-        reunies[difficulte] = apres as Etoiles;
-        change = true;
-      }
-    }
-    Object.defineProperty(etoiles, numero, { value: reunies, enumerable: true, writable: true, configurable: true });
-  }
+  const etoiles = reunirEtoiles(a.progression.etoiles, b.progression.etoiles);
   // Les défis réussis de `b` s'ajoutent à ceux de `a` : un défi réussi ne se perd pas.
-  const defis = { ...a.meta.defis };
-  for (const numero of Object.keys(b.meta.defis)) {
-    const miens = Object.hasOwn(defis, numero) ? defis[numero] : undefined;
-    const autres = b.meta.defis[numero];
-    if (!autres) continue;
-    const reunis: DefisNiveau = { ...miens };
-    for (const defi of IDS_DEFIS) {
-      if (autres[defi] === true && miens?.[defi] !== true) {
-        reunis[defi] = true;
-        change = true;
-      }
-    }
-    Object.defineProperty(defis, numero, { value: reunis, enumerable: true, writable: true, configurable: true });
-  }
+  const defis = reunirDefis(a.meta.defis, b.meta.defis);
   // Les records de l'infini : le meilleur de chaque carte. Les paliers payés restent ceux de `a` (leurs arêtes et leurs
   // braises sont dans les monnaies de `a`, que la fusion ne touche pas) : un palier de `b` que `a` n'a pas payé le sera
   // à la prochaine partie qui l'atteint, sans que `a` ait jamais payé deux fois.
-  const records = { ...a.meta.infini.records };
-  for (const carte of Object.keys(b.meta.infini.records)) {
-    const autre = b.meta.infini.records[carte] ?? 0;
-    const mien = Object.hasOwn(records, carte) ? (records[carte] ?? 0) : 0;
-    if (autre > mien) {
-      Object.defineProperty(records, carte, { value: autre, enumerable: true, writable: true, configurable: true });
-      change = true;
-    }
-  }
+  const records = reunirRecords(a.meta.infini.records, b.meta.infini.records);
+  let change = b.progression.niveauMax > a.progression.niveauMax || etoiles.change || defis.change || records.change;
   // Les inscriptions trouvées de `b` s'ajoutent à celles de `a` : une inscription trouvée ne se perd pas.
   const inscriptions = reunirInscriptions(a.meta.inscriptions, b.meta.inscriptions);
   if (inscriptions.length > a.meta.inscriptions.length) change = true;
   // Les ennemis rencontrés de `b` s'ajoutent à ceux de `a` (l'option de `a` reste) : une rencontre ne se perd pas.
   const rencontres = reunirRencontres(a.meta.bestiaire.rencontres, b.meta.bestiaire.rencontres);
   if (rencontres.length > a.meta.bestiaire.rencontres.length) change = true;
-  if (!change) return a;
+  // La campagne du DLC se réunit de la même façon (moderne.ts) ; null : `b` n'y apporte rien.
+  const moderne = fusionnerModerne(a.moderne, b.moderne);
+  if (!change && !moderne) return a;
   const niveauMax = Math.max(a.progression.niveauMax, b.progression.niveauMax);
-  return { ...a, progression: { niveauMax, etoiles }, meta: { ...a.meta, regionMax: regionOuverte(niveauMax), defis, infini: { ...a.meta.infini, records }, inscriptions, bestiaire: { ...a.meta.bestiaire, rencontres } } };
+  return {
+    ...a,
+    progression: { niveauMax, etoiles: etoiles.valeur },
+    meta: { ...a.meta, regionMax: regionOuverte(niveauMax), defis: defis.valeur, infini: { ...a.meta.infini, records: records.valeur }, inscriptions, bestiaire: { ...a.meta.bestiaire, rencontres } },
+    moderne: moderne ?? a.moderne,
+  };
 }
