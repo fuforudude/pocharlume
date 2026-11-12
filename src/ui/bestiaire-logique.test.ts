@@ -15,7 +15,28 @@ describe('les ennemis viennent des données', () => {
   it('chaque ennemi de la table figure une fois, et une seule, dans les groupes', () => {
     const ids = ennemisParRegion(sauvegardeVide()).flatMap((g) => g.ennemis.map((e) => e.id));
     expect(new Set(ids).size).toBe(ids.length);
-    expect([...ids].sort()).toEqual(Object.keys(ENNEMIS).sort());
+    // Le Bestiaire de l'histoire est celui d'avant le DLC : aucun ennemi « Temps modernes ».
+    expect([...ids].sort()).toEqual(Object.keys(ENNEMIS).filter((id) => !id.startsWith('moderne_')).sort());
+  });
+
+  it('le Bestiaire du DLC montre les ennemis « Temps modernes », et eux seuls', () => {
+    const ids = ennemisParRegion(sauvegardeVide(), undefined, 'moderne').flatMap((g) => g.ennemis.map((e) => e.id));
+    expect(ids.length).toBeGreaterThan(0);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect([...ids].sort()).toEqual(Object.keys(ENNEMIS).filter((id) => id.startsWith('moderne_')).sort());
+    // Leur contenu n'est pas encore dans les niveaux du DLC : tous dans le groupe « hors campagne ».
+    expect(ennemisParRegion(sauvegardeVide(), undefined, 'moderne').every((g) => g.region === 0)).toBe(true);
+  });
+
+  it('un ennemi du DLC placé dans un niveau du DLC prend la région de ce niveau, et jamais celle de l’histoire', () => {
+    const niveau = REGIONS[0]?.[0];
+    if (!niveau) throw new Error('niveau 1 absent');
+    const faux = { ...niveau, niveau: { ...niveau.niveau, vagues: [{ paquets: [{ ennemi: 'moderne_gendarme', nombre: 1, intervalle: 1, chemin: 0, delai: 0 }, { ennemi: 'paysan_affame', nombre: 1, intervalle: 1, chemin: 0, delai: 0 }] }] } };
+    const moderne = ennemisParRegion(sauvegardeVide(), [[faux]], 'moderne');
+    expect(moderne[0]).toMatchObject({ region: 1, ennemis: [{ id: 'moderne_gendarme' }] });
+    expect(moderne.flatMap((g) => g.ennemis).some((e) => e.id === 'paysan_affame')).toBe(false);
+    const histoire = ennemisParRegion(sauvegardeVide(), [[faux]]);
+    expect(histoire.flatMap((g) => g.ennemis).some((e) => e.id === 'moderne_gendarme')).toBe(false);
   });
 
   it('range un ennemi dans la région où il paraît d’abord, dans l’ordre des régions', () => {
@@ -35,7 +56,7 @@ describe('les ennemis viennent des données', () => {
     expect(groupes[0]).toMatchObject({ region: 1, ennemis: [{ id: 'paysan_affame', rencontre: false }] });
     // Tous les autres ennemis de la table, absents des niveaux donnés, finissent dans le groupe « hors campagne ».
     expect(groupes[1]?.region).toBe(0);
-    expect(groupes[1]?.ennemis.length).toBe(Object.keys(ENNEMIS).length - 1);
+    expect(groupes[1]?.ennemis.length).toBe(Object.keys(ENNEMIS).filter((id) => !id.startsWith('moderne_')).length - 1);
   });
 
   it('marque comme rencontrés ceux de la sauvegarde', () => {
@@ -144,11 +165,13 @@ describe('les tours et ce que la campagne a ouvert', () => {
   it('ses chiffres sont ceux des bulles, tirés des données', () => {
     const tir1 = groupesDeTours(11).flatMap((g) => g.tours).find((x) => x.id === 'tir-1');
     if (!tir1) throw new Error('tir-1 absent');
-    // Les lignes des bulles, puis la capacité que la famille gagne dans le DLC « Temps modernes ».
+    // Le Bestiaire de l'histoire montre exactement les lignes des bulles ; celui du DLC y ajoute la capacité de la famille.
     const bulle = contenuTourDeDonnees('tir', { niveau: 1 });
-    expect(contenuDeTour(tir1)).toEqual({ ...bulle, lignes: [...bulle.lignes, { libelle: t('bulle.tour.capacite_dlc'), valeur: expect.any(String) as string }] });
+    expect(contenuDeTour(tir1)).toEqual(bulle);
+    expect(contenuDeTour(tir1, 'histoire')).toEqual(bulle);
+    expect(contenuDeTour(tir1, 'moderne')).toEqual({ ...bulle, lignes: [...bulle.lignes, { libelle: t('bulle.tour.capacite_dlc'), valeur: expect.any(String) as string }] });
     const [min, max] = TOURS.tir.niveaux[0].degats;
-    expect(contenuDeTour(tir1).lignes.map((l) => l.valeur).join(' ')).toContain(`${String(min)} à ${String(max)}`);
+    expect(contenuDeTour(tir1, 'moderne').lignes.map((l) => l.valeur).join(' ')).toContain(`${String(min)} à ${String(max)}`);
     expect(nomDeTour(tir1)).toBe(tCle(TOURS.tir.niveaux[0].nom));
   });
 

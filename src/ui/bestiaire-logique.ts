@@ -6,9 +6,10 @@ import { DIEUX } from '../data/dieux';
 import { ENNEMIS } from '../data/ennemis';
 import { IDS_DIEUX, type IdDieu } from '../data/meta';
 import { REGIONS } from '../data/niveaux/campagne';
+import { REGIONS_MODERNE } from '../data/niveaux/campagne-moderne';
 import { FAMILLES, TOURS } from '../data/tours';
 import type { NiveauCampagne } from '../data/visuel';
-import type { DefEnnemi, DefNiveauTour, IdFamille, Niveau, Voie } from '../engine/definitions';
+import type { DefEnnemi, DefNiveauTour, IdCampagne, IdFamille, Niveau, Voie } from '../engine/definitions';
 import { aTexte, t, tCle, type CleTexte, type ParametresTexte } from '../i18n';
 import { spriteEnnemi, spriteTour } from '../render/habillage';
 import type { Sauvegarde } from '../save';
@@ -187,26 +188,39 @@ export function ennemisDeLaFiche(niveau: Niveau, s: Sauvegarde): { id: string; n
     .map((id) => ({ id, nouveau: !connus.has(id) }));
 }
 
+/** Un ennemi du DLC « Temps modernes » (ses identifiants commencent par `moderne_`) : il n'a de fiche que dans le Bestiaire du DLC. */
+export function estEnnemiModerne(id: string): boolean {
+  return id.startsWith('moderne_');
+}
+
 /**
- * Tous les ennemis du jeu (la table des données), rangés par région de première apparition, dans l'ordre où la campagne les présente.
- * `regions` : les niveaux de chaque région (par défaut ceux de la campagne). Un ennemi absent de tous les niveaux va dans le groupe 0.
+ * Les ennemis de la campagne (la table des données), rangés par région de première apparition, dans l'ordre où elle les présente : ceux
+ * de l'histoire pour `histoire` (jamais ceux du DLC), ceux du DLC pour `moderne` (jamais ceux de l'histoire).
+ * `regions` : les niveaux de chaque région (par défaut ceux de la campagne demandée). Un ennemi absent de tous les niveaux va dans le groupe 0.
  */
-export function ennemisParRegion(s: Sauvegarde, regions: readonly (readonly NiveauCampagne[])[] = REGIONS): GroupeEnnemis[] {
+export function ennemisParRegion(
+  s: Sauvegarde,
+  regions?: readonly (readonly NiveauCampagne[])[],
+  campagne: IdCampagne = 'histoire',
+): GroupeEnnemis[] {
+  const moderne = campagne === 'moderne';
+  const parRegion = regions ?? (moderne ? REGIONS_MODERNE : REGIONS);
+  const dansLaCampagne = (id: string): boolean => estEnnemiModerne(id) === moderne;
   const connus = new Set(s.meta.bestiaire.rencontres);
   const placé = new Set<string>();
   const groupes: GroupeEnnemis[] = [];
-  regions.forEach((niveaux, i) => {
+  parRegion.forEach((niveaux, i) => {
     const ids: string[] = [];
     for (const n of niveaux) {
       for (const id of ennemisDuNiveau(n.niveau)) {
-        if (defDe(id) === null || placé.has(id)) continue;
+        if (defDe(id) === null || placé.has(id) || !dansLaCampagne(id)) continue;
         placé.add(id);
         ids.push(id);
       }
     }
     if (ids.length > 0) groupes.push({ region: i + 1, ennemis: ids.map((id) => ({ id, rencontre: connus.has(id) })) });
   });
-  const restants = Object.keys(ENNEMIS).filter((id) => !placé.has(id));
+  const restants = Object.keys(ENNEMIS).filter((id) => !placé.has(id) && dansLaCampagne(id));
   if (restants.length > 0) groupes.push({ region: 0, ennemis: restants.map((id) => ({ id, rencontre: connus.has(id) })) });
   return groupes;
 }
@@ -293,12 +307,13 @@ export function nomDeTour(e: EntreeTour): string {
   return def ? tCle(def.nom) : e.id;
 }
 
-/** Le détail d'une tour : les chiffres et pouvoirs des bulles (une seule source, `bulle-contenus.ts`). */
-export function contenuDeTour(e: EntreeTour): ContenuBulle {
+/** Le détail d'une tour : les chiffres et pouvoirs des bulles (une seule source, `bulle-contenus.ts`) ; `campagne` : celle de l'écran qui l'ouvre. */
+export function contenuDeTour(e: EntreeTour, campagne: IdCampagne = 'histoire'): ContenuBulle {
   if (e.famille === 'divine') return contenuTourDeDonnees('divine', { dieu: e.dieu ?? 'plume' });
   const contenu = contenuTourDeDonnees(e.famille, { niveau: e.palier, ...(e.voie ? { voie: e.voie } : {}) });
-  // La capacité que la famille gagne dans la campagne du DLC « Temps modernes » (les stats, elles, restent celles-ci).
-  const capacite = CAPACITES_CAMPAGNE.moderne[e.famille];
+  // La capacité que la famille gagne dans la campagne du DLC « Temps modernes » (les stats, elles, restent celles-ci) : seulement dans les
+  // écrans du DLC, le Bestiaire de l'histoire est celui d'avant.
+  const capacite = campagne === 'moderne' ? CAPACITES_CAMPAGNE.moderne[e.famille] : undefined;
   return capacite ? { ...contenu, lignes: [...contenu.lignes, { libelle: t('bulle.tour.capacite_dlc'), valeur: texteCapacite(capacite) }] } : contenu;
 }
 
