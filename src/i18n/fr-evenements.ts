@@ -17,6 +17,7 @@ export const frEvenements = {
   'foule.aide.heros': 'Foule : laisse ton héros dedans {n} s pour l’activer.',
 
   'unite.etudiant': 'Étudiant',
+  'accueil.essai_evenements': 'Essai : événements du DLC',
 
   // Refus du moteur.
   'refus.foule_inconnue': 'Il n’y a pas de foule ici.',

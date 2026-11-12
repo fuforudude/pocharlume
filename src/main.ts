@@ -347,6 +347,7 @@ function raccourcisDeveloppement(): readonly ChoixNiveau[] {
     { libelle: t('accueil.niveau_test'), surChoisir: () => { jouer(NIVEAU_CAMPAGNE_TEST, 'matou', { horsSauvegarde: true }).catch(console.error); } },
     { libelle: t('accueil.essai_corbeaux'), surChoisir: () => { lancerEssaiGimmick('corbeaux'); } },
     { libelle: t('accueil.essai_radeau'), surChoisir: () => { lancerEssaiGimmick('radeau'); } },
+    { libelle: t('accueil.essai_evenements'), surChoisir: () => { lancerEssaiEvenements(); } },
   ];
 }
 
@@ -358,6 +359,14 @@ function lancerEssaiGimmick(type: 'corbeaux' | 'radeau'): void {
   if (!import.meta.env.DEV) return;
   import('./ui/niveaux-essai-gimmicks')
     .then(({ ESSAIS_GIMMICKS }) => jouer(ESSAIS_GIMMICKS[type], 'matou', { horsSauvegarde: true, essai: true }))
+    .catch(console.error);
+}
+
+/** Développement seulement : le niveau d'essai des événements datés et des foules du DLC, hors sauvegarde (chargé à la demande). */
+function lancerEssaiEvenements(): void {
+  if (!import.meta.env.DEV) return;
+  import('./ui/niveau-essai-evenements')
+    .then(({ ESSAI_EVENEMENTS }) => jouer(ESSAI_EVENEMENTS, 'matou', { horsSauvegarde: true, essai: true }))
     .catch(console.error);
 }
 

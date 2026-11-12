@@ -36,6 +36,7 @@ import { contenuParticularite, contenuRadeau, type TypeParticularite } from './p
 import { centreRadeauAffiche, placeAffichee } from '../render/gimmicks';
 import { cleParoleBoss } from './parole-boss';
 import { texteRefus } from './refus';
+import { fouleSous, texteBandeau, toucherFoule } from './evenements-niveau';
 import { statueTouchee } from './statue';
 import { el } from './dom';
 import { EVENEMENT_SECOURS } from './notes';
@@ -428,6 +429,15 @@ export async function lancerNiveau(
         lireInscription(statue.id);
         return;
       }
+      // Une foule (DLC) touchée sans rien d'autre en cours : on l'active si elle se paie, sinon la bulle explique.
+      const foule = interaction.mode.type === 'libre' ? fouleSous(etat, tx, ty) : -1;
+      if (foule >= 0) {
+        const geste = toucherFoule(etat, foule);
+        if (geste.action) envoyer(geste.action);
+        if (geste.refus !== null) jouerInterface('refus');
+        if (geste.message !== null) hud.afficherMessage(geste.message);
+        return;
+      }
       traiter(interaction.toucher(etat, tx, ty, rayon));
     },
     glisser: (dx, dy) => {
@@ -734,6 +744,11 @@ export async function lancerNiveau(
         mesures.pasSimules++;
         for (const evenement of etat.evenements) indications.evenement(etat, evenement, temps);
         indications.apresPas(etat);
+        // Bandeau des événements datés et des foules (DLC) : annonce, vente d'office, foule activée.
+        for (const evenement of etat.evenements) {
+          const texte = texteBandeau(etat, evenement);
+          if (texte !== null) hud.afficherParole(texte);
+        }
         for (const evenement of etat.evenements) {
           if (evenement.type !== 'vague') continue;
           const cle = cleParoleBoss(etat.niveau.vagues, evenement.index, niveau.visuel.region, niveau.boss);
