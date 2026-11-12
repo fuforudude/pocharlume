@@ -3,6 +3,7 @@
 // la session exige la même campagne pour effacer la partie rangée. Les niveaux du DLC ne sont pas encore livrés : ces tests raisonnent sur
 // des numéros et sur un plan de l'histoire déguisé en niveau du DLC.
 import { describe, expect, it } from 'vitest';
+import { BADGES_MODERNE } from '../data/recompenses-moderne';
 import { REGION1 } from '../data/niveaux/region1';
 import { VERSION_DONNEES } from '../data/version';
 import { premiereCaseLibre } from '../engine/aides.test-utils';
@@ -123,7 +124,7 @@ describe('braises du DLC (montants de la spec)', () => {
   it('vont dans les monnaies habituelles (`meta.monnaies.braises`), les badges vont dans `moderne.badges`', () => {
     const r = reussie(sauvegardeVide(), { niveau: 1 });
     expect(r.sauvegarde.meta.monnaies.braises).toBe(21);
-    expect(r.sauvegarde.moderne.badges).toBe(30);
+    expect(r.sauvegarde.moderne.badges).toBe(BADGES_MODERNE.premiereVictoire + BADGES_MODERNE.troisEtoiles);
   });
 
   it('12 par défi réussi la première fois, sur le niveau du DLC à 3 étoiles ; le défi est noté dans `moderne.defis`', () => {
