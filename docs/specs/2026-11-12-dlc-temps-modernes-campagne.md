@@ -136,3 +136,12 @@ avec ses propres récompenses.
 ## Questions ouvertes
 - Chiffres des capacités, des badges et du prix de la caisse : réglés au simulateur et en revue.
 - Détail des événements et des foules niveau par niveau : proposés par l'agent du contenu, validés en revue.
+
+## Décisions après les relectures de la vague 2 (2026-11-12)
+- Chaque boss du DLC (commissaire, Centaure, préfet) a sa réplique d'entrée, propre à la campagne, dans le lore.
+- Dans la campagne du DLC, les 9 héros sont toujours dessinés en étudiants, comme les tours ; la caisse sert à porter ces
+  apparences dans l'histoire.
+- Musique plus rythmée et slogans scandés : une tâche à part, pour tout le DLC, après les 3 régions et avant la sortie.
+- Un chemin mobile ouvert en cours de niveau reste ouvert assez longtemps pour qu'y construire vaille le coup (Fac : niveau 8
+  ouvert jusqu'à la fin, niveau 10 ouvert dès la moitié du niveau) ; règle à suivre pour les régions 2 et 3.
+- Une seule source pour la règle des badges ; l'écran de fin affiche badges et titres gagnés.
