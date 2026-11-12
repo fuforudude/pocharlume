@@ -1,7 +1,7 @@
 // Sol de la carte : herbe, chemin tracé à partir des polylignes du moteur (avec bords et coins), zones de
 // boue et de pavés. La grille de noms de tuiles est pure (testée) ; la peinture dans un canvas hors écran se
 // fait une seule fois au lancement du niveau.
-import type { VisuelCarte } from '../data/visuel';
+import { PREFIXES_TUILES_MODERNE, type VisuelCarte } from '../data/visuel';
 import type { Carte, Point } from '../engine/definitions';
 import type { AtlasRendu } from './atlas';
 import { TUILE } from './camera';
@@ -11,9 +11,12 @@ export const DEMI_LARGEUR_CHEMIN = 1;
 
 /**
  * Nom d'une tuile dans l'atlas selon la région du visuel : la région 1 garde les noms d'origine (`herbe-1`), les
- * suivantes ont leur jeu préfixé (`r2-herbe-1`, `r3-chemin-bord-n`…). Voir art/sprites/tuiles-region<N>.txt.
+ * suivantes ont leur jeu préfixé (`r2-herbe-1`, `r3-chemin-bord-n`…). Voir art/sprites/tuiles-region<N>.txt. Les jeux du DLC ont leur
+ * propre préfixe (`moderne-fac-herbe-1`, `PREFIXES_TUILES_MODERNE`).
  */
 export function nomTuile(region: number, base: string): string {
+  const moderne = PREFIXES_TUILES_MODERNE[region];
+  if (moderne !== undefined) return `${moderne}-${base}`;
   return region <= 1 ? base : `r${String(Math.trunc(region))}-${base}`;
 }
 

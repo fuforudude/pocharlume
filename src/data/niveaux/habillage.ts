@@ -67,6 +67,16 @@ export const GRANDS_DECORS: ReadonlySet<string> = new Set([
   'cloche-naufrage',
   'filets-perches',
   'ancre-rouillee',
+  // DLC « Temps modernes », la Fac (art/dlc-moderne/decor/fac-decor.txt)
+  'moderne-barricade',
+  'moderne-barrieres',
+  'moderne-distributeur',
+  'moderne-etagere',
+  'moderne-gradins',
+  'moderne-platane',
+  'moderne-sono',
+  'moderne-tableau',
+  'moderne-tente',
 ]);
 
 /** Emprise d'un décor : tout le sprite (le rectangle de pixels, ancre comprise). */
