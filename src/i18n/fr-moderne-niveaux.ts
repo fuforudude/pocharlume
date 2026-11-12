@@ -1,6 +1,5 @@
-// Noms et phrases d'ambiance des niveaux du DLC « Temps modernes » (région 1, la Fac ; région 3, la Préfecture), et la phrase de fin de
-// campagne du DLC (écran de fin, quand le préfet tombe). Les textes de référence sont dans docs/lore.md
-// (section « DLC « Temps modernes » : niveaux, région 1 ») : `npm run lore` les reporte ici.
+// Noms et phrases d'ambiance des niveaux du DLC « Temps modernes » (région 1, la Fac ; région 2, la Manif). Les textes de référence sont dans docs/lore.md
+// (sections « DLC « Temps modernes » : niveaux, région 1 » et « région 2 ») : `npm run lore` les reporte ici.
 export const frModerneNiveaux = {
   'niveau.m1.01.nom': 'L’Amphi Occupé',
   'niveau.m1.01.ambiance': 'Le cours de droit constitutionnel est suspendu. On y vote quand même, à main levée.',
@@ -22,6 +21,26 @@ export const frModerneNiveaux = {
   'niveau.m1.09.ambiance': 'Les escaliers mènent partout sauf à la sortie. Le plan d’évacuation, lui, a été évacué.',
   'niveau.m1.10.nom': 'Le Rectorat',
   'niveau.m1.10.ambiance': 'Le Commissaire Divisionnaire est attendu pour une visite de courtoisie. Il a amené sa courtoisie en fourgon.',
+  'niveau.m2.01.nom': 'Le Rendez-vous',
+  'niveau.m2.01.ambiance': 'Départ quatorze heures, place de la Gare. À quatorze heures, la place de la Gare était déjà encerclée, par précaution.',
+  'niveau.m2.02.nom': 'Le Boulevard',
+  'niveau.m2.02.ambiance': 'Le parcours a été déclaré en préfecture. La préfecture a déclaré un autre parcours.',
+  'niveau.m2.03.nom': 'Le Carrefour',
+  'niveau.m2.03.ambiance': 'Quatre rues, quatre cordons et un feu tricolore qui hésite, comme tout le monde.',
+  'niveau.m2.04.nom': 'Les Abribus',
+  'niveau.m2.04.ambiance': 'Le 38 est dévié jusqu’à nouvel ordre. Le nouvel ordre est arrivé en fourgon.',
+  'niveau.m2.05.nom': 'La Nasse',
+  'niveau.m2.05.ambiance': 'On peut entrer, on ne peut plus sortir. Officiellement, c’est un périmètre de sécurité ; officieusement aussi.',
+  'niveau.m2.06.nom': 'La Place de la République',
+  'niveau.m2.06.ambiance': 'La statue lève son rameau depuis cent ans. Elle n’a jamais dit à qui elle le tendait.',
+  'niveau.m2.07.nom': 'Le Cortège de Tête',
+  'niveau.m2.07.ambiance': 'Devant les banderoles, ceux qui marchent plus vite que le service d’ordre. Derrière, ceux qui courent plus vite que tout le monde.',
+  'niveau.m2.08.nom': 'Les Camionnettes Sono',
+  'niveau.m2.08.ambiance': 'Trois sonos, trois playlists, une seule rue. Le canon à eau, lui, passe toujours le même morceau.',
+  'niveau.m2.09.nom': 'Les Pavés',
+  'niveau.m2.09.ambiance': 'Sous les pavés, la plage, disait-on. Sous ceux-là, il y a surtout un devis de voirie.',
+  'niveau.m2.10.nom': 'Le Grand Carrefour',
+  'niveau.m2.10.ambiance': 'Le Grand Centaure vient rétablir la circulation. Pour l’instant, la circulation, c’est lui.',
   'niveau.m3.01.nom': 'Les Grilles',
   'niveau.m3.01.ambiance': 'Les grilles ont été repeintes pour la visite du ministre. Elles n’ont jamais été aussi fermées.',
   'niveau.m3.02.nom': 'La Cour d’Honneur',

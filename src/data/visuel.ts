@@ -28,7 +28,13 @@ export interface ZoneSol {
 export const REGION_VISUELLE_FAC = 101;
 /** Jeu de tuiles de la Préfecture (région 3 du DLC) : pierre, gravier, gazon et parquet. */
 export const REGION_VISUELLE_PREFECTURE = 103;
-export const PREFIXES_TUILES_MODERNE: Readonly<Record<number, string>> = { [REGION_VISUELLE_FAC]: 'moderne-fac', [REGION_VISUELLE_PREFECTURE]: 'moderne-prefecture' };
+/** La Manif (région 2 du DLC) : bitume et pavés (art/dlc-moderne/decor/manif-tuiles.txt). */
+export const REGION_VISUELLE_MANIF = 102;
+export const PREFIXES_TUILES_MODERNE: Readonly<Record<number, string>> = {
+  [REGION_VISUELLE_FAC]: 'moderne-fac',
+  [REGION_VISUELLE_MANIF]: 'moderne-manif',
+  [REGION_VISUELLE_PREFECTURE]: 'moderne-prefecture',
+};
 
 /** Un étudiant figurant de la mise en scène vivante, sur une case (cases de la grille, toujours interdites à la construction). */
 export interface CaseScene {
@@ -56,6 +62,10 @@ export interface SceneVivante {
   readonly gyrophares?: readonly { readonly x: number; readonly y: number }[];
   /** Préfecture : drapeaux sans emblème qui flottent (pied du mât en tuiles, couleur de la toile) ; ils ne bloquent rien. Absent = aucun. */
   readonly drapeaux?: readonly { readonly x: number; readonly y: number; readonly couleur: number }[];
+  /** Cortège en marche (la Manif) : une file d'étudiants sur `largeur` cases à partir de (cx, cy), vers l'est ; cases interdites comme un groupe. */
+  readonly corteges?: readonly (CaseScene & { readonly largeur: number })[];
+  /** Ondes d'une camionnette sono (la Manif) : point en tuiles, au-dessus du décor `moderne-camion-sono` ; ne bloque rien. */
+  readonly sonos?: readonly { readonly x: number; readonly y: number }[];
 }
 
 export interface VisuelCarte {

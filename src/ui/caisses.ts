@@ -29,6 +29,8 @@ const MODERNE = 'moderne';
 interface Revele {
   readonly nom: string;
   readonly icone: string;
+  /** L'icône à relire quand l'atlas du DLC est arrivé (la révélation ne l'attend pas) ; absent : l'icône est définitive. */
+  readonly iconeApres?: () => string;
   readonly rarete: OuvertureCaisse['rarete'];
   readonly nouveau: boolean;
   readonly eclats: number;
@@ -77,7 +79,11 @@ export function afficherCaisses(parent: HTMLElement, options: OptionsCaisses): E
     ouverture.append(image(atlas.iconeUrl(`icone-caisse-${type === MODERNE ? 'skins' : type}`, 4), 'icone'));
     const resultat = el('div', 'resultat');
     const objet = el('div', 'objet-revele');
-    objet.append(image(tirage.icone, 'icone'), image(atlas.iconeUrl(`icone-rarete-${tirage.rarete}`, 2), 'badge'));
+    const icone = image(tirage.icone, 'icone');
+    // L'atlas du DLC peut arriver après la révélation (ou jamais) : l'écran ne l'attend pas, l'icône se met à jour quand il est là.
+    const { iconeApres } = tirage;
+    if (iconeApres) void atlasModerne.then(() => { if (carte.isConnected) icone.src = iconeApres(); });
+    objet.append(icone, image(atlas.iconeUrl(`icone-rarete-${tirage.rarete}`, 2), 'badge'));
     const lignes = el('div', 'lignes');
     lignes.append(el('span', 'nom-revele', nom), el('span', 'rarete', t(`rarete.${tirage.rarete}`)));
     lignes.append(el('span', 'statut', t(tirage.nouveau ? 'caisses.resultat_nouveau' : 'caisses.resultat_doublon', { nom })));
@@ -118,9 +124,8 @@ export function afficherCaisses(parent: HTMLElement, options: OptionsCaisses): E
     if (type === MODERNE) {
       const r = await session.ouvrirCaisseModerne();
       if (!r.ok) return r;
-      await atlasModerne;
       const def = defSkinModerne(r.detail.id);
-      return { ok: true, revele: { ...r.detail, nom: def ? tCle(def.nom) : r.detail.id, icone: def ? atlas.iconeUrl(spriteDuSkinModerne(def), 3) : '' } };
+      return { ok: true, revele: { ...r.detail, nom: def ? tCle(def.nom) : r.detail.id, icone: def ? atlas.iconeUrl(spriteDuSkinModerne(def), 3) : '', iconeApres: () => (def ? atlas.iconeUrl(spriteDuSkinModerne(def), 3) : '') } };
     }
     const r = await session.ouvrirCaisse(type);
     if (!r.ok) return r;

@@ -77,12 +77,17 @@ export const GRANDS_DECORS: ReadonlySet<string> = new Set([
   'moderne-sono',
   'moderne-tableau',
   'moderne-tente',
+  // DLC « Temps modernes », la Manif (art/dlc-moderne/decor/manif-decor.txt)
+  'moderne-abribus',
+  'moderne-camion-sono',
+  'moderne-colonne',
+  'moderne-kiosque',
+  'moderne-statue',
   // DLC « Temps modernes », la Préfecture (art/dlc-moderne/decor/prefecture-decor.txt)
   'moderne-bassin',
   'moderne-buffet',
   'moderne-bureau',
   'moderne-cheminee',
-  'moderne-colonne',
   'moderne-grille',
   'moderne-guerite',
   'moderne-if',

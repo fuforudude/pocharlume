@@ -13,6 +13,7 @@ import { budgetVague, menaceVague } from '../../src/data/equilibrage.ts';
 import { CHAMPS_PAR_GROUPE, encoderVagues, type VagueCompacte } from '../../src/data/niveaux/format-vagues.ts';
 import { vaguesDuPlan, vaguesDuPlanModerne } from '../../src/data/niveaux/generation.ts';
 import { PLANS_MODERNE_R1 } from '../../src/data/niveaux/plan-moderne-r1.ts';
+import { PLANS_MODERNE_R2 } from '../../src/data/niveaux/plan-moderne-r2.ts';
 import { PLANS_MODERNE_R3 } from '../../src/data/niveaux/plan-moderne-r3.ts';
 import type { PlanNiveauModerne } from '../../src/data/niveaux/plan-moderne-r1.ts';
 import { PLANS_REGIONS } from '../../src/data/niveaux/plans.ts';
@@ -73,7 +74,7 @@ async function texteFichier(region: number, sortie: string): Promise<string> {
 }
 
 /** Les plans de chaque région du DLC livrée (une région vide n'a pas de fichier de vagues). */
-const PLANS_MODERNE_PAR_REGION: readonly (readonly PlanNiveauModerne[])[] = [PLANS_MODERNE_R1, [], PLANS_MODERNE_R3];
+const PLANS_MODERNE_PAR_REGION: readonly (readonly PlanNiveauModerne<string>[])[] = [PLANS_MODERNE_R1, PLANS_MODERNE_R2, PLANS_MODERNE_R3];
 
 /** Les vagues figées d'une région du DLC (même format compact, sans niveau retouché à la main pour l'instant). */
 function texteFichierModerne(region: number): string {

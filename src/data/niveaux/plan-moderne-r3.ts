@@ -25,11 +25,12 @@
 // d'un chemin qui ne bouge pas ; une foule « bloquer » a une recharge au moins égale à la durée de sa coupure.
 // `defiFer` : la tour de tir dès qu'il y a la BAC (furtive), des drones ou des hélicoptères (volants), jamais la même paire deux niveaux
 // de suite.
+import type { IdCarteModerneR3 } from './cartes-moderne-r3';
 import type { PlanNiveauModerne } from './plan-moderne-r1';
 
 const ETUDIANT = 'etudiant';
 
-export const PLANS_MODERNE_R3: readonly PlanNiveauModerne[] = [
+export const PLANS_MODERNE_R3: readonly PlanNiveauModerne<IdCarteModerneR3>[] = [
   {
     numero: 21,
     carte: 'grilles',

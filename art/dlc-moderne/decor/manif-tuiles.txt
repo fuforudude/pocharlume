@@ -1,0 +1,290 @@
+# Tuiles 16×16 de la Manif (DLC « Temps modernes », région 2) : trottoirs en pavés de grès (sol constructible), boulevard
+# de bitume bordé d'un trottoir clair et d'un caniveau (là où passent les forces de l'ordre) ; zones : terre-plein de gravier
+# et d'herbe (boue) et grandes dalles de granit de la place (pavés). Mêmes noms que les tuiles de la région 1, préfixés par
+# moderne-manif- (le rendu choisit le jeu d'après `region` du visuel, src/data/visuel.ts). Sans contour, ancre en haut à
+# gauche ; bords et coins dessinés une fois (côté nord, nord-ouest) puis tournés. Dessinées par un script jetable, à retoucher ici.
+categorie tuile
+palette commune
+taille 16 16
+ancre 0 0
+contour non
+couleur h 7a756b
+couleur H 6f6a60
+couleur n 878275
+couleur l 5c5850
+couleur k 2c2a27
+couleur m 4e5054
+couleur M 46484c
+couleur N 5b5d62
+couleur c b4afa4
+couleur C 9d988d
+couleur w e5e1d4
+couleur 1 4f6a36
+couleur 2 5d7a3e
+couleur 3 7f7458
+couleur 4 a59e90
+couleur 5 8c8577
+couleur 6 b5ae9f
+couleur 7 d86a98
+
+# Trottoir en pavés de grès : le plus fréquent.
+sprite moderne-manif-herbe-1
+hhhnhhhlhnhhHhhl
+hnhhhhnlHhHhhnhl
+hhhhhhhlhhhhHhHl
+llllllllllllllll
+hhhlhhhhhhhlhhhH
+hHhlhnhhhhhlhhnh
+hhhlhnhhhhnlhhhH
+llllllllllllllll
+hhhhhhhlhhhhhhhl
+hhhhhHhlhhhhhnhl
+hhhhhhhlhhhhhhnl
+llllllllllllllll
+hhhlhhhhhhhlhhhh
+hhhlhhnhnhhlhhhh
+hhhlhhhhhhhlhhhh
+llllllllllllllll
+
+# Un pavé manque (il est parti ailleurs).
+sprite moderne-manif-herbe-2
+hhnhhhhlhhhhhhhl
+hHhhhhhlhhhhhnhl
+hhhhnhhlhhhhhhhl
+llllllllllllllll
+hhhlhhhhMMMMMMMh
+nHhlhhhhkklkkkkh
+HHhlhhhhkkkkkkkh
+llllllllllllllll
+hhhHhhhlhhhhhhHl
+hhhhhhhlhhhhhnhl
+nhhhhhhlHnhhhnhl
+llllllllllllllll
+hhhlhHnhhhhlhhhn
+hhHlhhhhhhHlhhhh
+hhhlhhhhhhhlhhhH
+llllllllllllllll
+
+# Autocollant rose, trait de craie.
+sprite moderne-manif-herbe-3
+hhhhhhhlnhhhhhhl
+HhhhhnhlhhhHwwhl
+hhhhhhHlhhHhchhl
+llllllllllllllll
+HhhlhhhhhhHlhhhh
+hhhlhhhhhhhlhhnh
+hhhlhhhhhhhlhnhh
+llllllllllllllll
+hhhhhhhlhhnhhhHl
+hh777nhlhhhhnhhl
+hh7H7hhlhhhhhhhl
+llllllllllllllll
+hhhlhhhhhhhlhhhn
+hnhlhhhhhhhlhhhh
+hHhlhhhhHhhlhhHh
+llllllllllllllll
+
+# Bitume du boulevard.
+sprite moderne-manif-chemin-1
+mmmmmmMmmmNmmNmm
+mmmmmmmmmmMmmmMm
+NmmmmmmNmmmmmmmm
+mmmMmmNmmmmmMMmm
+mmmmmmMmmmMmmmmm
+NmmmmmmMmmmmmMmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmNMmmmmmm
+mmmmmMmmmmmmMMmm
+mmmmmmmmmmmmmmMm
+mmmmmmmmmmmmmmmm
+mmmmmMmmmmmmmmmm
+mmMMmmmmmmmmmMmm
+mmmmmmmmMmmmmmmM
+mmmNmNmmmmmmmmmm
+mmmmmmmMmmmmmmmm
+
+# Plaque d’égout.
+sprite moderne-manif-chemin-2
+MmmmmmmmMmmmmmmm
+NmmmmmmmMmmmmmmm
+mmmNmmmmmmmmmmmm
+mMmmmmmmmMmMmMmm
+Nmmmmmmkkkmmmmmm
+mNmMMkNMkMkkmmNm
+MmNmmkMMkMMkmmmM
+mmmmkMkkkkkMkmmm
+mmNmkMMMkMMMkmmm
+mmmmkMkkkkkMkmmm
+mMMmmkMMkMMkmmmm
+mmmmmkkMkMkkmmmM
+mmmmmMmkkkmmmmmm
+mNMmmmmmmMmmmmMM
+mmMmmmmMmmmmmmmm
+mmmmmmNmmMmmmmmm
+
+# Bord : trottoir au nord, bordure claire et caniveau, bitume au sud ; -e, -s, -o par rotation.
+sprite moderne-manif-chemin-bord-n
+hhhhhhhhhhhhhhhh
+llllllllllllllll
+cccccccCcccccccc
+CCCCCCCCCCCCCCCC
+kkkkkkkkkkkkkkkk
+NmmmmmmmmmmNmmmm
+mmmmmmmmmmNMmmMN
+mmmmMmmmmNMmMmmm
+mmmmmmmmMmmmmmmm
+MmmmmMmmmmmmmmmm
+mmmmmmNmmmmMmmmm
+mmmmmmmmmmMmmNmM
+MNmmmmmmMmmmmMmm
+mmmNmMmMmmmNmmmM
+mmmmmmmmMmmmmmMM
+mmmmmmmmMmmmmmmm
+
+sprite moderne-manif-chemin-bord-e
+anim repos
+cadre moderne-manif-chemin-bord-n/repos.0 tourne 90
+
+sprite moderne-manif-chemin-bord-s
+anim repos
+cadre moderne-manif-chemin-bord-n/repos.0 tourne 180
+
+sprite moderne-manif-chemin-bord-o
+anim repos
+cadre moderne-manif-chemin-bord-n/repos.0 tourne 270
+
+# Coin extérieur : trottoir au nord et à l’ouest (virage).
+sprite moderne-manif-chemin-coin-ext-no
+hhhhhhhhhhhhhhhh
+llllllllllllllll
+hlcccccccccccccc
+hlcCCCCCCCCCCCCC
+hlcCkkkkkkkkkkkk
+hlcCkmmmmmmmmMmm
+hlcCkmmmmmmmmMmm
+hlcCkmmmmmMmmmMm
+hlcCkmmmmmmmmmmm
+hlcCkmmmmmmmmmmm
+hlcCkmmmmmmmmmmm
+hlcCkmmmMmMmmmmm
+hlcCkmmmmmmmmmmm
+hlcCkmmmmmmmmmmm
+hlcCkmmmmmmmMmmm
+hlcCkmmmmmmmmmmm
+
+sprite moderne-manif-chemin-coin-ext-ne
+anim repos
+cadre moderne-manif-chemin-coin-ext-no/repos.0 tourne 90
+
+sprite moderne-manif-chemin-coin-ext-se
+anim repos
+cadre moderne-manif-chemin-coin-ext-no/repos.0 tourne 180
+
+sprite moderne-manif-chemin-coin-ext-so
+anim repos
+cadre moderne-manif-chemin-coin-ext-no/repos.0 tourne 270
+
+# Coin intérieur : un bout de trottoir au nord-ouest seulement.
+sprite moderne-manif-chemin-coin-int-no
+hhcCkmmmmmmmmmmm
+hhcCkmmmmmMmmmmm
+cccCkmMmmmmmmmmm
+CCCCkmmmmmmmmmmm
+kkkkkmmmmmmmmmmM
+mmmmmmmmmMmmmmmm
+mmmMmmMmmmmmmmmM
+Mmmmmmmmmmmmmmmm
+mmmmMmmmmmmmmMmm
+mmmmmmmmmmmmmMmm
+mmmmmmmmmmmmMmMM
+mmmMmmmMmmmmmmmm
+mmmmmmmmmmMmmMmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmMmmMmmm
+mmmmmmmmmmmmmMmm
+
+sprite moderne-manif-chemin-coin-int-ne
+anim repos
+cadre moderne-manif-chemin-coin-int-no/repos.0 tourne 90
+
+sprite moderne-manif-chemin-coin-int-se
+anim repos
+cadre moderne-manif-chemin-coin-int-no/repos.0 tourne 180
+
+sprite moderne-manif-chemin-coin-int-so
+anim repos
+cadre moderne-manif-chemin-coin-int-no/repos.0 tourne 270
+
+# Terre-plein de gravier et d’herbe (zone « boue »).
+sprite moderne-manif-boue-1
+32131131H3331113
+H31111231333H333
+3313333331322333
+2233333H21333333
+231323232111H1H3
+3233333333133131
+313131313333233H
+23113222333323H2
+1132313233313133
+33311H3321333221
+333233331H231333
+33113332H3133311
+1133323333333333
+32311323322333H3
+313131H311121333
+3333332333323311
+
+sprite moderne-manif-boue-2
+3313H33H33223321
+2333323213232333
+1313213131132323
+331323H331312121
+2331H23332133331
+3331111133123332
+31111121331H3213
+3333111123113133
+233313132H123333
+23113232H3333213
+33333331H121H333
+2133H23321133312
+2H13321312331331
+2H32311333213321
+3321H3332H311331
+311231H333111113
+
+# Grandes dalles de granit de la place (zone « pavés »).
+sprite moderne-manif-paves-1
+4444444444444445
+4444444444444445
+4444444444444465
+5444444464444445
+4444444464444445
+6444454444544545
+4444444444444445
+5555555555555555
+4644644446455444
+4445444444454464
+4444456444454444
+4444445444454444
+4444444444454454
+6444444464454444
+4644644644454444
+5555555555555555
+
+sprite moderne-manif-paves-2
+4444445446444565
+4444644444444445
+4444444444444445
+4444444444446455
+4444444444444445
+4464464444544445
+4444644544444545
+5555555555555555
+5444444444444445
+6444464444444645
+4444446444444465
+4445444444444455
+4444444445444445
+4446444444444465
+4444444446446445
+5555555555555555

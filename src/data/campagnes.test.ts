@@ -51,27 +51,28 @@ describe('campagnes nommées', () => {
 });
 
 describe('liste des niveaux du DLC', () => {
-  it('la Fac (région 1) et la Préfecture (région 3) sont livrées : niveaux 1 à 10 et 21 à 30, la Manif est encore vide', () => {
-    expect(CAMPAGNE_MODERNE.map((n) => n.numero)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]);
+  it('les trois régions sont livrées : 30 niveaux numérotés de 1 à 30, sans trou', () => {
+    expect(CAMPAGNE_MODERNE.map((n) => n.numero)).toEqual(Array.from({ length: 30 }, (_, i) => i + 1));
     expect(REGIONS_MODERNE).toHaveLength(NOMBRE_REGIONS_MODERNE);
-    expect(REGIONS_MODERNE.map((r) => r.length)).toEqual([10, 0, 10]);
+    expect(REGIONS_MODERNE.map((r) => r.length)).toEqual([10, 10, 10]);
     expect(niveauModerne(1)).toBe(CAMPAGNE_MODERNE[0]);
-    expect(niveauModerne(11)).toBeUndefined();
-    expect(niveauModerne(30)?.numero).toBe(30);
+    expect(niveauModerne(11)).toBe(CAMPAGNE_MODERNE[10]);
+    expect(niveauModerne(30)).toBe(CAMPAGNE_MODERNE[29]);
+    expect(niveauModerne(31)).toBeUndefined();
     expect([NOEUDS_REGIONS_MODERNE, TRACES_REGIONS_MODERNE, TEXTES_REGIONS_MODERNE].map((l) => l.length)).toEqual([NOMBRE_REGIONS_MODERNE, NOMBRE_REGIONS_MODERNE, NOMBRE_REGIONS_MODERNE]);
-    expect([NOEUDS_REGIONS_MODERNE[0]?.length, TRACES_REGIONS_MODERNE[0]?.length, TEXTES_REGIONS_MODERNE[0]?.length]).toEqual([10, 9, 10]);
-    expect([NOEUDS_REGIONS_MODERNE[1]?.length, TRACES_REGIONS_MODERNE[1]?.length, TEXTES_REGIONS_MODERNE[1]?.length]).toEqual([0, 0, 0]);
-    expect([NOEUDS_REGIONS_MODERNE[2]?.length, TRACES_REGIONS_MODERNE[2]?.length, TEXTES_REGIONS_MODERNE[2]?.length]).toEqual([10, 9, 10]);
+    for (let r = 0; r < 3; r++) {
+      expect([NOEUDS_REGIONS_MODERNE[r]?.length, TRACES_REGIONS_MODERNE[r]?.length, TEXTES_REGIONS_MODERNE[r]?.length]).toEqual([10, 9, 10]);
+      expect(TEXTES_REGIONS_MODERNE[r]?.map((t) => t.numero)).toEqual(Array.from({ length: 10 }, (_, i) => i + 1 + r * 10));
+    }
   });
 
-  /** Les écarts d'une liste de niveaux du DLC à la règle : campagne, numéros croissants, région. */
+  /** Les écarts d'une liste de niveaux du DLC à la règle : campagne, numéros de 1 à 30 sans trou, région. */
   function ecartsModerne(liste: readonly NiveauCampagne[], regions: readonly (readonly NiveauCampagne[])[]): string[] {
     const ecarts: string[] = [];
     liste.forEach((n, i) => {
       if (n.campagne !== 'moderne' || n.niveau.campagne !== 'moderne') ecarts.push(`${String(i + 1)} : campagne`);
-      // Numéros croissants de 1 à 30 (une région pas encore livrée laisse un trou de 10, comme la Manif tant qu'elle manque).
-      const precedent = liste[i - 1]?.numero ?? 0;
-      if (!(n.numero > precedent && n.numero <= NIVEAU_MAX_MODERNE) || n.niveau.numero !== n.numero) ecarts.push(`${String(i + 1)} : numéro`);
+      // Suite sans trou : le niveau d'indice i porte le numéro i + 1 (1 à 30).
+      if (n.numero !== i + 1 || n.numero > NIVEAU_MAX_MODERNE || n.niveau.numero !== n.numero) ecarts.push(`${String(i + 1)} : numéro`);
       if (!regions[regionDuNiveauModerne(n.numero) - 1]?.includes(n)) ecarts.push(`${String(i + 1)} : région`);
     });
     if (liste.length > NIVEAU_MAX_MODERNE) ecarts.push('trop de niveaux');

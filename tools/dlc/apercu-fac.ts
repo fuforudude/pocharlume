@@ -1,4 +1,4 @@
-// Aperçu d'un niveau du DLC Temps modernes (la Fac, la Préfecture…) pour les captures : le bot soigneux joue `t` secondes en avance rapide, puis la
+// Aperçu d'un niveau du DLC Temps modernes (la Fac, la Manif) pour les captures : le bot soigneux joue `t` secondes en avance rapide, puis la
 // partie continue en temps réel. Outil de développement seulement (tools/dlc/apercu-fac.html), hors du jeu publié.
 import { CAMPAGNE_MODERNE } from '../../src/data/niveaux/campagne-moderne';
 import { VERSION_DONNEES } from '../../src/data/version';
@@ -12,7 +12,7 @@ const params = new URLSearchParams(location.search);
 const numero = Number(params.get('n') ?? '1');
 const avance = Number(params.get('t') ?? '40');
 const niveau = CAMPAGNE_MODERNE.find((n) => n.numero === numero) ?? CAMPAGNE_MODERNE[0];
-if (!niveau) throw new Error('aucun niveau de la Fac');
+if (!niveau) throw new Error('aucun niveau du DLC');
 const canvas = document.querySelector<HTMLCanvasElement>('#vue');
 const info = document.querySelector<HTMLElement>('#info');
 if (!canvas || !info) throw new Error('page incomplète');

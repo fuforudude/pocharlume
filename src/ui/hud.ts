@@ -10,12 +10,13 @@ import { OBJETS } from '../data/objets';
 import type { EtatPartie } from '../engine';
 import { validerAction } from '../engine';
 import { decompteParole } from './parole-boss';
+import { campagneDe } from '../engine/capacites-campagne';
 import { chercherParId } from '../engine/recherche';
 import { PAS_PAR_SECONDE, enPas } from '../engine/temps';
 import { bonusAppel } from '../engine/vagues';
 import { t, tCle } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
-import { habillageSort, iconeObjet, spriteUnite } from '../render/habillage';
+import { apparenceModerne, habillageSort, iconeObjet, idHerosDe, spriteHerosModerne, spriteUnite } from '../render/habillage';
 import { attacherBulle } from './bulle';
 import type { ContenuBulle } from './bulle-contenus';
 import { basculerClasse, bouton, el, image, TexteSuivi } from './dom';
@@ -144,7 +145,13 @@ export class Hud {
     // Le héros emmené (l'avatar du dieu ou l'un de ses disciples) donne son nom et son visage au portrait.
     const heros = Object.hasOwn(HEROS, etat.config.heros) ? HEROS[etat.config.heros as keyof typeof HEROS] : dieu?.heros;
     this.portrait = bouton('bouton portrait', heros ? tCle(heros.nom) : t('hud.heros'), commandes.basculerHeros, signal);
-    if (heros) this.portrait.append(image(atlas.iconeUrl(spriteUnite('heros', heros.nom), 2), 'visage'));
+    if (heros) {
+      // Dans une partie du DLC le héros est dessiné en étudiant : le portrait suit le sprite en jeu (le sprite de base si l'atlas du DLC manque).
+      const idHeros = idHerosDe(heros.nom);
+      const moderne = idHeros !== null && apparenceModerne({}, idHeros, campagneDe(etat.niveau)) ? spriteHerosModerne(idHeros) : undefined;
+      const nomSprite = moderne !== undefined && atlas.sprite(moderne) ? moderne : spriteUnite('heros', heros.nom);
+      this.portrait.append(image(atlas.iconeUrl(nomSprite, 2), 'visage'));
+    }
     this.portrait.append(el('span', 'touche', t('hud.touche_heros')));
     const jauge = el('span', 'jauge');
     this.barrePv = el('span', 'rempli');
