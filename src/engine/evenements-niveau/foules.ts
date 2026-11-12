@@ -37,13 +37,17 @@ export function pointDansFoule(niveau: Niveau, foule: Foule, x: number, y: numbe
   return c !== null && foule.cases.some((f) => f.cx === c.cx && f.cy === c.cy);
 }
 
-/** Le héros peut-il se poster sur une case ? Il faut un point de la case à `distanceMaxChemin` d'un chemin (règle de `deplacerHeros`). */
+/**
+ * Le héros peut-il se poster sur une case ? Il faut un point de la case à `distanceMaxChemin` d'un chemin (règle de `deplacerHeros`).
+ * On essaie le centre de chaque sous-carré (comme `posteDansFoule` des bots), donc des points qui sont bien dans la case : les bords
+ * droit et bas appartiennent à la case voisine pour `caseSousPoint`.
+ */
 function heroPeutSePoster(niveau: Niveau, cx: number, cy: number): boolean {
   const chemins = niveau.carte.chemins.map(calculerChemin);
   const t = REGLES.tailleCase;
-  for (let i = 0; i <= 4; i++) {
-    for (let j = 0; j <= 4; j++) {
-      if (distanceAuxChemins(chemins, cx * t + (i * t) / 4, cy * t + (j * t) / 4) <= REGLES.distanceMaxChemin) return true;
+  for (let i = 0; i < 5; i++) {
+    for (let j = 0; j < 5; j++) {
+      if (distanceAuxChemins(chemins, cx * t + (t * (i + 0.5)) / 5, cy * t + (t * (j + 0.5)) / 5) <= REGLES.distanceMaxChemin) return true;
     }
   }
   return false;
@@ -129,9 +133,12 @@ function appliquerEffetFoule(etat: EtatPartie, foule: Foule, centre: Point): voi
       return;
     }
     case 'renforts': {
-      // Au point du chemin le plus proche du centre de la foule : les étudiants descendent dans la rue.
-      const proche = projeterSurChemin(etat.chemins, centre.x, centre.y);
-      const chemin = proche ? etat.chemins[proche.chemin] : undefined;
+      // Au point du chemin ouvert le plus proche du centre de la foule : les étudiants descendent dans la rue, pas sur un chemin fermé où
+      // personne ne passe (sans chemin ouvert, tous les chemins).
+      const ouverts = etat.chemins.filter((_, i) => etat.dynamique.cheminsActifs[i] !== false);
+      const candidats = ouverts.length > 0 ? ouverts : etat.chemins;
+      const proche = projeterSurChemin(candidats, centre.x, centre.y);
+      const chemin = proche ? candidats[proche.chemin] : undefined;
       const point = proche && chemin ? pointSurChemin(chemin, proche.distance) : centre;
       invoquerRenforts(etat, effet.unite, effet.nombre, effet.duree, point.x, point.y);
       return;

@@ -2,18 +2,20 @@
 //
 // - Un chemin fermé n'accueille plus de nouveaux groupes : ceux qui devaient l'emprunter prennent son chemin de repli (`cheminEffectif`).
 //   Les ennemis qui y marchent déjà vont au bout.
-// - Ses cases suivent : celles d'un chemin mobile actif sont interdites à la construction, celles d'un chemin mobile fermé se bâtissent
-//   (contrat des données : elles ne figurent pas dans `Niveau.casesInterdites`). Les cases des foules sont toujours interdites.
-// - Une tour posée sur une case qui devient chemin est vendue d'office au prix total dépensé (événement `vente_office`).
+// - Les cases d'un chemin mobile (fermé au départ, ou visé par un événement) sont TOUJOURS interdites à la construction, qu'il soit ouvert
+//   ou fermé (contrat des données : elles ne figurent pas dans `Niveau.casesInterdites`, le moteur les ajoute). Aucune tour ne peut donc se
+//   trouver sur un chemin qui s'ouvre : pas de vente d'office. Les cases des foules sont, elles aussi, toujours interdites.
+// - Un niveau qui referme tous ses chemins, ou dont les replis bouclent, est refusé à la création de la partie (`verifierReplis`) ; à
+//   l'exécution, un groupe ne prend jamais un chemin fermé tant qu'un autre est ouvert (`cheminEffectif`).
 //
 // Briques réutilisables : le Pont-Levis (herse qui bascule toutes les 2 vagues) s'écrit en paires `fermer_chemin` / `ouvrir_chemin` datées ;
-// la Crue pourra reprendre `casesDuChemin` et la vente d'office pour ses cases noyées.
+// la Crue pourra reprendre `casesDuChemin` pour ses cases noyées.
+import { EVENEMENTS_NIVEAU } from '../../data/evenements-niveau';
 import { tuilesDeChemin } from '../../data/niveaux/grille-niveau';
 import { REGLES } from '../../data/regles';
-import type { Carte, CheminCarte, EvenementFermerChemin, EvenementOuvrirChemin, Niveau } from '../definitions';
-import type { EtatPartie, Tour } from '../etat';
-import { colonnes, estCaseInterdite, lignes } from '../grille';
-import { libererBloques } from '../unites';
+import type { Carte, CaseGrille, CheminCarte, EvenementFermerChemin, EvenementOuvrirChemin, Niveau } from '../definitions';
+import type { EtatPartie } from '../etat';
+import { colonnes, estCaseInterdite, lignes, tourSurCase, toutesLesCases } from '../grille';
 
 /** Vérifie les chemins fermés au départ : chemin et repli existants et différents, un chemin au plus une fois. */
 export function verifierCheminsFermes(niveau: Niveau): void {
@@ -56,6 +58,62 @@ export function cheminsMobiles(niveau: Niveau): readonly number[] {
   return mobiles;
 }
 
+/**
+ * Vérifie la cohérence des replis en rejouant les événements de changement de chemin dans l'ordre (vague, délai, rang) : à chaque étape, tout
+ * chemin doit mener à un chemin ouvert en suivant ses replis. Refuse un cycle (0 se replie sur 1 qui se replie sur 0) et un niveau dont
+ * tous les chemins seraient fermés. L'ordre exact des événements de même moment ne change pas le diagnostic des niveaux bien écrits.
+ */
+export function verifierReplis(niveau: Niveau): void {
+  const n = niveau.carte.chemins.length;
+  const actifs = niveau.carte.chemins.map(() => true);
+  const replis = niveau.carte.chemins.map(() => -1);
+  const controler = (quand: string): void => {
+    for (let c = 0; c < n; c++) {
+      if (resoudreStrict(actifs, replis, c) < 0) throw new Error(`Chemins mobiles ${quand} : le chemin ${String(c)} ne mène à aucun chemin ouvert (replis qui bouclent, ou tous les chemins fermés)`);
+    }
+  };
+  for (const f of niveau.cheminsFermes ?? []) {
+    actifs[f.chemin] = false;
+    replis[f.chemin] = f.repli;
+  }
+  controler('au départ');
+  const mobiles = (niveau.evenements ?? [])
+    .map((e, i) => ({ e, i }))
+    .filter((x) => x.e.type === 'ouvrir_chemin' || x.e.type === 'fermer_chemin')
+    .sort((a, b) => a.e.vague - b.e.vague || (a.e.delai ?? EVENEMENTS_NIVEAU.annonce) - (b.e.delai ?? EVENEMENTS_NIVEAU.annonce) || a.i - b.i);
+  for (const { e, i } of mobiles) {
+    if (e.type === 'ouvrir_chemin') actifs[e.chemin] = true;
+    else if (e.type === 'fermer_chemin') {
+      actifs[e.chemin] = false;
+      replis[e.chemin] = e.repli;
+    }
+    controler(`après l'événement ${String(i)}`);
+  }
+}
+
+/** Le chemin ouvert au bout des replis de `chemin`, ou -1 s'il n'y en a pas (cycle, ou repli absent). */
+function resoudreStrict(actifs: readonly boolean[], replis: readonly number[], chemin: number): number {
+  let c = chemin;
+  for (let i = 0; i <= actifs.length; i++) {
+    if (actifs[c] !== false) return c;
+    const suivant = replis[c] ?? -1;
+    if (suivant < 0) return -1;
+    c = suivant;
+  }
+  return -1;
+}
+
+/**
+ * Le chemin que prend un groupe prévu sur `chemin` selon les chemins ouverts et les replis donnés : le premier chemin ouvert en suivant
+ * les replis. Garde-fou : si les replis ne mènent nulle part (cycle), le premier chemin ouvert ; s'il n'y en a aucun, `chemin` lui-même.
+ */
+export function cheminOuvertPour(actifs: readonly boolean[], replis: readonly number[], chemin: number): number {
+  const direct = resoudreStrict(actifs, replis, chemin);
+  if (direct >= 0) return direct;
+  const premier = actifs.findIndex((a) => a);
+  return premier >= 0 ? premier : chemin;
+}
+
 /** Cases (clé `cy * colonnes + cx`) qu'un chemin occupe, selon la règle du sol dessiné (`tuilesDeChemin`), mémorisées par chemin. */
 const CASES_CHEMIN = new WeakMap<CheminCarte, ReadonlySet<number>>();
 
@@ -83,52 +141,33 @@ export function casesDuChemin(carte: Carte, chemin: number): ReadonlySet<number>
 }
 
 /**
- * Case interdite à la construction en ce moment : interdite par le niveau, occupée par une foule, ou sous un chemin mobile ouvert. Sans
- * chemin mobile ni foule, c'est exactement `estCaseInterdite`.
+ * Case interdite à la construction : interdite par le niveau, occupée par une foule, ou sous un chemin mobile (ouvert ou fermé). Sans
+ * chemin mobile ni foule, c'est exactement `estCaseInterdite`. La règle ne change pas en cours de partie.
  */
-export function caseInterditeEnPartie(etat: Pick<EtatPartie, 'niveau' | 'dynamique'>, cx: number, cy: number): boolean {
+export function caseInterditeEnPartie(etat: Pick<EtatPartie, 'niveau'>, cx: number, cy: number): boolean {
   const niveau = etat.niveau;
   if (estCaseInterdite(niveau, cx, cy)) return true;
   for (const foule of niveau.foules ?? []) for (const c of foule.cases) if (c.cx === cx && c.cy === cy) return true;
   const cle = cy * colonnes(niveau.carte) + cx;
-  for (const k of cheminsMobiles(niveau)) if (etat.dynamique.cheminsActifs[k] === true && casesDuChemin(niveau.carte, k).has(cle)) return true;
+  for (const k of cheminsMobiles(niveau)) if (casesDuChemin(niveau.carte, k).has(cle)) return true;
   return false;
 }
 
-/** Le chemin que prend vraiment un groupe prévu sur `chemin` : le premier chemin ouvert en suivant les replis, sinon `chemin` lui-même. */
-export function cheminEffectif(etat: Pick<EtatPartie, 'dynamique'>, chemin: number): number {
-  const { cheminsActifs, replis } = etat.dynamique;
-  let c = chemin;
-  for (let i = 0; i < cheminsActifs.length; i++) {
-    if (cheminsActifs[c] !== false) return c;
-    const suivant = replis[c] ?? -1;
-    if (suivant < 0) break;
-    c = suivant;
-  }
-  return chemin;
+/**
+ * Les cases où l'on peut construire : celles de `casesLibres` (grille.ts) moins les cases des foules et des chemins mobiles. Les bots
+ * ne visent que celles-ci ; sans chemin mobile ni foule, c'est exactement `casesLibres`.
+ */
+export function casesLibresEnPartie(etat: Pick<EtatPartie, 'niveau' | 'tours'>): CaseGrille[] {
+  return toutesLesCases(etat.niveau.carte).filter((c) => !caseInterditeEnPartie(etat, c.cx, c.cy) && !tourSurCase(etat, c.cx, c.cy));
 }
 
-/** Vente d'office : la tour rend tout ce qu'elle a coûté (tour, améliorations, compétences), ses soldats et tourelles partent avec elle. */
-function vendreDOffice(etat: EtatPartie, t: Tour): void {
-  const aretes = t.coutCumule;
-  etat.aretes += aretes;
-  etat.tours = etat.tours.filter((autre) => autre !== t);
-  etat.structures = etat.structures.filter((s) => s.origine !== t.id);
-  const restent = [];
-  for (const u of etat.unites) {
-    if (u.tour === t.id && u.genre === 'soldat') libererBloques(etat, u);
-    else restent.push(u);
-  }
-  etat.unites = restent;
-  etat.evenements.push({ type: 'vente_office', tour: t.id, cx: t.cx, cy: t.cy, place: t.place, x: t.x, y: t.y, aretes });
+/** Le chemin que prend vraiment un groupe prévu sur `chemin` : le premier chemin ouvert en suivant les replis (voir `cheminOuvertPour`). */
+export function cheminEffectif(etat: Pick<EtatPartie, 'dynamique'>, chemin: number): number {
+  return cheminOuvertPour(etat.dynamique.cheminsActifs, etat.dynamique.replis, chemin);
 }
 
 export function ouvrirChemin(etat: EtatPartie, e: EvenementOuvrirChemin): void {
   etat.dynamique.cheminsActifs[e.chemin] = true;
-  const cases = casesDuChemin(etat.niveau.carte, e.chemin);
-  const n = colonnes(etat.niveau.carte);
-  // Ordre stable : celui des tours dans l'état.
-  for (const t of etat.tours.filter((tour) => tour.place < 0 && cases.has(tour.cy * n + tour.cx))) vendreDOffice(etat, t);
   etat.evenements.push({ type: 'chemin_ouvert', chemin: e.chemin });
 }
 

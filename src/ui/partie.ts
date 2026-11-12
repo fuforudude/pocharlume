@@ -37,7 +37,7 @@ import { contenuParticularite, contenuRadeau, type TypeParticularite } from './p
 import { centreRadeauAffiche, placeAffichee } from '../render/gimmicks';
 import { cleParoleBoss } from './parole-boss';
 import { texteRefus } from './refus';
-import { fouleSous, texteBandeau, toucherFoule } from './evenements-niveau';
+import { fouleVisee, reunirParoles, texteBandeau, toucherFoule } from './evenements-niveau';
 import { statueTouchee } from './statue';
 import { el } from './dom';
 import { EVENEMENT_SECOURS } from './notes';
@@ -432,7 +432,8 @@ export async function lancerNiveau(
         return;
       }
       // Une foule (DLC) touchée sans rien d'autre en cours : on l'active si elle se paie, sinon la bulle explique.
-      const foule = interaction.mode.type === 'libre' ? fouleSous(etat, tx, ty) : -1;
+      // Le héros posté dans la foule passe avant elle (voir `fouleVisee`) : le toucher le sélectionne.
+      const foule = interaction.mode.type === 'libre' ? fouleVisee(etat, tx, ty, rayon) : -1;
       if (foule >= 0) {
         const geste = toucherFoule(etat, foule);
         if (geste.action) envoyer(geste.action);
@@ -746,16 +747,20 @@ export async function lancerNiveau(
         mesures.pasSimules++;
         for (const evenement of etat.evenements) indications.evenement(etat, evenement, temps);
         indications.apresPas(etat);
-        // Bandeau des événements datés et des foules (DLC) : annonce, vente d'office, foule activée.
+        // Bandeau des événements datés et des foules (DLC) et paroles de boss : un seul bandeau par pas, qui réunit tout ce qu'il y a à dire
+        // (le bandeau remplace son texte : sans cela, la parole d'un boss écraserait l'annonce d'un événement du même pas).
+        const paroles: string[] = [];
         for (const evenement of etat.evenements) {
           const texte = texteBandeau(etat, evenement);
-          if (texte !== null) hud.afficherParole(texte);
+          if (texte !== null) paroles.push(texte);
         }
         for (const evenement of etat.evenements) {
           if (evenement.type !== 'vague') continue;
           const cle = cleParoleBoss(etat.niveau.vagues, evenement.index, niveau.visuel.region, niveau.boss);
-          if (cle) hud.afficherParole(t(cle));
+          if (cle) paroles.push(t(cle));
         }
+        const parole = reunirParoles(paroles);
+        if (parole !== null) hud.afficherParole(parole);
         if (etat.statut === 'en_cours' && (options.surVague || options.surObjet)) {
           let vague = false;
           let objet = false;

@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { EVENEMENTS_NIVEAU } from '../../data/evenements-niveau';
 import { CONFIG, VAGUE_LOINTAINE, avancerSecondes, ennemiEssai, heros } from '../aides.test-utils';
-import type { EvenementNiveau, Vague } from '../definitions';
+import type { EvenementNiveau, Niveau, Vague } from '../definitions';
 import { ajouterEnnemi } from '../ennemis';
 import type { EtatPartie } from '../etat';
 import type { Evenement } from '../evenements';
 import { appliquerAction, creerPartie, step, validerAction } from '../partie';
+import { cheminEffectif } from './chemins-mobiles';
 import { enPas } from '../temps';
 import { niveauDynamique, type OptionsNiveauDynamique } from './niveaux-essai.test-utils';
 
@@ -223,7 +224,7 @@ describe('carte qui bouge', () => {
   /** Une vague d'un paysan sur le chemin donné, `delai` s après son lancement. */
   const paysan = (chemin: number, delai: number): Vague => ({ paquets: [{ ennemi: 'paysan_affame', nombre: 1, intervalle: 0, chemin, delai }] });
 
-  it('ouvrir un chemin : avant, ses groupes prennent le repli et ses cases se bâtissent ; après, il sert, ses cases sont interdites et la tour posée dessus est vendue au prix total', () => {
+  it('ouvrir un chemin : avant, ses groupes prennent le repli ; après, il sert ; ses cases sont interdites à la construction avant comme après, sans rien vendre', () => {
     const etat = partie({
       vagues: [paysan(1, 1), paysan(1, 5), VAGUE_LOINTAINE],
       evenements: [{ vague: 2, type: 'ouvrir_chemin', chemin: 1 }],
@@ -231,38 +232,139 @@ describe('carte qui bouge', () => {
       mobiles: [1],
     });
     expect(etat.dynamique.cheminsActifs).toEqual([true, false]);
-    expect(appliquerAction(etat, { type: 'construire', tour: 'tir', cx: 4, cy: 6 }).ok).toBe(true);
-    expect(appliquerAction(etat, { type: 'ameliorer', cx: 4, cy: 6 }).ok).toBe(true);
-    const tour = etat.tours[0];
-    if (!tour) throw new Error('pas de tour');
-    const cout = tour.coutCumule;
+    expect(validerAction(etat, { type: 'construire', tour: 'tir', cx: 4, cy: 6 })).toBe('case_interdite');
     avancerSecondes(etat, 1.5);
     expect(etat.ennemis[0]?.chemin).toBe(0);
     expect(appliquerAction(etat, { type: 'appelerVague' }).ok).toBe(true);
-    const aretes = etat.aretes;
     const vus = suivre(etat, ANNONCE + 1);
     expect(etat.dynamique.cheminsActifs).toEqual([true, true]);
-    expect(etat.tours).toHaveLength(0);
-    const vente = vus.find((v) => v.ev.type === 'vente_office')?.ev;
-    expect(vente).toEqual({ type: 'vente_office', tour: tour.id, cx: 4, cy: 6, place: -1, x: tour.x, y: tour.y, aretes: cout });
     expect(vus.some((v) => v.ev.type === 'chemin_ouvert' && v.ev.chemin === 1)).toBe(true);
-    expect(etat.aretes).toBe(aretes + cout);
     expect(validerAction(etat, { type: 'construire', tour: 'tir', cx: 4, cy: 6 })).toBe('case_interdite');
     avancerSecondes(etat, 2.5);
     expect(etat.ennemis.filter((e) => e.chemin === 1)).toHaveLength(1);
   });
 
-  it('fermer un chemin : ses cases se libèrent, ses groupes prennent le repli, ceux qui y marchent déjà vont au bout', () => {
+  it('fermer un chemin : ses cases restent interdites, ses groupes prennent le repli, ceux qui y marchent déjà vont au bout', () => {
     const etat = partie({ vagues: [paysan(1, 5), VAGUE_LOINTAINE], evenements: [{ vague: 1, type: 'fermer_chemin', chemin: 1, repli: 0 }], mobiles: [1] });
     expect(validerAction(etat, { type: 'construire', tour: 'tir', cx: 4, cy: 6 })).toBe('case_interdite');
     const engage = marcheur(etat, 1, 2, 1);
     const vus = suivre(etat, ANNONCE + 1);
     expect(vus.some((v) => v.ev.type === 'chemin_ferme' && v.ev.chemin === 1)).toBe(true);
-    expect(validerAction(etat, { type: 'construire', tour: 'tir', cx: 4, cy: 6 })).toBeNull();
+    // Les cases d'un chemin mobile restent interdites une fois le chemin fermé.
+    expect(validerAction(etat, { type: 'construire', tour: 'tir', cx: 4, cy: 6 })).toBe('case_interdite');
     avancerSecondes(etat, 2.5);
     const venus = etat.ennemis.filter((e) => e !== engage);
     expect(venus.map((e) => e.chemin)).toEqual([0]);
     expect(engage.chemin).toBe(1);
     expect(engage.distance).toBeGreaterThan(6);
+  });
+});
+
+describe('chemins fermés : garde-fous', () => {
+  const creer = (o: OptionsNiveauDynamique): (() => EtatPartie) => () => creerPartie(niveauDynamique(o), CONFIG);
+
+  it('refuse des replis qui bouclent, au départ comme au fil des événements', () => {
+    expect(creer({ mobiles: [0, 1], cheminsFermes: [{ chemin: 0, repli: 1 }, { chemin: 1, repli: 0 }] })).toThrow(/aucun chemin ouvert/);
+    expect(creer({ mobiles: [0, 1], cheminsFermes: [{ chemin: 0, repli: 1 }], evenements: [{ vague: 1, type: 'fermer_chemin', chemin: 1, repli: 0 }] })).toThrow(/aucun chemin ouvert/);
+  });
+
+  it('accepte un chemin qui se ferme puis un autre, tant qu’il en reste un ouvert au bout des replis', () => {
+    expect(
+      creer({
+        mobiles: [0, 1],
+        evenements: [
+          { vague: 1, type: 'fermer_chemin', chemin: 0, repli: 1 },
+          { vague: 2, type: 'ouvrir_chemin', chemin: 0 },
+          { vague: 2, delai: 8, type: 'fermer_chemin', chemin: 1, repli: 0 },
+        ],
+      }),
+    ).not.toThrow();
+  });
+
+  it('jamais d’ennemi sur un chemin fermé tant qu’un autre est ouvert, même si les replis sont incohérents', () => {
+    const etat = creerPartie(niveauDynamique(), CONFIG);
+    etat.dynamique.cheminsActifs = [false, true];
+    etat.dynamique.replis = [-1, -1];
+    expect(cheminEffectif(etat, 0)).toBe(1);
+    etat.dynamique.cheminsActifs = [false, false];
+    etat.dynamique.replis = [1, 0];
+    expect(cheminEffectif(etat, 0)).toBe(0);
+    etat.dynamique.cheminsActifs = [false, true];
+    etat.dynamique.replis = [1, 0];
+    expect(cheminEffectif(etat, 0)).toBe(1);
+  });
+});
+
+describe('annonce du chemin réellement pris', () => {
+  it('une charge sur un chemin fermé est annoncée sur son repli, et sort par le repli', () => {
+    const etat = partie({
+      mobiles: [1],
+      cheminsFermes: [{ chemin: 1, repli: 0 }],
+      evenements: [{ vague: 1, type: 'charge', chemin: 1, ennemi: 'paysan_affame', nombre: 1, intervalle: 0.5, facteurVitesse: 2, duree: 3 }],
+    });
+    const vus = suivre(etat, ANNONCE + 2);
+    expect(vus.find((v) => v.ev.type === 'annonce_evenement')?.ev).toMatchObject({ type: 'annonce_evenement', chemin: 0 });
+    expect(vus.find((v) => v.ev.type === 'evenement_niveau')?.ev).toMatchObject({ type: 'evenement_niveau', chemin: 0 });
+    expect(etat.ennemis.length).toBeGreaterThan(0);
+    expect(etat.ennemis.every((e) => e.chemin === 0)).toBe(true);
+  });
+
+  it('une nasse garde son chemin, et un chemin qui s’ouvre est annoncé sous son propre numéro', () => {
+    const etat = partie({
+      mobiles: [1],
+      cheminsFermes: [{ chemin: 1, repli: 0 }],
+      evenements: [{ vague: 1, type: 'ouvrir_chemin', chemin: 1 }, { vague: 1, delai: 5, type: 'nasse', chemin: 1, debut: 6, longueur: 2, duree: 3 }],
+    });
+    const chemins = suivre(etat, enPas(6)).flatMap((v) => (v.ev.type === 'annonce_evenement' ? [v.ev.chemin] : []));
+    expect(chemins).toEqual([1, 1]);
+  });
+});
+
+describe('défi Fer : tous les événements sont joués pendant la vague unique', () => {
+  /** Trois vagues d'un groupe de paysans étalé dans le temps, un événement par vague (le premier avec un délai propre). */
+  function niveauFer(): Niveau {
+    const vague = { paquets: [{ ennemi: 'paysan_affame', nombre: 3, intervalle: 10, chemin: 0, delai: 0 }] };
+    return {
+      ...niveauDynamique({
+        vagues: [vague, vague, vague],
+        evenements: [
+          { vague: 1, delai: 5, type: 'nasse', chemin: 0, debut: 6, longueur: 2, duree: 3 },
+          { vague: 2, type: 'canon_a_eau', cy: 2, recul: 1, etourdissement: 1 },
+          { vague: 3, type: 'renforts', x: 10, y: 5, nombre: 1, duree: 3, unite: 'etudiant' },
+        ],
+      }),
+      defiFer: { familles: ['tir', 'magie'] },
+    };
+  }
+  const CONFIG_FER = { ...CONFIG, defi: 'fer' as const };
+
+  it('passe tous les événements à la vague 1, répartis selon le rang de leur vague d’origine', () => {
+    const etat = creerPartie(niveauFer(), CONFIG_FER);
+    expect(etat.niveau.vagues).toHaveLength(1);
+    const evenements = etat.niveau.evenements ?? [];
+    expect(evenements.map((e) => e.vague)).toEqual([1, 1, 1]);
+    const delais = evenements.map((e) => e.delai ?? 0);
+    const duree = Math.max(...(etat.niveau.vagues[0]?.paquets ?? []).map((p) => p.delai + p.intervalle * (p.nombre - 1)));
+    expect(duree).toBeGreaterThan(5);
+    expect(delais[0]).toBeCloseTo(5, 5);
+    expect(delais[1]).toBeCloseTo(Math.round(((duree * 1) / 3 + EVENEMENTS_NIVEAU.annonce) * 10) / 10, 5);
+    expect(delais[2]).toBeCloseTo(Math.round(((duree * 2) / 3 + EVENEMENTS_NIVEAU.annonce) * 10) / 10, 5);
+    expect(delais[0]).toBeLessThan(delais[1] ?? 0);
+    expect(delais[1]).toBeLessThan(delais[2] ?? 0);
+    for (const d of delais) expect(d).toBeGreaterThanOrEqual(EVENEMENTS_NIVEAU.annonce);
+    // Le niveau d'origine n'est pas modifié, et sans défi Fer rien ne change.
+    expect(niveauFer().evenements?.map((e) => e.vague)).toEqual([1, 2, 3]);
+    expect(creerPartie(niveauFer(), CONFIG).niveau.evenements?.map((e) => e.vague)).toEqual([1, 2, 3]);
+  });
+
+  it('joue bien les trois événements, dans l’ordre des vagues, pendant la partie', () => {
+    const etat = creerPartie(niveauFer(), CONFIG_FER);
+    expect(appliquerAction(etat, { type: 'appelerVague' }).ok).toBe(true);
+    const ordre: number[] = [];
+    for (let i = 0; i < 30 * 120 && ordre.length < 3; i++) {
+      step(etat);
+      for (const ev of etat.evenements) if (ev.type === 'evenement_niveau') ordre.push(ev.index);
+    }
+    expect(ordre).toEqual([0, 1, 2]);
   });
 });

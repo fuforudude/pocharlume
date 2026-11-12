@@ -11,12 +11,12 @@ import { enPas } from '../temps';
 import { mettreAJourBarrages } from './barrages';
 import { verifierCanonAEau, declencherCanonAEau } from './canon-a-eau';
 import { declencherCharge, poursuivreCharge, verifierCharge } from './charge';
-import { fermerChemin, ouvrirChemin, verifierCheminsFermes, verifierFermerChemin, verifierOuvrirChemin } from './chemins-mobiles';
+import { cheminEffectif, fermerChemin, ouvrirChemin, verifierCheminsFermes, verifierFermerChemin, verifierOuvrirChemin, verifierReplis } from './chemins-mobiles';
 import { creerEtatFoules, mettreAJourFoules, verifierFoules } from './foules';
 import { declencherNasse, verifierNasse } from './nasse';
 import { declencherRenforts, verifierEvenementRenforts } from './renforts';
 
-export { caseInterditeEnPartie, cheminEffectif } from './chemins-mobiles';
+export { caseInterditeEnPartie, casesLibresEnPartie, cheminEffectif, cheminOuvertPour } from './chemins-mobiles';
 export { borneBarrage, pointDansBarrage } from './barrages';
 export { payerFoule, validerActivationFoule } from './foules';
 
@@ -38,6 +38,15 @@ export function cheminDeLEvenement(e: EvenementNiveau): number {
     default:
       return evenementInconnu(e);
   }
+}
+
+/**
+ * Le chemin que l'événement désigne dans le bandeau et les panneaux : celui où il agit vraiment. Une charge sur un chemin fermé sort sur
+ * son repli ; les autres types gardent leur chemin (une nasse coupe bien le chemin écrit, un `ouvrir_chemin` parle du chemin qui s'ouvre).
+ */
+function cheminAnnonce(etat: EtatPartie, e: EvenementNiveau): number {
+  const chemin = cheminDeLEvenement(e);
+  return e.type === 'charge' ? cheminEffectif(etat, chemin) : chemin;
 }
 
 /** Vérifie les événements, les chemins fermés et les foules du niveau à la création de la partie (lève une erreur au premier défaut). */
@@ -72,6 +81,7 @@ export function verifierDynamique(niveau: Niveau): void {
         evenementInconnu(e);
     }
   });
+  verifierReplis(niveau);
   verifierFoules(niveau);
 }
 
@@ -90,6 +100,21 @@ export function creerEtatDynamique(niveau: Niveau): EtatDynamique {
     barrages: [],
     foules: creerEtatFoules(niveau),
   };
+}
+
+/**
+ * Défi Fer : toutes les vagues n'en font qu'une, mais tous les événements du niveau sont joués. Chacun passe à la vague 1 et son délai
+ * est réparti sur la durée `dureeFer` (secondes) de la vague unique, proportionnellement au rang de sa vague d'origine : l'événement de
+ * la vague k sur N part à `dureeFer × (k − 1) / N`, plus son propre délai, arrondi au dixième de seconde et borné à `dureeFer` (jamais
+ * avant le délai minimal de l'annonce). Déterministe : une pure fonction des données du niveau.
+ */
+export function repartirEvenementsFer(evenements: readonly EvenementNiveau[], nombreVagues: number, dureeFer: number): EvenementNiveau[] {
+  const total = Math.max(1, nombreVagues);
+  return evenements.map((e) => {
+    const debut = (dureeFer * (e.vague - 1)) / total;
+    const delai = Math.round(Math.min(debut + (e.delai ?? EVENEMENTS_NIVEAU.annonce), Math.max(EVENEMENTS_NIVEAU.annonce, dureeFer)) * 10) / 10;
+    return { ...e, vague: 1, delai: Math.max(EVENEMENTS_NIVEAU.annonce, delai) };
+  });
 }
 
 /** Le niveau sans ses événements, chemins fermés ni foules (copie de surface) : le mode infini joue la carte sans eux. */
@@ -164,12 +189,12 @@ export function mettreAJourDynamique(etat: EtatPartie): void {
       }
       if (!suivi.annonce && etat.pas >= suivi.pas - annonce) {
         suivi.annonce = true;
-        etat.evenements.push({ type: 'annonce_evenement', index, typeEvenement: e.type, chemin: cheminDeLEvenement(e), dans: EVENEMENTS_NIVEAU.annonce });
+        etat.evenements.push({ type: 'annonce_evenement', index, typeEvenement: e.type, chemin: cheminAnnonce(etat, e), dans: EVENEMENTS_NIVEAU.annonce });
       }
       if (!suivi.declenche) {
         if (etat.pas < suivi.pas) return;
         suivi.declenche = true;
-        etat.evenements.push({ type: 'evenement_niveau', index, typeEvenement: e.type, chemin: cheminDeLEvenement(e) });
+        etat.evenements.push({ type: 'evenement_niveau', index, typeEvenement: e.type, chemin: cheminAnnonce(etat, e) });
         declencher(etat, suivi, e);
       }
       // Charge : ses premiers ennemis apparaissent dès le pas du déclenchement ; les autres types sont déjà finis.

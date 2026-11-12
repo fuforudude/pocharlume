@@ -6,7 +6,8 @@
 //   `APPROCHE_BLOCAGE` tuiles. Une foule rentable passe avant les achats de tours : elle sert pendant qu'elle a des cibles.
 // - Foule « héros » : le bot y envoie son héros quand elle est prête et qu'au moins `SEUIL_FOULE` ennemis au sol (ou un boss) arrivent
 //   à `APPROCHE_HEROS` tuiles du point où son effet porte : le temps que le héros y reste, ils seront là. Sinon, le héros garde son
-//   poste habituel.
+//   poste habituel. Une fois le héros envoyé, la foule reste sa cible tant qu'elle est prête (hystérésis) : un ennemi qui meurt en route ne
+//   le renvoie pas à son poste, la présence s'accumule jusqu'à l'activation.
 //
 // Les événements datés, eux, ne demandent rien aux bots : le moteur refuse sans rien changer ce qui n'est plus possible (case devenue
 // chemin, passage coupé), et les bots passent au choix suivant.
@@ -97,23 +98,24 @@ export function activationRentable(etat: EtatPartie): Action | null {
 
 /**
  * Un point d'une foule « héros » prête où envoyer le héros (règle en tête du fichier), ou null. Le point est sur une case de la foule et
- * accepté par le moteur (`deplacerHeros`).
+ * accepté par le moteur (`deplacerHeros`). `visee` : l'indice de la foule où le héros a déjà été envoyé (-1 s'il n'y en a pas) : elle
+ * n'a plus besoin d'ennemis à l'approche tant qu'elle est prête. Le résultat dit de quelle foule il s'agit (`foule`).
  */
-export function posteDansFoule(etat: EtatPartie): Point | null {
+export function posteDansFoule(etat: EtatPartie, visee = -1): (Point & { readonly foule: number }) | null {
   const foules = etat.niveau.foules ?? [];
   for (let i = 0; i < foules.length; i++) {
     const foule = foules[i];
     const suivi = etat.dynamique.foules[i];
     if (foule?.condition.type !== 'heros' || !suivi || !foulePrete(suivi)) continue;
     const point = pointDeLEffet(etat, foule, foule.effet);
-    if (!assez(etat.ennemis.filter((e) => auSol(e) && proche(e, point, APPROCHE_HEROS)))) continue;
+    if (i !== visee && !assez(etat.ennemis.filter((e) => auSol(e) && proche(e, point, APPROCHE_HEROS)))) continue;
     const t = REGLES.tailleCase;
     for (const c of foule.cases) {
       for (let j = 0; j < 5; j++) {
         for (let k = 0; k < 5; k++) {
           const x = c.cx * t + (t * (k + 0.5)) / 5;
           const y = c.cy * t + (t * (j + 0.5)) / 5;
-          if (validerAction(etat, { type: 'deplacerHeros', x, y }) === null) return { x, y };
+          if (validerAction(etat, { type: 'deplacerHeros', x, y }) === null) return { x, y, foule: i };
         }
       }
     }

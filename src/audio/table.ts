@@ -256,7 +256,6 @@ export const SON_DES_EVENEMENTS: TableEvenements = {
   balayage: lecture('onde_choc', 0.8, 0.7, 'balayage', 1),
   chemin_ouvert: lecture('onde_choc', 0.7, 0.9, 'chemin', 1),
   chemin_ferme: lecture('onde_choc', 0.7, 0.9, 'chemin', 1),
-  vente_office: 'vente',
   foule_activee: lecture('sort', 0.8, 1.2, 'foule', 1),
   foule_prete: null,
   // DLC « Temps modernes » : sons existants réglés par événement, en attendant des fichiers dédiés.

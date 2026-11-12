@@ -2,6 +2,7 @@
 // et le geste à jouer quand on la touche. Pur : lit l'état, ne le change jamais (la commande passe par la file d'actions de la partie).
 import { foulePrete, pointDansFoule, validerAction, type Action, type EtatPartie, type Evenement, type RaisonRefus } from '../engine';
 import { t } from '../i18n';
+import { cibleTouchee } from './interaction';
 import { texteRefus } from './refus';
 
 /** Le texte du bandeau pour un événement du moteur, ou null s'il n'y a rien à annoncer. */
@@ -24,8 +25,6 @@ export function texteBandeau(etat: EtatPartie, ev: Evenement): string | null {
         default:
           return null;
       }
-    case 'vente_office':
-      return t('evenement.vente_office', { n: ev.aretes });
     case 'foule_activee': {
       const effet = etat.niveau.foules?.[ev.foule]?.effet.type;
       if (effet === 'ralentir') return t('foule.activee.ralentir');
@@ -38,6 +37,11 @@ export function texteBandeau(etat: EtatPartie, ev: Evenement): string | null {
   }
 }
 
+/** Les paroles d'un même pas réunies en un seul texte pour le bandeau (null s'il n'y en a pas). */
+export function reunirParoles(textes: readonly string[]): string | null {
+  return textes.length === 0 ? null : textes.join(' ');
+}
+
 /** L'indice de la foule sous le point (tuiles), -1 s'il n'y en a pas. */
 export function fouleSous(etat: EtatPartie, x: number, y: number): number {
   const foules = etat.niveau.foules ?? [];
@@ -46,6 +50,14 @@ export function fouleSous(etat: EtatPartie, x: number, y: number): number {
     if (foule && pointDansFoule(etat.niveau, foule, x, y)) return i;
   }
   return -1;
+}
+
+/**
+ * La foule que le toucher en (x, y) (tuiles, `rayon` de doigt) vise, -1 s'il n'en vise aucune. Le héros posté dans la foule passe avant elle :
+ * le toucher le sélectionne (l'activation d'une foule « payer » dépenserait des arêtes sans que le joueur l'ait voulu).
+ */
+export function fouleVisee(etat: EtatPartie, x: number, y: number, rayon: number): number {
+  return cibleTouchee(etat, x, y, rayon)?.type === 'heros' ? -1 : fouleSous(etat, x, y);
 }
 
 /** Ce que fait un toucher sur une foule : l'action à envoyer (foule « payer » prête et payable), sinon le message qui explique. */

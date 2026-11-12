@@ -1017,10 +1017,14 @@ Spec : [campagne du DLC](specs/2026-11-12-dlc-temps-modernes-campagne.md), déci
   ennemis.ts) ; celui qui l'a passée continue ; un volant passe ; personne ne recule. `deplacerHeros` et `deplacerRalliement` vers la portion
   coupée sont refusés (`zone_bloquee`).
 - **Carte qui bouge** : `etat.dynamique.cheminsActifs` et `replis`. Un groupe prévu sur un chemin fermé prend son repli (`cheminEffectif`,
-  vagues.ts) ; ceux qui y marchent vont au bout. Les cases d'un chemin **mobile** ouvert (et celles des foules) sont interdites
-  (`caseInterditeEnPartie`, utilisé par `validerAction` et l'interface) ; contrat des données : les cases propres aux chemins mobiles ne sont
-  pas dans `casesInterdites`. À l'ouverture, une tour posée sur une de ses cases est vendue d'office au prix total (`vente_office`).
-  Briques pour le Pont-Levis (paires `fermer_chemin` / `ouvrir_chemin`) et la Crue (`casesDuChemin`, vente d'office).
+  vagues.ts) ; ceux qui y marchent vont au bout. Les cases d'un chemin **mobile**, ouvert ou fermé, et celles des foules sont TOUJOURS
+  interdites à la construction (`caseInterditeEnPartie`, utilisé par `validerAction`, l'interface et les bots) ; contrat des données : les
+  cases propres aux chemins mobiles ne sont pas dans `casesInterdites`, le moteur les ajoute. Aucune tour ne se trouve donc sur un chemin qui
+  s'ouvre : pas de vente d'office. `verifierReplis` refuse à la création un niveau dont les replis bouclent ou dont tous les chemins se
+  ferment ; à l'exécution, un groupe ne prend jamais un chemin fermé tant qu'un autre est ouvert. Brique pour le Pont-Levis (paires
+  `fermer_chemin` / `ouvrir_chemin`) et la Crue (`casesDuChemin`).
+- **Défi Fer** : la vague unique joue tous les événements du niveau, répartis sur sa durée selon le rang de leur vague d'origine
+  (`repartirEvenementsFer`).
 - **Foules** : commande `activerFoule { foule }` (refus `foule_inconnue`, `foule_sans_paiement`, `foule_epuisee`, `foule_en_recharge`,
   `aretes_insuffisantes`) ; condition `heros` : le héros vivant reste `duree` s sur une case de la foule. État : `etat.dynamique.foules`
   (`recharge`, `utilisations`, `presence`).

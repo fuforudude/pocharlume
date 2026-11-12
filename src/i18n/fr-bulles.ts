@@ -133,7 +133,7 @@ export const frBulles = {
   'bulle.ennemi.affamer': 'Affame les tours proches : cadence −{n} % pendant {d} s.',
   'bulle.ennemi.desactiver_tour': 'Met le feu à la tour la plus proche : elle ne tire plus pendant {d} s.',
   'bulle.ennemi.invoquer': 'Appelle des renforts : {n} × {nom}.',
-  'bulle.ennemi.plonger': 'Plonge, intouchable {d} s, et ressort plus loin.',
+  'bulle.ennemi.plonger': 'Plonge, intouchable {d} s, et ressort plus loin, par-dessus les nasses.',
   'bulle.ennemi.figer_tour': 'Gèle {n}, les plus proches : elles ne tirent plus pendant {d} s.',
   'bulle.ennemi.aveugler': 'Aveugle les tours proches : portée −{n} % pendant {d} s.',
   'bulle.ennemi.bannir': 'Bannit une invocation proche, ou étourdit le héros {d} s.',

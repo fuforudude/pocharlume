@@ -3,7 +3,7 @@
 //
 // Un « trajet » est un chemin ou un couloir : les chemins gardent leurs indices (0 à N − 1), le couloir k prend l'indice N + k. Un
 // ennemi apparu dans un couloir n'est donc jamais compté sur le chemin 0. Sans couloir, rien ne change.
-import { creerPartie, genererVagueInfinie, pointSurChemin } from '../engine';
+import { cheminOuvertPour, creerPartie, genererVagueInfinie, pointSurChemin } from '../engine';
 import type { DefEnnemi, EtatPartie, Niveau, Paquet, Point } from '../engine';
 import { ENNEMIS } from '../data/ennemis';
 import { menaceEnnemi } from '../data/equilibrage';
@@ -53,16 +53,50 @@ export function menacePaquet(p: Paquet): number {
   return def ? p.nombre * menaceEnnemi(def) * (p.facteurPv ?? 1) : 0;
 }
 
-/** Part de la menace du niveau qui emprunte chaque trajet, chemins puis couloirs (somme égale à 1). */
+/**
+ * Le chemin que prend chaque groupe de chaque vague, une fois les replis des chemins fermés appliqués. Les chemins ouverts sont ceux du
+ * début de la vague : fermés au départ, puis changés par les événements `ouvrir_chemin` / `fermer_chemin` des vagues précédentes (ceux
+ * de la vague elle-même agissent après le départ de ses groupes). Sans chemin mobile, le chemin prévu.
+ */
+export function trajetsEffectifs(niveau: Niveau): number[][] {
+  const actifs = niveau.carte.chemins.map(() => true);
+  const replis = niveau.carte.chemins.map(() => -1);
+  for (const f of niveau.cheminsFermes ?? []) {
+    actifs[f.chemin] = false;
+    replis[f.chemin] = f.repli;
+  }
+  const mobiles = (niveau.evenements ?? []).filter((e) => e.type === 'ouvrir_chemin' || e.type === 'fermer_chemin');
+  return niveau.vagues.map((vague, index) => {
+    // Les événements des vagues déjà lancées (vague <= index) ont eu lieu, dans l'ordre des données.
+    actifs.fill(true);
+    replis.fill(-1);
+    for (const f of niveau.cheminsFermes ?? []) {
+      actifs[f.chemin] = false;
+      replis[f.chemin] = f.repli;
+    }
+    for (const e of mobiles) {
+      if (e.vague > index) continue;
+      if (e.type === 'ouvrir_chemin') actifs[e.chemin] = true;
+      else {
+        actifs[e.chemin] = false;
+        replis[e.chemin] = e.repli;
+      }
+    }
+    return vague.paquets.map((p) => (p.couloir !== undefined ? trajetDuPaquet(niveau, p) : cheminOuvertPour(actifs, replis, p.chemin)));
+  });
+}
+
+/** Part de la menace du niveau qui emprunte chaque trajet, chemins puis couloirs (somme égale à 1). Chemins fermés : leur repli. */
 export function poidsDesChemins(niveau: Niveau): number[] {
   const menaces = Array.from({ length: niveau.carte.chemins.length + nombreCouloirs(niveau) }, () => 0);
-  for (const vague of niveau.vagues) {
-    for (const p of vague.paquets) {
+  const trajets = trajetsEffectifs(niveau);
+  niveau.vagues.forEach((vague, v) => {
+    vague.paquets.forEach((p, k) => {
       const def = table[p.ennemi];
-      const t = trajetDuPaquet(niveau, p);
+      const t = trajets[v]?.[k] ?? trajetDuPaquet(niveau, p);
       if (def) menaces[t] = (menaces[t] ?? 0) + p.nombre * menaceEnnemi(def) * (p.facteurPv ?? 1);
-    }
-  }
+    });
+  });
   const total = menaces.reduce((a, b) => a + b, 0);
   return menaces.map((m) => (total > 0 ? m / total : 1 / menaces.length));
 }

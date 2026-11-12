@@ -28,7 +28,7 @@
 //   tours qui ne posent rien au sol (tir, magie, artillerie, tour divine de Charlie) et les estime par la couverture moyenne de leur
 //   place sur le trajet du radeau (`POSITIONS_RADEAU` positions réparties sur un aller, chacune pour sa part du temps : l'aller-retour
 //   repasse aux mêmes endroits). La zone de feu d'une tour du radeau (héros, sorts) suit la même couverture moyenne.
-import { PAS_PAR_SECONDE, ajusterMontant, casesLibres, centreCase, gimmickRadeau, niveauDeblocage, positionPlace, ralliementParDefaut, tourSurCase, tourSurPlace, validerAction } from '../engine';
+import { PAS_PAR_SECONDE, ajusterMontant, caseInterditeEnPartie, casesLibresEnPartie, centreCase, gimmickRadeau, niveauDeblocage, positionPlace, ralliementParDefaut, tourSurCase, tourSurPlace, validerAction } from '../engine';
 import type { Action, BonusFamille, CaseGrille, DefDieu, DefEnnemi, DefHeros, DefNiveauTour, DefSort, Ennemi, EtatPartie, GimmickRadeau, IdFamille, LieuTour, Niveau, Point, Tour, Voie } from '../engine';
 import { DIEUX } from '../data/dieux';
 import { DIFFICULTE_DES_DEFIS, DIFFICULTES } from '../data/difficultes';
@@ -374,8 +374,8 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
   function classer(etat: EtatPartie, def: Pick<DefNiveauTour, 'portee' | 'soldats' | 'volants'>): CaseGrille[] {
     const vide = { niveau: etat.niveau, tours: [] };
     const avecSoldats = def.soldats !== null;
-    return casesLibres(vide)
-      .filter((c) => !avecSoldats || ralliementParDefaut(etat.chemins, c.cx, c.cy, def.portee) !== null)
+    return casesLibresEnPartie(vide)
+      .filter((c) => !avecSoldats || ralliementParDefaut(etat.chemins, c.cx, c.cy, def.portee, etat.dynamique.cheminsActifs) !== null)
       .map((c) => ({ c, v: vue(c.cx, c.cy, def.portee, def.volants) }))
       .filter((m) => m.v > 0)
       .sort((a, b) => b.v - a.v)
@@ -400,7 +400,8 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
   function meilleuresCasesLibres(etat: EtatPartie, famille: IdFamille | 'divine', combien: number): CaseGrille[] {
     const libres: CaseGrille[] = [];
     for (const c of classements(etat)[famille]) {
-      if (tourSurCase(etat, c.cx, c.cy)) continue;
+      // Filtré au moment du choix, pas dans le classement mis en cache : une case de foule ou de chemin mobile n'est jamais proposée.
+      if (tourSurCase(etat, c.cx, c.cy) || caseInterditeEnPartie(etat, c.cx, c.cy)) continue;
       libres.push(c);
       if (libres.length >= combien) break;
     }
@@ -503,7 +504,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     let utilite_ = utiliteAjoutee(lieu, def.portee, libre, arrete, def.volants ? pleine : 0);
     // Des soldats qui arrêtent les ennemis valent aussi ce qu'ils apportent à la zone posée (ou à celle qu'on prépare).
     if (def.soldats && def.soldats.nombre > 0 && lieu.place === undefined) {
-      const rallie = ralliementParDefaut(etat.chemins, lieu.cx, lieu.cy, def.portee);
+      const rallie = ralliementParDefaut(etat.chemins, lieu.cx, lieu.cy, def.portee, etat.dynamique.cheminsActifs);
       if (rallie) utilite_ += utiliteBlocage(rallie, (variante.blocage ?? 0) * zoneAttendue(etat));
     }
     return (utilite_ * variante.poids[famille]) / (1 + (variante.diversite ?? 0) * memeFamille);
@@ -658,7 +659,7 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
       };
       for (const famille of FAMILLES.filter((f) => famillePermise(etat, f, options.familles) && TOURS[f].niveaux[0].volants)) {
         const def = TOURS[famille].niveaux[0];
-        const lieux: LieuTour[] = [...casesLibres(etat).map((c) => ({ cx: c.cx, cy: c.cy })), ...(poseAuSol(def) ? [] : placesLibres(etat))];
+        const lieux: LieuTour[] = [...casesLibresEnPartie(etat).map((c) => ({ cx: c.cx, cy: c.cy })), ...(poseAuSol(def) ? [] : placesLibres(etat))];
         const puissance = dpsAuVolant(etat, def, groupe, famille);
         for (const lieu of lieux) proposer({ type: 'construire', tour: famille, ...lieu }, degatsAuVolant(lieu, def.portee, puissance, groupe) / cout(etat, def, famille));
       }
@@ -803,6 +804,9 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     }
     return meilleur;
   }
+
+  /** La foule « héros » où le héros est envoyé (-1 : aucune) : elle reste sa cible tant qu'elle est prête (bot-foules.ts). */
+  let fouleVisee = -1;
 
   /** Le héros va activer une foule « héros » (bot-foules.ts) ; null s'il y est déjà envoyé. */
   function ordreVersFoule(poste: Point): Action | null {
@@ -972,7 +976,8 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
       if (achat) actions.push(achat);
       if (utiliserSorts) {
         // Une foule « héros » utile l'emporte sur le poste habituel, tant qu'elle n'est pas activée.
-        const poste = posteDansFoule(etat);
+        const poste = posteDansFoule(etat, fouleVisee);
+        fouleVisee = poste ? poste.foule : -1;
         const ordre = etat.tours.length > 0 ? (poste ? ordreVersFoule(poste) : ordreHeros(etat)) : null;
         if (ordre) actions.push(ordre);
         actions.push(...lancerSorts(etat));

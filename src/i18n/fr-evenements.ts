@@ -7,7 +7,6 @@ export const frEvenements = {
   'evenement.renforts.annonce': 'Renforts étudiants !',
   'evenement.ouvrir_chemin.annonce': 'La barricade cède : le chemin {n} s’ouvre !',
   'evenement.fermer_chemin.annonce': 'Le chemin {n} se ferme !',
-  'evenement.vente_office': 'Tour emportée par le cortège : {n} arêtes rendues.',
 
   // Foules activables.
   'foule.activee.ralentir': 'La foule ralentit les ennemis !',

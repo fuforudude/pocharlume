@@ -19,7 +19,7 @@ import { mettreAJourSorts, rechargeSort } from './sorts';
 import { mettreAJourPieges, mettreAJourStructures, mettreAJourZones } from './structures';
 import { calculerCouloirs, verifierPaquetEnCouloir } from './gimmicks/corbeaux';
 import { mettreAJourGimmick, verifierGimmick } from './gimmicks';
-import { chargesEnAttente, creerEtatDynamique, mettreAJourDynamique, sansDynamique, verifierDynamique } from './evenements-niveau';
+import { chargesEnAttente, creerEtatDynamique, mettreAJourDynamique, repartirEvenementsFer, sansDynamique, verifierDynamique } from './evenements-niveau';
 import { enPas, PAS_PAR_SECONDE } from './temps';
 import { mettreAJourProjectiles, mettreAJourTours } from './tours';
 import { creerUnite, estRetiree, mettreAJourUnites } from './unites';
@@ -89,6 +89,21 @@ function vaguesDuDefi(vagues: readonly Vague[], defi: DefiPartie | null, fer?: D
   return vagues;
 }
 
+/** Durée (secondes) de la vague : l'apparition du dernier ennemi de son groupe le plus long. */
+function dureeDeLaVague(vague: Vague): number {
+  return vague.paquets.reduce((duree, p) => Math.max(duree, p.delai + p.intervalle * Math.max(0, p.nombre - 1)), 0);
+}
+
+/**
+ * Défi Fer : les vagues n'en font qu'une, donc les événements du niveau, qui s'accrochent à une vague, sont tous joués pendant elle, répartis
+ * sur sa durée (voir `repartirEvenementsFer`). Sans défi Fer, le niveau tel quel.
+ */
+function evenementsDuDefi(niveau: Niveau, vaguesDOrigine: number, defi: DefiPartie | null): Niveau {
+  const premiere = niveau.vagues[0];
+  if (defi !== 'fer' || !niveau.evenements || !premiere) return niveau;
+  return { ...niveau, evenements: repartirEvenementsFer(niveau.evenements, vaguesDOrigine, dureeDeLaVague(premiere)) };
+}
+
 /**
  * Les `nombre` dernières vagues avec leurs groupes (boss exceptés) en élite : la difficulté Vieux Sage les joue ainsi.
  * Les défis se jouent avec les règles de Matou, qui n'en demande aucune.
@@ -127,7 +142,11 @@ export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
   // d'après l'histoire s'y jouent sans leur gimmick (spec de l'après-histoire) : on retire celui du niveau de campagne qui les porte.
   const copie: Niveau = infini
     ? { ...sansDynamique(sansGimmick(copieBrute)), vagues: [] }
-    : { ...copieBrute, vagues: vaguesAvecElites(vaguesDuDefi(copieBrute.vagues, defi, niveau.defiFer), niveau.sansElites === true ? 0 : difficulte.vaguesElites) };
+    : evenementsDuDefi(
+        { ...copieBrute, vagues: vaguesAvecElites(vaguesDuDefi(copieBrute.vagues, defi, niveau.defiFer), niveau.sansElites === true ? 0 : difficulte.vaguesElites) },
+        copieBrute.vagues.length,
+        defi,
+      );
   const vies = defi === 'heroique' ? REGLES.heroique.vies : difficulte.vies;
   const etat: EtatPartie = {
     version: VERSION_ETAT,

@@ -3,6 +3,7 @@ import { CONFIG } from '../aides.test-utils';
 import type { Action } from '../actions';
 import type { Niveau } from '../definitions';
 import type { EtatPartie } from '../etat';
+import type { Evenement } from '../evenements';
 import { avancer, creerPartie, deserialiser, rejouer, serialiser } from '../partie';
 import { niveauDynamique } from './niveaux-essai.test-utils';
 
@@ -43,8 +44,13 @@ const GESTES: Readonly<Record<number, readonly Action[]>> = {
   900: [{ type: 'activerFoule', foule: 0 }, { type: 'construire', tour: 'artillerie', cx: 9, cy: 3 }],
 };
 
-function jouerJusqua(etat: EtatPartie, pasFinal: number): void {
-  while (etat.statut === 'en_cours' && etat.pas < pasFinal) avancer(etat, GESTES[etat.pas] ?? []);
+function jouerJusqua(etat: EtatPartie, pasFinal: number): Evenement[] {
+  const vus: Evenement[] = [];
+  while (etat.statut === 'en_cours' && etat.pas < pasFinal) {
+    avancer(etat, GESTES[etat.pas] ?? []);
+    vus.push(...etat.evenements);
+  }
+  return vus;
 }
 
 describe('rejeu et reprise avec événements et foules', () => {
@@ -56,6 +62,8 @@ describe('rejeu et reprise avec événements et foules', () => {
     expect(etat.journal.some((e) => e.action.type === 'activerFoule')).toBe(true);
     expect(etat.dynamique.cheminsActifs).toEqual([true, true]);
     expect(etat.dynamique.evenements.filter((e) => e.declenche).length).toBeGreaterThanOrEqual(4);
+    // La foule « héros » (indice 1) s'est activée : le héros posté dedans y est resté assez longtemps (une utilisation sur 2 de dépensée).
+    expect(etat.dynamique.foules[1]?.utilisations).toBeLessThan(2);
     const rejoue = rejouer(niveau, CONFIG, etat.journal, etat.pas);
     expect(serialiser(rejoue)).toBe(serialiser(etat));
   });
@@ -66,10 +74,31 @@ describe('rejeu et reprise avec événements et foules', () => {
     const coupee = creerPartie(niveau, CONFIG);
     jouerJusqua(continue_, 230);
     jouerJusqua(coupee, 230);
-    expect(coupee.dynamique.barrages.length + coupee.dynamique.foules.filter((f) => f.recharge > 0).length).toBeGreaterThan(0);
+    expect(coupee.dynamique.barrages.length).toBeGreaterThan(0);
+    expect(coupee.dynamique.foules.filter((f) => f.recharge > 0).length).toBeGreaterThan(0);
     const reprise = deserialiser(serialiser(coupee));
     jouerJusqua(continue_, 1500);
     jouerJusqua(reprise, 1500);
+    expect(serialiser(reprise)).toBe(serialiser(continue_));
+  });
+
+  it('reprendre une sauvegarde au milieu d’une annonce ne rejoue pas l’annonce et ne manque pas le déclenchement', () => {
+    const niveau = niveauComplet();
+    const continue_ = creerPartie(niveau, CONFIG);
+    const coupee = creerPartie(niveau, CONFIG);
+    jouerJusqua(continue_, 70);
+    jouerJusqua(coupee, 70);
+    // La charge de la vague 1 (indice 0) est annoncée mais pas encore déclenchée.
+    const suivi = coupee.dynamique.evenements[0];
+    expect(suivi?.annonce).toBe(true);
+    expect(suivi?.declenche).toBe(false);
+    const reprise = deserialiser(serialiser(coupee));
+    const vusContinue = jouerJusqua(continue_, 400);
+    const vusReprise = jouerJusqua(reprise, 400);
+    const deLEvenement = (vus: readonly Evenement[], type: string): Evenement[] => vus.filter((e) => 'index' in e && e.index === 0 && e.type === type);
+    expect(deLEvenement(vusReprise, 'annonce_evenement')).toHaveLength(0);
+    expect(deLEvenement(vusReprise, 'evenement_niveau')).toHaveLength(1);
+    expect(vusReprise).toEqual(vusContinue);
     expect(serialiser(reprise)).toBe(serialiser(continue_));
   });
 });

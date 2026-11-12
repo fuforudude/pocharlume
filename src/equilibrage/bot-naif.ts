@@ -3,7 +3,7 @@
 // surtout un couloir), améliore ce qu'il peut quand il a des arêtes, choisit ses
 // spécialisations au hasard, et n'utilise ni les sorts ni le héros. Tous ses choix viennent d'un générateur à
 // graine : même graine, même partie.
-import { casesLibres, centreCase, creerGenerateur, niveauDeblocage, tirer, tourSurCase, validerAction } from '../engine';
+import { casesLibresEnPartie, centreCase, creerGenerateur, niveauDeblocage, tirer, tourSurCase, validerAction } from '../engine';
 import type { Action, CaseGrille, EtatPartie, Generateur, IdFamille, Tour, Voie } from '../engine';
 import { ENNEMIS } from '../data/ennemis';
 import { FAMILLES, TOURS } from '../data/tours';
@@ -33,12 +33,12 @@ interface CaseVue extends CaseGrille {
 }
 
 /**
- * Toutes les cases constructibles du niveau, les mieux placées d'abord : un débutant construit là où le chemin (ou un couloir du Vol de
+ * Toutes les cases constructibles du niveau (ni décor, ni foule, ni chemin mobile), les mieux placées d'abord : un débutant construit là où le chemin (ou un couloir du Vol de
  * Corbeaux) passe le plus près et le plus longtemps (virages, boucles), à vue d'œil, donc avec un bruit. Il ne connaît pas les vagues :
  * aucun chemin n'est pesé.
  */
 function ordreDesCases(etat: EtatPartie, g: Generateur, echantillons: readonly Echantillon[]): CaseVue[] {
-  const notes = casesLibres({ niveau: etat.niveau, tours: [] }).map((c) => {
+  const notes = casesLibresEnPartie({ niveau: etat.niveau, tours: [] }).map((c) => {
     const centre = centreCase(c.cx, c.cy);
     let vue = 0;
     let vueCouloir = 0;

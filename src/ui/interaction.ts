@@ -5,7 +5,7 @@ import { DIEUX } from '../data/dieux';
 import { OBJETS } from '../data/objets';
 import type { Action, EtatPartie, LieuTour, RaisonRefus } from '../engine';
 import type { CaseGrille, GimmickRadeau } from '../engine/definitions';
-import { casesDuTrajet, caseSousPoint, centreCase, estCaseDeChemin, estCaseInterdite, gimmickRadeau, positionPlace, tourDuLieu, tourSurCase, validerAction } from '../engine';
+import { casesDuTrajet, caseInterditeEnPartie, caseSousPoint, centreCase, estCaseDeChemin, gimmickRadeau, positionPlace, tourDuLieu, tourSurCase, validerAction } from '../engine';
 import type { FamilleTour } from '../engine/etat';
 import { chercherParId } from '../engine/recherche';
 import { tCle } from '../i18n';
@@ -175,7 +175,7 @@ export class Interaction {
     // Une case du chemin n'offre aucune pose : le toucher referme seulement le menu ouvert (le héros s'y envoie par son mode).
     if (estCaseDeChemin(etat.niveau.carte, cible.cx, cible.cy)) return this.annuler();
     // Une case interdite (décor) sans tour ne s'ouvre pas : le joueur sait pourquoi.
-    if (estCaseInterdite(etat.niveau, cible.cx, cible.cy) && !tourSurCase(etat, cible.cx, cible.cy)) return { action: null, refus: 'case_interdite' };
+    if (caseInterditeEnPartie(etat, cible.cx, cible.cy) && !tourSurCase(etat, cible.cx, cible.cy)) return { action: null, refus: 'case_interdite' };
     this.mode = mode.type === 'menu' && mode.place === undefined && mode.cx === cible.cx && mode.cy === cible.cy ? LIBRE : { type: 'menu', cx: cible.cx, cy: cible.cy };
     return RIEN;
   }
@@ -335,7 +335,7 @@ export class Interaction {
       surb.viseeCx = visee.cx;
       surb.viseeCy = visee.cy;
       // Rouge : un grand décor (le chemin, lui, ne s'éclaire pas). Une case qui porte une tour s'ouvre (améliorer, vendre) : elle reste claire.
-      surb.viseeInterdite = estCaseInterdite(etat.niveau, visee.cx, visee.cy) && !tourSurCase(etat, visee.cx, visee.cy);
+      surb.viseeInterdite = caseInterditeEnPartie(etat, visee.cx, visee.cy) && !tourSurCase(etat, visee.cx, visee.cy);
     }
     // La portée d'une tour qu'on s'apprête à construire se mesure depuis la case (ou la place) du menu, qui l'accueillerait.
     const apercu = lieu && !tourDuLieu(etat, lieu) ? this.apercu : null;

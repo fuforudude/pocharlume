@@ -9,7 +9,7 @@
 // Rien dans le calque ne capte le toucher : la bulle d'une pastille s'ouvre depuis le canvas (`puceSous`, branché sur
 // `BulleSurCarte` par la partie), si bien qu'un toucher court atteint toujours la case dessous.
 import { ENNEMIS } from '../data/ennemis';
-import { genererVagueInfinie } from '../engine';
+import { cheminEffectif, genererVagueInfinie } from '../engine';
 import type { EtatPartie, Evenement, Vague } from '../engine';
 import { t, tCle } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
@@ -84,13 +84,14 @@ function ajouterGroupe(groupes: GroupeEntree[], type: string, nombre: number): v
 /**
  * La composition d'une vague par chemin : pour chaque indice de chemin, les types d'ennemis qui y sortent et leur
  * nombre, dans l'ordre d'apparition. Les élites comptent avec leur type. Un groupe d'un couloir (Vol de Corbeaux) ne
- * suit aucun chemin : il n'est pas compté ici (voir `compositionParCouloir`).
+ * suit aucun chemin : il n'est pas compté ici (voir `compositionParCouloir`). `effectif` : le chemin que le groupe prend vraiment
+ * (chemin fermé : son repli) ; par défaut, le chemin prévu.
  */
-export function compositionParChemin(vague: Vague, chemins: number): GroupeEntree[][] {
+export function compositionParChemin(vague: Vague, chemins: number, effectif: (chemin: number) => number = (c) => c): GroupeEntree[][] {
   const resultat: GroupeEntree[][] = Array.from({ length: chemins }, () => []);
   for (const paquet of vague.paquets) {
     if (paquet.couloir !== undefined) continue;
-    const groupes = resultat[paquet.chemin];
+    const groupes = resultat[effectif(paquet.chemin)];
     if (groupes) ajouterGroupe(groupes, paquet.ennemi, paquet.nombre);
   }
   return resultat;
@@ -108,9 +109,9 @@ export function compositionParCouloir(vague: Vague, couloirs: number): GroupeEnt
 }
 
 /** Les chemins qu'une vague emprunte (ses groupes de couloir n'en suivent aucun). */
-export function cheminsDeLaVague(vague: Vague | null): number[] {
+export function cheminsDeLaVague(vague: Vague | null, effectif: (chemin: number) => number = (c) => c): number[] {
   const chemins = new Set<number>();
-  for (const paquet of vague?.paquets ?? []) if (paquet.couloir === undefined) chemins.add(paquet.chemin);
+  for (const paquet of vague?.paquets ?? []) if (paquet.couloir === undefined) chemins.add(effectif(paquet.chemin));
   return [...chemins];
 }
 
@@ -257,7 +258,7 @@ export class Indications {
   private readonly couloirDe = new Map<number, number>();
   private readonly reduit: () => boolean;
   private readonly maintenant: () => number;
-  private compositionIndex = -2;
+  private compositionCle = '';
   private composition: GroupeEntree[][] = [];
   private compositionCouloirs: GroupeEntree[][] = [];
   private tailleCanvas = '';
@@ -335,7 +336,7 @@ export class Indications {
 
     // Une partie reprise ne rejoue pas l'annonce des chemins déjà servis ; une nouvelle partie annonce ceux de la 1re vague.
     if (etat.vagues.lancees > 0) etat.chemins.forEach((_, i) => this.servis.add(i));
-    else for (const chemin of cheminsDeLaVague(prochaineVague(etat))) this.servis.add(chemin);
+    else for (const chemin of cheminsDeLaVague(prochaineVague(etat), (c) => cheminEffectif(etat, c))) this.servis.add(chemin);
     this.lancerTrainees(etat.chemins.map((_, i) => i), temps);
     signal.addEventListener('abort', () => { this.detruire(); }, { once: true });
   }
@@ -371,7 +372,7 @@ export class Indications {
   evenement(etat: EtatPartie, evenement: Evenement, temps: number): void {
     if (evenement.type === 'vague') {
       // Lue dans sa définition : un paquet d'un seul ennemi sans délai est déjà sorti de `etat.vagues.paquets` à ce pas.
-      const neufs = cheminsDeLaVague(vagueDefinie(etat, evenement.index)).filter((chemin) => !this.servis.has(chemin));
+      const neufs = cheminsDeLaVague(vagueDefinie(etat, evenement.index), (c) => cheminEffectif(etat, c)).filter((chemin) => !this.servis.has(chemin));
       for (const chemin of neufs) this.servis.add(chemin);
       this.lancerTrainees(neufs, temps);
     } else if (evenement.type === 'fuite') {
@@ -427,12 +428,13 @@ export class Indications {
   }
 
   private compositionCourante(etat: EtatPartie): void {
-    const index = etat.vagues.lancees;
-    if (index === this.compositionIndex) return;
+    // La composition suit aussi les chemins ouverts : un chemin qui s'ouvre ou se ferme change où les groupes sortent.
+    const cle = `${String(etat.vagues.lancees)}:${etat.dynamique.cheminsActifs.map((a) => (a ? 1 : 0)).join('')}`;
+    if (cle === this.compositionCle) return;
     const vague = prochaineVague(etat);
-    this.composition = vague ? compositionParChemin(vague, etat.chemins.length) : [];
+    this.composition = vague ? compositionParChemin(vague, etat.chemins.length, (c) => cheminEffectif(etat, c)) : [];
     this.compositionCouloirs = vague ? compositionParCouloir(vague, etat.couloirs.length) : [];
-    this.compositionIndex = index;
+    this.compositionCle = cle;
   }
 
   /** Les groupes annoncés à une entrée (les chemins qui partent du même point sont réunis). */

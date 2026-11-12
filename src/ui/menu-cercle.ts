@@ -73,7 +73,7 @@ export function elementsCaseVide(etat: EtatPartie, lieu: LieuTour): ElementMenu[
       rang: null,
       refus,
       // Sur le radeau, aucune tour à soldats n'est permise : pas de ralliement à montrer.
-      apercu: def ? { portee: statsTour(etat, famille, def).portee, ralliement: def.soldats && lieu.place === undefined ? ralliementParDefaut(etat.chemins, lieu.cx, lieu.cy, def.portee) : null } : null,
+      apercu: def ? { portee: statsTour(etat, famille, def).portee, ralliement: def.soldats && lieu.place === undefined ? ralliementParDefaut(etat.chemins, lieu.cx, lieu.cy, def.portee, etat.dynamique.cheminsActifs) : null } : null,
       deblocage: deblocageDe(etat, action, refus),
     };
   }).filter((element) => element.refus !== 'famille_interdite');

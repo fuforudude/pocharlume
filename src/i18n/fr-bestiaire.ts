@@ -83,7 +83,7 @@ export const frBestiaire = {
   'bestiaire.contre.explosion': 'Il explose au contact de tes soldats et blesse ceux qui l’entourent : tue-le avant qu’il ne les atteigne.',
   'bestiaire.contre.bouclier': 'Son bouclier n’encaisse qu’en partie les coups de face : préfère l’artillerie, les soldats, ou des tours placées après son passage.',
   'bestiaire.contre.aura_protection': 'Il protège les ennemis autour de lui : tue-le en premier.',
-  'bestiaire.contre.bond': 'Il bondit par-dessus ce qui l’arrête : aligne plusieurs lignes de soldats.',
+  'bestiaire.contre.bond': 'Il bondit par-dessus ce qui l’arrête, et saute par-dessus les nasses : aligne plusieurs lignes de soldats.',
   'bestiaire.contre.regeneration': 'Il se régénère : concentre tes dégâts sur lui plutôt que de les éparpiller.',
   'bestiaire.contre.epines': 'Ses épines blessent qui le frappe de près : laisse faire les tours plutôt que les soldats et ton héros.',
   'bestiaire.contre.alternance': 'Il change de protection tour à tour : frappe avec le type de dégâts qui passe sur le moment.',

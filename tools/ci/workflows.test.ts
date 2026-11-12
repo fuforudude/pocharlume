@@ -4,7 +4,8 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 function lire(nom: string): string {
-  return readFileSync(new URL(`../../.github/workflows/${nom}`, import.meta.url), 'utf8');
+  // Sous Windows, git peut rendre les fichiers en fins de ligne \r\n : les motifs attendent \n.
+  return readFileSync(new URL(`../../.github/workflows/${nom}`, import.meta.url), 'utf8').replace(/\r\n/g, '\n');
 }
 
 function regions(flux: string): number[] {

@@ -108,10 +108,19 @@ export function casesLibres(etat: Pick<EtatPartie, 'niveau' | 'tours'>): CaseGri
 
 /**
  * Point de ralliement par défaut d'une caserne posée sur la case : le point du chemin le plus proche du centre de la case,
- * s'il est à moins de `portee` tuiles. Null si aucun chemin n'est à portée : la caserne n'y est alors pas constructible.
+ * s'il est à moins de `portee` tuiles. Null si aucun chemin n'est à portée : la caserne n'y est alors pas constructible. `actifs` : les
+ * chemins ouverts (`etat.dynamique.cheminsActifs`), pour préférer un chemin ouvert.
  */
-export function ralliementParDefaut(chemins: readonly CheminCalcule[], cx: number, cy: number, portee: number): Point | null {
+export function ralliementParDefaut(chemins: readonly CheminCalcule[], cx: number, cy: number, portee: number, actifs?: readonly boolean[]): Point | null {
   const centre = centreCase(cx, cy);
+  // Chemins mobiles : on préfère un chemin ouvert (une caserne ne se rallie pas à un chemin fermé où personne ne passe), et à défaut
+  // un chemin fermé à portée (il peut s'ouvrir plus tard).
+  if (actifs?.includes(false)) {
+    const ouverts = chemins.map((c, i) => ({ c, i })).filter((x) => actifs[x.i] !== false);
+    const proche = projeterSurChemin(ouverts.map((x) => x.c), centre.x, centre.y);
+    const chemin = proche ? ouverts[proche.chemin]?.c : undefined;
+    if (proche && chemin && proche.ecart <= portee) return pointSurChemin(chemin, proche.distance);
+  }
   const proche = projeterSurChemin(chemins, centre.x, centre.y);
   const chemin = proche ? chemins[proche.chemin] : undefined;
   if (!proche || !chemin || proche.ecart > portee) return null;

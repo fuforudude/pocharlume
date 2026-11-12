@@ -162,7 +162,7 @@ export function validerAction(etat: EtatPartie, action: Action): RaisonRefus | n
       if (!def) return 'tour_inconnue';
       // Le radeau flotte : une tour qui pose quelque chose au sol y est refusée.
       if (action.place !== undefined && poseAuSol(def)) return 'radeau_sol_requis';
-      if (def.soldats && action.place === undefined && !ralliementParDefaut(etat.chemins, action.cx, action.cy, def.portee)) return 'caserne_sans_chemin';
+      if (def.soldats && action.place === undefined && !ralliementParDefaut(etat.chemins, action.cx, action.cy, def.portee, etat.dynamique.cheminsActifs)) return 'caserne_sans_chemin';
       return prix(etat, action.tour, def) > etat.aretes ? 'aretes_insuffisantes' : null;
     }
     case 'ameliorer':
@@ -253,7 +253,7 @@ function construire(etat: EtatPartie, lieu: LieuTour, famille: FamilleTour): voi
     centre = positionPlace(radeau, etat.pas, place);
   }
   // Une tour sans soldats n'a pas de ralliement : par défaut, il reste au centre de sa case (ou là où elle est posée sur le radeau).
-  const ralliement = (def.soldats ? ralliementParDefaut(etat.chemins, cx, cy, def.portee) : null) ?? centre;
+  const ralliement = (def.soldats ? ralliementParDefaut(etat.chemins, cx, cy, def.portee, etat.dynamique.cheminsActifs) : null) ?? centre;
   const cout = prix(etat, famille, def);
   etat.aretes -= cout;
   const t: Tour = {

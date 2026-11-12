@@ -116,8 +116,6 @@ export type Evenement =
   | { type: 'balayage'; cy: number; sens: number; unites: number }
   | { type: 'chemin_ouvert'; chemin: number }
   | { type: 'chemin_ferme'; chemin: number; repli: number }
-  /** Une tour posée sur une case qui devient chemin est vendue d'office, au prix total dépensé. */
-  | { type: 'vente_office'; tour: number; cx: number; cy: number; place: number; x: number; y: number; aretes: number }
   /** Une foule (`foule` : indice dans `Niveau.foules`) est activée ; (x, y) : le centre de sa zone. */
   | { type: 'foule_activee'; foule: number; x: number; y: number }
   /** Une foule a fini sa recharge : elle peut de nouveau servir. */

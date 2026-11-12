@@ -52,7 +52,7 @@ export {
   tourSurPlace,
 } from './grille';
 export { casesDuTrajet, gimmickRadeau, positionPlace, positionRadeau } from './gimmicks/radeau';
-export { caseInterditeEnPartie, cheminEffectif, pointDansBarrage } from './evenements-niveau';
+export { caseInterditeEnPartie, casesLibresEnPartie, cheminEffectif, cheminOuvertPour, pointDansBarrage } from './evenements-niveau';
 export { casesDuChemin, cheminsMobiles } from './evenements-niveau/chemins-mobiles';
 export { centreFoule, foulePrete, pointDansFoule } from './evenements-niveau/foules';
 export {
