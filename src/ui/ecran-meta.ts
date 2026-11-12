@@ -33,7 +33,8 @@ export interface OptionsEcranMeta {
 
 /** Le jeton des badges du DLC (en CSS, en attendant une icône dessinée). */
 export function jetonBadge(classe = 'icone'): HTMLElement {
-  const jeton = el('span', `jeton-badge ${classe}`);
+  // Un <i> et non un <span> : la barre du haut écrit le solde dans le premier <span> de la puce.
+  const jeton = el('i', `jeton-badge ${classe}`);
   jeton.setAttribute('aria-hidden', 'true');
   return jeton;
 }

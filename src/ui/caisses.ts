@@ -199,7 +199,7 @@ export function afficherCaisses(parent: HTMLElement, options: OptionsCaisses): E
     const noms = el('div', 'noms');
     noms.append(
       el('span', 'nom', t('caisses.caisse_moderne')),
-      el('span', 'desc', t('caisses.desc_moderne')),
+      el('span', 'desc desc-longue', t('caisses.desc_moderne')),
       el('span', 'desc', `${t('collection.possedes', { n: vue.possedes, m: vue.total })} · ${t('caisses.apparence_seule')}`),
     );
     tete.append(noms);
@@ -219,6 +219,8 @@ export function afficherCaisses(parent: HTMLElement, options: OptionsCaisses): E
     ouvrir.append(el('span', '', t('caisses.prix_badges', { n: vue.prix })), jetonBadge());
     ouvrir.classList.toggle('grise', !vue.peutPayer);
 
+    // Sur un écran bas, la note se lit au survol ou à l'appui long du bouton (libellé et bulle du navigateur).
+    ouvrir.title = t('caisses.badges_gagnes');
     carte.append(tete, chances, garantie, ouvrir, el('span', 'caisse-note', t('caisses.badges_gagnes')));
     return carte;
   }

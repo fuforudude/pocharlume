@@ -18,7 +18,7 @@ export const frRecompensesModerne = {
   'collection.moderne_porte_sur': 'Porté : {porteur}',
   'collection.moderne_herosabsent': 'Recrute ce héros pour le porter.',
   'collection.titre_obtenu': 'Obtenu',
-  'collection.titres_compte': '{n}/{m} titres',
+  'collection.titres_compte': '{n}/{m}',
   'collection.divine_de': 'Tour divine de {dieu}',
 
   // Refus

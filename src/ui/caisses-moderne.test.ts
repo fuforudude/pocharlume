@@ -47,6 +47,9 @@ describe('caisse Temps modernes', () => {
     const session = await ouvrir(avecBadges(37, { garantie: 9 }));
     afficherCaisses(document.body, { atlas: ATLAS, session, surFermer: vi.fn(), surCollection: vi.fn() });
     expect(document.querySelector('.meta-monnaies')?.lastElementChild?.getAttribute('aria-label')).toBe(t('monnaie.badges', { n: 37 }));
+    // Le solde s'écrit à côté du jeton, pas dedans.
+    expect(document.querySelector('.meta-monnaies')?.lastElementChild?.querySelector('span')?.textContent).toBe('37');
+    expect(document.querySelector('.meta-monnaies .jeton-badge')?.textContent).toBe('');
     expect(carte()?.textContent).toContain(t('caisses.prix_badges', { n: PRIX_CAISSE_MODERNE }));
     expect([...(carte()?.querySelectorAll('.chance') ?? [])].map((x) => x.textContent)).toEqual(
       RARETES.map((r) => t('caisses.chance', { rarete: t(`rarete.${r}`), n: CHANCES_RARETE[r] })),

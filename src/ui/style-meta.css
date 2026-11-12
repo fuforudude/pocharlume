@@ -1704,3 +1704,21 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Écran bas (740×360) : les trois caisses tiennent sans défiler ; la description du DLC et sa note passent en bulle du bouton. */
+@media (max-height: 460px) {
+  .caisse-moderne .desc-longue,
+  .caisse-note {
+    display: none;
+  }
+
+  .caisse {
+    gap: 4px;
+    padding: 4px 6px;
+  }
+
+  .caisse-tete .icone {
+    width: 40px;
+    height: 40px;
+  }
+}
