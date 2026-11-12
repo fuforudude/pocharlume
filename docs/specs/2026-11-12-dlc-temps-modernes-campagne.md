@@ -68,6 +68,12 @@ avec ses propres récompenses.
    type, union discriminée comme les gimmicks, déterministe ; briques réutilisables pour le Pont-Levis et la Crue.
 4. **Foules dans le moteur**, avec effet et condition d'activation décrits dans les données, et une stratégie de bot.
 
+### Règles de jeu tranchées en cours de route (2026-11-12)
+- **Nasse et foule qui bloque** : les ennemis au sol qui arrivent s'arrêtent devant et attendent ; ceux déjà dedans continuent,
+  les volants passent au-dessus.
+- **Charge** : les chargeurs passent à travers les soldats (comme la charge du Prince Croisé).
+- **Défi Fer** : tous les événements du niveau sont joués pendant la vague unique, à des moments répartis dans le temps.
+
 ### Livraison
 - **Tout d'un coup** : une seule mise en ligne quand les 30 niveaux, les héros, les capacités, les événements, les foules et les
   caisses sont prêts et équilibrés. Revues intermédiaires sur la page de revue (héros, capacités, premiers niveaux).
