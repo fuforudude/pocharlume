@@ -77,6 +77,12 @@ export const GRANDS_DECORS: ReadonlySet<string> = new Set([
   'moderne-sono',
   'moderne-tableau',
   'moderne-tente',
+  // DLC « Temps modernes », la Manif (art/dlc-moderne/decor/manif-decor.txt)
+  'moderne-abribus',
+  'moderne-camion-sono',
+  'moderne-colonne',
+  'moderne-kiosque',
+  'moderne-statue',
 ]);
 
 /** Emprise d'un décor : tout le sprite (le rectangle de pixels, ancre comprise). */
