@@ -9,7 +9,9 @@
 // <id> est le nom du sprite du skin, <original> celui du sprite du jeu (ou `-` s'il n'y en a pas). Les deux acceptent une
 // composition `sprite + autre@point` : `autre` est posé par son ancre sur le point nommé `point` du premier sprite (le
 // chat tireur sur le Clocher des Archers : `tour-tir-1 + archer-chat@tireur`). La catégorie (tour, ennemi…) est celle du
-// sprite. Les sources du DLC peuvent reprendre des sprites du jeu (`modele`, `derive`, cadres d'un autre sprite).
+// sprite, sauf pour les sources de art/dlc-moderne/heros/ : leurs sprites sont des unités pour le moteur de tools/art, mais
+// leur catégorie DLC est `heros` (CATEGORIE_HEROS). Les sources du DLC peuvent reprendre des sprites du jeu (`modele`,
+// `derive`, cadres d'un autre sprite).
 import { dessinerSprites, type AnimDessinee, type CadreDessine, type SpriteDessine } from '../art/dessin.ts';
 import { ErreurFormat, lireSprites, type SpriteSource } from '../art/format.ts';
 import { agrandirImage, poser } from '../art/apercu.ts';
@@ -51,9 +53,19 @@ export interface AnimationApercu {
   readonly miroir: ImageAnimee | null;
 }
 
+/** Gabarit d'un sprite : taille du cadre et ancre, qu'un skin doit garder pour prendre la place de son original. */
+export interface Gabarit {
+  readonly largeur: number;
+  readonly hauteur: number;
+  readonly ancre: readonly [number, number];
+}
+
 export interface Apercu {
   readonly entete: Entete;
   readonly categorie: string;
+  /** Gabarit de la base du skin, et de celle de l'original (null sans original). */
+  readonly gabarit: Gabarit;
+  readonly gabaritOriginal: Gabarit | null;
   /** Pose de repos (premier cadre). */
   readonly skin: Image;
   readonly original: Image | null;
@@ -399,6 +411,19 @@ export interface Entrees {
   readonly animations?: boolean;
 }
 
+/** Catégorie DLC des skins de héros (sources rangées dans art/dlc-moderne/heros/). */
+export const CATEGORIE_HEROS = 'heros';
+
+/** Catégorie DLC d'un skin : `heros` pour une source de art/dlc-moderne/heros/, sinon celle de son sprite. */
+export function categorieSkin(en: Entete, sprite: SpriteDessine | undefined): string {
+  if (/(^|\/)dlc-moderne\/heros\//.test(en.fichier)) return CATEGORIE_HEROS;
+  return sprite?.categorie ?? '';
+}
+
+function gabarit(s: SpriteDessine): Gabarit {
+  return { largeur: s.largeur, hauteur: s.hauteur, ancre: s.ancre };
+}
+
 /** Animations montrées aussi avec le tireur retourné : celles où il fait face à sa cible. */
 const ANIMATIONS_MIROIR = new Set(['repos', 'attaque']);
 
@@ -420,7 +445,9 @@ export function rendreApercus(e: Entrees): Apercu[] {
     if (en.original) for (const n of animationsComposition(en.original, parNom)) if (!noms.includes(n)) noms.push(n);
     return {
       entete: en,
-      categorie: parNom.get(en.id)?.categorie ?? '',
+      categorie: categorieSkin(en, parNom.get(en.id)),
+      gabarit: gabarit(trouverSprite(parNom, en.skin.base)),
+      gabaritOriginal: en.original ? gabarit(trouverSprite(parNom, en.original.base)) : null,
       skin: rendreComposition(en.skin, parNom, facteur),
       original: en.original ? rendreComposition(en.original, parNom, facteur) : null,
       animations: e.animations === false ? [] : noms.map((nom) => ({

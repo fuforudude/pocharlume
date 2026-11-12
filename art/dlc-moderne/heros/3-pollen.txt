@@ -1,0 +1,307 @@
+# DLC « Temps modernes » : les héros en étudiants mobilisés. Fidèles de Trois-Pattes (Pollen) : l'atelier de l'AG, ceux qui
+# peignent les banderoles, bricolent la sono et soignent le cortège.
+# Pose de repos seulement (première revue) : les animations viendront après l'avis de l'auteur. Chaque skin garde la
+# taille, l'ancre, l'origine des grilles et les noms de calques de son original (art/sprites/), pour que ses animations
+# puissent reprendre plus tard les lignes `cadre` de l'original presque telles quelles.
+# Satire en dessin : aucun logo, insigne ni inscription, aucune violence réaliste.
+# Hors atlas : ce dossier n'est lu que par l'outil d'aperçu du DLC (npm run dlc:apercu), jamais par npm run art.
+#= Les fidèles de Trois-Pattes (Pollen)
+#: moderne-heros-pollen | Clopin, Peintre de banderoles | heros-pollen
+#: moderne-heros-rouage | Rouage, le Bricoleur de sono | heros-rouage
+#: moderne-heros-lanterne | Lanterne, la Street-médic | heros-lanterne
+# Couleurs propres au DLC (mêmes lettres que les tours) : 1 magenta, 2 cyan, 3 vert fluo, 5 rose, 6 sweat marine, 7 kaki,
+# 8 orange chantier, 9 gris clair, 0 jaune fluo, C plastique bleu (le bleu du toit de l'Atelier), D carton, X marine sombre.
+categorie unite
+palette commune
+taille 32 32
+ancre 16 30
+couleur 1 e0508c
+couleur 2 40c8d8
+couleur 3 7ad040
+couleur 5 f4a8c8
+couleur 6 34467a
+couleur 7 5a6a3a
+couleur 8 f07a20
+couleur 9 cfcbc2
+couleur 0 d8f040
+couleur C 3070b0
+couleur D b08a58
+couleur X 1e2a44
+
+# Clopin, Peintre de banderoles : le tigré roux à l'oreille déchirée, foulard moutarde et ceinture d'outils gardés,
+# chapeau de papier journal, salopette bleue tachée de peinture, la patte arrière gauche toujours bandée ; à la place de
+# la corde, un rouleau à peindre plein de magenta, levé comme un outil. Origine (6, 18) comme l'original.
+sprite moderne-heros-pollen
+origine 6 18
+# Modèle : l'original. Repos, marche (le boitement) et blessure en viennent tels quels avec les calques ci-dessous ;
+# attaque, compétence et mort sont redessinées pour le rouleau à peindre.
+#   repos      respire, la queue bat, cligne des yeux (pose validée en première image)
+#   marche     boite sur sa patte bandée, le corps retombe à chaque pas
+#   attaque    lève le rouleau au-dessus de sa tête, puis le pousse devant lui d'un grand coup
+#   competence accroupi, il passe le rouleau au sol : une bande de peinture magenta collante s'étale devant lui
+#   blesse     recule, yeux plissés
+#   mort       touché, les genoux plient, il s'affaisse sur le côté (gisant du chat de grange, salopette bleue) ; le
+#              rouleau tombe à côté dans une goutte de peinture, le chapeau de papier aussi
+modele heros-pollen
+
+# Le chapeau de papier est cousu à la tête.
+calque tete 6 -3
+...w
+..w9w
+.w999w
+......b
+oO...Ob
+bobobob
+ooookok
+oooccrcc
+.occccc
+
+calque corps 5 6
+.YyYYY
+oCoCCCC
+oCCCC1
+.dTdPdd
+.CC1CCC
+
+calque queue 2 8
+b
+o
+.obo
+
+# Patte arrière gauche bandée (x 7-8, lin pâle) qui touche à peine le sol, comme l'original.
+calque jambes 7 11
+zz.oo
+zz.BB
+
+# Rouleau à peindre : manchon gorgé de magenta, armature d'acier, manche de bois.
+calque arme 11 1
+1111
+9999
+...T
+..d.
+..d.
+.c..
+
+# Rouleau levé au-dessus de la tête.
+calque arme-haut 7 -6
+1111
+9999
+...T
+..d
+..d
+.d
+
+# Bras tendu, le rouleau poussé devant lui.
+calque arme-frappe 11 4
+.......11
+.......99
+oo.dddT..
+
+# Rouleau posé au sol, la bande de peinture commence.
+calque piege-ouvert 11 8
+..c
+..d
+..d.
+.9911
+11111
+
+# La bande de peinture s'allonge devant lui, collante.
+calque piege 11 8
+.....c
+.....d
+.....d
+....99
+1111111
+
+calque outil-sol 17 10
+...d
+9911
+1..1
+
+calque chapeau-sol 2 10
+.w
+w9w
+
+anim attaque 100
+cadre queue + jambes + corps decale -1 0 + tete decale -1 0 + arme-haut duree 160
+cadre queue + jambes + corps decale 0 0 + tete decale 0 0 + arme-haut decale 1 0 duree 80
+cadre queue + jambes + corps decale 1 0 + tete decale 1 0 + arme-frappe decale 1 0 duree 90
+cadre queue + jambes + corps + arme + tete duree 140
+
+anim competence 120
+cadre queue + jambes + corps decale 0 2 + arme decale 0 2 + tete decale 0 2 duree 160
+cadre queue + jambes + corps decale 1 3 + tete decale 1 3 + piege-ouvert duree 200
+cadre queue + jambes + corps decale 1 3 + tete decale 1 3 + piege duree 200
+cadre queue + jambes + corps + arme + tete duree 160
+
+anim mort 140
+cadre queue + jambes + corps decale -1 0 + arme decale -1 0 + tete decale -1 0 + yeux-mal decale -1 0
+cadre soldat-grange/mort.1 couleurs B=C b=C K=d T=#00000000 i=#00000000 d=#00000000 + arme decale 1 3
+cadre soldat-grange/mort.2 couleurs B=C b=C K=d T=#00000000 i=#00000000 d=#00000000 + outil-sol decale 0 -1 + chapeau-sol duree 300
+cadre soldat-grange/mort.3 couleurs B=C b=C K=d T=#00000000 i=#00000000 d=#00000000 + outil-sol + chapeau-sol duree 600
+
+# Rouage, le Bricoleur de sono : chat sable aux lunettes de cuivre, tablier de cuir sur un tee-shirt cyan, la grande clé
+# à molette gardée ; l'engrenage de laiton dans le dos devient un enrouleur de rallonge orange dont pend le câble.
+sprite moderne-heros-rouage
+origine 6 18
+# Modèle : l'original (squelette du chat de grange). Repos, marche, blessure et l'attaque à la clé (même clé, mêmes
+# étincelles) en viennent tels quels avec les calques ci-dessous ; compétence et mort sont redessinées.
+#   repos      respire, l'enrouleur tourne dans son dos, cligne derrière ses lunettes (pose validée en première image)
+#   marche     trotte, l'enrouleur tourne
+#   attaque    lève la clé à molette et frappe devant lui : étincelles
+#   competence plante sa clé dans le sol : une enceinte sur pieds sort de terre, branchée par la rallonge orange
+#   blesse     recule, yeux plissés
+#   mort       touché, les genoux plient, il s'affaisse sur le côté (gisant du chat de grange, tee-shirt cyan) ; la clé
+#              tombe à côté, la rallonge se déroule
+modele heros-rouage
+
+calque tete 6 0
+N.....N.
+nN...Nn.
+ndddddd.
+ndnTiTi.
+nnnccrcc
+.nccccc.
+
+calque corps 5 6
+.n2222
+n2bBb22
+n2bBb2
+.dYdYdd
+.2bBb22
+
+# Enrouleur de rallonge dans le dos (moyeu sombre, câble qui pend), puis la queue.
+calque queue 0 3
+.888..
+8KKK8.
+8KkK8K
+8KKK8.K
+.888...
+..N
+..n
+...nnN
+
+# L'enrouleur a tourné d'un cran : le moyeu change de face.
+calque queue-b 0 3
+.888..
+8KkK8.
+8KKK8K
+8kKk8.K
+.888...
+...N
+..n
+...nnN
+
+calque jambes 7 11
+nn.nn
+bb.bb
+
+calque arme 13 0
+.iT.
+iT.T
+.TT.
+..T
+..T
+o.d
+.cd
+
+# Enceinte sur pieds sortie de terre, branchée par la rallonge orange.
+calque tourelle 14 7
+KKKK.
+KTiK.
+KiTK.
+KKKK8
+d..d.8
+
+calque outil-sol 17 11
+8...iT
+88TTTi
+
+anim competence 110
+cadre queue + jambes + corps decale 0 1 + tete decale 0 1 + arme-haut decale 0 1 duree 150
+cadre queue + jambes + corps decale 1 1 + tete decale 1 1 + arme-frappe decale 1 1 + etincelles duree 100
+cadre queue-b + jambes + corps decale 1 1 + tete decale 1 1 + arme-frappe decale 1 1 + etincelles decale 1 2 + tourelle decale 0 2 duree 120
+cadre queue + jambes + corps decale 0 1 + tete decale 0 1 + arme decale 0 1 + tourelle duree 150
+cadre queue + jambes + corps + arme + tete + tourelle duree 150
+
+anim mort 140
+cadre queue + jambes + corps decale -1 0 + arme decale -1 0 + tete decale -1 0 + yeux-mal decale -1 0
+cadre soldat-grange/mort.1 couleurs o=n O=N B=2 b=b K=d T=#00000000 i=#00000000 d=#00000000 + arme decale 1 3
+cadre soldat-grange/mort.2 couleurs o=n O=N B=2 b=b K=d T=#00000000 i=#00000000 d=#00000000 + outil-sol decale 0 -1 duree 300
+cadre soldat-grange/mort.3 couleurs o=n O=N B=2 b=b K=d T=#00000000 i=#00000000 d=#00000000 + outil-sol duree 600
+
+# Lanterne, la Street-médic : chatte blanche aux yeux bleus, casque gris clair à croix verte (jamais la croix rouge),
+# tunique claire et brassard vert, sacoche en bandoulière ; la perche à croc garde sa place, mais porte une lampe de
+# camping à LED dont la lueur est cyan.
+sprite moderne-heros-lanterne
+origine 6 18
+# Modèle : l'original (squelette du chat de grange). Repos, marche, blessure, attaque et soin en viennent tels quels
+# (mêmes cadres, mêmes cadences) avec les calques ci-dessous ; la mort est redessinée.
+#   repos      respire, la perche tenue, cligne des yeux (pose validée en première image)
+#   marche     trotte, la lampe se balance au bout de la perche
+#   attaque    lève la perche puis la tend : la lampe à LED jette un éclat cyan
+#   competence lève la lampe au-dessus d'elle, la lumière cyan grandit (soin)
+#   blesse     recule, yeux plissés
+#   mort       touchée, les genoux plient, elle s'affaisse sur le côté (gisant du chat de grange, tunique claire et
+#              brassard vert) ; la perche tombe à côté, la lampe encore allumée
+modele heros-lanterne
+
+calque tete 6 0
+..9399..
+w933399.
+9993999.
+wwwwAwA.
+wwwwwsww
+.wwwwww.
+
+calque corps 5 6
+.99999
+w339999
+w99999
+.dCdCdd
+.9w9w99
+
+calque queue 2 8
+q
+w
+.www
+
+calque jambes 7 11
+ww.ww
+qq.qq
+
+# Perche à croc, lampe de camping pendue ; le bras est tendu devant elle.
+calque arme 11 -2
+...ddddd
+...d...K
+...d..KTK
+...d..2I2
+...d..2I2
+...d..KTK
+...d
+...d
+...d
+999w
+...d
+...d
+
+# Lumière de la LED à pleine force, par-dessus la lampe.
+calque vive 16 -1
+.2.2.
+2.W.2
+.WIW.
+.WIW.
+2.W.2
+.2.2.
+
+# La perche tombée à côté d'elle, la lampe encore allumée.
+calque outil-sol 13 10
+.......KTK
+.......2I2
+dddddddKTK
+
+anim mort 140
+cadre queue + jambes + corps decale -1 0 + arme decale -1 0 + tete decale -1 0 + yeux-mal decale -1 0
+cadre soldat-grange/mort.1 couleurs o=w O=w B=9 b=3 c=w K=C T=#00000000 i=#00000000 d=#00000000 + arme decale 1 3
+cadre soldat-grange/mort.2 couleurs o=w O=w B=9 b=3 c=w K=C T=#00000000 i=#00000000 d=#00000000 + outil-sol decale 0 -1 duree 300
+cadre soldat-grange/mort.3 couleurs o=w O=w B=9 b=3 c=w K=C T=#00000000 i=#00000000 d=#00000000 + outil-sol duree 600
