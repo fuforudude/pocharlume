@@ -1034,13 +1034,13 @@ export interface CapacitePiquet {
 
 /**
  * « Renvoi » : la tour dissipe les nuages toxiques (pouvoir `nuage`) à sa portée, et renvoie au tireur un tir sur les tours (`tirer_tour`)
- * sur `chaque` parmi ceux qui visent une tour à sa portée (elle comprise), dans l'ordre d'arrivée ; le tireur touché est étourdi
- * `etourdissement` s.
+ * sur `chaque` parmi ceux qui visent une tour à sa portée (elle comprise), dans l'ordre d'arrivée ; le tir renvoyé blesse son tireur de
+ * `degats` points (dégâts physiques, protections comprises).
  */
 export interface CapaciteRenvoi {
   readonly type: 'renvoi';
   readonly chaque: number;
-  readonly etourdissement: number;
+  readonly degats: number;
 }
 
 /** « Sono » : les ennemis (volants compris si `volants`) à moins de `rayon` fois la portée de la tour vont `ralentissement` (0,15 = −15 %) moins vite, en permanence. */

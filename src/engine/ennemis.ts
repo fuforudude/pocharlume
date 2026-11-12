@@ -2,6 +2,7 @@
 import { REGLES } from '../data/regles';
 import { tirer, tirerEntre } from './aleatoire';
 import { ajusterMontant } from './argent';
+import { facteurPiquet } from './capacites-campagne';
 import { placerSurChemin, segmentPour, trajetEnnemi } from './chemins';
 import { difficulteDe } from './contenu';
 import { infligerDegats, libererEnnemi } from './degats';
@@ -203,7 +204,8 @@ function degatsContre(e: Ennemi, u: Unite, montant: number): number {
 
 /** Drain : retire des PV (purs, sans esquive) à l'unité touchée et en rend une part à l'ennemi, à chaque pas de contact. */
 function drainer(etat: EtatPartie, e: Ennemi, u: Unite, drain: Drain): void {
-  const montant = drain.degats / PAS_PAR_SECONDE;
+  // « Piquet » (campagne) : le drain aussi est amoindri ; l'ennemi ne se soigne que de ce qu'il a pris.
+  const montant = (drain.degats / PAS_PAR_SECONDE) * facteurPiquet(etat, u);
   u.pv -= montant;
   e.pv = Math.min(e.pvMax, e.pv + montant * drain.soin);
   if (u.pv <= 0) mourir(etat, u);

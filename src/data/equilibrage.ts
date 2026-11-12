@@ -179,10 +179,10 @@ export function facteurVitesse(vitesse: number): number {
   return Math.sqrt(vitesse / EQUILIBRAGE.vitesseReference);
 }
 
-/** Menace = PV ÷ (1 − protection moyenne) × facteur de vitesse × coût en vies. */
+/** Menace = PV ÷ (1 − protection moyenne) × facteur de vitesse × coût en vies ; doublée pour un binôme (une apparition en crée deux). */
 export function menaceEnnemi(def: DefEnnemi): number {
   const protection = (def.armure + def.resistance) / 2;
-  return (def.pv / (1 - protection)) * facteurVitesse(def.vitesse) * def.coutVies;
+  return (def.pv / (1 - protection)) * facteurVitesse(def.vitesse) * def.coutVies * (def.pouvoirs?.binome ? 2 : 1);
 }
 
 /** Budget de menace b(L, w) de la vague w (1, 2…) du niveau de campagne L (1 à 100). */

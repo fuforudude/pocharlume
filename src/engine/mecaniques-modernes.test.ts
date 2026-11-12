@@ -2,7 +2,9 @@
 // sans nom d'ennemi dans le moteur : repousse (action `repousser`), tir sur les tours (action `tirer_tour`, et le « Renvoi » du
 // Perchoir dans la campagne moderne), binôme (pouvoir `binome`).
 import { describe, expect, it } from 'vitest';
+import { CAPACITES_CAMPAGNE } from '../data/capacites-campagne';
 import { ENNEMIS } from '../data/ennemis';
+import { TOURS } from '../data/tours';
 import { avancerSecondes, CONFIG, compter, construireTour, ennemiEssai, ennemiFixe, evenementsPendant, heros, niveauEssai, tourDe } from './aides.test-utils';
 import { infligerDegats } from './degats';
 import type { ActionEnnemi, DefEnnemi, IdCampagne } from './definitions';
@@ -126,7 +128,7 @@ describe('tir sur les tours : le tireur de LBD met une tour hors service par pro
   });
 
   /** Trois tirs successifs ; rend le nombre de tours mises hors service, de renvois, et le tireur. */
-  function troisTirs(campagne: IdCampagne | undefined, cible: 'perchoir' | 'voisine'): { touchees: number; renvois: number; tireur: Ennemi; etourdi: boolean } {
+  function troisTirs(campagne: IdCampagne | undefined, cible: 'perchoir' | 'voisine'): { touchees: number; renvois: number; tireur: Ennemi; pvPerdus: number; etourdi: boolean } {
     const etat = partie(campagne);
     if (cible === 'perchoir') {
       construireTour(etat, 1, 'tir');
@@ -134,7 +136,10 @@ describe('tir sur les tours : le tireur de LBD met une tour hors service par pro
       construireTour(etat, 1, 'tir', 'B');
       construireTour(etat, 2, 'magie');
     }
+    // Les tours ne tirent pas : seuls les tirs renvoyés blessent le tireur.
+    for (const t of etat.tours) t.stats = { ...t.stats, degats: [0, 0] };
     const tireur = lanceur(etat, cible === 'perchoir' ? 9 : 17, TIR, 2);
+    const pvDepart = tireur.pv;
     let touchees = 0;
     let renvois = 0;
     let etourdi = false;
@@ -144,14 +149,38 @@ describe('tir sur les tours : le tireur de LBD met une tour hors service par pro
       renvois += compter(etat.evenements, 'renvoi');
       if ((tireur.effetsPas[EFFET.etourdissement] ?? 0) > 0) etourdi = true;
     }
-    return { touchees, renvois, tireur, etourdi };
+    return { touchees, renvois, tireur, pvPerdus: pvDepart - tireur.pv, etourdi };
   }
 
-  it('Renvoi (campagne moderne) : le Perchoir visé renvoie un tir sur trois au tireur, qui est étourdi', () => {
+  it('Renvoi (campagne moderne) : le Perchoir visé renvoie un tir sur trois au tireur, qui est blessé (et plus étourdi)', () => {
     const r = troisTirs('moderne', 'perchoir');
     expect(r.touchees).toBe(2);
     expect(r.renvois).toBe(1);
-    expect(r.etourdi).toBe(true);
+    const renvoi = CAPACITES_CAMPAGNE.moderne.tir;
+    expect(renvoi?.type).toBe('renvoi');
+    const degats = renvoi?.type === 'renvoi' ? renvoi.degats : 0;
+    expect(degats).toBeGreaterThan(0);
+    expect(r.pvPerdus).toBeCloseTo(degats * (1 - r.tireur.armure));
+    expect(r.etourdi).toBe(false);
+  });
+
+  it('Renvoi : un tir renvoyé qui achève son tireur le tue et verse sa prime', () => {
+    const etat = partie('moderne');
+    construireTour(etat, 1, 'tir');
+    const tireur = lanceur(etat, 9, TIR, 1);
+    tireur.pv = 1;
+    const aretes = etat.aretes;
+    jusquA(etat, 'tir_renvoye_touche', 10);
+    // Les deux premiers tirs mettent la tour hors service ; le troisième est renvoyé.
+    for (let i = 0; i < 30 * 8 && tireur.vivant; i++) step(etat);
+    expect(tireur.vivant).toBe(false);
+    expect(etat.aretes).toBeGreaterThan(aretes);
+  });
+
+  it('Renvoi : les dégâts renvoyés valent la moyenne d’un tir de Perchoir de rang 2 (base du réglage)', () => {
+    const renvoi = CAPACITES_CAMPAGNE.moderne.tir;
+    const [min, max] = TOURS.tir.niveaux[1].degats;
+    expect(renvoi?.type === 'renvoi' ? renvoi.degats : -1).toBe((min + max) / 2);
   });
 
   it('Renvoi : il protège aussi une tour voisine à sa portée', () => {
@@ -196,6 +225,30 @@ describe('binôme : une apparition crée deux ennemis liés ; quand l’un tombe
     const avant = b.distance;
     step(etat);
     expect((b.distance - avant) * 30).toBeCloseTo(1.5);
+  });
+
+  it('les deux tombent au même pas : aucune accélération signalée pour la moto qui meurt aussitôt', () => {
+    const etat = partie();
+    const a = ajouterEnnemi(etat, BINOME, 'paysan_affame', 0, 5);
+    const b = etat.ennemis[1];
+    if (!b) throw new Error('pas de second');
+    infligerDegats(etat, a, 1e6, 'pur');
+    expect(compter(etat.evenements, 'binome_seul')).toBe(1);
+    infligerDegats(etat, b, 1e6, 'pur');
+    expect(compter(etat.evenements, 'binome_seul')).toBe(0);
+    expect(compter(etat.evenements, 'mort')).toBe(2);
+    expect(b.binomeSeul).toBe(false);
+  });
+
+  it('l’un tombe, l’autre survit : un seul binome_seul, pour le survivant', () => {
+    const etat = partie();
+    const a = ajouterEnnemi(etat, BINOME, 'paysan_affame', 0, 5);
+    const b = etat.ennemis[1];
+    if (!b) throw new Error('pas de second');
+    infligerDegats(etat, a, 1e6, 'pur');
+    const vus = etat.evenements.filter((e) => e.type === 'binome_seul');
+    expect(vus).toHaveLength(1);
+    expect(vus[0]).toMatchObject({ ennemi: b.id });
   });
 
   it('un groupe de vague de N binômes donne 2N ennemis', () => {

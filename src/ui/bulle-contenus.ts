@@ -241,7 +241,7 @@ export function texteCapacite(c: CapaciteFamille): string {
     case 'piquet':
       return t('capacite.piquet', { n: pourcent(c.reduction), s: c.soldats });
     case 'renvoi':
-      return t('capacite.renvoi', { c: c.chaque });
+      return t('capacite.renvoi', { c: c.chaque, d: nombre(c.degats) });
     case 'sono':
       return t('capacite.sono', { n: pourcent(c.ralentissement) });
     case 'percage':

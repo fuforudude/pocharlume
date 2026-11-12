@@ -27,14 +27,14 @@ export const frDlcModerne = {
 
   // Conseils du Bestiaire
   'bestiaire.contre.repousse': 'Il repousse la ligne de soldats devant lui : arrête-le de loin, ou laisse-le passer avant de le prendre de flanc.',
-  'bestiaire.contre.tir_tour': 'Il met tes tours hors service à distance : un Perchoir à côté renvoie une partie de ses tirs, sinon abats-le vite.',
+  'bestiaire.contre.tir_tour': 'Il met tes tours hors service à distance : un Perchoir à côté lui renvoie un tir sur trois, qui le blesse ; sinon abats-le vite.',
   'bestiaire.contre.binome': 'Ils vont par deux : frappe-les ensemble en zone, sinon le survivant file plus vite.',
 
   // Capacités de famille de la campagne « Temps modernes »
   'bulle.tour.capacite_dlc': 'Capacité DLC',
   'bulle.capacite.note': 'Campagne « Temps modernes » : {texte}',
   'capacite.piquet': 'Piquet : les soldats subissent {n} % de dégâts en moins tant qu’au moins {s} d’entre eux tiennent la ligne.',
-  'capacite.renvoi': 'Renvoi : dissipe les nuages lacrymogènes à sa portée et renvoie au tireur un tir de LBD sur {c} visant une tour proche.',
+  'capacite.renvoi': 'Renvoi : dissipe les nuages lacrymogènes à sa portée et renvoie au tireur, pour {d} dégâts, un tir de LBD sur {c} visant une tour proche.',
   'capacite.sono': 'Sono : les ennemis à sa portée vont {n} % moins vite, en permanence.',
   'capacite.percage': 'Perçage : les pavés passent les boucliers frontaux et ignorent {n} % de l’armure en plus.',
 } as const;

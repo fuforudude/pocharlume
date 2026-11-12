@@ -7,7 +7,7 @@
 //   - Perçage : `avecCapacite`, appelé par `statsTour` (tours.ts), et `percageBouclier` lu par les coups directs.
 import { CAPACITES_CAMPAGNE } from '../data/capacites-campagne';
 import { appliquerEffet } from './degats';
-import type { CapaciteFamille, CapaciteRenvoi, DefNiveauTour, IdCampagne, Niveau } from './definitions';
+import type { CapaciteFamille, CapaciteRenvoi, CapaciteSono, DefNiveauTour, EffetCoup, IdCampagne, Niveau } from './definitions';
 import type { EtatPartie, FamilleTour, Tour, Unite } from './etat';
 import { chercherParId, distance2 } from './recherche';
 import { PAS_PAR_SECONDE } from './temps';
@@ -44,13 +44,14 @@ export function avecCapacite(etat: EtatPartie, famille: FamilleTour, stats: DefN
 
 /**
  * Piquet : facteur des dégâts reçus par une unité (1 = inchangés). Un soldat d'une caserne qui a cette capacité subit moins tant qu'au moins
- * `soldats` soldats vivants de la même caserne (lui compris) retiennent des ennemis.
+ * `soldats` soldats vivants de la même caserne (lui compris) retiennent des ennemis. Tous les dégâts reçus passent par ce facteur (coups,
+ * nuage toxique, drain) ; une caserne en feu ou gelée n'exerce pas sa capacité, ses soldats encaissent tout.
  */
 export function facteurPiquet(etat: EtatPartie, u: Unite): number {
   if (u.genre !== 'soldat' || u.tour < 0) return 1;
   const tour = chercherParId(etat.tours, u.tour);
   const capacite = tour ? capaciteDe(etat, tour.famille) : undefined;
-  if (capacite?.type !== 'piquet') return 1;
+  if (!tour || capacite?.type !== 'piquet' || !active(tour)) return 1;
   let tiennent = 0;
   for (const s of etat.unites) {
     if (s.tour === u.tour && s.genre === 'soldat' && !s.mort && s.bloques > 0) tiennent++;
@@ -58,26 +59,47 @@ export function facteurPiquet(etat: EtatPartie, u: Unite): number {
   return tiennent >= capacite.soldats ? 1 - capacite.reduction : 1;
 }
 
-/** Renvoi : les nuages toxiques (zones qui blessent les alliés) à portée de la tour se dissipent. */
+/** Renvoi : les nuages toxiques (zones qui blessent les alliés) à portée de la tour se dissipent ; la liste est compactée sur place, sans allocation. */
 function dissiperNuages(etat: EtatPartie, t: Tour): void {
-  if (etat.zones.length === 0) return;
+  const zones = etat.zones;
+  if (zones.length === 0) return;
   const portee = porteeEffective(t);
   const portee2 = portee * portee;
-  etat.zones = etat.zones.filter((z) => {
-    if (z.degatsAllies <= 0 || distance2(z.x, z.y, t.x, t.y) > portee2) return true;
+  let garde = 0;
+  for (const z of zones) {
+    if (z.degatsAllies <= 0 || distance2(z.x, z.y, t.x, t.y) > portee2) {
+      zones[garde++] = z;
+      continue;
+    }
     etat.evenements.push({ type: 'dissipation', tour: t.id, zone: z.id, x: z.x, y: z.y });
     etat.evenements.push({ type: 'zone_fin', zone: z.id, x: z.x, y: z.y });
-    return false;
-  });
+  }
+  zones.length = garde;
 }
 
-/** Sono : un ralentissement d'un pas, renouvelé à chaque pas, sur les ennemis de la zone (un ralentissement plus fort l'emporte). */
-function sonoriser(etat: EtatPartie, t: Tour, rayon: number, ralentissement: number, volants: boolean): void {
-  const r = porteeEffective(t) * rayon;
+/** Le ralentissement d'un pas de chaque Sono, créé une fois (les données ne changent pas) plutôt qu'à chaque pas et pour chaque tour. */
+const EFFETS_SONO = new WeakMap<CapaciteSono, EffetCoup>();
+
+function effetSono(sono: CapaciteSono): EffetCoup {
+  let effet = EFFETS_SONO.get(sono);
+  if (!effet) {
+    effet = { type: 'ralentissement', chance: 1, duree: 1 / PAS_PAR_SECONDE, valeur: 1 - sono.ralentissement };
+    EFFETS_SONO.set(sono, effet);
+  }
+  return effet;
+}
+
+/**
+ * Sono : un ralentissement d'un pas, renouvelé à chaque pas, sur les ennemis de la zone. Il passe par la case d'effet « ralentissement »
+ * (`appliquerEffet` garde le plus fort, sans cumul) : aucun ralentissement des données ne doit être plus faible que la Sono, sans quoi
+ * il prendrait sa valeur (voir le test « aucun ralentissement… » de capacites-campagne.test.ts).
+ */
+function sonoriser(etat: EtatPartie, t: Tour, sono: CapaciteSono): void {
+  const r = porteeEffective(t) * sono.rayon;
   const r2 = r * r;
-  const effet = { type: 'ralentissement', chance: 1, duree: 1 / PAS_PAR_SECONDE, valeur: 1 - ralentissement } as const;
+  const effet = effetSono(sono);
   for (const e of etat.ennemis) {
-    if (!e.vivant || (e.volant && !volants) || distance2(e.x, e.y, t.x, t.y) > r2) continue;
+    if (!e.vivant || (e.volant && !sono.volants) || distance2(e.x, e.y, t.x, t.y) > r2) continue;
     appliquerEffet(etat, e, effet);
   }
 }
@@ -92,7 +114,7 @@ export function appliquerCapacitesCampagne(etat: EtatPartie): void {
     const capacite = capaciteDe(etat, t.famille);
     if (!capacite || !active(t)) continue;
     if (capacite.type === 'renvoi') dissiperNuages(etat, t);
-    else if (capacite.type === 'sono') sonoriser(etat, t, capacite.rayon, capacite.ralentissement, capacite.volants);
+    else if (capacite.type === 'sono') sonoriser(etat, t, capacite);
   }
 }
 

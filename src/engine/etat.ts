@@ -269,9 +269,9 @@ export interface TirEnnemi {
   vitesse: number;
   /** Pas de mise hors service de la tour touchée. */
   duree: number;
-  /** Renvoyé vers le tireur par un Perchoir (« Renvoi »), et pas d'étourdissement du tireur à l'arrivée. */
+  /** Renvoyé vers le tireur par un Perchoir (« Renvoi ») : à l'arrivée il blesse son tireur de `degats` (dégâts physiques), sans mettre de tour hors service. */
   renvoye: boolean;
-  etourdissement: number;
+  degats: number;
 }
 
 export interface Projectile {
