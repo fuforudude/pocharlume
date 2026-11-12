@@ -60,6 +60,11 @@ avec ses propres récompenses.
   éclats, taux affichés) : elle contient les skins de tours et de héros du DLC, **apparence seulement**, utilisables aussi dans
   la campagne principale.
 - **Titres** de collection (« Fac occupée », « Préfecture tombée »…), affichés dans la collection.
+- **Tranché le 2026-11-12** : les arêtes et l'expérience restent celles des niveaux 101 à 130, même pour un joueur neuf (choix assumé
+  après chiffrage : 681 arêtes au niveau 1 en 3 étoiles) ; bonus de 30 braises aux seuls boss (niveaux 10, 20, 30) ; un skin du
+  DLC porté dans l'histoire ne change que l'apparence (le bonus du skin de l'histoire reste) ; skins du DLC par la caisse seulement
+  (doublons → éclats) ; badges : 20 par première victoire, +40 boss, +10 trois étoiles, 20 par défi (2 220 en tout), caisse à
+  15 badges, garantie à la 10e caisse.
 
 ### Décisions techniques (2026-11-12)
 1. **Campagne nommée** : chaque niveau porte une campagne (`histoire` ou `moderne`) et un numéro dans sa campagne ; la sauvegarde
