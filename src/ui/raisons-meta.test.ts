@@ -11,6 +11,8 @@ const RAISONS_COLLECTION = [
   'aleatoire_indisponible',
   'defi_inconnu',
   'defi_verrouille',
+  // DLC « Temps modernes » : la caisse payée en badges (le code et le test de l'écran des caisses lisent collection.refus.*).
+  'badges_insuffisants',
 ];
 
 describe('textes de refus de la méta-progression', () => {
@@ -33,6 +35,7 @@ describe('textes de refus de la méta-progression', () => {
     for (const raison of RAISONS_COLLECTION) expect(Object.hasOwn(CLES_REFUS_META, raison), raison).toBe(true);
     expect(texteRefusMeta('eclats_insuffisants')).toBe('Pas assez d’éclats.');
     expect(texteRefusMeta('defi_verrouille')).toBe('Il faut d’abord les trois étoiles sur ce niveau.');
+    expect(texteRefusMeta('badges_insuffisants')).toBe('Il te manque des badges : joue le DLC « Temps modernes » pour en gagner.');
     expect(texteRefusMeta('aleatoire_indisponible')).toBe('Les caisses ne peuvent pas s’ouvrir sur cet appareil.');
   });
 });

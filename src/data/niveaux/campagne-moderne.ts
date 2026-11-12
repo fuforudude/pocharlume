@@ -1,8 +1,8 @@
 // La campagne « Temps modernes » (le DLC) : 3 régions de 10 niveaux, numérotés de 1 à 30 dans leur campagne. Les trois sont livrées : la Fac
-// (plan-moderne-r1.ts, cartes-moderne-r1.ts, vagues-moderne-r1.ts), la Manif (…-r2) : leurs niveaux assemblés (chacun avec `campagne: 'moderne'` ici
-// et dans `niveau`), ses nœuds, son tracé et ses textes sur la carte du monde. Et la Préfecture (plan-moderne-r3.ts,
-// cartes-moderne-r3.ts, vagues-moderne-r3.ts). Tant qu'une région n'a pas ses 10 niveaux, ses 10 nœuds,
-// son tracé et ses textes, la carte du DLC l'annonce « à venir » (src/ui/regions-monde.ts), sans planter.
+// (plan-moderne-r1.ts, cartes-moderne-r1.ts, vagues-moderne-r1.ts), la Manif (…-r2) et la Préfecture (…-r3). Ici, leurs niveaux sont assemblés
+// (chacun marqué `campagne: 'moderne'`, lui et son `niveau`), avec leurs nœuds, leur tracé et leurs textes sur la carte du monde. Tant qu'une
+// région n'a pas ses 10 niveaux, ses 10 nœuds, son tracé et ses textes, la carte du DLC l'annonce « à venir » (src/ui/regions-monde.ts),
+// sans planter.
 import type { Point } from '../../engine/definitions';
 import { NIVEAUX_PAR_REGION } from '../meta';
 import { NOMBRE_REGIONS_MODERNE } from '../campagnes';

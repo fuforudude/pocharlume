@@ -2,7 +2,8 @@
 // moteur (`avancer` avec des actions), exactement comme l'interface : il lit l'état mais ne le modifie jamais
 // directement.
 import { avancer, creerPartie, derniereVagueTerminee, PAS_PAR_SECONDE } from '../engine';
-import type { Action, ConfigPartie, DefiPartie, EtatPartie, IdFamille, LieuTour, Niveau, Statut, Tour, Voie } from '../engine';
+import type { Action, ConfigPartie, DefEnnemi, DefiPartie, EtatPartie, IdFamille, LieuTour, Niveau, Statut, Tour, Voie } from '../engine';
+import { ENNEMIS } from '../data/ennemis';
 import { VERSION_DONNEES } from '../data/version';
 
 /** Clé d'un lieu de tour : la case (« cx,cy ») ou la place du radeau (« radeau n »). */
@@ -49,6 +50,10 @@ export interface ResultatPartie {
   readonly tourDivine: boolean;
   /** Dernière vague terminée à la fin de la partie (l'infini : le « record » de la partie). */
   readonly vagueTerminee?: number;
+  /** Boss tués pendant la partie (type de l'ennemi, dans l'ordre des morts). */
+  readonly bossTues?: readonly string[];
+  /** Points de vie les plus bas atteints par un boss de la partie (null s'il n'y en a pas eu) : ce qui reste de lui à l'instant le plus proche de sa mort. */
+  readonly pvMinBoss?: number | null;
 }
 
 /** Ce qu'apporte le joueur à une partie : son dieu, son héros et ce que la méta-progression lui a donné. */
@@ -94,6 +99,8 @@ export function configPartie(o: OptionsPartie): ConfigPartie {
   };
 }
 
+const defsEnnemis: Readonly<Record<string, DefEnnemi>> = ENNEMIS;
+
 /** Un bot qui ne fait rien : la défense du niveau se limite au héros immobile. */
 export const BOT_INACTIF: Bot = { nom: 'inactif', decider: () => [] };
 
@@ -112,6 +119,8 @@ export function jouerPartie(niveau: Niveau, bot: Bot, options: OptionsPartie): R
   const sorts: number[] = [0, 0];
   let tourDivine = false;
   let actions = 0;
+  const bossTues: string[] = [];
+  let pvMinBoss: number | null = null;
 
   const vagueMax = options.vagueMax ?? Infinity;
   while (etat.statut === 'en_cours' && etat.pas < limite && !(vagueMax < Infinity && etat.pas % periode === 0 && derniereVagueTerminee(etat) >= vagueMax)) {
@@ -132,8 +141,14 @@ export function jouerPartie(niveau: Niveau, bot: Bot, options: OptionsPartie): R
         familleDuLieu.delete(cleDuLieu(a));
       }
     });
+    for (const e of etat.ennemis) if (e.boss && (pvMinBoss === null || e.pv < pvMinBoss)) pvMinBoss = e.pv;
     for (const ev of etat.evenements) {
-      if (ev.type === 'apparition') vagueDe.set(ev.ennemi, Math.max(0, etat.vagues.lancees - 1));
+      if (ev.type === 'mort') {
+        if (defsEnnemis[ev.typeEnnemi]?.boss) {
+          bossTues.push(ev.typeEnnemi);
+          pvMinBoss = 0;
+        }
+      } else if (ev.type === 'apparition') vagueDe.set(ev.ennemi, Math.max(0, etat.vagues.lancees - 1));
       else if (ev.type === 'fuite') {
         const vague = vagueDe.get(ev.ennemi) ?? 0;
         viesPerduesParVague[vague] = (viesPerduesParVague[vague] ?? 0) + ev.vies;
@@ -153,5 +168,7 @@ export function jouerPartie(niveau: Niveau, bot: Bot, options: OptionsPartie): R
     sorts,
     tourDivine,
     vagueTerminee: derniereVagueTerminee(etat),
+    bossTues,
+    pvMinBoss,
   };
 }

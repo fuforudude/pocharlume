@@ -305,5 +305,10 @@ export function deserialiser(texte: string): EtatPartie {
   const etat = JSON.parse(texte) as EtatPartie;
   if (etat.version !== VERSION_ETAT) throw new Error(`Etat de partie en version ${String(etat.version)}, attendue ${String(VERSION_ETAT)}`);
   verifierVersionDonnees(etat.versionDonnees);
+  // Une sauvegarde d'avant `accelerationCharge` : la charge du Prince Croisé et du voleur accélère pendant toute sa durée.
+  for (const e of etat.ennemis) {
+    const ancien: { accelerationCharge?: number } = e;
+    if (ancien.accelerationCharge === undefined) e.accelerationCharge = e.charge;
+  }
   return etat;
 }

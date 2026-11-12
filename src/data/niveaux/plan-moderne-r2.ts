@@ -17,6 +17,8 @@
 // pas), envoyer des renforts ou bloquer (toujours avec une recharge au moins égale à la durée de la coupure).
 // `aretesDepart` et `facteurBudget` : une première estimation prudente, posée sur un seul essai du bot soigneux en Matou par niveau ;
 // la tâche 7 les règle contre les bandes imposées.
+// Niveau 20 : arêtes de départ et budget dans la courbe de la région (2 200 et 0,21), au lieu de 3 600 et 0,12 qui laissaient le bot « gagner » en
+// laissant passer le Grand Centaure. Le boss n'est pas encore tuable par le bot (voir src/equilibrage/boss-moderne.test.ts).
 // `defiFer` : une famille qui touche les volants (tir ou magie) dès qu'il y a drones ou hélicoptères, la tour de tir avec la BAC
 // (furtive), jamais la même paire deux niveaux de suite.
 import type { IdCarteModerneR2 } from './cartes-moderne-r2';
@@ -308,7 +310,7 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     numero: 20,
     carte: 'grand_carrefour',
     chemins: [0, 1, 2],
-    aretesDepart: 3600,
+    aretesDepart: 2200,
     defiFer: { familles: ['caserne', 'magie'] },
     nom: 'niveau.m2.10.nom',
     ambiance: 'niveau.m2.10.ambiance',
@@ -342,7 +344,7 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
       ennemis: ['moderne_crs', 'moderne_tireur_lbd', 'moderne_bravm', 'moderne_grenadier_lacrymo', 'moderne_bouclier_anti_emeute', 'moderne_commissaire', 'moderne_cavalier_monte', 'moderne_drone', 'moderne_helicoptere', 'moderne_canon_a_eau', 'moderne_centaure'],
       graine: 5120,
       niveauBudget: 40,
-      facteurBudget: 0.12,
+      facteurBudget: 0.21,
       boss: { vague: 15, ennemi: 'moderne_centaure_boss', chemin: 0, delai: 6 },
     },
   },

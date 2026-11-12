@@ -101,6 +101,16 @@ describe('carte du monde du DLC', () => {
     expect(manif?.noeuds).toHaveLength(10);
     for (const n of manif?.noeuds ?? []) expect(n.x >= 0 && n.x <= 512 && n.y >= 0 && n.y <= 288, `nœud ${String(n.numero)}`).toBe(true);
     expect(manif?.noeuds.filter((n) => n.boss).map((n) => n.numero)).toEqual([10]);
+    // Les 9 tronçons : chacun part d'un nœud et arrive au suivant, dans le fond de 512 × 288.
+    if (!manif) throw new Error('Manif absente');
+    expect(manif.trace).toHaveLength(9);
+    manif.trace.forEach((troncon, i) => {
+      const a = manif.noeuds[i];
+      const b = manif.noeuds[i + 1];
+      expect([troncon[0]?.x, troncon[0]?.y], `tronçon ${String(i + 1)} : départ`).toEqual([a?.x, a?.y]);
+      expect([troncon.at(-1)?.x, troncon.at(-1)?.y], `tronçon ${String(i + 1)} : arrivée`).toEqual([b?.x, b?.y]);
+      for (const p of troncon) expect(p.x >= 0 && p.x <= 512 && p.y >= 0 && p.y <= 288).toBe(true);
+    });
   });
 
   it('la Préfecture est livrée : ses 10 niveaux (21 à 30), ses 10 nœuds dont le boss au dernier, et ses 9 tronçons', () => {
