@@ -34,6 +34,13 @@ describe('docs/lore.md et src/i18n/', () => {
     expect(sansDescription).toEqual([]);
   });
 
+  it('le DLC a une parole par boss (boss.m1 à boss.m3), reconnue comme clé nouvelle', () => {
+    for (let n = 1; n <= 3; n++) {
+      expect(frLore).toHaveProperty(`boss.m${String(n)}.parole`);
+      expect(CLE_NOUVELLE.test(`boss.m${String(n)}.parole`)).toBe(true);
+    }
+  });
+
   it('lit une ligne, ignore l’Univers et refuse une clé répétée', () => {
     const doc = '## Univers\n- `a.b` : non\n## Autre\n- `c.d` : oui ’ « x »\nlibre\n';
     expect(lireLore(doc)).toEqual([{ cle: 'c.d', texte: 'oui ’ « x »', ligne: 4 }]);

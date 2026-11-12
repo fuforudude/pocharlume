@@ -9,7 +9,7 @@
 // - 5 : niveau de horde (le Resto U) avec la BAC (furtif) ; nasse et renforts étudiants.
 // - 6 : le Tireur de LBD (tire sur les tours) ; première carte qui bouge (la grille du parvis cède : chemin qui s'ouvre).
 // - 7 : la BRAV-M (binôme) ; le piquet ferme puis rouvre la porte nord.
-// - 8 : Grenadier Lacrymogène et Drone (volant) ; trois chemins, dont un qui s'ouvre puis se ferme.
+// - 8 : Grenadier Lacrymogène et Drone (volant) ; trois chemins, dont un qui s'ouvre à mi-niveau et reste ouvert.
 // - 9 : Commissaire (aura de vitesse) et Bouclier Anti-Émeute ; le raccourci de la verrière se ferme puis rouvre.
 // - 10 : le Commissaire Divisionnaire (boss), avec sa mise en scène dans la dernière vague (renforts, escorte, canon, nasse, BRAV-M).
 //
@@ -89,8 +89,8 @@ export const PLANS_MODERNE_R1: readonly PlanNiveauModerne[] = [
     nom: 'niveau.m1.03.nom',
     ambiance: 'niveau.m1.03.ambiance',
     evenements: [
-      { vague: 4, delai: 6, type: 'charge', chemin: 1, ennemi: 'moderne_gendarme', nombre: 4, intervalle: 0.7, facteurVitesse: 1.8, duree: 4 },
-      { vague: 7, delai: 8, type: 'charge', chemin: 0, ennemi: 'moderne_gendarme_mobile', nombre: 3, intervalle: 0.8, facteurVitesse: 1.7, duree: 4 },
+      { vague: 4, delai: 6, type: 'charge', chemin: 1, ennemi: 'moderne_gendarme', nombre: 4, intervalle: 0.7, facteurVitesse: 1.8, duree: 11 },
+      { vague: 7, delai: 8, type: 'charge', chemin: 0, ennemi: 'moderne_gendarme_mobile', nombre: 3, intervalle: 0.8, facteurVitesse: 1.7, duree: 14 },
     ],
     foules: [
       { cases: [{ cx: 9, cy: 4 }], condition: { type: 'payer', cout: 50 }, effet: { type: 'ralentir', rayon: 3.5, facteur: 0.5, duree: 4 }, recharge: 20 },
@@ -109,7 +109,7 @@ export const PLANS_MODERNE_R1: readonly PlanNiveauModerne[] = [
     evenements: [
       { vague: 3, delai: 8, type: 'canon_a_eau', cy: 7, sens: 1, recul: 3, etourdissement: 1.5 },
       { vague: 6, delai: 10, type: 'canon_a_eau', cy: 2, sens: -1, recul: 3, etourdissement: 1.5 },
-      { vague: 9, delai: 5, type: 'charge', chemin: 0, ennemi: 'moderne_crs', nombre: 3, intervalle: 1, facteurVitesse: 1.6, duree: 5 },
+      { vague: 9, delai: 5, type: 'charge', chemin: 0, ennemi: 'moderne_crs', nombre: 3, intervalle: 1, facteurVitesse: 1.6, duree: 29 },
     ],
     foules: [
       { cases: [{ cx: 9, cy: 4 }], condition: { type: 'payer', cout: 60 }, effet: { type: 'bloquer', chemin: 0, debut: 63, longueur: 3, duree: 5 }, recharge: 25 },
@@ -128,7 +128,7 @@ export const PLANS_MODERNE_R1: readonly PlanNiveauModerne[] = [
     evenements: [
       { vague: 3, delai: 6, type: 'nasse', chemin: 1, debut: 12, longueur: 3, duree: 6 },
       { vague: 6, delai: 4, type: 'renforts', x: 21, y: 9, nombre: 3, duree: 12, unite: ETUDIANT },
-      { vague: 8, delai: 8, type: 'charge', chemin: 0, ennemi: 'moderne_bac', nombre: 4, intervalle: 0.6, facteurVitesse: 1.6, duree: 4 },
+      { vague: 8, delai: 8, type: 'charge', chemin: 0, ennemi: 'moderne_bac', nombre: 4, intervalle: 0.6, facteurVitesse: 1.6, duree: 10 },
     ],
     foules: [
       { cases: [{ cx: 12, cy: 4 }], condition: { type: 'heros', duree: 3 }, effet: { type: 'ralentir', rayon: 3.5, facteur: 0.45, duree: 4 }, recharge: 22 },
@@ -148,7 +148,7 @@ export const PLANS_MODERNE_R1: readonly PlanNiveauModerne[] = [
     evenements: [
       { vague: 2, delai: 8, type: 'canon_a_eau', cy: 3, sens: 1, recul: 3, etourdissement: 1.5 },
       { vague: 4, delai: 3, type: 'ouvrir_chemin', chemin: 1 },
-      { vague: 4, delai: 9, type: 'charge', chemin: 1, ennemi: 'moderne_gendarme_mobile', nombre: 4, intervalle: 0.8, facteurVitesse: 1.7, duree: 4 },
+      { vague: 4, delai: 9, type: 'charge', chemin: 1, ennemi: 'moderne_gendarme_mobile', nombre: 4, intervalle: 0.8, facteurVitesse: 1.7, duree: 10 },
       { vague: 8, delai: 6, type: 'nasse', chemin: 0, debut: 10, longueur: 3, duree: 6 },
       { vague: 10, delai: 5, type: 'renforts', x: 20, y: 7, nombre: 3, duree: 12, unite: ETUDIANT },
     ],
@@ -169,12 +169,12 @@ export const PLANS_MODERNE_R1: readonly PlanNiveauModerne[] = [
     evenements: [
       { vague: 3, delai: 6, type: 'canon_a_eau', cy: 4, sens: -1, recul: 3, etourdissement: 1.5 },
       { vague: 5, delai: 3, type: 'fermer_chemin', chemin: 1, repli: 0 },
-      { vague: 6, delai: 8, type: 'charge', chemin: 0, ennemi: 'moderne_bravm', nombre: 2, intervalle: 0.4, facteurVitesse: 1.5, duree: 4 },
+      { vague: 6, delai: 8, type: 'charge', chemin: 0, ennemi: 'moderne_bravm', nombre: 2, intervalle: 0.4, facteurVitesse: 1.5, duree: 10 },
       { vague: 8, delai: 3, type: 'ouvrir_chemin', chemin: 1 },
       { vague: 9, delai: 10, type: 'nasse', chemin: 1, debut: 4, longueur: 3, duree: 5 },
     ],
     foules: [
-      { cases: [{ cx: 6, cy: 1 }], condition: { type: 'payer', cout: 70 }, effet: { type: 'ralentir', rayon: 4, facteur: 0.5, duree: 5 }, recharge: 20 },
+      { cases: [{ cx: 9, cy: 5 }], condition: { type: 'payer', cout: 70 }, effet: { type: 'ralentir', rayon: 4, facteur: 0.5, duree: 5 }, recharge: 20 },
       { cases: [{ cx: 8, cy: 2 }], condition: { type: 'heros', duree: 3 }, effet: { type: 'bloquer', chemin: 1, debut: 2, longueur: 3, duree: 6 }, recharge: 30 },
     ],
     vagues: { nombre: 11, ennemis: ['moderne_gendarme', 'moderne_gendarme_mobile', 'moderne_crs', 'moderne_tireur_lbd', 'moderne_bravm'], graine: 5107, niveauBudget: 27, facteurBudget: 0.3 },
@@ -189,16 +189,15 @@ export const PLANS_MODERNE_R1: readonly PlanNiveauModerne[] = [
     ambiance: 'niveau.m1.08.ambiance',
     cheminsFermes: [{ chemin: 2, repli: 1 }],
     evenements: [
-      { vague: 2, delai: 6, type: 'charge', chemin: 1, ennemi: 'moderne_gendarme', nombre: 5, intervalle: 0.6, facteurVitesse: 1.8, duree: 4 },
+      { vague: 2, delai: 6, type: 'charge', chemin: 1, ennemi: 'moderne_gendarme', nombre: 5, intervalle: 0.6, facteurVitesse: 1.8, duree: 13 },
       { vague: 4, delai: 8, type: 'canon_a_eau', cy: 4, sens: -1, recul: 3, etourdissement: 1.5 },
       { vague: 6, delai: 3, type: 'ouvrir_chemin', chemin: 2 },
-      { vague: 7, delai: 6, type: 'renforts', x: 27, y: 13, nombre: 3, duree: 12, unite: ETUDIANT },
-      { vague: 10, delai: 3, type: 'fermer_chemin', chemin: 2, repli: 1 },
-      { vague: 11, delai: 8, type: 'charge', chemin: 0, ennemi: 'moderne_bravm', nombre: 2, intervalle: 0.4, facteurVitesse: 1.5, duree: 4 },
+      { vague: 7, delai: 6, type: 'renforts', x: 25, y: 13, nombre: 3, duree: 12, unite: ETUDIANT },
+      { vague: 11, delai: 8, type: 'charge', chemin: 0, ennemi: 'moderne_bravm', nombre: 2, intervalle: 0.4, facteurVitesse: 1.5, duree: 10 },
     ],
     foules: [
       { cases: [{ cx: 11, cy: 3 }], condition: { type: 'payer', cout: 60 }, effet: { type: 'renforts', nombre: 3, duree: 12, unite: ETUDIANT }, recharge: 25 },
-      { cases: [{ cx: 8, cy: 7 }], condition: { type: 'payer', cout: 80 }, effet: { type: 'bloquer', chemin: 1, debut: 15, longueur: 3, duree: 5 }, utilisations: 3 },
+      { cases: [{ cx: 8, cy: 7 }], condition: { type: 'payer', cout: 80 }, effet: { type: 'bloquer', chemin: 1, debut: 15, longueur: 3, duree: 5 }, recharge: 8, utilisations: 3 },
       { cases: [{ cx: 12, cy: 4 }], condition: { type: 'heros', duree: 3 }, effet: { type: 'ralentir', rayon: 3.5, facteur: 0.5, duree: 5 }, recharge: 25 },
     ],
     vagues: {
@@ -221,7 +220,7 @@ export const PLANS_MODERNE_R1: readonly PlanNiveauModerne[] = [
       { vague: 2, delai: 8, type: 'nasse', chemin: 0, debut: 30, longueur: 3, duree: 6 },
       { vague: 4, delai: 3, type: 'fermer_chemin', chemin: 1, repli: 0 },
       { vague: 5, delai: 6, type: 'canon_a_eau', cy: 7, sens: 1, recul: 3, etourdissement: 1.5 },
-      { vague: 7, delai: 8, type: 'charge', chemin: 0, ennemi: 'moderne_crs', nombre: 3, intervalle: 1, facteurVitesse: 1.6, duree: 5 },
+      { vague: 7, delai: 8, type: 'charge', chemin: 0, ennemi: 'moderne_crs', nombre: 3, intervalle: 1, facteurVitesse: 1.6, duree: 26 },
       { vague: 9, delai: 3, type: 'ouvrir_chemin', chemin: 1 },
       { vague: 10, delai: 6, type: 'charge', chemin: 1, ennemi: 'moderne_bravm', nombre: 2, intervalle: 0.4, facteurVitesse: 1.5, duree: 4 },
       { vague: 11, delai: 5, type: 'renforts', x: 20, y: 15, nombre: 3, duree: 12, unite: ETUDIANT },
@@ -248,23 +247,23 @@ export const PLANS_MODERNE_R1: readonly PlanNiveauModerne[] = [
     nom: 'niveau.m1.10.nom',
     ambiance: 'niveau.m1.10.ambiance',
     cheminsFermes: [{ chemin: 2, repli: 1 }],
-    // Le Commissaire Divisionnaire entre à la vague 13 (chemin 0) : les étudiants descendent l'accueillir (renforts), le sud s'ouvre pour
-    // son escorte de CRS, le canon à eau balaie la ligne, une nasse coupe le chemin du sud-ouest et la BRAV-M ferme la marche.
+    // Le Commissaire Divisionnaire entre à la vague 13 (chemin 0) : les étudiants descendent l'accueillir (renforts), son escorte de CRS
+    // prend le chemin du sud (ouvert dès la vague 6 : on a eu le temps d'y bâtir), le canon à eau balaie la ligne, une nasse coupe le chemin du sud-ouest et la BRAV-M ferme la marche.
     evenements: [
-      { vague: 3, delai: 6, type: 'charge', chemin: 1, ennemi: 'moderne_gendarme_mobile', nombre: 4, intervalle: 0.8, facteurVitesse: 1.7, duree: 4 },
+      { vague: 3, delai: 6, type: 'charge', chemin: 1, ennemi: 'moderne_gendarme_mobile', nombre: 4, intervalle: 0.8, facteurVitesse: 1.7, duree: 14 },
       { vague: 5, delai: 8, type: 'canon_a_eau', cy: 4, sens: -1, recul: 3, etourdissement: 1.5 },
+      { vague: 6, delai: 3, type: 'ouvrir_chemin', chemin: 2 },
       { vague: 7, delai: 5, type: 'nasse', chemin: 0, debut: 14, longueur: 3, duree: 6 },
       { vague: 9, delai: 6, type: 'renforts', x: 18, y: 9, nombre: 3, duree: 12, unite: ETUDIANT },
-      { vague: 13, delai: 3, type: 'ouvrir_chemin', chemin: 2 },
       { vague: 13, delai: 4, type: 'renforts', x: 24, y: 9, nombre: 4, duree: 15, unite: ETUDIANT },
-      { vague: 13, delai: 8, type: 'charge', chemin: 2, ennemi: 'moderne_crs', nombre: 4, intervalle: 0.9, facteurVitesse: 1.5, duree: 5 },
+      { vague: 13, delai: 8, type: 'charge', chemin: 2, ennemi: 'moderne_crs', nombre: 4, intervalle: 0.9, facteurVitesse: 1.5, duree: 9 },
       { vague: 13, delai: 14, type: 'canon_a_eau', cy: 4, sens: -1, recul: 3, etourdissement: 2 },
       { vague: 13, delai: 20, type: 'nasse', chemin: 1, debut: 8, longueur: 3, duree: 6 },
-      { vague: 13, delai: 30, type: 'charge', chemin: 0, ennemi: 'moderne_bravm', nombre: 2, intervalle: 0.4, facteurVitesse: 1.5, duree: 4 },
+      { vague: 13, delai: 30, type: 'charge', chemin: 0, ennemi: 'moderne_bravm', nombre: 2, intervalle: 0.4, facteurVitesse: 1.5, duree: 10 },
     ],
     foules: [
       { cases: [{ cx: 12, cy: 3 }], condition: { type: 'payer', cout: 70 }, effet: { type: 'ralentir', rayon: 4, facteur: 0.5, duree: 5 }, recharge: 20 },
-      { cases: [{ cx: 6, cy: 6 }], condition: { type: 'payer', cout: 90 }, effet: { type: 'bloquer', chemin: 1, debut: 8, longueur: 3, duree: 6 }, utilisations: 3 },
+      { cases: [{ cx: 6, cy: 6 }], condition: { type: 'payer', cout: 90 }, effet: { type: 'bloquer', chemin: 1, debut: 8, longueur: 3, duree: 6 }, recharge: 8, utilisations: 3 },
       { cases: [{ cx: 11, cy: 4 }], condition: { type: 'heros', duree: 3 }, effet: { type: 'renforts', nombre: 4, duree: 14, unite: ETUDIANT }, recharge: 30 },
     ],
     vagues: {

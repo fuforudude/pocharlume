@@ -29,7 +29,41 @@ export function cheminsMobilesDuPlan(plan: PlanNiveauModerne): Set<number> {
   return mobiles;
 }
 
+/** Les indices de chemin que le plan écrit dans ses événements, ses chemins fermés et ses foules (`repli` compris), avec leur provenance. */
+function indicesVisesParLePlan(plan: PlanNiveauModerne): { quoi: string; chemin: number }[] {
+  const vises: { quoi: string; chemin: number }[] = [];
+  (plan.evenements ?? []).forEach((e, i) => {
+    const quoi = `événement ${String(i)} (${e.type})`;
+    if (e.type === 'charge' || e.type === 'nasse' || e.type === 'ouvrir_chemin' || e.type === 'fermer_chemin') vises.push({ quoi, chemin: e.chemin });
+    if (e.type === 'fermer_chemin') vises.push({ quoi: `${quoi}, repli`, chemin: e.repli });
+  });
+  (plan.cheminsFermes ?? []).forEach((f, i) => {
+    vises.push({ quoi: `chemin fermé ${String(i)}`, chemin: f.chemin }, { quoi: `chemin fermé ${String(i)}, repli`, chemin: f.repli });
+  });
+  (plan.foules ?? []).forEach((f, i) => {
+    if (f.effet.type === 'bloquer') vises.push({ quoi: `foule ${String(i)} (bloquer)`, chemin: f.effet.chemin });
+  });
+  return vises;
+}
+
+/**
+ * Garde de cohérence : `plan.chemins` est remappé sur la carte, alors que les événements, les chemins fermés et les foules sont copiés tels
+ * quels et lus en indices du niveau. Le plan doit donc garder l'ordre de la carte (0, 1, 2…), et rien ne doit viser un chemin hors du plan.
+ */
+function verifierPlan(plan: PlanNiveauModerne): void {
+  const n = plan.chemins.length;
+  if (!plan.chemins.every((c, i) => c === i)) {
+    throw new Error(`Niveau moderne ${String(plan.numero)} : les chemins du plan doivent être l'identité 0..${String(n - 1)} (reçu ${plan.chemins.join(', ')}), sinon les indices des événements et des foules seraient décalés`);
+  }
+  for (const { quoi, chemin } of indicesVisesParLePlan(plan)) {
+    if (!Number.isInteger(chemin) || chemin < 0 || chemin >= n) {
+      throw new Error(`Niveau moderne ${String(plan.numero)} : ${quoi} vise le chemin ${String(chemin)}, hors du plan (${String(n)} chemin(s))`);
+    }
+  }
+}
+
 export function assemblerNiveauModerne(plan: PlanNiveauModerne, vagues: readonly Vague[]): NiveauCampagne {
+  verifierPlan(plan);
   const modele = CARTES_MODERNE_R1[plan.carte];
   const region = Math.floor((plan.numero - 1) / NIVEAUX_PAR_REGION) + 1;
   const rang = ((plan.numero - 1) % NIVEAUX_PAR_REGION) + 1;

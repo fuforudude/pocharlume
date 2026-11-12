@@ -7,6 +7,7 @@
 // - la simulation avance par pas fixes (PasFixes), le rendu interpole entre deux pas ;
 // - tout ce que la partie installe (événements, DOM, boucle) est retiré par `arreter()`.
 import { audio, jouerInterface } from '../audio';
+import { NIVEAUX_PAR_REGION } from '../data/meta';
 import type { NiveauCampagne } from '../data/visuel';
 import { avancer, caseExiste, centreCase, creerPartie, derniereVagueTerminee, validerAction } from '../engine';
 import type { Action, ConfigPartie, EntreeJournal, EtatPartie, ResultatAction } from '../engine';
@@ -761,7 +762,9 @@ export async function lancerNiveau(
         }
         for (const evenement of etat.evenements) {
           if (evenement.type !== 'vague') continue;
-          const cle = cleParoleBoss(etat.niveau.vagues, evenement.index, niveau.visuel.region, niveau.boss);
+          const dlc = niveau.campagne === 'moderne';
+          const region = dlc ? Math.floor((niveau.numero - 1) / NIVEAUX_PAR_REGION) + 1 : niveau.visuel.region;
+          const cle = cleParoleBoss(etat.niveau.vagues, evenement.index, region, niveau.boss, dlc);
           if (cle) paroles.push(t(cle));
         }
         const parole = reunirParoles(paroles);

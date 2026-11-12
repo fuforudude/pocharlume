@@ -218,7 +218,9 @@ describe('les 10 niveaux de la Fac', () => {
     expect((boss.niveau.evenements ?? []).filter((e) => e.vague === derniere).length).toBeGreaterThanOrEqual(4);
   });
 
-  it('la difficulté monte : plus de vagues et un budget plus haut de niveau en niveau, une horde, jamais au boss', () => {
+  // Ce test ne mesure PAS la difficulté : `niveauBudget` n'est que le budget annoncé (niveau de l'histoire dont le budget de menace sert). Le budget
+  // effectif (× `facteurBudget`) baisse au fil des niveaux ; l'équilibrage réel (tâche 7, bots) viendra plus tard.
+  it('le budget annoncé (niveauBudget) monte de niveau en niveau, le nombre de vagues ne baisse pas ; une horde, jamais au boss', () => {
     PLANS_MODERNE_R1.forEach((p, i) => {
       const avant = PLANS_MODERNE_R1[i - 1];
       if (!avant) return;

@@ -230,40 +230,40 @@ export const BIBLIOTHEQUE: CarteModerne = {
   },
   decor: [
     decor('moderne-chaise', 19, 1, true),
-    decor('moderne-chaise', 5, 1.5, true),
+    decor('moderne-chaise', 5.5, 1.5, true),
     decor('moderne-poubelle', 7, 1.5),
     decor('moderne-tracts', 16, 1.5),
     decor('moderne-tracts', 20.5, 1.5, true),
-    decor('moderne-etagere', 9, 2),
-    decor('moderne-tableau', 12, 2),
+    decor('moderne-etagere', 8.5, 16.5),
+    decor('moderne-tableau', 26, 8.5),
     decor('moderne-plante', 17.5, 2),
-    decor('moderne-cartons', 22.5, 2, true),
-    decor('moderne-cartons', 31, 2),
-    decor('moderne-plante', 14, 2.5),
-    decor('moderne-cartons', 5, 3, true),
-    decor('moderne-cartons', 29.5, 3),
-    decor('moderne-sac', 11.5, 3.5, true),
-    decor('moderne-chaise', 16, 3.5),
-    decor('moderne-tracts', 22, 3.5),
+    decor('moderne-cartons', 22.5, 1.5, true),
+    decor('moderne-cartons', 31, 1.5),
+    decor('moderne-plante', 14, 1.5),
+    decor('moderne-cartons', 8.5, 1.5, true),
+    decor('moderne-cartons', 31.5, 3),
+    decor('moderne-sac', 11.5, 1.5, true),
+    decor('moderne-chaise', 17.5, 3.5),
+    decor('moderne-tracts', 20.5, 3.5),
     decor('moderne-poubelle', 6.5, 4, true),
-    decor('moderne-poubelle', 1, 5),
+    decor('moderne-poubelle', 0.5, 5),
     decor('moderne-tracts', 6, 5.5),
     decor('moderne-gradins', 19, 6, true),
-    decor('moderne-poubelle', 31, 6.5, true),
-    decor('moderne-plante', 25, 7.5, true),
+    decor('moderne-poubelle', 31.5, 6.5, true),
+    decor('moderne-plante', 25.5, 10, true),
     decor('moderne-plante', 17.5, 8, true),
-    decor('moderne-chaise', 31, 8),
+    decor('moderne-chaise', 31.5, 8),
     decor('moderne-sac', 12, 8.5),
     decor('moderne-plante', 6.5, 9),
-    decor('moderne-tracts', 25, 9, true),
+    decor('moderne-tracts', 25.5, 11.5, true),
     decor('moderne-poubelle', 0.5, 9.5, true),
     decor('moderne-etagere', 12, 11),
-    decor('moderne-cartons', 17, 11, true),
-    decor('moderne-chaise', 1, 11.5, true),
+    decor('moderne-cartons', 17.5, 11, true),
+    decor('moderne-chaise', 0.5, 11.5, true),
     decor('moderne-tracts', 12, 12.5),
-    decor('moderne-poubelle', 20, 13, true),
-    decor('moderne-cartons', 11, 14, true),
-    decor('moderne-tracts', 13, 14),
+    decor('moderne-poubelle', 20, 11.5, true),
+    decor('moderne-cartons', 11, 14.5, true),
+    decor('moderne-tracts', 12.5, 14),
     decor('moderne-etagere', 26, 15, true),
     decor('moderne-plante', 1.5, 16, true),
     decor('moderne-chaise', 5, 16.5, true),
@@ -477,7 +477,7 @@ export const PIQUET: CarteModerne = {
 };
 
 /**
- * L’Assemblée Générale : deux chemins entrent par l’ouest ; la porte du sud (chemin 2) s’ouvre pendant le vote, puis se referme.
+ * L’Assemblée Générale : deux chemins entrent par l’ouest ; la porte du sud (chemin 2) s’ouvre pendant le vote et reste ouverte.
  */
 export const ASSEMBLEE: CarteModerne = {
   id: 'assemblee',
@@ -612,7 +612,7 @@ export const HALL: CarteModerne = {
 };
 
 /**
- * Le Rectorat : deux chemins de l’ouest se rejoignent devant le rectorat ; un troisième, au sud (chemin 2), s’ouvre quand le commissaire arrive.
+ * Le Rectorat : deux chemins de l’ouest se rejoignent devant le rectorat ; un troisième, au sud (chemin 2), s’ouvre à mi-niveau (vague 6) et reste ouvert jusqu’au commissaire.
  */
 export const RECTORAT: CarteModerne = {
   id: 'rectorat',

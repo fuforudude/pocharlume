@@ -56,4 +56,4 @@ export function litteral(texte: string): string {
 }
 
 /** Les clés qui peuvent être nouvelles (et vont dans fr-lore.ts) : les autres doivent déjà exister dans src/i18n/. */
-export const CLE_NOUVELLE = /^(?:inscription\.[a-z0-9_]+|boss\.r\d+\.parole|ennemi\.[a-z0-9_]+\.desc)$/;
+export const CLE_NOUVELLE = /^(?:inscription\.[a-z0-9_]+|boss\.[rm]\d+\.parole|ennemi\.[a-z0-9_]+\.desc)$/;

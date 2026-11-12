@@ -1,6 +1,6 @@
 // `npm run lore` : reporte les textes de docs/lore.md dans src/i18n/.
 //   - une clé qui existe déjà est mise à jour dans son fichier, sur place ;
-//   - une clé nouvelle (inscription.*, boss.r<n>.parole, ennemi.<id>.desc) va dans src/i18n/fr-lore.ts,
+//   - une clé nouvelle (inscription.*, boss.r<n>.parole ou boss.m<n>.parole, ennemi.<id>.desc) va dans src/i18n/fr-lore.ts,
 //     réécrit en entier à chaque passage ;
 //   - toute autre clé inconnue, ou tout texte qui ne se retrouve pas à l'identique après écriture, est une erreur.
 // Rejouable : `npm run lore` après chaque correction de lore.md. `npm run lore -- --verifier` ne modifie rien et

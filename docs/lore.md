@@ -466,6 +466,15 @@ Ce ne sont plus les dieux qui parlent : un murmure, une inscription, une voix sa
 - `boss.r10.parole` : Personne ne parle. Seulement, très bas : « Garde tes braises dans l’ombre. La mort n’a jamais trouvé celle qui n’en a plus. »
 - `boss.r11.parole` : Gravé sur une rame plantée dans le sable : « Une obole pour passer. Personne n’a jamais dit qu’il y avait une autre rive. »
 
+## DLC « Temps modernes » : paroles avant les boss
+
+Une réplique par boss du DLC, clé construite sur la campagne (`boss.m<région>.parole` : la Fac, la Manif, la Préfecture). Même ton :
+satire pince-sans-rire, aucun nom réel, aucun insigne, aucune violence réaliste.
+
+- `boss.m1.parole` : Dans le mégaphone du commissaire, tout bas : « Je ne suis pas là pour la fac. Je suis là pour le procès-verbal. »
+- `boss.m2.parole` : Sur le flanc du Centaure, en lettres blanches : « Véhicule de dialogue. Veuillez ne pas dialoguer avec le véhicule. »
+- `boss.m3.parole` : Sous la porte de la préfecture, un arrêté glissé à la main : « Le préfet vous reçoit tout de suite. Prenez un ticket pour mardi. »
+
 ## Régions
 
 - `region.1` : Le Village Affamé

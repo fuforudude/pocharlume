@@ -92,6 +92,9 @@ export const frLore = {
   'boss.r9.parole': 'Sous le trône, à demi effacé : « La couronne parle. Les statues… se taisent pour toi. »',
   'boss.r10.parole': 'Personne ne parle. Seulement, très bas : « Garde tes braises dans l’ombre. La mort n’a jamais trouvé celle qui n’en a plus. »',
   'boss.r11.parole': 'Gravé sur une rame plantée dans le sable : « Une obole pour passer. Personne n’a jamais dit qu’il y avait une autre rive. »',
+  'boss.m1.parole': 'Dans le mégaphone du commissaire, tout bas : « Je ne suis pas là pour la fac. Je suis là pour le procès-verbal. »',
+  'boss.m2.parole': 'Sur le flanc du Centaure, en lettres blanches : « Véhicule de dialogue. Veuillez ne pas dialoguer avec le véhicule. »',
+  'boss.m3.parole': 'Sous la porte de la préfecture, un arrêté glissé à la main : « Le préfet vous reçoit tout de suite. Prenez un ticket pour mardi. »',
 
   // Inscriptions des statues
   'inscription.chaumes': 'Neuf jours il a tenu la porte. Derrière lui, on rentrait les foins, et des petits naissaient.',
