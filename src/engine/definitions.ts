@@ -877,7 +877,10 @@ export interface EvenementCharge extends MomentEvenement {
   readonly nombre: number;
   readonly intervalle: number;
   readonly facteurVitesse: number;
+  /** Secondes de traversée des soldats (de l'apparition jusqu'au milieu du chemin, en général). */
   readonly duree: number;
+  /** Secondes d'accélération (`facteurVitesse`), au plus `duree` ; par défaut EVENEMENTS_NIVEAU.accelerationCharge, bornée à `duree`. */
+  readonly dureeVitesse?: number;
   readonly elite?: boolean;
 }
 

@@ -86,6 +86,7 @@ export function ajouterEnnemi(etat: EtatPartie, def: DefEnnemi, type: string, ch
     bonusVitesse: 0,
     charge: 0,
     chargeVitesse: 1,
+    accelerationCharge: 0,
     renversements: def.pouvoirs?.renversement ? 1 : 0,
     bondPas: 0,
     vole: false,
@@ -127,7 +128,7 @@ function rageActive(e: Ennemi): Rage | null {
 export function facteurVitesse(e: Ennemi): number {
   if ((e.effetsPas[EFFET.etourdissement] ?? 0) > 0) return 0;
   let facteur = (e.effetsPas[EFFET.ralentissement] ?? 0) > 0 ? (e.effetsValeur[EFFET.ralentissement] ?? 1) : 1;
-  if (e.charge > 0) facteur *= e.chargeVitesse;
+  if (e.accelerationCharge > 0) facteur *= e.chargeVitesse;
   facteur *= 1 + e.bonusVitesse;
   if (e.binomeSeul) facteur *= 1 + (e.pouvoirs?.binome?.vitesse ?? 0);
   const rage = rageActive(e);
@@ -183,6 +184,7 @@ function voler(etat: EtatPartie, e: Ennemi, vol: Vol, enFuite: boolean): void {
   etat.evenements.push({ type: 'vol', ennemi: e.id, aretes: pris });
   if (enFuite) return;
   e.charge = Math.max(1, enPas(vol.duree));
+  e.accelerationCharge = e.charge;
   e.chargeVitesse = vol.vitesse;
   libererEnnemi(etat, e);
 }
@@ -322,6 +324,7 @@ export function mettreAJourEnnemis(etat: EtatPartie): void {
     if (e.recharge > 0) e.recharge--;
     if (e.rechargeDistance > 0) e.rechargeDistance--;
     if (e.charge > 0) e.charge--;
+    if (e.accelerationCharge > 0) e.accelerationCharge--;
     if (e.bondPas > 0) e.bondPas--;
     if (facteur === 0) continue;
 

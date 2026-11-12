@@ -7,7 +7,6 @@
 // - la simulation avance par pas fixes (PasFixes), le rendu interpole entre deux pas ;
 // - tout ce que la partie installe (événements, DOM, boucle) est retiré par `arreter()`.
 import { audio, jouerInterface } from '../audio';
-import { NIVEAUX_PAR_REGION } from '../data/meta';
 import type { NiveauCampagne } from '../data/visuel';
 import { avancer, caseExiste, centreCase, creerPartie, derniereVagueTerminee, validerAction } from '../engine';
 import type { Action, ConfigPartie, EntreeJournal, EtatPartie, ResultatAction } from '../engine';
@@ -36,7 +35,7 @@ import { elementsMenu, type ElementMenu } from './menu-cercle';
 import { afficherNouvelleParticularite } from './nouvelle-particularite';
 import { contenuParticularite, contenuRadeau, type TypeParticularite } from './particularites';
 import { centreRadeauAffiche, placeAffichee } from '../render/gimmicks';
-import { cleParoleBoss } from './parole-boss';
+import { cleParoleBoss, regionDeParole } from './parole-boss';
 import { texteRefus } from './refus';
 import { fouleVisee, reunirParoles, texteBandeau, toucherFoule } from './evenements-niveau';
 import { statueTouchee } from './statue';
@@ -762,9 +761,7 @@ export async function lancerNiveau(
         }
         for (const evenement of etat.evenements) {
           if (evenement.type !== 'vague') continue;
-          const dlc = niveau.campagne === 'moderne';
-          const region = dlc ? Math.floor((niveau.numero - 1) / NIVEAUX_PAR_REGION) + 1 : niveau.visuel.region;
-          const cle = cleParoleBoss(etat.niveau.vagues, evenement.index, region, niveau.boss, dlc);
+          const cle = cleParoleBoss(etat.niveau.vagues, evenement.index, regionDeParole(niveau), niveau.boss, niveau.campagne === 'moderne');
           if (cle) paroles.push(t(cle));
         }
         const parole = reunirParoles(paroles);

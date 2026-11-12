@@ -5,7 +5,7 @@ import type { EvenementNiveau, Niveau, Vague } from '../definitions';
 import { ajouterEnnemi } from '../ennemis';
 import type { EtatPartie } from '../etat';
 import type { Evenement } from '../evenements';
-import { appliquerAction, creerPartie, step, validerAction } from '../partie';
+import { appliquerAction, creerPartie, rejouer, serialiser, step, validerAction } from '../partie';
 import { cheminEffectif } from './chemins-mobiles';
 import { repartirEvenementsFer } from './index';
 import { enPas } from '../temps';
@@ -126,6 +126,93 @@ describe('charge', () => {
     const ensuite = e.distance;
     avancerSecondes(etat, 1);
     expect(e.distance - ensuite).toBeCloseTo(0.9, 1);
+  });
+
+  it('par défaut, l’accélération dure EVENEMENTS_NIVEAU.accelerationCharge s (ou toute la charge si elle est plus courte)', () => {
+    const etat = partie({ evenements: [{ ...charge, nombre: 1, duree: 20 }, { ...charge, chemin: 0, nombre: 1, duree: 2 }] });
+    suivre(etat, ANNONCE + 1);
+    const longue = etat.ennemis.find((x) => x.chemin === 1);
+    const courte = etat.ennemis.find((x) => x.chemin === 0);
+    if (!longue || !courte) throw new Error('pas de chargeur');
+    expect(longue.accelerationCharge).toBe(enPas(EVENEMENTS_NIVEAU.accelerationCharge) - 1);
+    expect(longue.charge).toBe(enPas(20) - 1);
+    expect(courte.accelerationCharge).toBe(courte.charge);
+  });
+
+  it('refuse une durée d’accélération nulle ou plus longue que la charge', () => {
+    const avec = (dureeVitesse: number): (() => EtatPartie) => () =>
+      creerPartie(niveauDynamique({ evenements: [{ ...charge, duree: 5, dureeVitesse }] }), CONFIG);
+    expect(avec(0)).toThrow(/accélération/);
+    expect(avec(6)).toThrow(/accélération/);
+    expect(avec(Number.NaN)).toThrow(/accélération/);
+    expect(avec(5)).not.toThrow();
+  });
+
+  describe('deux durées : accélération courte, traversée des soldats sur toute la charge', () => {
+    // CRS (240 PV, armure 0,6, 0,9 tuile/s) : il tient assez longtemps au contact du héros pour qu'on voie s'il est retenu.
+    const longue: EvenementNiveau = { vague: 1, delai: 20, type: 'charge', chemin: 1, ennemi: 'moderne_crs', nombre: 1, intervalle: 0, facteurVitesse: 2, duree: 10, dureeVitesse: 1 };
+
+    /** Partie où le héros attend sur le chemin 1, en (x, 12), quand la charge part (au pas qui suit son départ). */
+    function avecHeros(x: number): { niveau: Niveau; etat: EtatPartie; chargeur: () => ReturnType<typeof ajouterEnnemi> } {
+      const niveau = niveauDynamique({ evenements: [longue] });
+      const etat = creerPartie(niveau, CONFIG);
+      expect(appliquerAction(etat, { type: 'appelerVague' }).ok).toBe(true);
+      expect(appliquerAction(etat, { type: 'deplacerHeros', x, y: 12 }).ok).toBe(true);
+      suivre(etat, enPas(20) + 1);
+      const h = heros(etat);
+      expect(Math.abs(h.x - x)).toBeLessThan(0.5);
+      return {
+        niveau,
+        etat,
+        chargeur: () => {
+          const e = etat.ennemis.find((z) => z.type === 'moderne_crs');
+          if (!e) throw new Error('pas de chargeur');
+          return e;
+        },
+      };
+    }
+
+    it('après l’accélération, le chargeur reprend sa vitesse normale mais traverse encore les soldats', () => {
+      const { etat, chargeur } = avecHeros(6);
+      const e = chargeur();
+      avancerSecondes(etat, 1.5);
+      expect(e.accelerationCharge).toBe(0);
+      expect(e.charge).toBeGreaterThan(0);
+      const avant = e.distance;
+      avancerSecondes(etat, 1);
+      expect(e.distance - avant).toBeCloseTo(0.9, 1);
+      // Il passe le héros (x = 6) sans être retenu, encore en charge.
+      let retenu = false;
+      while (e.distance < 9 && e.charge > 0) {
+        suivre(etat, 1);
+        if (e.bloqueur !== -1) retenu = true;
+      }
+      expect(retenu).toBe(false);
+      expect(e.distance).toBeGreaterThanOrEqual(9);
+      expect(e.charge).toBeGreaterThan(0);
+    });
+
+    it('à la fin de la charge, les soldats le retiennent de nouveau', () => {
+      // 2 tuiles en 1 s d'accélération, puis 0,9 tuile/s : x = 14 est atteint vers 14,3 s, après la fin de la charge (10 s).
+      const { etat, chargeur } = avecHeros(14);
+      const e = chargeur();
+      avancerSecondes(etat, 10);
+      expect(e.charge).toBe(0);
+      expect(e.distance).toBeLessThan(13);
+      let retenu = false;
+      for (let i = 0; i < 30 * 8 && e.vivant && !retenu; i++) {
+        suivre(etat, 1);
+        if (e.bloqueur !== -1) retenu = true;
+      }
+      expect(retenu).toBe(true);
+    });
+
+    it('rejouer la graine et le journal redonne le même état, octet pour octet', () => {
+      const { niveau, etat } = avecHeros(6);
+      avancerSecondes(etat, 12);
+      const rejoue = rejouer(niveau, CONFIG, etat.journal, etat.pas);
+      expect(serialiser(rejoue)).toBe(serialiser(etat));
+    });
   });
 
   it('la victoire attend que la charge de la dernière vague soit passée', () => {
