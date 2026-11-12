@@ -1,0 +1,168 @@
+# DLC « Temps modernes » : les héros en étudiants mobilisés. Fidèles de l'Ombre (Plume) : les colleurs et tagueurs de nuit,
+# rapides et furtifs, en noir.
+# Pose de repos seulement (première revue) : les animations viendront après l'avis de l'auteur. Chaque skin garde la
+# taille, l'ancre, l'origine des grilles et les noms de calques de son original (art/sprites/), pour que ses animations
+# puissent reprendre plus tard les lignes `cadre` de l'original presque telles quelles.
+# Satire en dessin : aucun logo, insigne ni inscription, aucune violence réaliste.
+# Hors atlas : ce dossier n'est lu que par l'outil d'aperçu du DLC (npm run dlc:apercu), jamais par npm run art.
+#= Les fidèles de l'Ombre (Plume)
+#: moderne-heros-plume | Nielle, Colleuse de nuit | heros-plume
+#: moderne-heros-suie | Suie, le Tagueur | heros-suie
+#: moderne-heros-corbeau | Corbeau, le Guetteur des toits | heros-corbeau
+# Couleurs propres au DLC (mêmes lettres que les tours) : 1 magenta (tags, affiches), 2 cyan, 5 rose, 6 sweat marine,
+# 7 kaki, 8 orange chantier, 9 gris clair, 0 jaune fluo, C plastique bleu, D carton, X marine sombre, Q ardoise.
+categorie unite
+palette commune
+taille 32 32
+ancre 16 30
+couleur 1 e0508c
+couleur 2 40c8d8
+couleur 5 f4a8c8
+couleur 6 34467a
+couleur 7 5a6a3a
+couleur 8 f07a20
+couleur 9 cfcbc2
+couleur 0 d8f040
+couleur C 3070b0
+couleur D b08a58
+couleur X 1e2a44
+couleur Q 4a5868
+
+# Nielle, Colleuse de nuit : la chatte noire aux yeux ambre, capuche anthracite rabattue (les oreilles passent par deux
+# trous), sweat anthracite à cordons blancs (plus clair que le pelage, pour que le vêtement se lise), rouleau d'affiches
+# en bandoulière, seau de colle et pinceau à la place de la lanterne éteinte, baskets blanches. Origine (6, 17) comme l'original.
+sprite moderne-heros-plume
+origine 6 17
+
+calque tete 6 0
+.v....v.
+GkGGGGkG
+GgggggG.
+GgkkFkF.
+GgkuuUuu
+.Gguuuu.
+
+calque corps 5 6
+.GGGGG
+gGGwGGG
+gGGwGG
+.gGGGG
+.ggGGg
+
+calque queue 1 6
+k....
+u....
+k....
+ku...
+.kkkk
+
+# Rouleau d'affiches roulées en bandoulière, dans le dos.
+calque affiches 2 3
+.....ww
+....w1w
+...w1w.
+..w1w..
+.ww....
+
+calque jambes 7 11
+kk.kk
+ku.uk
+ww.ww
+
+# Seau de colle tenu au bout de la patte, le manche du pinceau dépasse.
+calque arme 11 5
+..d.
+..d.
+TdTT
+TiiT
+TTTT
+
+anim repos 220
+cadre queue + affiches + jambes + corps + arme + tete
+
+# Suie, le Tagueur : chat gris cendre aux yeux orange, capuche de suie gardée, cache-cou noir remonté sur le museau
+# (le ruban de la capuche devient sa queue de tissu), veste marine tachée de peinture, une bombe de peinture à la place
+# des lames, d'où sort un nuage rose.
+sprite moderne-heros-suie
+origine 6 18
+
+calque tete 6 0
+g.....g.
+gu...ug.
+guuuuug.
+gUUUfUf.
+gKKKKKKK
+.gKKKKK.
+
+calque corps 5 6
+.u666u
+vu6616u
+vu6166
+.XXXXXX
+.uXXuuX
+
+# Le pan du cache-cou flotte au-dessus de la queue.
+calque queue 0 3
+....KK
+..KKK.
+.KK...
+......
+......
+..U
+..v
+...UUU
+
+calque jambes 7 11
+uu.uu
+gg.gg
+
+# Bombe de peinture levée, buse en haut, nuage rose qui s'en échappe.
+calque arme 11 3
+...5.5
+..w.5.
+..1
+u.1
+.v
+
+anim repos 220
+cadre queue + jambes + corps + arme + tete
+
+# Corbeau, le Guetteur des toits : chat noir et blanc (museau, plastron et gants blancs), casquette marine retournée, coupe-
+# vent ardoise ouvert sur le plastron, lance-pierre en bois à l'élastique magenta tenu comme son arbalète.
+sprite moderne-heros-corbeau
+origine 6 18
+
+calque tete 6 0
+..6666..
+6666666k
+kkkwkkk.
+kkkkFkF.
+kkkwwrww
+.kwwwww.
+
+calque corps 5 6
+.QQQQQ
+wQwwQQQ
+wQwwQQ
+.QQQQQ
+.k.kuk
+
+calque queue 2 8
+w
+k
+.kkk
+
+calque jambes 7 11
+kk.kk
+ww.ww
+
+# Lance-pierre : fourche en Y devant lui, élastique tiré jusqu'au gant.
+calque arme 11 4
+.....d.d
+.....d.d
+kkw11ddd
+......d
+......d
+
+anim repos 220
+cadre queue + jambes + corps + arme + tete

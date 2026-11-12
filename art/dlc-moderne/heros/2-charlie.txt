@@ -1,0 +1,199 @@
+# DLC « Temps modernes » : les héros en étudiants mobilisés. Fidèles du Colosse (Charlie) : la tête du cortège et son
+# service d'ordre, les gros bras qui tiennent la ligne.
+# Pose de repos seulement (première revue) : les animations viendront après l'avis de l'auteur. Chaque skin garde la
+# taille, l'ancre, l'origine des grilles et les noms de calques de son original (art/sprites/), pour que ses animations
+# puissent reprendre plus tard les lignes `cadre` de l'original presque telles quelles.
+# Satire en dessin : aucun logo, insigne ni inscription, aucune violence réaliste.
+# Hors atlas : ce dossier n'est lu que par l'outil d'aperçu du DLC (npm run dlc:apercu), jamais par npm run art.
+#= Les fidèles du Colosse (Charlie)
+#: moderne-heros-charlie | Gond, Tête de cortège | charlie
+#: moderne-heros-mastoc | Mastoc, le Sens interdit | heros-mastoc
+#: moderne-heros-brise-os | Brise-Os, le Batteur | heros-brise-os
+# Couleurs propres au DLC (mêmes lettres que les tours) : 1 magenta, 2 cyan, 6 sweat marine, 7 kaki, 8 orange chantier,
+# 9 gris clair (bandes réfléchissantes, feutre), 0 jaune fluo, C plastique bleu, D carton, X marine sombre, Q ardoise ;
+# pelage sable de Mastoc (comme l'original) : 3 sable, 4 sable moyen, 5 sable sombre.
+categorie unite
+palette commune
+taille 32 32
+ancre 16 30
+couleur 1 e0508c
+couleur 2 40c8d8
+couleur 6 34467a
+couleur 7 5a6a3a
+couleur 8 f07a20
+couleur 9 cfcbc2
+couleur 0 d8f040
+couleur C 3070b0
+couleur D b08a58
+couleur X 1e2a44
+couleur Q 4a5868
+couleur 3 c8ac80
+couleur 4 9c8660
+couleur 5 6e5c3e
+
+# Gond, Tête de cortège : le gros chat brun au poitrail crème, béret rouge penché (le rouge de la Grosse Tête du cortège),
+# chasuble orange du service d'ordre à bandes réfléchissantes, et le drapeau rouge du cortège planté dans le dos : les deux
+# poings restent libres pour frapper. Origine (4, 10) comme l'original.
+sprite moderne-heros-charlie
+origine 4 10
+
+calque tete 8 0
+....R.....
+b.xxxxx.b.
+bxxxxxxxxR
+bBBBBBBBbb
+bBBBkBBkBb
+bBBBBccccc
+.bBBcccrcc
+..bbBcccc.
+
+calque corps 4 8
+....d888888d....
+..bb88888888bbb.
+.bbB89999998BBbb
+bbBB88888888BBBb
+bbBB89999998BBbb
+bbbB88888888Bbbb
+bbb.88888888.bbb
+ccc..bbbbbb..ccc
+
+# Drapeau rouge sans inscription, sa hampe sanglée dans le dos (cachée par le corps sous l'épaule).
+calque drapeau -1 -10
+.......q
+xxxxxxxd
+xxxxxxxd
+xxxxxxxd
+Rxxxxxxd
+.RRxxRRd
+...RR..d
+.......d
+.......d
+.......d
+.......d
+.......d
+.......d
+.......d
+.......d
+.......d
+.......d
+.......d
+.......d
+
+calque queue 0 8
+.bb
+b..
+b..
+bb.
+.bb
+
+calque jambes 7 17
+.bbb..bbb.
+.bbb..bbb.
+.bBb..bBb.
+cccc..cccc
+
+anim repos 260
+cadre queue + drapeau + jambes + corps + tete
+
+# Mastoc, le Sens interdit : le chat sable massif, casque de chantier jaune à la place du seau, sweat marine, et pour
+# bouclier rond un panneau sens interdit (rond rouge à barre blanche, sans inscription) tenu par son poteau.
+sprite moderne-heros-mastoc
+origine 4 10
+
+calque tete 8 0
+4..FFFF..4
+43FyFFFF34
+3FFFFFFFFF
+4333333334
+4333k33k34
+.4333ccccc
+.4333ccrcc
+..4433ccc.
+
+calque corps 4 8
+....X666666X....
+..4466666663333.
+.443666666633333
+4433666666333344
+4433366666333444
+.443366666X33344
+333.44444444.333
+333..555555..333
+
+# Panneau sens interdit : rond rouge cerclé de gris, barre blanche, poteau d'acier qu'il serre.
+calque bouclier 15 7
+..PxxxP..
+.PxxxxxP.
+PxxxxxxxP
+PwwwwwwwP
+PwwwwwwwP
+PxxxxxxxP
+.PxxxxxP.
+..PxxxP..
+....T....
+....T....
+
+calque queue 0 8
+.55
+5..
+5..
+55.
+.55
+
+calque jambes 7 17
+.444..444.
+.444..444.
+.4b4..4b4.
+.bbbb..bbbb
+
+anim repos 260
+cadre queue + jambes + corps + bouclier + tete
+
+# Brise-Os, le Batteur : chat brun rayé, balafre et yeux rouges gardés, bandana rouge noué sur le front, tee-shirt noir,
+# et à la place de la massue d'os la grosse mailloche de la batucada (tête de feutre clair sur un manche de bois).
+sprite moderne-heros-brise-os
+origine 6 18
+
+calque tete 6 0
+b.....b.
+Bo...oB.
+xxxxxxx.
+BBBwxBx.
+BBBcwrcc
+.Bccccc.
+
+# Les pans du bandana, noués derrière la tête.
+calque noeud 4 2
+xx
+.x
+
+calque corps 4 6
+.KKKKb
+oKKKKKK
+oKK1KK
+.dddddd
+.BBbBBB
+
+calque queue 1 8
+b
+B
+.BbB
+
+calque jambes 6 11
+BB.BB
+bb.bb
+
+# Mailloche de batucada tenue droite.
+calque arme 11 -1
+...99.
+..9ww9
+..9ww9
+...99.
+....d.
+....d.
+....d.
+o...d.
+.cd...
+
+anim repos 220
+cadre queue + jambes + corps + arme + noeud + tete

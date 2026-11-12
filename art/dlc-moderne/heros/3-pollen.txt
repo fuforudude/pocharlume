@@ -1,0 +1,173 @@
+# DLC « Temps modernes » : les héros en étudiants mobilisés. Fidèles de Trois-Pattes (Pollen) : l'atelier de l'AG, ceux qui
+# peignent les banderoles, bricolent la sono et soignent le cortège.
+# Pose de repos seulement (première revue) : les animations viendront après l'avis de l'auteur. Chaque skin garde la
+# taille, l'ancre, l'origine des grilles et les noms de calques de son original (art/sprites/), pour que ses animations
+# puissent reprendre plus tard les lignes `cadre` de l'original presque telles quelles.
+# Satire en dessin : aucun logo, insigne ni inscription, aucune violence réaliste.
+# Hors atlas : ce dossier n'est lu que par l'outil d'aperçu du DLC (npm run dlc:apercu), jamais par npm run art.
+#= Les fidèles de Trois-Pattes (Pollen)
+#: moderne-heros-pollen | Clopin, Peintre de banderoles | heros-pollen
+#: moderne-heros-rouage | Rouage, le Bricoleur de sono | heros-rouage
+#: moderne-heros-lanterne | Lanterne, la Street-médic | heros-lanterne
+# Couleurs propres au DLC (mêmes lettres que les tours) : 1 magenta, 2 cyan, 3 vert fluo, 5 rose, 6 sweat marine, 7 kaki,
+# 8 orange chantier, 9 gris clair, 0 jaune fluo, C plastique bleu (le bleu du toit de l'Atelier), D carton, X marine sombre.
+categorie unite
+palette commune
+taille 32 32
+ancre 16 30
+couleur 1 e0508c
+couleur 2 40c8d8
+couleur 3 7ad040
+couleur 5 f4a8c8
+couleur 6 34467a
+couleur 7 5a6a3a
+couleur 8 f07a20
+couleur 9 cfcbc2
+couleur 0 d8f040
+couleur C 3070b0
+couleur D b08a58
+couleur X 1e2a44
+
+# Clopin, Peintre de banderoles : le tigré roux à l'oreille déchirée, foulard moutarde et ceinture d'outils gardés,
+# chapeau de papier journal, salopette bleue tachée de peinture, la patte arrière gauche toujours bandée ; à la place de
+# la corde, un rouleau à peindre plein de magenta, levé comme un outil. Origine (6, 18) comme l'original.
+sprite moderne-heros-pollen
+origine 6 18
+
+calque tete 6 0
+......b.
+oO...Ob.
+bobobob.
+ooookok.
+oooccrcc
+.occccc.
+
+# Chapeau de papier plié, posé entre les oreilles.
+calque chapeau 7 -3
+..w..
+.w9w.
+w999w
+
+calque corps 5 6
+.YyYYY
+oCoCCCC
+oCCCC1
+.dTdPdd
+.CC1CCC
+
+calque queue 2 8
+b
+o
+.obo
+
+# Patte arrière gauche bandée (x 7-8, lin pâle) qui touche à peine le sol, comme l'original.
+calque jambes 7 11
+zz.oo
+zz.BB
+
+# Rouleau à peindre : manchon gorgé de magenta, armature d'acier, manche de bois.
+calque arme 11 1
+1111
+9999
+...T
+..d.
+..d.
+.c..
+
+anim repos 200
+cadre queue + jambes + corps + arme + tete + chapeau
+
+# Rouage, le Bricoleur de sono : chat sable aux lunettes de cuivre, tablier de cuir sur un tee-shirt cyan, la grande clé
+# à molette gardée ; l'engrenage de laiton dans le dos devient un enrouleur de rallonge orange dont pend le câble.
+sprite moderne-heros-rouage
+origine 6 18
+
+calque tete 6 0
+N.....N.
+nN...Nn.
+ndddddd.
+ndnTiTi.
+nnnccrcc
+.nccccc.
+
+calque corps 5 6
+.n2222
+n2bBb22
+n2bBb2
+.dYdYdd
+.2bBb22
+
+# Enrouleur de rallonge dans le dos (moyeu sombre, câble qui pend), puis la queue.
+calque queue 0 3
+.888..
+8KKK8.
+8KkK8K
+8KKK8.K
+.888...
+..N
+..n
+...nnN
+
+calque jambes 7 11
+nn.nn
+bb.bb
+
+calque arme 13 0
+.iT.
+iT.T
+.TT.
+..T
+..T
+o.d
+.cd
+
+anim repos 220
+cadre queue + jambes + corps + arme + tete
+
+# Lanterne, la Street-médic : chatte blanche aux yeux bleus, casque gris clair à croix verte (jamais la croix rouge),
+# tunique claire et brassard vert, sacoche en bandoulière ; la perche à croc garde sa place, mais porte une lampe de
+# camping à LED dont la lueur est cyan.
+sprite moderne-heros-lanterne
+origine 6 18
+
+calque tete 6 0
+..9399..
+w933399.
+9993999.
+wwwwAwA.
+wwwwwsww
+.wwwwww.
+
+calque corps 5 6
+.99999
+w339999
+w99999
+.dCdCdd
+.9w9w99
+
+calque queue 2 8
+q
+w
+.www
+
+calque jambes 7 11
+ww.ww
+qq.qq
+
+# Perche à croc, lampe de camping pendue ; le bras est tendu devant elle.
+calque arme 11 -2
+...ddddd
+...d...K
+...d..KTK
+...d..2I2
+...d..2I2
+...d..KTK
+...d
+...d
+...d
+999w
+...d
+...d
+
+anim repos 220
+cadre queue + jambes + corps + arme + tete

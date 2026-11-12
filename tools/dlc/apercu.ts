@@ -7,7 +7,9 @@
 //   <id>--<animation>-miroir.gif                            skin à tireur : repos et attaque avec le tireur retourné,
 //                                                           comme en jeu quand la cible est à gauche ;
 // puis l'index docs/dlc-moderne/index.json, et la liste des écarts d'animations avec les originaux.
-// La planche des tours se compose ensuite avec : python tools/dlc/planche.py tour docs/dlc-moderne/planche-tours.png
+// Les skins de héros (art/dlc-moderne/heros/) ont la catégorie `heros` ; tant qu'ils n'ont que leur pose de repos, leurs
+// animations manquantes apparaissent ci-dessous comme écarts, sans bloquer (voir conformite.test.ts).
+// Les planches se composent ensuite avec : python tools/dlc/planche.py tour|ennemi|heros docs/dlc-moderne/planche-<…>.png
 import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { RACINE, lireSources } from '../art/construire.ts';
