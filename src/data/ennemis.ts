@@ -810,6 +810,216 @@ export const ENNEMIS = {
       })),
     },
   }),
+
+  // --- DLC « Temps modernes » (docs/specs/2026-11-12-dlc-temps-modernes-campagne.md) ------------------------------------------
+  // Les forces de l'ordre : chacun reprend le pouvoir de l'ennemi d'origine choisi au dessin (champ `original` de sa source,
+  // art/dlc-moderne/ennemis/*.txt), avec des valeurs de l'après-histoire (PV et prime doublés, comme les groupes des régions 11 à
+  // 15). Trois mécaniques nouvelles : repousse (canon à eau), tir sur les tours (tireur de LBD), binôme (BRAV-M). Équilibrage à venir.
+  /** D'après le Paysan Affamé : la piétaille, sans particularité. */
+  moderne_gendarme: ennemi({ nom: 'ennemi.moderne_gendarme', pv: 80, vitesse: 0.9, degats: [4, 8], cadence: 1, coutVies: 1, prime: 12 }),
+  /** D'après le Fantassin : armure 60 %. */
+  moderne_crs: ennemi({ nom: 'ennemi.moderne_crs', pv: 240, vitesse: 0.9, armure: 0.6, degats: [10, 16], cadence: 1.3, coutVies: 1, prime: 28 }),
+  /** D'après le Chasseur de Sorcières : armure 30 %, coups doublés contre le héros. */
+  moderne_gendarme_mobile: ennemi({
+    nom: 'ennemi.moderne_gendarme_mobile',
+    pv: 140,
+    vitesse: 0.9,
+    armure: 0.3,
+    degats: [8, 12],
+    cadence: 1.3,
+    coutVies: 1,
+    prime: 22,
+    pouvoirs: { degatsHeros: 2 },
+  }),
+  /** D'après le Porte-Herse : bouclier frontal qui arrête 75 % des coups directs venus de devant. */
+  moderne_bouclier_anti_emeute: ennemi({
+    nom: 'ennemi.moderne_bouclier_anti_emeute',
+    pv: 200,
+    vitesse: 0.7,
+    degats: [8, 12],
+    cadence: 1.4,
+    coutVies: 1,
+    prime: 24,
+    pouvoirs: { bouclier: { reduction: 0.75 } },
+  }),
+  /** D'après le Fagotier, mais à distance et par projectile : toutes les 10 s, tire sur une tour à 4 cases, hors service 3 s. */
+  moderne_tireur_lbd: ennemi({
+    nom: 'ennemi.moderne_tireur_lbd',
+    pv: 110,
+    vitesse: 0.9,
+    degats: [4, 8],
+    cadence: 1.2,
+    coutVies: 1,
+    prime: 20,
+    pouvoirs: { periodiques: [{ cadence: 10, actions: [{ type: 'tirer_tour', portee: 4, vitesse: 8, duree: 3 }] }] },
+  }),
+  /** D'après le Pestiféré : laisse à sa mort un nuage lacrymogène qui blesse les soldats (le Perchoir le dissipe dans le DLC). */
+  moderne_grenadier_lacrymo: ennemi({
+    nom: 'ennemi.moderne_grenadier_lacrymo',
+    pv: 180,
+    vitesse: 0.9,
+    degats: [6, 10],
+    cadence: 1.2,
+    coutVies: 1,
+    prime: 20,
+    pouvoirs: { nuage: { rayon: 1.5, duree: 3, degats: 12 } },
+  }),
+  /** D'après le Délateur : furtif. */
+  moderne_bac: ennemi({ nom: 'ennemi.moderne_bac', pv: 60, vitesse: 1.3, furtif: true, degats: [2, 4], cadence: 1, coutVies: 1, prime: 16 }),
+  /** D'après le Porte-Bannière : aura de +25 % de vitesse aux ennemis à 2 cases. */
+  moderne_commissaire: ennemi({
+    nom: 'ennemi.moderne_commissaire',
+    pv: 200,
+    vitesse: 0.9,
+    armure: 0.3,
+    degats: [6, 10],
+    cadence: 1.3,
+    coutVies: 1,
+    prime: 32,
+    pouvoirs: { aura: { rayon: 2, vitesse: 0.25 } },
+  }),
+  /** D'après le Chevalier (rapide, armure 60 %, résistance 30 %), en binôme : quand l'un tombe, l'autre va 50 % plus vite. */
+  moderne_bravm: ennemi({
+    nom: 'ennemi.moderne_bravm',
+    pv: 170,
+    vitesse: 1.6,
+    armure: 0.6,
+    resistance: 0.3,
+    degats: [8, 12],
+    cadence: 1.3,
+    coutVies: 1,
+    prime: 26,
+    pouvoirs: { binome: { ecart: 0.6, vitesse: 0.5 } },
+  }),
+  /** D'après le Cavalier : très rapide, renverse le premier soldat qui le bloque (étourdi 2 s) et passe. */
+  moderne_cavalier_monte: ennemi({
+    nom: 'ennemi.moderne_cavalier_monte',
+    pv: 260,
+    vitesse: 2,
+    armure: 0.3,
+    degats: [12, 18],
+    cadence: 1.3,
+    coutVies: 1,
+    prime: 36,
+    pouvoirs: { renversement: { etourdissement: 2 } },
+  }),
+  /** D'après le Corbeau Noir : volant et rapide. */
+  moderne_drone: ennemi({ nom: 'ennemi.moderne_drone', pv: 48, vitesse: 1.8, volant: true, degats: [2, 4], cadence: 1, coutVies: 1, prime: 12 }),
+  /** D'après l'Ange de Cendre : volant lourd, armure 30 %, résistance 60 %. */
+  moderne_helicoptere: ennemi({
+    nom: 'ennemi.moderne_helicoptere',
+    pv: 320,
+    vitesse: 1.2,
+    armure: 0.3,
+    resistance: 0.6,
+    volant: true,
+    degats: [12, 18],
+    cadence: 1.2,
+    coutVies: 1,
+    prime: 52,
+  }),
+  /**
+   * D'après la Gargouille (armure 60 %, ni étourdi ni ralenti, intouchable 2 s toutes les 8 s) ; toutes les 6 s, repousse de 2 cases les
+   * soldats et le héros devant lui (à 2 cases), étourdis 1,5 s.
+   */
+  moderne_canon_a_eau: ennemi({
+    nom: 'ennemi.moderne_canon_a_eau',
+    pv: 280,
+    vitesse: 0.8,
+    armure: 0.6,
+    degats: [16, 24],
+    cadence: 1.4,
+    coutVies: 1,
+    prime: 56,
+    insensibleEtourdissement: true,
+    pouvoirs: {
+      insensibleRalentissement: true,
+      periodiques: [
+        { cadence: 8, actions: [{ type: 'invulnerabilite', duree: 2 }] },
+        { cadence: 6, actions: [{ type: 'repousser', portee: 2, distance: 2, etourdissement: 1.5 }] },
+      ],
+    },
+  }),
+  /** D'après le Garde Royal : lent, armure 90 %. */
+  moderne_centaure: ennemi({ nom: 'ennemi.moderne_centaure', pv: 260, vitesse: 0.6, armure: 0.9, degats: [14, 20], cadence: 1.4, coutVies: 1, prime: 44 }),
+  /** Boss de la région 3, d'après le Roi Fou : à 75, 50 et 25 % de PV, appelle 4 CRS et devient invulnérable 3 s. */
+  moderne_prefet: ennemi({
+    nom: 'ennemi.moderne_prefet',
+    pv: 22000,
+    vitesse: 0.4,
+    armure: 0.3,
+    resistance: 0.3,
+    degats: [40, 60],
+    cadence: 1.6,
+    coutVies: 12,
+    prime: 600,
+    boss: true,
+    insensibleEtourdissement: true,
+    pouvoirs: {
+      paliers: [0.75, 0.5, 0.25].map((pv) => ({
+        pv,
+        actions: [
+          { type: 'invoquer', ennemi: 'moderne_crs', nombre: 4, ecart: 0.5 },
+          { type: 'invulnerabilite', duree: 3 },
+        ],
+      })),
+    },
+  }),
+  /**
+   * Boss de la région 1, le Commissaire agrandi : porte son aura à 3 cases (+30 %) ; toutes les 15 s, appelle 2 Gendarmes ; à 66 et
+   * 33 % de PV, appelle 3 CRS et étourdit 2 s les soldats et le héros à 2,5 cases.
+   */
+  moderne_commissaire_boss: ennemi({
+    nom: 'ennemi.moderne_commissaire_boss',
+    pv: 9000,
+    vitesse: 0.5,
+    armure: 0.3,
+    degats: [24, 36],
+    cadence: 1.4,
+    coutVies: 10,
+    prime: 400,
+    boss: true,
+    insensibleEtourdissement: true,
+    pouvoirs: {
+      aura: { rayon: 3, vitesse: 0.3 },
+      periodiques: [{ cadence: 15, actions: [{ type: 'invoquer', ennemi: 'moderne_gendarme', nombre: 2, ecart: 0.5 }] }],
+      paliers: [0.66, 0.33].map((pv) => ({
+        pv,
+        actions: [
+          { type: 'invoquer', ennemi: 'moderne_crs', nombre: 3, ecart: 0.5 },
+          { type: 'terrifier', rayon: 2.5, etourdissement: 2 },
+        ],
+      })),
+    },
+  }),
+  /**
+   * Boss de la région 2, le Centaure en version boss : armure 90 %, jamais ralenti ; toutes les 12 s, charge (vitesse ×2,5 pendant 2 s) ;
+   * à 75, 50 et 25 % de PV, appelle 2 Boucliers Anti-Émeute et devient invulnérable 2 s.
+   */
+  moderne_centaure_boss: ennemi({
+    nom: 'ennemi.moderne_centaure_boss',
+    pv: 16000,
+    vitesse: 0.35,
+    armure: 0.9,
+    resistance: 0.3,
+    degats: [40, 60],
+    cadence: 1.6,
+    coutVies: 12,
+    prime: 520,
+    boss: true,
+    insensibleEtourdissement: true,
+    pouvoirs: {
+      insensibleRalentissement: true,
+      periodiques: [{ cadence: 12, actions: [{ type: 'charger', duree: 2, vitesse: 2.5 }] }],
+      paliers: [0.75, 0.5, 0.25].map((pv) => ({
+        pv,
+        actions: [
+          { type: 'invoquer', ennemi: 'moderne_bouclier_anti_emeute', nombre: 2, ecart: 0.5 },
+          { type: 'invulnerabilite', duree: 2 },
+        ],
+      })),
+    },
+  }),
 } as const satisfies Record<string, DefEnnemi>;
 
 export type IdEnnemi = keyof typeof ENNEMIS;

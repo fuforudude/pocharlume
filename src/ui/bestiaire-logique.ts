@@ -12,7 +12,8 @@ import type { DefEnnemi, DefNiveauTour, IdFamille, Niveau, Voie } from '../engin
 import { aTexte, t, tCle, type CleTexte, type ParametresTexte } from '../i18n';
 import { spriteEnnemi, spriteTour } from '../render/habillage';
 import type { Sauvegarde } from '../save';
-import { contenuEnnemiDeDonnees, contenuTourDeDonnees, type ContenuBulle } from './bulle-contenus';
+import { CAPACITES_CAMPAGNE } from '../data/capacites-campagne';
+import { contenuEnnemiDeDonnees, contenuTourDeDonnees, texteCapacite, type ContenuBulle } from './bulle-contenus';
 
 /** Un ennemi est « rapide » (conseil : le retenir) à partir de cette vitesse, en cases par seconde. */
 const VITESSE_RAPIDE = 1.8;
@@ -94,6 +95,7 @@ export const CONSEILS_POUVOIRS: Readonly<Record<string, (valeur: unknown, c: Con
   epines: () => ['bestiaire.contre.epines'],
   alternance: () => ['bestiaire.contre.alternance'],
   derniereLueur: () => ['bestiaire.contre.derniere_lueur'],
+  binome: () => ['bestiaire.contre.binome'],
   insaisissable: (v) => (v === true ? ['bestiaire.contre.insaisissable'] : null),
   // Listes d'actions : lues par CONSEILS_ACTIONS.
   paliers: () => null,
@@ -115,6 +117,8 @@ export const CONSEILS_ACTIONS: Readonly<Record<string, Conseil>> = {
   desamorcer: ['bestiaire.contre.desamorcer'],
   purifier: ['bestiaire.contre.purifier'],
   terrifier: ['bestiaire.contre.terrifier'],
+  repousser: ['bestiaire.contre.repousse'],
+  tirer_tour: ['bestiaire.contre.tir_tour'],
 };
 
 /**
@@ -292,7 +296,10 @@ export function nomDeTour(e: EntreeTour): string {
 /** Le détail d'une tour : les chiffres et pouvoirs des bulles (une seule source, `bulle-contenus.ts`). */
 export function contenuDeTour(e: EntreeTour): ContenuBulle {
   if (e.famille === 'divine') return contenuTourDeDonnees('divine', { dieu: e.dieu ?? 'plume' });
-  return contenuTourDeDonnees(e.famille, { niveau: e.palier, ...(e.voie ? { voie: e.voie } : {}) });
+  const contenu = contenuTourDeDonnees(e.famille, { niveau: e.palier, ...(e.voie ? { voie: e.voie } : {}) });
+  // La capacité que la famille gagne dans la campagne du DLC « Temps modernes » (les stats, elles, restent celles-ci).
+  const capacite = CAPACITES_CAMPAGNE.moderne[e.famille];
+  return capacite ? { ...contenu, lignes: [...contenu.lignes, { libelle: t('bulle.tour.capacite_dlc'), valeur: texteCapacite(capacite) }] } : contenu;
 }
 
 /**

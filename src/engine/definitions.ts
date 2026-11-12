@@ -10,6 +10,8 @@ export interface Point {
 
 export type TypeDegats = 'physique' | 'magique' | 'pur';
 export type IdFamille = 'caserne' | 'tir' | 'magie' | 'artillerie';
+/** Campagne d'un niveau : la principale (`histoire`) ou celle du DLC « Temps modernes » (`moderne`). */
+export type IdCampagne = 'histoire' | 'moderne';
 export type Voie = 'A' | 'B';
 export type Fourchette = readonly [number, number];
 
@@ -160,7 +162,18 @@ export type ActionEnnemi =
   /** Les ennemis à moins de `rayon` tuiles (lui compris) perdent ralentissement et étourdissement (Aumônier de Guerre). Sans effet s'il n'y en a aucun. */
   | { readonly type: 'purifier'; readonly rayon: number }
   /** Les unités alliées (soldats, héros) à moins de `rayon` tuiles sont étourdies `etourdissement` s (Chantre). Sans effet s'il n'y en a aucune. */
-  | { readonly type: 'terrifier'; readonly rayon: number; readonly etourdissement: number };
+  | { readonly type: 'terrifier'; readonly rayon: number; readonly etourdissement: number }
+  /**
+   * Repousse (canon à eau) : les unités alliées ciblables devant lui (du côté où il avance), à moins de `portee` tuiles, sont poussées de
+   * `distance` tuiles dans le sens de sa marche, étourdies `etourdissement` s et lâchent leurs ennemis. Sans effet s'il n'y en a aucune.
+   */
+  | { readonly type: 'repousser'; readonly portee: number; readonly distance: number; readonly etourdissement: number }
+  /**
+   * Tir sur les tours (tireur de LBD) : un projectile part vers la tour la plus proche à moins de `portee` tuiles, à `vitesse` tuiles par
+   * seconde ; à l'arrivée, la tour est hors service `duree` s. Un Perchoir qui a la capacité « Renvoi » en renvoie une partie au tireur.
+   * Sans effet s'il n'y a aucune tour à portée.
+   */
+  | { readonly type: 'tirer_tour'; readonly portee: number; readonly vitesse: number; readonly duree: number };
 
 /** Se déclenche une fois quand ses PV passent sous `pv` (fraction des PV maximaux). Paliers par `pv` décroissant. */
 export interface PalierEnnemi {
@@ -245,6 +258,15 @@ export interface DerniereLueur {
   readonly quantite: number;
 }
 
+/**
+ * Binôme (BRAV-M) : chaque apparition crée deux ennemis liés, le second `ecart` tuiles devant le premier. Quand l'un tombe (tué), l'autre
+ * va `vitesse` (0,5 = +50 %) plus vite jusqu'à la fin.
+ */
+export interface Binome {
+  readonly ecart: number;
+  readonly vitesse: number;
+}
+
 export interface PouvoirsEnnemi {
   readonly brulure?: BrulureContact;
   readonly noyade?: Noyade;
@@ -266,6 +288,7 @@ export interface PouvoirsEnnemi {
   readonly epines?: Epines;
   readonly alternance?: Alternance;
   readonly derniereLueur?: DerniereLueur;
+  readonly binome?: Binome;
   /** Aucun soldat ni héros ne l'arrête ni ne le vise : il passe entre eux (Frère Sans-Porte). Les tours l'atteignent comme un ennemi au sol. */
   readonly insaisissable?: boolean;
   /** Aucun ralentissement ne le touche (Grand Inquisiteur). */
@@ -539,6 +562,8 @@ export interface DefNiveauTour {
   readonly piegeAuSol: PiegeAuSol | null;
   /** Tour qui construit des tourelles et pose des pièges au lieu de tirer (Atelier Boiteux). */
   readonly atelier: Ouvrage | null;
+  /** Capacité « Perçage » de la campagne : ses coups directs passent le bouclier frontal. Posé par le moteur, jamais dans les données. */
+  readonly percageBouclier?: boolean;
   /** Compétences de la spécialisation (0 ou 2). */
   readonly competences: readonly DefCompetenceTour[];
 }
@@ -881,7 +906,51 @@ export interface Niveau {
   readonly numero?: number;
   /** Particularité du niveau (Vol de Corbeaux…) ; absent = niveau ordinaire. */
   readonly gimmick?: Gimmick;
+  /** Campagne du niveau ; absent = `histoire`. La campagne `moderne` active les capacités de famille (src/data/capacites-campagne.ts). */
+  readonly campagne?: IdCampagne;
 }
+
+// ---------------------------------------------------------------------------------------------
+// Capacités de famille par campagne (DLC « Temps modernes ») : les tours ne changent pas dans les données, la campagne active
+// pour chaque famille une capacité décrite ici. Le moteur ne connaît que ces mécaniques, jamais un niveau par son nom.
+// ---------------------------------------------------------------------------------------------
+
+/** « Piquet » : les soldats d'une caserne subissent `reduction` (0,25 = −25 %) de dégâts en moins tant qu'au moins `soldats` d'entre eux retiennent des ennemis. */
+export interface CapacitePiquet {
+  readonly type: 'piquet';
+  readonly reduction: number;
+  readonly soldats: number;
+}
+
+/**
+ * « Renvoi » : la tour dissipe les nuages toxiques (pouvoir `nuage`) à sa portée, et renvoie au tireur un tir sur les tours (`tirer_tour`)
+ * sur `chaque` parmi ceux qui visent une tour à sa portée (elle comprise), dans l'ordre d'arrivée ; le tireur touché est étourdi
+ * `etourdissement` s.
+ */
+export interface CapaciteRenvoi {
+  readonly type: 'renvoi';
+  readonly chaque: number;
+  readonly etourdissement: number;
+}
+
+/** « Sono » : les ennemis (volants compris si `volants`) à moins de `rayon` fois la portée de la tour vont `ralentissement` (0,15 = −15 %) moins vite, en permanence. */
+export interface CapaciteSono {
+  readonly type: 'sono';
+  readonly rayon: number;
+  readonly ralentissement: number;
+  readonly volants: boolean;
+}
+
+/** « Perçage » : les coups de la tour passent le bouclier frontal et ignorent `ignoreArmure` (0,3 = 30 %) de l'armure en plus. */
+export interface CapacitePercage {
+  readonly type: 'percage';
+  readonly ignoreArmure: number;
+}
+
+export type CapaciteFamille = CapacitePiquet | CapaciteRenvoi | CapaciteSono | CapacitePercage;
+
+/** Capacité gagnée par chaque famille dans une campagne ; une famille absente n'en gagne pas. */
+export type CapacitesCampagne = Readonly<Partial<Record<IdFamille, CapaciteFamille>>>;
 
 /** Une région du mode infini : ses ennemis propres, et le boss dont les mini-boss sont tirés. */
 export interface RegionInfini {

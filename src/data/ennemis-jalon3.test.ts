@@ -8,6 +8,12 @@ import { REGLES } from './regles';
 
 const table: Readonly<Record<string, DefEnnemi>> = ENNEMIS;
 
+/**
+ * Les ennemis de la campagne principale : ceux du DLC « Temps modernes » (`moderne_*`), aux valeurs de l'après-histoire, ont leurs
+ * propres contrôles (ennemis-moderne.test.ts).
+ */
+const histoire: Readonly<Record<string, DefEnnemi>> = Object.fromEntries(Object.entries(table).filter(([id]) => !id.startsWith('moderne_')));
+
 /** Ennemis ordinaires des régions 6 à 10 (voir ennemis-jalon4.test.ts). */
 const ID_REGIONS_6_A_10: ReadonlySet<string> = new Set([
   'fossoyeur', 'creux', 'chauve_souris', 'fantassin', 'porte_banniere', 'cavalier', 'flagellant', 'inquisiteur', 'exorciste',
@@ -32,8 +38,9 @@ describe('ennemis des régions 2 à 5', () => {
       for (const id of ennemis) expect(Object.hasOwn(ENNEMIS, id), id).toBe(true);
       expect(table[boss]?.boss, boss).toBe(true);
     }
-    expect(Object.keys(ENNEMIS)).toHaveLength(4 + 12 + 4 + 14 + 5 + 20 + 1);
-    expect(Object.values(ENNEMIS).filter((e) => e.boss)).toHaveLength(5 + 5 + 1);
+    // Région 1, régions 2 à 5 et leurs boss, régions 6 à 10 et leurs boss, variété, après-histoire, puis le DLC (15 ennemis et 2 boss).
+    expect(Object.keys(ENNEMIS)).toHaveLength(4 + 12 + 4 + 14 + 5 + 20 + 1 + 17);
+    expect(Object.values(ENNEMIS).filter((e) => e.boss)).toHaveLength(5 + 5 + 1 + 3);
   });
 
   it('chaque ennemi a un nom traduit, des valeurs saines et une prime', () => {
@@ -115,8 +122,8 @@ describe('ennemis des régions 2 à 5', () => {
   });
 
   it('seuls les boss sont des boss, et ils valent des vies et une prime bien supérieures', () => {
-    const ordinaires = Object.values(table).filter((e) => !e.boss);
-    const boss = Object.values(table).filter((e) => e.boss);
+    const ordinaires = Object.values(histoire).filter((e) => !e.boss);
+    const boss = Object.values(histoire).filter((e) => e.boss);
     const meilleure = Math.max(...ordinaires.map((e) => e.prime));
     for (const b of boss) {
       expect(b.prime).toBeGreaterThan(5 * meilleure);
@@ -127,7 +134,7 @@ describe('ennemis des régions 2 à 5', () => {
 
   it('la menace des ennemis ordinaires reste dans l’ordre de grandeur de la région 1', () => {
     const reference = menaceEnnemi(ENNEMIS.paysan_affame);
-    for (const [id, def] of Object.entries(table)) {
+    for (const [id, def] of Object.entries(histoire)) {
       if (def.boss) continue;
       const menace = menaceEnnemi(def);
       expect(menace, id).toBeGreaterThan(reference / 4);

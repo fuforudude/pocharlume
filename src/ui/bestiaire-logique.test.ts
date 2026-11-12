@@ -144,7 +144,9 @@ describe('les tours et ce que la campagne a ouvert', () => {
   it('ses chiffres sont ceux des bulles, tirés des données', () => {
     const tir1 = groupesDeTours(11).flatMap((g) => g.tours).find((x) => x.id === 'tir-1');
     if (!tir1) throw new Error('tir-1 absent');
-    expect(contenuDeTour(tir1)).toEqual(contenuTourDeDonnees('tir', { niveau: 1 }));
+    // Les lignes des bulles, puis la capacité que la famille gagne dans le DLC « Temps modernes ».
+    const bulle = contenuTourDeDonnees('tir', { niveau: 1 });
+    expect(contenuDeTour(tir1)).toEqual({ ...bulle, lignes: [...bulle.lignes, { libelle: t('bulle.tour.capacite_dlc'), valeur: expect.any(String) as string }] });
     const [min, max] = TOURS.tir.niveaux[0].degats;
     expect(contenuDeTour(tir1).lignes.map((l) => l.valeur).join(' ')).toContain(`${String(min)} à ${String(max)}`);
     expect(nomDeTour(tir1)).toBe(tCle(TOURS.tir.niveaux[0].nom));

@@ -31,6 +31,14 @@ function tuer(etat: EtatPartie, e: Ennemi): void {
   // Un voleur tué rend le butin qu'il portait en plus de sa prime.
   etat.aretes += e.prime + e.butin;
   libererEnnemi(etat, e);
+  // Binôme : l'équipier encore debout accélère (facteurVitesse).
+  const equipier = e.binome >= 0 ? chercherParId(etat.ennemis, e.binome) : undefined;
+  if (equipier?.vivant) {
+    equipier.binome = -1;
+    equipier.binomeSeul = true;
+    etat.evenements.push({ type: 'binome_seul', ennemi: equipier.id, x: equipier.x, y: equipier.y });
+  }
+  e.binome = -1;
   // Un volant tombé dans un couloir n'est pas gardé : le relever le poserait sur un chemin.
   if (!e.boss && e.couloir < 0) {
     etat.morts.push({ type: e.type, chemin: e.chemin, distance: e.distance, elite: e.elite, vague: e.vague });

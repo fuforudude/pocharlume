@@ -26,6 +26,8 @@ export interface OptionsApparition {
   vague?: number;
   /** Couloir du Vol de Corbeaux où il vole à la place de son chemin (volant seulement) ; absent ou -1 = il suit son chemin. */
   couloir?: number;
+  /** Vrai : un ennemi à binôme apparaît seul (relevé, second du binôme). */
+  seul?: boolean;
 }
 
 /**
@@ -93,6 +95,8 @@ export function ajouterEnnemi(etat: EtatPartie, def: DefEnnemi, type: string, ch
     palier: 0,
     minuteurs: (def.pouvoirs?.periodiques ?? []).map((p) => Math.max(1, enPas(p.cadence))),
     rechargeSoin: def.pouvoirs?.soin ? Math.max(1, enPas(def.pouvoirs.soin.cadence)) : 0,
+    binome: -1,
+    binomeSeul: false,
     bloqueur: -1,
     vivant: true,
     effetsPas: [0, 0, 0, 0, 0],
@@ -101,6 +105,13 @@ export function ajouterEnnemi(etat: EtatPartie, def: DefEnnemi, type: string, ch
   placerSurChemin(c, e.distance, e.segment, e.decalage, e);
   etat.ennemis.push(e);
   etat.evenements.push({ type: 'apparition', ennemi: e.id, typeEnnemi: type });
+  // Binôme : l'apparition crée aussi son équipier, `ecart` tuiles devant (à l'entrée, il n'y a pas de place derrière), et les lie.
+  const binome = def.pouvoirs?.binome;
+  if (binome && options.seul !== true) {
+    const autre = ajouterEnnemi(etat, def, type, chemin, Math.min(c.longueur, distance + binome.ecart), elite, { ...options, seul: true });
+    e.binome = autre.id;
+    autre.binome = e.id;
+  }
   return e;
 }
 
@@ -116,6 +127,7 @@ export function facteurVitesse(e: Ennemi): number {
   let facteur = (e.effetsPas[EFFET.ralentissement] ?? 0) > 0 ? (e.effetsValeur[EFFET.ralentissement] ?? 1) : 1;
   if (e.charge > 0) facteur *= e.chargeVitesse;
   facteur *= 1 + e.bonusVitesse;
+  if (e.binomeSeul) facteur *= 1 + (e.pouvoirs?.binome?.vitesse ?? 0);
   const rage = rageActive(e);
   return rage ? facteur * (1 + rage.vitesse) : facteur;
 }

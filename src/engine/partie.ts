@@ -3,6 +3,7 @@ import { REGLES } from '../data/regles';
 import { VERSION_DONNEES } from '../data/version';
 import type { Action, ResultatAction } from './actions';
 import { ajusterMontant } from './argent';
+import { appliquerCapacitesCampagne } from './capacites-campagne';
 import { calculerChemin } from './chemins';
 import { appliquerAction } from './commandes';
 import { copierConfig, verifierConfig } from './config';
@@ -13,6 +14,7 @@ import { VERSION_ETAT, type ConfigPartie, type DefiPartie, type EntreeJournal, t
 import { ouvrirPas } from './evenements';
 import { resoudreHeros } from './modificateurs';
 import { laisserEffetsDesMorts, laisserNuagesDesMorts, mettreAJourNuages, mettreAJourPouvoirsEnnemis } from './pouvoirs-ennemis';
+import { mettreAJourTirsEnnemis } from './pouvoirs-modernes';
 import { mettreAJourSorts, rechargeSort } from './sorts';
 import { mettreAJourPieges, mettreAJourStructures, mettreAJourZones } from './structures';
 import { calculerCouloirs, verifierPaquetEnCouloir } from './gimmicks/corbeaux';
@@ -145,6 +147,7 @@ export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
     unites: [],
     tours: [],
     projectiles: [],
+    tirsEnnemis: [],
     pieges: [],
     zones: [],
     structures: [],
@@ -208,6 +211,7 @@ function simuler(etat: EtatPartie): void {
   mettreAJourGimmick(etat);
   mettreAJourVagues(etat);
   mettreAJourPouvoirsEnnemis(etat);
+  appliquerCapacitesCampagne(etat);
   mettreAJourNuages(etat);
   mettreAJourZones(etat);
   mettreAJourEnnemis(etat);
@@ -216,6 +220,7 @@ function simuler(etat: EtatPartie): void {
   mettreAJourTours(etat);
   mettreAJourStructures(etat);
   mettreAJourProjectiles(etat);
+  mettreAJourTirsEnnemis(etat);
   mettreAJourSorts(etat);
   laisserNuagesDesMorts(etat);
   laisserEffetsDesMorts(etat);

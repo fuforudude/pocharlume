@@ -274,6 +274,7 @@ function construire(etat: EtatPartie, lieu: LieuTour, famille: FamilleTour): voi
     aveuglePas: 0,
     aveugleFacteur: 0,
     minuteurs: minuteursInitiaux(def.atelier, 0),
+    renvois: 0,
   };
   etat.tours.push(t);
   synchroniserSoldats(etat, t);

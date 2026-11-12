@@ -11,6 +11,7 @@ import { defEnnemi } from './contenu';
 import { libererEnnemi } from './degats';
 import type { ActionEnnemi, SoinEnnemis } from './definitions';
 import { ajouterEnnemi } from './ennemis';
+import { repousser, tirerSurTour } from './pouvoirs-modernes';
 import { EFFET, MINUTEUR, type Ennemi, type EtatPartie, type Tour, type Unite } from './etat';
 import { chercherParId, distance2 } from './recherche';
 import { creerZone } from './structures';
@@ -131,7 +132,8 @@ function releverMorts(etat: EtatPartie, e: Ennemi, action: Extract<ActionEnnemi,
   for (const mort of morts) {
     const def = defEnnemi(mort.type);
     if (!def) continue;
-    const releve = ajouterEnnemi(etat, def, mort.type, mort.chemin, mort.distance, mort.elite, { vague: mort.vague });
+    // Un mort de binôme se relève seul : chacun des deux est relevé pour son compte.
+    const releve = ajouterEnnemi(etat, def, mort.type, mort.chemin, mort.distance, mort.elite, { vague: mort.vague, seul: true });
     releve.pv = releve.pvMax * action.pv;
   }
   return true;
@@ -271,6 +273,10 @@ function executerAction(etat: EtatPartie, e: Ennemi, action: ActionEnnemi): bool
       return purifier(etat, e, action.rayon);
     case 'terrifier':
       return terrifier(etat, e, action.rayon, action.etourdissement);
+    case 'repousser':
+      return repousser(etat, e, action);
+    case 'tirer_tour':
+      return tirerSurTour(etat, e, action);
   }
 }
 

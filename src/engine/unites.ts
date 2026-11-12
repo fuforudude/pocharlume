@@ -5,6 +5,7 @@ import { CAPACITES_NULLES } from '../data/capacites';
 import { REGLES } from '../data/regles';
 import { tirer } from './aleatoire';
 import { degatsDuCoup, mettreAJourPouvoirs, tirerDeLoin } from './capacites';
+import { facteurPiquet } from './capacites-campagne';
 import { appliquerEffets, estVisible, executer, infligerDegats, partRestante } from './degats';
 import type { CapacitesUnite, StatsCombattant, TypeDegats, ZoneHeros } from './definitions';
 import type { Ennemi, EtatPartie, GenreUnite, Unite } from './etat';
@@ -143,7 +144,8 @@ export function blesserUnite(etat: EtatPartie, u: Unite, montant: number, type: 
     etat.evenements.push({ type: 'esquive', unite: u.id, ennemi });
     return;
   }
-  u.pv -= montant * partRestante(type, u.stats.armure, u.stats.resistance);
+  // « Piquet » (capacité de campagne) : un soldat qui tient la ligne avec ses camarades encaisse moins.
+  u.pv -= montant * partRestante(type, u.stats.armure, u.stats.resistance) * facteurPiquet(etat, u);
   if (u.pv <= 0) mourir(etat, u);
 }
 
