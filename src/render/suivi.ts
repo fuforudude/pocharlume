@@ -16,6 +16,9 @@ import { TUILE } from './camera';
 import { TYPE_EFFET, type Effet, type PoolEffets } from './effets';
 import { DUREE_ANNEAU, DUREE_POUSSIERE, haloDe, requeteAnimationsReduites, type DefHalo } from './effets-tours';
 import {
+  apparenceModerne,
+  campagneDApparence,
+  cibleModerneDeTour,
   effetObjet,
   habillageSort,
   idHerosDe,
@@ -27,6 +30,7 @@ import {
   spriteImpact,
   spriteProjectile,
   spriteStructure,
+  spriteHerosModerne,
   spriteTireur,
   spriteTour,
   spriteUnite,
@@ -54,6 +58,12 @@ export interface OptionsCollection {
   readonly skins?: Readonly<Record<string, string | undefined>>;
   /** Id du familier du héros de la partie (`familier_rat`…), null ou absent pour aucun : `Collection.equipes.familiers[héros]`. */
   readonly familier?: string | null;
+  /**
+   * Skins du DLC portés (`moderne.collection.equipes` : `tir`, `divine_plume`, `suie` vers un skin du DLC) : dans l'histoire, la tour ou le
+   * héros habillé prend son apparence du DLC (l'atlas du DLC doit être chargé ; sinon, sprite de base). Un skin qui ne va pas à sa cible
+   * est ignoré.
+   */
+  readonly skinsModernes?: Readonly<Record<string, string | undefined>>;
 }
 
 /** Familiers : distance (tuiles) derrière le héros, part de l'écart rattrapée à chaque pas, et écart au-delà duquel il le rejoint d'un bond. */
@@ -188,6 +198,7 @@ export class Suivi {
   private marque = 0;
   private version = 0;
   private skins: Readonly<Record<string, string | undefined>> = {};
+  private skinsModernes: Readonly<Record<string, string | undefined>> = {};
   private familierId: string | null = null;
   /** Ennemis appelés par `appel` dont l'apparition reste à marquer (les `apparition` suivent l'événement). */
   private appelsRestants = 0;
@@ -206,6 +217,7 @@ export class Suivi {
    */
   definirCollection(options: OptionsCollection): void {
     this.skins = options.skins ?? {};
+    this.skinsModernes = options.skinsModernes ?? {};
     this.familierId = options.familier ?? null;
     this.version++;
   }
@@ -356,13 +368,18 @@ export class Suivi {
     v.famille = t.famille;
     v.niveau = t.niveau;
     v.voie = t.voie;
-    // DLC « Temps modernes » : le skin moderne de la tour (atlas à part), avec les mêmes animations.
-    v.nomSprite = spriteTour(t.famille, t.niveau, t.voie, dieu, campagne);
+    // DLC « Temps modernes » : le skin moderne de la tour (atlas à part), avec les mêmes animations ; dans l'histoire, la tour qui porte
+    // son skin du DLC le prend aussi (retour au sprite de base si l'atlas du DLC n'est pas chargé).
+    const apparence = campagneDApparence(campagne, this.skinsModernes, cibleModerneDeTour(t.famille, dieu));
+    const nomModerne = spriteTour(t.famille, t.niveau, t.voie, dieu, apparence);
+    const habilleDuDlc = apparence !== campagne && this.atlas.sprite(nomModerne) !== undefined;
+    const vue = habilleDuDlc ? apparence : campagne;
+    v.nomSprite = spriteTour(t.famille, t.niveau, t.voie, dieu, vue);
     v.sprite = this.atlas.sprite(v.nomSprite) ?? null;
     v.habille = this.habiller(v.nomSprite, t.famille);
     v.halo = haloDe(t.famille, t.niveau, t.voie, v.habille?.skin ?? null);
     v.versionCollection = this.version;
-    const nomTireur = spriteTireur(t.famille, t.niveau, t.voie, campagne);
+    const nomTireur = spriteTireur(t.famille, t.niveau, t.voie, vue);
     v.tireur = nomTireur ? (this.atlas.sprite(nomTireur) ?? null) : null;
     const nomPoint = nomPointDeTir(t.famille);
     const point = nomPoint ? v.sprite?.points?.[nomPoint] : undefined;
@@ -454,14 +471,15 @@ export class Suivi {
       }
       if (v.cleSprite !== u.stats.nom) {
         v.cleSprite = u.stats.nom;
-        v.nomSprite = spriteUnite(u.genre, u.stats.nom);
-        v.sprite = this.atlas.sprite(v.nomSprite) ?? null;
         v.versionCollection = -1;
       }
       if (v.versionCollection !== this.version) {
         v.versionCollection = this.version;
-        // Seul le héros de la partie porte le skin de sa collection.
+        // Seul le héros de la partie porte le skin de sa collection ; son skin du DLC, s'il le porte, change son sprite (atlas du DLC).
         const idHeros = u.id === etat.heros ? idHerosDe(u.stats.nom) : null;
+        const moderne = idHeros !== null && apparenceModerne(this.skinsModernes, idHeros) ? this.atlas.sprite(spriteHerosModerne(idHeros)) : undefined;
+        v.nomSprite = moderne && idHeros !== null ? spriteHerosModerne(idHeros) : spriteUnite(u.genre, u.stats.nom);
+        v.sprite = moderne ?? this.atlas.sprite(v.nomSprite) ?? null;
         v.habille = idHeros === null ? null : this.habiller(v.nomSprite, idHeros);
       }
       v.noyadeMax = u.noyade > 0 ? Math.max(v.noyadeMax, u.noyade) : 0;

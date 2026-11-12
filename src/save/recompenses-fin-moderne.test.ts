@@ -62,7 +62,7 @@ describe('badges et titres d’une partie du DLC', () => {
   });
 
   it('une défaite ne rapporte aucun badge', () => {
-    const r = enregistrerFinDePartie(sauvegardeVide(), { niveau: 1, statut: 'defaite', heros: 'charlie', campagne: 'moderne' }, DEFS_TEST);
+    const r = enregistrerFinDePartie(sauvegardeVide(), { niveau: 1, statut: 'defaite', difficulte: 'matou', etoiles: 0, heros: 'charlie', campagne: 'moderne' }, DEFS_TEST);
     expect(r.ok && r.sauvegarde.moderne.badges).toBe(0);
   });
 

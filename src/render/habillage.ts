@@ -2,6 +2,7 @@
 // l'atlas. C'est de l'habillage : le moteur ne le lit jamais, et les tests vérifient que chaque nom existe.
 import type { FamilleTour, GenreUnite } from '../engine/etat';
 import type { IdCampagne, Voie } from '../engine/definitions';
+import { skinModerneAcceptable } from '../data/recompenses-moderne';
 
 /** Sprite d'un ennemi : son identifiant avec des tirets (paysan_affame devient paysan-affame). */
 export function spriteEnnemi(type: string): string {
@@ -91,6 +92,31 @@ export function spriteTour(famille: FamilleTour, niveau: number, voie: Voie | nu
   const prefixe = moderne ? 'moderne' : 'tour';
   if (niveau >= 4 && voie !== null) return (moderne ? SPECIALISATIONS_MODERNES : SPRITES_SPECIALISATIONS)[famille]?.[voie] ?? `${prefixe}-${famille}-3`;
   return `${prefixe}-${famille}-${String(Math.min(Math.max(niveau, 1), 3))}`;
+}
+
+// Skins du DLC portés dans l'histoire (caisse « Temps modernes ») : la tour ou le héros habillé prend son apparence du DLC, la même que
+// dans une partie du DLC. Les emplacements sont ceux de `moderne.collection.equipes` : famille, `divine_<dieu>`, héros.
+
+/** L'emplacement de skin du DLC d'une tour : sa famille, ou `divine_<dieu>` pour la tour divine. */
+export function cibleModerneDeTour(famille: FamilleTour, dieu: string): string {
+  return famille === 'divine' ? `divine_${dieu}` : famille;
+}
+
+/** La campagne dont une tour prend l'apparence : celle de la partie, ou `moderne` si elle porte le skin du DLC de son emplacement. */
+export function campagneDApparence(campagne: IdCampagne, skinsModernes: Readonly<Record<string, string | undefined>>, cible: string): IdCampagne {
+  if (campagne === 'moderne') return campagne;
+  const skin = Object.hasOwn(skinsModernes, cible) ? skinsModernes[cible] : undefined;
+  return skin !== undefined && skinModerneAcceptable(cible, skin) ? 'moderne' : campagne;
+}
+
+/** Le héros porte-t-il son skin du DLC ? */
+export function apparenceModerne(skinsModernes: Readonly<Record<string, string | undefined>>, heros: string): boolean {
+  return campagneDApparence('histoire', skinsModernes, heros) === 'moderne';
+}
+
+/** Sprite d'un héros habillé en étudiant (atlas du DLC) : `moderne-heros-brise-os`. */
+export function spriteHerosModerne(heros: string): string {
+  return `moderne-heros-${heros.replaceAll('_', '-')}`;
 }
 
 /**

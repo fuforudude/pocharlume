@@ -19,7 +19,7 @@ import type { AtlasRendu } from '../render/atlas';
 import type { EcranBestiaire } from './bestiaire';
 import { ECART_MAX_MS, PasFixes } from '../render/pas-fixes';
 import { Rendu, Surbrillance } from '../render/rendu';
-import { apparenceDeLaPartie, type Equipes } from './apparence';
+import { apparenceDeLaPartie, campagneDeLAtlas, type Equipes, type SkinsModernes } from './apparence';
 import { BulleSurCarte, fermerBulle, type CibleCarteSurvolee } from './bulle';
 import { contenuElementMenu, contenuEnnemi, contenuEnnemiDeDonnees, contenuHerosEnPartie, ennemiSous } from './bulle-contenus';
 import { commandeClavier, type Commande } from './clavier';
@@ -122,6 +122,8 @@ export interface OptionsPartie {
    * (en Fer les skins restent visibles, seul le bonus est ignoré).
    */
   equipes?: Equipes;
+  /** Skins du DLC portés (`moderne.collection.equipes`) : ils habillent aussi l'histoire ; l'atlas du DLC est alors chargé. */
+  skinsModernes?: SkinsModernes;
   /**
    * Une vieille statue de la carte a été touchée (`niveau.visuel.statue`) : l'appelant range son inscription dans la sauvegarde et
    * répond vrai si elle est nouvelle, faux si elle était déjà trouvée, null s'il n'y a rien à en dire (partie hors sauvegarde).
@@ -203,8 +205,8 @@ export async function lancerNiveau(
   surFin: (resultat: ResultatPartie) => unknown,
   options: OptionsPartie = {},
 ): Promise<PartieEnCours> {
-  // Une partie du DLC « Temps modernes » charge aussi l'atlas à part du DLC ; l'histoire ne le télécharge jamais.
-  const atlas = await chargerAtlas(campagneDe(options.reprise?.niveau ?? niveau.niveau));
+  // Une partie du DLC « Temps modernes » charge aussi l'atlas à part du DLC ; l'histoire seulement si un skin du DLC est porté.
+  const atlas = await chargerAtlas(campagneDeLAtlas(campagneDe(options.reprise?.niveau ?? niveau.niveau), options.skinsModernes));
   const etat = options.reprise ?? creerPartie(niveau.niveau, config);
   const parent = options.parent ?? document.body;
   const controleur = new AbortController();
@@ -219,7 +221,7 @@ export async function lancerNiveau(
 
   let rendu: Rendu;
   try {
-    rendu = new Rendu(canvas, atlas, etat.niveau.carte, niveau.visuel, apparenceDeLaPartie(options.equipes, etat.config.heros));
+    rendu = new Rendu(canvas, atlas, etat.niveau.carte, niveau.visuel, apparenceDeLaPartie(options.equipes, etat.config.heros, options.skinsModernes));
   } catch (erreur) {
     // Pas de contexte 2D : on ne laisse pas un écran noir derrière soi, l'appelant revient à l'écran précédent.
     racine.remove();

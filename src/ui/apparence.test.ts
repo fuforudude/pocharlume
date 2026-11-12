@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { apparenceDeLaPartie, type Equipes } from './apparence';
+import { apparenceDeLaPartie, campagneDeLAtlas, type Equipes } from './apparence';
 
 const EQUIPES: Equipes = {
   skins: { tir: 'skin_tir_2', charlie: 'skin_charlie', suie: 'skin_suie' },
@@ -28,5 +28,24 @@ describe('apparence d’une partie', () => {
     const copie = apparenceDeLaPartie(EQUIPES, 'charlie');
     (copie.skins as Record<string, string>).tir = 'autre';
     expect(EQUIPES.skins.tir).toBe('skin_tir_2');
+  });
+});
+
+describe('apparence d’une partie : skins du DLC', () => {
+  it('ajoute les skins du DLC portés (copie), seulement s’il y en a', () => {
+    const modernes = { tir: 'skin_moderne_tir' };
+    const apparence = apparenceDeLaPartie(EQUIPES, 'charlie', modernes);
+    expect(apparence.skinsModernes).toEqual(modernes);
+    expect(apparence.skinsModernes).not.toBe(modernes);
+    expect(apparenceDeLaPartie(EQUIPES, 'charlie', {})).toEqual(apparenceDeLaPartie(EQUIPES, 'charlie'));
+    expect(apparenceDeLaPartie(undefined, 'charlie', modernes)).toEqual({ skins: {}, familier: null, skinsModernes: modernes });
+  });
+
+  it('l’atlas du DLC se charge pour une partie du DLC, ou pour l’histoire si un skin du DLC est porté', () => {
+    expect(campagneDeLAtlas('moderne', {})).toBe('moderne');
+    expect(campagneDeLAtlas('histoire', {})).toBe('histoire');
+    expect(campagneDeLAtlas('histoire', undefined)).toBe('histoire');
+    expect(campagneDeLAtlas('histoire', { tir: 'skin_moderne_tir' })).toBe('moderne');
+    expect(campagneDeLAtlas('histoire', { caserne: 'skin_moderne_tir' })).toBe('histoire');
   });
 });
