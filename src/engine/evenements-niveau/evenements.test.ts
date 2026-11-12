@@ -7,6 +7,7 @@ import type { EtatPartie } from '../etat';
 import type { Evenement } from '../evenements';
 import { appliquerAction, creerPartie, step, validerAction } from '../partie';
 import { cheminEffectif } from './chemins-mobiles';
+import { repartirEvenementsFer } from './index';
 import { enPas } from '../temps';
 import { niveauDynamique, type OptionsNiveauDynamique } from './niveaux-essai.test-utils';
 
@@ -366,5 +367,58 @@ describe('défi Fer : tous les événements sont joués pendant la vague unique'
       for (const ev of etat.evenements) if (ev.type === 'evenement_niveau') ordre.push(ev.index);
     }
     expect(ordre).toEqual([0, 1, 2]);
+  });
+});
+
+describe('défi Fer : bornes et ordre de la répartition', () => {
+  const renforts = (vague: number, delai?: number): EvenementNiveau => ({ vague, ...(delai !== undefined ? { delai } : {}), type: 'renforts', x: 10, y: 5, nombre: 1, duree: 3, unite: 'etudiant' });
+
+  it('aucun événement ne tombe après la dernière apparition, même quand l’arrondi au dixième dépasserait la durée', () => {
+    // Durée 12,36 s : 6,18 + 12,3 = 18,48 est borné à 12,36, que l'arrondi seul aurait porté à 12,4.
+    const [e] = repartirEvenementsFer([renforts(2, 12.3)], 2, 12.36);
+    expect(e?.delai).toBeLessThanOrEqual(12.36);
+    expect(e?.delai).toBeGreaterThanOrEqual(12.3);
+    for (const d of repartirEvenementsFer([renforts(1, 12.3), renforts(2, 12.34), renforts(3)], 3, 12.36).map((x) => x.delai ?? 0)) expect(d).toBeLessThanOrEqual(12.36);
+  });
+
+  it('un événement placé plus tard dans le niveau ne passe jamais avant un événement placé plus tôt', () => {
+    // Vague 1 au délai 20 et vague 2 au délai 3, sur 30 s : brut 20 et 13 ; l'ordre d'origine impose 20 et 20.
+    const delais = repartirEvenementsFer([renforts(1, 20), renforts(2, 3)], 3, 30).map((e) => e.delai ?? 0);
+    expect(delais).toEqual([20, 20]);
+    // Dans les données en désordre (vague 2 écrite avant), c'est l'ordre (vague, délai) qui compte, pas celui du tableau.
+    expect(repartirEvenementsFer([renforts(2, 3), renforts(1, 20)], 3, 30).map((e) => e.delai ?? 0)).toEqual([20, 20]);
+    // À vague et délai égaux, l'ordre des données est gardé.
+    const egaux = repartirEvenementsFer([renforts(1, 5), renforts(1, 5), renforts(1, 8)], 2, 30).map((e) => e.delai ?? 0);
+    expect(egaux).toEqual([5, 5, 8]);
+  });
+
+  it('le scénario de la relecture : l’ouverture passe avant la fermeture, sans chemin fermé en même temps', () => {
+    const vague = { paquets: [{ ennemi: 'paysan_affame', nombre: 4, intervalle: 10, chemin: 0, delai: 0 }] };
+    const niveau: Niveau = {
+      ...niveauDynamique({
+        mobiles: [0, 1],
+        vagues: [vague, vague, vague],
+        cheminsFermes: [{ chemin: 0, repli: 1 }],
+        evenements: [
+          { vague: 1, delai: 20, type: 'ouvrir_chemin', chemin: 0 },
+          { vague: 2, delai: 3, type: 'fermer_chemin', chemin: 1, repli: 0 },
+        ],
+      }),
+      defiFer: { familles: ['tir', 'magie'] },
+    };
+    const etat = creerPartie(niveau, { ...CONFIG, defi: 'fer' as const });
+    const [ouvrir, fermer] = etat.niveau.evenements ?? [];
+    expect(ouvrir?.type).toBe('ouvrir_chemin');
+    expect(fermer?.type).toBe('fermer_chemin');
+    expect(ouvrir?.delai ?? 0).toBeLessThanOrEqual(fermer?.delai ?? 0);
+    expect(appliquerAction(etat, { type: 'appelerVague' }).ok).toBe(true);
+    const ordre: number[] = [];
+    for (let i = 0; i < 40 * 120 && ordre.length < 2; i++) {
+      step(etat);
+      for (const ev of etat.evenements) if (ev.type === 'evenement_niveau') ordre.push(ev.index);
+    }
+    expect(ordre).toEqual([0, 1]);
+    // Jamais les deux chemins fermés à la fois.
+    expect(etat.dynamique.cheminsActifs.some((a) => a)).toBe(true);
   });
 });

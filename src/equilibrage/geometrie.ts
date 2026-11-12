@@ -7,6 +7,7 @@ import { cheminOuvertPour, creerPartie, genererVagueInfinie, pointSurChemin } fr
 import type { DefEnnemi, EtatPartie, Niveau, Paquet, Point } from '../engine';
 import { ENNEMIS } from '../data/ennemis';
 import { menaceEnnemi } from '../data/equilibrage';
+import { EVENEMENTS_NIVEAU } from '../data/evenements-niveau';
 import { VERSION_DONNEES } from '../data/version';
 
 /** Écart entre deux points d'échantillonnage, en tuiles. */
@@ -61,13 +62,14 @@ export function menacePaquet(p: Paquet): number {
 export function trajetsEffectifs(niveau: Niveau): number[][] {
   const actifs = niveau.carte.chemins.map(() => true);
   const replis = niveau.carte.chemins.map(() => -1);
-  for (const f of niveau.cheminsFermes ?? []) {
-    actifs[f.chemin] = false;
-    replis[f.chemin] = f.repli;
-  }
-  const mobiles = (niveau.evenements ?? []).filter((e) => e.type === 'ouvrir_chemin' || e.type === 'fermer_chemin');
+  // Dans l'ordre (vague, délai, rang), comme `verifierReplis` : c'est l'ordre où le moteur les joue.
+  const mobiles = (niveau.evenements ?? [])
+    .map((e, i) => ({ e, i }))
+    .filter((x) => x.e.type === 'ouvrir_chemin' || x.e.type === 'fermer_chemin')
+    .sort((a, b) => a.e.vague - b.e.vague || (a.e.delai ?? EVENEMENTS_NIVEAU.annonce) - (b.e.delai ?? EVENEMENTS_NIVEAU.annonce) || a.i - b.i)
+    .map((x) => x.e);
   return niveau.vagues.map((vague, index) => {
-    // Les événements des vagues déjà lancées (vague <= index) ont eu lieu, dans l'ordre des données.
+    // Les événements des vagues déjà lancées (vague <= index) ont eu lieu, dans l'ordre (vague, délai).
     actifs.fill(true);
     replis.fill(-1);
     for (const f of niveau.cheminsFermes ?? []) {
@@ -77,7 +79,7 @@ export function trajetsEffectifs(niveau: Niveau): number[][] {
     for (const e of mobiles) {
       if (e.vague > index) continue;
       if (e.type === 'ouvrir_chemin') actifs[e.chemin] = true;
-      else {
+      else if (e.type === 'fermer_chemin') {
         actifs[e.chemin] = false;
         replis[e.chemin] = e.repli;
       }

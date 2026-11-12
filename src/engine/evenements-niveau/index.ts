@@ -105,16 +105,34 @@ export function creerEtatDynamique(niveau: Niveau): EtatDynamique {
 /**
  * Défi Fer : toutes les vagues n'en font qu'une, mais tous les événements du niveau sont joués. Chacun passe à la vague 1 et son délai
  * est réparti sur la durée `dureeFer` (secondes) de la vague unique, proportionnellement au rang de sa vague d'origine : l'événement de
- * la vague k sur N part à `dureeFer × (k − 1) / N`, plus son propre délai, arrondi au dixième de seconde et borné à `dureeFer` (jamais
- * avant le délai minimal de l'annonce). Déterministe : une pure fonction des données du niveau.
+ * la vague k sur N part à `dureeFer × (k − 1) / N`, plus son propre délai, arrondi au dixième de seconde puis borné à `dureeFer` (la borne
+ * s'applique après l'arrondi : aucun événement ne tombe après la dernière apparition), jamais avant le délai minimal de l'annonce.
+ * L'ordre (vague, délai) du niveau est gardé : un événement placé plus tard dans le niveau ne part jamais avant un événement placé plus
+ * tôt, et à égalité l'ordre des données compte (les délais répartis sont croissants dans cet ordre). Déterministe : une pure fonction
+ * des données du niveau.
  */
 export function repartirEvenementsFer(evenements: readonly EvenementNiveau[], nombreVagues: number, dureeFer: number): EvenementNiveau[] {
   const total = Math.max(1, nombreVagues);
-  return evenements.map((e) => {
+  const borne = Math.max(EVENEMENTS_NIVEAU.annonce, dureeFer);
+  const delais = evenements.map((e) => {
     const debut = (dureeFer * (e.vague - 1)) / total;
-    const delai = Math.round(Math.min(debut + (e.delai ?? EVENEMENTS_NIVEAU.annonce), Math.max(EVENEMENTS_NIVEAU.annonce, dureeFer)) * 10) / 10;
-    return { ...e, vague: 1, delai: Math.max(EVENEMENTS_NIVEAU.annonce, delai) };
+    return Math.max(EVENEMENTS_NIVEAU.annonce, Math.min(Math.round((debut + (e.delai ?? EVENEMENTS_NIVEAU.annonce)) * 10) / 10, borne));
   });
+  // Ordre (vague, délai propre, rang dans les données) du niveau d'origine ; chaque délai réparti est au moins celui du précédent.
+  const ordre = evenements
+    .map((_, i) => i)
+    .sort((a, b) => {
+      const ea = evenements[a];
+      const eb = evenements[b];
+      return (ea?.vague ?? 0) - (eb?.vague ?? 0) || (ea?.delai ?? EVENEMENTS_NIVEAU.annonce) - (eb?.delai ?? EVENEMENTS_NIVEAU.annonce) || a - b;
+    });
+  let precedent = 0;
+  for (const i of ordre) {
+    const d = Math.max(delais[i] ?? 0, precedent);
+    delais[i] = d;
+    precedent = d;
+  }
+  return evenements.map((e, i) => ({ ...e, vague: 1, delai: delais[i] ?? EVENEMENTS_NIVEAU.annonce }));
 }
 
 /** Le niveau sans ses événements, chemins fermés ni foules (copie de surface) : le mode infini joue la carte sans eux. */
