@@ -28,10 +28,11 @@ import type { IdEnnemi } from '../ennemis';
 import type { IdCarteModerneR1 } from './cartes-moderne-r1';
 import type { BossDeVague } from './generation';
 
-export interface PlanNiveauModerne {
+/** Plan d'un niveau du DLC ; `C` : les identifiants de cartes de sa région (la Fac par défaut). */
+export interface PlanNiveauModerne<C extends string = IdCarteModerneR1> {
   /** Numéro dans la campagne `moderne` (1 à 30). */
   readonly numero: number;
-  readonly carte: IdCarteModerneR1;
+  readonly carte: C;
   /** Chemins de la carte utilisés, dans l'ordre (tous ici) ; les chemins mobiles en font partie. */
   readonly chemins: readonly number[];
   readonly aretesDepart: number;

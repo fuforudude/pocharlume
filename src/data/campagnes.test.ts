@@ -51,14 +51,17 @@ describe('campagnes nommées', () => {
 });
 
 describe('liste des niveaux du DLC', () => {
-  it('la Fac (région 1) est livrée : 10 niveaux numérotés 1 à 10, les deux autres régions sont encore vides', () => {
-    expect(CAMPAGNE_MODERNE.map((n) => n.numero)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  it('la Fac et la Manif (régions 1 et 2) sont livrées : 20 niveaux numérotés 1 à 20, la Préfecture est encore vide', () => {
+    expect(CAMPAGNE_MODERNE.map((n) => n.numero)).toEqual(Array.from({ length: 20 }, (_, i) => i + 1));
     expect(REGIONS_MODERNE).toHaveLength(NOMBRE_REGIONS_MODERNE);
-    expect(REGIONS_MODERNE.map((r) => r.length)).toEqual([10, 0, 0]);
+    expect(REGIONS_MODERNE.map((r) => r.length)).toEqual([10, 10, 0]);
     expect(niveauModerne(1)).toBe(CAMPAGNE_MODERNE[0]);
-    expect(niveauModerne(11)).toBeUndefined();
+    expect(niveauModerne(11)).toBe(CAMPAGNE_MODERNE[10]);
+    expect(niveauModerne(21)).toBeUndefined();
     expect([NOEUDS_REGIONS_MODERNE, TRACES_REGIONS_MODERNE, TEXTES_REGIONS_MODERNE].map((l) => l.length)).toEqual([NOMBRE_REGIONS_MODERNE, NOMBRE_REGIONS_MODERNE, NOMBRE_REGIONS_MODERNE]);
     expect([NOEUDS_REGIONS_MODERNE[0]?.length, TRACES_REGIONS_MODERNE[0]?.length, TEXTES_REGIONS_MODERNE[0]?.length]).toEqual([10, 9, 10]);
+    expect([NOEUDS_REGIONS_MODERNE[1]?.length, TRACES_REGIONS_MODERNE[1]?.length, TEXTES_REGIONS_MODERNE[1]?.length]).toEqual([10, 9, 10]);
+    expect(TEXTES_REGIONS_MODERNE[1]?.map((t) => t.numero)).toEqual(Array.from({ length: 10 }, (_, i) => i + 11));
   });
 
   /** Les écarts d'une liste de niveaux du DLC à la règle : campagne, numéro suivi, région. */

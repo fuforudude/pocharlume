@@ -90,9 +90,17 @@ describe('carte du monde du DLC', () => {
   it('la Fac est livrée : ses 10 niveaux, ses nœuds et son tracé sont sur la carte, plus de panneau « à venir »', () => {
     expect(REGIONS_MONDE_MODERNE[0]?.contenu?.niveaux.map((n) => n.numero)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     expect(REGIONS_MONDE_MODERNE[0]?.contenu?.noeuds).toHaveLength(10);
-    expect(REGIONS_MONDE_MODERNE.slice(1).map((r) => r.contenu)).toEqual([null, null]);
+    expect(REGIONS_MONDE_MODERNE.slice(2).map((r) => r.contenu)).toEqual([null]);
     monter(sauvegardeVide(), { campagne: 'moderne', regions: REGIONS_MONDE_MODERNE });
     expect(document.querySelector<HTMLElement>('.carte-region-vide')?.hidden ?? true).toBe(true);
+  });
+
+  it('la Manif est livrée : ses 10 niveaux (11 à 20), ses nœuds dans le fond de 512 × 288 et ses 9 tronçons sont sur la carte', () => {
+    const manif = REGIONS_MONDE_MODERNE[1]?.contenu;
+    expect(manif?.niveaux.map((n) => n.numero)).toEqual(Array.from({ length: 10 }, (_, i) => i + 11));
+    expect(manif?.noeuds).toHaveLength(10);
+    for (const n of manif?.noeuds ?? []) expect(n.x >= 0 && n.x <= 512 && n.y >= 0 && n.y <= 288, `nœud ${String(n.numero)}`).toBe(true);
+    expect(manif?.noeuds.filter((n) => n.boss).map((n) => n.numero)).toEqual([10]);
   });
 
   it('les régions du DLC s’ouvrent avec la progression du DLC, pas celle de l’histoire', () => {

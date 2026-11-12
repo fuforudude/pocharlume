@@ -26,7 +26,12 @@ export interface ZoneSol {
  * (tuiles préfixées, dans l'atlas du DLC, art/dlc-moderne/decor/). Les régions 1 à 15 gardent leurs noms (`herbe-1`, `r2-herbe-1`…).
  */
 export const REGION_VISUELLE_FAC = 101;
-export const PREFIXES_TUILES_MODERNE: Readonly<Record<number, string>> = { [REGION_VISUELLE_FAC]: 'moderne-fac' };
+/** La Manif (région 2 du DLC) : bitume et pavés (art/dlc-moderne/decor/manif-tuiles.txt). */
+export const REGION_VISUELLE_MANIF = 102;
+export const PREFIXES_TUILES_MODERNE: Readonly<Record<number, string>> = {
+  [REGION_VISUELLE_FAC]: 'moderne-fac',
+  [REGION_VISUELLE_MANIF]: 'moderne-manif',
+};
 
 /** Un étudiant figurant de la mise en scène vivante, sur une case (cases de la grille, toujours interdites à la construction). */
 export interface CaseScene {
@@ -45,6 +50,10 @@ export interface SceneVivante {
   readonly banderoles: readonly (CaseScene & { readonly largeur: number; readonly couleur: number })[];
   /** Fumigène : point du sol en tuiles, couleur (indice de la palette des fumées du rendu). */
   readonly fumigenes: readonly { readonly x: number; readonly y: number; readonly couleur: number }[];
+  /** Cortège en marche (la Manif) : une file d'étudiants sur `largeur` cases à partir de (cx, cy), vers l'est ; cases interdites comme un groupe. */
+  readonly corteges?: readonly (CaseScene & { readonly largeur: number })[];
+  /** Ondes d'une camionnette sono (la Manif) : point en tuiles, au-dessus du décor `moderne-camion-sono` ; ne bloque rien. */
+  readonly sonos?: readonly { readonly x: number; readonly y: number }[];
 }
 
 export interface VisuelCarte {
