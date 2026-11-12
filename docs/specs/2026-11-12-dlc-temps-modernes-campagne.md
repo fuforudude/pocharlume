@@ -152,6 +152,8 @@ avec ses propres récompenses.
 - **Décors de la Fac** : les grands décors qui prenaient une case de tour près d'un chemin, et ceux cachés par le fourgon,
   sont tous déplacés ; aucune liste d'exceptions (décision du 2026-11-12).
 - **Boss tuables** : sur chaque niveau de boss du DLC, le boss doit pouvoir être tué ; un test vérifie que le bot le tue
-  (le laisser passer en perdant des vies ne compte pas comme une vraie victoire de conception).
+  (le laisser passer en perdant des vies ne compte pas comme une vraie victoire de conception). Le boss peut demander une
+  stratégie précise (ex. : le Centaure se tue en cherchant la pénétration d'armure, archers voie B, Perçage) ; le test peut
+  jouer une stratégie dédiée, et le bot générique ne doit plus gagner en laissant passer le boss.
 - **Scène vivante** : cortèges et figurants de décor suivent la même règle que les grands décors (cases sans valeur).
 - **Fermetures de chemin** : une fermeture dure quelques vagues puis le chemin rouvre avant la fin du niveau, sur les 30 niveaux.
