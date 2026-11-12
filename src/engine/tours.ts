@@ -5,6 +5,7 @@ import { tirer, tirerEntre } from './aleatoire';
 import { ajusterMontant } from './argent';
 import { appliquerBonusTour, bonusDeFamille, bonusEffectif } from './bonus';
 import { placerSurChemin, segmentPour, trajetEnnemi } from './chemins';
+import { avecCapacite } from './capacites-campagne';
 import { premierEnnemi } from './ciblage';
 import { defFamille, dieuDe } from './contenu';
 import { appliquerEffets, estVisible, infligerDegats, partApresBouclier } from './degats';
@@ -36,7 +37,8 @@ export function statsTour(etat: EtatPartie, famille: FamilleTour, def: DefNiveau
   const stats = statsTourDuDieu(etat, famille, def, rangs);
   if (famille === 'divine') return stats;
   const collection = bonusDeFamille(bonusEffectif(etat.config), famille);
-  return collection ? appliquerBonusTour(stats, collection) : stats;
+  // Puis la capacité de famille de la campagne qui change ses coups (« Perçage » ; rien dans l'histoire).
+  return avecCapacite(etat, famille, collection ? appliquerBonusTour(stats, collection) : stats);
 }
 
 function statsTourDuDieu(etat: EtatPartie, famille: FamilleTour, def: DefNiveauTour, rangs: readonly number[]): DefNiveauTour {
@@ -131,8 +133,9 @@ const dejaTouches: number[] = [];
 function toucher(etat: EtatPartie, s: DefNiveauTour, cible: Ennemi, degats: number, origineX: number, origineY: number): void {
   const x = cible.x;
   const y = cible.y;
-  // Le bouclier frontal (Porte-Herse) arrête le coup direct venu de devant lui ; la chaîne qui suit n'est pas arrêtée.
-  infligerDegats(etat, cible, degats * partApresBouclier(etat, cible, origineX, origineY), s.typeDegats, s.ignoreArmure);
+  // Le bouclier frontal (Porte-Herse) arrête le coup direct venu de devant lui, sauf « Perçage » ; la chaîne qui suit n'est pas arrêtée.
+  const bouclier = s.percageBouclier === true ? 1 : partApresBouclier(etat, cible, origineX, origineY);
+  infligerDegats(etat, cible, degats * bouclier, s.typeDegats, s.ignoreArmure);
   appliquerEffets(etat, cible, s.effets);
   const chaine = s.chaine;
   if (!chaine) return;

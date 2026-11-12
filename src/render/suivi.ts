@@ -7,8 +7,9 @@
 // viennent d'un pool. Seule la création d'une entité nouvelle peut allouer (et seulement au début).
 import { DIEUX } from '../data/dieux';
 import { type Ennemi, type EtatPartie, type Evenement, type Projectile, type Tour, type Unite } from '../engine';
-import type { Voie } from '../engine/definitions';
+import type { IdCampagne, Voie } from '../engine/definitions';
 import type { FamilleTour } from '../engine/etat';
+import { campagneDe } from '../engine/capacites-campagne';
 import { dureeAnimation } from './animations';
 import type { AtlasRendu, SpriteAtlas, SpriteHabille } from './atlas';
 import { TUILE } from './camera';
@@ -337,7 +338,7 @@ export class Suivi {
         v = this.creer(CATEGORIE.tour, t.id, t.x, t.y);
         this.tours.set(t.id, v);
       }
-      if (v.niveau !== t.niveau || v.voie !== t.voie || v.sprite === null || v.versionCollection !== this.version) this.habillerTour(v, t, etat.config.dieu);
+      if (v.niveau !== t.niveau || v.voie !== t.voie || v.sprite === null || v.versionCollection !== this.version) this.habillerTour(v, t, etat.config.dieu, campagneDe(etat.niveau));
       // Une tour du radeau suit sa place : le moteur recopie la position de la place dans t.x, t.y à chaque pas, le rendu
       // interpole entre le pas précédent et celui-ci (halo, tireur, portée et anneaux suivent son visuel).
       if (t.place >= 0) {
@@ -351,16 +352,17 @@ export class Suivi {
     }
   }
 
-  private habillerTour(v: Visuel, t: Tour, dieu: string): void {
+  private habillerTour(v: Visuel, t: Tour, dieu: string, campagne: IdCampagne): void {
     v.famille = t.famille;
     v.niveau = t.niveau;
     v.voie = t.voie;
-    v.nomSprite = spriteTour(t.famille, t.niveau, t.voie, dieu);
+    // DLC « Temps modernes » : le skin moderne de la tour (atlas à part), avec les mêmes animations.
+    v.nomSprite = spriteTour(t.famille, t.niveau, t.voie, dieu, campagne);
     v.sprite = this.atlas.sprite(v.nomSprite) ?? null;
     v.habille = this.habiller(v.nomSprite, t.famille);
     v.halo = haloDe(t.famille, t.niveau, t.voie, v.habille?.skin ?? null);
     v.versionCollection = this.version;
-    const nomTireur = spriteTireur(t.famille, t.niveau, t.voie);
+    const nomTireur = spriteTireur(t.famille, t.niveau, t.voie, campagne);
     v.tireur = nomTireur ? (this.atlas.sprite(nomTireur) ?? null) : null;
     const nomPoint = nomPointDeTir(t.famille);
     const point = nomPoint ? v.sprite?.points?.[nomPoint] : undefined;

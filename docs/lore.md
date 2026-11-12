@@ -382,6 +382,48 @@ Ce qu'on voit au choix avant un niveau : un symbole, une épithète, une phrase.
 - `ennemi.martyr_bleme.desc` : Il s’est offert au Soleil Blême. Sa dernière lueur ne lui appartient plus.
 - `ennemi.passeur.desc` : Il a laissé sa barque pourrir dans les marais. Il fait toujours payer le passage, et ne dit jamais vers où.
 
+## DLC « Temps modernes » : ennemis
+
+Ton propre au DLC (spec `docs/specs/2026-11-12-dlc-temps-modernes-campagne.md`) : satire en dessin, comme les skins. Les chats
+sont des étudiants mobilisés, les humains les forces de l'ordre ; uniformes génériques, ni insigne, ni nom réel, ni violence
+réaliste. Une phrase courte, pince-sans-rire, qui se moque de la fonction plus que de la personne.
+
+- `ennemi.moderne_gendarme` : Gendarme
+- `ennemi.moderne_crs` : CRS
+- `ennemi.moderne_gendarme_mobile` : Gendarme Mobile
+- `ennemi.moderne_bouclier_anti_emeute` : Bouclier Anti-Émeute
+- `ennemi.moderne_tireur_lbd` : Tireur de LBD
+- `ennemi.moderne_grenadier_lacrymo` : Grenadier Lacrymogène
+- `ennemi.moderne_bac` : Agent de la BAC
+- `ennemi.moderne_commissaire` : Commissaire
+- `ennemi.moderne_bravm` : BRAV-M
+- `ennemi.moderne_cavalier_monte` : Cavalier de la Police Montée
+- `ennemi.moderne_drone` : Drone
+- `ennemi.moderne_helicoptere` : Hélicoptère
+- `ennemi.moderne_canon_a_eau` : Canon à Eau
+- `ennemi.moderne_centaure` : Centaure
+- `ennemi.moderne_prefet` : Le Préfet
+- `ennemi.moderne_commissaire_boss` : Le Commissaire Divisionnaire
+- `ennemi.moderne_centaure_boss` : Le Grand Centaure
+
+- `ennemi.moderne_gendarme.desc` : Il est venu vérifier que la manifestation était déclarée. Elle ne l’était pas : il est resté.
+- `ennemi.moderne_crs.desc` : Trois manifs cette semaine, toujours du même côté de la ligne. Il dit que c’est le bon.
+- `ennemi.moderne_gendarme_mobile.desc` : Formé aux grands rassemblements. Il garde ses meilleurs coups pour ceux qui tiennent le mégaphone.
+- `ennemi.moderne_bouclier_anti_emeute.desc` : Derrière son bouclier, il ne voit rien venir. C’est tout l’intérêt.
+- `ennemi.moderne_tireur_lbd.desc` : Le règlement dit de viser les jambes. Le règlement ne dit rien des enceintes.
+- `ennemi.moderne_grenadier_lacrymo.desc` : Il disperse la foule et l’air avec. Après son passage, tout le monde pleure, lui compris.
+- `ennemi.moderne_bac.desc` : Jean, baskets, brassard dans la poche. Discret jusqu’au moment précis où il ne l’est plus.
+- `ennemi.moderne_commissaire.desc` : Il ne court jamais. Il dit aux autres de courir plus vite.
+- `ennemi.moderne_bravm.desc` : Ils vont toujours par deux : un qui conduit, un qui frappe. Seul, le survivant conduit plus vite.
+- `ennemi.moderne_cavalier_monte.desc` : Le cheval a fait une école de dressage. Le cavalier, une école de maintien de l’ordre. Le cheval a eu la mention.
+- `ennemi.moderne_drone.desc` : Il filme tout, pour l’enquête. L’enquête n’en regardera que la moitié.
+- `ennemi.moderne_helicoptere.desc` : Il tourne au-dessus du cortège depuis midi. Personne ne sait qui paie le kérosène.
+- `ennemi.moderne_canon_a_eau.desc` : Il nettoie la place en un seul passage. La place, et ce qui se tenait dessus.
+- `ennemi.moderne_centaure.desc` : Dix tonnes de blindage pour un carrefour. On n’est jamais trop prudent avec un carrefour.
+- `ennemi.moderne_prefet.desc` : Il signe les arrêtés le matin et les communiqués le soir. Entre les deux, il regarde la carte.
+- `ennemi.moderne_commissaire_boss.desc` : Il a reçu des ordres d’en haut. Il les répète, plus fort, à tout ce qui est en bas.
+- `ennemi.moderne_centaure_boss.desc` : Le dernier modèle, option canon et marchepied. Il a coûté plus cher que la fac qu’il assiège.
+
 ## Paroles avant les boss
 
 Ce ne sont plus les dieux qui parlent : un murmure, une inscription, une voix sans source.

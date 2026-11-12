@@ -2,6 +2,7 @@
 // seul code asynchrone du rendu ; ensuite tout est synchrone et sans allocation.
 import type { AnimationAtlas, AtlasJson, CadreAtlas, SpriteAtlas } from '../../tools/art/atlas.ts';
 
+import type { IdCampagne } from '../engine/definitions';
 import { estSkinConnu, imageDuSkin, spritesDuSkin, zoneDuSprite, type ImageDonnees, type Zone } from './palettes-skins';
 
 export type { AnimationAtlas, AtlasJson, CadreAtlas, SpriteAtlas };
@@ -34,11 +35,43 @@ function creerCanvas(largeur: number, hauteur: number): { canvas: HTMLCanvasElem
   return { canvas, ctx };
 }
 
+/** Une planche, et la même retournée de gauche à droite (les cadres tournés vers la gauche en sont tirés), avec sa largeur. */
+interface Planche {
+  readonly normal: HTMLCanvasElement;
+  readonly miroir: HTMLCanvasElement;
+  readonly largeur: number;
+}
+
+function creerPlanche(json: AtlasJson, image: CanvasImageSource): { planche: Planche; ctx: CanvasRenderingContext2D } {
+  const { canvas, ctx } = creerCanvas(json.largeur, json.hauteur);
+  ctx.drawImage(image, 0, 0);
+  const m = creerCanvas(json.largeur, json.hauteur);
+  m.ctx.translate(json.largeur, 0);
+  m.ctx.scale(-1, 1);
+  m.ctx.drawImage(canvas, 0, 0);
+  return { planche: { normal: canvas, miroir: m.canvas, largeur: json.largeur }, ctx };
+}
+
+/**
+ * Sprites d'un atlas ajouté (DLC « Temps modernes ») fusionnés à ceux de l'atlas principal : un nom déjà présent est refusé (les
+ * sprites du DLC sont tous préfixés `moderne-`). Pur : testé sans canvas.
+ */
+export function fusionnerSprites(
+  principaux: Readonly<Record<string, SpriteAtlas>>,
+  ajoutes: Readonly<Record<string, SpriteAtlas>>,
+): Record<string, SpriteAtlas> {
+  for (const nom of Object.keys(ajoutes)) if (Object.hasOwn(principaux, nom)) throw new Error(`Sprite en double entre deux atlas : ${nom}`);
+  return { ...principaux, ...ajoutes };
+}
+
 export class AtlasRendu {
-  /** La planche, et la même retournée de gauche à droite (les cadres tournés vers la gauche en sont tirés). */
-  private readonly planche: HTMLCanvasElement;
-  private readonly miroir: HTMLCanvasElement;
-  private readonly sprites: Readonly<Record<string, SpriteAtlas>>;
+  /** La planche principale (celle de l'histoire). */
+  private readonly principale: Planche;
+  private sprites: Readonly<Record<string, SpriteAtlas>>;
+  /** Planche des sprites venus d'un atlas ajouté (DLC) ; les autres sont sur la principale. */
+  private readonly planches = new Map<SpriteAtlas, Planche>();
+  /** Atlas ajoutés, par nom d'image : chacun ne s'ajoute qu'une fois. */
+  private readonly ajoutes = new Set<string>();
   private readonly icones = new Map<string, string>();
   private readonly ctxPlanche: CanvasRenderingContext2D;
   /** Pixels de la planche, lus une seule fois, à la première demande de skin (4 Mo : jamais lus si personne n'équipe de skin). */
@@ -52,15 +85,25 @@ export class AtlasRendu {
     image: CanvasImageSource,
   ) {
     this.sprites = json.sprites;
-    const { canvas, ctx } = creerCanvas(json.largeur, json.hauteur);
-    ctx.drawImage(image, 0, 0);
-    this.planche = canvas;
+    const { planche, ctx } = creerPlanche(json, image);
+    this.principale = planche;
     this.ctxPlanche = ctx;
-    const m = creerCanvas(json.largeur, json.hauteur);
-    m.ctx.translate(json.largeur, 0);
-    m.ctx.scale(-1, 1);
-    m.ctx.drawImage(canvas, 0, 0);
-    this.miroir = m.canvas;
+  }
+
+  /**
+   * Ajoute les sprites d'un autre atlas, sur sa propre planche (l'atlas du DLC « Temps modernes », chargé seulement pour une partie de
+   * cette campagne). Sans effet s'il est déjà ajouté.
+   */
+  ajouterAtlas(json: AtlasJson, image: CanvasImageSource): void {
+    if (this.ajoutes.has(json.image)) return;
+    const { planche } = creerPlanche(json, image);
+    this.sprites = fusionnerSprites(this.sprites, json.sprites);
+    for (const sprite of Object.values(json.sprites)) this.planches.set(sprite, planche);
+    this.ajoutes.add(json.image);
+  }
+
+  private plancheDe(sprite: SpriteAtlas): Planche {
+    return this.planches.get(sprite) ?? this.principale;
   }
 
   sprite(nom: string): SpriteAtlas | undefined {
@@ -83,14 +126,15 @@ export class AtlasRendu {
   dessiner(ctx: CanvasRenderingContext2D, sprite: SpriteAtlas, cadre: CadreAtlas, px: number, py: number, miroir: boolean): void {
     if (cadre.largeur === 0) return;
     const y = py - sprite.ancre.y + cadre.dy;
+    const planche = this.plancheDe(sprite);
     if (miroir) {
       ctx.drawImage(
-        this.miroir,
-        this.json.largeur - cadre.x - cadre.largeur, cadre.y, cadre.largeur, cadre.hauteur,
+        planche.miroir,
+        planche.largeur - cadre.x - cadre.largeur, cadre.y, cadre.largeur, cadre.hauteur,
         px + sprite.ancre.x - cadre.dx - cadre.largeur, y, cadre.largeur, cadre.hauteur,
       );
     } else {
-      ctx.drawImage(this.planche, cadre.x, cadre.y, cadre.largeur, cadre.hauteur, px - sprite.ancre.x + cadre.dx, y, cadre.largeur, cadre.hauteur);
+      ctx.drawImage(planche.normal, cadre.x, cadre.y, cadre.largeur, cadre.hauteur, px - sprite.ancre.x + cadre.dx, y, cadre.largeur, cadre.hauteur);
     }
   }
 
@@ -126,7 +170,8 @@ export class AtlasRendu {
     if (this.habilles.has(cle)) return this.habilles.get(cle) ?? null;
     let habille: SpriteHabille | null = null;
     const sprite = this.sprite(nom);
-    if (sprite && estSkinConnu(skin) && spritesDuSkin(skin).includes(nom)) {
+    // Les skins recolorent la planche principale : un sprite d'un atlas ajouté n'en a pas.
+    if (sprite && !this.planches.has(sprite) && estSkinConnu(skin) && spritesDuSkin(skin).includes(nom)) {
       this.pixels ??= this.ctxPlanche.getImageData(0, 0, this.json.largeur, this.json.hauteur);
       const zone = zoneDuSprite(sprite);
       const image = imageDuSkin(this.pixels, skin, zone);
@@ -157,7 +202,7 @@ export class AtlasRendu {
   dessinerEchelle(ctx: CanvasRenderingContext2D, sprite: SpriteAtlas, cadre: CadreAtlas, px: number, py: number, echelle: number): void {
     if (cadre.largeur === 0) return;
     ctx.drawImage(
-      this.planche,
+      this.plancheDe(sprite).normal,
       cadre.x, cadre.y, cadre.largeur, cadre.hauteur,
       px + (cadre.dx - sprite.ancre.x) * echelle, py + (cadre.dy - sprite.ancre.y) * echelle, cadre.largeur * echelle, cadre.hauteur * echelle,
     );
@@ -173,7 +218,7 @@ export class AtlasRendu {
     if (!sprite || !cadre) return '';
     const { canvas, ctx } = creerCanvas(sprite.largeur * echelle, sprite.hauteur * echelle);
     ctx.drawImage(
-      this.planche,
+      this.plancheDe(sprite).normal,
       cadre.x, cadre.y, cadre.largeur, cadre.hauteur,
       cadre.dx * echelle, cadre.dy * echelle, cadre.largeur * echelle, cadre.hauteur * echelle,
     );
@@ -184,20 +229,41 @@ export class AtlasRendu {
 }
 
 let chargement: Promise<AtlasRendu> | undefined;
+let chargementModerne: Promise<AtlasRendu> | undefined;
 
-/** Charge l'atlas une seule fois (le résultat est partagé entre les parties). */
-export function chargerAtlas(base: string = `${import.meta.env.BASE_URL}sprites/`): Promise<AtlasRendu> {
+/** Lit un atlas (JSON puis planche) dans le dossier `base`. */
+async function lireAtlas(base: string, fichier: string): Promise<{ json: AtlasJson; image: HTMLImageElement }> {
+  const reponse = await fetch(`${base}${fichier}`);
+  if (!reponse.ok) throw new Error(`Atlas introuvable : ${fichier} (${String(reponse.status)})`);
+  const json = (await reponse.json()) as AtlasJson;
+  const image = new Image();
+  image.src = `${base}${json.image}`;
+  await image.decode();
+  return { json, image };
+}
+
+/**
+ * Charge l'atlas une seule fois (le résultat est partagé entre les parties). Pour la campagne `moderne`, ajoute aussi l'atlas à part du DLC
+ * (atlas-moderne.json, chargé une seule fois, et jamais pour l'histoire).
+ */
+export function chargerAtlas(campagne: IdCampagne = 'histoire', base: string = `${import.meta.env.BASE_URL}sprites/`): Promise<AtlasRendu> {
   chargement ??= (async () => {
-    const reponse = await fetch(`${base}atlas.json`);
-    if (!reponse.ok) throw new Error(`Atlas introuvable : ${String(reponse.status)}`);
-    const json = (await reponse.json()) as AtlasJson;
-    const image = new Image();
-    image.src = `${base}${json.image}`;
-    await image.decode();
+    const { json, image } = await lireAtlas(base, 'atlas.json');
     return new AtlasRendu(json, image);
   })();
   chargement.catch(() => {
     chargement = undefined;
   });
-  return chargement;
+  if (campagne !== 'moderne') return chargement;
+  const principal = chargement;
+  chargementModerne ??= (async () => {
+    const atlas = await principal;
+    const { json, image } = await lireAtlas(base, 'atlas-moderne.json');
+    atlas.ajouterAtlas(json, image);
+    return atlas;
+  })();
+  chargementModerne.catch(() => {
+    chargementModerne = undefined;
+  });
+  return chargementModerne;
 }

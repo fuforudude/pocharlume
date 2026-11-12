@@ -157,6 +157,10 @@ export interface Ennemi {
   minuteurs: number[];
   /** Pas restants avant le prochain soin des ennemis proches. */
   rechargeSoin: number;
+  /** Id de l'autre ennemi de son binôme (BRAV-M) tant que les deux vivent, -1 sinon. */
+  binome: number;
+  /** Vrai une fois l'autre ennemi de son binôme tombé : il accélère (`pouvoirs.binome.vitesse`). */
+  binomeSeul: boolean;
   /** Id de l'unité qui le bloque, -1 si libre. */
   bloqueur: number;
   vivant: boolean;
@@ -245,6 +249,29 @@ export interface Tour {
   aveugleFacteur: number;
   /** Pas restants avant la prochaine tourelle et le prochain piège de l'Atelier (indices de MINUTEUR). */
   minuteurs: number[];
+  /** Tirs sur les tours arrivés à sa portée tant qu'elle a la capacité « Renvoi » (campagne) : elle renvoie un tir sur `chaque`. */
+  renvois: number;
+}
+
+/** Tir d'un ennemi sur une tour (tireur de LBD) : il vole vers la tour, ou, renvoyé par un Perchoir, vers le tireur. */
+export interface TirEnnemi {
+  id: number;
+  /** Ennemi qui a tiré. */
+  ennemi: number;
+  /** Tour visée. */
+  tour: number;
+  x: number;
+  y: number;
+  /** Point visé (la tour, ou le tireur suivi une fois renvoyé). */
+  cx: number;
+  cy: number;
+  /** Tuiles par pas. */
+  vitesse: number;
+  /** Pas de mise hors service de la tour touchée. */
+  duree: number;
+  /** Renvoyé vers le tireur par un Perchoir (« Renvoi »), et pas d'étourdissement du tireur à l'arrivée. */
+  renvoye: boolean;
+  etourdissement: number;
 }
 
 export interface Projectile {
@@ -409,6 +436,8 @@ export interface EtatPartie {
   unites: Unite[];
   tours: Tour[];
   projectiles: Projectile[];
+  /** Tirs des ennemis sur les tours (tireurs de LBD), en vol. */
+  tirsEnnemis: TirEnnemi[];
   pieges: Piege[];
   zones: ZoneDurable[];
   structures: Structure[];

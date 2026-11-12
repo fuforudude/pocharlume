@@ -3,7 +3,7 @@
 # Pose de repos seulement (pas d'animation tant que le skin n'est pas validé). 32×32, ancre aux pieds, de profil vers la
 # droite ; les engins lourds et le boss sont dessinés en 32×32 puis agrandis ×2 (cadres de 64×64), comme les boss du jeu.
 # Uniformes génériques, reconnaissables aux couleurs et à l'équipement : aucun insigne, logo ni inscription.
-# Hors atlas : ce dossier n'est lu que par l'outil d'aperçu du DLC (npm run dlc:apercu), jamais par npm run art.
+# Atlas à part : npm run art en fait public/sprites/atlas-moderne.png, chargé seulement pour une partie du DLC (et npm run dlc:apercu, les aperçus).
 # Première version générée par un script, retouchée à la main : on la modifie ici.
 #= À pied : la piétaille
 categorie ennemi

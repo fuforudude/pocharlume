@@ -12,6 +12,7 @@ import { avancer, caseExiste, centreCase, creerPartie, derniereVagueTerminee, va
 import type { Action, ConfigPartie, EntreeJournal, EtatPartie, ResultatAction } from '../engine';
 import { t } from '../i18n';
 import type { IdInscription } from '../data/niveaux/statues';
+import { campagneDe } from '../engine/capacites-campagne';
 import { chargerAtlas } from '../render/atlas';
 import type { BilanPartie, RaisonFin } from '../save';
 import type { AtlasRendu } from '../render/atlas';
@@ -200,7 +201,8 @@ export async function lancerNiveau(
   surFin: (resultat: ResultatPartie) => unknown,
   options: OptionsPartie = {},
 ): Promise<PartieEnCours> {
-  const atlas = await chargerAtlas();
+  // Une partie du DLC « Temps modernes » charge aussi l'atlas à part du DLC ; l'histoire ne le télécharge jamais.
+  const atlas = await chargerAtlas(campagneDe(options.reprise?.niveau ?? niveau.niveau));
   const etat = options.reprise ?? creerPartie(niveau.niveau, config);
   const parent = options.parent ?? document.body;
   const controleur = new AbortController();

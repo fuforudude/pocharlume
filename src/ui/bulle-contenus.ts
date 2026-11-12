@@ -8,8 +8,10 @@ import { HEROS, type IdHeros } from '../data/heros';
 import { RANG_MAX_COMPETENCE } from '../data/meta';
 import { TOURS } from '../data/tours';
 import { tourDuLieu, valeurRevente, type LieuTour } from '../engine';
+import { capaciteDe } from '../engine/capacites-campagne';
 import type {
   ActionEnnemi,
+  CapaciteFamille,
   CapacitesUnite,
   DefEnnemi,
   DefNiveauTour,
@@ -233,6 +235,26 @@ function notesCompetences(def: DefNiveauTour): string[] {
   return def.competences.length > 0 ? [t('bulle.competences_tour', { noms: def.competences.map((c) => tCle(c.nom)).join(', ') })] : [];
 }
 
+/** Une capacité de famille de campagne (DLC « Temps modernes ») en une phrase, chiffres lus dans les données. */
+export function texteCapacite(c: CapaciteFamille): string {
+  switch (c.type) {
+    case 'piquet':
+      return t('capacite.piquet', { n: pourcent(c.reduction), s: c.soldats });
+    case 'renvoi':
+      return t('capacite.renvoi', { c: c.chaque });
+    case 'sono':
+      return t('capacite.sono', { n: pourcent(c.ralentissement) });
+    case 'percage':
+      return t('capacite.percage', { n: pourcent(c.ignoreArmure) });
+  }
+}
+
+/** Note de bulle de la capacité que la campagne de la partie donne à cette famille ; aucune dans l'histoire. */
+export function notesCapacite(etat: EtatPartie, famille: FamilleTour): string[] {
+  const capacite = capaciteDe(etat, famille);
+  return capacite ? [t('bulle.capacite.note', { texte: texteCapacite(capacite) })] : [];
+}
+
 /** Une tour d'après ses stats (brutes ou effectives) : rôle de sa famille, caractéristiques, compétences à acheter. */
 export function contenuTour(def: DefNiveauTour, famille: FamilleTour, notes: readonly string[] = []): ContenuBulle {
   return { titre: tCle(def.nom), sousTitre: t(`bulle.role.${famille}`), lignes: lignes(caracsTour(def)), notes: [...notes, ...notesCompetences(def)], texte: null };
@@ -271,7 +293,7 @@ function contenuSansRefus(etat: EtatPartie, lieu: LieuTour, element: ElementMenu
   if (genre === 'construire') {
     const famille = detail as FamilleTour;
     const def = defNiveau(etat, famille, 1, null);
-    return def ? contenuTour(statsTour(etat, famille, def), famille) : null;
+    return def ? contenuTour(statsTour(etat, famille, def), famille, notesCapacite(etat, famille)) : null;
   }
   const tour = tourDuLieu(etat, lieu);
   if (!tour) return null;
@@ -284,7 +306,7 @@ function contenuSansRefus(etat: EtatPartie, lieu: LieuTour, element: ElementMenu
   }
   if (genre === 'specialiser' && (detail === 'A' || detail === 'B')) {
     const def = defNiveau(etat, famille, 4, detail);
-    return def ? contenuTour(statsTour(etat, famille, def), famille, [t('bulle.specialisation')]) : null;
+    return def ? contenuTour(statsTour(etat, famille, def), famille, [t('bulle.specialisation'), ...notesCapacite(etat, famille)]) : null;
   }
   if (genre === 'competence') {
     const base = defNiveau(etat, famille, tour.niveau, tour.voie);
@@ -377,6 +399,10 @@ function texteAction(a: ActionEnnemi): string {
       return t('bulle.ennemi.purifier');
     case 'terrifier':
       return t('bulle.ennemi.terrifier', { d: nombre(a.etourdissement) });
+    case 'repousser':
+      return t('bulle.ennemi.repousser', { n: nombre(a.distance), d: nombre(a.etourdissement) });
+    case 'tirer_tour':
+      return t('bulle.ennemi.tirer_tour', { d: nombre(a.duree), r: nombre(a.portee) });
   }
 }
 
@@ -408,6 +434,7 @@ function notesPouvoirs(p: PouvoirsEnnemi | undefined): string[] {
   if (p.regeneration) notes.push(t('bulle.ennemi.regeneration', { n: pourcent(p.regeneration.quantite) }));
   if (p.epines) notes.push(t('bulle.ennemi.epines', { n: nombre(p.epines.degats) }));
   if (p.alternance) notes.push(t('bulle.ennemi.alternance', { d: nombre(p.alternance.periode) }));
+  if (p.binome) notes.push(t('bulle.ennemi.binome', { n: pourcent(p.binome.vitesse) }));
   if (p.derniereLueur) notes.push(t('bulle.ennemi.derniere_lueur', { p: pourcent(p.derniereLueur.quantite) }));
   if (p.insaisissable) notes.push(t('bulle.ennemi.insaisissable'));
   if (p.insensibleRalentissement) notes.push(t('bulle.ennemi.insensible_ralentissement'));

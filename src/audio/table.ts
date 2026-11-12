@@ -259,7 +259,20 @@ export const SON_DES_EVENEMENTS: TableEvenements = {
   vente_office: 'vente',
   foule_activee: lecture('sort', 0.8, 1.2, 'foule', 1),
   foule_prete: null,
-  fin:(e) => (e.statut === 'victoire' ? 'victoire' : e.statut === 'defaite' ? 'defaite' : null),
+  // DLC « Temps modernes » : sons existants réglés par événement, en attendant des fichiers dédiés.
+  /** Un Perchoir dissipe un nuage : le souffle du sort, aigu et discret. */
+  dissipation: lecture('sort', 0.5, 1.5, 'dissipation', 1),
+  /** Le canon à eau repousse : l'onde de choc, grave. */
+  repousse: lecture('onde_choc', 0.8, 0.9, 'repousse', 1),
+  /** Le tireur de LBD tire sur une tour : le tir du carreau, sec. */
+  tir_tour: lecture('tir_carreau', 0.8, 1.2, 'tir_tour', 2),
+  /** Un Perchoir renvoie le tir : l'éclat de verre, aigu. */
+  renvoi: lecture('impact_magique', 0.7, 1.5, 'renvoi', 1),
+  /** Le tir renvoyé touche son tireur : un choc sec. */
+  tir_renvoye_touche: lecture('impact_physique', 0.8, 1.2),
+  /** Une BRAV-M perd son équipier et accélère : le moteur, l'onde de choc grave et brève. */
+  binome_seul: lecture('onde_choc', 0.5, 1.3, 'binome_seul', 1),
+  fin: (e) => (e.statut === 'victoire' ? 'victoire' : e.statut === 'defaite' ? 'defaite' : null),
 };
 
 /** La lecture à lancer pour un événement (son, facteurs, limite), ou null pour le silence. */

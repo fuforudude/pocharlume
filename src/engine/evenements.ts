@@ -122,6 +122,19 @@ export type Evenement =
   | { type: 'foule_activee'; foule: number; x: number; y: number }
   /** Une foule a fini sa recharge : elle peut de nouveau servir. */
   | { type: 'foule_prete'; foule: number }
+  // --- DLC « Temps modernes » : capacités de famille et mécaniques d'ennemis ---
+  /** Un Perchoir (« Renvoi ») dissipe un nuage toxique (son `zone_fin` suit). */
+  | { type: 'dissipation'; tour: number; zone: number; x: number; y: number }
+  /** Un ennemi repousse `nombre` unités alliées devant lui, dans la direction (dx, dy). */
+  | { type: 'repousse'; ennemi: number; x: number; y: number; dx: number; dy: number; portee: number; nombre: number }
+  /** Un ennemi tire un projectile sur une tour (le tir `tir` est dans `etat.tirsEnnemis` tant qu'il vole). */
+  | { type: 'tir_tour'; tir: number; ennemi: number; tour: number; x: number; y: number }
+  /** Un Perchoir (« Renvoi ») renvoie un tir sur les tours vers son tireur. */
+  | { type: 'renvoi'; tir: number; tour: number; ennemi: number; x: number; y: number }
+  /** Un tir renvoyé atteint son tireur, qui est étourdi. */
+  | { type: 'tir_renvoye_touche'; tir: number; ennemi: number; x: number; y: number }
+  /** L'autre ennemi d'un binôme est tombé : celui-ci accélère. */
+  | { type: 'binome_seul'; ennemi: number; x: number; y: number }
   | { type: 'fin'; statut: Statut; etoiles: number };
 
 /** Ouvre la liste d'événements du pas courant : celle d'un pas précédent est remplacée. */
