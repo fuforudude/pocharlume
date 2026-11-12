@@ -37,6 +37,7 @@ import { HEROS } from '../data/heros';
 import { dpsEfficace, EQUILIBRAGE, estTourDeZone } from '../data/equilibrage';
 import { REGLES } from '../data/regles';
 import { FAMILLES, TOURS } from '../data/tours';
+import { activationRentable, posteDansFoule } from './bot-foules';
 import { distance, echantillonner, longueurVue, menacePaquet, niveauLu, PAS_ECHANTILLON, partsSpeciales, poidsDesChemins, premiereVagueFurtifs, trajetDuPaquet, type Echantillon } from './geometrie';
 import { jouerPartie, lieuDeLaTour, type Bot, type Joueur, type ResultatPartie } from './simulation';
 
@@ -803,6 +804,13 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
     return meilleur;
   }
 
+  /** Le héros va activer une foule « héros » (bot-foules.ts) ; null s'il y est déjà envoyé. */
+  function ordreVersFoule(poste: Point): Action | null {
+    if (dernierOrdreHeros && distance(dernierOrdreHeros, poste) < 0.3) return null;
+    dernierOrdreHeros = { x: poste.x, y: poste.y };
+    return { type: 'deplacerHeros', x: poste.x, y: poste.y };
+  }
+
   function ordreHeros(etat: EtatPartie): Action | null {
     calculerZones(etat);
     let cheminCle = 0;
@@ -957,10 +965,15 @@ export function creerBotSoigneux(options: OptionsSoigneux = {}): Bot {
         vagueFurtifs = premiereVagueFurtifs(lu);
       }
       const actions: Action[] = [];
-      const achat = acheter(etat);
+      // Foules du DLC (bot-foules.ts) : une foule « payer » qui a assez de cibles passe avant les achats.
+      const foule = activationRentable(etat);
+      if (foule) actions.push(foule);
+      const achat = foule ? null : acheter(etat);
       if (achat) actions.push(achat);
       if (utiliserSorts) {
-        const ordre = etat.tours.length > 0 ? ordreHeros(etat) : null;
+        // Une foule « héros » utile l'emporte sur le poste habituel, tant qu'elle n'est pas activée.
+        const poste = posteDansFoule(etat);
+        const ordre = etat.tours.length > 0 ? (poste ? ordreVersFoule(poste) : ordreHeros(etat)) : null;
         if (ordre) actions.push(ordre);
         actions.push(...lancerSorts(etat));
       }

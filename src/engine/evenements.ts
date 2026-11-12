@@ -5,7 +5,7 @@
 // simulation qui suit. La liste est remplacée dès que quelque chose se passe au pas suivant, donc le
 // rendu la lit après chaque `step` ou `avancer`. Partie terminée : « fin » se lit après le dernier pas,
 // puis l'appel suivant à `step` ou `avancer` vide la liste.
-import type { Voie } from './definitions';
+import type { EvenementNiveau, Voie } from './definitions';
 import type { EtatPartie, FamilleTour, GenreUnite, Statut } from './etat';
 
 export type Evenement =
@@ -104,6 +104,24 @@ export type Evenement =
   | { type: 'desamorcage'; ennemi: number; x: number; y: number; nombre: number }
   /** L'armure et la résistance d'une Effigie s'échangent. */
   | { type: 'inversion'; ennemi: number; x: number; y: number }
+  // --- Événements datés, carte qui bouge et foules (DLC Temps modernes) ---
+  /** Un événement du niveau (`index` dans `Niveau.evenements`) arrive dans `dans` secondes : le bandeau l'annonce. `chemin` : -1 s'il n'en vise aucun. */
+  | { type: 'annonce_evenement'; index: number; typeEvenement: EvenementNiveau['type']; chemin: number; dans: number }
+  /** L'événement du niveau se déclenche (ses effets suivent : apparitions, barrage, balayage, invocations, chemin ouvert ou fermé). */
+  | { type: 'evenement_niveau'; index: number; typeEvenement: EvenementNiveau['type']; chemin: number }
+  /** Un chemin est coupé de `debut` à `fin` (tuiles le long du chemin) pendant `duree` s (nasse, foule qui bloque). */
+  | { type: 'barrage'; chemin: number; debut: number; fin: number; duree: number }
+  | { type: 'barrage_fin'; chemin: number; debut: number; fin: number }
+  /** Le canon à eau balaie la ligne `cy` de la grille ; `unites` : nombre d'unités alliées repoussées. */
+  | { type: 'balayage'; cy: number; sens: number; unites: number }
+  | { type: 'chemin_ouvert'; chemin: number }
+  | { type: 'chemin_ferme'; chemin: number; repli: number }
+  /** Une tour posée sur une case qui devient chemin est vendue d'office, au prix total dépensé. */
+  | { type: 'vente_office'; tour: number; cx: number; cy: number; place: number; x: number; y: number; aretes: number }
+  /** Une foule (`foule` : indice dans `Niveau.foules`) est activée ; (x, y) : le centre de sa zone. */
+  | { type: 'foule_activee'; foule: number; x: number; y: number }
+  /** Une foule a fini sa recharge : elle peut de nouveau servir. */
+  | { type: 'foule_prete'; foule: number }
   | { type: 'fin'; statut: Statut; etoiles: number };
 
 /** Ouvre la liste d'événements du pas courant : celle d'un pas précédent est remplacée. */

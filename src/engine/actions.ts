@@ -21,7 +21,9 @@ export type Action =
   | { type: 'lancerSort'; emplacement: number; x: number; y: number }
   /** Utilise l'objet de l'emplacement (0 à 2) en un point ; un emplacement ne sert qu'une fois par partie. */
   | { type: 'utiliserObjet'; emplacement: number; x: number; y: number }
-  | { type: 'appelerVague' };
+  | { type: 'appelerVague' }
+  /** Active la foule `foule` (indice dans `Niveau.foules`) dont la condition est de payer : son coût en arêtes est pris. */
+  | { type: 'activerFoule'; foule: number };
 
 export type RaisonRefus =
   | 'partie_terminee'
@@ -63,6 +65,16 @@ export type RaisonRefus =
   /** Défi Fer : cette famille de tours n'est pas constructible sur ce niveau. */
   | 'famille_interdite'
   /** Déblocage progressif : le niveau joué n'a pas encore ouvert ce palier de tour (src/data/deblocage.ts). */
-  | 'non_debloque';
+  | 'non_debloque'
+  /** Le niveau n'a pas de foule de ce numéro. */
+  | 'foule_inconnue'
+  /** Cette foule ne s'active pas en payant (il faut y poster le héros). */
+  | 'foule_sans_paiement'
+  /** La foule se remet de sa dernière activation. */
+  | 'foule_en_recharge'
+  /** La foule a servi autant de fois qu'elle le pouvait. */
+  | 'foule_epuisee'
+  /** Le point visé est dans une portion de chemin coupée (nasse, foule qui bloque) : on n'y envoie ni soldats ni héros. */
+  | 'zone_bloquee';
 
 export type ResultatAction = { ok: true } | { ok: false; raison: RaisonRefus };

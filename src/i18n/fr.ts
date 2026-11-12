@@ -9,6 +9,7 @@ import { frEnnemis } from './fr-ennemis';
 import { frDeblocage } from './fr-deblocage';
 import { frHorde } from './fr-horde';
 import { frGimmicks } from './fr-gimmicks';
+import { frEvenements } from './fr-evenements';
 import { frIndications } from './fr-indications';
 import { frInscriptions } from './fr-inscriptions';
 import { frEnnemisRegions6a10 } from './fr-ennemis-regions-6-10';
@@ -242,6 +243,8 @@ export const fr = {
   // Indications de départ et d'arrivée en partie (fr-indications.ts)
   ...frIndications,
   ...frGimmicks,
+  // Événements datés et foules du DLC Temps modernes (fr-evenements.ts)
+  ...frEvenements,
   // Déblocage progressif des tours (fr-deblocage.ts)
   ...frDeblocage,
 

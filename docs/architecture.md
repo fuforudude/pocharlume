@@ -1000,3 +1000,33 @@ Voir `v7versV8` dans `src/save/migrations.ts`. La campagne passe de 100 à 150 n
 - **Code d'export** : un joueur complet fait environ 18 400 caractères quand le navigateur ne sait pas compresser (mode `j`). `TAILLE_MAX_CODE` est donc
   de 32 Ko ; les 64 Ko de données décompressées restent la protection contre les codes démesurés.
 - **Tests** : `migrations.test.ts` (fixture figée `sauvegarde-v7.json`, avec ou sans partie en cours), `code.test.ts` (import d'un code v7, export complet sans compression).
+
+## Événements datés, carte qui bouge et foules (DLC Temps modernes, tâche 3, 2026-11-12)
+
+Spec : [campagne du DLC](specs/2026-11-12-dlc-temps-modernes-campagne.md), décisions techniques 3 et 4. Même modèle que les gimmicks.
+- **Format** (`definitions.ts`) : `Niveau.evenements?: EvenementNiveau[]` (union sur `type` : `charge`, `nasse`, `canon_a_eau`, `renforts`,
+  `ouvrir_chemin`, `fermer_chemin`, chacun avec `vague` (de 1) et `delai?` en secondes), `Niveau.cheminsFermes?: { chemin, repli }[]` et
+  `Niveau.foules?: Foule[]` (`cases`, `condition` `payer` | `heros`, `effet` `ralentir` | `renforts` | `bloquer`, `recharge?`, `utilisations?`).
+  Valeurs communes dans `src/data/evenements-niveau.ts` (`EVENEMENTS_NIVEAU.annonce` = 3 s, `UNITES_EVENEMENTS` pour les renforts).
+- **Modules** : `src/engine/evenements-niveau/` (un par type, plus `barrages.ts`, `chemins-mobiles.ts`, `foules.ts`), aiguillage `index.ts` :
+  `verifierDynamique` à la création, `mettreAJourDynamique` à chaque pas **juste après les vagues**, `switch` exhaustifs finis par `never`.
+- **Temps** : un événement est planifié au lancement de sa vague (`pas` = lancement + `delai`, par défaut et au minimum la durée d'annonce),
+  annoncé 3 s avant (`annonce_evenement`), puis déclenché (`evenement_niveau`). En défi Fer (une seule vague), seuls ceux de la vague 1 jouent.
+  La victoire attend qu'une charge lancée ait fait apparaître tous ses ennemis (`chargesEnAttente`).
+- **Coupure** (nasse, foule `bloquer`) : `etat.dynamique.barrages`. Un ennemi au sol qui n'a pas atteint l'entrée s'y arrête (`borneBarrage`,
+  ennemis.ts) ; celui qui l'a passée continue ; un volant passe ; personne ne recule. `deplacerHeros` et `deplacerRalliement` vers la portion
+  coupée sont refusés (`zone_bloquee`).
+- **Carte qui bouge** : `etat.dynamique.cheminsActifs` et `replis`. Un groupe prévu sur un chemin fermé prend son repli (`cheminEffectif`,
+  vagues.ts) ; ceux qui y marchent vont au bout. Les cases d'un chemin **mobile** ouvert (et celles des foules) sont interdites
+  (`caseInterditeEnPartie`, utilisé par `validerAction` et l'interface) ; contrat des données : les cases propres aux chemins mobiles ne sont
+  pas dans `casesInterdites`. À l'ouverture, une tour posée sur une de ses cases est vendue d'office au prix total (`vente_office`).
+  Briques pour le Pont-Levis (paires `fermer_chemin` / `ouvrir_chemin`) et la Crue (`casesDuChemin`, vente d'office).
+- **Foules** : commande `activerFoule { foule }` (refus `foule_inconnue`, `foule_sans_paiement`, `foule_epuisee`, `foule_en_recharge`,
+  `aretes_insuffisantes`) ; condition `heros` : le héros vivant reste `duree` s sur une case de la foule. État : `etat.dynamique.foules`
+  (`recharge`, `utilisations`, `presence`).
+- **Versions** : `VERSION_ETAT` 9 → 10 (`etat.dynamique`). Un niveau sans événements ni foules a un état dynamique neutre et joue comme avant.
+  L'infini retire événements, chemins fermés et foules (`sansDynamique`).
+- **Rendu et interface** : `render/evenements-niveau.ts` (zones des foules, coupures, chemins fermés, jet du canon), bandeau par
+  `Hud.afficherParole`, textes `i18n/fr-evenements.ts`, toucher d'une foule dans `ui/partie.ts` (`ui/evenements-niveau.ts`). Niveau d'essai du
+  développement : `ui/niveau-essai-evenements.ts` (accueil, mode dev).
+- **Bots** : `equilibrage/bot-foules.ts` (règles en tête du fichier), branché dans le soigneux.

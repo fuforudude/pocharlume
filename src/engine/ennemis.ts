@@ -7,6 +7,7 @@ import { difficulteDe } from './contenu';
 import { infligerDegats, libererEnnemi } from './degats';
 import type { Bond, BrulureContact, DefEnnemi, Drain, Explosion, Noyade, Rage, Renversement, Vol } from './definitions';
 import { EFFET, type Ennemi, type EtatPartie, type Unite } from './etat';
+import { borneBarrage } from './evenements-niveau/barrages';
 import { coutViesCouloir, peutVolerEnCouloir } from './gimmicks/corbeaux';
 import { chercherParId, distance2 } from './recherche';
 import { enPas, PAS_PAR_SECONDE } from './temps';
@@ -333,7 +334,10 @@ export function mettreAJourEnnemis(etat: EtatPartie): void {
     }
     const c = trajetEnnemi(etat, e);
     if (!c) continue;
+    const avant = e.distance;
     e.distance += e.vitesse * facteur;
+    // Coupure de chemin (nasse, foule qui bloque) : un ennemi au sol qui ne l'a pas encore atteinte s'arrête à son entrée.
+    if (etat.dynamique.barrages.length > 0 && !e.volant && e.couloir < 0) e.distance = borneBarrage(etat.dynamique.barrages, e.chemin, avant, e.distance);
     if (e.distance >= c.longueur) {
       fuir(etat, e);
       continue;

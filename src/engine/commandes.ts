@@ -11,8 +11,9 @@ import { niveauDeblocage } from './deblocage';
 import type { DefNiveauTour, Point } from './definitions';
 import type { EtatPartie, FamilleTour, Tour } from './etat';
 import { ouvrirPas } from './evenements';
+import { caseInterditeEnPartie, payerFoule, pointDansBarrage, validerActivationFoule } from './evenements-niveau';
 import { gimmickRadeau, placeExiste, positionPlace } from './gimmicks/radeau';
-import { caseExiste, centreCase, estCaseInterdite, ralliementParDefaut, tourDuLieu } from './grille';
+import { caseExiste, centreCase, ralliementParDefaut, tourDuLieu } from './grille';
 import { chercherParId, distance2 } from './recherche';
 import { lancerEffets, rechargeSort } from './sorts';
 import { minuteursInitiaux } from './structures';
@@ -55,6 +56,8 @@ function estBienFormee(action: unknown): action is Action {
       return Number.isInteger(a.emplacement) && estFini(a.x) && estFini(a.y);
     case 'appelerVague':
       return true;
+    case 'activerFoule':
+      return Number.isInteger(a.foule);
     default:
       return false;
   }
@@ -149,7 +152,7 @@ export function validerAction(etat: EtatPartie, action: Action): RaisonRefus | n
         if (!placeExiste(etat.niveau, action.place)) return 'place_inconnue';
       } else {
         if (!caseExiste(etat.niveau.carte, action.cx, action.cy)) return 'case_hors_carte';
-        if (estCaseInterdite(etat.niveau, action.cx, action.cy)) return 'case_interdite';
+        if (caseInterditeEnPartie(etat, action.cx, action.cy)) return 'case_interdite';
       }
       if (tourDuLieu(etat, action)) return 'case_occupee';
       if (action.tour === 'divine' && etat.tours.some((t) => t.famille === 'divine')) return 'une_seule_divine';
@@ -204,13 +207,15 @@ export function validerAction(etat: EtatPartie, action: Action): RaisonRefus | n
       if (!t.stats.soldats) return 'pas_une_caserne';
       if (horsCarte(etat, action.x, action.y)) return 'hors_carte';
       if (distance2(t.x, t.y, action.x, action.y) > t.stats.portee * t.stats.portee) return 'hors_portee';
-      return loinDuChemin(etat, action.x, action.y) ? 'hors_chemin' : null;
+      if (loinDuChemin(etat, action.x, action.y)) return 'hors_chemin';
+      return pointDansBarrage(etat, action.x, action.y) ? 'zone_bloquee' : null;
     }
     case 'deplacerHeros': {
       const h = chercherParId(etat.unites, etat.heros);
       if (!h || h.mort) return 'heros_mort';
       if (horsCarte(etat, action.x, action.y)) return 'hors_carte';
-      return loinDuChemin(etat, action.x, action.y) ? 'hors_chemin' : null;
+      if (loinDuChemin(etat, action.x, action.y)) return 'hors_chemin';
+      return pointDansBarrage(etat, action.x, action.y) ? 'zone_bloquee' : null;
     }
     case 'lancerSort': {
       const sort = dieuDe(etat).sorts[action.emplacement];
@@ -224,6 +229,8 @@ export function validerAction(etat: EtatPartie, action: Action): RaisonRefus | n
       // Comme dans Kingdom Rush : avant la vague 1, ou une fois la vague en cours entièrement apparue.
       if (etat.vagues.prochaine === -1) return 'plus_de_vague';
       return etat.vagues.lancees > 0 && etat.vagues.paquets.length > 0 ? 'vague_en_cours' : null;
+    case 'activerFoule':
+      return validerActivationFoule(etat, action.foule);
   }
 }
 
@@ -385,6 +392,9 @@ function executer(etat: EtatPartie, action: Action): void {
       lancerVague(etat, bonus);
       return;
     }
+    case 'activerFoule':
+      payerFoule(etat, action.foule);
+      return;
   }
 }
 

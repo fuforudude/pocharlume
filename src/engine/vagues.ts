@@ -2,6 +2,7 @@
 import { REGLES } from '../data/regles';
 import { defEnnemi } from './contenu';
 import { ajouterEnnemi } from './ennemis';
+import { cheminEffectif } from './evenements-niveau/chemins-mobiles';
 import type { EtatPartie } from './etat';
 import { genererVagueInfinie } from './infini';
 import { enPas, PAS_PAR_SECONDE } from './temps';
@@ -53,7 +54,8 @@ export function mettreAJourVagues(etat: EtatPartie): void {
     while (p.restants > 0 && etat.pas >= p.prochain) {
       const def = defEnnemi(p.ennemi);
       if (!def) throw new Error(`Ennemi inconnu : ${p.ennemi}`);
-      ajouterEnnemi(etat, def, p.ennemi, p.chemin, 0, p.elite, { facteurPv: p.facteurPv, vague: p.vague, couloir: p.couloir });
+      // Un groupe prévu sur un chemin fermé (carte qui bouge) prend son repli.
+      ajouterEnnemi(etat, def, p.ennemi, p.couloir >= 0 ? p.chemin : cheminEffectif(etat, p.chemin), 0, p.elite, { facteurPv: p.facteurPv, vague: p.vague, couloir: p.couloir });
       p.restants--;
       p.prochain += p.intervalle;
     }
