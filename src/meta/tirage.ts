@@ -4,6 +4,7 @@
 // proportions (10, 4, 1).
 import { objetsDeCaisse, type IdCollection } from '../data/collection';
 import { CAISSES_AVANT_GARANTIE, CHANCES_RARETE, RARETE_GARANTIE, RARETES, type Rarete, type TypeCaisse } from '../data/meta';
+import { skinsCaisseModerne } from '../data/recompenses-moderne';
 import type { SourceAleatoire } from './aleatoire';
 
 /** Nombre de jets qu'un tirage consomme. */
@@ -57,4 +58,25 @@ export function tirerCaisse(type: TypeCaisse, compteur: number, alea: SourceAlea
   if (id === undefined) throw new Error(`la caisse ${type} n'a aucun objet ${rarete}`);
   const bon = RARETES_GARANTIES.includes(rarete);
   return { id, rarete, garantie, compteur: bon ? 0 : compteur + 1 };
+}
+
+/** Ce que donne la caisse « Temps modernes » : un skin du DLC (identifiant de `DEFS_SKINS_MODERNES`). */
+export interface TirageCaisseModerne {
+  readonly id: string;
+  readonly rarete: Rarete;
+  readonly garantie: boolean;
+  readonly compteur: number;
+}
+
+/**
+ * Ouvre la caisse « Temps modernes » : les mêmes règles que `tirerCaisse` (mêmes chances, même garantie, deux jets), parmi les skins
+ * du DLC. `compteur` : caisses « Temps modernes » ouvertes de suite sans Épique ni mieux (`moderne.collection.garantie`).
+ */
+export function tirerCaisseModerne(compteur: number, alea: SourceAleatoire): TirageCaisseModerne {
+  const garantie = garantieAtteinte(compteur);
+  const rarete = tirerRarete(alea, garantie);
+  const objets = skinsCaisseModerne(rarete);
+  const id = objets[indice(alea(), objets.length)];
+  if (id === undefined) throw new Error(`la caisse Temps modernes n'a aucun skin ${rarete}`);
+  return { id, rarete, garantie, compteur: RARETES_GARANTIES.includes(rarete) ? 0 : compteur + 1 };
 }
