@@ -213,8 +213,8 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     defiFer: { familles: ['magie', 'tir'] },
     nom: 'niveau.m2.07.nom',
     ambiance: 'niveau.m2.07.ambiance',
-    // Le cortège de tête avance : la grande rue s'ouvre devant lui à la vague 3 (jusqu'à la fin), puis il occupe la rue du nord à la
-    // vague 9 (ses groupes passent alors par la grande rue). La rue du sud ne bouge pas.
+    // Le cortège de tête avance : la grande rue s'ouvre devant lui à la vague 3 (jusqu'à la fin), puis il occupe la rue du nord de la
+    // vague 9 à la vague 11 (ses groupes passent alors par la grande rue) ; elle rouvre à la vague 12. La rue du sud ne bouge pas.
     cheminsFermes: [{ chemin: 1, repli: 0 }],
     evenements: [
       { vague: 3, delai: 3, type: 'ouvrir_chemin', chemin: 1 },
@@ -223,6 +223,7 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
       { vague: 7, delai: 6, type: 'nasse', chemin: 2, debut: 6, longueur: 3, duree: 6 },
       { vague: 9, delai: 3, type: 'fermer_chemin', chemin: 0, repli: 1 },
       { vague: 10, delai: 8, type: 'charge', chemin: 1, ennemi: 'moderne_cavalier_monte', nombre: 3, intervalle: 0.8, facteurVitesse: 1.4, duree: 8 },
+      { vague: 12, delai: 3, type: 'ouvrir_chemin', chemin: 0 },
       { vague: 12, delai: 6, type: 'canon_a_eau', cy: 6, sens: 1, recul: 3, etourdissement: 1.5 },
       { vague: 13, delai: 5, type: 'renforts', x: 19, y: 9, nombre: 3, duree: 12, unite: ETUDIANT },
     ],
@@ -277,8 +278,8 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     defiFer: { familles: ['tir', 'artillerie'] },
     nom: 'niveau.m2.09.nom',
     ambiance: 'niveau.m2.09.ambiance',
-    // La ruelle du sud (chemin 2) s'ouvre à la vague 5 et reste ouverte jusqu'à la fin ; la foule prend la rue du sud (chemin 1) à la
-    // vague 11 : ses groupes repassent par la rue du nord.
+    // La ruelle du sud (chemin 2) s'ouvre à la vague 5 et reste ouverte jusqu'à la fin ; la foule prend la rue du sud (chemin 1) aux
+    // vagues 11 et 12 : ses groupes repassent par la rue du nord ; la rue rouvre à la vague 13.
     cheminsFermes: [{ chemin: 2, repli: 1 }],
     evenements: [
       { vague: 2, delai: 8, type: 'charge', chemin: 0, ennemi: 'moderne_gendarme_mobile', nombre: 4, intervalle: 0.8, facteurVitesse: 1.7, duree: 24 },
@@ -289,6 +290,7 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
       { vague: 9, delai: 6, type: 'canon_a_eau', cy: 7, sens: -1, recul: 3, etourdissement: 1.5 },
       { vague: 11, delai: 3, type: 'fermer_chemin', chemin: 1, repli: 0 },
       { vague: 12, delai: 8, type: 'charge', chemin: 0, ennemi: 'moderne_crs', nombre: 3, intervalle: 1, facteurVitesse: 1.6, duree: 25 },
+      { vague: 13, delai: 3, type: 'ouvrir_chemin', chemin: 1 },
       { vague: 13, delai: 5, type: 'renforts', x: 13, y: 3, nombre: 3, duree: 12, unite: ETUDIANT },
     ],
     foules: [

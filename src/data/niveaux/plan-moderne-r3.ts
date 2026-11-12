@@ -296,7 +296,7 @@ export const PLANS_MODERNE_R3: readonly PlanNiveauModerne<IdCarteModerneR3>[] = 
     defiFer: { familles: ['tir', 'magie'] },
     nom: 'niveau.m3.09.nom',
     ambiance: 'niveau.m3.09.ambiance',
-    // La verrière du sud-ouest (chemin 1) cède à la vague 4 et reste ouverte ; la lucarne du nord (chemin 2) est condamnée à la vague 9.
+    // La verrière du sud-ouest (chemin 1) cède à la vague 4 et reste ouverte ; la lucarne du nord (chemin 2) est condamnée de la vague 9 à la vague 11, puis rouverte à la vague 12.
     cheminsFermes: [{ chemin: 1, repli: 0 }],
     evenements: [
       { vague: 2, delai: 6, type: 'charge', chemin: 2, ennemi: 'moderne_bravm', nombre: 2, intervalle: 0.4, facteurVitesse: 1.5, duree: 6 },
@@ -308,6 +308,7 @@ export const PLANS_MODERNE_R3: readonly PlanNiveauModerne<IdCarteModerneR3>[] = 
       { vague: 9, delai: 3, type: 'fermer_chemin', chemin: 2, repli: 0 },
       { vague: 10, delai: 6, type: 'renforts', x: 21, y: 9, nombre: 3, duree: 12, unite: ETUDIANT },
       { vague: 11, delai: 8, type: 'charge', chemin: 0, ennemi: 'moderne_centaure', nombre: 3, intervalle: 1.5, facteurVitesse: 1.3, duree: 42 },
+      { vague: 12, delai: 3, type: 'ouvrir_chemin', chemin: 2 },
       { vague: 12, delai: 6, type: 'nasse', chemin: 1, debut: 6, longueur: 3, duree: 6 },
       { vague: 13, delai: 8, type: 'charge', chemin: 1, ennemi: 'moderne_bravm', nombre: 4, intervalle: 0.5, facteurVitesse: 1.5, duree: 11 },
     ],

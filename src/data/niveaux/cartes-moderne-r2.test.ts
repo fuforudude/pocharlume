@@ -255,3 +255,23 @@ describe('les 10 niveaux de la Manif', () => {
     }
   });
 });
+
+describe('ondes des camionnettes sono', () => {
+  it.each(cartes)('%s : chaque camionnette a ses ondes sur son haut-parleur (même x, deux tuiles plus haut), et chaque onde est dans la carte', (_nom, m) => {
+    const camions = m.decor.filter((d) => d.sprite === 'moderne-camion-sono');
+    const sonos = m.scene.sonos ?? [];
+    expect(sonos.length, 'autant d’ondes que de camionnettes').toBe(camions.length);
+    for (const s of sonos) {
+      // Dans la carte, avec une tuile de marge : les ondes montent et ne doivent pas sortir par le haut.
+      expect(s.x, `ondes en (${String(s.x)}, ${String(s.y)})`).toBeGreaterThanOrEqual(1);
+      expect(s.x).toBeLessThanOrEqual(m.largeur - 1);
+      expect(s.y).toBeGreaterThanOrEqual(1);
+      expect(s.y).toBeLessThanOrEqual(m.hauteur - 1);
+      const proche = camions.some((c) => Math.abs(c.x - s.x) < 1 && s.y - c.y >= -2.5 && s.y - c.y <= -0.5);
+      expect(proche, `ondes en (${String(s.x)}, ${String(s.y)}) loin de toute camionnette`).toBe(true);
+    }
+    for (const c of camions) {
+      expect(sonos.some((s) => Math.abs(c.x - s.x) < 1 && s.y - c.y >= -2.5 && s.y - c.y <= -0.5), `camionnette en (${String(c.x)}, ${String(c.y)}) sans ondes`).toBe(true);
+    }
+  });
+});
