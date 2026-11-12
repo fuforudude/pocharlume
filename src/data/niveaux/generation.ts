@@ -5,6 +5,7 @@ import type { DefEnnemi, Paquet, Vague } from '../../engine/definitions';
 import { ENNEMIS, type IdEnnemi } from '../ennemis';
 import { budgetVague, EQUILIBRAGE, genererVague } from '../equilibrage';
 import type { PlanNiveau } from './plan-niveau';
+import type { PlanNiveauModerne } from './plan-moderne-r1';
 
 /** Un boss ajouté à une vague, en plus de ses ennemis ordinaires (son budget dépasse celui de la vague). */
 export interface BossDeVague {
@@ -87,4 +88,22 @@ export function genererVaguesNiveau(plan: PlanVagues): Vague[] {
     vagues.push({ paquets });
   }
   return vagues;
+}
+
+/**
+ * Les vagues d'un niveau du DLC « Temps modernes » (plan-moderne-r1.ts) : même générateur, au budget du niveau L de l'histoire que le plan
+ * désigne (`niveauBudget`), sur tous les chemins du niveau (un groupe prévu sur un chemin fermé prend son repli).
+ */
+export function vaguesDuPlanModerne(plan: PlanNiveauModerne): Vague[] {
+  const v = plan.vagues;
+  return genererVaguesNiveau({
+    niveau: v.niveauBudget,
+    nombre: v.nombre,
+    ennemis: v.ennemis,
+    graine: v.graine,
+    chemins: plan.chemins.length,
+    ...(v.facteurBudget === undefined ? {} : { facteurBudget: v.facteurBudget }),
+    ...(v.boss === undefined ? {} : { boss: v.boss }),
+    ...(v.horde === true ? { horde: true } : {}),
+  });
 }
