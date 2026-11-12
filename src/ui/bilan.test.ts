@@ -76,10 +76,12 @@ describe('bilan de fin : défi, disciple offert, région ouverte', () => {
     expect(lignesBilan({ ...BILAN, titresNouveaux: ['titre_inconnu'] })).toEqual([]);
   });
 
-  it('DLC : à 740×360, le butin le plus long (six lignes) a une mise en page sur deux colonnes dans la feuille de style', () => {
+  it('DLC : à 740×360, le butin le plus long (six lignes) reste sur une colonne et les étoiles gardent leurs proportions', () => {
     const feuille = readFileSync('src/ui/style-meta.css', 'utf8');
-    const bas = /@media \(max-height: 460px\) \{\s*\.ecran\.fin \.bilan \{[^}]*grid-template-columns: repeat\(2/.exec(feuille);
+    const bas = /@media \(max-height: 460px\) \{\s*\.ecran\.fin \.bilan \{([^}]*)\}/.exec(feuille);
     expect(bas).not.toBeNull();
+    expect(bas?.[1]).not.toContain('grid-template-columns');
+    expect(/\.ecran\.fin \.etoile \{\s*width: 30px;\s*height: 30px;\s*\}/.test(feuille)).toBe(true);
     const lignes = lignesBilan({ ...BILAN, aretes: 681, braises: 21, xp: 2120, niveauHeros: { avant: 1, apres: 7 }, badges: 30, titresNouveaux: ['fac_occupee'] });
     expect(lignes).toHaveLength(6);
   });

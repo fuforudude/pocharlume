@@ -92,3 +92,35 @@ describe('menu du HUD : élément pas encore débloqué', () => {
     expect(boutonDivine().querySelector('.prix')).toBeNull();
   });
 });
+
+describe('portrait du héros dans le HUD', () => {
+  const atlasAvec = (sprites: readonly string[]): AtlasRendu => ({
+    iconeUrl: (nom: string) => `${nom}.png`,
+    sprite: (nom: string) => (sprites.includes(nom) ? {} : undefined),
+  }) as unknown as AtlasRendu;
+  const visage = (): string | null | undefined => document.querySelector('.portrait img.visage')?.getAttribute('src');
+  const monterAvec = (etat: EtatPartie, atlas: AtlasRendu): void => {
+    new Hud(document.body, atlas, etat, commandes(), new AbortController().signal);
+  };
+  const moderne = (): EtatPartie => {
+    const base = partie(1);
+    return { ...base, niveau: { ...base.niveau, campagne: 'moderne' } };
+  };
+
+  it('dans le DLC, le portrait suit le sprite en jeu : l’étudiant', () => {
+    const etat = moderne();
+    const id = etat.config.heros;
+    monterAvec(etat, atlasAvec([`moderne-heros-${id.replaceAll('_', '-')}`]));
+    expect(visage()).toBe(`moderne-heros-${id.replaceAll('_', '-')}.png`);
+  });
+
+  it('dans le DLC sans atlas du DLC, le portrait garde le sprite de base', () => {
+    monterAvec(moderne(), atlasAvec([]));
+    expect(visage()).not.toContain('moderne-heros');
+  });
+
+  it('dans l’histoire, le portrait reste celui de l’histoire', () => {
+    monterAvec(partie(1), atlasAvec(['moderne-heros-charlie', 'moderne-heros-brise-os']));
+    expect(visage()).not.toContain('moderne-heros');
+  });
+});

@@ -82,7 +82,8 @@ describe('badges et titres d’une partie du DLC', () => {
 
   it('une partie de l’histoire ne touche ni aux badges ni aux titres, même au boss', () => {
     let histoire = sauvegardeVide();
-    for (let n = 1; n <= 10; n++) histoire = enregistrerVictoire(histoire, n, 'matou', 3);
+    for (let n = 1; n <= 9; n++) histoire = enregistrerVictoire(histoire, n, 'matou', 3);
+    // Le niveau 10 (le boss) est joué ici pour la première fois.
     const r = enregistrerFinDePartie(histoire, { niveau: 10, statut: 'victoire', difficulte: 'matou', etoiles: 3, heros: 'charlie' }, DEFS_TEST);
     expect(r.ok && r.sauvegarde.moderne.badges).toBe(0);
     expect(r.ok && r.sauvegarde.moderne.titres).toEqual([]);
