@@ -833,6 +833,107 @@ export interface GimmickRadeau {
  */
 export type Gimmick = GimmickCorbeaux | GimmickRadeau;
 
+// --- Événements datés, carte qui bouge et foules activables (DLC Temps modernes ; src/engine/evenements-niveau/) ---
+
+/**
+ * Moment d'un événement du niveau : il se déclenche `delai` secondes après le lancement de la vague `vague` (1 = la première), et il est
+ * annoncé `EVENEMENTS_NIVEAU.annonce` secondes avant. `delai` vaut au moins cette durée d'annonce (et la vaut par défaut).
+ */
+interface MomentEvenement {
+  readonly vague: number;
+  readonly delai?: number;
+}
+
+/** Charge : `nombre` ennemis surgissent sur `chemin`, un toutes les `intervalle` s, et filent `facteurVitesse` fois plus vite pendant `duree` s. */
+export interface EvenementCharge extends MomentEvenement {
+  readonly type: 'charge';
+  readonly chemin: number;
+  readonly ennemi: string;
+  readonly nombre: number;
+  readonly intervalle: number;
+  readonly facteurVitesse: number;
+  readonly duree: number;
+  readonly elite?: boolean;
+}
+
+/** Nasse : le chemin est coupé de `debut` à `debut + longueur` (tuiles le long du chemin) pendant `duree` s. */
+export interface EvenementNasse extends MomentEvenement {
+  readonly type: 'nasse';
+  readonly chemin: number;
+  readonly debut: number;
+  readonly longueur: number;
+  readonly duree: number;
+}
+
+/**
+ * Canon à eau : la ligne `cy` de la grille est balayée d'un bord à l'autre (`sens` 1 : vers la droite, -1 : vers la gauche) ; les unités
+ * alliées qui s'y trouvent sont repoussées de `recul` tuiles dans le sens du jet et étourdies `etourdissement` s.
+ */
+export interface EvenementCanonAEau extends MomentEvenement {
+  readonly type: 'canon_a_eau';
+  readonly cy: number;
+  readonly sens?: 1 | -1;
+  readonly recul: number;
+  readonly etourdissement: number;
+}
+
+/** Renforts : `nombre` unités alliées (`unite` : clé de `UNITES_EVENEMENTS`) apparaissent en (x, y) et tiennent `duree` s. */
+export interface EvenementRenforts extends MomentEvenement {
+  readonly type: 'renforts';
+  readonly x: number;
+  readonly y: number;
+  readonly nombre: number;
+  readonly duree: number;
+  readonly unite: string;
+}
+
+/** Carte qui bouge : le chemin `chemin` devient actif (barricade qui tombe, cortège qui avance). */
+export interface EvenementOuvrirChemin extends MomentEvenement {
+  readonly type: 'ouvrir_chemin';
+  readonly chemin: number;
+}
+
+/** Carte qui bouge : le chemin `chemin` devient inactif ; les groupes qui devaient l'emprunter prennent `repli`. */
+export interface EvenementFermerChemin extends MomentEvenement {
+  readonly type: 'fermer_chemin';
+  readonly chemin: number;
+  readonly repli: number;
+}
+
+/** Événement daté d'un niveau, union discriminée sur `type` : un module par type dans src/engine/evenements-niveau/. */
+export type EvenementNiveau = EvenementCharge | EvenementNasse | EvenementCanonAEau | EvenementRenforts | EvenementOuvrirChemin | EvenementFermerChemin;
+
+/** Un chemin fermé au début de la partie : ses groupes prennent `repli` tant qu'un `ouvrir_chemin` ne l'a pas ouvert. */
+export interface CheminFerme {
+  readonly chemin: number;
+  readonly repli: number;
+}
+
+/** Ce qu'il faut pour activer une foule : payer `cout` arêtes (commande `activerFoule`), ou y laisser le héros `duree` s. */
+export type ConditionFoule = { readonly type: 'payer'; readonly cout: number } | { readonly type: 'heros'; readonly duree: number };
+
+/**
+ * Ce que fait une foule activée. `ralentir` : les ennemis au sol à `rayon` tuiles du centre de la zone vont à `facteur` de leur vitesse
+ * pendant `duree` s. `renforts` : `nombre` unités (`unite`, clé de `UNITES_EVENEMENTS`) au point du chemin le plus proche du centre,
+ * pendant `duree` s. `bloquer` : comme une nasse, sur `chemin` de `debut` à `debut + longueur`, pendant `duree` s.
+ */
+export type EffetFoule =
+  | { readonly type: 'ralentir'; readonly rayon: number; readonly facteur: number; readonly duree: number }
+  | { readonly type: 'renforts'; readonly nombre: number; readonly duree: number; readonly unite: string }
+  | { readonly type: 'bloquer'; readonly chemin: number; readonly debut: number; readonly longueur: number; readonly duree: number };
+
+/**
+ * Foule d'étudiants posée sur la carte (cases de la grille, où l'on ne construit pas). Après chaque activation, elle attend `recharge` s ;
+ * `utilisations` limite le nombre d'activations (absent : illimité). Au moins l'un des deux est donné.
+ */
+export interface Foule {
+  readonly cases: readonly CaseGrille[];
+  readonly condition: ConditionFoule;
+  readonly effet: EffetFoule;
+  readonly recharge?: number;
+  readonly utilisations?: number;
+}
+
 export interface CheminCarte {
   /** Polyligne de l'entrée à la sortie. */
   readonly points: readonly Point[];
@@ -881,6 +982,12 @@ export interface Niveau {
   readonly numero?: number;
   /** Particularité du niveau (Vol de Corbeaux…) ; absent = niveau ordinaire. */
   readonly gimmick?: Gimmick;
+  /** Événements datés (DLC) ; absent = aucun. */
+  readonly evenements?: readonly EvenementNiveau[];
+  /** Chemins fermés au départ (carte qui bouge) ; leurs cases ne doivent pas figurer dans `casesInterdites`. */
+  readonly cheminsFermes?: readonly CheminFerme[];
+  /** Foules activables (DLC) ; absent = aucune. */
+  readonly foules?: readonly Foule[];
 }
 
 /** Une région du mode infini : ses ennemis propres, et le boss dont les mini-boss sont tirés. */

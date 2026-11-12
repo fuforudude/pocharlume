@@ -17,7 +17,7 @@ import type {
 } from './definitions';
 import type { Evenement } from './evenements';
 
-export const VERSION_ETAT = 9;
+export const VERSION_ETAT = 10;
 
 export type Statut = 'en_cours' | 'victoire' | 'defaite';
 export type FamilleTour = IdFamille | 'divine';
@@ -337,6 +337,50 @@ export interface EtatSort {
   recharge: number;
 }
 
+/**
+ * Suivi d'un événement daté du niveau (même ordre que `Niveau.evenements`). `pas` : pas du déclenchement, -1 tant que sa vague n'est pas
+ * lancée. `fin` : pas où son effet s'arrête (nasse), -1 sinon. `restants` et `prochain` : ennemis d'une charge encore à faire apparaître.
+ */
+export interface EtatEvenementNiveau {
+  pas: number;
+  annonce: boolean;
+  declenche: boolean;
+  fini: boolean;
+  fin: number;
+  restants: number;
+  prochain: number;
+}
+
+/** Une coupure de chemin (nasse, foule qui bloque) : aucun ennemi au sol n'entre de `debut` à `fin` (tuiles le long du chemin). */
+export interface Barrage {
+  chemin: number;
+  debut: number;
+  fin: number;
+  /** Pas restants. */
+  restant: number;
+}
+
+/** Suivi d'une foule (même ordre que `Niveau.foules`). */
+export interface EtatFoule {
+  /** Pas restants avant qu'elle puisse de nouveau servir. */
+  recharge: number;
+  /** Activations encore possibles, -1 si illimité. */
+  utilisations: number;
+  /** Pas que le héros a déjà passés dans sa zone (condition `heros`). */
+  presence: number;
+}
+
+/** Tout ce que les événements datés et les foules changent pendant la partie (vide pour un niveau qui n'en a pas). */
+export interface EtatDynamique {
+  evenements: EtatEvenementNiveau[];
+  /** Pour chaque chemin de la carte : actif (les ennemis l'empruntent, ses cases sont interdites) ou fermé. */
+  cheminsActifs: boolean[];
+  /** Pour chaque chemin : celui que prennent ses groupes quand il est fermé, -1 s'il n'en a pas. */
+  replis: number[];
+  barrages: Barrage[];
+  foules: EtatFoule[];
+}
+
 export interface EntreeJournal {
   pas: number;
   action: Action;
@@ -385,4 +429,6 @@ export interface EtatPartie {
   evenementsPas: number;
   /** Actions acceptées, horodatées : avec la config, elles suffisent à rejouer la partie. */
   journal: EntreeJournal[];
+  /** Événements datés, chemins actifs, coupures et foules (src/engine/evenements-niveau/), VERSION_ETAT 10. */
+  dynamique: EtatDynamique;
 }

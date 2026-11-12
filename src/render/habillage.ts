@@ -30,6 +30,8 @@ const SPRITES_UNITES: Readonly<Record<string, string>> = {
   'unite.ecorcheur': 'ecorcheur',
   'unite.spectre': 'spectre-chat',
   'unite.gros_matou': 'gros-matou',
+  // Renforts étudiants (DLC) : le gros matou en attendant leur dessin.
+  'unite.etudiant': 'gros-matou',
   'heros.charlie': 'charlie',
   'heros.plume': 'heros-plume',
   'heros.suie': 'heros-suie',

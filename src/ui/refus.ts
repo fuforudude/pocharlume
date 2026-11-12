@@ -35,6 +35,11 @@ export const CLES_REFUS: Readonly<Record<RaisonRefus, CleTexte>> = {
   plus_de_vague: 'refus.plus_de_vague',
   famille_interdite: 'refus.famille_interdite',
   non_debloque: 'refus.non_debloque',
+  foule_inconnue: 'refus.foule_inconnue',
+  foule_sans_paiement: 'refus.foule_sans_paiement',
+  foule_en_recharge: 'refus.foule_en_recharge',
+  foule_epuisee: 'refus.foule_epuisee',
+  zone_bloquee: 'refus.zone_bloquee',
 };
 
 /** La phrase d'un refus ; pour un élément pas encore débloqué, `niveau` dit où il se débloque (« Se débloque au niveau 4. »). */

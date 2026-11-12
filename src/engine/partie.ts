@@ -17,6 +17,7 @@ import { mettreAJourSorts, rechargeSort } from './sorts';
 import { mettreAJourPieges, mettreAJourStructures, mettreAJourZones } from './structures';
 import { calculerCouloirs, verifierPaquetEnCouloir } from './gimmicks/corbeaux';
 import { mettreAJourGimmick, verifierGimmick } from './gimmicks';
+import { chargesEnAttente, creerEtatDynamique, mettreAJourDynamique, sansDynamique, verifierDynamique } from './evenements-niveau';
 import { enPas, PAS_PAR_SECONDE } from './temps';
 import { mettreAJourProjectiles, mettreAJourTours } from './tours';
 import { creerUnite, estRetiree, mettreAJourUnites } from './unites';
@@ -39,6 +40,7 @@ export function etoilesPour(vies: number, viesDepart: number, viePerdue: boolean
 
 function verifierNiveau(niveau: Niveau): void {
   verifierGimmick(niveau);
+  verifierDynamique(niveau);
   niveau.vagues.forEach((vague, i) => {
     for (const p of vague.paquets) {
       const def = defEnnemi(p.ennemi);
@@ -122,7 +124,7 @@ export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
   // Infini : les vagues du niveau sont ignorées, le moteur génère les siennes (voir infini.ts) et la partie ne se gagne pas. Les cartes
   // d'après l'histoire s'y jouent sans leur gimmick (spec de l'après-histoire) : on retire celui du niveau de campagne qui les porte.
   const copie: Niveau = infini
-    ? { ...sansGimmick(copieBrute), vagues: [] }
+    ? { ...sansDynamique(sansGimmick(copieBrute)), vagues: [] }
     : { ...copieBrute, vagues: vaguesAvecElites(vaguesDuDefi(copieBrute.vagues, defi, niveau.defiFer), niveau.sansElites === true ? 0 : difficulte.vaguesElites) };
   const vies = defi === 'heroique' ? REGLES.heroique.vies : difficulte.vies;
   const etat: EtatPartie = {
@@ -156,6 +158,7 @@ export function creerPartie(niveau: Niveau, config: ConfigPartie): EtatPartie {
     evenements: [],
     evenementsPas: 0,
     journal: [],
+    dynamique: creerEtatDynamique(copie),
   };
   etat.sorts = dieu.sorts.map((s) => ({ recharge: rechargeSort(etat, s, true) }));
   const depart = copie.carte.departHeros;
@@ -193,7 +196,7 @@ function verifierFin(etat: EtatPartie): void {
   } else if (etat.config.infini) {
     // Infini : jamais de victoire, la partie finit à la dernière vie perdue.
     return;
-  } else if (etat.vagues.lancees >= etat.niveau.vagues.length && etat.vagues.paquets.length === 0 && etat.ennemis.length === 0) {
+  } else if (etat.vagues.lancees >= etat.niveau.vagues.length && etat.vagues.paquets.length === 0 && etat.ennemis.length === 0 && !chargesEnAttente(etat)) {
     etat.statut = 'victoire';
     etat.etoiles = etoilesPour(etat.vies, etat.viesDepart, etat.viePerdue);
   } else {
@@ -207,6 +210,7 @@ function simuler(etat: EtatPartie): void {
   ouvrirPas(etat);
   mettreAJourGimmick(etat);
   mettreAJourVagues(etat);
+  mettreAJourDynamique(etat);
   mettreAJourPouvoirsEnnemis(etat);
   mettreAJourNuages(etat);
   mettreAJourZones(etat);

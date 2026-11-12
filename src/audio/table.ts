@@ -246,7 +246,20 @@ export const SON_DES_EVENEMENTS: TableEvenements = {
   desamorcage: lecture('impact_physique', 0.9, 1.1, 'desamorcage', 1),
   /** L'Effigie change de peau : l'éclat de verre, grave. */
   inversion: lecture('impact_magique', 0.6, 0.8, 'inversion', 1),
-  fin: (e) => (e.statut === 'victoire' ? 'victoire' : e.statut === 'defaite' ? 'defaite' : null),
+  // --- Événements datés et foules (DLC Temps modernes) : sons provisoires pris dans la banque existante ---
+  /** Le bandeau annonce un événement : la cloche de vague, plus aiguë. */
+  annonce_evenement: lecture('vague', 0.7, 1.3, 'annonce_evenement', 1),
+  evenement_niveau: null,
+  barrage: lecture('impact_physique', 0.9, 0.7, 'barrage', 1),
+  barrage_fin: null,
+  /** Le jet du canon à eau : l'onde de choc, grave. */
+  balayage: lecture('onde_choc', 0.8, 0.7, 'balayage', 1),
+  chemin_ouvert: lecture('onde_choc', 0.7, 0.9, 'chemin', 1),
+  chemin_ferme: lecture('onde_choc', 0.7, 0.9, 'chemin', 1),
+  vente_office: 'vente',
+  foule_activee: lecture('sort', 0.8, 1.2, 'foule', 1),
+  foule_prete: null,
+  fin:(e) => (e.statut === 'victoire' ? 'victoire' : e.statut === 'defaite' ? 'defaite' : null),
 };
 
 /** La lecture à lancer pour un événement (son, facteurs, limite), ou null pour le silence. */

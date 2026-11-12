@@ -24,6 +24,10 @@ export type {
   Tour,
   Unite,
   ZoneDurable,
+  Barrage,
+  EtatDynamique,
+  EtatEvenementNiveau,
+  EtatFoule,
 } from './etat';
 export { EFFET, MINUTEUR, VERSION_ETAT } from './etat';
 export { verifierConfig } from './config';
@@ -48,6 +52,9 @@ export {
   tourSurPlace,
 } from './grille';
 export { casesDuTrajet, gimmickRadeau, positionPlace, positionRadeau } from './gimmicks/radeau';
+export { caseInterditeEnPartie, cheminEffectif, pointDansBarrage } from './evenements-niveau';
+export { casesDuChemin, cheminsMobiles } from './evenements-niveau/chemins-mobiles';
+export { centreFoule, foulePrete, pointDansFoule } from './evenements-niveau/foules';
 export {
   appliquerAction,
   avancer,
