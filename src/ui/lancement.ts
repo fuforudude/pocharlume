@@ -11,6 +11,7 @@ import {
   type RaisonConfig,
   type RaisonDefi,
   type RaisonEquipement,
+  type Reprise,
   type ResultatTransaction,
   type Sauvegarde,
 } from '../save';
@@ -142,4 +143,31 @@ export async function relancerAvecDebit(
   const config = configDeRelance(session.sauvegarde, precedente, graine, niveau);
   const debit = await debiterAuLancement(session, config);
   return debit.ok ? { ok: true, config } : debit;
+}
+
+/** La partie sauvegardée qu'un nouveau lancement remplacerait, vue par les écrans (avertissement « tu perds ta partie »). */
+export interface PartieEnCoursVue {
+  readonly niveau: number;
+  readonly vague: number;
+  /** Partie du mode infini. */
+  readonly infini?: true;
+  /** Partie du DLC « Temps modernes » : `niveau` est alors son numéro dans le DLC. Absent = l'histoire. */
+  readonly campagne?: 'moderne';
+}
+
+/** La partie en cours telle que les écrans la voient, avec sa campagne, ou null s'il n'y a rien à reprendre. */
+export function partieEnCoursDe(reprise: Reprise | null): PartieEnCoursVue | null {
+  if (!reprise) return null;
+  return {
+    niveau: reprise.niveau,
+    vague: reprise.vague,
+    ...(reprise.carte === undefined ? {} : { infini: true as const }),
+    ...(reprise.campagne === 'moderne' ? { campagne: 'moderne' as const } : {}),
+  };
+}
+
+/** La phrase de l'avertissement « tu perds ta partie » : elle dit si la partie vient du DLC ou du mode infini. */
+export function detailPerte(enCours: PartieEnCoursVue): string {
+  const cle = enCours.infini ? 'lancer.perte_detail_infini' : enCours.campagne === 'moderne' ? 'lancer.perte_detail_moderne' : 'lancer.perte_detail';
+  return t(cle, { n: enCours.niveau, m: enCours.vague });
 }

@@ -18,7 +18,7 @@
 // Sur les cartes de l'histoire, le sticker « DLC disponible ! » (option `sticker`) se tient à droite de la barre du haut, dans
 // l'en-tête que la carte laisse toujours libre : il ne masque aucun nœud ; sa croix le replie en bouton « DLC ».
 import { ENNEMIS } from '../data/ennemis';
-import type { IdCampagne } from '../data/campagnes';
+import { BRAISES_DEFI_MODERNE, type IdCampagne } from '../data/campagnes';
 import { braisesDeDefi, type IdDieu } from '../data/meta';
 import type { NiveauCampagne } from '../data/visuel';
 import type { DefiPartie } from '../engine';
@@ -51,7 +51,7 @@ import { bouton, el, image } from './dom';
 import { afficherConfirmation } from './ecrans';
 import { creerChoixFiche, type SessionChoix } from './fiche-choix';
 import { Gestes } from './gestes';
-import { configDuChoix } from './lancement';
+import { configDuChoix, detailPerte, type PartieEnCoursVue } from './lancement';
 import { choixJouable, famillesDuFer, vueModes, type ModeNiveau } from './meta-vues';
 import { texteRefusMeta } from './raisons-meta';
 import { decalageDeRegion, nombreNiveauxLivres, REGIONS_MONDE, type RegionMonde } from './regions-monde';
@@ -85,7 +85,7 @@ export interface OptionsCarteMonde {
    * Une partie en cours qu'on peut reprendre : lancer un niveau la remplacerait, donc « Lancer » demande d'abord
    * confirmation.
    */
-  readonly partieEnCours?: { readonly niveau: number; readonly vague: number; readonly infini?: true } | null;
+  readonly partieEnCours?: PartieEnCoursVue | null;
   /** Les régions montrées ; par défaut celles du jeu (`REGIONS_MONDE`). */
   readonly regions?: readonly RegionMonde[];
   /** Numéro de la région montrée à l'ouverture si elle est ouverte ; par défaut la plus haute région ouverte. */
@@ -587,7 +587,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
       const lignes = [t(defi === 'fer' ? 'fiche.defi_fer' : 'fiche.defi_heroique'), t('fiche.defi_regles')];
       const familles = famillesDuFer(niveau);
       if (defi === 'fer' && familles) lignes.push(t('fiche.defi_familles', { noms: familles.map((f) => tCle(`famille.${f}`)).join(', ') }));
-      lignes.push(vm?.reussi === true ? t('fiche.defi_deja') : t('fiche.defi_prime', { n: braisesDeDefi(niveau.numero) }));
+      lignes.push(vm?.reussi === true ? t('fiche.defi_deja') : t('fiche.defi_prime', { n: campagne === 'moderne' ? BRAISES_DEFI_MODERNE : braisesDeDefi(niveau.numero) }));
       regles.replaceChildren(...lignes.map((ligne, k) => el('p', k === lignes.length - 1 ? 'defi-prime' : '', ligne)));
     };
 
@@ -681,7 +681,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
       avertissement?.remove();
       avertissement = afficherConfirmation(racine, {
         titre: t('lancer.perte_titre'),
-        detail: t(enCours.infini ? 'lancer.perte_detail_infini' : 'lancer.perte_detail', { n: enCours.niveau, m: enCours.vague }),
+        detail: detailPerte(enCours),
         confirmer: t('lancer.confirmer'),
         annuler: t('lancer.annuler'),
         surConfirmer: () => {

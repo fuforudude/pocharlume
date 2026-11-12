@@ -5,7 +5,7 @@
 // - `moderne` : le DLC « Temps modernes », ouvert à tous, niveaux 1 à 30 en 3 régions de 10 (la Fac, la Manif, la Préfecture).
 // La sauvegarde garde une progression par campagne (src/save/moderne.ts).
 import type { IdCampagne } from '../engine/definitions';
-import { NIVEAUX_PAR_REGION } from './meta';
+import { BRAISES_APRES_HISTOIRE, NIVEAUX_PAR_REGION } from './meta';
 
 export type { IdCampagne };
 
@@ -39,3 +39,23 @@ export function campagneDuNiveau(niveau: { readonly campagne?: IdCampagne }): Id
 export function toutEstOuvertDans(campagne: IdCampagne): boolean {
   return campagne === 'moderne';
 }
+
+/** Le boss d'une région du DLC : son 10e niveau (10, 20 et 30 : commissaire, Centaure, préfet). */
+export function estBossModerne(numero: number): boolean {
+  return regionDuNiveauModerne(numero) > 0 && numero % NIVEAUX_PAR_REGION === 0;
+}
+
+/**
+ * Braises d'une victoire du DLC, aux montants des niveaux 101 à 150 (spec « Temps modernes », Récompenses) : 15 la première victoire,
+ * 30 de plus à la première victoire d'un boss, 6 la première fois que les 3 étoiles sont atteintes.
+ */
+export function braisesDeVictoireModerne(numero: number, premiereVictoire: boolean, premieresTroisEtoiles: boolean): number {
+  return (
+    (premiereVictoire ? BRAISES_APRES_HISTOIRE.premiereVictoire : 0) +
+    (premiereVictoire && estBossModerne(numero) ? BRAISES_APRES_HISTOIRE.finDeBloc : 0) +
+    (premieresTroisEtoiles ? BRAISES_APRES_HISTOIRE.troisEtoiles : 0)
+  );
+}
+
+/** Braises de la première réussite d'un défi sur un niveau du DLC : 12. */
+export const BRAISES_DEFI_MODERNE = BRAISES_APRES_HISTOIRE.defi;

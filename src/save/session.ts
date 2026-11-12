@@ -99,6 +99,8 @@ export interface FinDePartie {
   readonly objetsUtilises?: readonly string[];
   /** Défi joué (« heroique », « fer »). Par défaut, celui de la config du moteur (`config.defi`) s'il y en a un. */
   readonly defi?: string | null;
+  /** Campagne de la partie : `moderne` pour le DLC ; absent = l'histoire. `niveau` est celui de cette campagne. */
+  readonly campagne?: 'moderne';
 }
 
 /** Une partie sauvegardée qu'on peut relancer. */
@@ -426,13 +428,19 @@ export class Session {
           objetsEquipes: Array.isArray(equipes) ? equipes : [],
           objetsUtilises: fin.objetsUtilises ?? [],
           defi: typeof defi === 'string' ? defi : null,
+          ...(fin.campagne === 'moderne' ? { campagne: 'moderne' as const } : {}),
         },
         this.defs,
       );
       const apres = r.ok ? r.sauvegarde : s;
       // Un abandon n'efface que la partie sauvegardée qui est la sienne : quitter une partie neuve, jamais rangée,
       // garde la partie plus ancienne que le joueur pourrait encore reprendre.
-      const sienne = apres.partie !== null && apres.partie.niveau === fin.niveau && apres.partie.config.graine === fin.config.graine;
+      // La sienne : même campagne (le niveau 1 du DLC n'est pas le niveau 1 de l'histoire), même niveau, même graine.
+      const sienne =
+        apres.partie !== null &&
+        (apres.partie.campagne ?? 'histoire') === (fin.campagne ?? 'histoire') &&
+        apres.partie.niveau === fin.niveau &&
+        apres.partie.config.graine === fin.config.graine;
       return {
         ok: true,
         sauvegarde: fin.statut === 'abandon' && !sienne ? apres : avecPartieEnCours(apres, null),

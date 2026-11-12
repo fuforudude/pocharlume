@@ -52,6 +52,8 @@ avec ses propres récompenses.
 
 ### Récompenses
 - **Braises** aux montants des niveaux 101 à 150 (15 par première victoire, +30 aux boss, +6 pour 3 étoiles, 12 par défi).
+- **Arêtes et expérience** : le niveau N du DLC rapporte comme le niveau 100+N de l'histoire (décision du 2026-11-12). Le boss
+  est le niveau 10 de chaque région ; une victoire du DLC ne débloque ni région, ni infini, ni disciple de l'histoire.
 - **Nouvelle monnaie : les badges**, gagnés uniquement en jouant le DLC (première victoire, étoiles, défis, boss), jamais avec de
   l'argent réel.
 - **Caisse « Temps modernes »**, ouverte avec des badges, sur le modèle des caisses actuelles (raretés, garantie, doublons en
