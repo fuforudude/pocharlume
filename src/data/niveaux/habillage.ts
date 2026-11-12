@@ -88,6 +88,7 @@ export const GRANDS_DECORS: ReadonlySet<string> = new Set([
   'moderne-buffet',
   'moderne-bureau',
   'moderne-cheminee',
+  'moderne-colonne-prefecture',
   'moderne-grille',
   'moderne-guerite',
   'moderne-if',

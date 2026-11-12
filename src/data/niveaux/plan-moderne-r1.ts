@@ -25,7 +25,7 @@
 // `defiFer` : la tour de tir dès qu'il y a la BAC (furtive) ou des drones (volants), jamais la même paire deux niveaux de suite.
 import type { CheminFerme, DefiFer, EvenementNiveau, Foule } from '../../engine/definitions';
 import type { IdEnnemi } from '../ennemis';
-import type { IdCarteModerne } from './cartes-moderne';
+import type { IdCarteModerneR1 } from './cartes-moderne-r1';
 import type { BossDeVague } from './generation';
 
 /** Plan d'un niveau du DLC ; `C` : les identifiants de cartes de sa région (la Fac par défaut). */
