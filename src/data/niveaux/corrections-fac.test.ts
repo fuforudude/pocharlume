@@ -234,42 +234,6 @@ function casesDeTour(plan: PlanNiveauModerne<string>, decor: readonly Decor[]): 
   return Math.floor(modele.largeur / t) * Math.floor(modele.hauteur / t) - interditesSansDecor(plan, decor).size;
 }
 
-/**
- * Grands décors déjà posés à côté d'un chemin avant la règle « les grands décors se posent sur des cases sans valeur » (spec du DLC,
- * décisions de la vague 2) : écarts connus, signalés, à déplacer carte par carte. La liste ne doit que raccourcir.
- */
-const ECARTS_DECOR_CONNUS: ReadonlySet<string> = new Set([
-  'niveau 1 : moderne-gradins en (12, 11)',
-  'niveau 1 : moderne-sono en (6, 6)',
-  'niveau 2 : moderne-distributeur en (10, 4)',
-  'niveau 2 : moderne-distributeur en (25, 3)',
-  'niveau 2 : moderne-tableau en (20, 9)',
-  'niveau 3 : moderne-platane en (8, 13)',
-  'niveau 4 : moderne-etagere en (11, 17)',
-  'niveau 4 : moderne-etagere en (12, 11)',
-  'niveau 4 : moderne-etagere en (26, 15)',
-  'niveau 5 : moderne-distributeur en (16, 3)',
-  'niveau 5 : moderne-distributeur en (22, 13)',
-  'niveau 6 : moderne-barrieres en (14, 11)',
-  'niveau 7 : moderne-barricade en (4, 15)',
-  'niveau 7 : moderne-barricade en (10, 6)',
-  'niveau 7 : moderne-barricade en (16, 17)',
-  'niveau 7 : moderne-tente en (5, 3)',
-  'niveau 8 : moderne-gradins en (10, 7)',
-  'niveau 8 : moderne-gradins en (13, 7)',
-  'niveau 8 : moderne-gradins en (29, 7)',
-  'niveau 8 : moderne-sono en (1, 7)',
-  'niveau 8 : moderne-sono en (28, 14)',
-  'niveau 9 : moderne-barricade en (8, 5)',
-  'niveau 9 : moderne-distributeur en (20, 7)',
-  'niveau 9 : moderne-etagere en (8, 13)',
-  'niveau 9 : moderne-platane en (2, 7)',
-  'niveau 9 : moderne-sono en (26, 9)',
-  'niveau 10 : moderne-barricade en (31, 13)',
-  'niveau 10 : moderne-platane en (19, 7)',
-  'niveau 10 : moderne-sono en (29, 7)',
-]);
-
 /** Les grands décors de chaque niveau du DLC qui bloquent une case de tour à moins de 2 cases d'un chemin, avec ces cases. */
 function decorsQuiPrennentDesCasesUtiles(): Map<string, string[]> {
   const fautifs = new Map<string, string[]>();
@@ -284,14 +248,19 @@ function decorsQuiPrennentDesCasesUtiles(): Map<string, string[]> {
 }
 
 describe('grands décors et cases de tour', () => {
-  it('pour chaque niveau du DLC, aucun grand décor ne bloque une case de tour à moins de 2 cases d’un chemin (hors écarts connus)', () => {
-    const nouveaux = [...decorsQuiPrennentDesCasesUtiles()].filter(([cle]) => !ECARTS_DECOR_CONNUS.has(cle)).map(([cle, cases]) => `${cle} : ${cases.join(', ')}`);
-    expect(nouveaux).toEqual([]);
+  it('pour chaque niveau du DLC, aucun grand décor ne bloque une case de tour à moins de 2 cases d’un chemin', () => {
+    const fautifs = [...decorsQuiPrennentDesCasesUtiles()].map(([cle, cases]) => `${cle} : ${cases.join(', ')}`);
+    expect(fautifs).toEqual([]);
   });
 
-  it('chaque écart connu existe encore (un décor déplacé sort de la liste)', () => {
-    const fautifs = decorsQuiPrennentDesCasesUtiles();
-    expect([...ECARTS_DECOR_CONNUS].filter((cle) => !fautifs.has(cle))).toEqual([]);
+  it('chaque niveau a au moins autant de cases de tour qu’avant le déplacement des grands décors collés aux chemins (de 81 à 107 cases avant, de 94 à 110 après)', () => {
+    const avant = [104, 96, 98, 86, 95, 107, 101, 89, 81, 92];
+    const apres = PLANS_MODERNE_R1.map((plan) => casesDeTour(plan, decorDuPlan(plan).decor.filter((d) => GRANDS_DECORS.has(d.sprite))));
+    expect(apres.length).toBe(avant.length);
+    avant.forEach((n, i) => {
+      expect(apres[i], `niveau ${String(i + 1)}`).toBeGreaterThanOrEqual(n);
+    });
+    expect(apres).toEqual([108, 100, 101, 94, 101, 110, 109, 96, 94, 95]);
   });
 
   it('niveau 4 : le plan de jeu a au moins les cases de tour d’avant le déplacement du décor (étagère en (9, 2), tableau en (12, 2))', () => {
@@ -311,36 +280,6 @@ describe('grands décors et cases de tour', () => {
   });
 });
 
-/**
- * Décors que le fourgon cache déjà, avant la règle : le niveau 10 (Rectorat), relevé à la relecture de b8a8eaf. Ils sont presque tous
- * petits (pancartes, tags, cônes) : les déplacer est une passe de décor à part, signalée.
- */
-const ECARTS_FOURGON_CONNUS: Readonly<Record<number, readonly string[]>> = {
-  10: [
-    'moderne-pancarte en (0.5, 6)',
-    'moderne-tag en (1.5, 7.5)',
-    'moderne-fumigene en (3, 7.5)',
-    'moderne-cartons en (7, 8.5)',
-    'moderne-cone en (3, 3.5)',
-    'moderne-pancarte en (4, 1.5)',
-    'moderne-tag en (10, 1)',
-    'moderne-pancarte en (12, 1.5)',
-    'moderne-pancarte en (16.5, 2)',
-    'moderne-fumigene en (17, 6)',
-    'moderne-platane en (19, 7)',
-    'moderne-tag en (21.5, 6.5)',
-    'moderne-sono en (29, 7)',
-    'moderne-pancarte en (5.5, 13)',
-    'moderne-pneus en (7, 13.5)',
-    'moderne-palette en (11, 13)',
-    'moderne-tag en (11, 15)',
-    'moderne-cone en (9, 7.5)',
-    'moderne-fumigene en (11, 6)',
-    'moderne-pancarte en (23, 16.5)',
-    'moderne-cartons en (19, 11.5)',
-  ],
-};
-
 /** Les niveaux où passe le fourgon du canon à eau (dans leurs vagues figées). */
 const AVEC_FOURGON = PLANS_DLC.filter((_, i) => (VAGUES_DLC[i] ?? []).some((v) => v.paquets.some((p) => p.ennemi === 'moderne_canon_a_eau')));
 
@@ -352,7 +291,7 @@ describe('le décor reste visible sous les fourgons du canon à eau', () => {
     expect(numeros).not.toContain(8);
   });
 
-  it.each(AVEC_FOURGON.map((p) => [p.numero, p] as const))('niveau %i : aucun décor sous la silhouette du fourgon (4 tuiles de large, 3,4 de haut au-dessus de ses pieds), hors écarts connus', (numero, plan) => {
+  it.each(AVEC_FOURGON.map((p) => [p.numero, p] as const))('niveau %i : aucun décor sous la silhouette du fourgon (4 tuiles de large, 3,4 de haut au-dessus de ses pieds)', (_numero, plan) => {
     const { carte, decor } = decorDuPlan(plan);
     const caches: string[] = [];
     for (const chemin of carte.chemins) {
@@ -363,9 +302,6 @@ describe('le décor reste visible sous les fourgons du canon à eau', () => {
         for (const dec of decor) if (rectsSeChevauchent(empriseDecor(dec), fourgon)) caches.push(`${dec.sprite} en (${String(dec.x)}, ${String(dec.y)})`);
       }
     }
-    const connus = ECARTS_FOURGON_CONNUS[numero] ?? [];
-    expect([...new Set(caches)].filter((c) => !connus.includes(c))).toEqual([]);
-    // La liste des écarts ne garde que des décors encore cachés.
-    expect(connus.filter((c) => !caches.includes(c))).toEqual([]);
+    expect([...new Set(caches)]).toEqual([]);
   });
 });
