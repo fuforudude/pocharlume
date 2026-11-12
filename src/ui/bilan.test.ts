@@ -3,6 +3,11 @@ import { describe, expect, it } from 'vitest';
 import { BRAISES_DEFI } from '../data/meta';
 import { t } from '../i18n';
 import type { BilanPartie } from '../save';
+import { DEFS_TEST } from '../save/aides.test-utils';
+import { sauvegardeVide, type Sauvegarde } from '../save/format';
+import { enregistrerVictoireModerne } from '../save/moderne';
+import { enregistrerVictoire } from '../save/progression';
+import { enregistrerFinDePartie, type FinDePartieMeta } from '../save/transactions';
 import { lignesBilan } from './ecrans';
 
 const BILAN: BilanPartie = {
@@ -84,5 +89,47 @@ describe('bilan de fin : défi, disciple offert, région ouverte', () => {
     expect(/\.ecran\.fin \.etoile \{\s*width: 30px;\s*height: 30px;\s*\}/.test(feuille)).toBe(true);
     const lignes = lignesBilan({ ...BILAN, aretes: 681, braises: 21, xp: 2120, niveauHeros: { avant: 1, apres: 7 }, badges: 30, titresNouveaux: ['fac_occupee'] });
     expect(lignes).toHaveLength(6);
+  });
+});
+
+describe('bilan de fin : la phrase de fin du DLC (« Préfecture tombée »)', () => {
+  const PHRASE = t('fin.bilan_campagne_moderne');
+  const TITRE = t('fin.bilan_titre', { nom: 'Préfecture tombée' });
+
+  function bilanDe(s: Sauvegarde, fin: FinDePartieMeta): BilanPartie {
+    const r = enregistrerFinDePartie(s, fin, DEFS_TEST);
+    if (!r.ok) throw new Error(`refusée : ${r.raison}`);
+    return r.bilan;
+  }
+  function joueurModerne(jusqua: number): Sauvegarde {
+    let s = sauvegardeVide();
+    for (let n = 1; n <= jusqua; n++) s = enregistrerVictoireModerne(s, n, 'matou', 3);
+    return s;
+  }
+  const victoire = { statut: 'victoire', difficulte: 'matou', etoiles: 2, heros: 'charlie' } as const;
+
+  it('lignesBilan : la phrase suit le titre « Préfecture tombée », et seulement lui', () => {
+    expect(lignesBilan({ ...BILAN, titresNouveaux: ['prefecture_tombee'] })).toEqual([TITRE, PHRASE]);
+    expect(lignesBilan({ ...BILAN, titresNouveaux: ['cortege_de_tete'] })).not.toContain(PHRASE);
+    expect(lignesBilan({ ...BILAN, campagneTerminee: true })).not.toContain(PHRASE);
+  });
+
+  it('niveau 30 du DLC gagné pour la première fois : titre et phrase ; rejoué ensuite : ni l’un ni l’autre', () => {
+    const avant = joueurModerne(29);
+    const r = enregistrerFinDePartie(avant, { ...victoire, niveau: 30, campagne: 'moderne' }, DEFS_TEST);
+    if (!r.ok) throw new Error(`refusée : ${r.raison}`);
+    expect(lignesBilan(r.bilan)).toEqual(expect.arrayContaining([TITRE, PHRASE]));
+    const encore = lignesBilan(bilanDe(r.sauvegarde, { ...victoire, niveau: 30, campagne: 'moderne' }));
+    expect(encore).not.toContain(PHRASE);
+    expect(encore).not.toContain(TITRE);
+  });
+
+  it('un autre boss du DLC et l’histoire ne donnent jamais la phrase', () => {
+    expect(lignesBilan(bilanDe(joueurModerne(19), { ...victoire, niveau: 20, campagne: 'moderne' }))).not.toContain(PHRASE);
+    let histoire = sauvegardeVide();
+    for (let n = 1; n <= 29; n++) histoire = enregistrerVictoire(histoire, n, 'matou', 3);
+    const lignes = lignesBilan(bilanDe(histoire, { ...victoire, niveau: 30 }));
+    expect(lignes).not.toContain(PHRASE);
+    expect(lignes).not.toContain(TITRE);
   });
 });

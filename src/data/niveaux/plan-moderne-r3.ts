@@ -351,7 +351,7 @@ export const PLANS_MODERNE_R3: readonly PlanNiveauModerne<IdCarteModerneR3>[] = 
       { vague: 13, delai: 6, type: 'nasse', chemin: 1, debut: 12, longueur: 3, duree: 6 },
       { vague: 15, delai: 4, type: 'renforts', x: 25, y: 9, nombre: 5, duree: 18, unite: ETUDIANT },
       { vague: 15, delai: 9, type: 'canon_a_eau', cy: 4, sens: -1, recul: 3, etourdissement: 2 },
-      { vague: 15, delai: 14, type: 'charge', chemin: 2, ennemi: 'moderne_bravm', nombre: 4, intervalle: 0.5, facteurVitesse: 1.5, duree: 9 },
+      { vague: 15, delai: 14, type: 'charge', chemin: 2, ennemi: 'moderne_bravm', nombre: 4, intervalle: 0.5, facteurVitesse: 1.5, duree: 5 },
       { vague: 15, delai: 20, type: 'nasse', chemin: 1, debut: 12, longueur: 3, duree: 8 },
       { vague: 15, delai: 26, type: 'charge', chemin: 0, ennemi: 'moderne_bouclier_anti_emeute', nombre: 4, intervalle: 1, facteurVitesse: 1.3, duree: 29 },
       { vague: 15, delai: 34, type: 'canon_a_eau', cy: 7, sens: 1, recul: 3, etourdissement: 2 },

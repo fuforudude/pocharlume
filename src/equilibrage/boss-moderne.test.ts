@@ -33,9 +33,10 @@ describe('boss du DLC tuables par le bot', () => {
     if (r.statut === 'victoire') expect(r.bossTues ?? []).toContain('moderne_centaure_boss');
   });
 
-  // DÉCISION REQUISE : le Grand Centaure n'est tué ni par le soigneux ni par la stratégie perce-armure (voir le rapport de la tâche
-  // « corr-boss »). `it.fails` garde le test vert tant que c'est le cas et le fait passer au rouge dès que le boss devient tuable :
-  // il faut alors le changer en `it`.
+  // DÉCISION REQUISE : le Grand Centaure n'est tué ni par le soigneux ni par la stratégie perce-armure. Ce n'est pas faute de cases
+  // (le couloir final y=9 est bordé de cases libres, lignes 3 et 5 de la grille) : à 2 200 arêtes, le bot arrive au boss avec peu de
+  // vies et des tours de niveau 1, et la perce-armure ne le tue qu'avec une économie de l'ordre de 20 000 arêtes (rapport « niveau 20 »).
+  // `it.fails` garde le test vert tant que c'est le cas et le fait passer au rouge dès que le boss devient tuable : le changer en `it`.
   it.fails('niveau 20 : une stratégie dédiée (percer l’armure) tue le Grand Centaure', () => {
     const r = jouerPartie(niveau(20), creerBotPerceArmure(), options);
     expect(r.bossTues ?? []).toContain('moderne_centaure_boss');

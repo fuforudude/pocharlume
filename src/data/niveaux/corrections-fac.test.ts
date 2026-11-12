@@ -97,7 +97,10 @@ describe('renforts', () => {
 });
 
 describe('charges', () => {
-  it('chaque charge dure au moins jusqu’au milieu du chemin (les chargeurs passent à travers les soldats sur la moitié du parcours)', () => {
+  /** Part du chemin au-delà de laquelle la traversée irait presque jusqu'à la sortie (relecture de la Préfecture, point 1). */
+  const PART_MAX_CHARGE = 0.65;
+
+  it('chaque charge dure au moins jusqu’au milieu du chemin, et pas au-delà des 65 % (les chargeurs passent à travers les soldats sur la moitié du parcours, pas jusqu’à la sortie)', () => {
     const problemes: string[] = [];
     for (const plan of PLANS_DLC) {
       for (const e of plan.evenements ?? []) {
@@ -106,7 +109,9 @@ describe('charges', () => {
         // Accélération courte (`dureeVitesse`, ou la valeur commune bornée à `duree`), puis l'allure normale jusqu'à la fin de la traversée.
         const acceleration = e.dureeVitesse ?? Math.min(EVENEMENTS_NIVEAU.accelerationCharge, e.duree);
         const parcouru = ENNEMIS[e.ennemi as keyof typeof ENNEMIS].vitesse * (e.facteurVitesse * acceleration + (e.duree - acceleration));
-        if (parcouru < longueur / 2) problemes.push(quoi(plan, `charge de la vague ${String(e.vague)} : ${parcouru.toFixed(1)} tuiles pour un chemin de ${longueur.toFixed(1)}`));
+        if (parcouru < longueur / 2 || parcouru > longueur * PART_MAX_CHARGE) {
+          problemes.push(quoi(plan, `charge de la vague ${String(e.vague)} : ${parcouru.toFixed(1)} tuiles pour un chemin de ${longueur.toFixed(1)}`));
+        }
       }
     }
     expect(problemes).toEqual([]);

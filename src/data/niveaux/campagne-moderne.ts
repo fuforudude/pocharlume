@@ -30,8 +30,8 @@ const REGION2_MODERNE: readonly NiveauCampagne[] = PLANS_MODERNE_R2.map((plan, i
   if (!vagues) throw new Error(`Vagues figées manquantes pour le niveau moderne ${String(plan.numero)} : relancer npm run niveaux -- moderne`);
   return assemblerNiveauModerne(plan, vagues);
 });
+
 /** Les niveaux de la Préfecture (région 3 du DLC, niveaux 21 à 30), assemblés depuis leur plan et leurs vagues figées. */
-/** Les niveaux de la Manif (région 2 du DLC), assemblés depuis leur plan et leurs vagues figées. */
 const REGION3_MODERNE: readonly NiveauCampagne[] = PLANS_MODERNE_R3.map((plan, i) => {
   const vagues = VAGUES_MODERNE_R3[i];
   if (!vagues) throw new Error(`Vagues figées manquantes pour le niveau moderne ${String(plan.numero)} : relancer npm run niveaux -- moderne`);
