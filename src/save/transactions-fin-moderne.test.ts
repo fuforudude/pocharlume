@@ -3,6 +3,7 @@
 // la session exige la même campagne pour effacer la partie rangée. Les niveaux du DLC ne sont pas encore livrés : ces tests raisonnent sur
 // des numéros et sur un plan de l'histoire déguisé en niveau du DLC.
 import { describe, expect, it } from 'vitest';
+import { BADGES_MODERNE } from '../data/recompenses-moderne';
 import { REGION1 } from '../data/niveaux/region1';
 import { VERSION_DONNEES } from '../data/version';
 import { premiereCaseLibre } from '../engine/aides.test-utils';
@@ -89,11 +90,15 @@ describe('victoire du DLC : la progression du DLC, jamais celle de l’histoire'
     expect(JSON.stringify(avant)).toBe(copie);
   });
 
-  it('l’expérience du héros est donnée, les arêtes aussi', () => {
+  it('arêtes et expérience : celles des niveaux 100 + N, figées (choix de l’étudiant du 2026-11-12)', () => {
+    // Niveau 1 du DLC en 3 étoiles = 681 arêtes (81 au niveau 1 de l'histoire) et 2 120 points d'expérience (120 dans l'histoire).
     const r = reussie(sauvegardeVide(), { niveau: 1 });
-    expect(r.bilan.xp).toBeGreaterThan(0);
-    expect(r.bilan.aretes).toBeGreaterThan(0);
-    expect(r.sauvegarde.meta.monnaies.aretes).toBe(r.bilan.aretes);
+    expect(r.bilan.aretes).toBe(681);
+    expect(r.bilan.xp).toBe(2120);
+    expect(r.sauvegarde.meta.monnaies.aretes).toBe(681);
+    expect(reussie(sauvegardeVide(), { niveau: 1, etoiles: 1 }).bilan.aretes).toBe(651);
+    expect(reussie(r.sauvegarde, { niveau: 1 }).bilan.aretes).toBe(212);
+    expect(enregistrerFinDePartie(sauvegardeVide(), { niveau: 1, statut: 'defaite', difficulte: 'matou', etoiles: 0, heros: 'charlie', campagne: 'moderne' }, DEFS_TEST)).toMatchObject({ ok: true, bilan: { xp: 1060, aretes: 0 } });
   });
 });
 
@@ -119,7 +124,7 @@ describe('braises du DLC (montants de la spec)', () => {
   it('vont dans les monnaies habituelles (`meta.monnaies.braises`), les badges vont dans `moderne.badges`', () => {
     const r = reussie(sauvegardeVide(), { niveau: 1 });
     expect(r.sauvegarde.meta.monnaies.braises).toBe(21);
-    expect(r.sauvegarde.moderne.badges).toBe(30);
+    expect(r.sauvegarde.moderne.badges).toBe(BADGES_MODERNE.premiereVictoire + BADGES_MODERNE.troisEtoiles);
   });
 
   it('12 par défi réussi la première fois, sur le niveau du DLC à 3 étoiles ; le défi est noté dans `moderne.defis`', () => {

@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { BRAISES_DEFI } from '../data/meta';
 import { t } from '../i18n';
@@ -57,5 +58,29 @@ describe('bilan de fin : défi, disciple offert, région ouverte', () => {
     expect(lignesBilan({ ...BILAN, infiniDebloque: true })).toEqual([t('fin.bilan_infini_debloque')]);
     expect(lignesBilan({ ...BILAN, campagneTerminee: true })).toEqual([t('fin.bilan_campagne')]);
     expect(t('fin.bilan_infini_debloque')).toBe('Mode infini débloqué : il t’attend sur l’accueil.');
+  });
+
+  it('DLC : les badges et les titres gagnés sont annoncés, après les gains habituels', () => {
+    const lignes = lignesBilan({ ...BILAN, aretes: 681, badges: 30, titresNouveaux: ['fac_occupee', 'greve_generale'] });
+    expect(lignes).toEqual([
+      t('fin.bilan_aretes', { n: 681 }),
+      t('fin.bilan_badges', { n: 30 }),
+      t('fin.bilan_titre', { nom: 'Fac occupée' }),
+      t('fin.bilan_titre', { nom: 'Grève générale' }),
+    ]);
+    expect(t('fin.bilan_badges', { n: 30 })).toBe('+30 badges');
+  });
+
+  it('DLC : zéro badge et aucun titre ne disent rien ; un titre inconnu est ignoré', () => {
+    expect(lignesBilan({ ...BILAN, badges: 0 })).toEqual([]);
+    expect(lignesBilan({ ...BILAN, titresNouveaux: ['titre_inconnu'] })).toEqual([]);
+  });
+
+  it('DLC : à 740×360, le butin le plus long (six lignes) a une mise en page sur deux colonnes dans la feuille de style', () => {
+    const feuille = readFileSync('src/ui/style-meta.css', 'utf8');
+    const bas = /@media \(max-height: 460px\) \{\s*\.ecran\.fin \.bilan \{[^}]*grid-template-columns: repeat\(2/.exec(feuille);
+    expect(bas).not.toBeNull();
+    const lignes = lignesBilan({ ...BILAN, aretes: 681, braises: 21, xp: 2120, niveauHeros: { avant: 1, apres: 7 }, badges: 30, titresNouveaux: ['fac_occupee'] });
+    expect(lignes).toHaveLength(6);
   });
 });

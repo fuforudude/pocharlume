@@ -1,12 +1,14 @@
 // Badges et titres gagnés en fin de partie du DLC « Temps modernes » (spec du DLC, tâche 6) : montants de `BADGES_MODERNE`, prime de boss,
 // défis, plafond, titres qui s'ajoutent sans jamais se retirer ; rien pour une partie de l'histoire.
 import { describe, expect, it } from 'vitest';
-import { PLAFOND_MONNAIE } from '../data/meta';
-import { BADGES_MODERNE } from '../data/recompenses-moderne';
+import { NIVEAU_MAX_MODERNE } from '../data/campagnes';
+import { IDS_DEFIS, PLAFOND_MONNAIE } from '../data/meta';
+import { BADGES_MODERNE, badgesDuDlcComplet, DEFS_TITRES_MODERNES, titresMerites } from '../data/recompenses-moderne';
 import { DEFS_TEST } from './aides.test-utils';
 import { badgesDeLaVictoire } from './badges-moderne';
 import { sauvegardeVide, type Sauvegarde } from './format';
 import { enregistrerVictoireModerne } from './moderne';
+import { enregistrerVictoire } from './progression';
 import { enregistrerFinDePartie, type FinDePartieMeta, type ResultatFin } from './transactions';
 import { validerSauvegarde } from './validation';
 
@@ -78,11 +80,59 @@ describe('badges et titres d’une partie du DLC', () => {
     expect(reussie(avecTitre, { niveau: 1 }).sauvegarde.moderne.titres).toEqual(['greve_generale']);
   });
 
-  it('une partie de l’histoire ne touche ni aux badges ni aux titres', () => {
-    const r = enregistrerFinDePartie(sauvegardeVide(), { niveau: 10, statut: 'victoire', difficulte: 'matou', etoiles: 3, heros: 'charlie' }, DEFS_TEST);
-    expect(r.ok).toBe(false);
-    const h = enregistrerFinDePartie(sauvegardeVide(), { niveau: 1, statut: 'victoire', difficulte: 'matou', etoiles: 3, heros: 'charlie' }, DEFS_TEST);
-    expect(h.ok && h.sauvegarde.moderne.badges).toBe(0);
-    expect(h.ok && h.bilan.badges).toBeUndefined();
+  it('une partie de l’histoire ne touche ni aux badges ni aux titres, même au boss', () => {
+    let histoire = sauvegardeVide();
+    for (let n = 1; n <= 10; n++) histoire = enregistrerVictoire(histoire, n, 'matou', 3);
+    const r = enregistrerFinDePartie(histoire, { niveau: 10, statut: 'victoire', difficulte: 'matou', etoiles: 3, heros: 'charlie' }, DEFS_TEST);
+    expect(r.ok && r.sauvegarde.moderne.badges).toBe(0);
+    expect(r.ok && r.sauvegarde.moderne.titres).toEqual([]);
+    expect(r.ok && r.bilan.badges).toBeUndefined();
+    expect(r.ok && r.bilan.titresNouveaux).toBeUndefined();
+  });
+
+  it('une défaite ou un abandon dans le DLC n’ajoute aucun titre ni badge, même quand tout le reste mérite un titre', () => {
+    // Le boss de la Fac est déjà battu (titre obtenu) ; les niveaux 11 à 19 aussi : une défaite au 20 ne donne pas « Cortège de tête ».
+    const gagne = joueurModerne(19);
+    const avance = { ...gagne, moderne: { ...gagne.moderne, titres: titresMerites({ etoiles: gagne.moderne.progression.etoiles, defis: gagne.moderne.defis }) } };
+    expect(avance.moderne.titres).toEqual(['fac_occupee']);
+    for (const statut of ['defaite', 'abandon'] as const) {
+      const r = enregistrerFinDePartie(avance, { niveau: 20, statut, difficulte: 'matou', etoiles: 0, heros: 'charlie', campagne: 'moderne' }, DEFS_TEST);
+      if (!r.ok) throw new Error(`refusée : ${r.raison}`);
+      expect(r.sauvegarde.moderne.titres).toEqual(['fac_occupee']);
+      expect(r.sauvegarde.moderne.badges).toBe(0);
+      expect(r.bilan.titresNouveaux).toBeUndefined();
+      expect(r.bilan.badges ?? 0).toBe(0);
+    }
+  });
+});
+
+describe('le total des badges, par de vraies fins de partie', () => {
+  it('30 niveaux à 3 étoiles (boss compris), puis les 2 défis de chacun : tout le DLC rapporte 2 220 badges et tous les titres', () => {
+    let s = sauvegardeVide();
+    let total = 0;
+    for (let n = 1; n <= NIVEAU_MAX_MODERNE; n++) {
+      const r = reussie(s, { niveau: n });
+      total += r.bilan.badges ?? 0;
+      s = r.sauvegarde;
+      for (const defi of IDS_DEFIS) {
+        const d = reussie(s, { niveau: n, defi });
+        total += d.bilan.badges ?? 0;
+        s = d.sauvegarde;
+      }
+    }
+    expect(total).toBe(badgesDuDlcComplet());
+    expect(total).toBe(2220);
+    expect(s.moderne.badges).toBe(total);
+    expect(s.moderne.titres).toEqual(DEFS_TITRES_MODERNES.map((d) => d.id).sort());
+  });
+
+  it('rejouer tout ne rapporte plus rien', () => {
+    let s = sauvegardeVide();
+    for (let n = 1; n <= NIVEAU_MAX_MODERNE; n++) {
+      s = reussie(s, { niveau: n }).sauvegarde;
+      for (const defi of IDS_DEFIS) s = reussie(s, { niveau: n, defi }).sauvegarde;
+    }
+    expect(reussie(s, { niveau: 10 }).bilan.badges).toBe(0);
+    expect(reussie(s, { niveau: 30, defi: 'fer' }).bilan.badges).toBe(0);
   });
 });

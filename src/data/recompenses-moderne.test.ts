@@ -5,7 +5,6 @@ import { NIVEAU_MAX_MODERNE } from './campagnes';
 import { CAISSES_AVANT_GARANTIE, CHANCES_RARETE, IDS_DIEUX, IDS_HEROS, RARETES } from './meta';
 import {
   BADGES_MODERNE,
-  badgesDeLaVictoire,
   badgesDuDlcComplet,
   CATALOGUE_MODERNE,
   cibleDuSkinModerne,
@@ -66,61 +65,13 @@ describe('catalogue du DLC', () => {
   });
 });
 
-describe('badges d’une victoire', () => {
-  it('première victoire : la prime, et la prime de boss aux niveaux 10, 20 et 30', () => {
-    expect(badgesDeLaVictoire(1, { etoiles: 2, defi: null }, vide)).toBe(BADGES_MODERNE.premiereVictoire);
-    for (const boss of [10, 20, 30]) {
-      expect(badgesDeLaVictoire(boss, { etoiles: 1, defi: null }, vide)).toBe(BADGES_MODERNE.premiereVictoire + BADGES_MODERNE.boss);
-    }
-  });
-
-  it('3 étoiles la première fois : la prime d’étoiles, même au-dessus d’une première victoire', () => {
-    expect(badgesDeLaVictoire(4, { etoiles: 3, defi: null }, vide)).toBe(BADGES_MODERNE.premiereVictoire + BADGES_MODERNE.troisEtoiles);
-    const deuxEtoiles: EtatRecompensesModerne = { etoiles: { '4': { chaton: 2 } }, defis: {} };
-    expect(badgesDeLaVictoire(4, { etoiles: 3, defi: null }, deuxEtoiles)).toBe(BADGES_MODERNE.troisEtoiles);
-  });
-
-  it('rejouer un niveau sans mieux faire ne rapporte rien', () => {
-    const fait: EtatRecompensesModerne = { etoiles: { '4': { matou: 3 } }, defis: {} };
-    expect(badgesDeLaVictoire(4, { etoiles: 3, defi: null }, fait)).toBe(0);
-    expect(badgesDeLaVictoire(4, { etoiles: 1, defi: null }, { etoiles: { '4': { chaton: 1 } }, defis: {} })).toBe(0);
-  });
-
-  it('un défi rapporte sa prime la première fois, sur un niveau à 3 étoiles seulement', () => {
-    const troisEtoiles: EtatRecompensesModerne = { etoiles: { '7': { vieux_sage: 3 } }, defis: {} };
-    expect(badgesDeLaVictoire(7, { etoiles: 3, defi: 'heroique' }, troisEtoiles)).toBe(BADGES_MODERNE.defi);
-    expect(badgesDeLaVictoire(7, { etoiles: 3, defi: 'fer' }, { ...troisEtoiles, defis: { '7': { heroique: true } } })).toBe(BADGES_MODERNE.defi);
-    expect(badgesDeLaVictoire(7, { etoiles: 3, defi: 'fer' }, { ...troisEtoiles, defis: { '7': { fer: true } } })).toBe(0);
-    expect(badgesDeLaVictoire(7, { etoiles: 3, defi: 'fer' }, { etoiles: { '7': { matou: 2 } }, defis: {} })).toBe(0);
-  });
-
-  it('une victoire absurde ne rapporte rien', () => {
-    expect(badgesDeLaVictoire(0, { etoiles: 3, defi: null }, vide)).toBe(0);
-    expect(badgesDeLaVictoire(NIVEAU_MAX_MODERNE + 1, { etoiles: 3, defi: null }, vide)).toBe(0);
-    expect(badgesDeLaVictoire(2.5, { etoiles: 3, defi: null }, vide)).toBe(0);
-    expect(badgesDeLaVictoire(2, { etoiles: 4, defi: null }, vide)).toBe(0);
-    expect(badgesDeLaVictoire(2, { etoiles: 0, defi: null }, vide)).toBe(0);
-  });
-
-  it('lit les étoiles et les défis en propriétés propres seulement', () => {
-    const piege = { etoiles: Object.create({ '3': { matou: 3 } }) as EtatRecompensesModerne['etoiles'], defis: {} };
-    expect(badgesDeLaVictoire(3, { etoiles: 1, defi: null }, piege)).toBe(BADGES_MODERNE.premiereVictoire);
-  });
-
-  it('tout le DLC avec ses défis rapporte le total annoncé, qui ouvre ~148 caisses', () => {
-    let etat: EtatRecompensesModerne = vide;
-    let total = 0;
-    for (let n = 1; n <= NIVEAU_MAX_MODERNE; n++) {
-      total += badgesDeLaVictoire(n, { etoiles: 3, defi: null }, etat);
-      etat = { ...etat, etoiles: { ...etat.etoiles, [String(n)]: { matou: 3 } } };
-      for (const defi of ['heroique', 'fer'] as const) {
-        total += badgesDeLaVictoire(n, { etoiles: 3, defi }, etat);
-        etat = { ...etat, defis: { ...etat.defis, [String(n)]: { ...etat.defis[String(n)], [defi]: true } } };
-      }
-    }
-    expect(total).toBe(badgesDuDlcComplet());
-    expect(total).toBe(2220);
-    expect(Math.floor(total / PRIX_CAISSE_MODERNE)).toBe(148);
+describe('badges du DLC complet', () => {
+  it('le total annoncé ouvre ~148 caisses (la règle d’une victoire est testée sur la fin de partie, src/save/recompenses-fin-moderne.test.ts)', () => {
+    expect(badgesDuDlcComplet()).toBe(2220);
+    expect(badgesDuDlcComplet()).toBe(
+      NIVEAU_MAX_MODERNE * (BADGES_MODERNE.premiereVictoire + BADGES_MODERNE.troisEtoiles + 2 * BADGES_MODERNE.defi) + 3 * BADGES_MODERNE.boss,
+    );
+    expect(Math.floor(badgesDuDlcComplet() / PRIX_CAISSE_MODERNE)).toBe(148);
   });
 });
 

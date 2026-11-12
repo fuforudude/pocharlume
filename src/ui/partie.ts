@@ -206,8 +206,10 @@ export async function lancerNiveau(
   surFin: (resultat: ResultatPartie) => unknown,
   options: OptionsPartie = {},
 ): Promise<PartieEnCours> {
-  // Une partie du DLC « Temps modernes » charge aussi l'atlas à part du DLC ; l'histoire seulement si un skin du DLC est porté.
-  const atlas = await chargerAtlas(campagneDeLAtlas(campagneDe(options.reprise?.niveau ?? niveau.niveau), options.skinsModernes));
+  // Une partie du DLC « Temps modernes » charge aussi l'atlas à part du DLC ; l'histoire seulement si un skin du DLC porté sert dans
+  // cette partie (les 4 familles, la tour divine du dieu joué, le héros joué).
+  const configDeLaPartie = options.reprise?.config ?? config;
+  const atlas = await chargerAtlas(campagneDeLAtlas(campagneDe(options.reprise?.niveau ?? niveau.niveau), options.skinsModernes, configDeLaPartie.dieu, configDeLaPartie.heros));
   const etat = options.reprise ?? creerPartie(niveau.niveau, config);
   const parent = options.parent ?? document.body;
   const controleur = new AbortController();
@@ -356,7 +358,8 @@ export async function lancerNiveau(
   const objetsUtilises = (): string[] => etat.config.objets.filter((_, i) => etat.objetsUtilises[i] === true);
   const resultatDe = (statut: 'victoire' | 'defaite' | 'abandon'): ResultatPartie => ({
     niveau: niveau.numero,
-    ...(niveau.niveau.campagne === 'moderne' ? { campagne: 'moderne' as const } : {}),
+    // Même source que la partie rangée (save/partie.ts) : l'état de la partie, pas le niveau passé en paramètre.
+    ...(etat.niveau.campagne === 'moderne' ? { campagne: 'moderne' as const } : {}),
     statut,
     etoiles: statut === 'victoire' ? etat.etoiles : 0,
     vies: etat.vies,

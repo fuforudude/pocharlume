@@ -20,7 +20,8 @@ export interface VictoireModerne {
 
 /**
  * Badges gagnés par cette victoire : la première victoire, la prime du boss (à sa première victoire seulement), les 3 étoiles la première
- * fois, un défi réussi la première fois (mêmes règles que `badgesDeLaVictoire` de `src/data/recompenses-moderne.ts`).
+ * fois, un défi réussi la première fois. C'est la seule règle des badges (il n'y en a pas d'autre dans `src/data/`) : les montants viennent de
+ * `badgesDesFaits`, et `src/save/recompenses-fin-moderne.test.ts` en fige le total (2 220) en enchaînant de vraies fins de partie.
  */
 export function badgesDeLaVictoire(victoire: VictoireModerne): number {
   return badgesDesFaits({

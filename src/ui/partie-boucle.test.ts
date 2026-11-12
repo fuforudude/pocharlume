@@ -275,6 +275,46 @@ describe('reprise', () => {
   });
 });
 
+describe('campagne du DLC dans le résultat', () => {
+  /** Le niveau 1 de l'histoire déguisé en niveau du DLC (les niveaux du DLC portent `campagne: 'moderne'`). */
+  const NIVEAU_MODERNE = { ...NIVEAU, niveau: { ...NIVEAU.niveau, campagne: 'moderne' as const } } as NonNullable<typeof NIVEAU>;
+
+  it('surFin reçoit `campagne: moderne` pour une partie du DLC, et rien pour l’histoire', async () => {
+    const moderne: ResultatPartie[] = [];
+    const partie = await lancerNiveau(NIVEAU_MODERNE, CONFIG, (r) => { moderne.push(r); }, { parent: document.body, surDemarrage: (p) => { parties.push(p); } });
+    partie.etat.vies = 0;
+    imagesJusqua(() => moderne.length > 0);
+    expect(moderne[0]?.campagne).toBe('moderne');
+    partie.arreter();
+
+    const histoire = await demarrer();
+    histoire.etat.vies = 0;
+    imagesJusqua(() => fins.length > 0);
+    expect(fins[0]?.campagne).toBeUndefined();
+  });
+
+  it('surQuitter reçoit `campagne: moderne` dans l’abandon d’une partie du DLC', async () => {
+    const surQuitter = vi.fn();
+    await lancerNiveau(NIVEAU_MODERNE, CONFIG, (r) => { fins.push(r); }, { parent: document.body, surDemarrage: (p) => { parties.push(p); }, surQuitter });
+    images(2);
+    appuyer('p');
+    boutonTexte(t('fin.quitter')).click();
+    const abandon = surQuitter.mock.calls[0]?.[0] as ResultatPartie | null;
+    expect(abandon).toMatchObject({ statut: 'abandon', campagne: 'moderne' });
+  });
+
+  it('la campagne vient de l’état de la partie : une partie reprise d’un état du DLC reste du DLC', async () => {
+    const etat = etatRepris();
+    etat.niveau = { ...etat.niveau, campagne: 'moderne' };
+    const recue: ResultatPartie[] = [];
+    const partie = await lancerNiveau(NIVEAU, CONFIG, (r) => { recue.push(r); }, { parent: document.body, surDemarrage: (p) => { parties.push(p); }, reprise: etat });
+    reprendre();
+    partie.etat.vies = 0;
+    imagesJusqua(() => recue.length > 0);
+    expect(recue[0]?.campagne).toBe('moderne');
+  });
+});
+
 describe('fin de partie', () => {
   it('surFin est appelée une seule fois, même après l’écran de fin', async () => {
     const partie = await demarrer();

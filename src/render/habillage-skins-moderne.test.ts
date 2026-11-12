@@ -2,6 +2,7 @@
 // demande existe dans l'atlas du DLC.
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { IDS_HEROS } from '../data/meta';
 import { DEFS_SKINS_MODERNES } from '../data/recompenses-moderne';
 import type { AtlasJson } from './atlas';
 import { apparenceModerne, campagneDApparence, cibleModerneDeTour, spriteHerosModerne, spriteTireur, spriteTour } from './habillage';
@@ -30,6 +31,14 @@ describe('apparence du DLC dans l’histoire', () => {
     expect(apparenceModerne({ suie: 'skin_moderne_suie' }, 'suie')).toBe(true);
     expect(apparenceModerne({ suie: 'skin_moderne_corbeau' }, 'suie')).toBe(false);
     expect(apparenceModerne({}, 'suie')).toBe(false);
+    // Dans une partie du DLC, les héros sont toujours étudiants, skin porté ou non.
+    expect(apparenceModerne({}, 'suie', 'moderne')).toBe(true);
+    expect(apparenceModerne({}, 'suie', 'histoire')).toBe(false);
+  });
+
+  it('les 9 héros ont leur sprite d’étudiant dans l’atlas du DLC (dessinés ainsi dans toute partie du DLC)', () => {
+    expect(IDS_HEROS).toHaveLength(9);
+    for (const h of IDS_HEROS) expect(Object.hasOwn(moderne.sprites, spriteHerosModerne(h))).toBe(true);
   });
 
   it('chaque sprite qu’un skin du DLC demande est dans l’atlas du DLC', () => {

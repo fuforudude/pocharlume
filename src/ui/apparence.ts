@@ -2,6 +2,7 @@
 // portés (ils habillent aussi l'histoire). Elle ne dépend pas du défi : en Fer le bonus de la collection est ignoré (config.bonus), mais
 // les skins restent visibles.
 import type { IdCampagne } from '../engine/definitions';
+import { FAMILLES_BASE } from '../data/collection';
 import type { Collection } from '../meta/collection';
 import { campagneDApparence } from '../render/habillage';
 import type { OptionsCollection } from '../render/rendu';
@@ -24,8 +25,13 @@ export function apparenceDeLaPartie(equipes: Equipes | undefined, heros: string,
   return { skins: { ...equipes.skins }, familier, ...modernes };
 }
 
-/** La campagne de l'atlas à charger : celle de la partie, ou `moderne` si un skin du DLC porté habille l'histoire. */
-export function campagneDeLAtlas(campagne: IdCampagne, skinsModernes: SkinsModernes | undefined): IdCampagne {
+/**
+ * La campagne de l'atlas à charger : celle de la partie, ou `moderne` si un skin du DLC porté sert dans cette partie de l'histoire,
+ * c'est-à-dire s'il habille l'une des 4 familles de tours, la tour divine du dieu joué ou le héros joué (un skin porté ailleurs ne
+ * justifie pas le téléchargement).
+ */
+export function campagneDeLAtlas(campagne: IdCampagne, skinsModernes: SkinsModernes | undefined, dieu: string, heros: string): IdCampagne {
   if (campagne === 'moderne' || !skinsModernes) return campagne;
-  return Object.keys(skinsModernes).some((cible) => campagneDApparence(campagne, skinsModernes, cible) === 'moderne') ? 'moderne' : campagne;
+  const cibles = [...FAMILLES_BASE, `divine_${dieu}`, heros];
+  return cibles.some((cible) => campagneDApparence(campagne, skinsModernes, cible) === 'moderne') ? 'moderne' : campagne;
 }

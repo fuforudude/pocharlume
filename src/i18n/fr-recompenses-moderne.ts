@@ -3,11 +3,16 @@
 export const frRecompensesModerne = {
   'monnaie.badges': 'Badges : {n}',
 
+  // Fin de partie du DLC
+  'fin.bilan_badges': '+{n} badges',
+  'fin.bilan_titre': 'Titre gagné : {nom}',
+
   // Caisse
   'caisses.caisse_moderne': 'Caisse Temps modernes',
   'caisses.desc_moderne': 'Les étudiants mobilisés : skins de tours et de héros, à porter aussi dans l’histoire.',
   'caisses.prix_badges': '{n} badges',
   'caisses.badges_gagnes': 'Les badges se gagnent seulement en jouant le DLC : victoires, 3 étoiles, défis, boss.',
+  'caisses.badges_gagnes_court': 'Badges : en jouant le DLC.',
   'caisses.apparence_seule': 'Apparence seulement : aucun bonus.',
 
   // Collection
