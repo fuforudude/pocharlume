@@ -717,6 +717,20 @@
    "source": "art/dlc-moderne/heros/1-plume.txt",
    "animations": [
     {
+     "nom": "marche",
+     "boucle": true,
+     "gif": "apercus/moderne-heros-plume--marche.gif",
+     "gifOriginal": "apercus/moderne-heros-plume--marche-original.gif",
+     "gifMiroir": null
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-heros-plume--blesse.gif",
+     "gifOriginal": "apercus/moderne-heros-plume--blesse-original.gif",
+     "gifMiroir": null
+    },
+    {
      "nom": "repos",
      "boucle": true,
      "gif": "apercus/moderne-heros-plume--repos.gif",
@@ -724,42 +738,28 @@
      "gifMiroir": null
     },
     {
-     "nom": "marche",
-     "boucle": true,
-     "gif": null,
-     "gifOriginal": "apercus/moderne-heros-plume--marche-original.gif",
-     "gifMiroir": null
-    },
-    {
-     "nom": "blesse",
-     "boucle": false,
-     "gif": null,
-     "gifOriginal": "apercus/moderne-heros-plume--blesse-original.gif",
-     "gifMiroir": null
-    },
-    {
      "nom": "attaque",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-plume--attaque.gif",
      "gifOriginal": "apercus/moderne-heros-plume--attaque-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "competence",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-plume--competence.gif",
      "gifOriginal": "apercus/moderne-heros-plume--competence-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-plume--mort.gif",
      "gifOriginal": "apercus/moderne-heros-plume--mort-original.gif",
      "gifMiroir": null
     }
    ],
-   "complet": false
+   "complet": true
   },
   {
    "id": "moderne-heros-suie",
@@ -780,40 +780,40 @@
     {
      "nom": "marche",
      "boucle": true,
-     "gif": null,
+     "gif": "apercus/moderne-heros-suie--marche.gif",
      "gifOriginal": "apercus/moderne-heros-suie--marche-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "blesse",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-suie--blesse.gif",
      "gifOriginal": "apercus/moderne-heros-suie--blesse-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-suie--attaque.gif",
      "gifOriginal": "apercus/moderne-heros-suie--attaque-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "competence",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-suie--competence.gif",
      "gifOriginal": "apercus/moderne-heros-suie--competence-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-suie--mort.gif",
      "gifOriginal": "apercus/moderne-heros-suie--mort-original.gif",
      "gifMiroir": null
     }
    ],
-   "complet": false
+   "complet": true
   },
   {
    "id": "moderne-heros-corbeau",
@@ -888,40 +888,40 @@
     {
      "nom": "marche",
      "boucle": true,
-     "gif": null,
+     "gif": "apercus/moderne-heros-charlie--marche.gif",
      "gifOriginal": "apercus/moderne-heros-charlie--marche-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-charlie--attaque.gif",
      "gifOriginal": "apercus/moderne-heros-charlie--attaque-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "competence",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-charlie--competence.gif",
      "gifOriginal": "apercus/moderne-heros-charlie--competence-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "blesse",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-charlie--blesse.gif",
      "gifOriginal": "apercus/moderne-heros-charlie--blesse-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-charlie--mort.gif",
      "gifOriginal": "apercus/moderne-heros-charlie--mort-original.gif",
      "gifMiroir": null
     }
    ],
-   "complet": false
+   "complet": true
   },
   {
    "id": "moderne-heros-mastoc",
@@ -942,40 +942,40 @@
     {
      "nom": "marche",
      "boucle": true,
-     "gif": null,
+     "gif": "apercus/moderne-heros-mastoc--marche.gif",
      "gifOriginal": "apercus/moderne-heros-mastoc--marche-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-mastoc--attaque.gif",
      "gifOriginal": "apercus/moderne-heros-mastoc--attaque-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "competence",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-mastoc--competence.gif",
      "gifOriginal": "apercus/moderne-heros-mastoc--competence-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "blesse",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-mastoc--blesse.gif",
      "gifOriginal": "apercus/moderne-heros-mastoc--blesse-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-mastoc--mort.gif",
      "gifOriginal": "apercus/moderne-heros-mastoc--mort-original.gif",
      "gifMiroir": null
     }
    ],
-   "complet": false
+   "complet": true
   },
   {
    "id": "moderne-heros-brise-os",
@@ -1050,40 +1050,40 @@
     {
      "nom": "marche",
      "boucle": true,
-     "gif": null,
+     "gif": "apercus/moderne-heros-pollen--marche.gif",
      "gifOriginal": "apercus/moderne-heros-pollen--marche-original.gif",
+     "gifMiroir": null
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-heros-pollen--blesse.gif",
+     "gifOriginal": "apercus/moderne-heros-pollen--blesse-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-pollen--attaque.gif",
      "gifOriginal": "apercus/moderne-heros-pollen--attaque-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "competence",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-pollen--competence.gif",
      "gifOriginal": "apercus/moderne-heros-pollen--competence-original.gif",
-     "gifMiroir": null
-    },
-    {
-     "nom": "blesse",
-     "boucle": false,
-     "gif": null,
-     "gifOriginal": "apercus/moderne-heros-pollen--blesse-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-pollen--mort.gif",
      "gifOriginal": "apercus/moderne-heros-pollen--mort-original.gif",
      "gifMiroir": null
     }
    ],
-   "complet": false
+   "complet": true
   },
   {
    "id": "moderne-heros-rouage",
@@ -1104,40 +1104,40 @@
     {
      "nom": "marche",
      "boucle": true,
-     "gif": null,
+     "gif": "apercus/moderne-heros-rouage--marche.gif",
      "gifOriginal": "apercus/moderne-heros-rouage--marche-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "blesse",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-rouage--blesse.gif",
      "gifOriginal": "apercus/moderne-heros-rouage--blesse-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-rouage--attaque.gif",
      "gifOriginal": "apercus/moderne-heros-rouage--attaque-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "competence",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-rouage--competence.gif",
      "gifOriginal": "apercus/moderne-heros-rouage--competence-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-rouage--mort.gif",
      "gifOriginal": "apercus/moderne-heros-rouage--mort-original.gif",
      "gifMiroir": null
     }
    ],
-   "complet": false
+   "complet": true
   },
   {
    "id": "moderne-heros-lanterne",
@@ -1158,40 +1158,40 @@
     {
      "nom": "marche",
      "boucle": true,
-     "gif": null,
+     "gif": "apercus/moderne-heros-lanterne--marche.gif",
      "gifOriginal": "apercus/moderne-heros-lanterne--marche-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "blesse",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-lanterne--blesse.gif",
      "gifOriginal": "apercus/moderne-heros-lanterne--blesse-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-lanterne--attaque.gif",
      "gifOriginal": "apercus/moderne-heros-lanterne--attaque-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "competence",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-lanterne--competence.gif",
      "gifOriginal": "apercus/moderne-heros-lanterne--competence-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-lanterne--mort.gif",
      "gifOriginal": "apercus/moderne-heros-lanterne--mort-original.gif",
      "gifMiroir": null
     }
    ],
-   "complet": false
+   "complet": true
   },
   {
    "id": "moderne-caserne-1",

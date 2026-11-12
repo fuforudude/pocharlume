@@ -33,6 +33,16 @@ couleur Q 4a5868
 # en bandoulière, seau de colle et pinceau à la place de la lanterne éteinte, baskets blanches. Origine (6, 17) comme l'original.
 sprite moderne-heros-plume
 origine 6 17
+# Modèle : l'original. Repos, marche et blessure en viennent tels quels (mêmes cadres, mêmes cadences) avec les calques
+# ci-dessous ; attaque, compétence et mort sont redessinées pour l'outil de colleuse.
+#   repos      respire, la queue bat, cligne des yeux (pose validée en première image)
+#   marche     trottine en baskets, le seau suit le corps
+#   attaque    lève le pinceau plein de colle, puis le plaque devant elle : éclaboussure de colle
+#   competence se fond dans la nuit (silhouette d'encre), puis jaillit et plaque une affiche sur la cible
+#   blesse     recule d'un pas, yeux plissés
+#   mort       touchée, les genoux plient, elle s'affaisse sur le côté (gisant du chat de grange aux couleurs du sweat) ;
+#              le seau glisse de sa patte et roule à côté
+modele heros-plume
 
 calque tete 6 0
 .v....v.
@@ -42,12 +52,16 @@ GgkkFkF.
 GgkuuUuu
 .Gguuuu.
 
-calque corps 5 6
-.GGGGG
-gGGwGGG
-gGGwGG
-.gGGGG
-.ggGGg
+# Le rouleau d'affiches est cousu au calque du corps : il suit chaque mouvement du dos.
+calque corps 3 3
+....ww
+...w1w
+..w1w
+.w1GGGGG
+wwgGGwGGG
+..gGGwGG
+...gGGGG
+...ggGGg
 
 calque queue 1 6
 k....
@@ -56,18 +70,25 @@ k....
 ku...
 .kkkk
 
-# Rouleau d'affiches roulées en bandoulière, dans le dos.
-calque affiches 2 3
-.....ww
-....w1w
-...w1w.
-..w1w..
-.ww....
-
 calque jambes 7 11
 kk.kk
 ku.uk
 ww.ww
+
+calque jambes-a 6 11
+kk...kk
+kk...ku
+ww...ww
+
+calque jambes-b 7 11
+.kkk
+.kuk
+.www
+
+calque jambes-c 6 11
+.kk.kk
+.ku.uk
+.ww.ww
 
 # Seau de colle tenu au bout de la patte, le manche du pinceau dépasse.
 calque arme 11 5
@@ -77,14 +98,74 @@ TdTT
 TiiT
 TTTT
 
-anim repos 220
-cadre queue + affiches + jambes + corps + arme + tete
+# Pinceau levé au-dessus de la tête, poils gorgés de colle.
+calque arme-haut 8 -2
+.wzz
+.zzw
+...d
+....d
+.....d
+
+# Patte tendue, le pinceau plaqué devant elle.
+calque arme-frappe 11 6
+kkkddzw
+.....zz
+
+# Éclaboussure de colle.
+calque trace 17 4
+.w.w
+w.w.
+.w.w
+
+# Affiche plaquée sur la cible : papier blanc à bandes de couleur, aucun texte.
+calque trace-large 15 0
+wwwwww
+w1111w
+w5555w
+w1111w
+wwwwww
+
+# Le seau tombé à côté d'elle, couché, une flaque de colle.
+calque outil-sol 17 11
+TTT
+iiTd
+TTTww
+
+anim attaque 60
+cadre queue + jambes + corps decale -1 0 + tete decale -1 0 + arme-haut duree 80
+cadre queue + jambes-a + corps decale 2 0 + tete decale 2 0 + arme-frappe decale 2 0 + trace duree 70
+cadre queue + jambes-a + corps decale 2 0 + tete decale 2 1 + arme-frappe decale 2 1 duree 60
+cadre queue + jambes + corps + arme + tete duree 120
+
+anim competence 90
+cadre queue + jambes + corps decale 0 2 + tete decale 0 2 duree 160
+cadre ombre decale 0 3 duree 110
+cadre ombre decale 5 0 duree 80
+cadre queue + jambes-a + corps decale 4 0 + tete decale 4 0 + arme-frappe decale 4 0 + trace-large decale 3 0 duree 90
+cadre queue + jambes-a + corps decale 4 0 + tete decale 4 1 + arme-frappe decale 4 1 + trace-large decale 3 0 duree 90
+cadre queue + jambes + corps + arme + tete + trace-large decale 3 0 duree 160
+
+anim mort 140
+cadre queue + jambes + corps decale -1 0 + arme decale -1 0 + tete decale -1 0 + yeux-mal decale -1 0
+cadre soldat-grange/mort.1 couleurs o=k O=U B=G b=g c=u r=u K=g T=#00000000 i=#00000000 d=#00000000 + arme decale 1 3
+cadre soldat-grange/mort.2 couleurs o=k O=U B=G b=g c=u r=u K=g T=#00000000 i=#00000000 d=#00000000 + outil-sol decale 0 -1 duree 300
+cadre soldat-grange/mort.3 couleurs o=k O=U B=G b=g c=u r=u K=g T=#00000000 i=#00000000 d=#00000000 + outil-sol duree 600
 
 # Suie, le Tagueur : chat gris cendre aux yeux orange, capuche de suie gardée, cache-cou noir remonté sur le museau
 # (le ruban de la capuche devient sa queue de tissu), veste marine tachée de peinture, une bombe de peinture à la place
 # des lames, d'où sort un nuage rose.
 sprite moderne-heros-suie
 origine 6 18
+# Modèle : l'original (squelette du chat de grange). Repos, marche et blessure en viennent tels quels avec les calques
+# ci-dessous ; attaque, compétence et mort sont redessinées pour la bombe de peinture.
+#   repos      respire, le pan du cache-cou flotte, cligne des yeux (pose validée en première image)
+#   marche     pas furtifs, la bombe tenue levée
+#   attaque    secoue la bombe au-dessus de sa tête, puis bras tendu, un jet rose gicle devant lui
+#   competence s'efface dans un nuage de peinture rose, réapparaît derrière la cible et la tague d'un jet
+#   blesse     recule, yeux plissés
+#   mort       touché, les genoux plient, il s'affaisse sur le côté (gisant du chat de grange aux couleurs de sa veste) ;
+#              la bombe lui échappe et roule à côté
+modele heros-suie
 
 calque tete 6 0
 g.....g.
@@ -112,6 +193,16 @@ calque queue 0 3
 ..v
 ...UUU
 
+calque queue-b 0 3
+.....K
+...KKK
+..KK..
+.K....
+......
+...U
+..v
+...UUU
+
 calque jambes 7 11
 uu.uu
 gg.gg
@@ -124,8 +215,56 @@ calque arme 11 3
 u.1
 .v
 
-anim repos 220
-cadre queue + jambes + corps + arme + tete
+# Il secoue la bombe au-dessus de sa tête.
+calque arme-haut 9 -3
+.w
+.1
+.1
+v
+.u
+
+# Bras tendu, la bombe couchée crache son jet.
+calque arme-frappe 11 5
+.......5
+uuv11w55
+.......5
+
+# Le jet de peinture qui s'étale devant lui.
+calque trace 15 3
+..5.5
+.5.5.5
+..5.5
+
+# Disparition dans un nuage de peinture rose.
+calque fumee 8 2
+.5.1.5
+5.5.5.
+.1.5.5
+5.5.1.
+
+# La bombe tombée à côté de lui, une goutte de peinture.
+calque outil-sol 17 11
+.5
+w11
+
+anim attaque 70
+cadre queue + jambes + corps decale -1 0 + tete decale -1 0 + arme-haut duree 90
+cadre queue + jambes-a + corps decale 2 0 + tete decale 2 0 + arme-frappe decale 2 0 + trace decale 2 0 duree 60
+cadre queue + jambes-a + corps decale 2 0 + tete decale 2 0 + arme-frappe decale 2 1 + trace decale 3 1 duree 60
+cadre queue + jambes + corps + arme + tete duree 130
+
+anim competence 90
+cadre queue + jambes + corps decale 0 2 + tete decale 0 2 + arme decale 0 2 duree 150
+cadre fumee decale 0 6 duree 90
+cadre fumee decale 6 6 duree 90
+cadre queue decale 5 0 + jambes-a decale 5 0 + corps decale 6 0 + tete decale 6 0 + arme-frappe decale 6 0 + trace decale 6 0 duree 100
+cadre queue + jambes + corps + arme + tete duree 150
+
+anim mort 140
+cadre queue + jambes + corps decale -1 0 + arme decale -1 0 + tete decale -1 0 + yeux-mal decale -1 0
+cadre soldat-grange/mort.1 couleurs o=U O=v B=6 b=X c=K r=K K=X T=#00000000 i=#00000000 d=#00000000 + arme decale 1 3
+cadre soldat-grange/mort.2 couleurs o=U O=v B=6 b=X c=K r=K K=X T=#00000000 i=#00000000 d=#00000000 + outil-sol decale 0 -1 duree 300
+cadre soldat-grange/mort.3 couleurs o=U O=v B=6 b=X c=K r=K K=X T=#00000000 i=#00000000 d=#00000000 + outil-sol duree 600
 
 # Corbeau, le Guetteur des toits : chat noir et blanc (museau, plastron et gants blancs), casquette marine retournée, coupe-
 # vent ardoise ouvert sur le plastron, lance-pierre en bois tenu devant lui en position de tir.

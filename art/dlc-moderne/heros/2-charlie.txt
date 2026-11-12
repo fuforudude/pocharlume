@@ -36,6 +36,16 @@ couleur 5 6e5c3e
 # poings restent libres pour frapper. Origine (4, 10) comme l'original.
 sprite moderne-heros-charlie
 origine 4 10
+# Modèle : l'original. Repos, marche, attaque, compétence et blessure en viennent tels quels (mêmes cadres, mêmes
+# cadences) avec les calques ci-dessous : le drapeau est cousu aux calques du corps, il suit le dos dans chaque geste.
+#   repos      respire, le drapeau sur le dos, cligne des yeux (pose validée en première image)
+#   marche     pas lourds de tête de cortège, le drapeau balance avec lui
+#   attaque    lève les deux poings et les abat devant lui : poussière
+#   competence s'accroupit, bondit drapeau au dos et retombe en écrasant le sol
+#   blesse     recule d'un pas, yeux fermés
+#   mort       touché, il tombe à genoux, le drapeau glisse de son dos ; puis couché sur le flanc (gisant de Gond, la
+#              chasuble orange), le drapeau tombé sur lui et le béret à côté de sa tête
+modele charlie
 
 calque tete 8 0
 ....R.....
@@ -47,7 +57,90 @@ bBBBBccccc
 .bBBcccrcc
 ..bbBcccc.
 
-calque corps 4 8
+# Corps, bras levés et coup : chasuble orange à bandes réfléchissantes, et le drapeau rouge sanglé dans le dos (plus
+# bas quand il lève les bras, pour rester dans le cadre quand il bondit).
+calque corps -1 -10
+.......q
+xxxxxxxd
+xxxxxxxd
+xxxxxxxd
+Rxxxxxxd
+.RRxxRRd
+...RR..d
+.......d
+.......d
+.......d
+.......d
+.......d
+.......d
+.......d
+.......d
+.......d
+.......d
+.......d
+.......d.d888888d
+.......bb88888888bbb
+......bbB89999998BBbb
+.....bbBB88888888BBBb
+.....bbBB89999998BBbb
+.....bbbB88888888Bbbb
+.....bbb.88888888.bbb
+.....ccc..bbbbbb..ccc
+
+calque corps-leve -1 -5
+.......q
+xxxxxxxd....cccc
+xxxxxxxd...cccccc
+xxxxxxxd..bccccccb
+Rxxxxxxd.bb......bb
+.RRxxRRdbb........bb
+...RR..bb..........bb
+.......bb..........bb
+.......bb..........bb
+.......bb..........bb
+.......bb..........bb
+.......bb..........bb
+.......bb..........bb
+.......bbd888888dBbb
+.......bb88888888bbb
+.......bB89999998BB
+.......bB88888888BB
+.......bB89999998BB
+.......bb88888888Bb
+.........88888888
+..........bbbbbb
+
+calque corps-frappe -1 -10
+.......q
+xxxxxxxd
+xxxxxxxd
+xxxxxxxd
+Rxxxxxxd
+.RRxxRRd
+...RR..d
+.......d
+.......d
+.......d
+.......d
+.......d
+.......d
+.......d
+.......d
+.......d
+.......d
+.......d
+.......d.d888888d
+.......bb88888888bbbb
+.......bB89999998Bbbb
+.......bB88888888BBbbb
+.......bB89999998BB.bbb
+.......bb88888888b...bb
+.........88888888....bbb
+..........bbbbbb.....cccc
+.....................cccc
+
+# Pour la mort : le corps sans drapeau, et le drapeau seul qui glisse.
+calque corps-nu 4 8
 ....d888888d....
 ..bb88888888bbb.
 .bbB89999998BBbb
@@ -57,7 +150,6 @@ bbbB88888888Bbbb
 bbb.88888888.bbb
 ccc..bbbbbb..ccc
 
-# Drapeau rouge sans inscription, sa hampe sanglée dans le dos (cachée par le corps sous l'épaule).
 calque drapeau -1 -10
 .......q
 xxxxxxxd
@@ -79,26 +171,38 @@ Rxxxxxxd
 .......d
 .......d
 
-calque queue 0 8
-.bb
-b..
-b..
-bb.
-.bb
+# Drapeau tombé sur lui, hampe couchée au sol.
+calque drapeau-sol -4 16
+.....xxxxxx
+.....xRxxxx
+.....xxxxRx
+qddddRxxxxx
 
-calque jambes 7 17
-.bbb..bbb.
-.bbb..bbb.
-.bBb..bBb.
-cccc..cccc
+# Le béret tombé à côté de sa tête.
+calque beret-sol 22 19
+.xxR
+xxxx
 
-anim repos 260
-cadre queue + drapeau + jambes + corps + tete
+anim mort 160
+cadre queue + jambes + corps decale -1 0 + tete decale -1 1 + yeux-clos decale -1 1
+cadre drapeau decale -3 4 + queue decale 0 3 + corps-nu decale 0 3 + tete decale 0 4 + yeux-clos decale 0 4
+cadre charlie/mort.2 couleurs c=8 B=8 dans 9 26 15 29 + drapeau-sol + beret-sol duree 1000
+
 
 # Mastoc, le Sens interdit : le chat sable massif, casque de chantier jaune à la place du seau, sweat marine, et pour
 # bouclier rond un panneau sens interdit (rond rouge à barre blanche, sans inscription) tenu par son poteau.
 sprite moderne-heros-mastoc
 origine 4 10
+# Modèle : l'original. Repos, marche, attaque, compétence et blessure en viennent tels quels (mêmes cadres, mêmes
+# cadences) avec les calques ci-dessous, tous redessinés car l'original peint son pelage avec d'autres chiffres.
+#   repos      respire derrière son panneau sens interdit (pose validée en première image)
+#   marche     avance lourdement, le panneau devant lui
+#   attaque    recule l'épaule, puis se jette en avant et claque le panneau : poussière
+#   competence lève le panneau sens interdit au-dessus de sa tête et le plante dans le sol (provocation)
+#   blesse     recule d'un pas, yeux fermés
+#   mort       touché, il tombe à genoux ; puis couché sur le flanc (gisant du Colosse, pelage sable et sweat marine),
+#              le panneau tombé à plat devant lui, le casque roulé à côté
+modele heros-mastoc
 
 calque tete 8 0
 4..FFFF..4
@@ -109,6 +213,9 @@ calque tete 8 0
 .4333ccccc
 .4333ccrcc
 ..4433ccc.
+
+calque yeux-clos 12 4
+3..3
 
 calque corps 4 8
 ....X666666X....
@@ -140,14 +247,47 @@ calque queue 0 8
 55.
 .55
 
+calque queue-b 0 8
+55.
+5..
+5..
+55.
+.55
+
 calque jambes 7 17
 .444..444.
 .444..444.
 .4b4..4b4.
 .bbbb..bbbb
 
-anim repos 260
-cadre queue + jambes + corps + bouclier + tete
+calque jambes-a 6 17
+.444....444.
+.444....444.
+4b4......4b4
+bbb......bbbb
+
+calque jambes-b 7 17
+..444.444.
+..444.444.
+..4b4.4b4.
+.bbbbbbbb.
+
+# Le panneau sens interdit tombé à plat devant lui, vu de biais.
+calque panneau-sol -3 18
+.PxxxxxP
+PxwwwwwxPTTT
+.PxxxxxP
+
+# Le casque de chantier roulé à côté de sa tête.
+calque casque-sol 22 18
+.FFF
+FyFFF
+55555
+
+anim mort 160
+cadre queue + jambes + corps decale -1 0 + tete decale -1 1 + bouclier decale -1 0 + yeux-clos decale -1 1
+cadre queue decale 0 3 + corps decale 0 3 + bouclier decale 2 4 + tete decale 0 4 + yeux-clos decale 0 4
+cadre charlie-ancien/mort.2 couleurs v=6 U=6 dans 9 26 15 29 couleurs u=5 U=4 v=3 + panneau-sol + casque-sol duree 1000
 
 # Brise-Os, le Porte-pancarte : chat brun rayé, balafre et yeux rouges gardés, bandana rouge noué sur le front, tee-shirt noir,
 # et à la place de la massue d'os une pancarte de manif en carton (traits de couleur, aucun texte), portée à l'épaule.
