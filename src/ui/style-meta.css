@@ -781,7 +781,8 @@
 
 .caisses {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* Trois caisses (skins, familiers, Temps modernes) : côte à côte quand la largeur le permet, sinon à la ligne. */
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 8px;
 }
 
@@ -1614,5 +1615,92 @@
   .illustration-fin {
     max-width: 100%;
     height: auto;
+  }
+}
+
+/* --- DLC « Temps modernes » : badges, caisse, skins et titres --- */
+
+/* Jeton des badges (en attendant une icône dessinée) : une pastille ronde aux couleurs du DLC. */
+.jeton-badge {
+  display: inline-block;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #2b2928;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ff8ad8 0 25%, #d0308f 26% 100%);
+  box-shadow: inset 0 0 0 2px #ffd84a;
+}
+
+.meta-monnaies .jeton-badge.icone {
+  width: 20px;
+  height: 20px;
+}
+
+.caisse-moderne {
+  border-color: #d0308f;
+}
+
+.caisse-moderne .caisse-tete .icone,
+.objet-moderne .icone {
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.caisse-note {
+  font-size: 11px;
+  color: var(--texte-doux);
+}
+
+.collection-section {
+  margin: 6px 0 2px;
+  font-size: 14px;
+  color: var(--or);
+}
+
+.collection-note {
+  margin: 0 0 4px;
+  font-size: 11px;
+  color: var(--texte-doux);
+}
+
+.porteur-moderne {
+  font-size: 12px;
+}
+
+.titres-modernes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 6px;
+}
+
+.titre-moderne {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 8px;
+  background: rgba(40, 30, 26, 0.7);
+  border: 2px dashed var(--bord);
+  border-radius: 6px;
+  color: var(--texte-doux);
+}
+
+.titre-moderne.obtenu {
+  border-style: solid;
+  border-color: var(--or);
+  color: inherit;
+}
+
+.titre-moderne .nom {
+  font-weight: bold;
+}
+
+.titre-moderne .condition {
+  font-size: 11px;
+}
+
+@media (max-width: 640px) {
+  .titres-modernes {
+    grid-template-columns: 1fr;
   }
 }

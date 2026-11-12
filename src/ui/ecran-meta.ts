@@ -27,8 +27,15 @@ export interface OptionsEcranMeta {
   readonly atlas: AtlasRendu;
   readonly sauvegarde: Sauvegarde;
   /** Quelles monnaies la barre montre : les braises (héros, caisses), les arêtes et les étoiles (boutique), les éclats (collection). */
-  readonly monnaies: readonly ('aretes' | 'braises' | 'etoiles' | 'eclats')[];
+  readonly monnaies: readonly ('aretes' | 'braises' | 'etoiles' | 'eclats' | 'badges')[];
   readonly surFermer: () => void;
+}
+
+/** Le jeton des badges du DLC (en CSS, en attendant une icône dessinée). */
+export function jetonBadge(classe = 'icone'): HTMLElement {
+  const jeton = el('span', `jeton-badge ${classe}`);
+  jeton.setAttribute('aria-hidden', 'true');
+  return jeton;
 }
 
 /** Une rangée de pastilles pleines et vides (rangs d'une compétence ou d'une branche). */
@@ -58,7 +65,8 @@ export function creerEcranMeta(parent: HTMLElement, options: OptionsEcranMeta): 
   const icones = { aretes: 'icone-arete', braises: 'icone-braise', etoiles: 'icone-etoile', eclats: 'icone-eclat' } as const;
   for (const monnaie of options.monnaies) {
     const puce = el('div', 'puce monnaie');
-    puce.append(image(atlas.iconeUrl(icones[monnaie], 2), 'icone'), el('span'));
+    // Les badges du DLC n'ont pas encore d'icône dessinée : un jeton en CSS les représente.
+    puce.append(monnaie === 'badges' ? jetonBadge() : image(atlas.iconeUrl(icones[monnaie], 2), 'icone'), el('span'));
     puces.set(monnaie, puce);
     monnaies.append(puce);
   }
@@ -77,12 +85,13 @@ export function creerEcranMeta(parent: HTMLElement, options: OptionsEcranMeta): 
   parent.append(racine);
 
   const majMonnaies = (s: Sauvegarde): void => {
-    const valeurs = { aretes: s.meta.monnaies.aretes, braises: s.meta.monnaies.braises, etoiles: etoilesDisponibles(s), eclats: s.meta.collection.eclats };
+    const valeurs = { aretes: s.meta.monnaies.aretes, braises: s.meta.monnaies.braises, etoiles: etoilesDisponibles(s), eclats: s.meta.collection.eclats, badges: s.moderne.badges };
     const libelles = {
       aretes: t('monnaie.aretes', { n: valeurs.aretes }),
       braises: t('monnaie.braises', { n: valeurs.braises }),
       etoiles: t('monnaie.etoiles', { n: valeurs.etoiles }),
       eclats: t('monnaie.eclats', { n: valeurs.eclats }),
+      badges: t('monnaie.badges', { n: valeurs.badges }),
     };
     for (const [nom, puce] of puces) {
       const cle = nom as keyof typeof valeurs;

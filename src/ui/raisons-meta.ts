@@ -6,6 +6,7 @@ import type {
   RaisonAchatPrecis,
   RaisonArbre,
   RaisonCaisse,
+  RaisonCaisseModerne,
   RaisonChoix,
   RaisonConfig,
   RaisonDefi,
@@ -33,6 +34,7 @@ export type RaisonMeta =
   | RaisonFin
   | RaisonDefi
   | RaisonCaisse
+  | RaisonCaisseModerne
   | RaisonRang
   | RaisonAchatPrecis
   | RaisonEquipementCollection
@@ -75,6 +77,8 @@ export const CLES_REFUS_META: Readonly<Record<RaisonMeta, CleTexte>> = {
   aleatoire_indisponible: 'collection.refus.aleatoire_indisponible',
   defi_inconnu: 'collection.refus.defi_inconnu',
   defi_verrouille: 'collection.refus.defi_verrouille',
+  // DLC « Temps modernes » : la caisse payée en badges.
+  badges_insuffisants: 'collection.refus.badges_insuffisants',
 };
 
 export function texteRefusMeta(raison: RaisonMeta): string {

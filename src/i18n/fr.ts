@@ -15,6 +15,7 @@ import { frInscriptions } from './fr-inscriptions';
 import { frEnnemisRegions6a10 } from './fr-ennemis-regions-6-10';
 import { frEnnemisRegions11a15 } from './fr-ennemis-regions-11-15';
 import { frDlcModerne } from './fr-dlc-moderne';
+import { frRecompensesModerne } from './fr-recompenses-moderne';
 import { frEnnemisVariete } from './fr-ennemis-variete';
 import { frLore } from './fr-lore';
 import { frMeta } from './fr-meta';
@@ -50,6 +51,7 @@ export const fr = {
   // Boss des régions 11 à 15 (fr-ennemis-regions-11-15.ts)
   ...frEnnemisRegions11a15,
   ...frDlcModerne,
+  ...frRecompensesModerne,
 
   // Tours communes
   'tour.grenier_des_griffes': 'Grenier des Griffes',

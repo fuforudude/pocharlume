@@ -55,7 +55,8 @@ describe('écran des caisses', () => {
   it('montre les deux caisses avec leur prix, les cinq chances lues dans meta.ts et la garantie restante', async () => {
     const session = await ouvrir(riche());
     afficherCaisses(document.body, { atlas: ATLAS, session, surFermer: vi.fn(), surCollection: vi.fn() });
-    expect(document.querySelectorAll('.caisse')).toHaveLength(2);
+    // Les deux caisses de l'histoire, puis celle du DLC.
+    expect(document.querySelectorAll('.caisse')).toHaveLength(3);
     for (const type of ['skins', 'familiers']) {
       const c = caisse(type);
       expect(c?.textContent).toContain(t('caisses.prix', { n: PRIX_CAISSE }));
@@ -63,7 +64,8 @@ describe('écran des caisses', () => {
       expect(chances).toEqual(RARETES.map((r) => t('caisses.chance', { rarete: t(`rarete.${r}`), n: CHANCES_RARETE[r] })));
       expect(c?.querySelector('.garantie')?.textContent).toContain(t('caisses.garantie', { n: CAISSES_AVANT_GARANTIE }));
     }
-    expect(monnaies()).toBe('1000');
+    // Braises, éclats, badges.
+    expect(monnaies()).toBe('10000');
   });
 
   it('la garantie dit « à la prochaine caisse » quand le compteur est à 9, par type de caisse', async () => {
@@ -88,7 +90,7 @@ describe('écran des caisses', () => {
     expect(r?.classList.contains('rarete-commun')).toBe(true);
     expect(son.jouerInterface).toHaveBeenCalledWith('achat');
     // Le fond a suivi : braises à jour, garantie avancée (un Commun de plus sans Épique).
-    expect(monnaies()).toBe('250');
+    expect(monnaies()).toBe('2500');
     expect(caisse('skins')?.querySelector('.garantie')?.textContent).toContain(t('caisses.garantie', { n: CAISSES_AVANT_GARANTIE - 1 }));
     expect(caisse('familiers')?.querySelector('.garantie')?.textContent).toContain(t('caisses.garantie', { n: CAISSES_AVANT_GARANTIE }));
   });
@@ -126,7 +128,7 @@ describe('écran des caisses', () => {
     expect(r?.textContent).toContain(t('caisses.resultat_eclats', { n: ECLATS_DOUBLON.commun }));
     expect(session.sauvegarde.meta.collection.eclats).toBe(ECLATS_DOUBLON.commun);
     expect(Object.keys(session.sauvegarde.meta.collection.possedes)).toEqual(['skin_caserne_1']);
-    expect(monnaies()).toBe(`${String(100 - PRIX_CAISSE)}${String(ECLATS_DOUBLON.commun)}`);
+    expect(monnaies()).toBe(`${String(100 - PRIX_CAISSE)}${String(ECLATS_DOUBLON.commun)}0`);
   });
 
   it('à la garantie, la révélation est un Épique ou mieux et le dit', async () => {

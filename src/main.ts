@@ -376,6 +376,8 @@ function ouvrirCaisses(atlas: AtlasRendu): void {
     session,
     surFermer: () => { ouvrirBoutique(atlas); },
     surCollection: () => { ecran.arreter(); ouvrirCollection(atlas); },
+    // La caisse du DLC montre ses skins avec l'atlas du DLC (chargé une seule fois, ajouté à `atlas`).
+    chargerAtlasModerne: () => chargerAtlas('moderne'),
   });
 }
 
@@ -385,6 +387,7 @@ function ouvrirCollection(atlas: AtlasRendu): void {
     session,
     surFermer: () => { ouvrirBoutique(atlas); },
     surCaisses: () => { ecran.arreter(); ouvrirCaisses(atlas); },
+    chargerAtlasModerne: () => chargerAtlas('moderne'),
   });
 }
 

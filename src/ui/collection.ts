@@ -3,10 +3,13 @@
 // éclats, équiper un skin (sur sa tour de base ou son héros) ou un familier (sur un héros recruté, un seul par héros). Un
 // troisième onglet liste les porteurs avec le total de leur bonus et le plafond de +10 %. Les règles sont dans src/save/ et
 // src/meta/ : l'écran présente la sauvegarde, envoie les gestes à la session et affiche ses refus.
+// L'onglet « Temps modernes » montre les skins du DLC (obtenus dans sa caisse, apparence seulement, portés aussi dans l'histoire) et
+// les titres de collection.
 import { jouerInterface } from '../audio';
 import { CATALOGUE, type IdCollection } from '../data/collection';
+import { DIEUX } from '../data/dieux';
 import { HEROS } from '../data/heros';
-import { PLAFOND_BONUS_POURCENT, RANG_MAX_COLLECTION, type IdHeros } from '../data/meta';
+import { PLAFOND_BONUS_POURCENT, RANG_MAX_COLLECTION, type IdDieu, type IdHeros } from '../data/meta';
 import { t, tCle } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
 import { portraitHeros } from '../render/habillage';
@@ -23,6 +26,7 @@ import { attacherBulleTour } from './bulle';
 import { formaterPourcent, spriteDeCollection, vueObjetsCollection, vuePorteurs, type VueObjetCollection, type VuePorteur } from './collection-vues';
 import { bouton, el, image } from './dom';
 import { creerEcranMeta, pastilles, redessiner, type EcranMeta } from './ecran-meta';
+import { vueSkinsModernes, vueTitresModernes, type VueSkinModerne } from './recompenses-moderne-vues';
 import { texteRefusMeta } from './raisons-meta';
 
 /** Ce que l'écran demande à la session (la session en entier y répond). */
@@ -32,9 +36,10 @@ export interface SessionCollection {
   acheterObjetPrecis(objet: string): Promise<ResultatTransaction<RaisonAchatPrecis>>;
   equiperSkin(cible: string, skin: string | null): Promise<ResultatTransaction<RaisonEquipementCollection>>;
   equiperFamilier(heros: string, familier: string | null): Promise<ResultatTransaction<RaisonEquipementCollection>>;
+  equiperSkinModerne(cible: string, skin: string | null): Promise<ResultatTransaction<RaisonEquipementCollection>>;
 }
 
-export type OngletCollection = 'skins' | 'familiers' | 'equipement';
+export type OngletCollection = 'skins' | 'familiers' | 'equipement' | 'moderne';
 
 export interface OptionsCollection {
   readonly atlas: AtlasRendu;
@@ -43,6 +48,8 @@ export interface OptionsCollection {
   readonly surFermer: () => void;
   /** « Caisses » : l'appelant remplace cet écran par celui des caisses. */
   readonly surCaisses: () => void;
+  /** Charge l'atlas du DLC (images des skins « Temps modernes ») ; l'écran se redessine quand il est là. */
+  readonly chargerAtlasModerne?: () => Promise<unknown>;
 }
 
 /**
@@ -54,8 +61,12 @@ function decrireTour(icone: HTMLImageElement, famille: IdFamille): void {
   attacherBulleTour(icone, famille, {}, { focus: false });
 }
 
-/** Nom affiché d'un porteur : la tour de base (`tir`) ou le héros (`suie`). */
+/** Nom affiché d'un porteur : la tour de base (`tir`), la tour divine d'un dieu (`divine_plume`) ou le héros (`suie`). */
 function nomDuPorteur(id: string): string {
+  if (id.startsWith('divine_')) {
+    const dieu = id.slice('divine_'.length);
+    return t('collection.divine_de', { dieu: Object.hasOwn(DIEUX, dieu) ? tCle(DIEUX[dieu as IdDieu].nom) : dieu });
+  }
   return Object.hasOwn(HEROS, id) ? tCle(HEROS[id as IdHeros].nom) : t(`famille.${id as 'caserne' | 'tir' | 'magie' | 'artillerie'}`);
 }
 
@@ -108,7 +119,12 @@ export function afficherCollection(parent: HTMLElement, options: OptionsCollecti
   function onglets(): HTMLElement {
     const rangee = el('div', 'collection-onglets');
     rangee.setAttribute('role', 'tablist');
-    for (const [id, cle] of [['skins', 'collection.onglet_skins'], ['familiers', 'collection.onglet_familiers'], ['equipement', 'collection.onglet_equipement']] as const) {
+    for (const [id, cle] of [
+      ['skins', 'collection.onglet_skins'],
+      ['familiers', 'collection.onglet_familiers'],
+      ['equipement', 'collection.onglet_equipement'],
+      ['moderne', 'collection.onglet_moderne'],
+    ] as const) {
       const b = bouton('bouton onglet', t(cle), () => {
         if (id === onglet) return;
         onglet = id;
@@ -123,7 +139,10 @@ export function afficherCollection(parent: HTMLElement, options: OptionsCollecti
       b.classList.toggle('actif', id === onglet);
       rangee.append(b);
     }
-    if (onglet !== 'equipement') {
+    if (onglet === 'moderne') {
+      const vues = vueSkinsModernes(session.sauvegarde);
+      rangee.append(el('span', 'collection-compte', t('collection.possedes', { n: vues.filter((v) => v.possede).length, m: vues.length })));
+    } else if (onglet !== 'equipement') {
       const genre = onglet === 'skins' ? 'skin' : 'familier';
       const vues = vueObjetsCollection(session.sauvegarde, genre);
       rangee.append(el('span', 'collection-compte', t('collection.possedes', { n: vues.filter((v) => v.possede).length, m: vues.length })));
@@ -303,12 +322,75 @@ export function afficherCollection(parent: HTMLElement, options: OptionsCollecti
     return grille;
   }
 
+  // --- Temps modernes : skins du DLC et titres ---
+
+  function carteSkinModerne(vue: VueSkinModerne): HTMLElement {
+    const nom = tCle(vue.nom);
+    const carte = el('div', `objet-collection objet-moderne rarete-${vue.rarete}`);
+    carte.dataset.id = vue.id;
+    carte.classList.toggle('silhouette', !vue.possede);
+    carte.classList.toggle('equipe', vue.porte);
+    const tete = el('div', 'tete');
+    const noms = el('div', 'noms');
+    const rarete = el('span', 'rarete');
+    rarete.append(image(atlas.iconeUrl(`icone-rarete-${vue.rarete}`, 1), 'petite'), el('span', '', t(`rarete.${vue.rarete}`)));
+    noms.append(el('span', 'nom', nom), rarete);
+    tete.append(image(atlas.iconeUrl(vue.sprite, 2), vue.possede ? 'icone' : 'icone silhouette'), noms);
+
+    const details = el('div', 'details');
+    details.append(el('span', 'porteur-moderne', nomDuPorteur(vue.cible)));
+    if (!vue.possede) details.append(el('span', 'verrou', t('collection.verrouille')));
+    else if (vue.porte) details.append(el('span', 'equipe-sur', t('collection.moderne_porte_sur', { porteur: nomDuPorteur(vue.cible) })));
+    else if (!vue.peutPorter) details.append(el('span', 'verrou', t('collection.moderne_herosabsent')));
+
+    const actions = el('div', 'actions');
+    if (vue.peutPorter) {
+      const b = bouton('bouton equiper', t(vue.porte ? 'collection.retirer_libelle' : 'collection.equiper_libelle', { nom }), () => {
+        void agir(
+          () => session.equiperSkinModerne(vue.cible, vue.porte ? null : vue.id),
+          t(vue.porte ? 'collection.retire_ok' : 'collection.equipe_ok', { nom, porteur: nomDuPorteur(vue.cible) }),
+        );
+      });
+      b.dataset.cle = `porter:${vue.id}`;
+      b.textContent = t(vue.porte ? 'collection.retirer' : 'collection.equiper');
+      actions.append(b);
+    }
+    carte.append(tete, details, actions);
+    return carte;
+  }
+
+  function moderne(): HTMLElement[] {
+    const titres = vueTitresModernes(session.sauvegarde);
+    const grilleSkins = el('div', 'collection-grille');
+    for (const vue of vueSkinsModernes(session.sauvegarde)) grilleSkins.append(carteSkinModerne(vue));
+    const grilleTitres = el('div', 'titres-modernes');
+    for (const titre of titres) {
+      const ligne = el('div', 'titre-moderne');
+      ligne.dataset.id = titre.id;
+      ligne.classList.toggle('obtenu', titre.obtenu);
+      ligne.append(el('span', 'nom', tCle(titre.nom)), el('span', 'condition', titre.obtenu ? t('collection.titre_obtenu') : tCle(titre.condition)));
+      grilleTitres.append(ligne);
+    }
+    return [
+      el('h3', 'collection-section', t('collection.moderne_skins')),
+      el('p', 'collection-note', t('collection.moderne_apparence')),
+      grilleSkins,
+      el('h3', 'collection-section', `${t('collection.moderne_titres')} (${t('collection.titres_compte', { n: titres.filter((x) => x.obtenu).length, m: titres.length })})`),
+      grilleTitres,
+    ];
+  }
+
   function dessiner(): void {
     ecran.majMonnaies(session.sauvegarde);
-    redessiner(ecran.corps, () => [onglets(), onglet === 'equipement' ? equipement() : liste(onglet === 'skins' ? 'skin' : 'familier')]);
+    redessiner(ecran.corps, () => {
+      if (onglet === 'moderne') return [onglets(), ...moderne()];
+      return [onglets(), onglet === 'equipement' ? equipement() : liste(onglet === 'skins' ? 'skin' : 'familier')];
+    });
   }
 
   ecran.corps.classList.add('collection-corps');
   dessiner();
+  // Les images du DLC arrivent avec son atlas (chargé une fois) : on redessine alors, si l'écran est encore là.
+  options.chargerAtlasModerne?.().then(() => { if (ecran.racine.isConnected) dessiner(); }).catch((erreur: unknown) => { console.error(erreur); });
   return ecran;
 }
