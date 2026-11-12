@@ -128,7 +128,7 @@ anim repos 220
 cadre queue + jambes + corps + arme + tete
 
 # Corbeau, le Guetteur des toits : chat noir et blanc (museau, plastron et gants blancs), casquette marine retournée, coupe-
-# vent ardoise ouvert sur le plastron, lance-pierre en bois à l'élastique magenta tenu comme son arbalète.
+# vent ardoise ouvert sur le plastron, lance-pierre en bois tenu devant lui en position de tir.
 sprite moderne-heros-corbeau
 origine 6 18
 
@@ -156,13 +156,16 @@ calque jambes 7 11
 kk.kk
 ww.ww
 
-# Lance-pierre : fourche en Y devant lui, élastique tiré jusqu'au gant.
-calque arme 11 4
-.....d.d
-.....d.d
-kkw11ddd
-......d
-......d
+# Lance-pierre en position de tir : fourche en Y nette tenue devant par le gant avant, élastique jaune clair tendu
+# jusqu'à la poche de cuir, où l'on voit la pierre, pincée par le gant arrière contre la joue.
+calque arme 11 1
+........O...O
+......00O000O
+....00...O.O.
+..wqb.....O..
+......kkkwO..
+..........O..
+..........d..
 
 anim repos 220
 cadre queue + jambes + corps + arme + tete

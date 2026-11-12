@@ -8,7 +8,7 @@
 #= Les fidèles du Colosse (Charlie)
 #: moderne-heros-charlie | Gond, Tête de cortège | charlie
 #: moderne-heros-mastoc | Mastoc, le Sens interdit | heros-mastoc
-#: moderne-heros-brise-os | Brise-Os, le Batteur | heros-brise-os
+#: moderne-heros-brise-os | Brise-Os, le Porte-pancarte | heros-brise-os
 # Couleurs propres au DLC (mêmes lettres que les tours) : 1 magenta, 2 cyan, 6 sweat marine, 7 kaki, 8 orange chantier,
 # 9 gris clair (bandes réfléchissantes, feutre), 0 jaune fluo, C plastique bleu, D carton, X marine sombre, Q ardoise ;
 # pelage sable de Mastoc (comme l'original) : 3 sable, 4 sable moyen, 5 sable sombre.
@@ -149,8 +149,8 @@ calque jambes 7 17
 anim repos 260
 cadre queue + jambes + corps + bouclier + tete
 
-# Brise-Os, le Batteur : chat brun rayé, balafre et yeux rouges gardés, bandana rouge noué sur le front, tee-shirt noir,
-# et à la place de la massue d'os la grosse mailloche de la batucada (tête de feutre clair sur un manche de bois).
+# Brise-Os, le Porte-pancarte : chat brun rayé, balafre et yeux rouges gardés, bandana rouge noué sur le front, tee-shirt noir,
+# et à la place de la massue d'os une pancarte de manif en carton (traits de couleur, aucun texte), portée à l'épaule.
 sprite moderne-heros-brise-os
 origine 6 18
 
@@ -183,17 +183,21 @@ calque jambes 6 11
 BB.BB
 bb.bb
 
-# Mailloche de batucada tenue droite.
-calque arme 11 -1
-...99.
-..9ww9
-..9ww9
-...99.
-....d.
-....d.
-....d.
-o...d.
-.cd...
+# Pancarte de manif portée à l'épaule : carton cerclé de bois sombre, des traits de couleur et aucun texte, sur un manche
+# que la patte avant serre.
+calque arme 11 -4
+.dDDDDDDd
+.D11.111D
+.DD0000DD
+.D.2222.D
+.dDDDDDDd
+....d
+....d
+....d
+....d
+....d
+oocd
+....d
 
 anim repos 220
 cadre queue + jambes + corps + arme + noeud + tete
