@@ -41,7 +41,7 @@ function image(maintenant: number): void {
     reste -= 1000 / PAS_PAR_SECONDE;
   }
   rendu.dessiner(etat, 0, temps(), surb);
-  if (info) info.textContent = `Niveau ${String(numero)} — vague ${String(etat.vagues.lancees)}/${String(etat.niveau.vagues.length)} — ${etat.statut}`;
+  if (info) info.textContent = `DLC ${String(numero)} — vague ${String(etat.vagues.lancees)}/${String(etat.niveau.vagues.length)} — ${etat.statut}`;
   requestAnimationFrame(image);
 }
 requestAnimationFrame(image);

@@ -1,5 +1,5 @@
 // Corrections de contenu de la Fac (DLC « Temps modernes », région 1) après la relecture, étendues à tous les niveaux livrés du DLC
-// (la Manif comprise) : foules qui servent, renforts sur le chemin,
+// (la Manif et la Préfecture comprises) : foules qui servent, renforts sur le chemin,
 // charges qui durent, recharges, chemins mobiles ouverts assez longtemps, plan cohérent avec sa carte, décor visible au niveau 4.
 // Ce sont des vérifications de contenu : le moteur ne les fait pas (il ne regarde que la forme).
 import { describe, expect, it } from 'vitest';
@@ -13,20 +13,19 @@ import { ENNEMIS } from '../ennemis';
 import { REGLES } from '../regles';
 import { decorVisible } from './assemblage';
 import { assemblerNiveauModerne, casesDeLaScene, cheminsMobilesDuPlan } from './assemblage-moderne';
-import { CARTES_MODERNE_R1, type CarteModerne } from './cartes-moderne-r1';
-import { CARTES_MODERNE_R2 } from './cartes-moderne-r2';
+import { CARTES_MODERNE } from './cartes-moderne';
+import type { CarteModerne } from './cartes-moderne-r1';
 import { distancePointChemin, rectAutour, rectsSeChevauchent } from './geometrie';
 import { casesInterditesDuNiveau } from './grille-niveau';
 import { empriseDecor, GRANDS_DECORS, zonesBloquantes } from './habillage';
 import { PLANS_MODERNE_R1, type PlanNiveauModerne } from './plan-moderne-r1';
+import { PLANS_MODERNE, VAGUES_MODERNE } from './plans-moderne';
 import { VAGUES_MODERNE_R1 } from './vagues-moderne-r1';
-import { PLANS_MODERNE_R2 } from './plan-moderne-r2';
-import { VAGUES_MODERNE_R2 } from './vagues-moderne-r2';
 
-/** Tous les niveaux livrés du DLC (la Fac, la Manif) : les règles de conception valent pour chacun. */
-const PLANS_DLC: readonly PlanNiveauModerne<string>[] = [...PLANS_MODERNE_R1, ...PLANS_MODERNE_R2];
-const VAGUES_DLC = [...VAGUES_MODERNE_R1, ...VAGUES_MODERNE_R2];
-const CARTES_DLC: Readonly<Record<string, CarteModerne>> = { ...CARTES_MODERNE_R1, ...CARTES_MODERNE_R2 };
+/** Tous les niveaux livrés du DLC (la Fac, la Manif, la Préfecture) : les règles de conception valent pour chacun. */
+const PLANS_DLC: readonly PlanNiveauModerne<string>[] = PLANS_MODERNE;
+const VAGUES_DLC = VAGUES_MODERNE;
+const CARTES_DLC: Readonly<Record<string, CarteModerne>> = CARTES_MODERNE;
 function carteDuPlan(plan: PlanNiveauModerne<string>): CarteModerne {
   const carte = CARTES_DLC[plan.carte];
   if (!carte) throw new Error(`niveau ${String(plan.numero)} : carte ${plan.carte} absente`);
