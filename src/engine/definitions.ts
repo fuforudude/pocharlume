@@ -858,6 +858,12 @@ export interface DefiFer {
   readonly facteurEffectifs?: number;
 }
 
+/**
+ * Campagne d'un niveau : l'histoire (niveaux 1 à 150) ou « Temps modernes » (le DLC, niveaux 1 à 30 de sa propre numérotation).
+ * Constantes et règles dans src/data/campagnes.ts.
+ */
+export type IdCampagne = 'histoire' | 'moderne';
+
 export interface Niveau {
   readonly id: string;
   readonly carte: Carte;
@@ -879,6 +885,11 @@ export interface Niveau {
    * est ouvert.
    */
   readonly numero?: number;
+  /**
+   * Campagne du niveau ; absente = l'histoire (ses niveaux ne la portent pas, leur état sérialisé est inchangé). `numero` est alors le
+   * numéro dans cette campagne. Dans la campagne `moderne`, toutes les tours sont ouvertes.
+   */
+  readonly campagne?: IdCampagne;
   /** Particularité du niveau (Vol de Corbeaux…) ; absent = niveau ordinaire. */
   readonly gimmick?: Gimmick;
 }

@@ -8,14 +8,16 @@ import './ui/style-bestiaire.css';
 import './ui/style-bulles.css';
 import './ui/style-indications.css';
 import './ui/style-notes.css';
+import './ui/style-moderne.css';
 import { installerAudio } from './audio';
+import type { IdCampagne } from './data/campagnes';
 import { DEFS_META } from './data/heros';
 import { REGION1 } from './data/niveaux/region1';
 import type { NiveauCampagne } from './data/visuel';
 import type { DefiPartie, EtatPartie } from './engine';
 import { t } from './i18n';
 import { chargerAtlas, type AtlasRendu } from './render/atlas';
-import { campagneTerminee, Depot, difficulteDe, infiniOuvert, inscriptionTrouvee, ouvrirCanalNavigateur, ouvrirStockage, recordDeLaCarte, Session, type ChoixPartie, type DifficulteSauvegarde } from './save';
+import { campagneTerminee, Depot, difficulteDe, infiniOuvert, inscriptionTrouvee, ouvrirCanalNavigateur, ouvrirStockage, recordDeLaCarte, Session, stickerDlcReplie, type ChoixPartie, type DifficulteSauvegarde } from './save';
 import { afficherBestiaire } from './ui/bestiaire';
 import { ennemisAMontrer } from './ui/fiches-ennemis';
 import { afficherBoutique } from './ui/boutique';
@@ -35,7 +37,7 @@ import { installerNotes } from './ui/notes';
 import { afficherOptions } from './ui/options';
 import { lancerNiveau, graineSuivante, type PartieEnCours, type ResultatPartie, type RetourFin } from './ui/partie';
 import { texteRefusMeta } from './ui/raisons-meta';
-import { niveauDeCampagne } from './ui/regions-monde';
+import { niveauDeCampagne, REGIONS_MONDE_MODERNE } from './ui/regions-monde';
 import { particulariteAMontrer } from './ui/particularites';
 
 const conteneur = document.querySelector<HTMLElement>('#app');
@@ -50,6 +52,10 @@ let carteOuverte: EcranCarteMonde | null = null;
 let derniereDifficulte: DifficulteSauvegarde = 'matou';
 /** Région montrée sur la carte du monde : la dernière regardée (absente : la plus haute région ouverte). */
 let derniereRegion: number | undefined;
+/** Région montrée sur la carte du DLC : la dernière regardée (absente : la plus haute région ouverte du DLC). */
+let derniereRegionModerne: number | undefined;
+/** Campagne de la dernière carte du monde ouverte : c'est elle qu'on rouvre en fermant les héros, la boutique ou les options. */
+let derniereCampagne: IdCampagne = 'histoire';
 /** Carte cochée dans l'écran du mode infini : la dernière jouée. */
 let derniereCarteInfini: string | undefined;
 
@@ -247,24 +253,67 @@ function ecranInfini(): void {
     });
 }
 
+/** La carte du monde de l'histoire. */
 function carte(): void {
+  ouvrirCarte('histoire');
+}
+
+/** La carte du monde du DLC « Temps modernes » (menu principal, sticker ou bouton « DLC » des cartes de l'histoire). */
+function carteModerne(): void {
+  ouvrirCarte('moderne');
+}
+
+/** Rouvre la carte du monde de la dernière campagne montrée (fermeture des héros, de la boutique, des options…). */
+function rouvrirCarte(): void {
+  ouvrirCarte(derniereCampagne);
+}
+
+function ouvrirCarte(campagne: IdCampagne): void {
+  derniereCampagne = campagne;
+  const moderne = campagne === 'moderne';
   carteOuverte?.arreter();
   carteOuverte = null;
   app.replaceChildren();
   chargerAtlas()
     .then((atlas) => {
+      const region = moderne ? derniereRegionModerne : derniereRegion;
       carteOuverte = afficherCarteMonde(app, {
         atlas,
         session,
         difficulte: derniereDifficulte,
         partieEnCours: partieEnCours(),
-        // La campagne finie : l'écran de fin ne se perd pas si le joueur a cliqué « Rejouer » ou fermé l'onglet.
-        ...(campagneTerminee(session.sauvegarde) ? { surRevoirFin: finDeCampagne } : {}),
-        ...(derniereRegion === undefined ? {} : { region: derniereRegion }),
+        ...(moderne
+          ? { campagne, regions: REGIONS_MONDE_MODERNE }
+          : {
+              // La campagne finie : l'écran de fin ne se perd pas si le joueur a cliqué « Rejouer » ou fermé l'onglet.
+              ...(campagneTerminee(session.sauvegarde) ? { surRevoirFin: finDeCampagne } : {}),
+              surInscriptions: () => {
+                carteOuverte?.suspendre(true);
+                afficherEcranInscriptions(app, { atlas, session, surFermer: rouvrirCarte });
+              },
+              surBestiaire: () => {
+                carteOuverte?.suspendre(true);
+                afficherBestiaire(app, { atlas, session, surFermer: rouvrirCarte });
+              },
+              // Le sticker « DLC disponible ! » : un clic ouvre la carte du DLC, la croix le replie (choix gardé dans la sauvegarde).
+              sticker: {
+                replie: stickerDlcReplie(session.sauvegarde),
+                surOuvrir: carteModerne,
+                surReplier: () => { session.replierStickerDlc(true).catch(console.error); },
+              },
+            }),
+        ...(region === undefined ? {} : { region }),
         surRegion: (numero) => {
-          derniereRegion = numero;
+          if (moderne) derniereRegionModerne = numero;
+          else derniereRegion = numero;
         },
         surLancer: (niveau, difficulte, choix, defi) => {
+          // Les niveaux du DLC ne se jouent pas encore : leur fin de partie (progression du DLC, badges) arrive avec leur contenu.
+          if (moderne) {
+            afficherAvis(document.body, t('moderne.bientot'));
+            carteModerne();
+            return;
+          }
           // Un défi se joue en Matou, imposé : la difficulté cochée dans la fiche n'est pas changée.
           if (defi === null) derniereDifficulte = difficulte;
           jouer(niveau, difficulte, { choix, ...(defi === null ? {} : { defi }) }).catch(console.error);
@@ -272,24 +321,16 @@ function carte(): void {
         // Les écrans des héros et de la boutique couvrent la carte, qui dort dessous puis est rouverte (elle relit la sauvegarde).
         surHeros: () => {
           carteOuverte?.suspendre(true);
-          afficherEcranHeros(app, { atlas, session, surFermer: carte });
+          afficherEcranHeros(app, { atlas, session, surFermer: rouvrirCarte });
         },
         surBoutique: () => {
           carteOuverte?.suspendre(true);
           ouvrirBoutique(atlas);
         },
-        surInscriptions: () => {
-          carteOuverte?.suspendre(true);
-          afficherEcranInscriptions(app, { atlas, session, surFermer: carte });
-        },
-        surBestiaire: () => {
-          carteOuverte?.suspendre(true);
-          afficherBestiaire(app, { atlas, session, surFermer: carte });
-        },
         surOptions: () => {
           // La carte dort sous les options : plus de clavier ni de dessin ; elle est rouverte à la fermeture.
           carteOuverte?.suspendre(true);
-          afficherOptions(app, session, carte);
+          afficherOptions(app, session, rouvrirCarte);
         },
         surRetour: accueil,
       });
@@ -307,7 +348,7 @@ function ouvrirBoutique(atlas: AtlasRendu): void {
   const ecran = afficherBoutique(app, {
     atlas,
     session,
-    surFermer: carte,
+    surFermer: rouvrirCarte,
     surCaisses: () => { ecran.arreter(); ouvrirCaisses(atlas); },
     surCollection: () => { ecran.arreter(); ouvrirCollection(atlas); },
   });
@@ -370,6 +411,8 @@ function accueil(): void {
   const niveauRepris = reprise ? niveauDeCampagne(reprise.niveau) : undefined;
   afficherAccueil(app, {
     surJouer: carte,
+    // Le DLC « Temps modernes » est ouvert à tous, dès le départ.
+    surModerne: carteModerne,
     surOptions: () => {
       afficherOptions(app, session, accueil);
     },

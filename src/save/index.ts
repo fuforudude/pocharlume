@@ -27,6 +27,7 @@ export {
   etoilesDepensees,
   etoilesGagnees,
   metaParDefaut,
+  moderneParDefaut,
   NOMBRE_NIVEAUX,
   REGLAGES_PAR_DEFAUT,
   sauvegardeVide,
@@ -40,6 +41,8 @@ export {
   type Meta,
   type Monnaies,
   type Bestiaire,
+  type CampagneModerne,
+  type CollectionModerne,
   type PartieEnCours,
   type Progression,
   type ProgressionHeros,
@@ -67,6 +70,7 @@ export {
   type ResultatInscription,
 } from './transactions-inscriptions';
 export { migrer, type ResultatMigration } from './migrations';
+export { enregistrerVictoireModerne, fusionnerModerne, replierStickerDlc, sauvegardeDeCampagne, stickerDlcReplie } from './moderne';
 export { normaliserImport } from './normalisation';
 export { avecPartieEnCours, partieEnCours, reprendrePartie } from './partie';
 export { campagneTerminee, changerReglages, enregistrerVictoire, etoilesDe, fusionnerProgressions, meilleuresEtoiles, niveauDebloque, niveauReussi, totalEtoiles } from './progression';

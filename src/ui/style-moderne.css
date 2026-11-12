@@ -1,0 +1,181 @@
+/* DLC « Temps modernes » : l'entrée du menu principal, le sticker « DLC disponible ! » des cartes de l'histoire et son bouton replié,
+   le fond des régions de la carte du DLC (la Fac, la Manif, la Préfecture). */
+
+:root {
+  --dlc-jaune: #f2d03b;
+  --dlc-encre: #1b1a22;
+  --dlc-rouge: #d8432e;
+}
+
+/* --- Menu principal --- */
+
+.accueil .bouton-moderne {
+  border-color: var(--dlc-jaune);
+  color: var(--dlc-jaune);
+}
+
+/* --- Sticker « DLC disponible ! » : au bout de la barre du haut, penché, qui se dandine doucement --- */
+
+.sticker-dlc {
+  position: relative;
+  flex: 0 0 auto;
+  margin: 4px 10px 0 auto;
+  display: flex;
+  align-items: center;
+  transform: rotate(-6deg);
+  transform-origin: 50% 60%;
+  animation: sticker-dlc-dandine 2.6s ease-in-out infinite alternate;
+  pointer-events: auto;
+}
+
+.sticker-dlc-ouvrir {
+  min-height: var(--cible);
+  padding: 4px 14px 4px 10px;
+  box-sizing: border-box;
+  background: var(--dlc-jaune);
+  color: var(--dlc-encre);
+  border: 2px solid var(--dlc-encre);
+  border-radius: 4px;
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.55), inset 0 0 0 2px rgba(255, 255, 255, 0.35);
+  font: inherit;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1.05;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  /* Le coin replié de l'autocollant. */
+  background-image: linear-gradient(225deg, var(--dlc-encre) 0 7px, #c9a72a 7px 11px, transparent 11px);
+}
+
+.sticker-dlc-texte {
+  display: block;
+  /* Deux lignes, « DLC » puis « disponible ! » (espace insécable avant le point d'exclamation). */
+  width: min-content;
+  white-space: normal;
+}
+
+.sticker-dlc-ouvrir:hover,
+.sticker-dlc-ouvrir:focus-visible {
+  filter: brightness(1.08);
+  outline: 2px solid var(--texte);
+  outline-offset: 2px;
+}
+
+/* La petite croix : une pastille ronde posée sur le coin, avec une cible tactile élargie (zone invisible autour). */
+.sticker-dlc-fermer {
+  position: absolute;
+  top: -6px;
+  right: -9px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 2px solid var(--dlc-jaune);
+  border-radius: 50%;
+  background: var(--dlc-encre);
+  color: var(--dlc-jaune);
+  font: inherit;
+  font-size: 15px;
+  font-weight: bold;
+  line-height: 16px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.sticker-dlc-fermer::before {
+  content: '';
+  position: absolute;
+  inset: -11px;
+}
+
+.sticker-dlc-fermer:focus-visible {
+  outline: 2px solid var(--texte);
+  outline-offset: 2px;
+}
+
+@keyframes sticker-dlc-dandine {
+  from {
+    transform: rotate(-7deg) scale(1);
+  }
+
+  to {
+    transform: rotate(-3deg) scale(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sticker-dlc {
+    animation: none;
+  }
+}
+
+/* Le bouton replié « DLC », dans la barre. */
+.carte-barre .bouton-dlc {
+  margin-left: auto;
+  border-color: var(--dlc-jaune);
+  color: var(--dlc-jaune);
+  font-weight: bold;
+}
+
+/* Écran étroit : le nom du niveau passe sur sa propre ligne (style.css) ; le sticker vient s'y ranger à sa droite, sans ligne de plus. */
+@media (max-width: 960px) {
+  .carte-barre.avec-sticker .carte-titre {
+    flex: 1 1 50%;
+  }
+
+  .carte-barre .sticker-dlc {
+    order: 6;
+  }
+}
+
+/* Écrans bas (740×360) : le sticker garde la hauteur d'un bouton de la barre. */
+@media (max-height: 460px) {
+  .sticker-dlc-ouvrir {
+    padding: 3px 12px 3px 8px;
+    font-size: 12px;
+  }
+}
+
+/* --- Carte du DLC : le fond de chaque région, dessiné en CSS derrière le canvas (transparent quand la région n'a pas de niveaux) --- */
+
+.carte-monde[data-campagne='moderne'] .carte-titre {
+  color: var(--dlc-jaune);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* La Fac : murs de béton peint défraîchis, joints des panneaux, affiches collées et un tag. */
+.carte-monde[data-ambiance='fac'] {
+  background:
+    linear-gradient(rgba(20, 16, 12, 0.35), rgba(20, 16, 12, 0.7)),
+    linear-gradient(100deg, transparent 0 14%, rgba(216, 67, 46, 0.55) 14% 22%, transparent 22% 61%, rgba(242, 208, 59, 0.45) 61% 67%, transparent 67%) 0 58% / 100% 18% no-repeat,
+    linear-gradient(transparent 0 30%, rgba(234, 220, 185, 0.18) 30% 70%, transparent 70%) 8% 50% / 9% 36% no-repeat,
+    linear-gradient(transparent 0 20%, rgba(234, 220, 185, 0.14) 20% 80%, transparent 80%) 78% 45% / 7% 40% no-repeat,
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.28) 0 2px, transparent 2px 64px),
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.22) 0 2px, transparent 2px 128px),
+    linear-gradient(#6b5f4f, #4b4237 70%, #2e2924);
+}
+
+/* La Manif : le bitume du boulevard, ses marquages, et la bande de pavés du trottoir. */
+.carte-monde[data-ambiance='manif'] {
+  background:
+    linear-gradient(rgba(10, 10, 12, 0.25), rgba(10, 10, 12, 0.6)),
+    repeating-linear-gradient(90deg, rgba(234, 230, 220, 0.55) 0 48px, transparent 48px 112px) 0 62% / 100% 6px no-repeat,
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.45) 0 2px, transparent 2px 22px) 0 100% / 100% 24% no-repeat,
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.45) 0 2px, transparent 2px 18px) 0 100% / 100% 24% no-repeat,
+    linear-gradient(#5a5a5e, #4a4a4f) 0 100% / 100% 24% no-repeat,
+    radial-gradient(circle at 30% 40%, rgba(255, 255, 255, 0.04) 0 2px, transparent 3px) 0 0 / 9px 9px,
+    linear-gradient(#34353a, #26272b);
+}
+
+/* La Préfecture : façade de pierre claire, colonnes et corniche, drapeau tricolore. */
+.carte-monde[data-ambiance='prefecture'] {
+  background:
+    linear-gradient(rgba(14, 16, 22, 0.3), rgba(14, 16, 22, 0.72)),
+    linear-gradient(90deg, #2f4a8a 0 33%, #e8e6df 33% 66%, #c23a2e 66%) 50% 30% / 54px 34px no-repeat,
+    linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.35)) 0 22% / 100% 3px no-repeat,
+    linear-gradient(#a7a49a, #8d8a80) 0 18% / 100% 20px no-repeat,
+    repeating-linear-gradient(90deg, transparent 0 34px, rgba(255, 255, 255, 0.16) 34px 40px, rgba(0, 0, 0, 0.3) 40px 52px, transparent 52px 120px),
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.16) 0 2px, transparent 2px 30px),
+    linear-gradient(#8b8f99, #6c707b 60%, #464a55);
+}

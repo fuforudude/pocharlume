@@ -12,14 +12,20 @@
 // (main.ts) qui enchaîne sur la partie ou l'accueil. La barre du haut suit la sauvegarde de la session (autre onglet,
 // fermeture d'un dialogue) ; les nœuds de la carte sont lus à l'ouverture d'une région : pour voir une victoire ou un
 // import, on rouvre la carte.
+//
+// Le même écran montre la carte du DLC « Temps modernes » (`campagne: 'moderne'`, régions `REGIONS_MONDE_MODERNE`) : ses nœuds, ses
+// régions ouvertes et ses défis se lisent sur la progression du DLC (`sauvegardeDeCampagne`), son fond prend l'ambiance de la région.
+// Sur les cartes de l'histoire, le sticker « DLC disponible ! » (option `sticker`) se tient à droite de la barre du haut, dans
+// l'en-tête que la carte laisse toujours libre : il ne masque aucun nœud ; sa croix le replie en bouton « DLC ».
 import { ENNEMIS } from '../data/ennemis';
+import type { IdCampagne } from '../data/campagnes';
 import { braisesDeDefi, type IdDieu } from '../data/meta';
 import type { NiveauCampagne } from '../data/visuel';
 import type { DefiPartie } from '../engine';
 import { t, tCle } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
 import { RenduCarteMonde } from '../render/carte-monde';
-import { DIFFICULTES_SAUVEGARDE, etoilesDisponibles, totalEtoiles, type ChoixPartie, type DifficulteSauvegarde } from '../save';
+import { DIFFICULTES_SAUVEGARDE, etoilesDisponibles, sauvegardeDeCampagne, totalEtoiles, type ChoixPartie, type DifficulteSauvegarde, type Sauvegarde } from '../save';
 import { dessinerIconesDefis } from './carte-monde-defis';
 import { ennemisDeLaFiche } from './bestiaire-logique';
 import { contenuParticularite, ligneParticularite, nomParticularite, phraseParticularite } from './particularites';
@@ -86,6 +92,19 @@ export interface OptionsCarteMonde {
   readonly region?: number;
   /** Appelée à chaque changement de région (numéro de la région), pour la retrouver à la réouverture de la carte. */
   readonly surRegion?: (numero: number) => void;
+  /** Campagne montrée (avec ses `regions`) ; par défaut l'histoire. */
+  readonly campagne?: IdCampagne;
+  /** Le sticker « DLC disponible ! » (cartes de l'histoire) ; absent : ni sticker ni bouton « DLC ». */
+  readonly sticker?: OptionsSticker;
+}
+
+export interface OptionsSticker {
+  /** Vrai : replié en bouton « DLC » dans la barre du haut (choix gardé dans la sauvegarde). */
+  readonly replie: boolean;
+  /** Un clic sur le sticker ou sur le bouton « DLC » : l'écran est déjà arrêté, l'appelant ouvre la carte du DLC. */
+  surOuvrir: () => void;
+  /** La croix : le sticker vient d'être replié à l'écran, l'appelant garde le choix dans la sauvegarde. */
+  surReplier: () => void;
 }
 
 export interface EcranCarteMonde {
@@ -112,6 +131,9 @@ function nomDeMode(mode: ModeNiveau): string {
 export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMonde): EcranCarteMonde {
   const { atlas, session } = options;
   const regions = options.regions ?? REGIONS_MONDE;
+  const campagne: IdCampagne = options.campagne ?? 'histoire';
+  /** La sauvegarde telle que cette campagne la lit (progression, défis et région ouverte du DLC sur sa carte). */
+  const sauvegardeVue = (): Sauvegarde => sauvegardeDeCampagne(session.sauvegarde, campagne);
   const controleur = new AbortController();
   const { signal } = controleur;
   let arretee = false;
@@ -131,6 +153,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   let rendu: RenduCarteMonde | null = null;
 
   const racine = el('div', 'carte-monde');
+  racine.dataset.campagne = campagne;
   const canvas = el('canvas', 'jeu');
   racine.append(canvas);
   parent.append(racine);
@@ -208,6 +231,40 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     : null;
   if (revoir) revoir.textContent = t('carte.revoir_fin');
   barre.append(retour, titre, monnaies, heros, boutique, ...(inscriptions ? [inscriptions] : []), ...(bestiaire ? [bestiaire] : []), ...(revoir ? [revoir] : []), reglages);
+
+  // --- Sticker « DLC disponible ! » et son bouton replié, au bout de la barre du haut ---
+
+  const optionsSticker = options.sticker;
+  const ouvrirDlc = (): void => {
+    if (!optionsSticker) return;
+    arreter();
+    optionsSticker.surOuvrir();
+  };
+  const boutonDlc = (): HTMLButtonElement => {
+    const b = bouton('bouton bouton-dlc', t('sticker.bouton_libelle'), ouvrirDlc, signal);
+    b.textContent = t('sticker.bouton');
+    return b;
+  };
+  if (optionsSticker?.replie === true) barre.append(boutonDlc());
+  else if (optionsSticker) {
+    const autocollant = el('div', 'sticker-dlc');
+    autocollant.setAttribute('role', 'group');
+    autocollant.setAttribute('aria-label', t('sticker.texte'));
+    const ouvrir = bouton('sticker-dlc-ouvrir', t('sticker.ouvrir'), ouvrirDlc, signal);
+    ouvrir.append(el('span', 'sticker-dlc-texte', t('sticker.texte')));
+    const fermer = bouton('sticker-dlc-fermer', t('sticker.replier'), () => {
+      const replie = boutonDlc();
+      autocollant.replaceWith(replie);
+      barre.classList.remove('avec-sticker');
+      replie.focus({ preventScroll: true });
+      optionsSticker.surReplier();
+    }, signal);
+    fermer.textContent = '×';
+    autocollant.append(ouvrir, fermer);
+    barre.append(autocollant);
+    // Sur écran étroit, le sticker partage la ligne du nom du niveau au lieu d'en ajouter une (style-moderne.css).
+    barre.classList.add('avec-sticker');
+  }
   // La barre et la rangée des régions s'empilent dans un même bloc : si la barre passe sur deux lignes (écran étroit, bouton en
   // plus), la rangée descend avec elle au lieu de la recouvrir.
   const haut = el('div', 'carte-haut');
@@ -220,9 +277,11 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   };
 
   const majTitre = (): void => {
-    const vue = vues[selection];
-    const textes = vue ? textesDe(vue.numero) : null;
-    titre.textContent = vue && textes ? t('carte.niveau', { n: vue.numero, nom: textes.nom }) : '';
+    const choisie = vues[selection];
+    const textes = choisie ? textesDe(choisie.numero) : null;
+    // Sans niveau à nommer, la carte du DLC dit où l'on est.
+    const repli = campagne === 'moderne' ? t('moderne.titre') : '';
+    titre.textContent = choisie && textes ? t('carte.niveau', { n: choisie.numero, nom: textes.nom }) : repli;
   };
 
   // --- Choix de la région : flèches, pastilles (les régions fermées sont grisées), nom ---
@@ -230,13 +289,13 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   const rangeeRegions = el('div', 'carte-regions');
   rangeeRegions.setAttribute('role', 'group');
   rangeeRegions.setAttribute('aria-label', t('carte.regions'));
-  const flechePrecedente = bouton('bouton region-fleche', t('carte.region_precedente'), () => { aller(regionVoisine(session.sauvegarde, regions, indiceRegion, -1)); }, signal);
+  const flechePrecedente = bouton('bouton region-fleche', t('carte.region_precedente'), () => { aller(regionVoisine(sauvegardeVue(), regions, indiceRegion, -1)); }, signal);
   flechePrecedente.textContent = '‹';
-  const flecheSuivante = bouton('bouton region-fleche', t('carte.region_suivante'), () => { aller(regionVoisine(session.sauvegarde, regions, indiceRegion, 1)); }, signal);
+  const flecheSuivante = bouton('bouton region-fleche', t('carte.region_suivante'), () => { aller(regionVoisine(sauvegardeVue(), regions, indiceRegion, 1)); }, signal);
   flecheSuivante.textContent = '›';
   const puces: HTMLButtonElement[] = regions.map((region, i) => {
     const nom = tCle(region.nom);
-    const b = bouton('bouton region-puce', t('carte.region_aller', { n: region.numero, nom }), () => { aller(regionVisee(session.sauvegarde, regions, i)); }, signal);
+    const b = bouton('bouton region-puce', t('carte.region_aller', { n: region.numero, nom }), () => { aller(regionVisee(sauvegardeVue(), regions, i)); }, signal);
     b.dataset.cle = `region:${String(region.numero)}`;
     b.append(el('span', 'numero', String(region.numero)));
     return b;
@@ -270,7 +329,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   };
 
   const majRegionsUI = (): void => {
-    const vuesRegions = vueRegions(session.sauvegarde, regions);
+    const vuesRegions = vueRegions(sauvegardeVue(), regions);
     vuesRegions.forEach((vr, i) => {
       const b = puces[i];
       if (!b) return;
@@ -316,10 +375,12 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     if (!region) return;
     indiceRegion = i;
     const contenu = region.contenu;
-    vues = contenu ? vueNoeuds(session.sauvegarde, contenu.noeuds, decalageDeRegion(region)) : [];
+    vues = contenu ? vueNoeuds(sauvegardeVue(), contenu.noeuds, decalageDeRegion(region)) : [];
     selection = noeudInitial(vues);
     rendu = contenu ? new RenduCarteMonde(canvas, atlas, contenu.trace, contenu.decor, nombreTroncons(vues)) : null;
     regionVide.hidden = contenu !== null;
+    if (region.ambiance?.motif) racine.dataset.ambiance = region.ambiance.motif;
+    else delete racine.dataset.ambiance;
     if (region.ambiance) {
       racine.style.setProperty('--region-fond', region.ambiance.fond);
       racine.style.setProperty('--region-brume', region.ambiance.brume);
@@ -351,7 +412,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
 
   // La région d'ouverture : celle qu'on demande si elle est ouverte, sinon la plus haute région ouverte.
   const demandee = options.region === undefined ? -1 : regions.findIndex((r) => r.numero === options.region);
-  const depart = demandee >= 0 && !regionVisee(session.sauvegarde, regions, demandee).bloquee ? demandee : regionInitiale(session.sauvegarde, regions);
+  const depart = demandee >= 0 && !regionVisee(sauvegardeVue(), regions, demandee).bloquee ? demandee : regionInitiale(sauvegardeVue(), regions);
   chargerRegion(depart);
 
   /** Change le nœud sélectionné ; la vue le suit s'il sort de l'écran. */
@@ -394,6 +455,8 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
    * ses data-attributs (`data-tour`, `data-palier`, `data-voie`, `data-niveau`) pour qu'on puisse y brancher une description.
    */
   const encadreDecouvertes = (numero: number, dieu: IdDieu, signalFiche: AbortSignal): HTMLElement | null => {
+    // Dans le DLC tout est ouvert dès le premier niveau : rien à découvrir (la table du déblocage est celle de l'histoire).
+    if (campagne === 'moderne') return null;
     const liste = decouvertesDuNiveau(numero, dieu);
     if (liste.length === 0) return null;
     const encadre = el('section', 'decouvertes');
@@ -507,7 +570,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     message.setAttribute('role', 'status');
 
     // Mode : Normal, Héroïque ou Fer. Un défi s'ouvre avec les trois étoiles ; fermé, il dit ce qui manque.
-    const vuesModes = vueModes(session.sauvegarde, niveau);
+    const vuesModes = vueModes(sauvegardeVue(), niveau);
     const groupeModes = el('div', 'modes');
     groupeModes.setAttribute('role', 'radiogroup');
     groupeModes.setAttribute('aria-label', t('fiche.mode'));
@@ -566,7 +629,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     gauche.append(groupeModes);
 
     const boutons: HTMLButtonElement[] = [];
-    for (const { difficulte: id, etoiles } of etoilesParDifficulte(session.sauvegarde, vue.numero)) {
+    for (const { difficulte: id, etoiles } of etoilesParDifficulte(sauvegardeVue(), vue.numero)) {
       const b = bouton('bouton difficulte', t('fiche.etoiles', { n: etoiles, difficulte: nomDeDifficulte(id) }), () => { choisirDifficulte(id); }, signal);
       b.setAttribute('role', 'radio');
       const rangee = el('span', 'etoiles petites');
@@ -601,7 +664,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
       const choisie: DifficulteSauvegarde = defi === null ? difficulte : 'matou';
       // Un choix qui ne tient plus (objet épuisé dans un autre onglet…) est refusé ici, avant de quitter la carte.
       const choix = choixJouable(session.sauvegarde, choisir.choix());
-      const compose = configDuChoix(session.sauvegarde, choix, choisie, 0, defi === null ? undefined : { niveau: niveau.numero, defi });
+      const compose = configDuChoix(sauvegardeVue(), choix, choisie, 0, defi === null ? undefined : { niveau: niveau.numero, defi });
       if (!compose.ok) {
         message.textContent = t('fiche.lancement_refuse', { raison: texteRefusMeta(compose.raison) });
         return;
@@ -710,7 +773,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     }
     if (e.key === 'PageUp' || e.key === 'PageDown') {
       e.preventDefault();
-      aller(regionVoisine(session.sauvegarde, regions, indiceRegion, e.key === 'PageUp' ? -1 : 1));
+      aller(regionVoisine(sauvegardeVue(), regions, indiceRegion, e.key === 'PageUp' ? -1 : 1));
       return;
     }
     const direction = directionDeTouche(e.key);

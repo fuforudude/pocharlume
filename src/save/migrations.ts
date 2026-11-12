@@ -141,8 +141,21 @@ function v7versV8(v7: Brut): Brut {
   return { ...v7, version: 8, progression: { ...progression, niveauMax: 101 }, meta: { ...objet(v7.meta), regionMax: 11 } };
 }
 
+/**
+ * v8 vers v9 : la campagne « Temps modernes » (le DLC) entre dans la sauvegarde, vide (écrite en dur ici comme pour les versions
+ * précédentes) : sa progression (niveau 1 ouvert, aucune étoile), ni défi ni record, 0 badge, rien en collection, aucun titre, sticker
+ * déplié. Tout le reste est gardé tel quel : l'histoire n'est pas touchée. Une campagne du DLC déjà présente est gardée (la migration
+ * appliquée deux fois ne la remet pas à zéro) ; la validation finale juge sa forme.
+ */
+function v8versV9(v8: Brut): Brut {
+  const moderne = Object.hasOwn(v8, 'moderne')
+    ? v8.moderne
+    : { progression: { niveauMax: 1, etoiles: {} }, defis: {}, records: {}, badges: 0, collection: { skinsTours: [], skinsHeros: [], garantie: 0 }, titres: [], stickerReplie: false };
+  return { ...v8, version: 9, moderne };
+}
+
 /** `MIGRATIONS[n]` fait passer une sauvegarde de la version n à la version n + 1. */
-export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: v1versV2, 2: v2versV3, 3: v3versV4, 4: v4versV5, 5: v5versV6, 6: v6versV7, 7: v7versV8 };
+export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: v1versV2, 2: v2versV3, 3: v3versV4, 4: v4versV5, 5: v5versV6, 6: v6versV7, 7: v7versV8, 8: v8versV9 };
 
 /**
  * Migre une sauvegarde brute (n'importe quelle version connue) vers la version courante et la valide. `defs`

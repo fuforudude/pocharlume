@@ -41,6 +41,7 @@ import { exporterCode, importerCode, remplacerProgression, type ResultatImport }
 import type { DefsMeta } from './definitions';
 import type { Chargement, Depot, OrigineChargement } from './depot';
 import { DIFFICULTES_SAUVEGARDE, type DifficulteSauvegarde, type Reglages, type Sauvegarde } from './format';
+import { replierStickerDlc } from './moderne';
 import { avecPartieEnCours, partieEnCours, reprendrePartie } from './partie';
 import { changerReglages } from './progression';
 import { changerFichesEnnemis, rencontrerEnnemis } from './transactions-bestiaire';
@@ -683,6 +684,11 @@ export class Session {
   /** Active ou coupe les fiches « Nouvel ennemi » (option des Options). */
   async changerFichesEnnemis(actives: boolean): Promise<boolean> {
     return ecrite(await this.lancer((s) => reussite(changerFichesEnnemis(s, actives))));
+  }
+
+  /** Replie (ou déplie) le sticker « DLC disponible ! » des cartes du monde ; le choix est gardé dans la sauvegarde. */
+  async replierStickerDlc(replie: boolean): Promise<boolean> {
+    return ecrite(await this.lancer((s) => reussite(replierStickerDlc(s, replie))));
   }
 
   // --- Export et import ---------------------------------------------------------------------------------------

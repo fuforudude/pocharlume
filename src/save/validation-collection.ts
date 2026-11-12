@@ -36,22 +36,22 @@ function meilleuresEtoilesBrutes(progression: Progression, cle: string): number 
 }
 
 /** Les défis réussis : seulement des niveaux à 3 étoiles, des défis connus, la valeur `true`. */
-export function validerDefis(x: unknown, progression: Progression): Resultat<Record<string, DefisNiveau>> {
-  if (!estEnregistrement(x)) return echec('meta.defis : objet attendu');
+export function validerDefis(x: unknown, progression: Progression, chemin = 'meta.defis'): Resultat<Record<string, DefisNiveau>> {
+  if (!estEnregistrement(x)) return echec(`${chemin} : objet attendu`);
   const copie: Record<string, DefisNiveau> = {};
   for (const cle of Object.keys(x)) {
-    if (!CLE_NIVEAU.test(cle)) return echec(`meta.defis : numéro de niveau invalide « ${cle} »`);
+    if (!CLE_NIVEAU.test(cle)) return echec(`${chemin} : numéro de niveau invalide « ${cle} »`);
     const defis = valeur(x, cle);
-    if (!estEnregistrement(defis)) return echec(`meta.defis.${cle} : objet attendu`);
+    if (!estEnregistrement(defis)) return echec(`${chemin}.${cle} : objet attendu`);
     const noms = Object.keys(defis);
-    if (noms.length === 0) return echec(`meta.defis.${cle} : aucun défi`);
+    if (noms.length === 0) return echec(`${chemin}.${cle} : aucun défi`);
     const reussis: DefisNiveau = {};
     for (const nom of noms) {
-      if (!parmi(IDS_DEFIS, nom)) return echec(`meta.defis.${cle} : défi inconnu « ${nom} »`);
-      if (valeur(defis, nom) !== true) return echec(`meta.defis.${cle}.${nom} : vrai attendu`);
+      if (!parmi(IDS_DEFIS, nom)) return echec(`${chemin}.${cle} : défi inconnu « ${nom} »`);
+      if (valeur(defis, nom) !== true) return echec(`${chemin}.${cle}.${nom} : vrai attendu`);
       reussis[nom] = true;
     }
-    if (meilleuresEtoilesBrutes(progression, cle) < 3) return echec(`meta.defis.${cle} : un défi demande 3 étoiles sur le niveau`);
+    if (meilleuresEtoilesBrutes(progression, cle) < 3) return echec(`${chemin}.${cle} : un défi demande 3 étoiles sur le niveau`);
     poser(copie, cle, reussis);
   }
   return ok(copie);

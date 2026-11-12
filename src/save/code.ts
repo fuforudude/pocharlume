@@ -6,11 +6,11 @@
 //   navigateur n'a pas de CompressionStream. L'import comprend les deux.
 // - `somme` : CRC-32 en 8 chiffres hexadécimaux de `<mode>.<données>`, qui détecte une copie tronquée ou fautive.
 //
-// Le code contient la progression, les réglages et la méta-progression (monnaies, héros, arbre, objets, choix), pas
-// la partie en cours. Un import ne touche à rien tant que
+// Le code contient la progression, les réglages, la méta-progression (monnaies, héros, arbre, objets, choix) et la campagne du
+// DLC (`moderne`, v9), pas la partie en cours. Un import ne touche à rien tant que
 // tout n'est pas validé : taille, forme, somme, décompression bornée, JSON, migration, validation stricte.
 import type { DefsMeta } from './definitions';
-import { VERSION_SAUVEGARDE, type Sauvegarde } from './format';
+import { moderneParDefaut, VERSION_SAUVEGARDE, type CampagneModerne, type Sauvegarde } from './format';
 import { migrer } from './migrations';
 import { normaliserImport } from './normalisation';
 
@@ -118,10 +118,21 @@ const compressionDisponible = (): boolean => typeof CompressionStream === 'funct
 
 // --- export -----------------------------------------------------------------------------------------------
 
-/** Les données qui voyagent dans un code : tout sauf la partie en cours. */
-function donneesExportees(s: Sauvegarde): string {
-  return JSON.stringify({ version: s.version, progression: s.progression, reglages: s.reglages, meta: s.meta });
+/** Vrai : la campagne du DLC est celle d'un joueur qui ne l'a jamais touchée (rien à transporter). */
+function moderneVide(moderne: CampagneModerne): boolean {
+  return JSON.stringify(moderne) === JSON.stringify(moderneParDefaut());
 }
+
+/**
+ * Les données qui voyagent dans un code : tout sauf la partie en cours. La campagne du DLC n'y est que si elle n'est pas vide : le code
+ * d'un joueur qui n'a pas touché au DLC garde la taille qu'il avait en v8 ; à l'import, un code v9 sans `moderne` la reçoit vide.
+ */
+function donneesExportees(s: Sauvegarde): string {
+  return JSON.stringify({ version: s.version, progression: s.progression, reglages: s.reglages, meta: s.meta, ...(moderneVide(s.moderne) ? {} : { moderne: s.moderne }) });
+}
+
+/** Premier format de sauvegarde qui a la campagne du DLC (`moderne`). */
+const VERSION_MODERNE = 9;
 
 /** Produit le code qui redonne la progression, les réglages et la méta-progression de cette sauvegarde. */
 export async function exporterCode(s: Sauvegarde): Promise<string> {
@@ -193,7 +204,10 @@ export async function importerCode(code: string, defs?: DefsMeta): Promise<Resul
   }
   // Validation comme une lecture du stockage (sans les définitions de héros) : seule une structure impossible est
   // refusée. Ce qui est devenu incohérent avec les données d'aujourd'hui est corrigé, pas refusé.
-  const migration = migrer({ ...analyse, partie: null });
+  // Un code v9 ou plus récent sans campagne du DLC vient d'un joueur qui n'y a pas touché (voir `donneesExportees`).
+  const version: unknown = Reflect.get(analyse, 'version');
+  const sansModerne = typeof version === 'number' && version >= VERSION_MODERNE && !Object.hasOwn(analyse, 'moderne');
+  const migration = migrer({ ...analyse, partie: null, ...(sansModerne ? { moderne: moderneParDefaut() } : {}) });
   if (!migration.ok) return refus(migration.cause === 'trop_recente' ? 'trop_recent' : 'donnees', migration.raison);
   return { ok: true, sauvegarde: normaliserImport(migration.sauvegarde, defs), depuis: migration.depuis };
 }
@@ -203,5 +217,5 @@ export async function importerCode(code: string, defs?: DefsMeta): Promise<Resul
  * sauvegarde courante, la partie en cours est abandonnée (elle appartenait à l'ancienne progression).
  */
 export function remplacerProgression(importee: Sauvegarde): Sauvegarde {
-  return { version: VERSION_SAUVEGARDE, progression: importee.progression, reglages: importee.reglages, meta: importee.meta, partie: null };
+  return { version: VERSION_SAUVEGARDE, progression: importee.progression, reglages: importee.reglages, meta: importee.meta, partie: null, moderne: importee.moderne };
 }
