@@ -73,6 +73,19 @@ avec ses propres récompenses.
   les volants passent au-dessus.
 - **Charge** : les chargeurs passent à travers les soldats (comme la charge du Prince Croisé).
 - **Défi Fer** : tous les événements du niveau sont joués pendant la vague unique, à des moments répartis dans le temps.
+- **Renvoi** : le tir de LBD renvoyé **blesse** son tireur (dégâts, sans étourdissement) ; montant réglé au simulateur.
+- **Chemin fermé** : les ennemis déjà engagés finissent leur route ; les nouveaux groupes prennent le repli ; les cases deviennent
+  constructibles une fois le chemin vide.
+- **Foule « ralentir »** : ralentit d'un coup les ennemis présents dans le rayon à l'activation.
+- **Sauvegarde** : tout le DLC (progression, badges, collection, titres, sticker) dans un bloc `moderne` à part ; les badges
+  ne sont pas dans `meta.monnaies`. Les « records » sont les records d'infini par carte du DLC. La partie en cours porte sa
+  campagne (champ facultatif, absent = histoire), vérifiée contre la bonne progression. Un identifiant de skin ou de titre
+  inconnu est écarté à la normalisation, jamais une cause de rejet de toute la sauvegarde.
+- **Chemins mobiles** : leurs cases restent toujours interdites à la construction, ouverts ou fermés (moteur et interface).
+- **Sauteur et plongeur** franchissent une nasse : c'est leur force, écrite dans le Bestiaire.
+- **Bestiaire par campagne** : celui ouvert depuis le DLC montre les ennemis du DLC ; celui de l'histoire est inchangé.
+- **Ligne « Capacité DLC »** des fiches de tours : seulement dans les écrans du DLC.
+- **Piquet** : coupé quand la caserne est en feu ou gelée ; réduit tous les dégâts (coups, nuage, drain).
 
 ### Livraison
 - **Tout d'un coup** : une seule mise en ligne quand les 30 niveaux, les héros, les capacités, les événements, les foules et les
