@@ -1,6 +1,6 @@
 # DLC « Temps modernes » : animation des 41 skins validés
 
-Statut : validée le 2026-11-11
+Statut : livrée le 2026-11-12
 Date : 2026-11-11
 
 ## Besoin
@@ -33,10 +33,19 @@ Toujours hors du jeu : aucune règle, aucun branchement dans l'atlas.
   points confondus) et `tireurMiroir` le retourne vers sa cible, comme les chats des tours de tir.
 
 ## Critères d'acceptation
-- [ ] Chaque skin a toutes les animations de son original (mêmes noms et même nombre d'images), testé par l'outil `tools/dlc`.
-- [ ] Aperçus animés générés (GIF par skin et par animation) par `npm run dlc:apercu`.
-- [ ] Le jeu ne change pas : atlas et tests de sprites inchangés.
-- [ ] Page de revue republiée avec les animations ; avis de l'auteur relevés et traités.
+- [x] Chaque skin a toutes les animations de son original (mêmes noms et même nombre d'images), testé par l'outil `tools/dlc`.
+- [x] Aperçus animés générés (GIF par skin et par animation) par `npm run dlc:apercu`.
+- [x] Le jeu ne change pas : atlas et tests de sprites inchangés.
+- [x] Page de revue republiée avec les animations ; avis de l'auteur relevés et traités.
+
+## Livraison (2026-11-12)
+- 38 skins animés (23 tours avec leurs tireurs, 15 ennemis), 284 GIF, validés par l'auteur en deux revues sur
+  https://claude.ai/artifact/VWMGWvx8m6pycg5zHBPYcD (avis dans la collection `avis-anim`).
+- Retouches demandées en revue : ondes sonores qui sortent des enceintes de la Sono, mégaphone devenu tireur sur une estrade,
+  affiches de Plume qui s'envolent, cheminée et panneau de Pollen rattachés au toit, fronde des Vigies et jonglage des
+  Renvoyeurs lisibles, morts des ennemis réalistes (plus de croix au sol), BRAV-M qui explose, chute du cavalier.
+- Test de conformité bloquant pour tours et ennemis (`tools/dlc`), avec la seule exception du tireur du mégaphone.
+- Suite : règles du DLC et branchement des skins dans le jeu (`spriteTireur()` pour le mégaphone, voir plus haut).
 
 ## Hors périmètre
 - Règles, niveaux, équilibrage, vente ou déblocage du DLC ; branchement des skins dans le jeu.
