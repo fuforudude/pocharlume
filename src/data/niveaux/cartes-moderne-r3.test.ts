@@ -228,7 +228,9 @@ describe('les 10 niveaux de la Préfecture', () => {
         if (e.type !== 'ouvrir_chemin') continue;
         const quoi = `niveau ${String(n.numero)} : chemin ${String(e.chemin)}`;
         expect(evs.some((f) => f.type === 'fermer_chemin' && f.chemin === e.chemin && f.vague >= e.vague), `${quoi} refermé`).toBe(false);
-        expect(n.niveau.vagues.length - e.vague + 1, `${quoi} ouvert trop tard`).toBeGreaterThanOrEqual(5);
+        // Une réouverture après une fermeture temporaire n'a pas à durer : la fermeture a sa propre règle (corrections-fac.test.ts).
+        const reouverture = evs.some((f) => f.type === 'fermer_chemin' && f.chemin === e.chemin && f.vague <= e.vague);
+        if (!reouverture) expect(n.niveau.vagues.length - e.vague + 1, `${quoi} ouvert trop tard`).toBeGreaterThanOrEqual(5);
       }
     }
   });

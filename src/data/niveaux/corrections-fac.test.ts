@@ -148,6 +148,22 @@ describe('chemins mobiles', () => {
     expect(ouverture?.vague).toBeLessThanOrEqual(7);
   });
 
+  it('une fermeture de chemin dure quelques vagues : le même chemin rouvre au plus tard 2 vagues avant la dernière', () => {
+    const problemes: string[] = [];
+    PLANS_DLC.forEach((plan, i) => {
+      const derniere = (VAGUES_DLC[i] ?? []).length;
+      const evs = plan.evenements ?? [];
+      evs.forEach((e) => {
+        if (e.type !== 'fermer_chemin') return;
+        const date = (x: { vague: number; delai?: number }): number => x.vague * 1000 + (x.delai ?? 0);
+        const ouverture = evs.find((o) => o.type === 'ouvrir_chemin' && o.chemin === e.chemin && date(o) > date(e));
+        if (!ouverture) problemes.push(quoi(plan, `chemin ${String(e.chemin)} fermé vague ${String(e.vague)}, jamais rouvert`));
+        else if (ouverture.vague > derniere - 2) problemes.push(quoi(plan, `chemin ${String(e.chemin)} fermé vague ${String(e.vague)}, rouvert vague ${String(ouverture.vague)} (dernière : ${String(derniere)})`));
+      });
+    });
+    expect(problemes).toEqual([]);
+  });
+
   it('les événements restent triés par (vague, délai)', () => {
     for (const plan of PLANS_DLC) {
       const evs = plan.evenements ?? [];
@@ -302,5 +318,23 @@ describe('le décor reste visible sous les fourgons du canon à eau', () => {
       }
     }
     expect([...new Set(caches)]).toEqual([]);
+  });
+});
+
+describe('scène vivante et cases de tour', () => {
+  it('cortèges, groupes, banderoles et grilles en décor : aucune case de tour qui servirait (à moins de 4 tuiles d’un chemin) n’est prise (même règle que les grands décors, sans exception)', () => {
+    const fautifs: string[] = [];
+    const t = REGLES.tailleCase;
+    for (const plan of PLANS_DLC) {
+      const { modele, carte, fixes, zones } = decorDuPlan(plan);
+      // Les cases déjà interdites sans la scène (chemin fixe, zones) ne comptent pas : on ne perd rien à les occuper.
+      const dejaInterdites = new Set(casesInterditesDuNiveau(fixes, [], zones).map(cleCase));
+      for (const c of casesDeLaScene(modele.scene)) {
+        if (dejaInterdites.has(cleCase(c))) continue;
+        const distance = Math.min(...carte.chemins.map((ch) => distancePointChemin(c.cx * t + t / 2, c.cy * t + t / 2, ch.points)));
+        if (distance < 2 * t) fautifs.push(quoi(plan, `scène sur la case (${String(c.cx)}, ${String(c.cy)}) à ${distance.toFixed(1)} d’un chemin`));
+      }
+    }
+    expect(fautifs).toEqual([]);
   });
 });
