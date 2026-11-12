@@ -21,10 +21,10 @@ import { decoderPng } from '../art/png.ts';
 import { CATEGORIE_HEROS, decrireEcart, estBloquant, rendreApercus } from './skins.ts';
 
 const CATEGORIES_BLOQUANTES = new Set<string>(['tour', 'ennemi']);
-/** Héros validés en revue et animés (2026-11-12) : Brise-Os et Corbeau attendent la revue de leur pose retouchée. */
+/** Les neuf héros du DLC, validés en revue et animés (2026-11-12). */
 const HEROS_ANIMES = new Set<string>([
   'moderne-heros-plume', 'moderne-heros-suie', 'moderne-heros-charlie', 'moderne-heros-mastoc', 'moderne-heros-pollen',
-  'moderne-heros-rouage', 'moderne-heros-lanterne',
+  'moderne-heros-rouage', 'moderne-heros-lanterne', 'moderne-heros-brise-os', 'moderne-heros-corbeau',
 ]);
 
 const dossier = join(RACINE, 'art', 'dlc-moderne');

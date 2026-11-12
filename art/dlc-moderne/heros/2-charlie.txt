@@ -293,19 +293,25 @@ cadre charlie-ancien/mort.2 couleurs v=6 U=6 dans 9 26 15 29 couleurs u=5 U=4 v=
 # et à la place de la massue d'os une pancarte de manif en carton (traits de couleur, aucun texte), portée à l'épaule.
 sprite moderne-heros-brise-os
 origine 6 18
+# Modèle : l'original (squelette du chat de grange). Repos, marche et blessure en viennent tels quels avec les calques
+# ci-dessous ; attaque, compétence et mort sont redessinées pour la pancarte. Les pans du bandana sont cousus à la tête.
+#   repos      respire, la queue bat, cligne des yeux, la pancarte sur l'épaule (pose validée en première image)
+#   marche     pas lourds, la pancarte sur l'épaule
+#   attaque    lève la pancarte au-dessus de sa tête, puis l'abat devant lui d'un grand coup
+#   competence rage : il rugit, des flammes rouges montent, il lève la pancarte et charge
+#   blesse     recule, yeux plissés
+#   mort       touché, les genoux plient, il s'affaisse sur le côté (gisant du chat de grange, pelage brun) ; la
+#              pancarte glisse de son épaule et tombe à plat à côté
+modele heros-brise-os
 
-calque tete 6 0
-b.....b.
-Bo...oB.
-xxxxxxx.
-BBBwxBx.
-BBBcwrcc
-.Bccccc.
-
-# Les pans du bandana, noués derrière la tête.
-calque noeud 4 2
-xx
-.x
+# Les pans du bandana, noués derrière la tête, font partie du calque (ils suivent chaque geste).
+calque tete 4 0
+..b.....b.
+..Bo...oB.
+xxxxxxxxx.
+.xBBBwxBx.
+..BBBcwrcc
+...Bccccc.
 
 calque corps 4 6
 .KKKKb
@@ -323,8 +329,6 @@ calque jambes 6 11
 BB.BB
 bb.bb
 
-# Pancarte de manif portée à l'épaule : carton cerclé de bois sombre, des traits de couleur et aucun texte, sur un manche
-# que la patte avant serre.
 calque arme 11 -4
 .dDDDDDDd
 .D11.111D
@@ -339,5 +343,64 @@ calque arme 11 -4
 oocd
 ....d
 
-anim repos 220
-cadre queue + jambes + corps + arme + noeud + tete
+# Pancarte levée au-dessus de la tête, le bras tendu vers le haut.
+calque arme-haut 6 -7
+.dDDDDDDd
+.D11.111D
+.DD0000DD
+.D.2222.D
+.dDDDDDDd
+....d
+....d
+...oo
+
+# Pancarte abattue devant lui, à plat de face, le manche dans la patte.
+calque arme-frappe 11 2
+.......dDDDDd
+.......D11.0D
+.......DD00DD
+oocdddddD.22.D
+.......DDDDDD
+.......dDDDDd
+
+# Le souffle du coup, au-dessus de la pancarte.
+calque trace 16 -1
+..ww
+.w
+w
+
+# Rage : flammes rouges tout autour de lui.
+calque rage 3 4
+x..x...x..x
+.x..x.x..x.
+..x.....x..
+x.........x
+x.........x
+.x.......x.
+..x.....x..
+
+# La pancarte tombée à plat à côté de lui, un bout de manche dépasse.
+calque outil-sol 16 10
+.dDDDDDd
+ddD10.2D
+.dDDDDDd
+
+anim attaque 80
+cadre queue + jambes + corps decale -1 0 + tete decale -1 0 + arme-haut duree 130
+cadre queue + jambes-a + corps decale 2 0 + tete decale 2 0 + arme-frappe decale 2 0 + trace duree 60
+cadre queue + jambes-a + corps decale 2 0 + tete decale 2 0 + arme-frappe decale 2 1 duree 90
+cadre queue + jambes + corps + arme + tete duree 140
+
+# Rage : il rugit, ses flammes grandissent, puis il lève la pancarte et charge.
+anim competence 100
+cadre queue + jambes + corps decale 0 1 + tete decale 0 1 + arme decale 0 1 duree 140
+cadre queue + jambes + corps + tete + arme + rage duree 120
+cadre queue + jambes + corps decale 0 -1 + tete decale 0 -1 + arme-haut decale 0 -1 + rage decale 0 -1 duree 140
+cadre queue + jambes-a + corps decale 2 0 + tete decale 2 0 + arme-frappe decale 2 0 + trace + rage decale 2 0 duree 90
+cadre queue + jambes + corps + arme + tete duree 160
+
+anim mort 140
+cadre queue + jambes + corps decale -1 0 + arme decale -1 0 + tete decale -1 0 + yeux-mal decale -1 0
+cadre soldat-grange/mort.1 couleurs o=B O=o B=b T=#00000000 i=#00000000 d=#00000000 + arme decale 1 3
+cadre soldat-grange/mort.2 couleurs o=B O=o B=b T=#00000000 i=#00000000 d=#00000000 + outil-sol decale 0 -1 duree 300
+cadre soldat-grange/mort.3 couleurs o=B O=o B=b T=#00000000 i=#00000000 d=#00000000 + outil-sol duree 600

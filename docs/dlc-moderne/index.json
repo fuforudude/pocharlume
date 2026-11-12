@@ -708,6 +708,100 @@
    "complet": true
   },
   {
+   "id": "moderne-commissaire-boss",
+   "nom": "Le Commissaire Divisionnaire (boss)",
+   "categorie": "ennemi",
+   "original": null,
+   "apercu": "apercus/moderne-commissaire-boss.png",
+   "apercuOriginal": null,
+   "source": "art/dlc-moderne/ennemis/6-boss.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-commissaire-boss--repos.gif",
+     "gifOriginal": null,
+     "gifMiroir": null
+    },
+    {
+     "nom": "marche",
+     "boucle": true,
+     "gif": "apercus/moderne-commissaire-boss--marche.gif",
+     "gifOriginal": null,
+     "gifMiroir": null
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-commissaire-boss--attaque.gif",
+     "gifOriginal": null,
+     "gifMiroir": null
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-commissaire-boss--blesse.gif",
+     "gifOriginal": null,
+     "gifMiroir": null
+    },
+    {
+     "nom": "mort",
+     "boucle": false,
+     "gif": "apercus/moderne-commissaire-boss--mort.gif",
+     "gifOriginal": null,
+     "gifMiroir": null
+    }
+   ],
+   "complet": true
+  },
+  {
+   "id": "moderne-centaure-boss",
+   "nom": "Le Grand Centaure (boss)",
+   "categorie": "ennemi",
+   "original": null,
+   "apercu": "apercus/moderne-centaure-boss.png",
+   "apercuOriginal": null,
+   "source": "art/dlc-moderne/ennemis/6-boss.txt",
+   "animations": [
+    {
+     "nom": "repos",
+     "boucle": true,
+     "gif": "apercus/moderne-centaure-boss--repos.gif",
+     "gifOriginal": null,
+     "gifMiroir": null
+    },
+    {
+     "nom": "marche",
+     "boucle": true,
+     "gif": "apercus/moderne-centaure-boss--marche.gif",
+     "gifOriginal": null,
+     "gifMiroir": null
+    },
+    {
+     "nom": "attaque",
+     "boucle": false,
+     "gif": "apercus/moderne-centaure-boss--attaque.gif",
+     "gifOriginal": null,
+     "gifMiroir": null
+    },
+    {
+     "nom": "blesse",
+     "boucle": false,
+     "gif": "apercus/moderne-centaure-boss--blesse.gif",
+     "gifOriginal": null,
+     "gifMiroir": null
+    },
+    {
+     "nom": "mort",
+     "boucle": false,
+     "gif": "apercus/moderne-centaure-boss--mort.gif",
+     "gifOriginal": null,
+     "gifMiroir": null
+    }
+   ],
+   "complet": true
+  },
+  {
    "id": "moderne-heros-plume",
    "nom": "Nielle, Colleuse de nuit",
    "categorie": "heros",
@@ -834,40 +928,40 @@
     {
      "nom": "marche",
      "boucle": true,
-     "gif": null,
+     "gif": "apercus/moderne-heros-corbeau--marche.gif",
      "gifOriginal": "apercus/moderne-heros-corbeau--marche-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "blesse",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-corbeau--blesse.gif",
      "gifOriginal": "apercus/moderne-heros-corbeau--blesse-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-corbeau--attaque.gif",
      "gifOriginal": "apercus/moderne-heros-corbeau--attaque-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "competence",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-corbeau--competence.gif",
      "gifOriginal": "apercus/moderne-heros-corbeau--competence-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-corbeau--mort.gif",
      "gifOriginal": "apercus/moderne-heros-corbeau--mort-original.gif",
      "gifMiroir": null
     }
    ],
-   "complet": false
+   "complet": true
   },
   {
    "id": "moderne-heros-charlie",
@@ -996,40 +1090,40 @@
     {
      "nom": "marche",
      "boucle": true,
-     "gif": null,
+     "gif": "apercus/moderne-heros-brise-os--marche.gif",
      "gifOriginal": "apercus/moderne-heros-brise-os--marche-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "blesse",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-brise-os--blesse.gif",
      "gifOriginal": "apercus/moderne-heros-brise-os--blesse-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "attaque",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-brise-os--attaque.gif",
      "gifOriginal": "apercus/moderne-heros-brise-os--attaque-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "competence",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-brise-os--competence.gif",
      "gifOriginal": "apercus/moderne-heros-brise-os--competence-original.gif",
      "gifMiroir": null
     },
     {
      "nom": "mort",
      "boucle": false,
-     "gif": null,
+     "gif": "apercus/moderne-heros-brise-os--mort.gif",
      "gifOriginal": "apercus/moderne-heros-brise-os--mort-original.gif",
      "gifMiroir": null
     }
    ],
-   "complet": false
+   "complet": true
   },
   {
    "id": "moderne-heros-pollen",

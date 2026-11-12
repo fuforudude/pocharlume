@@ -270,6 +270,16 @@ cadre soldat-grange/mort.3 couleurs o=U O=v B=6 b=X c=K r=K K=X T=#00000000 i=#0
 # vent ardoise ouvert sur le plastron, lance-pierre en bois tenu devant lui en position de tir.
 sprite moderne-heros-corbeau
 origine 6 18
+# Modèle : l'original (squelette du chat de grange). Repos, marche et blessure en viennent tels quels avec les calques
+# ci-dessous ; attaque, compétence et mort sont redessinées pour le lance-pierre.
+#   repos      respire, la queue bat, cligne des yeux (pose validée en première image)
+#   marche     pas souples, le lance-pierre tenu devant lui
+#   attaque    tend l'élastique en arrière, puis le lâche : la pierre part, l'élastique retombe
+#   competence tir ajusté : il vise accroupi, tend à fond (un éclat sur la pierre), puis deux tirs coup sur coup
+#   blesse     recule, yeux plissés
+#   mort       touché, les genoux plient, il s'affaisse sur le côté (gisant du chat de grange, coupe-vent ardoise) ;
+#              le lance-pierre lui échappe et tombe à côté
+modele heros-corbeau
 
 calque tete 6 0
 ..6666..
@@ -306,5 +316,52 @@ calque arme 11 1
 ..........O..
 ..........d..
 
-anim repos 220
-cadre queue + jambes + corps + arme + tete
+# Élastique tendu à fond : la poche et la pierre reculent contre la joue.
+calque arme-tendu 11 1
+........O...O
+.....000O000O
+..000....O.O.
+.wqb......O..
+......kkkwO..
+..........O..
+..........d..
+
+# Élastique lâché : il retombe mou entre les branches, la pierre est partie.
+calque arme-lache 11 1
+........O...O
+........O0.0OqQ
+.........O0O..
+..w.......O..
+......kkkwO..
+..........O..
+..........d..
+
+# Éclat sur la pierre avant le tir.
+calque eclat 12 3
+w
+
+# Le lance-pierre tombé à côté de lui, l'élastique mou.
+calque outil-sol 16 10
+O0
+.OOOd
+O0
+
+anim attaque 90
+cadre queue + jambes + corps decale -1 0 + tete decale -1 0 + arme-tendu decale -1 0 duree 130
+cadre queue + jambes + corps + tete + arme-lache decale -1 0 duree 160
+cadre queue + jambes + corps + arme + tete duree 140
+
+# Tir ajusté : il vise accroupi, tend à fond, puis deux tirs coup sur coup.
+anim competence 90
+cadre queue + jambes + corps decale 0 1 + tete decale 0 1 + arme decale 0 1 duree 160
+cadre queue + jambes + corps decale -1 1 + tete decale -1 1 + arme-tendu decale -1 1 + eclat decale -1 1 duree 220
+cadre queue + jambes + corps decale 0 1 + tete decale 0 1 + arme-lache decale -1 1 duree 90
+cadre queue + jambes + corps decale 0 1 + tete decale 0 1 + arme decale 0 1 duree 70
+cadre queue + jambes + corps decale 0 1 + tete decale 0 1 + arme-lache decale -1 1 duree 90
+cadre queue + jambes + corps + arme + tete duree 160
+
+anim mort 140
+cadre queue + jambes + corps decale -1 0 + arme decale -1 0 + tete decale -1 0 + yeux-mal decale -1 0
+cadre soldat-grange/mort.1 couleurs o=k O=u B=k b=Q c=w K=Q T=#00000000 i=#00000000 d=#00000000 + arme decale 1 3
+cadre soldat-grange/mort.2 couleurs o=k O=u B=k b=Q c=w K=Q T=#00000000 i=#00000000 d=#00000000 + outil-sol decale 0 -1 duree 300
+cadre soldat-grange/mort.3 couleurs o=k O=u B=k b=Q c=w K=Q T=#00000000 i=#00000000 d=#00000000 + outil-sol duree 600
