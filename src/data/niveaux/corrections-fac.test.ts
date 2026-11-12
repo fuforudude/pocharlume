@@ -1,4 +1,5 @@
-// Corrections de contenu de la Fac (DLC « Temps modernes », région 1) après la relecture : foules qui servent, renforts sur le chemin,
+// Corrections de contenu de la Fac (DLC « Temps modernes », région 1) après la relecture, étendues à tous les niveaux livrés du DLC
+// (la Manif comprise) : foules qui servent, renforts sur le chemin,
 // charges qui durent, recharges, chemins mobiles ouverts assez longtemps, plan cohérent avec sa carte, décor visible au niveau 4.
 // Ce sont des vérifications de contenu : le moteur ne les fait pas (il ne regarde que la forme).
 import { describe, expect, it } from 'vitest';
@@ -12,18 +13,31 @@ import { ENNEMIS } from '../ennemis';
 import { REGLES } from '../regles';
 import { decorVisible } from './assemblage';
 import { assemblerNiveauModerne, casesDeLaScene, cheminsMobilesDuPlan } from './assemblage-moderne';
-import { CARTES_MODERNE_R1 } from './cartes-moderne-r1';
+import { CARTES_MODERNE_R1, type CarteModerne } from './cartes-moderne-r1';
+import { CARTES_MODERNE_R2 } from './cartes-moderne-r2';
 import { distancePointChemin, rectAutour, rectsSeChevauchent } from './geometrie';
 import { casesInterditesDuNiveau } from './grille-niveau';
 import { empriseDecor, GRANDS_DECORS, zonesBloquantes } from './habillage';
 import { PLANS_MODERNE_R1, type PlanNiveauModerne } from './plan-moderne-r1';
 import { VAGUES_MODERNE_R1 } from './vagues-moderne-r1';
+import { PLANS_MODERNE_R2 } from './plan-moderne-r2';
+import { VAGUES_MODERNE_R2 } from './vagues-moderne-r2';
 
-const points = (plan: PlanNiveauModerne, chemin: number): readonly Point[] => CARTES_MODERNE_R1[plan.carte].chemins[chemin]?.points ?? [];
-const quoi = (plan: PlanNiveauModerne, detail: string): string => `niveau ${String(plan.numero)} : ${detail}`;
+/** Tous les niveaux livrés du DLC (la Fac, la Manif) : les règles de conception valent pour chacun. */
+const PLANS_DLC: readonly PlanNiveauModerne<string>[] = [...PLANS_MODERNE_R1, ...PLANS_MODERNE_R2];
+const VAGUES_DLC = [...VAGUES_MODERNE_R1, ...VAGUES_MODERNE_R2];
+const CARTES_DLC: Readonly<Record<string, CarteModerne>> = { ...CARTES_MODERNE_R1, ...CARTES_MODERNE_R2 };
+function carteDuPlan(plan: PlanNiveauModerne<string>): CarteModerne {
+  const carte = CARTES_DLC[plan.carte];
+  if (!carte) throw new Error(`niveau ${String(plan.numero)} : carte ${plan.carte} absente`);
+  return carte;
+}
+
+const points = (plan: PlanNiveauModerne<string>, chemin: number): readonly Point[] => carteDuPlan(plan).chemins[chemin]?.points ?? [];
+const quoi = (plan: PlanNiveauModerne<string>, detail: string): string => `niveau ${String(plan.numero)} : ${detail}`;
 
 /** Les chemins ouverts juste avant l'événement d'indice `k` du plan (état de départ, puis les ouvertures et fermetures précédentes). */
-function ouvertsAvant(plan: PlanNiveauModerne, k: number): boolean[] {
+function ouvertsAvant(plan: PlanNiveauModerne<string>, k: number): boolean[] {
   const ouverts = plan.chemins.map((i) => !(plan.cheminsFermes ?? []).some((f) => f.chemin === i));
   (plan.evenements ?? []).slice(0, k).forEach((e) => {
     if (e.type === 'ouvrir_chemin') ouverts[e.chemin] = true;
@@ -32,14 +46,14 @@ function ouvertsAvant(plan: PlanNiveauModerne, k: number): boolean[] {
   return ouverts;
 }
 
-function foulesDuPlan(plan: PlanNiveauModerne): readonly Foule[] {
+function foulesDuPlan(plan: PlanNiveauModerne<string>): readonly Foule[] {
   return plan.foules ?? [];
 }
 
 describe('foules « ralentir »', () => {
   it('le centre est à moins de rayon − 1 d’un chemin qui ne bouge pas (sinon on paie pour presque rien)', () => {
     const problemes: string[] = [];
-    for (const plan of PLANS_MODERNE_R1) {
+    for (const plan of PLANS_DLC) {
       const mobiles = cheminsMobilesDuPlan(plan);
       for (const f of foulesDuPlan(plan)) {
         if (f.effet.type !== 'ralentir') continue;
@@ -55,7 +69,7 @@ describe('foules « ralentir »', () => {
 describe('renforts', () => {
   it('chaque renfort daté apparaît à au plus 1 tuile d’un chemin ouvert à ce moment', () => {
     const problemes: string[] = [];
-    for (const plan of PLANS_MODERNE_R1) {
+    for (const plan of PLANS_DLC) {
       (plan.evenements ?? []).forEach((e, k) => {
         if (e.type !== 'renforts') return;
         const ouverts = ouvertsAvant(plan, k);
@@ -67,7 +81,7 @@ describe('renforts', () => {
   });
 
   it('chaque foule à renforts a un chemin qui ne bouge pas, et ses renforts tombent sur un chemin', () => {
-    for (const plan of PLANS_MODERNE_R1) {
+    for (const plan of PLANS_DLC) {
       const fixes = plan.chemins.filter((i) => !cheminsMobilesDuPlan(plan).has(i));
       for (const f of foulesDuPlan(plan)) {
         if (f.effet.type !== 'renforts') continue;
@@ -86,7 +100,7 @@ describe('renforts', () => {
 describe('charges', () => {
   it('chaque charge dure au moins jusqu’au milieu du chemin (les chargeurs passent à travers les soldats sur la moitié du parcours)', () => {
     const problemes: string[] = [];
-    for (const plan of PLANS_MODERNE_R1) {
+    for (const plan of PLANS_DLC) {
       for (const e of plan.evenements ?? []) {
         if (e.type !== 'charge') continue;
         const longueur = calculerChemin({ points: points(plan, e.chemin) }).longueur;
@@ -102,7 +116,7 @@ describe('charges', () => {
 
 describe('foules qui bloquent', () => {
   it('la recharge est au moins égale à la durée de l’effet (un double clic ne paie pas deux fois la même coupure)', () => {
-    for (const plan of PLANS_MODERNE_R1) {
+    for (const plan of PLANS_DLC) {
       for (const f of foulesDuPlan(plan)) {
         if (f.effet.type !== 'bloquer') continue;
         expect(f.recharge ?? 0, quoi(plan, `foule bloquer en ${JSON.stringify(f.cases)}`)).toBeGreaterThanOrEqual(f.effet.duree);
@@ -114,7 +128,7 @@ describe('foules qui bloquent', () => {
 describe('chemins mobiles', () => {
   it('un chemin ouvert en cours de niveau reste ouvert au moins 5 vagues (ou jusqu’à la fin) : construire dessus vaut le coup', () => {
     const problemes: string[] = [];
-    for (const plan of PLANS_MODERNE_R1) {
+    for (const plan of PLANS_DLC) {
       const evs = plan.evenements ?? [];
       evs.forEach((e) => {
         if (e.type !== 'ouvrir_chemin') return;
@@ -136,7 +150,7 @@ describe('chemins mobiles', () => {
   });
 
   it('les événements restent triés par (vague, délai)', () => {
-    for (const plan of PLANS_MODERNE_R1) {
+    for (const plan of PLANS_DLC) {
       const evs = plan.evenements ?? [];
       evs.forEach((e, i) => {
         const avant = evs[i - 1];
@@ -176,7 +190,7 @@ describe('garde de l’assemblage', () => {
 const cleCase = (c: CaseGrille): string => `${String(c.cx)},${String(c.cy)}`;
 
 interface DecorDuPlan {
-  readonly modele: (typeof CARTES_MODERNE_R1)[keyof typeof CARTES_MODERNE_R1];
+  readonly modele: CarteModerne;
   readonly carte: Parameters<typeof decorVisible>[1];
   readonly fixes: Parameters<typeof casesInterditesDuNiveau>[0];
   readonly zones: ReturnType<typeof zonesBloquantes>;
@@ -184,8 +198,8 @@ interface DecorDuPlan {
 }
 
 /** La carte du niveau (chemins du plan), ses chemins fixes, ses zones bloquantes et son décor visible. */
-function decorDuPlan(plan: PlanNiveauModerne): DecorDuPlan {
-  const modele = CARTES_MODERNE_R1[plan.carte];
+function decorDuPlan(plan: PlanNiveauModerne<string>): DecorDuPlan {
+  const modele = carteDuPlan(plan);
   const chemins = plan.chemins.map((i) => {
     const c = modele.chemins[i];
     if (!c) throw new Error(quoi(plan, `chemin ${String(i)} absent`));
@@ -198,13 +212,13 @@ function decorDuPlan(plan: PlanNiveauModerne): DecorDuPlan {
 }
 
 /** Cases interdites par le chemin fixe, les zones et la scène, sans aucun décor. */
-function interditesSansDecor(plan: PlanNiveauModerne, decor: readonly Decor[]): Set<string> {
+function interditesSansDecor(plan: PlanNiveauModerne<string>, decor: readonly Decor[]): Set<string> {
   const { modele, fixes, zones } = decorDuPlan(plan);
   return new Set([...casesInterditesDuNiveau(fixes, decor, zones), ...casesDeLaScene(modele.scene)].map(cleCase));
 }
 
 /** Cases de tour (hors chemin fixe, zone et scène) qu'un grand décor rend interdites, avec la distance de leur centre au chemin le plus proche. */
-function casesPrisesParLeDecor(plan: PlanNiveauModerne, d: Decor): { c: CaseGrille; distance: number }[] {
+function casesPrisesParLeDecor(plan: PlanNiveauModerne<string>, d: Decor): { c: CaseGrille; distance: number }[] {
   const { carte, fixes, zones } = decorDuPlan(plan);
   const sansDecor = interditesSansDecor(plan, []);
   const t = REGLES.tailleCase;
@@ -214,7 +228,7 @@ function casesPrisesParLeDecor(plan: PlanNiveauModerne, d: Decor): { c: CaseGril
 }
 
 /** Nombre de cases où l'on peut construire, avec le décor donné. */
-function casesDeTour(plan: PlanNiveauModerne, decor: readonly Decor[]): number {
+function casesDeTour(plan: PlanNiveauModerne<string>, decor: readonly Decor[]): number {
   const { modele } = decorDuPlan(plan);
   const t = REGLES.tailleCase;
   return Math.floor(modele.largeur / t) * Math.floor(modele.hauteur / t) - interditesSansDecor(plan, decor).size;
@@ -259,7 +273,7 @@ const ECARTS_DECOR_CONNUS: ReadonlySet<string> = new Set([
 /** Les grands décors de chaque niveau du DLC qui bloquent une case de tour à moins de 2 cases d'un chemin, avec ces cases. */
 function decorsQuiPrennentDesCasesUtiles(): Map<string, string[]> {
   const fautifs = new Map<string, string[]>();
-  for (const plan of PLANS_MODERNE_R1) {
+  for (const plan of PLANS_DLC) {
     for (const d of decorDuPlan(plan).decor) {
       if (!GRANDS_DECORS.has(d.sprite)) continue;
       const cases = casesPrisesParLeDecor(plan, d).filter(({ distance }) => distance < 2 * REGLES.tailleCase);
@@ -328,7 +342,7 @@ const ECARTS_FOURGON_CONNUS: Readonly<Record<number, readonly string[]>> = {
 };
 
 /** Les niveaux où passe le fourgon du canon à eau (dans leurs vagues figées). */
-const AVEC_FOURGON = PLANS_MODERNE_R1.filter((_, i) => (VAGUES_MODERNE_R1[i] ?? []).some((v) => v.paquets.some((p) => p.ennemi === 'moderne_canon_a_eau')));
+const AVEC_FOURGON = PLANS_DLC.filter((_, i) => (VAGUES_DLC[i] ?? []).some((v) => v.paquets.some((p) => p.ennemi === 'moderne_canon_a_eau')));
 
 describe('le décor reste visible sous les fourgons du canon à eau', () => {
   it('les niveaux 4 et 10 ont des fourgons ; le niveau 8 n’en a pas', () => {

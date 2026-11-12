@@ -13,6 +13,7 @@ import { budgetVague, menaceVague } from '../../src/data/equilibrage.ts';
 import { CHAMPS_PAR_GROUPE, encoderVagues, type VagueCompacte } from '../../src/data/niveaux/format-vagues.ts';
 import { vaguesDuPlan, vaguesDuPlanModerne } from '../../src/data/niveaux/generation.ts';
 import { PLANS_MODERNE_R1 } from '../../src/data/niveaux/plan-moderne-r1.ts';
+import { PLANS_MODERNE_R2 } from '../../src/data/niveaux/plan-moderne-r2.ts';
 import { PLANS_REGIONS } from '../../src/data/niveaux/plans.ts';
 
 const NOMS_REGION = ['du Village Affamé', 'des Champs Brûlés', 'du Bourg des Bûchers', 'des Marais de l’Ordalie', 'de la Ville Pestiférée', 'du Charnier', 'de la Croisade', 'du Monastère Noir', 'de la Cité du Roi', 'de la Cathédrale du Soleil Blême', 'des Grèves Grises'] as const;
@@ -72,7 +73,7 @@ async function texteFichier(region: number, sortie: string): Promise<string> {
 
 /** Les vagues figées d'une région du DLC (même format compact, sans niveau retouché à la main pour l'instant). */
 function texteFichierModerne(region: number): string {
-  const plans = [PLANS_MODERNE_R1][region - 1] ?? [];
+  const plans = [PLANS_MODERNE_R1, PLANS_MODERNE_R2][region - 1] ?? [];
   const niveaux = plans.map((plan) => vaguesDuPlanModerne(plan));
   const compact = encoderVagues(niveaux);
   const blocs = plans.map((plan, i) => {
@@ -100,9 +101,11 @@ function texteFichierModerne(region: number): string {
 
 const argument = process.argv[2];
 if (argument === undefined || argument === 'moderne') {
-  const sortie = fileURLToPath(new URL('../../src/data/niveaux/vagues-moderne-r1.ts', import.meta.url));
-  writeFileSync(sortie, texteFichierModerne(1));
-  console.log(`Vagues de ${String(PLANS_MODERNE_R1.length)} niveaux écrites dans src/data/niveaux/vagues-moderne-r1.ts.`);
+  for (const [region, plans] of [[1, PLANS_MODERNE_R1], [2, PLANS_MODERNE_R2]] as const) {
+    const sortie = fileURLToPath(new URL(`../../src/data/niveaux/vagues-moderne-r${String(region)}.ts`, import.meta.url));
+    writeFileSync(sortie, texteFichierModerne(region));
+    console.log(`Vagues de ${String(plans.length)} niveaux écrites dans src/data/niveaux/vagues-moderne-r${String(region)}.ts.`);
+  }
 }
 const voulue = argument === undefined ? undefined : argument === 'moderne' ? 0 : Number(argument);
 for (let region = 1; region <= PLANS_REGIONS.length; region++) {

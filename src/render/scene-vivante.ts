@@ -5,7 +5,8 @@
 //
 // La foule réagit aux événements du moteur, qu'elle lit sans jamais rien changer : une annonce, une charge, un canon à eau, une nasse ou
 // un chemin qui bouge la font s'agiter (elle scande plus vite, bras levés) ; des renforts ou une foule activée la font sauter de joie.
-// Avec les animations réduites, tout reste immobile.
+// La Manif ajoute un cortège en marche (file d'étudiants qui piétinent) et les ondes des camionnettes sono, qui battent plus vite quand
+// la foule s'agite. Avec les animations réduites, tout reste immobile.
 import { foulePrete, type EtatPartie } from '../engine';
 import type { SceneVivante } from '../data/visuel';
 import { TUILE } from './camera';
@@ -98,6 +99,9 @@ export class DessinSceneVivante {
     scene.groupes.forEach((g, i) => {
       this.dessinerGroupe(g.cx * CASE - ox, g.cy * CASE - oy, 4, t, i * 13 + 5, humeur);
     });
+    (scene.corteges ?? []).forEach((c, i) => {
+      this.dessinerCortege(c.cx * CASE - ox, c.cy * CASE - oy, c.largeur, t, i * 17 + 3, humeur);
+    });
     // Les foules activables : des figurants sur leurs cases, qui scandent quand elles sont prêtes et attendent assis sinon.
     (etat.niveau.foules ?? []).forEach((foule, i) => {
       const suivi = etat.dynamique.foules[i];
@@ -108,11 +112,14 @@ export class DessinSceneVivante {
     });
   }
 
-  /** Par-dessus les entités : les fumées des fumigènes. */
+  /** Par-dessus les entités : les fumées des fumigènes, les ondes des camionnettes sono. */
   dessinerDessus(temps: number, reduit: boolean, ox: number, oy: number): void {
     const scene = this.scene;
     if (!scene) return;
     const ctx = this.ctx;
+    (scene.sonos ?? []).forEach((s, i) => {
+      this.dessinerSono(Math.round(s.x * TUILE) - ox, Math.round(s.y * TUILE) - oy, reduit ? 0 : temps, i, reduit ? 'calme' : this.humeur(temps));
+    });
     scene.fumigenes.forEach((f, i) => {
       const px = Math.round(f.x * TUILE) - ox;
       const py = Math.round(f.y * TUILE) - oy;
@@ -139,6 +146,56 @@ export class DessinSceneVivante {
         ctx.fillRect(x, y + 1, taille, taille - 2);
       }
     });
+  }
+
+  /**
+   * Le cortège : une file d'étudiants sur `largeur` cases (trois par case, sur deux rangs), qui piétinent en avançant sur place ; un sur
+   * quatre porte une pancarte. Agité, il piétine plus vite (le rythme des étudiants suit l'humeur).
+   */
+  private dessinerCortege(x0: number, y0: number, largeur: number, t: number, graine: number, humeur: Humeur): void {
+    const n = largeur * 3;
+    const pas = humeur === 'calme' ? 520 : 260;
+    for (let k = 0; k < n; k++) {
+      const marche = t === 0 ? 0 : Math.round(Math.sin((t / pas) * Math.PI + k * 1.3));
+      const x = x0 + 6 + Math.round((k * CASE) / 3) + marche;
+      const y = y0 + (k % 2 === 0 ? CASE - 3 : CASE - 11);
+      this.dessinerEtudiant(x, y, t, graine * 7 + k, humeur, false, k % 4 === 1);
+    }
+  }
+
+  /**
+   * Les ondes d'une camionnette sono : des anneaux de pixels qui partent du toit au rythme de la musique (plus vite quand la foule
+   * s'agite) et deux notes qui sautillent ; le haut-parleur vibre d'un pixel au temps fort.
+   */
+  private dessinerSono(px: number, py: number, temps: number, graine: number, humeur: Humeur): void {
+    const ctx = this.ctx;
+    const battement = humeur === 'calme' ? 600 : 300;
+    const fort = temps !== 0 && temps % battement < battement / 3;
+    // Le haut-parleur : il vibre d'un pixel au temps fort.
+    const v = fort ? 1 : 0;
+    ctx.fillStyle = CONTOUR;
+    ctx.fillRect(px - 3 - v, py - 3 - v, 7 + 2 * v, 6 + 2 * v);
+    ctx.fillStyle = '#7c8288';
+    ctx.fillRect(px - 2, py - 2, 5, 4);
+    if (temps === 0) return;
+    for (let k = 0; k < 3; k++) {
+      const vie = ((temps + (k * battement * 2) / 3 + graine * 211) % (battement * 2)) / (battement * 2);
+      const r = 4 + vie * 12;
+      ctx.fillStyle = `rgba(242, 237, 224, ${(0.7 * (1 - vie)).toFixed(3)})`;
+      for (let a = 0; a < 10; a++) {
+        const angle = -Math.PI * (0.1 + (0.8 * a) / 9);
+        ctx.fillRect(Math.round(px + Math.cos(angle) * r), Math.round(py + Math.sin(angle) * r * 0.8), 1, 1);
+      }
+    }
+    // Deux notes de musique (une tête, une hampe) qui montent et sautillent.
+    for (let k = 0; k < 2; k++) {
+      const vie = ((temps + k * 900 + graine * 377) % 1800) / 1800;
+      const nx = Math.round(px + (k === 0 ? -8 : 7) + Math.sin(vie * 6 + k) * 2);
+      const ny = Math.round(py - 6 - vie * 14);
+      ctx.fillStyle = k === 0 ? '#e0508c' : '#40c8d8';
+      ctx.fillRect(nx, ny, 2, 2);
+      ctx.fillRect(nx + 1, ny - 4, 1, 4);
+    }
   }
 
   /** Un groupe d'étudiants sur une case (coin haut gauche en pixels d'écran du tampon). */

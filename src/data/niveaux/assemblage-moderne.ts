@@ -7,30 +7,35 @@
 import type { Carte, CaseGrille, Niveau, Vague } from '../../engine/definitions';
 import type { NiveauCampagne, SceneVivante } from '../visuel';
 import { decorVisible } from './assemblage';
-import { CARTES_MODERNE_R1 } from './cartes-moderne-r1';
+import { CARTES_MODERNE_R1, type CarteModerne } from './cartes-moderne-r1';
+import { CARTES_MODERNE_R2 } from './cartes-moderne-r2';
 import { casesInterditesDuNiveau } from './grille-niveau';
 import { zonesBloquantes } from './habillage';
 import type { PlanNiveauModerne } from './plan-moderne-r1';
 
+/** Les cartes du DLC, toutes régions, par identifiant. */
+const CARTES_MODERNE: Readonly<Record<string, CarteModerne>> = { ...CARTES_MODERNE_R1, ...CARTES_MODERNE_R2 };
+
 const NIVEAUX_PAR_REGION = 10;
 
-/** Les cases de la mise en scène : groupes d'étudiants et banderoles (sur `largeur` cases vers l'est). */
+/** Les cases de la mise en scène : groupes d'étudiants, banderoles et cortèges (sur `largeur` cases vers l'est). */
 export function casesDeLaScene(scene: SceneVivante): CaseGrille[] {
   return [
     ...scene.groupes.map((g) => ({ cx: g.cx, cy: g.cy })),
     ...scene.banderoles.flatMap((b) => Array.from({ length: b.largeur }, (_, i) => ({ cx: b.cx + i, cy: b.cy }))),
+    ...(scene.corteges ?? []).flatMap((c) => Array.from({ length: c.largeur }, (_, i) => ({ cx: c.cx + i, cy: c.cy }))),
   ];
 }
 
 /** Les chemins (indices du niveau) qui peuvent s'ouvrir ou se fermer pendant la partie. */
-export function cheminsMobilesDuPlan(plan: PlanNiveauModerne): Set<number> {
+export function cheminsMobilesDuPlan(plan: PlanNiveauModerne<string>): Set<number> {
   const mobiles = new Set<number>((plan.cheminsFermes ?? []).map((f) => f.chemin));
   for (const e of plan.evenements ?? []) if (e.type === 'ouvrir_chemin' || e.type === 'fermer_chemin') mobiles.add(e.chemin);
   return mobiles;
 }
 
 /** Les indices de chemin que le plan écrit dans ses événements, ses chemins fermés et ses foules (`repli` compris), avec leur provenance. */
-function indicesVisesParLePlan(plan: PlanNiveauModerne): { quoi: string; chemin: number }[] {
+function indicesVisesParLePlan(plan: PlanNiveauModerne<string>): { quoi: string; chemin: number }[] {
   const vises: { quoi: string; chemin: number }[] = [];
   (plan.evenements ?? []).forEach((e, i) => {
     const quoi = `événement ${String(i)} (${e.type})`;
@@ -50,7 +55,7 @@ function indicesVisesParLePlan(plan: PlanNiveauModerne): { quoi: string; chemin:
  * Garde de cohérence : `plan.chemins` est remappé sur la carte, alors que les événements, les chemins fermés et les foules sont copiés tels
  * quels et lus en indices du niveau. Le plan doit donc garder l'ordre de la carte (0, 1, 2…), et rien ne doit viser un chemin hors du plan.
  */
-function verifierPlan(plan: PlanNiveauModerne): void {
+function verifierPlan(plan: PlanNiveauModerne<string>): void {
   const n = plan.chemins.length;
   if (!plan.chemins.every((c, i) => c === i)) {
     throw new Error(`Niveau moderne ${String(plan.numero)} : les chemins du plan doivent être l'identité 0..${String(n - 1)} (reçu ${plan.chemins.join(', ')}), sinon les indices des événements et des foules seraient décalés`);
@@ -67,9 +72,10 @@ function verifierPlan(plan: PlanNiveauModerne): void {
   }
 }
 
-export function assemblerNiveauModerne(plan: PlanNiveauModerne, vagues: readonly Vague[]): NiveauCampagne {
+export function assemblerNiveauModerne(plan: PlanNiveauModerne<string>, vagues: readonly Vague[]): NiveauCampagne {
   verifierPlan(plan);
-  const modele = CARTES_MODERNE_R1[plan.carte];
+  const modele = CARTES_MODERNE[plan.carte];
+  if (!modele) throw new Error(`Niveau moderne ${String(plan.numero)} : carte inconnue ${plan.carte}`);
   const region = Math.floor((plan.numero - 1) / NIVEAUX_PAR_REGION) + 1;
   const rang = ((plan.numero - 1) % NIVEAUX_PAR_REGION) + 1;
   const chemins = plan.chemins.map((i) => {

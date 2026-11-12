@@ -450,6 +450,32 @@ tâche 5) : même ton que les ennemis du DLC, satire pince-sans-rire des institu
 - `niveau.m1.10.nom` : Le Rectorat
 - `niveau.m1.10.ambiance` : Le Commissaire Divisionnaire est attendu pour une visite de courtoisie. Il a amené sa courtoisie en fourgon.
 
+## DLC « Temps modernes » : niveaux, région 2 (la Manif)
+
+Le cortège, les boulevards et les carrefours (niveaux 11 à 20 de la campagne `moderne`, même spec, tâche 5) : même ton que la Fac,
+satire pince-sans-rire du maintien de l’ordre et de l’administration, ni nom réel, ni insigne, ni violence réaliste.
+
+- `niveau.m2.01.nom` : Le Rendez-vous
+- `niveau.m2.01.ambiance` : Départ quatorze heures, place de la Gare. À quatorze heures, la place de la Gare était déjà encerclée, par précaution.
+- `niveau.m2.02.nom` : Le Boulevard
+- `niveau.m2.02.ambiance` : Le parcours a été déclaré en préfecture. La préfecture a déclaré un autre parcours.
+- `niveau.m2.03.nom` : Le Carrefour
+- `niveau.m2.03.ambiance` : Quatre rues, quatre cordons et un feu tricolore qui hésite, comme tout le monde.
+- `niveau.m2.04.nom` : Les Abribus
+- `niveau.m2.04.ambiance` : Le 38 est dévié jusqu’à nouvel ordre. Le nouvel ordre est arrivé en fourgon.
+- `niveau.m2.05.nom` : La Nasse
+- `niveau.m2.05.ambiance` : On peut entrer, on ne peut plus sortir. Officiellement, c’est un périmètre de sécurité ; officieusement aussi.
+- `niveau.m2.06.nom` : La Place de la République
+- `niveau.m2.06.ambiance` : La statue lève son rameau depuis cent ans. Elle n’a jamais dit à qui elle le tendait.
+- `niveau.m2.07.nom` : Le Cortège de Tête
+- `niveau.m2.07.ambiance` : Devant les banderoles, ceux qui marchent plus vite que le service d’ordre. Derrière, ceux qui courent plus vite que tout le monde.
+- `niveau.m2.08.nom` : Les Camionnettes Sono
+- `niveau.m2.08.ambiance` : Trois sonos, trois playlists, une seule rue. Le canon à eau, lui, passe toujours le même morceau.
+- `niveau.m2.09.nom` : Les Pavés
+- `niveau.m2.09.ambiance` : Sous les pavés, la plage, disait-on. Sous ceux-là, il y a surtout un devis de voirie.
+- `niveau.m2.10.nom` : Le Grand Carrefour
+- `niveau.m2.10.ambiance` : Le Grand Centaure vient rétablir la circulation. Pour l’instant, la circulation, c’est lui.
+
 ## Paroles avant les boss
 
 Ce ne sont plus les dieux qui parlent : un murmure, une inscription, une voix sans source.

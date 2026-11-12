@@ -94,7 +94,7 @@ export function genererVaguesNiveau(plan: PlanVagues): Vague[] {
  * Les vagues d'un niveau du DLC « Temps modernes » (plan-moderne-r1.ts) : même générateur, au budget du niveau L de l'histoire que le plan
  * désigne (`niveauBudget`), sur tous les chemins du niveau (un groupe prévu sur un chemin fermé prend son repli).
  */
-export function vaguesDuPlanModerne(plan: PlanNiveauModerne): Vague[] {
+export function vaguesDuPlanModerne(plan: PlanNiveauModerne<string>): Vague[] {
   const v = plan.vagues;
   return genererVaguesNiveau({
     niveau: v.niveauBudget,
