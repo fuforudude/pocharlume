@@ -2,6 +2,7 @@
 // « Reprendre à la vague N ». Fonctions pures, sans stockage.
 import type { EtatPartie } from '../engine/etat';
 import { deserialiser, serialiser } from '../engine/partie';
+import { NIVEAU_MAX_MODERNE } from '../data/campagnes';
 import { NOMBRE_NIVEAUX, type PartieEnCours, type Sauvegarde } from './format';
 import { estEntierEntre, TAILLE_MAX_ETAT } from './validation';
 import { estIdCarteBienForme } from './validation-infini';
@@ -13,7 +14,10 @@ import { estIdCarteBienForme } from './validation-infini';
  * trop gros pour la sauvegarde.
  */
 export function partieEnCours(etat: EtatPartie, numeroNiveau: number, carte?: string): PartieEnCours | null {
-  if (etat.statut !== 'en_cours' || etat.vagues.lancees < 1 || !estEntierEntre(numeroNiveau, 1, NOMBRE_NIVEAUX)) return null;
+  // Le DLC garde sa campagne dans la partie (absent = histoire) ; son niveau va de 1 à 30 et il n'a pas de mode infini.
+  const moderne = etat.niveau.campagne === 'moderne';
+  if (etat.statut !== 'en_cours' || etat.vagues.lancees < 1 || !estEntierEntre(numeroNiveau, 1, moderne ? NIVEAU_MAX_MODERNE : NOMBRE_NIVEAUX)) return null;
+  if (moderne && carte !== undefined) return null;
   // Une partie infinie va avec sa carte, une partie de campagne n'en a pas : l'un sans l'autre est une incohérence.
   const infinie = etat.config.infini !== undefined && etat.config.infini !== null;
   if (infinie !== (carte !== undefined) || (carte !== undefined && !estIdCarteBienForme(carte))) return null;
@@ -25,6 +29,7 @@ export function partieEnCours(etat: EtatPartie, numeroNiveau: number, carte?: st
     etat: texte,
     vague: etat.vagues.lancees,
     ...(carte === undefined ? {} : { carte }),
+    ...(moderne ? { campagne: 'moderne' as const } : {}),
   };
 }
 
@@ -45,6 +50,7 @@ export function reprendrePartie(partie: PartieEnCours): EtatPartie | null {
       etat.vagues.lancees === partie.vague &&
       // Le niveau de l'état est celui de la partie rangée : son numéro décide aussi des tours débloquées.
       etat.niveau.numero === partie.niveau &&
+      (etat.niveau.campagne === 'moderne') === (partie.campagne === 'moderne') &&
       etat.config.versionDonnees === partie.config.versionDonnees &&
       etat.config.difficulte === partie.config.difficulte &&
       etat.config.dieu === partie.config.dieu &&

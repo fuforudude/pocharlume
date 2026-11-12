@@ -122,7 +122,7 @@ describe('sticker « DLC disponible ! » sur la carte de l’histoire', () => {
     return { surOuvrir, surReplier };
   };
 
-  it('s’affiche dans l’en-tête (que la carte laisse libre : il ne masque aucun nœud), penché, avec son texte et sa croix', () => {
+  it('s’affiche dans l’en-tête de la carte (la mise en page n’est pas jouée ici : l’absence de recouvrement se juge sur les captures 740x360), penché, avec son texte et sa croix', () => {
     avecSticker(false);
     const s = sticker();
     expect(s).not.toBeNull();

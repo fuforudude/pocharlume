@@ -2,8 +2,9 @@
 import { describe, expect, it } from 'vitest';
 import { DEFS_TEST, sauvegardeRemplie } from './aides.test-utils';
 import { exporterCode, importerCode } from './code';
-import type { Sauvegarde } from './format';
+import { moderneParDefaut, sauvegardeVide, type Sauvegarde } from './format';
 import { normaliserImport } from './normalisation';
+import { validerSauvegarde } from './validation';
 
 /** La sauvegarde remplie avec un familier et un skin équipés sur des héros que le joueur n'a pas (Mastoc, Lanterne). */
 function avecEquipementSurHerosAbsents(): Sauvegarde {
@@ -69,5 +70,33 @@ describe('normalisation de la collection à l’import', () => {
     if (!r.ok) throw new Error(r.detail);
     expect(r.sauvegarde.meta.collection.equipes.familiers).toEqual({ suie: 'familier_chouette', plume: 'familier_rat' });
     expect(r.sauvegarde.meta.collection.equipes.skins).toEqual({ tir: 'skin_tir_1', suie: 'skin_suie' });
+  });
+});
+
+describe('skins et titres du DLC inconnus du catalogue', () => {
+  const catalogue = { skinsTours: ['skin_moderne_tir'], skinsHeros: ['skin_moderne_plume'], titres: ['fac_occupee'] };
+  const importee = (): Sauvegarde => ({
+    ...sauvegardeVide(),
+    moderne: {
+      ...moderneParDefaut(),
+      collection: { skinsTours: ['skin_moderne_caserne', 'skin_moderne_tir', 'skin_retire'], skinsHeros: ['skin_moderne_plume', 'skin_renomme'], garantie: 4 },
+      titres: ['fac_occupee', 'titre_retire'],
+    },
+  });
+
+  it('sont écartés à la normalisation, le reste est gardé dans l’ordre', () => {
+    const s = normaliserImport(importee(), undefined, catalogue);
+    expect(s.moderne.collection).toEqual({ skinsTours: ['skin_moderne_tir'], skinsHeros: ['skin_moderne_plume'], garantie: 4 });
+    expect(s.moderne.titres).toEqual(['fac_occupee']);
+    expect(validerSauvegarde(JSON.parse(JSON.stringify(s))).ok).toBe(true);
+  });
+
+  it('la validation ne refuse pas une sauvegarde pour un identifiant bien formé mais inconnu', () => {
+    expect(validerSauvegarde(JSON.parse(JSON.stringify(importee()))).ok).toBe(true);
+  });
+
+  it('sans catalogue (pas encore de récompenses), rien n’est écarté', () => {
+    expect(normaliserImport(importee()).moderne).toEqual(importee().moderne);
+    expect(normaliserImport(importee(), undefined, null).moderne).toEqual(importee().moderne);
   });
 });

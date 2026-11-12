@@ -10,6 +10,7 @@
 // permis et que le niveau requis (6 pour l'ultime) est atteint. Les définitions ne servent qu'aux imports et aux
 // transactions : relire le stockage ne les passe pas, pour qu'un rééquilibrage ne rende jamais une sauvegarde
 // existante illisible.
+import { NIVEAU_MAX_MODERNE } from '../data/campagnes';
 import { DIEUX } from '../data/dieux';
 import { DIFFICULTES } from '../data/difficultes';
 import {
@@ -264,25 +265,31 @@ function validerConfig(x: unknown): Resultat<ConfigPartie> {
   return ok(complete);
 }
 
-function validerPartie(x: unknown, niveauMax: number): Resultat<PartieEnCours | null> {
+function validerPartie(x: unknown, niveauMax: number, niveauMaxModerne: number): Resultat<PartieEnCours | null> {
   if (x === null) return ok(null);
   // `carte` (mode infini, jalon 4) est facultative : une partie de campagne, ou enregistrée avant l'infini, n'en a pas.
   const avecCarte = estEnregistrement(x) && Object.hasOwn(x, 'carte');
-  const base = avecCles(x, ['niveau', 'config', 'etat', 'vague', ...(avecCarte ? ['carte'] : [])], 'partie');
+  // `campagne` (v9) est facultative : absente = l'histoire ; seule la valeur « moderne » s'écrit.
+  const avecCampagne = estEnregistrement(x) && Object.hasOwn(x, 'campagne');
+  const base = avecCles(x, ['niveau', 'config', 'etat', 'vague', ...(avecCarte ? ['carte'] : []), ...(avecCampagne ? ['campagne'] : [])], 'partie');
   if (!base.ok) return base;
+  if (avecCampagne && valeur(base.valeur, 'campagne') !== 'moderne') return echec("partie.campagne : « moderne » attendue (absente pour l'histoire)");
+  const moderne = avecCampagne;
   const niveau = valeur(base.valeur, 'niveau');
   const etat = valeur(base.valeur, 'etat');
   const vague = valeur(base.valeur, 'vague');
-  if (!estEntierEntre(niveau, 1, NOMBRE_NIVEAUX) || niveau > niveauMax) return echec('partie.niveau : niveau débloqué attendu');
+  if (!estEntierEntre(niveau, 1, moderne ? NIVEAU_MAX_MODERNE : NOMBRE_NIVEAUX) || niveau > (moderne ? niveauMaxModerne : niveauMax)) return echec('partie.niveau : niveau débloqué attendu');
   if (typeof etat !== 'string' || etat.length < 2 || etat.length > TAILLE_MAX_ETAT || !etat.startsWith('{')) return echec('partie.etat : état sérialisé attendu');
   const config = validerConfig(valeur(base.valeur, 'config'));
   if (!config.ok) return config;
   const infinie = config.valeur.infini !== undefined && config.valeur.infini !== null;
   if (!estEntierEntre(vague, 1, infinie ? VAGUE_MAX_INFINI : VAGUE_MAX)) return echec(`partie.vague : entier de 1 à ${String(infinie ? VAGUE_MAX_INFINI : VAGUE_MAX)} attendu`);
   if (infinie && niveauMax <= NIVEAU_OUVERTURE_INFINI) return echec("partie.config.infini : le mode infini n'est pas ouvert");
+  if (moderne && (infinie || avecCarte)) return echec('partie.campagne : pas de mode infini dans le DLC');
+  const campagne = moderne ? { campagne: 'moderne' as const } : {};
   if (!avecCarte) {
     if (infinie) return echec('partie.carte : la carte est attendue pour une partie infinie');
-    return ok({ niveau, config: config.valeur, etat, vague });
+    return ok({ niveau, config: config.valeur, etat, vague, ...campagne });
   }
   const carte = valeur(base.valeur, 'carte');
   if (!infinie) return echec('partie.carte : seule une partie infinie a une carte');
@@ -304,9 +311,9 @@ export function validerSauvegarde(x: unknown, defs?: DefsMeta): Resultat<Sauvega
   if (!reglages.ok) return reglages;
   const meta = validerMeta(valeur(base.valeur, 'meta'), progression.valeur, defs);
   if (!meta.ok) return meta;
-  const partie = validerPartie(valeur(base.valeur, 'partie'), progression.valeur.niveauMax);
-  if (!partie.ok) return partie;
   const moderne = validerModerne(valeur(base.valeur, 'moderne'));
   if (!moderne.ok) return moderne;
+  const partie = validerPartie(valeur(base.valeur, 'partie'), progression.valeur.niveauMax, moderne.valeur.progression.niveauMax);
+  if (!partie.ok) return partie;
   return ok({ version: VERSION_SAUVEGARDE, progression: progression.valeur, reglages: reglages.valeur, meta: meta.valeur, partie: partie.valeur, moderne: moderne.valeur });
 }

@@ -431,7 +431,8 @@ function accueil(): void {
   app.replaceChildren();
   const { reprise, oubliee } = session.examinerPartie();
   if (oubliee) afficherAvis(document.body, t('sauvegarde.partie_oubliee'));
-  const niveauRepris = reprise ? niveauDeCampagne(reprise.niveau) : undefined;
+  // La partie reprend dans la campagne où elle a été rangée (histoire sans précision).
+  const niveauRepris = reprise ? niveauDeCampagne(reprise.niveau, reprise.campagne === 'moderne' ? REGIONS_MONDE_MODERNE : undefined) : undefined;
   afficherAccueil(app, {
     surJouer: carte,
     // Le DLC « Temps modernes » est ouvert à tous, dès le départ.

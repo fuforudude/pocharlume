@@ -215,12 +215,17 @@ describe('migrations de format', () => {
     });
   });
 
-  it('la migration v8 vers v9 est idempotente : la v9 obtenue, relue, ressort identique', () => {
+  it('une v9 obtenue par migration, relue, est acceptée telle quelle (aller-retour de la validation, sans nouvelle migration)', () => {
     const r = migrer(JSON.parse(FIXTURE_V8));
     if (!r.ok) throw new Error(r.raison);
     const relue = migrer(JSON.parse(JSON.stringify(r.sauvegarde)));
     expect(relue.ok && relue.depuis).toBe(VERSION_SAUVEGARDE);
     expect(relue.ok && relue.sauvegarde).toEqual(r.sauvegarde);
+  });
+
+  it('la migration v8 vers v9 est idempotente : appliquée à une sauvegarde qui a déjà sa campagne du DLC, elle la garde', () => {
+    const r = migrer(JSON.parse(FIXTURE_V8));
+    if (!r.ok) throw new Error(r.raison);
     // Appliquer la migration à une v9 déjà migrée ne change rien non plus (elle ne remplace pas une campagne existante).
     const avecDlc = { ...r.sauvegarde, version: 8, moderne: { ...moderneParDefaut(), badges: 5 } };
     expect(MIGRATIONS[8]?.(avecDlc)).toMatchObject({ version: 9, moderne: { badges: 5 } });

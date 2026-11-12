@@ -11,6 +11,8 @@ import {
 } from './campagnes';
 import { NIVEAU_MAX, NIVEAUX_PAR_REGION, NOMBRE_REGIONS, regionDuNiveau } from './meta';
 import { CAMPAGNE } from './niveaux/campagne';
+import { REGION1 } from './niveaux/region1';
+import type { NiveauCampagne } from './visuel';
 import { CAMPAGNE_MODERNE, NOEUDS_REGIONS_MODERNE, REGIONS_MODERNE, TEXTES_REGIONS_MODERNE, TRACES_REGIONS_MODERNE, niveauModerne } from './niveaux/campagne-moderne';
 
 describe('campagnes nommées', () => {
@@ -57,14 +59,31 @@ describe('liste des niveaux du DLC', () => {
     expect([NOEUDS_REGIONS_MODERNE, TRACES_REGIONS_MODERNE, TEXTES_REGIONS_MODERNE].map((l) => l.length)).toEqual([NOMBRE_REGIONS_MODERNE, NOMBRE_REGIONS_MODERNE, NOMBRE_REGIONS_MODERNE]);
   });
 
-  it('chaque niveau livré porte la campagne moderne et un numéro de 1 à 30, rangé dans sa région', () => {
-    CAMPAGNE_MODERNE.forEach((n, i) => {
-      expect(n.campagne).toBe('moderne');
-      expect(n.niveau.campagne).toBe('moderne');
-      expect(n.numero).toBe(i + 1);
-      expect(n.niveau.numero).toBe(n.numero);
-      expect(REGIONS_MODERNE[regionDuNiveauModerne(n.numero) - 1]).toContain(n);
+  /** Les écarts d'une liste de niveaux du DLC à la règle : campagne, numéro suivi, région. */
+  function ecartsModerne(liste: readonly NiveauCampagne[], regions: readonly (readonly NiveauCampagne[])[]): string[] {
+    const ecarts: string[] = [];
+    liste.forEach((n, i) => {
+      if (n.campagne !== 'moderne' || n.niveau.campagne !== 'moderne') ecarts.push(`${String(i + 1)} : campagne`);
+      if (n.numero !== i + 1 || n.niveau.numero !== n.numero) ecarts.push(`${String(i + 1)} : numéro`);
+      if (!regions[regionDuNiveauModerne(n.numero) - 1]?.includes(n)) ecarts.push(`${String(i + 1)} : région`);
     });
-    expect(CAMPAGNE_MODERNE.length).toBeLessThanOrEqual(NIVEAU_MAX_MODERNE);
+    if (liste.length > NIVEAU_MAX_MODERNE) ecarts.push('trop de niveaux');
+    return ecarts;
+  }
+
+  it('chaque niveau livré porte la campagne moderne et un numéro de 1 à 30, rangé dans sa région', () => {
+    // Vide tant que le contenu n'est pas livré : la vérification ne prouve alors rien, d'où le contrôle de la règle sur des niveaux d'essai.
+    expect(ecartsModerne(CAMPAGNE_MODERNE, REGIONS_MODERNE)).toEqual([]);
+  });
+
+  it('la règle sait voir un niveau du DLC mal étiqueté (elle ne passe pas à vide)', () => {
+    const base = REGION1[0];
+    if (!base) throw new Error('niveau 1 absent');
+    const bon: NiveauCampagne = { ...base, numero: 1, campagne: 'moderne', niveau: { ...base.niveau, numero: 1, campagne: 'moderne' } };
+    const mauvais: NiveauCampagne = { ...base, numero: 2, niveau: { ...base.niveau, numero: 2 } };
+    const regions = [[bon, mauvais], [], []];
+    expect(ecartsModerne([bon], regions)).toEqual([]);
+    expect(ecartsModerne([bon, mauvais], regions)).toEqual(['2 : campagne']);
+    expect(ecartsModerne([mauvais, bon], regions)).toContain('1 : campagne');
   });
 });
