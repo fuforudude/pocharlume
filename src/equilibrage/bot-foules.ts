@@ -9,8 +9,7 @@
 //   poste habituel. Une fois le héros envoyé, la foule reste sa cible tant qu'elle est prête (hystérésis) : un ennemi qui meurt en route ne
 //   le renvoie pas à son poste, la présence s'accumule jusqu'à l'activation.
 //
-// Les événements datés, eux, ne demandent rien aux bots : le moteur refuse sans rien changer ce qui n'est plus possible (case devenue
-// chemin, passage coupé), et les bots passent au choix suivant.
+// Les événements datés, eux, ne demandent rien aux bots : le moteur refuse sans rien changer ce qui n'est plus possible (passage coupé), et les bots passent au choix suivant.
 import { centreFoule, foulePrete, pointSurChemin, validerAction } from '../engine';
 import type { Action, EffetFoule, Ennemi, EtatPartie, Foule, Point } from '../engine';
 import { REGLES } from '../data/regles';

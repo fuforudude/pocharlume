@@ -171,3 +171,21 @@ describe('les bots sur un niveau à événements et foules', () => {
     expect(r.actions).toBeGreaterThan(2);
   });
 });
+
+describe('trajets effectifs : ordre (vague, délai)', () => {
+  it('applique les événements dans l’ordre (vague, délai), même écrits dans le désordre', () => {
+    const groupe = { ennemi: 'paysan_affame', nombre: 5, intervalle: 1, chemin: 1, delai: 0 };
+    // Même vague : fermer (délai 30) est écrit avant ouvrir (délai 10), mais l'ouverture a lieu la première : le chemin finit fermé.
+    const niveau = niveauDynamique({
+      mobiles: [1],
+      cheminsFermes: [{ chemin: 1, repli: 0 }],
+      vagues: [{ paquets: [groupe] }, { paquets: [groupe] }],
+      evenements: [
+        { vague: 1, delai: 30, type: 'fermer_chemin', chemin: 1, repli: 0 },
+        { vague: 1, delai: 10, type: 'ouvrir_chemin', chemin: 1 },
+      ],
+    });
+    // Vague 2 : fermé de nouveau (la dernière à se jouer est la fermeture), donc repli sur le chemin 0.
+    expect(trajetsEffectifs(niveau)).toEqual([[0], [0]]);
+  });
+});

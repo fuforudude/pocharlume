@@ -164,3 +164,13 @@ describe('sortie d’un corbeau', () => {
     expect(bout?.hidden).toBe(true);
   });
 });
+
+describe('composition par chemin avec repli', () => {
+  it('un groupe prévu sur le chemin 1, replié sur le chemin 0, est compté sur le chemin 0', () => {
+    const vague: Vague = { paquets: [{ ennemi: 'paysan_affame', nombre: 4, intervalle: 1, chemin: 1, delai: 0 }] };
+    const repli = (c: number): number => (c === 1 ? 0 : c);
+    expect(compositionParChemin(vague, 2, repli)).toEqual([[{ type: 'paysan_affame', nombre: 4 }], []]);
+    expect(cheminsDeLaVague(vague, repli)).toEqual([0]);
+    expect(compositionParChemin(vague, 2)).toEqual([[], [{ type: 'paysan_affame', nombre: 4 }]]);
+  });
+});
