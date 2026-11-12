@@ -82,7 +82,9 @@ avec ses propres récompenses.
   inconnu est écarté à la normalisation, jamais une cause de rejet de toute la sauvegarde.
 - **Chemins mobiles** : leurs cases restent toujours interdites à la construction, ouverts ou fermés (moteur et interface) ;
   il n'y a donc plus de vente d'office. En défi Fer, le délai de chaque événement est réparti sur la durée de la vague unique,
-  en gardant toujours l'ordre (vague, délai) du niveau.
+  en gardant toujours l'ordre (vague, délai) du niveau. Un niveau dont les événements ne sont pas écrits dans cet ordre est
+  refusé à la validation. Quand le joueur appelle la vague suivante en avance, les événements de chemin encore en attente
+  de la vague en cours se déclenchent aussitôt (avec leur annonce).
 - **Sauteur et plongeur** franchissent une nasse : c'est leur force, écrite dans le Bestiaire.
 - **Bestiaire par campagne** : celui ouvert depuis le DLC montre les ennemis du DLC ; celui de l'histoire est inchangé.
 - **Ligne « Capacité DLC »** des fiches de tours : seulement dans les écrans du DLC.
