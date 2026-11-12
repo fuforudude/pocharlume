@@ -79,14 +79,19 @@ describe('skins et titres du DLC inconnus du catalogue', () => {
     ...sauvegardeVide(),
     moderne: {
       ...moderneParDefaut(),
-      collection: { skinsTours: ['skin_moderne_caserne', 'skin_moderne_tir', 'skin_retire'], skinsHeros: ['skin_moderne_plume', 'skin_renomme'], garantie: 4 },
+      collection: {
+        skinsTours: ['skin_moderne_caserne', 'skin_moderne_tir', 'skin_retire'],
+        skinsHeros: ['skin_moderne_plume', 'skin_renomme'],
+        garantie: 4,
+        equipes: { tir: 'skin_moderne_tir', caserne: 'skin_retire', plume: 'skin_renomme' },
+      },
       titres: ['fac_occupee', 'titre_retire'],
     },
   });
 
   it('sont écartés à la normalisation, le reste est gardé dans l’ordre', () => {
     const s = normaliserImport(importee(), undefined, catalogue);
-    expect(s.moderne.collection).toEqual({ skinsTours: ['skin_moderne_tir'], skinsHeros: ['skin_moderne_plume'], garantie: 4 });
+    expect(s.moderne.collection).toEqual({ skinsTours: ['skin_moderne_tir'], skinsHeros: ['skin_moderne_plume'], garantie: 4, equipes: { tir: 'skin_moderne_tir' } });
     expect(s.moderne.titres).toEqual(['fac_occupee']);
     expect(validerSauvegarde(JSON.parse(JSON.stringify(s))).ok).toBe(true);
   });
@@ -95,8 +100,33 @@ describe('skins et titres du DLC inconnus du catalogue', () => {
     expect(validerSauvegarde(JSON.parse(JSON.stringify(importee()))).ok).toBe(true);
   });
 
-  it('sans catalogue (pas encore de récompenses), rien n’est écarté', () => {
-    expect(normaliserImport(importee()).moderne).toEqual(importee().moderne);
+  it('sans catalogue (`null`), rien n’est écarté', () => {
     expect(normaliserImport(importee(), undefined, null).moderne).toEqual(importee().moderne);
+  });
+
+  it('avec le vrai catalogue (par défaut) : les skins et titres du DLC sont gardés, les inconnus écartés, les emplacements faux déséquipés', () => {
+    const s: Sauvegarde = {
+      ...sauvegardeVide(),
+      moderne: {
+        ...moderneParDefaut(),
+        collection: {
+          skinsTours: ['skin_moderne_divine_plume', 'skin_moderne_tir', 'skin_moderne_tour_00'],
+          skinsHeros: ['skin_moderne_charlie', 'skin_moderne_mastoc'],
+          garantie: 2,
+          // Le skin de tir porté sur la caserne, Mastoc pas recruté, un skin inconnu : déséquipés ; les autres restent.
+          equipes: { caserne: 'skin_moderne_tir', divine_plume: 'skin_moderne_divine_plume', charlie: 'skin_moderne_charlie', mastoc: 'skin_moderne_mastoc', tir: 'skin_moderne_tour_00' },
+        },
+        titres: ['fac_occupee', 'manif_tenue', 'prefecture_tombee'],
+      },
+    };
+    const n = normaliserImport(s);
+    expect(n.moderne.collection).toEqual({
+      skinsTours: ['skin_moderne_divine_plume', 'skin_moderne_tir'],
+      skinsHeros: ['skin_moderne_charlie', 'skin_moderne_mastoc'],
+      garantie: 2,
+      equipes: { divine_plume: 'skin_moderne_divine_plume', charlie: 'skin_moderne_charlie' },
+    });
+    expect(n.moderne.titres).toEqual(['fac_occupee', 'prefecture_tombee']);
+    expect(validerSauvegarde(JSON.parse(JSON.stringify(n))).ok).toBe(true);
   });
 });

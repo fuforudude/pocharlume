@@ -26,7 +26,7 @@ function moderneRemplie(): CampagneModerne {
     defis: { '2': { heroique: true }, '4': { fer: true } },
     records: { amphi: 14 },
     badges: 120,
-    collection: { skinsTours: ['skin_moderne_tir', 'skin_moderne_caserne'].sort(), skinsHeros: ['skin_moderne_plume'], garantie: 3 },
+    collection: { skinsTours: ['skin_moderne_tir', 'skin_moderne_caserne'].sort(), skinsHeros: ['skin_moderne_plume'], garantie: 3, equipes: { tir: 'skin_moderne_tir' } },
     titres: ['fac_occupee'],
     stickerReplie: true,
   };
@@ -43,7 +43,7 @@ describe('campagne Temps modernes : format v9', () => {
       defis: {},
       records: {},
       badges: 0,
-      collection: { skinsTours: [], skinsHeros: [], garantie: 0 },
+      collection: { skinsTours: [], skinsHeros: [], garantie: 0, equipes: {} },
       titres: [],
       stickerReplie: false,
     });
@@ -88,6 +88,11 @@ describe('campagne Temps modernes : format v9', () => {
     ['titre qui n’est pas une chaîne', { 'moderne.titres': [3] }],
     ['titre en double', { 'moderne.titres': ['fac_occupee', 'fac_occupee'] }],
     ['sticker qui n’est pas un booléen', { 'moderne.stickerReplie': 'oui' }],
+    ['skin porté sans être obtenu', { 'moderne.collection.equipes': { magie: 'skin_moderne_magie' } }],
+    ['skin porté qui n’est pas une chaîne', { 'moderne.collection.equipes': { tir: 3 } }],
+    ['emplacement mal nommé', { 'moderne.collection.equipes': { 'Tir!': 'skin_moderne_tir' } }],
+    ['emplacement au nom hérité d’Object', { 'moderne.collection.equipes': { constructor: 'skin_moderne_tir' } }],
+    ['équipement qui n’est pas un objet', { 'moderne.collection.equipes': [] }],
   ])('refuse une campagne du DLC abîmée : %s', (_, changements) => {
     expect(validerSauvegarde(variante(changements, avecModerne(moderneRemplie()))).ok).toBe(false);
   });

@@ -209,7 +209,7 @@ describe('migrations de format', () => {
       defis: {},
       records: {},
       badges: 0,
-      collection: { skinsTours: [], skinsHeros: [], garantie: 0 },
+      collection: { skinsTours: [], skinsHeros: [], garantie: 0, equipes: {} },
       titres: [],
       stickerReplie: false,
     });

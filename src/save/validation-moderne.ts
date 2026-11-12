@@ -1,6 +1,7 @@
 // Validation stricte de ce que la sauvegarde v9 ajoute : la campagne « Temps modernes » (`moderne`). Même esprit que validation.ts :
-// types exacts, bornes, aucune clé en trop, propriétés propres seulement, copie neuve. Les skins et les titres du DLC n'ont pas encore
-// de catalogue (tâche « récompenses ») : on vérifie leur forme (identifiant bien formé, sans doublon, triés), pas leur existence.
+// types exacts, bornes, aucune clé en trop, propriétés propres seulement, copie neuve. Pour les skins et les titres du DLC, on vérifie
+// leur forme (identifiant bien formé, sans doublon, triés), pas leur existence dans le catalogue : un identifiant inconnu est écarté à
+// la normalisation d'un import (normalisation.ts), jamais une cause de rejet de toute la sauvegarde. Un skin porté doit être obtenu.
 import { NIVEAU_MAX_MODERNE } from '../data/campagnes';
 import { CAISSES_AVANT_GARANTIE, CARTES_INFINI_MAX, PLAFOND_MONNAIE, VAGUE_MAX_INFINI } from '../data/meta';
 import type { CampagneModerne, CollectionModerne } from './format';
@@ -42,8 +43,23 @@ function validerRecords(x: unknown): Resultat<Record<string, number>> {
   return ok(records);
 }
 
+/** Les skins du DLC portés : emplacement et skin bien formés, le skin parmi ceux obtenus. */
+function validerEquipesModernes(x: unknown, obtenus: readonly string[]): Resultat<Record<string, string>> {
+  if (!estEnregistrement(x)) return echec('moderne.collection.equipes : objet attendu');
+  const cibles = Object.keys(x);
+  if (cibles.length > ELEMENTS_MAX_DLC) return echec(`moderne.collection.equipes : au plus ${String(ELEMENTS_MAX_DLC)} emplacements`);
+  const equipes: Record<string, string> = {};
+  for (const cible of cibles) {
+    if (!ID_DLC.test(cible) || cible in Object.prototype) return echec(`moderne.collection.equipes : emplacement invalide « ${cible} »`);
+    const skin = valeur(x, cible);
+    if (typeof skin !== 'string' || !obtenus.includes(skin)) return echec(`moderne.collection.equipes.${cible} : skin non obtenu`);
+    poser(equipes, cible, skin);
+  }
+  return ok(equipes);
+}
+
 function validerCollectionModerne(x: unknown): Resultat<CollectionModerne> {
-  const base = avecCles(x, ['skinsTours', 'skinsHeros', 'garantie'], 'moderne.collection');
+  const base = avecCles(x, ['skinsTours', 'skinsHeros', 'garantie', 'equipes'], 'moderne.collection');
   if (!base.ok) return base;
   const skinsTours = validerListeIds(valeur(base.valeur, 'skinsTours'), 'moderne.collection.skinsTours');
   if (!skinsTours.ok) return skinsTours;
@@ -51,7 +67,9 @@ function validerCollectionModerne(x: unknown): Resultat<CollectionModerne> {
   if (!skinsHeros.ok) return skinsHeros;
   const garantie = valeur(base.valeur, 'garantie');
   if (!estEntierEntre(garantie, 0, CAISSES_AVANT_GARANTIE - 1)) return echec(`moderne.collection.garantie : entier de 0 à ${String(CAISSES_AVANT_GARANTIE - 1)} attendu`);
-  return ok({ skinsTours: skinsTours.valeur, skinsHeros: skinsHeros.valeur, garantie });
+  const equipes = validerEquipesModernes(valeur(base.valeur, 'equipes'), [...skinsTours.valeur, ...skinsHeros.valeur]);
+  if (!equipes.ok) return equipes;
+  return ok({ skinsTours: skinsTours.valeur, skinsHeros: skinsHeros.valeur, garantie, equipes: equipes.valeur });
 }
 
 export function validerModerne(x: unknown): Resultat<CampagneModerne> {

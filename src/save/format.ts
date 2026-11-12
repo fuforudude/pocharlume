@@ -161,6 +161,11 @@ export interface CollectionModerne {
   skinsHeros: string[];
   /** Caisses « Temps modernes » ouvertes d'affilée sans Épique ou mieux (0 à 9), comme les compteurs de `meta.collection.garanties`. */
   garantie: number;
+  /**
+   * Skins du DLC portés, par emplacement (`tir`, `divine_plume`, `suie`) : ils habillent aussi les tours et le héros de l'histoire, par-dessus
+   * le skin de `meta.collection.equipes` dont le bonus reste compté (apparence seulement). Seuls des skins obtenus y figurent.
+   */
+  equipes: Record<string, string>;
 }
 
 /**
@@ -221,7 +226,7 @@ export function moderneParDefaut(): CampagneModerne {
     defis: {},
     records: {},
     badges: 0,
-    collection: { skinsTours: [], skinsHeros: [], garantie: 0 },
+    collection: { skinsTours: [], skinsHeros: [], garantie: 0, equipes: {} },
     titres: [],
     stickerReplie: false,
   };

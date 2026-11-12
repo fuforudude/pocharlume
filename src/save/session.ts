@@ -81,6 +81,7 @@ import {
   type RaisonEquipementCollection,
   type RaisonRang,
 } from './transactions-collection';
+import { equiperSkinModerne, ouvrirCaisseModerne, type OuvertureCaisseModerne, type RaisonCaisseModerne } from './transactions-moderne';
 import { enregistrerFinInfinie, type BilanInfini, type FinInfinie, type RaisonFinInfinie } from './transactions-infini';
 import { ouvrirVerrouNavigateur, type VerrouSauvegarde } from './verrou';
 
@@ -657,6 +658,22 @@ export class Session {
   /** Équipe un skin à son emplacement (tour de base ou héros), ou le retire avec `null`. */
   async equiperSkin(cible: string, skin: string | null): Promise<ResultatTransaction<RaisonEquipementCollection>> {
     return sansDetail(await this.lancer((s) => depuisTransaction(equiperSkin(s, cible, skin))));
+  }
+
+  /** Ouvre une caisse « Temps modernes » (payée en badges) ; hasard tiré d'avance, rejoué à l'identique sous verrou. */
+  async ouvrirCaisseModerne(): Promise<ResultatTransactionAvecDetail<OuvertureCaisseModerne, RaisonCaisseModerne | 'aleatoire_indisponible'>> {
+    if (this.aleatoire === null) return { ok: false, raison: 'aleatoire_indisponible' };
+    const rejouable = sourceRejouable(this.aleatoire, JETS_PAR_TIRAGE);
+    const issue = await this.lancer<OuvertureCaisseModerne, RaisonCaisseModerne>((s) => {
+      const r = ouvrirCaisseModerne(s, rejouable());
+      return r.ok ? { ok: true, sauvegarde: r.sauvegarde, detail: r.tirage } : r;
+    });
+    return issue.ok ? { ok: true, sauvegarde: issue.sauvegarde, ecrite: issue.ecrite, detail: issue.detail } : issue;
+  }
+
+  /** Porte un skin du DLC sur son emplacement (il habille aussi l'histoire), ou le retire avec `null`. */
+  async equiperSkinModerne(cible: string, skin: string | null): Promise<ResultatTransaction<RaisonEquipementCollection>> {
+    return sansDetail(await this.lancer((s) => depuisTransaction(equiperSkinModerne(s, cible, skin))));
   }
 
   /** Équipe un familier sur un héros, ou le retire avec `null`. */

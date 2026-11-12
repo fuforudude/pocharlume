@@ -150,7 +150,7 @@ function v7versV8(v7: Brut): Brut {
 function v8versV9(v8: Brut): Brut {
   const moderne = Object.hasOwn(v8, 'moderne')
     ? v8.moderne
-    : { progression: { niveauMax: 1, etoiles: {} }, defis: {}, records: {}, badges: 0, collection: { skinsTours: [], skinsHeros: [], garantie: 0 }, titres: [], stickerReplie: false };
+    : { progression: { niveauMax: 1, etoiles: {} }, defis: {}, records: {}, badges: 0, collection: { skinsTours: [], skinsHeros: [], garantie: 0, equipes: {} }, titres: [], stickerReplie: false };
   return { ...v8, version: 9, moderne };
 }
 

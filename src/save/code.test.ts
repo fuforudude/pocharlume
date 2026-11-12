@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ENNEMIS } from '../data/ennemis';
 import { FIXTURE_V1, FIXTURE_V7, FIXTURE_V8, sauvegardeRemplie } from './aides.test-utils';
 import { crc32, depuisBase64Url, exporterCode, importerCode, PREFIXE_CODE, remplacerProgression, TAILLE_MAX_CODE, versBase64Url } from './code';
+import { CATALOGUE_MODERNE } from '../data/recompenses-moderne';
 import { moderneParDefaut, sauvegardeVide, type Sauvegarde } from './format';
 import { enregistrerVictoireModerne } from './moderne';
 import { enregistrerVictoire } from './progression';
@@ -38,7 +39,6 @@ function dlcComplet(s: Sauvegarde): Sauvegarde {
     d = enregistrerVictoireModerne(d, n, 'vieux_sage', 2);
   }
   const defis = Object.fromEntries(Array.from({ length: 30 }, (_, i) => [String(i + 1), { heroique: true as const, fer: true as const }]));
-  const skins = (prefixe: string, n: number): string[] => Array.from({ length: n }, (_, i) => `${prefixe}_${String(i).padStart(2, '0')}`);
   return {
     ...d,
     moderne: {
@@ -46,8 +46,14 @@ function dlcComplet(s: Sauvegarde): Sauvegarde {
       defis,
       records: { amphi: 120, cortege: 88, prefecture: 61 },
       badges: 99_999,
-      collection: { skinsTours: skins('skin_moderne_tour', 29), skinsHeros: skins('skin_moderne_heros', 9), garantie: 9 },
-      titres: ['fac_occupee', 'manif_tenue', 'prefecture_tombee'],
+      // Le vrai catalogue : la normalisation de l'import écarte les identifiants inconnus.
+      collection: {
+        skinsTours: [...CATALOGUE_MODERNE.skinsTours].sort(),
+        skinsHeros: [...CATALOGUE_MODERNE.skinsHeros].sort(),
+        garantie: 9,
+        equipes: { tir: 'skin_moderne_tir', divine_plume: 'skin_moderne_divine_plume', charlie: 'skin_moderne_charlie' },
+      },
+      titres: [...CATALOGUE_MODERNE.titres].sort(),
       stickerReplie: true,
     },
   };

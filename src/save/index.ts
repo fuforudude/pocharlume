@@ -136,5 +136,6 @@ export {
   type RaisonRang,
   type ResultatCaisse,
 } from './transactions-collection';
+export { equiperSkinModerne, ouvrirCaisseModerne, type OuvertureCaisseModerne, type RaisonCaisseModerne, type ResultatCaisseModerne } from './transactions-moderne';
 export { validerSauvegarde, type Resultat } from './validation';
 export { creerVerrouMemoire, ouvrirVerrouNavigateur, type VerrouSauvegarde } from './verrou';

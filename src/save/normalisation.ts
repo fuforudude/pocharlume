@@ -4,7 +4,7 @@
 // Fonction pure : rend une copie, ne modifie pas l'original.
 import { FAMILLES_BASE, type IdFamilier, type IdSkin } from '../data/collection';
 import { HEROS_PAR_DIEU, IDS_HEROS, type IdHeros } from '../data/meta';
-import { CATALOGUE_MODERNE, type CatalogueModerne } from '../data/recompenses-moderne';
+import { CATALOGUE_MODERNE, skinModerneAcceptable, type CatalogueModerne } from '../data/recompenses-moderne';
 import type { CibleSkin, Collection } from '../meta/collection';
 import { definitionDuHeros, niveauHerosDepuisXp, pointsDeCompetence, type DefsMeta } from './definitions';
 import type { Meta, ProgressionHeros, Sauvegarde } from './format';
@@ -46,7 +46,7 @@ export function normaliserImport(s: Sauvegarde, defs?: DefsMeta, catalogue: Cata
   return {
     ...s,
     meta: { ...s.meta, heros, choix: { ...choix, heros: choisi }, collection: { ...s.meta.collection, equipes: equipementPossede(s.meta.collection.equipes, heros) } },
-    moderne: catalogue ? moderneConnu(s.moderne, catalogue) : s.moderne,
+    moderne: catalogue ? moderneConnu(s.moderne, catalogue, heros) : s.moderne,
   };
 }
 
@@ -63,16 +63,23 @@ function equipementPossede(equipes: Collection['equipes'], heros: Meta['heros'])
   return { skins, familiers };
 }
 
-/** La campagne du DLC sans les skins et les titres que le catalogue ne connaît pas (l'ordre, donc la validité, est gardé). */
-function moderneConnu(moderne: Sauvegarde['moderne'], catalogue: CatalogueModerne): Sauvegarde['moderne'] {
+/**
+ * La campagne du DLC sans les skins et les titres que le catalogue ne connaît pas (l'ordre, donc la validité, est gardé), et sans les skins
+ * portés qui ne tiennent plus : inconnu, porté ailleurs que sur son emplacement, ou sur un héros que le joueur n'a pas.
+ */
+function moderneConnu(moderne: Sauvegarde['moderne'], catalogue: CatalogueModerne, heros: Meta['heros']): Sauvegarde['moderne'] {
   const garder = (ids: readonly string[], connus: readonly string[]): string[] => ids.filter((id) => connus.includes(id));
+  const skinsTours = garder(moderne.collection.skinsTours, catalogue.skinsTours);
+  const skinsHeros = garder(moderne.collection.skinsHeros, catalogue.skinsHeros);
+  const equipes: Record<string, string> = {};
+  for (const [cible, skin] of Object.entries(moderne.collection.equipes)) {
+    const obtenu = skinsTours.includes(skin) || skinsHeros.includes(skin);
+    const herosAbsent = (IDS_HEROS as readonly string[]).includes(cible) && !Object.hasOwn(heros, cible);
+    if (obtenu && !herosAbsent && skinModerneAcceptable(cible, skin)) Object.defineProperty(equipes, cible, { value: skin, enumerable: true, writable: true, configurable: true });
+  }
   return {
     ...moderne,
-    collection: {
-      ...moderne.collection,
-      skinsTours: garder(moderne.collection.skinsTours, catalogue.skinsTours),
-      skinsHeros: garder(moderne.collection.skinsHeros, catalogue.skinsHeros),
-    },
+    collection: { ...moderne.collection, skinsTours, skinsHeros, equipes },
     titres: garder(moderne.titres, catalogue.titres),
   };
 }
