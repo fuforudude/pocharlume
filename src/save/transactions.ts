@@ -31,6 +31,7 @@ import {
   type IdObjet,
 } from '../data/meta';
 import { BRAISES_DEFI_MODERNE, braisesDeVictoireModerne, estBossModerne, NIVEAU_MAX_MODERNE } from '../data/campagnes';
+import { titresMerites } from '../data/recompenses-moderne';
 import { badgesDeLaVictoire } from './badges-moderne';
 import { definitionDuHeros, niveauHerosDepuisXp, pointsDeCompetence, type DefsMeta } from './definitions';
 import { DIFFICULTES_SAUVEGARDE, etoilesDepensees, etoilesGagnees, metaParDefaut, type Meta, type Sauvegarde } from './format';
@@ -276,6 +277,10 @@ export interface BilanPartie {
   readonly campagneTerminee?: true;
   /** Vrai à la première victoire sur le boss de la région 1 : le mode infini vient de s'ouvrir. */
   readonly infiniDebloque?: true;
+  /** DLC seulement : badges gagnés par cette partie (0 s'il n'y en a pas). */
+  readonly badges?: number;
+  /** DLC seulement : titres de collection obtenus par cette partie, s'il y en a. */
+  readonly titresNouveaux?: readonly string[];
 }
 
 export type ResultatFin =
@@ -401,8 +406,12 @@ export function enregistrerFinDePartie(s: Sauvegarde, fin: FinDePartieMeta, defs
   const meta = { ...suivante.meta, monnaies: { aretes, braises }, heros: herosMeta, objets };
   // Le DLC range ses défis et ses badges dans son bloc `moderne` ; les défis de l'histoire (`meta.defis`) ne bougent pas.
   const badges = moderne && victoire ? badgesDeLaVictoire({ numero: fin.niveau, boss: estBossModerne(fin.niveau), premiereVictoire: premiereVictoireOrdinaire, etoilesAvant, etoilesApres, defiReussi }) : 0;
+  // Les titres de collection mérités s'ajoutent (jamais retirés) ; les badges sont tronqués au plafond des monnaies.
+  const titres = moderne ? [...new Set([...suivante.moderne.titres, ...titresMerites({ etoiles: suivante.moderne.progression.etoiles, defis })])].sort() : [];
+  const titresNouveaux = moderne ? titres.filter((id) => !suivante.moderne.titres.includes(id)) : [];
+  const badgesApres = moderne ? Math.min(PLAFOND_MONNAIE, suivante.moderne.badges + badges) : 0;
   const sauvegarde: Sauvegarde = moderne
-    ? { ...suivante, meta, moderne: { ...suivante.moderne, defis, badges: suivante.moderne.badges + badges } }
+    ? { ...suivante, meta, moderne: { ...suivante.moderne, defis, badges: badgesApres, titres } }
     : { ...suivante, meta: { ...meta, defis } };
   return {
     ok: true,
@@ -417,6 +426,8 @@ export function enregistrerFinDePartie(s: Sauvegarde, fin: FinDePartieMeta, defs
       objetsConsommes: utilises,
       objetsRendus: rendus,
       ...(defiReussi !== null ? { defiReussi, braisesDefi: braisesDuDefi } : {}),
+      ...(moderne ? { badges: badgesApres - s.moderne.badges } : {}),
+      ...(titresNouveaux.length > 0 ? { titresNouveaux } : {}),
       ...(discipleOffert !== undefined ? { discipleOffert } : {}),
       ...(regionDebloquee !== undefined ? { regionDebloquee } : {}),
       ...(campagneTerminee ? { campagneTerminee: true as const } : {}),

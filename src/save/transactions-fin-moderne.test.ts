@@ -116,10 +116,10 @@ describe('braises du DLC (montants de la spec)', () => {
     expect(trois.sauvegarde.meta.monnaies.braises).toBe(21);
   });
 
-  it('vont dans les monnaies habituelles (`meta.monnaies.braises`), les badges ne bougent pas', () => {
+  it('vont dans les monnaies habituelles (`meta.monnaies.braises`), les badges vont dans `moderne.badges`', () => {
     const r = reussie(sauvegardeVide(), { niveau: 1 });
     expect(r.sauvegarde.meta.monnaies.braises).toBe(21);
-    expect(r.sauvegarde.moderne.badges).toBe(0);
+    expect(r.sauvegarde.moderne.badges).toBe(30);
   });
 
   it('12 par défi réussi la première fois, sur le niveau du DLC à 3 étoiles ; le défi est noté dans `moderne.defis`', () => {
