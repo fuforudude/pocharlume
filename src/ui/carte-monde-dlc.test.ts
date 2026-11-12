@@ -76,7 +76,8 @@ describe('carte du monde du DLC', () => {
   });
 
   it('une campagne vide ne casse rien : la Fac s’annonce « à venir », avec son ambiance et le nom du DLC en titre', () => {
-    monter(sauvegardeVide(), { campagne: 'moderne', regions: REGIONS_MONDE_MODERNE });
+    // Des régions sans contenu (comme avant la livraison des niveaux de la Fac).
+    monter(sauvegardeVide(), { campagne: 'moderne', regions: REGIONS_MONDE_MODERNE.map((r) => ({ ...r, contenu: null })) });
     expect(document.querySelectorAll('.region-puce')).toHaveLength(3);
     expect(puce(1).classList.contains('actif')).toBe(true);
     expect(document.querySelector<HTMLElement>('.carte-region-vide')?.hidden).toBe(false);
@@ -84,6 +85,14 @@ describe('carte du monde du DLC', () => {
     expect(racine().dataset.ambiance).toBe('fac');
     expect(document.querySelector('.carte-titre')?.textContent).toBe(t('moderne.titre'));
     expect(document.querySelector('.region-nom')?.textContent).toBe(t('carte.region_nom', { n: 1, nom: 'La Fac' }));
+  });
+
+  it('la Fac est livrée : ses 10 niveaux, ses nœuds et son tracé sont sur la carte, plus de panneau « à venir »', () => {
+    expect(REGIONS_MONDE_MODERNE[0]?.contenu?.niveaux.map((n) => n.numero)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    expect(REGIONS_MONDE_MODERNE[0]?.contenu?.noeuds).toHaveLength(10);
+    expect(REGIONS_MONDE_MODERNE.slice(1).map((r) => r.contenu)).toEqual([null, null]);
+    monter(sauvegardeVide(), { campagne: 'moderne', regions: REGIONS_MONDE_MODERNE });
+    expect(document.querySelector<HTMLElement>('.carte-region-vide')?.hidden ?? true).toBe(true);
   });
 
   it('les régions du DLC s’ouvrent avec la progression du DLC, pas celle de l’histoire', () => {

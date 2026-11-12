@@ -20,6 +20,7 @@ import { frEnnemisVariete } from './fr-ennemis-variete';
 import { frLore } from './fr-lore';
 import { frMeta } from './fr-meta';
 import { frModerne } from './fr-moderne';
+import { frModerneNiveaux } from './fr-moderne-niveaux';
 import { frNiveaux } from './fr-niveaux';
 
 export const fr = {
@@ -266,4 +267,5 @@ export const fr = {
 
   // DLC Temps modernes : menu, carte du monde du DLC, sticker (fr-moderne.ts)
   ...frModerne,
+  ...frModerneNiveaux,
 } as const;

@@ -51,12 +51,14 @@ describe('campagnes nommées', () => {
 });
 
 describe('liste des niveaux du DLC', () => {
-  it('est vide pour l’instant, sans rien casser : aucune région n’est complète', () => {
-    expect(CAMPAGNE_MODERNE).toEqual([]);
+  it('la Fac (région 1) est livrée : 10 niveaux numérotés 1 à 10, les deux autres régions sont encore vides', () => {
+    expect(CAMPAGNE_MODERNE.map((n) => n.numero)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     expect(REGIONS_MODERNE).toHaveLength(NOMBRE_REGIONS_MODERNE);
-    expect(REGIONS_MODERNE.every((r) => r.length === 0)).toBe(true);
-    expect(niveauModerne(1)).toBeUndefined();
+    expect(REGIONS_MODERNE.map((r) => r.length)).toEqual([10, 0, 0]);
+    expect(niveauModerne(1)).toBe(CAMPAGNE_MODERNE[0]);
+    expect(niveauModerne(11)).toBeUndefined();
     expect([NOEUDS_REGIONS_MODERNE, TRACES_REGIONS_MODERNE, TEXTES_REGIONS_MODERNE].map((l) => l.length)).toEqual([NOMBRE_REGIONS_MODERNE, NOMBRE_REGIONS_MODERNE, NOMBRE_REGIONS_MODERNE]);
+    expect([NOEUDS_REGIONS_MODERNE[0]?.length, TRACES_REGIONS_MODERNE[0]?.length, TEXTES_REGIONS_MODERNE[0]?.length]).toEqual([10, 9, 10]);
   });
 
   /** Les écarts d'une liste de niveaux du DLC à la règle : campagne, numéro suivi, région. */
@@ -72,7 +74,6 @@ describe('liste des niveaux du DLC', () => {
   }
 
   it('chaque niveau livré porte la campagne moderne et un numéro de 1 à 30, rangé dans sa région', () => {
-    // Vide tant que le contenu n'est pas livré : la vérification ne prouve alors rien, d'où le contrôle de la règle sur des niveaux d'essai.
     expect(ecartsModerne(CAMPAGNE_MODERNE, REGIONS_MODERNE)).toEqual([]);
   });
 

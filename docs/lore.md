@@ -424,6 +424,32 @@ réaliste. Une phrase courte, pince-sans-rire, qui se moque de la fonction plus 
 - `ennemi.moderne_commissaire_boss.desc` : Il a reçu des ordres d’en haut. Il les répète, plus fort, à tout ce qui est en bas.
 - `ennemi.moderne_centaure_boss.desc` : Le dernier modèle, option canon et marchepied. Il a coûté plus cher que la fac qu’il assiège.
 
+## DLC « Temps modernes » : niveaux, région 1 (la Fac)
+
+Occupation de la fac et AG (niveaux 1 à 10 de la campagne `moderne`, spec `docs/specs/2026-11-12-dlc-temps-modernes-campagne.md`,
+tâche 5) : même ton que les ennemis du DLC, satire pince-sans-rire des institutions, ni nom réel, ni insigne, ni violence réaliste.
+
+- `niveau.m1.01.nom` : L’Amphi Occupé
+- `niveau.m1.01.ambiance` : Le cours de droit constitutionnel est suspendu. On y vote quand même, à main levée.
+- `niveau.m1.02.nom` : Les Couloirs
+- `niveau.m1.02.ambiance` : Les casiers sont fermés, les tracts ouverts. Le secrétariat rouvre lundi, dit l’affiche de l’an dernier.
+- `niveau.m1.03.nom` : La Cour
+- `niveau.m1.03.ambiance` : Sous les platanes, on refait le monde. De l’autre côté de la grille, on vient le défaire.
+- `niveau.m1.04.nom` : La Bibliothèque
+- `niveau.m1.04.ambiance` : Silence, on révise la Constitution. Le canon à eau n’a pas de carte de lecteur.
+- `niveau.m1.05.nom` : Le Resto U
+- `niveau.m1.05.ambiance` : Plat du jour : coquillettes. Les agents en civil ont pris le menu, mais pas le plateau.
+- `niveau.m1.06.nom` : Le Parvis
+- `niveau.m1.06.ambiance` : La grille du nord est cadenassée. Le cadenas aussi a un avis sur la réforme.
+- `niveau.m1.07.nom` : Le Piquet de Grève
+- `niveau.m1.07.ambiance` : Trois palettes, un brasero, une thermos. Ce n’est pas une barricade, c’est un piquet : la nuance est juridique.
+- `niveau.m1.08.nom` : L’Assemblée Générale
+- `niveau.m1.08.ambiance` : Motion pour, motion contre, motion pour voter la motion. Dehors, quelqu’un a déjà tranché.
+- `niveau.m1.09.nom` : Le Grand Hall
+- `niveau.m1.09.ambiance` : Les escaliers mènent partout sauf à la sortie. Le plan d’évacuation, lui, a été évacué.
+- `niveau.m1.10.nom` : Le Rectorat
+- `niveau.m1.10.ambiance` : Le Commissaire Divisionnaire est attendu pour une visite de courtoisie. Il a amené sa courtoisie en fourgon.
+
 ## Paroles avant les boss
 
 Ce ne sont plus les dieux qui parlent : un murmure, une inscription, une voix sans source.

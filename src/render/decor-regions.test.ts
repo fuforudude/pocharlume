@@ -6,6 +6,8 @@ import { GRANDS_DECORS } from '../data/niveaux/habillage';
 import type { AtlasJson } from './atlas';
 
 const atlas = JSON.parse(readFileSync('public/sprites/atlas.json', 'utf-8')) as AtlasJson;
+/** L'atlas du DLC « Temps modernes » : le décor de la Fac y est (grands décors préfixés `moderne-`). */
+const atlasModerne = JSON.parse(readFileSync('public/sprites/atlas-moderne.json', 'utf-8')) as AtlasJson;
 
 const DECOR_PAR_REGION: Readonly<Record<number, { grands: readonly string[]; petits: readonly string[] }>> = {
   2: {
@@ -65,6 +67,6 @@ describe('décor des régions 2 à 10', () => {
   }
 
   it('n’a pas de grand décor déclaré sans sprite 32×32 dans l’atlas', () => {
-    for (const nom of GRANDS_DECORS) expect(atlas.sprites[nom]?.largeur, nom).toBe(32);
+    for (const nom of GRANDS_DECORS) expect((nom.startsWith('moderne-') ? atlasModerne : atlas).sprites[nom]?.largeur, nom).toBe(32);
   });
 });

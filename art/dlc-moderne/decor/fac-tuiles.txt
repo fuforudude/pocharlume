@@ -1,0 +1,288 @@
+# Tuiles 16×16 de la Fac (DLC « Temps modernes », région 1) : dalles de béton grises de la cour et des couloirs (sol
+# constructible), chemin de dalles beiges usées bordé d'un joint sombre (là où passent les forces de l'ordre) ; zones :
+# pelouse pelée de la cour (boue) et parquet des amphis (pavés). Mêmes noms que les tuiles de la région 1, préfixés par
+# moderne-fac- (le rendu choisit le jeu d'après `region` du visuel, src/data/visuel.ts). Sans contour, ancre en haut à gauche ;
+# bords et coins dessinés une fois (côté nord, nord-ouest) puis tournés. Dessinées par un script jetable, à retoucher ici.
+categorie tuile
+palette commune
+taille 16 16
+ancre 0 0
+contour non
+couleur h 4e5250
+couleur H 454947
+couleur n 5a5e5b
+couleur l 3b3f3d
+couleur k 2c2a27
+couleur m 8a7e68
+couleur M 7d725e
+couleur N 978b74
+couleur 1 4b5a33
+couleur 2 56683a
+couleur 3 6a5a3c
+couleur 4 6e4630
+couleur 5 5c3a27
+couleur 6 7d5338
+couleur w d8d4c8
+couleur 7 c84a6a
+
+# Dalles de béton : la plus fréquente.
+sprite moderne-fac-herbe-1
+hhhnhhhlhnhhHhhh
+hnhhhhnlHhHhhnhH
+hhhhhhhlhhhhHhhh
+hhhhhhnlhhhhhhhh
+hhhHhhhlhhhhhhhh
+hHhhhnhlhhhhhhnh
+hhhhhnhlhhnHhhhH
+llllllllllllllll
+hhhhhhhhhhhhhhhl
+hhhhhHhhhhhhhhhl
+hhhhhhhhhhhhhhnl
+hhHhhhhhhhhhHhhl
+hhhnhhhhhhhhhhhl
+hhhhhhnhnhhhhhhl
+hhhhhhhhhhhhhhhl
+llllllllllllllll
+
+# Dalle fendue, chewing-gum écrasé.
+sprite moderne-fac-herbe-2
+hhnhhhhlhhhhhhhh
+hHhhhhhlhhhhhnhh
+hhhhhhhlhhhhhhhh
+hhhlhhhlhhhhnhnh
+hhhhlhhlhhhhhhhh
+nhhnllhlhhhhhhhh
+HHhnhhhlhnhhHhhh
+llllllllllllllll
+hhhHhhhhhhhhhhHl
+hhhhhhhhhhhhhhhl
+nhhhhhhhhnhhhnhl
+hnhhhhhhhhhkHhnl
+hhhhhHnhhhhhhhhl
+hhHhhhhhhhHnhhhl
+hhhhhhhhhhhhhhhl
+llllllllllllllll
+
+# Tract tombé, autocollant rose.
+sprite moderne-fac-herbe-3
+hhhhhhhlhhhhhhhh
+HhhhhnhlhhhHhhhh
+hhhhhhHlhwNwhhhh
+hhhhhhhlHwwwhhhh
+HhhhhhhlhhHhhhhh
+hhhhhhhlhhhhhhnh
+hhhhhhhlhhhhhnhh
+llllllllllllllll
+hhhhhhhhhhnhhhHl
+hhhnhnhhhhhhhhhl
+hh77hhhhhhhhhhhl
+hh7HhhHhhHhhhhhl
+hhhhhhhhhhhhhhhl
+hnhhhhhhhhhhhhhl
+hhhnhhhhHhhhhhHl
+llllllllllllllll
+
+# Dalles beiges usées du passage.
+sprite moderne-fac-chemin-1
+MMMMMMMMMMMMMMMM
+MmmmmmmmmmMmmmMm
+Mmmmmmmmmmmmmmmm
+MmmMmmNmmmmmMMmm
+MmmmmmMmmmMmmmmm
+MmmmmmmMmmmmmmmm
+Mmmmmmmmmmmmmmmm
+MmmmmmmmmMmmmmmm
+MMMMMMMMMMMMMMMM
+mmmmmmmmMmmmmmMm
+mmmmmmmmMmmmmmmm
+mmmmmMmmMmmmmmmm
+mmMMmmmmMmmmmMmm
+mmmmmmmmMmmmmmmm
+mmmNmNmmMmmmmmmm
+mmmmmmmmMmmmmmmm
+
+# Dalle tachée, mégot.
+sprite moderne-fac-chemin-2
+MMMMMMMMMMMMMMMM
+MmmmmmmmMmmmmmmm
+MmmNmmmmmmmmmmmm
+MmmmmmmmmMmMmMmm
+MmmmkMmmmMmmmmmm
+MNmmMmmmNMmMmmNm
+MmNmmmmmmmmmmmmM
+Mmmmmmmmmmmmmmmm
+MMMMMMMMMMMMMMMM
+mmmmmNmmMmmmmmmm
+mMmmmmmMMmmmmmmm
+mmmmmmmmMmmwwmmM
+mmmmmMmmMmmmmmmm
+mNMmmmmmMMmmmmmm
+mmMmmmmMMmmmmmmm
+mmmmmmNmMmmmmmmm
+
+# Bord : sol au nord, chemin au sud (joint sombre puis rebord clair) ; -e, -s, -o par rotation.
+sprite moderne-fac-chemin-bord-n
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+kkkkkkkkkkkkkkkk
+NNNNNNNNNNNNNNNN
+mmmmmmmmmmmmmmmm
+mmmmmmmMmmmmmmmm
+mmmmmmmmmmmmmmmm
+MMMMMMMMMMMMMMMM
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmMmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmMmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+
+sprite moderne-fac-chemin-bord-e
+anim repos
+cadre moderne-fac-chemin-bord-n/repos.0 tourne 90
+
+sprite moderne-fac-chemin-bord-s
+anim repos
+cadre moderne-fac-chemin-bord-n/repos.0 tourne 180
+
+sprite moderne-fac-chemin-bord-o
+anim repos
+cadre moderne-fac-chemin-bord-n/repos.0 tourne 270
+
+# Coin extérieur : sol au nord et à l’ouest (virage).
+sprite moderne-fac-chemin-coin-ext-no
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhkkkkkkkkkkkk
+hhhkkNNNNNNNNNNN
+hhhkNmmmmmmmmmmm
+hhhkNmmmmmmmmmmm
+hhhkNmmmmmmmmmmm
+hhhkNmmmmmmmmmmm
+hhhkNmmmmmmmmmmm
+hhhkNmmmmmmmmmmm
+hhhkNmmmmmmmmmmm
+hhhkNmmmmmmmmmmm
+hhhkNmmmmmmmmmmm
+hhhkNmmmmmmmmmmm
+hhhkNmmmmmmmmmmm
+
+sprite moderne-fac-chemin-coin-ext-ne
+anim repos
+cadre moderne-fac-chemin-coin-ext-no/repos.0 tourne 90
+
+sprite moderne-fac-chemin-coin-ext-se
+anim repos
+cadre moderne-fac-chemin-coin-ext-no/repos.0 tourne 180
+
+sprite moderne-fac-chemin-coin-ext-so
+anim repos
+cadre moderne-fac-chemin-coin-ext-no/repos.0 tourne 270
+
+# Coin intérieur : un peu de sol au nord-ouest seulement.
+sprite moderne-fac-chemin-coin-int-no
+hhhkNmmmmmmmmmmm
+hhhkNmmmmmmmmmmm
+hhhkNmmmmmmmmmmm
+kkkkNmmmmmmmmmmm
+NNNNNmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+mmmmmmmmmmmmmmmm
+
+sprite moderne-fac-chemin-coin-int-ne
+anim repos
+cadre moderne-fac-chemin-coin-int-no/repos.0 tourne 90
+
+sprite moderne-fac-chemin-coin-int-se
+anim repos
+cadre moderne-fac-chemin-coin-int-no/repos.0 tourne 180
+
+sprite moderne-fac-chemin-coin-int-so
+anim repos
+cadre moderne-fac-chemin-coin-int-no/repos.0 tourne 270
+
+# Pelouse pelée de la cour (zone « boue »).
+sprite moderne-fac-boue-1
+1221221231112221
+3122222121113111
+1221111212123111
+2312211332111211
+3121313132223231
+1211121111211212
+1222221211113123
+2122132211113233
+2212121211121211
+1112231132111232
+1113111123322112
+1122121231211122
+2211131111111111
+1312222113211131
+1212123122232111
+1211112112132222
+
+sprite moderne-fac-boue-2
+1121311311221122
+2111121221212211
+2121321212222131
+1121213222222232
+2112321112221112
+2112211211232112
+1222233332232321
+111123H332221211
+2111233333221111
+2222122331111221
+1112122232323121
+2211331222221122
+2321222222122112
+2312122112321132
+2122312133222112
+1223223222222221
+
+# Parquet des amphis (zone « pavés »).
+sprite moderne-fac-paves-1
+4444444454444444
+4444444454444444
+4444444454444444
+5555555555555555
+4444444446444445
+4444464444644645
+4444444444644445
+5555555555555555
+4446444454446444
+4446444454444644
+4444464454444464
+5555555555555555
+4444444444444465
+4444444444444445
+4444444444444445
+5555555555555555
+
+sprite moderne-fac-paves-2
+4464446444454644
+4444466444454444
+4444444644454444
+5555555555555555
+4454444444644444
+4454444444644444
+6454444644444644
+5555555555555555
+6444444444456444
+4444444444454444
+4444444444454444
+5555555555555555
+4654444446446444
+4454644444444444
+4454444444444444
+5555555555555555

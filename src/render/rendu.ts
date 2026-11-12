@@ -25,6 +25,7 @@ import { tuileTouchee } from './zones';
 import { zoomPourCase } from './zoom-tactile';
 import { CATEGORIE, DECALAGE_BASE_TOUR, DEPLOIEMENT_NUAGE, Suivi, type OptionsCollection, type Visuel, type VisuelProjectile } from './suivi';
 import { DessinEvenementsNiveau } from './evenements-niveau';
+import { DessinSceneVivante } from './scene-vivante';
 import { DEMI_VISEE_PLACE, DessinGimmicks, placeAffichee } from './gimmicks';
 
 export type { OptionsCollection } from './suivi';
@@ -179,6 +180,8 @@ export class Rendu {
   private readonly ondulation: SpriteAtlas | undefined;
   private readonly gimmicks: DessinGimmicks;
   private readonly evenementsNiveau: DessinEvenementsNiveau;
+  /** Mise en scène vivante des cartes du DLC (foule qui scande, banderoles, fumigènes) ; inactive ailleurs. */
+  private readonly scene: DessinSceneVivante;
 
   /**
    * `collection` : les skins et le familier équipés par le joueur (voir `OptionsCollection`) ; on peut aussi les donner ou les
@@ -202,6 +205,7 @@ export class Rendu {
     this.suivi = new Suivi(atlas, this.effets);
     this.gimmicks = new DessinGimmicks(atlas, ctx);
     this.evenementsNiveau = new DessinEvenementsNiveau(ctx);
+    this.scene = new DessinSceneVivante(ctx, visuel.scene);
     this.etourdi = atlas.sprite('etourdi');
     this.piege = atlas.sprite('piege');
     this.tuileVoile = atlas.sprite('effet-voile-nuit-tuile');
@@ -255,6 +259,7 @@ export class Rendu {
   apresPas(etat: EtatPartie, temps: number): void {
     this.suivi.apresPas(etat, temps);
     this.evenementsNiveau.apresPas(etat, temps);
+    this.scene.apresPas(etat, temps);
     this.effets.nettoyer(temps);
   }
 
@@ -320,6 +325,7 @@ export class Rendu {
     this.gimmicks.dessinerCouloirs(etat, temps, this.suivi.animationsReduites(), ox, oy, l);
     // Événements datés et foules (DLC) : chemins fermés, coupures et zones des foules, sur le sol.
     this.evenementsNiveau.dessinerSol(etat, ox, oy);
+    if (this.scene.active) this.scene.dessinerSol(etat, temps, this.suivi.animationsReduites(), ox, oy);
 
     this.dessinerCadavres(temps, ox, oy);
     this.dessinerAuSol(etat, temps, ox, oy);
@@ -335,6 +341,7 @@ export class Rendu {
     this.dessinerProjectiles(alpha, temps, ox, oy);
     this.dessinerEffets(temps, ox, oy);
     this.evenementsNiveau.dessinerDessus(etat, temps, ox, oy);
+    if (this.scene.active) this.scene.dessinerDessus(temps, this.suivi.animationsReduites(), ox, oy);
     this.dessinerBarres(temps, l, h);
     this.dessinerSurbrillance(etat, surb, alpha, temps, ox, oy);
 
