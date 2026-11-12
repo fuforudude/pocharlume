@@ -7,7 +7,6 @@
 // - la simulation avance par pas fixes (PasFixes), le rendu interpole entre deux pas ;
 // - tout ce que la partie installe (événements, DOM, boucle) est retiré par `arreter()`.
 import { audio, jouerInterface } from '../audio';
-import { NIVEAUX_PAR_REGION } from '../data/meta';
 import type { NiveauCampagne } from '../data/visuel';
 import { avancer, caseExiste, centreCase, creerPartie, derniereVagueTerminee, validerAction } from '../engine';
 import type { Action, ConfigPartie, EntreeJournal, EtatPartie, ResultatAction } from '../engine';
@@ -36,7 +35,7 @@ import { elementsMenu, type ElementMenu } from './menu-cercle';
 import { afficherNouvelleParticularite } from './nouvelle-particularite';
 import { contenuParticularite, contenuRadeau, type TypeParticularite } from './particularites';
 import { centreRadeauAffiche, placeAffichee } from '../render/gimmicks';
-import { cleParoleBoss } from './parole-boss';
+import { cleParoleBoss, regionDeParole } from './parole-boss';
 import { texteRefus } from './refus';
 import { fouleVisee, reunirParoles, texteBandeau, toucherFoule } from './evenements-niveau';
 import { statueTouchee } from './statue';
@@ -206,8 +205,10 @@ export async function lancerNiveau(
   surFin: (resultat: ResultatPartie) => unknown,
   options: OptionsPartie = {},
 ): Promise<PartieEnCours> {
-  // Une partie du DLC « Temps modernes » charge aussi l'atlas à part du DLC ; l'histoire seulement si un skin du DLC est porté.
-  const atlas = await chargerAtlas(campagneDeLAtlas(campagneDe(options.reprise?.niveau ?? niveau.niveau), options.skinsModernes));
+  // Une partie du DLC « Temps modernes » charge aussi l'atlas à part du DLC ; l'histoire seulement si un skin du DLC porté sert dans
+  // cette partie (les 4 familles, la tour divine du dieu joué, le héros joué).
+  const configDeLaPartie = options.reprise?.config ?? config;
+  const atlas = await chargerAtlas(campagneDeLAtlas(campagneDe(options.reprise?.niveau ?? niveau.niveau), options.skinsModernes, configDeLaPartie.dieu, configDeLaPartie.heros));
   const etat = options.reprise ?? creerPartie(niveau.niveau, config);
   const parent = options.parent ?? document.body;
   const controleur = new AbortController();
@@ -356,7 +357,8 @@ export async function lancerNiveau(
   const objetsUtilises = (): string[] => etat.config.objets.filter((_, i) => etat.objetsUtilises[i] === true);
   const resultatDe = (statut: 'victoire' | 'defaite' | 'abandon'): ResultatPartie => ({
     niveau: niveau.numero,
-    ...(niveau.niveau.campagne === 'moderne' ? { campagne: 'moderne' as const } : {}),
+    // Même source que la partie rangée (save/partie.ts) : l'état de la partie, pas le niveau passé en paramètre.
+    ...(etat.niveau.campagne === 'moderne' ? { campagne: 'moderne' as const } : {}),
     statut,
     etoiles: statut === 'victoire' ? etat.etoiles : 0,
     vies: etat.vies,
@@ -762,9 +764,7 @@ export async function lancerNiveau(
         }
         for (const evenement of etat.evenements) {
           if (evenement.type !== 'vague') continue;
-          const dlc = niveau.campagne === 'moderne';
-          const region = dlc ? Math.floor((niveau.numero - 1) / NIVEAUX_PAR_REGION) + 1 : niveau.visuel.region;
-          const cle = cleParoleBoss(etat.niveau.vagues, evenement.index, region, niveau.boss, dlc);
+          const cle = cleParoleBoss(etat.niveau.vagues, evenement.index, regionDeParole(niveau), niveau.boss, niveau.campagne === 'moderne');
           if (cle) paroles.push(t(cle));
         }
         const parole = reunirParoles(paroles);

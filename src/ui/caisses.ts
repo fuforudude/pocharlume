@@ -49,6 +49,8 @@ export function afficherCaisses(parent: HTMLElement, options: OptionsCaisses): E
   const { atlas, session } = options;
   /** Une ouverture est en cours (ou sa révélation affichée) : un second geste n'ouvre rien de plus. */
   let occupe = false;
+  // L'atlas du DLC se charge une fois, dès l'ouverture de l'écran : la révélation d'une caisse du DLC l'attend avant de lire l'icône.
+  const atlasModerne: Promise<void> = (options.chargerAtlasModerne?.() ?? Promise.resolve()).then(() => undefined, (erreur: unknown) => { console.error(erreur); });
 
   const ecran = creerEcranMeta(parent, {
     classe: 'ecran-caisses',
@@ -116,6 +118,7 @@ export function afficherCaisses(parent: HTMLElement, options: OptionsCaisses): E
     if (type === MODERNE) {
       const r = await session.ouvrirCaisseModerne();
       if (!r.ok) return r;
+      await atlasModerne;
       const def = defSkinModerne(r.detail.id);
       return { ok: true, revele: { ...r.detail, nom: def ? tCle(def.nom) : r.detail.id, icone: def ? atlas.iconeUrl(spriteDuSkinModerne(def), 3) : '' } };
     }
@@ -219,9 +222,10 @@ export function afficherCaisses(parent: HTMLElement, options: OptionsCaisses): E
     ouvrir.append(el('span', '', t('caisses.prix_badges', { n: vue.prix })), jetonBadge());
     ouvrir.classList.toggle('grise', !vue.peutPayer);
 
-    // Sur un écran bas, la note se lit au survol ou à l'appui long du bouton (libellé et bulle du navigateur).
+    // La note complète se lit aussi dans la bulle du bouton (survol à la souris).
     ouvrir.title = t('caisses.badges_gagnes');
-    carte.append(tete, chances, garantie, ouvrir, el('span', 'caisse-note', t('caisses.badges_gagnes')));
+    // Écran bas : la note longue disparaît, une ligne courte reste toujours visible (la bulle `title` ne s'affiche pas au toucher).
+    carte.append(tete, chances, garantie, ouvrir, el('span', 'caisse-note', t('caisses.badges_gagnes')), el('span', 'caisse-note-courte', t('caisses.badges_gagnes_court')));
     return carte;
   }
 
@@ -238,6 +242,6 @@ export function afficherCaisses(parent: HTMLElement, options: OptionsCaisses): E
   ecran.corps.classList.add('caisses-corps');
   dessiner();
   // Les images du DLC arrivent avec son atlas (chargé une fois) : on redessine alors, si l'écran est encore là.
-  options.chargerAtlasModerne?.().then(() => { if (ecran.racine.isConnected) dessiner(); }).catch((erreur: unknown) => { console.error(erreur); });
+  void atlasModerne.then(() => { if (ecran.racine.isConnected) dessiner(); });
   return ecran;
 }

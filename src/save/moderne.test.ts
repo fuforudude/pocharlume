@@ -93,8 +93,22 @@ describe('campagne Temps modernes : format v9', () => {
     ['emplacement mal nommé', { 'moderne.collection.equipes': { 'Tir!': 'skin_moderne_tir' } }],
     ['emplacement au nom hérité d’Object', { 'moderne.collection.equipes': { constructor: 'skin_moderne_tir' } }],
     ['équipement qui n’est pas un objet', { 'moderne.collection.equipes': [] }],
+    ['skin connu porté sur le mauvais emplacement', { 'moderne.collection.equipes': { caserne: 'skin_moderne_tir' } }],
+    ['skin de héros porté sur une tour', { 'moderne.collection.equipes': { tir: 'skin_moderne_plume' } }],
   ])('refuse une campagne du DLC abîmée : %s', (_, changements) => {
     expect(validerSauvegarde(variante(changements, avecModerne(moderneRemplie()))).ok).toBe(false);
+  });
+
+  it('un skin inconnu du catalogue, obtenu, n’est jamais rejeté (quel que soit l’emplacement)', () => {
+    const base = moderneRemplie();
+    const m = { ...base, collection: { ...base.collection, skinsTours: [...base.collection.skinsTours, 'skin_moderne_futur'].sort(), equipes: { magie: 'skin_moderne_futur' } } };
+    expect(validerSauvegarde(avecModerne(m)).ok).toBe(true);
+  });
+
+  it('une v9 locale sans `equipes` est acceptée et complétée par {}', () => {
+    const r = validerSauvegarde(variante({ 'moderne.collection.equipes': SUPPRIME }, avecModerne(moderneRemplie())));
+    expect(r.ok && r.valeur.moderne.collection.equipes).toEqual({});
+    expect(r.ok && r.valeur.moderne.collection.skinsTours).toEqual(moderneRemplie().collection.skinsTours);
   });
 
   it('refuse les clés empoisonnées dans les tables du DLC', () => {

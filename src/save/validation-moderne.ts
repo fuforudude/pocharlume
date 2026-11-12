@@ -1,8 +1,11 @@
 // Validation stricte de ce que la sauvegarde v9 ajoute : la campagne « Temps modernes » (`moderne`). Même esprit que validation.ts :
 // types exacts, bornes, aucune clé en trop, propriétés propres seulement, copie neuve. Pour les skins et les titres du DLC, on vérifie
 // leur forme (identifiant bien formé, sans doublon, triés), pas leur existence dans le catalogue : un identifiant inconnu est écarté à
-// la normalisation d'un import (normalisation.ts), jamais une cause de rejet de toute la sauvegarde. Un skin porté doit être obtenu.
+// la normalisation d'un import (normalisation.ts), jamais une cause de rejet de toute la sauvegarde. Un skin porté doit être obtenu, et un
+// skin *connu* du catalogue ne se porte que sur son emplacement (comme dans l'histoire) ; un identifiant inconnu n'est jamais rejeté.
+// Une v9 écrite avant l'ajout de `equipes` (branche de développement) est tolérée : l'équipement manquant devient `{}`.
 import { NIVEAU_MAX_MODERNE } from '../data/campagnes';
+import { defSkinModerne, skinModerneAcceptable } from '../data/recompenses-moderne';
 import { CAISSES_AVANT_GARANTIE, CARTES_INFINI_MAX, PLAFOND_MONNAIE, VAGUE_MAX_INFINI } from '../data/meta';
 import type { CampagneModerne, CollectionModerne } from './format';
 import { avecCles, echec, estEnregistrement, estEntierEntre, ok, poser, valeur, type Resultat } from './validation-base';
@@ -53,12 +56,14 @@ function validerEquipesModernes(x: unknown, obtenus: readonly string[]): Resulta
     if (!ID_DLC.test(cible) || cible in Object.prototype) return echec(`moderne.collection.equipes : emplacement invalide « ${cible} »`);
     const skin = valeur(x, cible);
     if (typeof skin !== 'string' || !obtenus.includes(skin)) return echec(`moderne.collection.equipes.${cible} : skin non obtenu`);
+    if (defSkinModerne(skin) !== undefined && !skinModerneAcceptable(cible, skin)) return echec(`moderne.collection.equipes.${cible} : ce skin ne se porte pas à cet emplacement`);
     poser(equipes, cible, skin);
   }
   return ok(equipes);
 }
 
-function validerCollectionModerne(x: unknown): Resultat<CollectionModerne> {
+function validerCollectionModerne(brut: unknown): Resultat<CollectionModerne> {
+  const x = estEnregistrement(brut) && !Object.hasOwn(brut, 'equipes') ? { ...brut, equipes: {} } : brut;
   const base = avecCles(x, ['skinsTours', 'skinsHeros', 'garantie', 'equipes'], 'moderne.collection');
   if (!base.ok) return base;
   const skinsTours = validerListeIds(valeur(base.valeur, 'skinsTours'), 'moderne.collection.skinsTours');

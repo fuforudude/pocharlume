@@ -27,8 +27,10 @@ export function enregistrerVictoireModerne(s: Sauvegarde, numero: number, diffic
 
 /**
  * La sauvegarde telle qu'une carte du monde de cette campagne la lit : pour le DLC, sa progression, ses défis et sa région ouverte prennent
- * la place de ceux de l'histoire (le reste, monnaies comprises, est celui du joueur). Sert seulement à l'affichage (nœuds, régions, étoiles
- * par difficulté, modes d'une fiche) : on n'écrit jamais cette vue. Pour l'histoire, rend la sauvegarde elle-même.
+ * la place de ceux de l'histoire (le reste, monnaies comprises, est celui du joueur). Sert à l'affichage (nœuds, régions, étoiles
+ * par difficulté, modes d'une fiche) et, en lecture seulement, à la fin de partie (`enregistrerFinDePartie`), au choix de la configuration
+ * (`configDuChoix`) et à la relance, qui y lisent les étoiles et les défis d'avant la partie : on n'écrit jamais cette vue. Pour
+ * l'histoire, rend la sauvegarde elle-même.
  */
 export function sauvegardeDeCampagne(s: Sauvegarde, campagne: IdCampagne): Sauvegarde {
   if (campagne === 'histoire') return s;

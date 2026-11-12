@@ -60,6 +60,11 @@ function verifierPlan(plan: PlanNiveauModerne): void {
       throw new Error(`Niveau moderne ${String(plan.numero)} : ${quoi} vise le chemin ${String(chemin)}, hors du plan (${String(n)} chemin(s))`);
     }
   }
+  // Une fermeture dont le repli est le chemin fermé lui-même enverrait ses groupes sur un chemin fermé.
+  const fermetures = [...(plan.cheminsFermes ?? []), ...(plan.evenements ?? []).flatMap((e) => (e.type === 'fermer_chemin' ? [e] : []))];
+  for (const f of fermetures) {
+    if (f.repli === f.chemin) throw new Error(`Niveau moderne ${String(plan.numero)} : le chemin ${String(f.chemin)} se ferme avec lui-même pour repli`);
+  }
 }
 
 export function assemblerNiveauModerne(plan: PlanNiveauModerne, vagues: readonly Vague[]): NiveauCampagne {

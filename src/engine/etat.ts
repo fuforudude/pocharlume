@@ -133,9 +133,14 @@ export interface Ennemi {
   vague: number;
   /** Bonus de vitesse de l'aura d'un autre ennemi ce pas-ci (0,25 = +25 %), recalculé à chaque pas. */
   bonusVitesse: number;
-  /** Pas de charge restants et facteur de vitesse de la charge (Prince Croisé). */
+  /**
+   * Pas de charge restants (Prince Croisé, voleur, événement `charge` du DLC) : tant qu'il en reste, l'ennemi passe à travers les soldats.
+   * `accelerationCharge` compte les pas où il va aussi `chargeVitesse` fois plus vite. Égaux pour le Prince Croisé et le voleur ;
+   * plus courte pour l'événement `charge`, qui accélère un temps puis traverse encore les soldats à son allure.
+   */
   charge: number;
   chargeVitesse: number;
+  accelerationCharge: number;
   /** Renversements de soldats encore possibles (Cavalier). */
   renversements: number;
   /** Pas restants avant le prochain bond (Crapaud Gonflé), 0 = prêt. */

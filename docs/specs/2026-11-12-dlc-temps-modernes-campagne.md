@@ -149,3 +149,5 @@ avec ses propres récompenses.
   la traversée dure jusqu'au milieu du chemin. La charge du Prince Croisé (histoire) ne change pas.
 - **Décor et cases de tour** : un déplacement de décor pour l'apparence ne doit pas retirer de bonnes cases de tour ; les grands
   décors se posent sur des cases sans valeur (vérifié par un test).
+- **Décors de la Fac** : les grands décors qui prenaient une case de tour près d'un chemin, et ceux cachés par le fourgon,
+  sont tous déplacés ; aucune liste d'exceptions (décision du 2026-11-12).

@@ -1269,6 +1269,32 @@
   color: var(--sang);
 }
 
+/* Écran bas (740×360) : le butin se range sur deux colonnes et les étoiles rapetissent, pour que le bilan du DLC (jusqu'à six lignes avec
+   badges et titre) tienne avec les boutons ; la carte défile en dernier recours. */
+@media (max-height: 460px) {
+  .ecran.fin .bilan {
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+    column-gap: 18px;
+    row-gap: 1px;
+    min-width: 0;
+    padding: 4px 10px;
+  }
+
+  .ecran.fin .bilan p {
+    font-size: 12px;
+  }
+
+  .ecran.fin .etoile {
+    width: 30px;
+  }
+
+  .ecran.fin .carte {
+    max-height: calc(100% - 8px);
+    overflow-y: auto;
+  }
+}
+
 /* --- Nouvelles découvertes de la fiche d'un niveau (déblocage progressif) --- */
 
 .decouvertes {
@@ -1705,11 +1731,23 @@
   }
 }
 
-/* Écran bas (740×360) : les trois caisses tiennent sans défiler ; la description du DLC et sa note passent en bulle du bouton. */
+/* La ligne courte sur les badges ne sert que sur écran bas, où la note longue est masquée. */
+.caisse-note-courte {
+  display: none;
+  font-size: 11px;
+  color: var(--texte-doux);
+  text-align: center;
+}
+
+/* Écran bas (740×360) : les trois caisses tiennent sans défiler ; la description du DLC passe en bulle du bouton, la note devient une ligne courte. */
 @media (max-height: 460px) {
   .caisse-moderne .desc-longue,
   .caisse-note {
     display: none;
+  }
+
+  .caisse-note-courte {
+    display: block;
   }
 
   .caisse {

@@ -12,9 +12,10 @@ import { creerPartie, serialiser, step } from './partie';
 
 /**
  * Les champs de l'état que le DLC a ajoutés (leur valeur ne dit rien de l'histoire) ; `version` et `versionDonnees` suivent le format de
- * l'état et des données. `dynamique` (événements, chemins, foules) doit rester neutre dans l'histoire : `neutre` le vérifie.
+ * l'état et des données ; `accelerationCharge` vaut toujours `charge` dans l'histoire (Prince Croisé, voleur). `dynamique` (événements,
+ * chemins, foules) doit rester neutre dans l'histoire : `neutre` le vérifie.
  */
-const CHAMPS_DU_DLC = new Set(['tirsEnnemis', 'renvois', 'binome', 'binomeSeul', 'version', 'versionDonnees', 'dynamique']);
+const CHAMPS_DU_DLC = new Set(['tirsEnnemis', 'renvois', 'binome', 'binomeSeul', 'accelerationCharge', 'version', 'versionDonnees', 'dynamique']);
 
 /** Rien de dynamique dans l'histoire : ni événement, ni chemin fermé, ni barrage, ni foule. */
 function neutre(etat: Parameters<typeof serialiser>[0]): boolean {

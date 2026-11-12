@@ -234,8 +234,9 @@ export const BIBLIOTHEQUE: CarteModerne = {
     decor('moderne-poubelle', 7, 1.5),
     decor('moderne-tracts', 16, 1.5),
     decor('moderne-tracts', 20.5, 1.5, true),
-    decor('moderne-etagere', 8.5, 16.5),
-    decor('moderne-tableau', 26, 8.5),
+    // Grands décors sur des cases sans valeur (bord sud ; entre les gradins et le haut de la carte), hors de la silhouette des fourgons.
+    decor('moderne-etagere', 9, 17.875),
+    decor('moderne-tableau', 19, 4),
     decor('moderne-plante', 17.5, 2),
     decor('moderne-cartons', 22.5, 1.5, true),
     decor('moderne-cartons', 31, 1.5),
