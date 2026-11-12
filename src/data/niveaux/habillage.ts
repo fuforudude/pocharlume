@@ -77,6 +77,16 @@ export const GRANDS_DECORS: ReadonlySet<string> = new Set([
   'moderne-sono',
   'moderne-tableau',
   'moderne-tente',
+  // DLC « Temps modernes », la Préfecture (art/dlc-moderne/decor/prefecture-decor.txt)
+  'moderne-bassin',
+  'moderne-buffet',
+  'moderne-bureau',
+  'moderne-cheminee',
+  'moderne-colonne',
+  'moderne-grille',
+  'moderne-guerite',
+  'moderne-if',
+  'moderne-vase',
 ]);
 
 /** Emprise d'un décor : tout le sprite (le rectangle de pixels, ancre comprise). */

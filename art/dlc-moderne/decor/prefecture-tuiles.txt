@@ -1,0 +1,288 @@
+# Tuiles 16×16 de la Préfecture (DLC « Temps modernes », région 3) : grandes dalles de pierre grise de la cour d'honneur (sol
+# constructible), allée de gravier clair bordée d'une bordure de pierre sombre (là où passent les forces de l'ordre) ; zones :
+# gazon tondu en bandes des jardins à la française (boue) et parquet à bâtons rompus des salons (pavés). Mêmes noms que les tuiles de
+# la région 1, préfixés par moderne-prefecture- (le rendu choisit le jeu d'après `region` du visuel, src/data/visuel.ts). Sans contour,
+# ancre en haut à gauche ; bords et coins dessinés une fois (côté nord, nord-ouest) puis tournés. Dessinées par un script jetable, à
+# retoucher ici.
+categorie tuile
+palette commune
+taille 16 16
+ancre 0 0
+contour non
+couleur h 70747b
+couleur H 676b72
+couleur n 7d8188
+couleur l 55595f
+couleur k 34363a
+couleur m c3b18c
+couleur M a7946f
+couleur N dccba6
+couleur 1 3d6a33
+couleur 2 487a3c
+couleur 3 335b2c
+couleur 4 8c5c35
+couleur 5 6b4327
+couleur 6 a56f42
+couleur w d8d4c8
+
+# Dalles de pierre de la cour d’honneur : la plus fréquente.
+sprite moderne-prefecture-herbe-1
+nnhnnhnnnhlnnnhh
+hhhhhhhnhhlHnhhh
+hhhhhhnhhhlHhhhh
+hhhhhhhhhnlhhhhh
+hhhhhhnhhhlnhhhn
+hhhhhHhhhhlhhhhh
+hhhhhhhhhhlhhhhh
+llllllllllllllll
+Hhnlnnnhnhhhnhnn
+HhhlhhnhhhhHHhhh
+hhhlhhhnhhhhhhhh
+hhhlHhhhhhhhhhnh
+hhnlhhnhhhhhHhhh
+hhhlhhnhHhhhhhhh
+hhHlhhhhhhnhhhnn
+llllllllllllllll
+
+# Dalle fêlée.
+sprite moderne-prefecture-herbe-2
+nnhnnhnnhhlnnnhh
+nhhhhhhhhhlhhhhh
+hhhhhhhhHhlhhHhh
+hhhHhlhhhhlhhhhh
+hhhhhhlhhhlhhhhh
+hhhhhhlhhhlhhhhh
+hhnhhhhhhHlhhhhh
+llllllllllllllll
+hhnlnnnHnhhHnhnn
+Hhhlhhhhhhhhhhhh
+hhhlhnhhHhhhHhhh
+hnhlhhhhhhhhnlhh
+hhhlhnhHhhhhlhhH
+hhhlhhhhhnhHhhhh
+hhhlnhhhhhHhHhhh
+llllllllllllllll
+
+# Tract tombé, mégot.
+sprite moderne-prefecture-herbe-3
+nnhnnhnnhhlnnnhh
+hhHhhhHhhhlhhhhh
+hhhhhhhhnnlhhhhh
+hHhhhhkHhhlnhhhh
+hhhhhhHhhhlhhhhh
+hhhhhhhHhhlhhhhH
+hhhhhhhhHhlhhhHh
+llllllllllllllll
+hhnlnnnhnhhhnhnn
+hhhlhhhhhhHhhhHH
+hhHlHnhhhhhwnwhh
+hhhlhhhhhhhwwwhh
+hhhlhhhhhhhhhhhh
+hhHlhhhHhhhhhhhh
+hhhlhhhhhnhhhhhh
+llllllllllllllll
+
+# Gravier ratissé de l’allée.
+sprite moderne-prefecture-chemin-1
+MmmmmmmNNMmNNNmm
+mmmmmmmmmmmmmmmm
+mNMNNmmNMNmmmmMm
+MmmmmmmmMmmmmMmm
+mmmmmNmmmNmMmmNm
+mMNmmmmNmmmmmmmm
+NNmNmmmmmmNmNmmm
+mmmmmmmmNmMNmmmm
+mmmNmmMNmMmmmmMM
+MmmmMmmmmmmmMmmN
+mmmmmmNmNmNMmmmm
+NMmmmmMmmMmmMMmm
+MMmmmmmmmMmmmmNM
+mMmmmmNmmmmMNmmm
+MmmmNmmmmmmmNmmm
+mmmmmmMNmmmMmNmm
+
+# Gravier piétiné, un caillou sombre, un papier.
+sprite moderne-prefecture-chemin-2
+mmmmmMmNMmMmmNmM
+mmNmNmmmmmmmmmMM
+mmmmMmmMMmmmmMmm
+mmmmMMmmNNNmmmmm
+MmmmMmmmmMMNNMMm
+MNmmkMmmmmmNMNmm
+mmmNmmmmmmmMmMmm
+mmMNmmmMmmMmmNmm
+mmmNmmmNNMMNmMmM
+mmmmNmNmmmMMNMmm
+NmmmmMmmNmmmmmmm
+NNMmmmmmmNwwmMmm
+mmmmmmmMmMmMmmmm
+mmmmmmmMmmmMmmMm
+mmmmmNMmmMMmmmmM
+MmMMMmmmmmNmmmmm
+
+# Bord : pierre au nord, bordure de pierre sombre, gravier au sud ; -e, -s, -o par rotation.
+sprite moderne-prefecture-chemin-bord-n
+hhhhhhhhhhhhhhHh
+hhhhhHhHhHhhhhhh
+hhhhhhhhhhhhhhhh
+kkkkkkkkkkkkkkkk
+lllllllklllllllk
+MmmMNMmmNmMmmmmm
+mNmmMmmMNmmmNmNN
+MmNmmMMmmmmmmmmm
+NNNNmmmmNMmmMmmm
+mmMmmNmmMNmmmMmm
+mmmNmmmmMMmmmmmM
+NMmMmmNmmmmmNmmM
+mmmmmNmMmmMMmmmm
+mmNNmmmNmmmNMmMm
+mmmmmmMmNNmNmmmM
+NMMmMmmmmMMmmmNM
+
+sprite moderne-prefecture-chemin-bord-e
+anim repos
+cadre moderne-prefecture-chemin-bord-n/repos.0 tourne 90
+
+sprite moderne-prefecture-chemin-bord-s
+anim repos
+cadre moderne-prefecture-chemin-bord-n/repos.0 tourne 180
+
+sprite moderne-prefecture-chemin-bord-o
+anim repos
+cadre moderne-prefecture-chemin-bord-n/repos.0 tourne 270
+
+# Coin extérieur : pierre au nord et à l’ouest (virage).
+sprite moderne-prefecture-chemin-coin-ext-no
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhhhhhhhhhhhhh
+hhhhkkkkkkkkkkkk
+hhhkklllllllllll
+hhhklmmmMmmMMmMm
+hhhklmmmmMmmNmmN
+hhhklNNmMMmmNmNN
+hhhklmmmmmMmmmMm
+hhhklNmmNmmmmNNm
+hhhklMMMmNNmmMmm
+hhhklmmNNMmmmMmm
+hhhklNmmmmmmMmmm
+hhhklmmmmNNMmmNM
+hhhklmNmmmmNmmMM
+hhhklmNmmmmNmmmm
+
+sprite moderne-prefecture-chemin-coin-ext-ne
+anim repos
+cadre moderne-prefecture-chemin-coin-ext-no/repos.0 tourne 90
+
+sprite moderne-prefecture-chemin-coin-ext-se
+anim repos
+cadre moderne-prefecture-chemin-coin-ext-no/repos.0 tourne 180
+
+sprite moderne-prefecture-chemin-coin-ext-so
+anim repos
+cadre moderne-prefecture-chemin-coin-ext-no/repos.0 tourne 270
+
+# Coin intérieur : un peu de pierre au nord-ouest seulement.
+sprite moderne-prefecture-chemin-coin-int-no
+hhhklmMMmNmmmmMm
+hhhklmmmNmmmMmmm
+hhhklNmmmmmmNmmM
+kkkklMMmmmMmMmmM
+lllllNNmmmmNNmMm
+mNmMmmmmMMmmmNmN
+NMmMmmmNmmmMMMMM
+mmmmmmmMmNNmNNmm
+NmmmmmmNmMMmmMmN
+mmmMmmmmmmMMmmmM
+mMmmmMmmNmmMMmMM
+NmmmNMmmNmmMMmmN
+mmmNmmmmmmmmNNmN
+mmNmmmmmmMmmMmmM
+mmMMNMmmMmmmmmmm
+mmmmmMmmNmmmmmmm
+
+sprite moderne-prefecture-chemin-coin-int-ne
+anim repos
+cadre moderne-prefecture-chemin-coin-int-no/repos.0 tourne 90
+
+sprite moderne-prefecture-chemin-coin-int-se
+anim repos
+cadre moderne-prefecture-chemin-coin-int-no/repos.0 tourne 180
+
+sprite moderne-prefecture-chemin-coin-int-so
+anim repos
+cadre moderne-prefecture-chemin-coin-int-no/repos.0 tourne 270
+
+# Gazon tondu en bandes des jardins à la française (zone « boue »).
+sprite moderne-prefecture-boue-1
+2222113122221111
+2322111122221111
+2222111122221131
+2222111122221111
+2222111122223111
+2222111122223311
+2223111122321111
+2222111122231111
+2332111122221113
+2322111122223311
+2222111132321111
+2322111123223111
+2222111122221111
+2222111123321111
+2222111122221111
+2222131122221131
+
+sprite moderne-prefecture-boue-2
+1131222311112222
+3113222211112223
+1111222211112223
+1111232211112222
+1111222211112222
+1111322211112322
+113132ww33112322
+113123F211112222
+1131222211112223
+1111222211112322
+1111222211113222
+1113223211132222
+1111222213112223
+1111222211112223
+1111222213112222
+1111222211112222
+
+# Parquet à bâtons rompus des salons (zone « pavés »).
+sprite moderne-prefecture-paves-1
+5466664454666644
+4666644556666445
+6666444456664444
+6665444656654446
+6644546656445466
+6444456654444566
+4454665654546656
+4546666455466664
+5466664454666644
+4666644556666445
+6666444456664444
+6665444656654446
+6644546656445466
+6444456654444566
+4454665654546656
+4546666455466664
+
+sprite moderne-prefecture-paves-2
+5666444456665444
+6664444566645445
+6654445666545456
+6445466664455666
+4444566644445666
+4446656444465564
+4466664444665644
+4566644445665444
+5666444456665444
+6664444566645445
+6654445666545456
+6445466664455666
+4444566644445666
+4446656444465564
+4466664444665644
+4566644445665444
