@@ -93,11 +93,11 @@ describe('campagne Temps modernes : format v9', () => {
   });
 
   it('refuse les clés empoisonnées dans les tables du DLC', () => {
-    const json = JSON.stringify(avecModerne(moderneRemplie())).replace('"amphi":14', '"__proto__":14');
+    // La clé empoisonnée porte un objet : une pollution laisserait `pollue` sur tous les objets.
+    const json = JSON.stringify(avecModerne(moderneRemplie())).replace('"amphi":14', '"__proto__":{"pollue":1}');
     expect(validerSauvegarde(JSON.parse(json)).ok).toBe(false);
-    // Aucune pollution du prototype : la clé empoisonnée n'a rien laissé sur Object.prototype.
+    expect((({}) as Record<string, unknown>).pollue).toBeUndefined();
     expect(Object.keys(Object.prototype)).toEqual([]);
-    expect(Object.hasOwn(Object.prototype, 'amphi')).toBe(false);
   });
 });
 

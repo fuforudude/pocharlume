@@ -11,7 +11,7 @@ import { niveauDeblocage } from './deblocage';
 import type { DefNiveauTour, Point } from './definitions';
 import type { EtatPartie, FamilleTour, Tour } from './etat';
 import { ouvrirPas } from './evenements';
-import { caseInterditeEnPartie, payerFoule, pointDansBarrage, validerActivationFoule } from './evenements-niveau';
+import { caseInterditeEnPartie, payerFoule, pointDansBarrage, rattraperChemins, validerActivationFoule } from './evenements-niveau';
 import { gimmickRadeau, placeExiste, positionPlace } from './gimmicks/radeau';
 import { caseExiste, centreCase, ralliementParDefaut, tourDuLieu } from './grille';
 import { chercherParId, distance2 } from './recherche';
@@ -390,6 +390,7 @@ function executer(etat: EtatPartie, action: Action): void {
     case 'appelerVague': {
       const bonus = bonusAppel(etat);
       etat.aretes += bonus;
+      rattraperChemins(etat);
       lancerVague(etat, bonus);
       return;
     }

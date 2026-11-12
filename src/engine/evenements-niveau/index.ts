@@ -54,6 +54,11 @@ export function verifierDynamique(niveau: Niveau): void {
   verifierCheminsFermes(niveau);
   (niveau.evenements ?? []).forEach((e, i) => {
     const quoi = `Événement ${String(i)} (${e.type})`;
+    const avant = i > 0 ? niveau.evenements?.[i - 1] : undefined;
+    // L'ordre écrit est l'ordre de jeu (défi Fer, replis, rattrapage) : il doit être croissant en (vague, délai).
+    if (avant && (e.vague < avant.vague || (e.vague === avant.vague && (e.delai ?? EVENEMENTS_NIVEAU.annonce) < (avant.delai ?? EVENEMENTS_NIVEAU.annonce)))) {
+      throw new Error(`${quoi} : les événements doivent être écrits dans l'ordre (vague, délai), celui-ci passe avant l'événement ${String(i - 1)}`);
+    }
     if (!Number.isInteger(e.vague) || e.vague < 1 || e.vague > niveau.vagues.length) throw new Error(`${quoi} : vague inconnue ${String(e.vague)}`);
     if (e.delai !== undefined && !(Number.isFinite(e.delai) && e.delai >= EVENEMENTS_NIVEAU.annonce)) {
       throw new Error(`${quoi} : délai trop court (${String(e.delai)} s), au moins ${String(EVENEMENTS_NIVEAU.annonce)} s pour l'annonce`);
@@ -108,7 +113,8 @@ export function creerEtatDynamique(niveau: Niveau): EtatDynamique {
  * la vague k sur N part à `dureeFer × (k − 1) / N`, plus son propre délai, arrondi au dixième de seconde puis borné à `dureeFer` (la borne
  * s'applique après l'arrondi : aucun événement ne tombe après la dernière apparition), jamais avant le délai minimal de l'annonce.
  * L'ordre (vague, délai) du niveau est gardé : un événement placé plus tard dans le niveau ne part jamais avant un événement placé plus
- * tôt, et à égalité l'ordre des données compte (les délais répartis sont croissants dans cet ordre). Déterministe : une pure fonction
+ * tôt, et à égalité l'ordre des données compte (les délais répartis sont croissants dans cet ordre). `dureeFer` vient d'un compte en pas
+ * (voir `dureeDeLaVague`) : la borne tombe sur un pas réel. Seul le délai minimal de l'annonce peut dépasser une vague plus courte que lui. Déterministe : une pure fonction
  * des données du niveau.
  */
 export function repartirEvenementsFer(evenements: readonly EvenementNiveau[], nombreVagues: number, dureeFer: number): EvenementNiveau[] {
@@ -169,6 +175,33 @@ function declencher(etat: EtatPartie, suivi: EtatEvenementNiveau, e: EvenementNi
       evenementInconnu(e);
   }
   suivi.fini = true;
+}
+
+/**
+ * Appel de la vague suivante en avance : les événements de chemin (`ouvrir_chemin`, `fermer_chemin`) encore en attente dans les vagues
+ * déjà lancées se déclenchent aussitôt, dans l'ordre (vague, délai, rang), avec leur annonce, avant que la vague suivante ne planifie les
+ * siens. Sans cela, la fermeture de la vague suivante pourrait passer avant l'ouverture de la vague en cours, et fermer tous les chemins.
+ * Les autres types (charge, nasse, canon à eau, renforts) gardent leur délai.
+ */
+export function rattraperChemins(etat: EtatPartie): void {
+  const evenements = etat.niveau.evenements;
+  if (!evenements) return;
+  const attente = evenements
+    .map((e, index) => ({ e, index }))
+    .filter(({ e, index }) => (e.type === 'ouvrir_chemin' || e.type === 'fermer_chemin') && e.vague <= etat.vagues.lancees && etat.dynamique.evenements[index]?.fini === false)
+    .sort((a, b) => a.e.vague - b.e.vague || (a.e.delai ?? EVENEMENTS_NIVEAU.annonce) - (b.e.delai ?? EVENEMENTS_NIVEAU.annonce) || a.index - b.index);
+  for (const { e, index } of attente) {
+    const suivi = etat.dynamique.evenements[index];
+    if (!suivi) continue;
+    suivi.pas = etat.pas;
+    if (!suivi.annonce) {
+      suivi.annonce = true;
+      etat.evenements.push({ type: 'annonce_evenement', index, typeEvenement: e.type, chemin: cheminAnnonce(etat, e), dans: EVENEMENTS_NIVEAU.annonce });
+    }
+    suivi.declenche = true;
+    etat.evenements.push({ type: 'evenement_niveau', index, typeEvenement: e.type, chemin: cheminAnnonce(etat, e) });
+    declencher(etat, suivi, e);
+  }
 }
 
 /** Ce qui se poursuit après le déclenchement (seule la charge fait apparaître ses ennemis sur plusieurs pas). */

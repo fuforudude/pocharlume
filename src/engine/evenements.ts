@@ -129,7 +129,7 @@ export type Evenement =
   | { type: 'tir_tour'; tir: number; ennemi: number; tour: number; x: number; y: number }
   /** Un Perchoir (« Renvoi ») renvoie un tir sur les tours vers son tireur. */
   | { type: 'renvoi'; tir: number; tour: number; ennemi: number; x: number; y: number }
-  /** Un tir renvoyé atteint son tireur, qui est étourdi. */
+  /** Un tir renvoyé atteint son tireur, qui est blessé. */
   | { type: 'tir_renvoye_touche'; tir: number; ennemi: number; x: number; y: number }
   /** L'autre ennemi d'un binôme est tombé : celui-ci accélère. */
   | { type: 'binome_seul'; ennemi: number; x: number; y: number }

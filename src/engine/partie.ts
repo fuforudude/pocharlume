@@ -89,9 +89,13 @@ function vaguesDuDefi(vagues: readonly Vague[], defi: DefiPartie | null, fer?: D
   return vagues;
 }
 
-/** Durée (secondes) de la vague : l'apparition du dernier ennemi de son groupe le plus long. */
+/**
+ * Durée (secondes) de la vague : l'apparition du dernier ennemi de son groupe le plus long, comptée en pas comme `lancerVague` (délai et
+ * intervalle arrondis chacun au pas) puis ramenée en secondes : la borne des événements du défi Fer tombe sur un pas réel.
+ */
 function dureeDeLaVague(vague: Vague): number {
-  return vague.paquets.reduce((duree, p) => Math.max(duree, p.delai + p.intervalle * Math.max(0, p.nombre - 1)), 0);
+  const pas = vague.paquets.reduce((duree, p) => Math.max(duree, enPas(p.delai) + enPas(p.intervalle) * Math.max(0, p.nombre - 1)), 0);
+  return pas / PAS_PAR_SECONDE;
 }
 
 /**

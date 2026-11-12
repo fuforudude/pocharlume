@@ -10,6 +10,7 @@ import { moderneParDefaut, sauvegardeVide, type PartieEnCours, type Sauvegarde }
 import { avecPartieEnCours, partieEnCours, reprendrePartie } from './partie';
 import { StockageMemoire } from './stockage';
 import { Depot } from './depot';
+import { Session } from './session';
 import { validerSauvegarde } from './validation';
 
 const CONFIG: ConfigPartie = { graine: 5, difficulte: 'matou', dieu: 'charlie', heros: 'charlie', niveauHeros: 1, competencesHeros: {}, ameliorations: {}, objets: [], versionDonnees: VERSION_DONNEES };
@@ -106,5 +107,12 @@ describe('partie du DLC rangée dans la sauvegarde', () => {
     const sans: PartieEnCours = { ...moderne };
     delete sans.campagne;
     expect(reprendrePartie(sans)).toBeNull();
+  });
+
+  it('la session propose de reprendre la partie du DLC, avec sa campagne', async () => {
+    const stockage = new StockageMemoire();
+    await new Depot(stockage).enregistrer(sauvegardeAvec(rangee(partie('moderne', 3), 3), 3));
+    const session = await Session.ouvrir(new Depot(stockage), null, { verrou: null });
+    expect(session.partieAReprendre()).toMatchObject({ niveau: 3, campagne: 'moderne' });
   });
 });
