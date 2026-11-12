@@ -1,8 +1,18 @@
 // La parole d'un boss (`boss.r<n>.parole` pour l'histoire, `boss.m<n>.parole` pour le DLC) s'affiche quand la vague qui le contient arrive : un bandeau qui
 // ne bloque rien (voir Hud.afficherParole).
 import { ENNEMIS } from '../data/ennemis';
+import { NIVEAUX_PAR_REGION } from '../data/meta';
+import type { NiveauCampagne } from '../data/visuel';
 import { aTexte, type CleTexte } from '../i18n';
 import type { Vague } from '../engine/definitions';
+
+/**
+ * La région à passer à `cleParoleBoss` pour ce niveau : la région visuelle dans l'histoire, la région de la campagne (1 à 3, par dizaines
+ * de numéros) dans le DLC, dont la région visuelle (101…) ne dit pas quel boss on affronte.
+ */
+export function regionDeParole(niveau: Pick<NiveauCampagne, 'numero' | 'campagne' | 'visuel'>): number {
+  return niveau.campagne === 'moderne' ? Math.floor((niveau.numero - 1) / NIVEAUX_PAR_REGION) + 1 : niveau.visuel.region;
+}
 
 /**
  * Clé de la parole à dire au lancement de la vague `index` (0 = première) d'un niveau, ou null (pas de boss dans la vague, ou pas de texte).

@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
+import { CAMPAGNE } from '../data/niveaux/campagne';
 import { CAMPAGNE_MODERNE } from '../data/niveaux/campagne-moderne';
 import { REGION1 } from '../data/niveaux/region1';
 import { fr } from '../i18n/fr';
 import { ENNEMIS } from '../data/ennemis';
 import type { Vague } from '../engine/definitions';
 import { aTexte } from '../i18n';
-import { cleParoleBoss, decompteParole } from './parole-boss';
+import { cleParoleBoss, decompteParole, regionDeParole } from './parole-boss';
 
 describe('cleParoleBoss', () => {
   const niveau = REGION1.find((n) => n.boss);
@@ -24,7 +25,7 @@ describe('cleParoleBoss', () => {
 
 describe('paroles', () => {
   it('chaque région a la sienne dans les textes', () => {
-    for (let n = 1; n <= 10; n++) expect(fr).toHaveProperty(`boss.r${String(n)}.parole`);
+    for (let n = 1; n <= 11; n++) expect(fr).toHaveProperty(`boss.r${String(n)}.parole`);
   });
 });
 
@@ -59,6 +60,41 @@ describe('paroles du DLC « Temps modernes »', () => {
     const region = Math.floor((niveau.numero - 1) / 10) + 1;
     const dites = vagues.flatMap((_, i) => (cleParoleBoss(vagues, i, region, true, true) ? [i] : []));
     expect(dites).toHaveLength(1);
+  });
+});
+
+describe('regionDeParole', () => {
+  it('rend la région de campagne pour le DLC (1 au boss de la Fac), la région visuelle pour l’histoire', () => {
+    const fac = CAMPAGNE_MODERNE.find((n) => n.boss && n.numero <= 10);
+    expect(fac?.visuel.region).not.toBe(1);
+    expect(fac && regionDeParole(fac)).toBe(1);
+    expect(regionDeParole({ numero: 25, campagne: 'moderne', visuel: { region: 101, zones: [], decor: [] } })).toBe(3);
+    const histoire = CAMPAGNE.find((n) => n.boss && n.numero > 10 && n.numero <= 20);
+    expect(histoire && regionDeParole(histoire)).toBe(histoire?.visuel.region);
+    expect(histoire?.visuel.region).toBe(2);
+  });
+
+  it('avec la région de partie.ts, la vague du boss de la Fac dit `boss.m1.parole`', () => {
+    const fac = CAMPAGNE_MODERNE.find((n) => n.boss && n.numero <= 10);
+    if (!fac) throw new Error('pas de boss à la Fac');
+    const cles = fac.niveau.vagues.map((_, i) => cleParoleBoss(fac.niveau.vagues, i, regionDeParole(fac), fac.boss, fac.campagne === 'moderne'));
+    expect(cles.filter((c) => c !== null)).toEqual(['boss.m1.parole']);
+  });
+});
+
+describe('chaque niveau de boss des régions construites a sa réplique', () => {
+  /** Régions de l'histoire construites (1 à 11) et tout le DLC. */
+  const NIVEAUX = [...CAMPAGNE.filter((n) => n.numero <= 110), ...CAMPAGNE_MODERNE].filter((n) => n.boss);
+
+  it('il y a un niveau de boss par région construite', () => {
+    expect(NIVEAUX.filter((n) => n.campagne !== 'moderne')).toHaveLength(11);
+    expect(NIVEAUX.filter((n) => n.campagne === 'moderne').length).toBeGreaterThanOrEqual(1);
+  });
+
+  it.each(NIVEAUX.map((n) => [`${n.campagne ?? 'histoire'} ${String(n.numero)}`, n] as const))('%s : une vague dit une réplique qui existe', (_, n) => {
+    const cles = n.niveau.vagues.map((_v, i) => cleParoleBoss(n.niveau.vagues, i, regionDeParole(n), n.boss, n.campagne === 'moderne')).filter((c) => c !== null);
+    expect(cles.length).toBeGreaterThan(0);
+    for (const c of cles) expect(fr).toHaveProperty(c);
   });
 });
 

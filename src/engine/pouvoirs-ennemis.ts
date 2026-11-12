@@ -143,6 +143,7 @@ function releverMorts(etat: EtatPartie, e: Ennemi, action: Extract<ActionEnnemi,
 /** Charge : vitesse multipliée un temps, sans s'arrêter aux soldats (ceux qui le bloquaient le lâchent). */
 function charger(etat: EtatPartie, e: Ennemi, action: Extract<ActionEnnemi, { type: 'charger' }>): void {
   e.charge = Math.max(e.charge, Math.max(1, enPas(action.duree)));
+  e.accelerationCharge = Math.max(e.accelerationCharge, Math.max(1, enPas(action.duree)));
   e.chargeVitesse = action.vitesse;
   libererEnnemi(etat, e);
   etat.evenements.push({ type: 'charge', ennemi: e.id, x: e.x, y: e.y, duree: action.duree });
