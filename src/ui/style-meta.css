@@ -1269,13 +1269,10 @@
   color: var(--sang);
 }
 
-/* Écran bas (740×360) : le butin se range sur deux colonnes et les étoiles rapetissent, pour que le bilan du DLC (jusqu'à six lignes avec
-   badges et titre) tienne avec les boutons ; la carte défile en dernier recours. */
+/* Écran bas (740×360) : le butin se resserre et les étoiles rapetissent, pour que le bilan du DLC (jusqu'à six lignes avec badges et
+   titre) tienne avec les boutons, sur une seule colonne (une ligne longue se replie au lieu de déborder) ; la carte défile en dernier recours. */
 @media (max-height: 460px) {
   .ecran.fin .bilan {
-    display: grid;
-    grid-template-columns: repeat(2, max-content);
-    column-gap: 18px;
     row-gap: 1px;
     min-width: 0;
     padding: 4px 10px;
@@ -1287,6 +1284,7 @@
 
   .ecran.fin .etoile {
     width: 30px;
+    height: 30px;
   }
 
   .ecran.fin .carte {

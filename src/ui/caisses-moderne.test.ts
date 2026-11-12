@@ -98,7 +98,7 @@ describe('caisse Temps modernes', () => {
     expect(carte()).not.toBe(avant);
   });
 
-  it('la révélation attend l’atlas du DLC avant de lire l’icône du skin', async () => {
+  it('la révélation s’affiche tout de suite, puis l’icône du skin arrive avec l’atlas du DLC', async () => {
     const session = await ouvrir(avecBadges(PRIX_CAISSE_MODERNE));
     let charge: () => void = () => undefined;
     let pret = false;
@@ -107,11 +107,25 @@ describe('caisse Temps modernes', () => {
     afficherCaisses(document.body, { atlas, session, surFermer: vi.fn(), surCollection: vi.fn(), chargerAtlasModerne });
     bouton().click();
     await attendre();
-    // L'atlas n'est pas là : la révélation n'est pas encore affichée (et n'a pas d'icône vide).
-    expect(document.querySelector('.revelation')).toBeNull();
+    expect(document.querySelector('.revelation')).not.toBeNull();
+    expect(document.querySelector('.revelation .objet-revele img')?.getAttribute('src')).toBe('');
     charge();
     await attendre();
     expect(document.querySelector('.revelation .objet-revele img')?.getAttribute('src')).toBe('moderne-caserne-3.png');
+  });
+
+  it('un atlas du DLC qui ne répond jamais ne bloque pas la révélation : on peut continuer et rouvrir', async () => {
+    const session = await ouvrir(avecBadges(PRIX_CAISSE_MODERNE * 2));
+    const chargerAtlasModerne = vi.fn(() => new Promise<void>(() => undefined));
+    afficherCaisses(document.body, { atlas: ATLAS, session, surFermer: vi.fn(), surCollection: vi.fn(), chargerAtlasModerne });
+    bouton().click();
+    await attendre();
+    expect(document.querySelector('.revelation')).not.toBeNull();
+    document.querySelector<HTMLButtonElement>('.revelation button')?.click();
+    expect(document.querySelector('.revelation')).toBeNull();
+    bouton().click();
+    await attendre();
+    expect(document.querySelector('.revelation')).not.toBeNull();
   });
 
   it('une ligne courte sur les badges est toujours dans la carte (la note longue est masquée en 740×360, la bulle ne sert pas au toucher)', async () => {
