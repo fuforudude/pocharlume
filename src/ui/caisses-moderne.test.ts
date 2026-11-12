@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
 // La caisse « Temps modernes » dans l'écran des caisses : solde de badges, prix, chances, garantie, ouverture et révélation, refus.
+import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DEFS_META } from '../data/heros';
 import { CAISSES_AVANT_GARANTIE, CHANCES_RARETE, ECLATS_DOUBLON, RARETES } from '../data/meta';
@@ -95,5 +96,29 @@ describe('caisse Temps modernes', () => {
     await attendre();
     expect(chargerAtlasModerne).toHaveBeenCalledOnce();
     expect(carte()).not.toBe(avant);
+  });
+
+  it('la révélation attend l’atlas du DLC avant de lire l’icône du skin', async () => {
+    const session = await ouvrir(avecBadges(PRIX_CAISSE_MODERNE));
+    let charge: () => void = () => undefined;
+    let pret = false;
+    const atlas = { iconeUrl: (nom: string) => (pret ? `${nom}.png` : '') } as unknown as AtlasRendu;
+    const chargerAtlasModerne = vi.fn(() => new Promise<void>((resolve) => { charge = () => { pret = true; resolve(); }; }));
+    afficherCaisses(document.body, { atlas, session, surFermer: vi.fn(), surCollection: vi.fn(), chargerAtlasModerne });
+    bouton().click();
+    await attendre();
+    // L'atlas n'est pas là : la révélation n'est pas encore affichée (et n'a pas d'icône vide).
+    expect(document.querySelector('.revelation')).toBeNull();
+    charge();
+    await attendre();
+    expect(document.querySelector('.revelation .objet-revele img')?.getAttribute('src')).toBe('moderne-caserne-3.png');
+  });
+
+  it('une ligne courte sur les badges est toujours dans la carte (la note longue est masquée en 740×360, la bulle ne sert pas au toucher)', async () => {
+    const session = await ouvrir(avecBadges(0));
+    afficherCaisses(document.body, { atlas: ATLAS, session, surFermer: vi.fn(), surCollection: vi.fn() });
+    expect(carte()?.querySelector('.caisse-note-courte')?.textContent).toBe(t('caisses.badges_gagnes_court'));
+    const feuille = readFileSync('src/ui/style-meta.css', 'utf8');
+    expect(/@media \(max-height: 460px\) \{\s*\.caisse-moderne \.desc-longue,\s*\.caisse-note \{\s*display: none;\s*\}\s*\.caisse-note-courte \{\s*display: block;/.test(feuille)).toBe(true);
   });
 });

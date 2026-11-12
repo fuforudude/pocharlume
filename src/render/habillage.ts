@@ -109,9 +109,12 @@ export function campagneDApparence(campagne: IdCampagne, skinsModernes: Readonly
   return skin !== undefined && skinModerneAcceptable(cible, skin) ? 'moderne' : campagne;
 }
 
-/** Le héros porte-t-il son skin du DLC ? */
-export function apparenceModerne(skinsModernes: Readonly<Record<string, string | undefined>>, heros: string): boolean {
-  return campagneDApparence('histoire', skinsModernes, heros) === 'moderne';
+/**
+ * Le héros est-il dessiné en étudiant ? Toujours dans une partie du DLC (les 9 héros y sont étudiants, comme les tours, sans skin à
+ * posséder), et dans l'histoire seulement s'il porte son skin du DLC.
+ */
+export function apparenceModerne(skinsModernes: Readonly<Record<string, string | undefined>>, heros: string, campagne: IdCampagne = 'histoire'): boolean {
+  return campagneDApparence(campagne, skinsModernes, heros) === 'moderne';
 }
 
 /** Sprite d'un héros habillé en étudiant (atlas du DLC) : `moderne-heros-brise-os`. */

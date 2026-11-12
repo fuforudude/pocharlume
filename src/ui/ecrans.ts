@@ -1,6 +1,7 @@
 // Écrans plein cadre en DOM : accueil, pause, fin de partie, « Tourne ton téléphone ».
 import { HEROS } from '../data/heros';
 import { BRAISES_DEFI } from '../data/meta';
+import { DEFS_TITRES_MODERNES } from '../data/recompenses-moderne';
 import { OBJETS } from '../data/objets';
 import { t, tCle } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
@@ -146,7 +147,7 @@ export interface ButinFin {
   readonly lignesInfini?: readonly string[] | null;
 }
 
-/** Les lignes du butin : arêtes, braises, expérience, niveau gagné, objets consommés. Vide si la partie n'a rien rapporté. */
+/** Les lignes du butin : arêtes, braises, expérience, niveau gagné, objets consommés, et pour le DLC badges et titres gagnés. Vide si la partie n'a rien rapporté. */
 export function lignesBilan(bilan: BilanPartie): string[] {
   const lignes: string[] = [];
   if (bilan.aretes > 0) lignes.push(t('fin.bilan_aretes', { n: bilan.aretes }));
@@ -174,6 +175,12 @@ export function lignesBilan(bilan: BilanPartie): string[] {
   if (bilan.regionDebloquee !== undefined) {
     const region = REGIONS_MONDE.find((r) => r.numero === bilan.regionDebloquee);
     lignes.push(region ? t('fin.bilan_region', { nom: tCle(region.nom) }) : t('fin.bilan_region_numero', { n: bilan.regionDebloquee }));
+  }
+  // DLC « Temps modernes » : les badges gagnés et les titres de collection obtenus par cette partie.
+  if (bilan.badges !== undefined && bilan.badges > 0) lignes.push(t('fin.bilan_badges', { n: bilan.badges }));
+  for (const id of bilan.titresNouveaux ?? []) {
+    const def = DEFS_TITRES_MODERNES.find((d) => d.id === id);
+    if (def) lignes.push(t('fin.bilan_titre', { nom: tCle(def.nom) }));
   }
   // Jalon 4 : la première victoire sur le boss de la région 1 ouvre le mode infini, celle sur le Soleil Blême finit la campagne.
   if (bilan.infiniDebloque === true) lignes.push(t('fin.bilan_infini_debloque'));

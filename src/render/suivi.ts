@@ -475,9 +475,10 @@ export class Suivi {
       }
       if (v.versionCollection !== this.version) {
         v.versionCollection = this.version;
-        // Seul le héros de la partie porte le skin de sa collection ; son skin du DLC, s'il le porte, change son sprite (atlas du DLC).
+        // Seul le héros de la partie porte le skin de sa collection ; il est dessiné en étudiant (atlas du DLC) dans une partie du DLC, et
+        // dans l'histoire s'il porte son skin du DLC.
         const idHeros = u.id === etat.heros ? idHerosDe(u.stats.nom) : null;
-        const moderne = idHeros !== null && apparenceModerne(this.skinsModernes, idHeros) ? this.atlas.sprite(spriteHerosModerne(idHeros)) : undefined;
+        const moderne = idHeros !== null && apparenceModerne(this.skinsModernes, idHeros, campagneDe(etat.niveau)) ? this.atlas.sprite(spriteHerosModerne(idHeros)) : undefined;
         v.nomSprite = moderne && idHeros !== null ? spriteHerosModerne(idHeros) : spriteUnite(u.genre, u.stats.nom);
         v.sprite = moderne ?? this.atlas.sprite(v.nomSprite) ?? null;
         v.habille = idHeros === null ? null : this.habiller(v.nomSprite, idHeros);

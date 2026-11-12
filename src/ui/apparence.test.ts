@@ -41,11 +41,24 @@ describe('apparence d’une partie : skins du DLC', () => {
     expect(apparenceDeLaPartie(undefined, 'charlie', modernes)).toEqual({ skins: {}, familier: null, skinsModernes: modernes });
   });
 
-  it('l’atlas du DLC se charge pour une partie du DLC, ou pour l’histoire si un skin du DLC est porté', () => {
-    expect(campagneDeLAtlas('moderne', {})).toBe('moderne');
-    expect(campagneDeLAtlas('histoire', {})).toBe('histoire');
-    expect(campagneDeLAtlas('histoire', undefined)).toBe('histoire');
-    expect(campagneDeLAtlas('histoire', { tir: 'skin_moderne_tir' })).toBe('moderne');
-    expect(campagneDeLAtlas('histoire', { caserne: 'skin_moderne_tir' })).toBe('histoire');
+  it('l’atlas du DLC se charge pour une partie du DLC, ou pour l’histoire si un skin du DLC porté y sert', () => {
+    expect(campagneDeLAtlas('moderne', {}, 'charlie', 'charlie')).toBe('moderne');
+    expect(campagneDeLAtlas('histoire', {}, 'charlie', 'charlie')).toBe('histoire');
+    expect(campagneDeLAtlas('histoire', undefined, 'charlie', 'charlie')).toBe('histoire');
+    expect(campagneDeLAtlas('histoire', { tir: 'skin_moderne_tir' }, 'charlie', 'charlie')).toBe('moderne');
+    expect(campagneDeLAtlas('histoire', { caserne: 'skin_moderne_tir' }, 'charlie', 'charlie')).toBe('histoire');
+  });
+
+  it('l’atlas du DLC ne se charge pas pour un skin porté qui ne sert pas dans la partie (autre dieu, autre héros)', () => {
+    // Tour divine de Pollen et skin de Mastoc portés, partie de Charlie avec le dieu Charlie : rien à télécharger.
+    const portes = { divine_pollen: 'skin_moderne_divine_pollen', mastoc: 'skin_moderne_mastoc' };
+    expect(campagneDeLAtlas('histoire', portes, 'charlie', 'charlie')).toBe('histoire');
+    // Le dieu joué ou le héros joué porte son skin : l'atlas est nécessaire.
+    expect(campagneDeLAtlas('histoire', portes, 'pollen', 'charlie')).toBe('moderne');
+    expect(campagneDeLAtlas('histoire', portes, 'charlie', 'mastoc')).toBe('moderne');
+    // Les 4 familles servent toujours.
+    for (const famille of ['caserne', 'tir', 'magie', 'artillerie']) {
+      expect(campagneDeLAtlas('histoire', { [famille]: `skin_moderne_${famille}` }, 'charlie', 'charlie')).toBe('moderne');
+    }
   });
 });

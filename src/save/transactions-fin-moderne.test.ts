@@ -89,11 +89,15 @@ describe('victoire du DLC : la progression du DLC, jamais celle de l’histoire'
     expect(JSON.stringify(avant)).toBe(copie);
   });
 
-  it('l’expérience du héros est donnée, les arêtes aussi', () => {
+  it('arêtes et expérience : celles des niveaux 100 + N, figées (choix de l’étudiant du 2026-11-12)', () => {
+    // Niveau 1 du DLC en 3 étoiles = 681 arêtes (81 au niveau 1 de l'histoire) et 2 120 points d'expérience (120 dans l'histoire).
     const r = reussie(sauvegardeVide(), { niveau: 1 });
-    expect(r.bilan.xp).toBeGreaterThan(0);
-    expect(r.bilan.aretes).toBeGreaterThan(0);
-    expect(r.sauvegarde.meta.monnaies.aretes).toBe(r.bilan.aretes);
+    expect(r.bilan.aretes).toBe(681);
+    expect(r.bilan.xp).toBe(2120);
+    expect(r.sauvegarde.meta.monnaies.aretes).toBe(681);
+    expect(reussie(sauvegardeVide(), { niveau: 1, etoiles: 1 }).bilan.aretes).toBe(651);
+    expect(reussie(r.sauvegarde, { niveau: 1 }).bilan.aretes).toBe(212);
+    expect(enregistrerFinDePartie(sauvegardeVide(), { niveau: 1, statut: 'defaite', difficulte: 'matou', etoiles: 0, heros: 'charlie', campagne: 'moderne' }, DEFS_TEST)).toMatchObject({ ok: true, bilan: { xp: 1060, aretes: 0 } });
   });
 });
 

@@ -14,7 +14,7 @@ const NIVEAU = REGION1[0] ? { ...REGION1[0].niveau, numero: NIVEAU_TOUT_OUVERT }
 if (!NIVEAU) throw new Error('niveau 1 absent');
 
 /** Un atlas qui connaît les sprites de l'histoire, et ceux du DLC seulement si `moderne`. */
-function monter(moderne: boolean, dieu = 'charlie') {
+function monter(moderne: boolean, dieu = 'charlie', campagne: 'histoire' | 'moderne' = 'histoire') {
   const sprite = { ancre: { x: 0, y: 0 }, largeur: 16, hauteur: 16 } as unknown as SpriteAtlas;
   const atlas = {
     sprite: (nom: string) => (moderne || !nom.startsWith('moderne-') ? { ...sprite, nom } : undefined),
@@ -22,7 +22,7 @@ function monter(moderne: boolean, dieu = 'charlie') {
     habiller: (nom: string, skin: string) => ({ nom, skin }) as unknown as SpriteHabille,
   } as unknown as AtlasRendu;
   const suivi = new Suivi(atlas, new PoolEffets(32));
-  const etat: EtatPartie = creerPartie(NIVEAU as NonNullable<typeof NIVEAU>, configDe(dieu));
+  const etat: EtatPartie = creerPartie(campagne === 'moderne' ? { ...(NIVEAU as NonNullable<typeof NIVEAU>), campagne } : (NIVEAU as NonNullable<typeof NIVEAU>), configDe(dieu));
   appliquerAction(etat, { type: 'construire', ...ct(0), tour: 'tir' });
   appliquerAction(etat, { type: 'construire', ...ct(1), tour: 'caserne' });
   return { suivi, etat };
@@ -61,5 +61,28 @@ describe('Suivi : skins du DLC dans l’histoire', () => {
     suivi.definirCollection({});
     suivi.apresPas(etat, 33);
     expect(nomDe(suivi.unites.get(etat.heros)?.sprite)).toBe('charlie');
+  });
+});
+
+describe('Suivi : le héros d’une partie du DLC est toujours un étudiant', () => {
+  it('dans le DLC, le héros prend son sprite d’étudiant sans porter de skin', () => {
+    const { suivi, etat } = monter(true, 'charlie', 'moderne');
+    suivi.definirCollection({});
+    suivi.apresPas(etat, 0);
+    expect(nomDe(suivi.unites.get(etat.heros)?.sprite)).toBe('moderne-heros-charlie');
+  });
+
+  it('dans l’histoire, sans skin porté, le héros garde son sprite de base (même si l’atlas du DLC est là)', () => {
+    const { suivi, etat } = monter(true, 'charlie', 'histoire');
+    suivi.definirCollection({});
+    suivi.apresPas(etat, 0);
+    expect(nomDe(suivi.unites.get(etat.heros)?.sprite)).toBe('charlie');
+  });
+
+  it('dans le DLC, le skin d’un autre héros porté ne change rien : le héros joué est étudiant', () => {
+    const { suivi, etat } = monter(true, 'charlie', 'moderne');
+    suivi.definirCollection({ skinsModernes: { suie: 'skin_moderne_suie' } });
+    suivi.apresPas(etat, 0);
+    expect(nomDe(suivi.unites.get(etat.heros)?.sprite)).toBe('moderne-heros-charlie');
   });
 });

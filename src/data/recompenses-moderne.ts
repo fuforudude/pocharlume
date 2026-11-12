@@ -148,12 +148,6 @@ export interface EtatRecompensesModerne {
   readonly defis: Readonly<Record<string, Readonly<Partial<Record<IdDefi, true>>>>>;
 }
 
-/** L'issue d'une victoire : les étoiles obtenues et le défi joué (null pour une partie ordinaire). */
-export interface ResultatVictoireModerne {
-  readonly etoiles: number;
-  readonly defi: IdDefi | null;
-}
-
 function propre<T>(objet: Readonly<Record<string, T>>, cle: string): T | undefined {
   return Object.hasOwn(objet, cle) ? objet[cle] : undefined;
 }
@@ -169,24 +163,6 @@ function defiReussi(etat: EtatRecompensesModerne, niveau: number, defi: IdDefi):
   return defis !== undefined && Object.hasOwn(defis, defi) && defis[defi] === true;
 }
 
-/**
- * Badges que rapporte une victoire au niveau `niveau` du DLC (1 à 30), d'après la campagne du DLC d'avant cette victoire. Partie
- * ordinaire : la première victoire (plus le boss), et les 3 étoiles la première fois. Défi : sa prime la première fois, sur un niveau
- * déjà à 3 étoiles seulement. Une victoire absurde (niveau ou étoiles hors bornes) ne rapporte rien. C'est le point d'entrée de la fin
- * de partie du DLC.
- */
-export function badgesDeLaVictoire(niveau: number, resultat: ResultatVictoireModerne, avant: EtatRecompensesModerne): number {
-  if (!Number.isInteger(niveau) || niveau < 1 || niveau > NIVEAU_MAX_MODERNE) return 0;
-  if (!Number.isInteger(resultat.etoiles) || resultat.etoiles < 1 || resultat.etoiles > 3) return 0;
-  const etoilesAvant = meilleuresEtoiles(avant, niveau);
-  if (resultat.defi !== null) {
-    if (etoilesAvant < 3 || defiReussi(avant, niveau, resultat.defi)) return 0;
-    return badgesDesFaits({ premiereVictoire: false, boss: false, troisEtoiles: false, defi: true });
-  }
-  const premiere = etoilesAvant === 0;
-  return badgesDesFaits({ premiereVictoire: premiere, boss: premiere && niveau % NIVEAUX_PAR_REGION === 0, troisEtoiles: etoilesAvant < 3 && resultat.etoiles === 3, defi: false });
-}
-
 /** Ce qu'une victoire a accompli pour la première fois, tel que la fin de partie le sait déjà. */
 export interface FaitsVictoireModerne {
   /** Première victoire ordinaire du niveau. */
@@ -199,7 +175,7 @@ export interface FaitsVictoireModerne {
   readonly defi: boolean;
 }
 
-/** Badges de ces faits : la seule table de montants (`BADGES_MODERNE`), lue par `badgesDeLaVictoire` et par la fin de partie. */
+/** Badges de ces faits : la seule table de montants (`BADGES_MODERNE`). La règle d'une victoire (quels faits) est dans `badgesDeLaVictoire` de `src/save/badges-moderne.ts`, la seule que la fin de partie appelle. */
 export function badgesDesFaits(faits: FaitsVictoireModerne): number {
   return (
     (faits.premiereVictoire ? BADGES_MODERNE.premiereVictoire : 0) +
