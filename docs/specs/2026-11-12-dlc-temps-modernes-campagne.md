@@ -81,7 +81,8 @@ avec ses propres récompenses.
   ne sont pas dans `meta.monnaies`. Les « records » sont les records d'infini par carte du DLC. La partie en cours porte sa
   campagne (champ facultatif, absent = histoire), vérifiée contre la bonne progression. Un identifiant de skin ou de titre
   inconnu est écarté à la normalisation, jamais une cause de rejet de toute la sauvegarde.
-- **Chemins mobiles** : leurs cases restent toujours interdites à la construction, ouverts ou fermés (moteur et interface).
+- **Chemins mobiles** : leurs cases restent toujours interdites à la construction, ouverts ou fermés (moteur et interface) ;
+  il n'y a donc plus de vente d'office. En défi Fer, le délai de chaque événement est réparti sur la durée de la vague unique.
 - **Sauteur et plongeur** franchissent une nasse : c'est leur force, écrite dans le Bestiaire.
 - **Bestiaire par campagne** : celui ouvert depuis le DLC montre les ennemis du DLC ; celui de l'histoire est inchangé.
 - **Ligne « Capacité DLC »** des fiches de tours : seulement dans les écrans du DLC.
