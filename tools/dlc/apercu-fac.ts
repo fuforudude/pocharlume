@@ -1,4 +1,4 @@
-// Aperçu d'un niveau de la Fac (DLC Temps modernes) pour les captures : le bot soigneux joue `t` secondes en avance rapide, puis la
+// Aperçu d'un niveau du DLC Temps modernes (la Fac, la Préfecture…) pour les captures : le bot soigneux joue `t` secondes en avance rapide, puis la
 // partie continue en temps réel. Outil de développement seulement (tools/dlc/apercu-fac.html), hors du jeu publié.
 import { CAMPAGNE_MODERNE } from '../../src/data/niveaux/campagne-moderne';
 import { VERSION_DONNEES } from '../../src/data/version';
@@ -41,7 +41,7 @@ function image(maintenant: number): void {
     reste -= 1000 / PAS_PAR_SECONDE;
   }
   rendu.dessiner(etat, 0, temps(), surb);
-  if (info) info.textContent = `Fac ${String(numero)} — vague ${String(etat.vagues.lancees)}/${String(etat.niveau.vagues.length)} — ${etat.statut}`;
+  if (info) info.textContent = `DLC ${String(numero)} — vague ${String(etat.vagues.lancees)}/${String(etat.niveau.vagues.length)} — ${etat.statut}`;
   requestAnimationFrame(image);
 }
 requestAnimationFrame(image);

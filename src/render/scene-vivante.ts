@@ -6,6 +6,10 @@
 // La foule réagit aux événements du moteur, qu'elle lit sans jamais rien changer : une annonce, une charge, un canon à eau, une nasse ou
 // un chemin qui bouge la font s'agiter (elle scande plus vite, bras levés) ; des renforts ou une foule activée la font sauter de joie.
 // Avec les animations réduites, tout reste immobile.
+//
+// La Préfecture ajoute ses propres figurants : une foule massée derrière les grilles en fer forgé (elle secoue les barreaux quand elle
+// s'agite), des gyrophares d'ambiance qui tournent (bleu, sans stroboscope : un halo qui pulse lentement), et des drapeaux sans emblème
+// (toiles unies ou à deux bandes) qui flottent au vent.
 import { foulePrete, type EtatPartie } from '../engine';
 import type { SceneVivante } from '../data/visuel';
 import { TUILE } from './camera';
@@ -25,6 +29,17 @@ const TOILES: readonly (readonly [string, string])[] = [
 /** Couleurs des fumées (rose, verte, violette, rouge). */
 const FUMEES = ['244, 168, 200', '154, 216, 154', '180, 140, 230', '230, 96, 80'];
 const CONTOUR = '#2b2928';
+/** Toiles des drapeaux de la Préfecture : unies ou à deux bandes, sans emblème (couleurs, puis couleur de la bande ou null). */
+const DRAPEAUX: readonly (readonly [string, string | null])[] = [
+  ['#e0508c', null],
+  ['#2f8a4a', '#f2ede0'],
+  ['#7a4ab0', null],
+  ['#e8c840', '#2b2928'],
+];
+const FER = '#1c1b1f';
+const DORURE = '#d8b850';
+/** Cycle de rotation d'un gyrophare (ms). */
+const CYCLE_GYROPHARE = 1400;
 const MONTANT = '#8a8478';
 
 /** Durée d'une agitation et d'une joie après l'événement qui les déclenche (ms). */
@@ -98,6 +113,12 @@ export class DessinSceneVivante {
     scene.groupes.forEach((g, i) => {
       this.dessinerGroupe(g.cx * CASE - ox, g.cy * CASE - oy, 4, t, i * 13 + 5, humeur);
     });
+    (scene.grilles ?? []).forEach((g, i) => {
+      this.dessinerGrille(g.cx * CASE - ox, g.cy * CASE - oy, g.largeur, t, 300 + i * 17, humeur);
+    });
+    (scene.drapeaux ?? []).forEach((d, i) => {
+      this.dessinerDrapeau(Math.round(d.x * TUILE) - ox, Math.round(d.y * TUILE) - oy, d.couleur, t, i, humeur);
+    });
     // Les foules activables : des figurants sur leurs cases, qui scandent quand elles sont prêtes et attendent assis sinon.
     (etat.niveau.foules ?? []).forEach((foule, i) => {
       const suivi = etat.dynamique.foules[i];
@@ -108,11 +129,14 @@ export class DessinSceneVivante {
     });
   }
 
-  /** Par-dessus les entités : les fumées des fumigènes. */
+  /** Par-dessus les entités : les fumées des fumigènes et les halos des gyrophares. */
   dessinerDessus(temps: number, reduit: boolean, ox: number, oy: number): void {
     const scene = this.scene;
     if (!scene) return;
     const ctx = this.ctx;
+    (scene.gyrophares ?? []).forEach((g, i) => {
+      this.dessinerGyrophare(Math.round(g.x * TUILE) - ox, Math.round(g.y * TUILE) - oy, reduit ? 0 : temps, i);
+    });
     scene.fumigenes.forEach((f, i) => {
       const px = Math.round(f.x * TUILE) - ox;
       const py = Math.round(f.y * TUILE) - oy;
@@ -208,6 +232,88 @@ export class DessinSceneVivante {
       ctx.fillRect(x, py + 1, 4, 1);
       ctx.fillRect(x - 4, py + 3, 6, 1);
     }
+  }
+
+  /**
+   * Une grille en fer forgé sur `largeur` cases, la foule massée derrière : deux rangs d'étudiants (le rang du fond plus petit), puis les
+   * barreaux à pointes dorées par-dessus. Quand la foule s'agite, des mains passent entre les barreaux et la grille tremble d'un pixel.
+   */
+  private dessinerGrille(x0: number, y0: number, largeur: number, t: number, graine: number, humeur: Humeur): void {
+    const ctx = this.ctx;
+    const l = largeur * CASE;
+    // La foule : un rang du fond, puis un rang devant, serrés.
+    for (let k = 0; k < largeur * 4; k++) this.dessinerEtudiant(x0 + 4 + k * 8, y0 + 15, t, graine + k, humeur, false, false);
+    for (let k = 0; k < largeur * 3; k++) this.dessinerEtudiant(x0 + 7 + k * 10, y0 + 24, t, graine + 50 + k, humeur, false, k % 4 === 1);
+    // La grille : socle de pierre, barreaux, deux traverses, pointes dorées.
+    const secousse = t !== 0 && humeur !== 'calme' && Math.floor(t / 90) % 2 === 0 ? 1 : 0;
+    const gx = x0 + secousse;
+    ctx.fillStyle = '#8a8478';
+    ctx.fillRect(x0, y0 + CASE - 4, l, 4);
+    ctx.fillStyle = '#aea696';
+    ctx.fillRect(x0, y0 + CASE - 4, l, 1);
+    ctx.fillStyle = FER;
+    ctx.fillRect(gx, y0 + 9, l, 2);
+    ctx.fillRect(gx, y0 + 24, l, 2);
+    for (let x = 2; x < l; x += 4) {
+      ctx.fillStyle = FER;
+      ctx.fillRect(gx + x, y0 + 5, 1, CASE - 9);
+      ctx.fillStyle = DORURE;
+      ctx.fillRect(gx + x, y0 + 3, 1, 2);
+    }
+    // Piliers aux deux bouts.
+    for (const px of [x0, x0 + l - 4]) {
+      ctx.fillStyle = CONTOUR;
+      ctx.fillRect(px - 1, y0 + 1, 6, CASE - 1);
+      ctx.fillStyle = '#c8c0b0';
+      ctx.fillRect(px, y0 + 2, 4, CASE - 3);
+    }
+  }
+
+  /** Un drapeau sans emblème : mât, toile unie ou à deux bandes qui ondule (pied du mât en (x, y)). */
+  private dessinerDrapeau(x: number, y: number, indice: number, t: number, graine: number, humeur: Humeur): void {
+    const ctx = this.ctx;
+    const [toile, bande] = couleur(DRAPEAUX, indice);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fillRect(x - 2, y - 1, 5, 2);
+    ctx.fillStyle = CONTOUR;
+    ctx.fillRect(x - 1, y - 30, 3, 30);
+    ctx.fillStyle = MONTANT;
+    ctx.fillRect(x, y - 29, 1, 29);
+    const amplitude = humeur === 'calme' ? 1 : 2;
+    for (let k = 1; k <= 14; k++) {
+      const dy = t === 0 ? 0 : Math.round(Math.sin(t / 260 + k / 3 + graine) * amplitude * (k / 14));
+      ctx.fillStyle = CONTOUR;
+      ctx.fillRect(x + k, y - 30 + dy, 1, 11);
+      ctx.fillStyle = toile;
+      ctx.fillRect(x + k, y - 29 + dy, 1, 9);
+      if (bande !== null) {
+        ctx.fillStyle = bande;
+        ctx.fillRect(x + k, y - 26 + dy, 1, 3);
+      }
+    }
+  }
+
+  /** Un gyrophare posé au sol : socle sombre, dôme bleu, et un halo qui tourne lentement (rien qui clignote vite). */
+  private dessinerGyrophare(x: number, y: number, temps: number, graine: number): void {
+    const ctx = this.ctx;
+    const angle = ((temps + graine * 400) % CYCLE_GYROPHARE) / CYCLE_GYROPHARE * Math.PI * 2;
+    const eclat = temps === 0 ? 0.5 : 0.5 + 0.5 * Math.cos(angle);
+    // Halo : deux disques « pixel » de plus en plus transparents, décalés dans le sens du faisceau.
+    const dx = temps === 0 ? 0 : Math.round(Math.cos(angle) * 5);
+    for (const [r, a] of [[11, 0.12], [6, 0.22]] as const) {
+      ctx.fillStyle = `rgba(80, 140, 255, ${(a * (0.4 + eclat)).toFixed(3)})`;
+      ctx.fillRect(x - r + dx, y - 6 - Math.round(r / 2), r * 2, r);
+      ctx.fillRect(x - Math.round(r / 2) + dx, y - 6 - r, r, r * 2);
+    }
+    ctx.fillStyle = CONTOUR;
+    ctx.fillRect(x - 4, y - 3, 9, 4);
+    ctx.fillRect(x - 3, y - 8, 7, 6);
+    ctx.fillStyle = '#3a4660';
+    ctx.fillRect(x - 3, y - 2, 7, 2);
+    ctx.fillStyle = eclat > 0.6 ? '#9ad0ff' : '#4a7ad0';
+    ctx.fillRect(x - 2, y - 7, 5, 4);
+    ctx.fillStyle = '#e8f4ff';
+    ctx.fillRect(x - 1 + (dx > 0 ? 1 : 0), y - 6, 1, 1);
   }
 
   /** Une banderole sur `largeur` cases : deux montants, une toile qui ondule, des glyphes en blocs, deux porteurs. */

@@ -1,24 +1,26 @@
 // Assemble un niveau du DLC « Temps modernes » depuis son plan (plan-moderne-r<N>.ts), sa carte (cartes-moderne-r<N>.ts) et ses vagues
 // figées (vagues-moderne-r<N>.ts), comme `assemblerNiveau` pour l'histoire, avec ce que le DLC ajoute :
 // - le niveau porte la campagne `moderne` (ici et dans `niveau`), un numéro de 1 à 30 et un identifiant `m<région>-<rang>` ;
-// - ses événements datés, chemins fermés au départ et foules sont copiés tels quels du plan ;
+// - sa carte vient de n'importe quelle région (cartes-moderne.ts) ; ses événements datés, chemins fermés au départ et foules sont copiés tels
+//   quels du plan ;
 // - les cases des chemins mobiles (fermés au départ, ou visés par `ouvrir_chemin` / `fermer_chemin`) ne sont pas dans les cases interdites
-//   (contrat des données : le moteur les interdit toujours lui-même) ; celles de la mise en scène (groupes, banderoles) y sont.
+//   (contrat des données : le moteur les interdit toujours lui-même) ; celles de la mise en scène (groupes, banderoles, grilles) y sont.
 import type { Carte, CaseGrille, Niveau, Vague } from '../../engine/definitions';
 import type { NiveauCampagne, SceneVivante } from '../visuel';
 import { decorVisible } from './assemblage';
-import { CARTES_MODERNE_R1 } from './cartes-moderne-r1';
+import { CARTES_MODERNE } from './cartes-moderne';
 import { casesInterditesDuNiveau } from './grille-niveau';
 import { zonesBloquantes } from './habillage';
 import type { PlanNiveauModerne } from './plan-moderne-r1';
 
 const NIVEAUX_PAR_REGION = 10;
 
-/** Les cases de la mise en scène : groupes d'étudiants et banderoles (sur `largeur` cases vers l'est). */
+/** Les cases de la mise en scène : groupes d'étudiants, banderoles et grilles de la Préfecture (sur `largeur` cases vers l'est). */
 export function casesDeLaScene(scene: SceneVivante): CaseGrille[] {
   return [
     ...scene.groupes.map((g) => ({ cx: g.cx, cy: g.cy })),
     ...scene.banderoles.flatMap((b) => Array.from({ length: b.largeur }, (_, i) => ({ cx: b.cx + i, cy: b.cy }))),
+    ...(scene.grilles ?? []).flatMap((g) => Array.from({ length: g.largeur }, (_, i) => ({ cx: g.cx + i, cy: g.cy }))),
   ];
 }
 
@@ -69,7 +71,7 @@ function verifierPlan(plan: PlanNiveauModerne): void {
 
 export function assemblerNiveauModerne(plan: PlanNiveauModerne, vagues: readonly Vague[]): NiveauCampagne {
   verifierPlan(plan);
-  const modele = CARTES_MODERNE_R1[plan.carte];
+  const modele = CARTES_MODERNE[plan.carte];
   const region = Math.floor((plan.numero - 1) / NIVEAUX_PAR_REGION) + 1;
   const rang = ((plan.numero - 1) % NIVEAUX_PAR_REGION) + 1;
   const chemins = plan.chemins.map((i) => {

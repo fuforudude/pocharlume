@@ -25,13 +25,14 @@
 // `defiFer` : la tour de tir dès qu'il y a la BAC (furtive) ou des drones (volants), jamais la même paire deux niveaux de suite.
 import type { CheminFerme, DefiFer, EvenementNiveau, Foule } from '../../engine/definitions';
 import type { IdEnnemi } from '../ennemis';
-import type { IdCarteModerneR1 } from './cartes-moderne-r1';
+import type { IdCarteModerne } from './cartes-moderne';
 import type { BossDeVague } from './generation';
 
 export interface PlanNiveauModerne {
   /** Numéro dans la campagne `moderne` (1 à 30). */
   readonly numero: number;
-  readonly carte: IdCarteModerneR1;
+  /** Carte de n'importe quelle région du DLC (cartes-moderne.ts). */
+  readonly carte: IdCarteModerne;
   /** Chemins de la carte utilisés, dans l'ordre (tous ici) ; les chemins mobiles en font partie. */
   readonly chemins: readonly number[];
   readonly aretesDepart: number;

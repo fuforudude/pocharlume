@@ -15,6 +15,7 @@ import { REGLES } from '../regles';
 import { REGION_VISUELLE_FAC } from '../visuel';
 import { casesDeLaScene, cheminsMobilesDuPlan } from './assemblage-moderne';
 import { CAMPAGNE_MODERNE } from './campagne-moderne';
+import { CARTES_MODERNE } from './cartes-moderne';
 import { CARTES_MODERNE_R1, type CarteModerne } from './cartes-moderne-r1';
 import { vaguesDuPlanModerne } from './generation';
 import { distancePointChemin, distanceRectChemin, rectsSeChevauchent, type Rect } from './geometrie';
@@ -146,7 +147,7 @@ describe('les 10 niveaux de la Fac', () => {
 
   it.each(NIVEAUX.map((n, i) => [n.numero, n.niveau, i] as const))('niveau %i : chemins mobiles hors des cases interdites (le moteur les interdit), scène dedans ; assez de cases libres', (_n, niveau, i) => {
     const plan = PLANS_MODERNE_R1[i];
-    const carte = CARTES_MODERNE_R1[plan?.carte ?? 'amphi'];
+    const carte = CARTES_MODERNE[plan?.carte ?? 'amphi'];
     if (!plan) throw new Error('plan absent');
     const fixes = new Set<number>();
     niveau.carte.chemins.forEach((_, k) => {

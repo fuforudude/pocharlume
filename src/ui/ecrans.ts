@@ -182,6 +182,8 @@ export function lignesBilan(bilan: BilanPartie): string[] {
     const def = DEFS_TITRES_MODERNES.find((d) => d.id === id);
     if (def) lignes.push(t('fin.bilan_titre', { nom: tCle(def.nom) }));
   }
+  // Le titre « Préfecture tombée » ne s'obtient qu'une fois, en battant le préfet (niveau 30) : la campagne du DLC est finie.
+  if ((bilan.titresNouveaux ?? []).includes('prefecture_tombee')) lignes.push(t('fin.bilan_campagne_moderne'));
   // Jalon 4 : la première victoire sur le boss de la région 1 ouvre le mode infini, celle sur le Soleil Blême finit la campagne.
   if (bilan.infiniDebloque === true) lignes.push(t('fin.bilan_infini_debloque'));
   if (bilan.campagneTerminee === true) lignes.push(t('fin.bilan_campagne'));

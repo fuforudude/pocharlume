@@ -90,9 +90,25 @@ describe('carte du monde du DLC', () => {
   it('la Fac est livrée : ses 10 niveaux, ses nœuds et son tracé sont sur la carte, plus de panneau « à venir »', () => {
     expect(REGIONS_MONDE_MODERNE[0]?.contenu?.niveaux.map((n) => n.numero)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     expect(REGIONS_MONDE_MODERNE[0]?.contenu?.noeuds).toHaveLength(10);
-    expect(REGIONS_MONDE_MODERNE.slice(1).map((r) => r.contenu)).toEqual([null, null]);
+    expect(REGIONS_MONDE_MODERNE[1]?.contenu).toBeNull();
     monter(sauvegardeVide(), { campagne: 'moderne', regions: REGIONS_MONDE_MODERNE });
     expect(document.querySelector<HTMLElement>('.carte-region-vide')?.hidden ?? true).toBe(true);
+  });
+
+  it('la Préfecture est livrée : ses 10 niveaux (21 à 30), ses 10 nœuds dont le boss au dernier, et ses 9 tronçons', () => {
+    const prefecture = REGIONS_MONDE_MODERNE[2]?.contenu;
+    if (!prefecture) throw new Error('Préfecture absente');
+    expect(prefecture.niveaux.map((n) => n.numero)).toEqual([21, 22, 23, 24, 25, 26, 27, 28, 29, 30]);
+    expect(prefecture.noeuds.map((n) => n.boss)).toEqual([false, false, false, false, false, false, false, false, false, true]);
+    expect(prefecture.trace).toHaveLength(9);
+    // Chaque tronçon part d'un nœud et arrive au suivant, dans le fond de 512 × 288.
+    prefecture.trace.forEach((troncon, i) => {
+      const a = prefecture.noeuds[i];
+      const b = prefecture.noeuds[i + 1];
+      expect([troncon[0]?.x, troncon[0]?.y]).toEqual([a?.x, a?.y]);
+      expect([troncon.at(-1)?.x, troncon.at(-1)?.y]).toEqual([b?.x, b?.y]);
+      for (const p of troncon) expect(p.x >= 0 && p.x <= 512 && p.y >= 0 && p.y <= 288).toBe(true);
+    });
   });
 
   it('les régions du DLC s’ouvrent avec la progression du DLC, pas celle de l’histoire', () => {
