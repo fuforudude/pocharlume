@@ -32,6 +32,11 @@ import {
 
 const atlas = JSON.parse(readFileSync('public/sprites/atlas.json', 'utf-8')) as AtlasJson;
 const existe = (nom: string): boolean => Object.hasOwn(atlas.sprites, nom);
+/** L'atlas à part du DLC « Temps modernes » (chargé seulement pour une partie de cette campagne). */
+const atlasModerne = JSON.parse(readFileSync('public/sprites/atlas-moderne.json', 'utf-8')) as AtlasJson;
+const existeModerne = (nom: string): boolean => Object.hasOwn(atlasModerne.sprites, nom);
+/** Un ennemi du DLC : son sprite est dans l'atlas du DLC, pas dans celui de l'histoire. */
+const estModerne = (type: string): boolean => type.startsWith('moderne_');
 
 /** Tous les niveaux de tour du jeu : (famille, niveau, voie, définition). */
 function niveauxDeTours(): { famille: 'caserne' | 'tir' | 'magie' | 'artillerie'; niveau: number; voie: 'A' | 'B' | null; def: DefNiveauTour }[] {
@@ -51,13 +56,14 @@ describe('habillage : chaque sprite demandé existe dans l’atlas', () => {
   it('ennemis', () => {
     for (const type of Object.keys(ENNEMIS)) {
       if (SPRITES_A_VENIR.has(type)) continue;
-      expect(existe(spriteEnnemi(type)), type).toBe(true);
+      if (estModerne(type)) expect(existeModerne(spriteEnnemi(type)), type).toBe(true);
+      else expect(existe(spriteEnnemi(type)), type).toBe(true);
     }
   });
 
-  it('chaque ennemi ordinaire a sa version d’élite (les boss ne sont jamais élites)', () => {
+  it('chaque ennemi ordinaire a sa version d’élite (les boss ne sont jamais élites ; le DLC n’en a pas encore, le rendu reprend alors le sprite de base)', () => {
     for (const [type, def] of Object.entries(ENNEMIS)) {
-      if ((def as { boss: boolean }).boss || SPRITES_A_VENIR.has(type)) continue;
+      if ((def as { boss: boolean }).boss || SPRITES_A_VENIR.has(type) || estModerne(type)) continue;
       expect(existe(spriteEnnemiElite(type)), type).toBe(true);
     }
   });
@@ -185,5 +191,72 @@ describe('habillage : cas particuliers', () => {
   it('les flèches et traits se tournent vers leur cible, pas les boules et pierres', () => {
     expect(projectileTourne('fleche')).toBe(true);
     expect(projectileTourne('pierre')).toBe(false);
+  });
+});
+
+describe('habillage du DLC « Temps modernes » : les sprites moderne-* à la place des originaux, avec les mêmes animations', () => {
+  const tours = niveauxDeTours();
+
+  it('dans la campagne moderne, chaque tour et chaque tour divine prend son sprite DLC, présent dans l’atlas du DLC', () => {
+    for (const { famille, niveau, voie } of tours) {
+      const nom = spriteTour(famille, niveau, voie, 'charlie', 'moderne');
+      expect(nom.startsWith('moderne-'), nom).toBe(true);
+      expect(existeModerne(nom), nom).toBe(true);
+    }
+    for (const dieu of IDS_DIEUX) expect(existeModerne(spriteTour('divine', 1, null, dieu, 'moderne')), dieu).toBe(true);
+  });
+
+  it('contrat de conformité : chaque sprite DLC a les animations (noms et nombre d’images) de l’original qu’il remplace', () => {
+    const paires: [string, string][] = [];
+    for (const { famille, niveau, voie } of tours) {
+      paires.push([spriteTour(famille, niveau, voie, 'charlie', 'moderne'), spriteTour(famille, niveau, voie)]);
+      const tireur = spriteTireur(famille, niveau, voie);
+      const tireurModerne = spriteTireur(famille, niveau, voie, 'moderne');
+      if (tireur && tireurModerne) paires.push([tireurModerne, tireur]);
+    }
+    for (const dieu of IDS_DIEUX) paires.push([spriteTour('divine', 1, null, dieu, 'moderne'), spriteTour('divine', 1, null, dieu)]);
+    for (const [moderne, original] of paires) {
+      const m = atlasModerne.sprites[moderne];
+      const o = atlas.sprites[original];
+      expect(Object.keys(m?.animations ?? {}).sort(), `${moderne} / ${original}`).toEqual(Object.keys(o?.animations ?? {}).sort());
+      for (const [anim, a] of Object.entries(o?.animations ?? {})) {
+        expect(m?.animations[anim]?.cadres.length, `${moderne}/${anim}`).toBe(a.cadres.length);
+      }
+    }
+  });
+
+  it('les tours de tir ont leur chat tireur DLC ; le mégaphone d’or (magie niveau 4 voie A) devient un tireur', () => {
+    for (const { famille, niveau, voie } of tours) {
+      const tireur = spriteTireur(famille, niveau, voie, 'moderne');
+      if (famille === 'tir') expect(tireur?.startsWith('moderne-'), `${famille} ${String(niveau)}`).toBe(true);
+      if (tireur) expect(existeModerne(tireur), tireur).toBe(true);
+    }
+    expect(spriteTireur('magie', 4, 'A', 'moderne')).toBe('moderne-megaphone-chat');
+    expect(spriteTireur('magie', 4, 'B', 'moderne')).toBeNull();
+    expect(spriteTireur('magie', 3, null, 'moderne')).toBeNull();
+    // Le rendu le pose au point de tir de l'estrade (« tir », confondu avec « tireur »).
+    const estrade = atlasModerne.sprites['moderne-magie-megaphone'];
+    expect(nomPointDeTir('magie')).toBe('tir');
+    expect(estrade?.points?.tir).toEqual(estrade?.points?.tireur);
+  });
+
+  it('dans l’histoire (par défaut), rien ne change', () => {
+    for (const { famille, niveau, voie } of tours) {
+      expect(spriteTour(famille, niveau, voie, 'charlie', 'histoire')).toBe(spriteTour(famille, niveau, voie));
+      expect(spriteTour(famille, niveau, voie).startsWith('moderne-')).toBe(false);
+      expect(spriteTireur(famille, niveau, voie, 'histoire')).toBe(spriteTireur(famille, niveau, voie));
+    }
+    expect(spriteTireur('magie', 4, 'A')).toBeNull();
+  });
+
+  it('les ennemis du DLC (boss compris) ont leur propre sprite dans l’atlas du DLC, aucun dans celui de l’histoire', () => {
+    const modernes = Object.keys(ENNEMIS).filter(estModerne);
+    expect(modernes).toHaveLength(17);
+    for (const type of modernes) {
+      expect(existeModerne(spriteEnnemi(type)), type).toBe(true);
+      expect(existe(spriteEnnemi(type)), type).toBe(false);
+    }
+    expect(atlasModerne.sprites['moderne-commissaire-boss']?.largeur).toBe(64);
+    expect(atlasModerne.sprites['moderne-centaure-boss']?.largeur).toBe(64);
   });
 });

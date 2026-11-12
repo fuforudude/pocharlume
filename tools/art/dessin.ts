@@ -35,6 +35,11 @@ export interface Sources {
   readonly palettes: ReadonlyMap<string, ReadonlyMap<string, string>>;
   /** Charge une planche du pack, par chemin relatif à art/minifolks/. */
   readonly planche: (chemin: string) => Image;
+  /**
+   * Les seuls sprites à rendre (les autres ne servent que de références, dessinés à la demande) ; absent = tous. L'atlas du DLC
+   * « Temps modernes » ne garde que ses sprites, qui reprennent parfois des cadres du jeu.
+   */
+  readonly garder?: (nom: string) => boolean;
 }
 
 function hexVersRvba(hex: string): number {
@@ -72,7 +77,8 @@ export function dessinerSprites(sources: Sources): SpriteDessine[] {
     return anims;
   };
 
-  return sources.sprites.map((s): SpriteDessine => {
+  const gardes = sources.garder ? sources.sprites.filter((s) => sources.garder?.(s.nom) === true) : sources.sprites;
+  return gardes.map((s): SpriteDessine => {
     const anims = brut(s.nom, s, s.ligne);
     const finaliser = (avecContour: boolean): AnimDessinee[] => anims.map((a) => ({
       nom: a.nom,

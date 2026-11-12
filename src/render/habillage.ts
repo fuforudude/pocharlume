@@ -1,7 +1,7 @@
 // Correspondance entre le contenu du jeu (types d'ennemis, tours, unités, sorts) et les noms de sprites de
 // l'atlas. C'est de l'habillage : le moteur ne le lit jamais, et les tests vérifient que chaque nom existe.
 import type { FamilleTour, GenreUnite } from '../engine/etat';
-import type { Voie } from '../engine/definitions';
+import type { IdCampagne, Voie } from '../engine/definitions';
 
 /** Sprite d'un ennemi : son identifiant avec des tirets (paysan_affame devient paysan-affame). */
 export function spriteEnnemi(type: string): string {
@@ -60,18 +60,50 @@ const TOURS_DIVINES: Readonly<Record<string, string>> = {
   pollen: 'tour-atelier',
 };
 
-/** Sprite d'une tour selon sa famille, son niveau (1 à 4), sa spécialisation et, pour la tour divine, le dieu de la partie. */
-export function spriteTour(famille: FamilleTour, niveau: number, voie: Voie | null, dieu = 'charlie'): string {
-  if (famille === 'divine') return Object.hasOwn(TOURS_DIVINES, dieu) ? (TOURS_DIVINES[dieu] ?? 'tour-totem') : 'tour-totem';
-  if (niveau >= 4 && voie !== null) return SPRITES_SPECIALISATIONS[famille]?.[voie] ?? `tour-${famille}-3`;
-  return `tour-${famille}-${String(Math.min(Math.max(niveau, 1), 3))}`;
+// DLC « Temps modernes » : dans une partie de cette campagne, les tours prennent leur skin DLC (atlas à part, atlas-moderne.json),
+// avec les mêmes animations que l'original qu'il remplace (contrat de conformité, testé). Hors de cette campagne, rien ne change.
+const SPECIALISATIONS_MODERNES: Readonly<Record<string, Readonly<Record<Voie, string>>>> = {
+  caserne: { A: 'moderne-caserne-amphi', B: 'moderne-caserne-zad' },
+  tir: { A: 'moderne-tir-vigies', B: 'moderne-tir-renvoyeurs' },
+  magie: { A: 'moderne-magie-megaphone', B: 'moderne-magie-graffeurs' },
+  artillerie: { A: 'moderne-artillerie-trebuchet', B: 'moderne-artillerie-canon-paves' },
+};
+
+const DIVINES_MODERNES: Readonly<Record<string, string>> = {
+  charlie: 'moderne-charlie',
+  plume: 'moderne-plume',
+  pollen: 'moderne-pollen',
+};
+
+/**
+ * Sprite d'une tour selon sa famille, son niveau (1 à 4), sa spécialisation, pour la tour divine le dieu de la partie, et la campagne
+ * (`moderne` : le skin du DLC).
+ */
+export function spriteTour(famille: FamilleTour, niveau: number, voie: Voie | null, dieu = 'charlie', campagne: IdCampagne = 'histoire'): string {
+  const moderne = campagne === 'moderne';
+  if (famille === 'divine') {
+    const table = moderne ? DIVINES_MODERNES : TOURS_DIVINES;
+    const defaut = moderne ? 'moderne-charlie' : 'tour-totem';
+    return Object.hasOwn(table, dieu) ? (table[dieu] ?? defaut) : defaut;
+  }
+  const prefixe = moderne ? 'moderne' : 'tour';
+  if (niveau >= 4 && voie !== null) return (moderne ? SPECIALISATIONS_MODERNES : SPRITES_SPECIALISATIONS)[famille]?.[voie] ?? `${prefixe}-${famille}-3`;
+  return `${prefixe}-${famille}-${String(Math.min(Math.max(niveau, 1), 3))}`;
 }
 
-/** Chat tireur posé au sommet d'une tour de tir (au point `tireur` de son sprite), null pour les autres. */
-export function spriteTireur(famille: FamilleTour, niveau: number, voie: Voie | null): string | null {
+/**
+ * Chat tireur posé au sommet d'une tour (au point de tir de son sprite, `nomPointDeTir`), null s'il n'y en a pas : les tours de tir, et
+ * dans le DLC le mégaphone d'or (magie niveau 4 voie A), dont l'étudiant se tourne vers sa cible (spec d'animation du DLC).
+ */
+export function spriteTireur(famille: FamilleTour, niveau: number, voie: Voie | null, campagne: IdCampagne = 'histoire'): string | null {
+  const moderne = campagne === 'moderne';
+  if (moderne && famille === 'magie' && niveau >= 4 && voie === 'A') return 'moderne-megaphone-chat';
   if (famille !== 'tir') return null;
-  if (niveau >= 4) return voie === 'A' ? 'guetteur-chat' : 'arbaletrier-chat';
-  return 'archer-chat';
+  if (niveau >= 4) {
+    if (voie === 'A') return moderne ? 'moderne-vigie-chat' : 'guetteur-chat';
+    return moderne ? 'moderne-renvoyeur-chat' : 'arbaletrier-chat';
+  }
+  return moderne ? 'moderne-lanceur-chat' : 'archer-chat';
 }
 
 /** Point du sprite d'une tour d'où part le projectile (tireur ou tir), s'il y en a un. */

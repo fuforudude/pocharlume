@@ -1,0 +1,26 @@
+# Ennemis du DLC « Temps modernes » : versions boss du commissaire (région 1) et du Centaure (région 2). Le préfet (région 3) est
+# déjà un boss (5-lourds.txt). Aucun dessin neuf : chaque boss reprend les cadres finis de l'ennemi validé (`derive`), avec ses
+# animations, puis :
+#   - le commissaire est agrandi ×2 (cadres de 64×64), comme les boss du jeu ;
+#   - le Centaure, déjà dessiné en 64×64, garde sa taille et passe au noir mat (caisse et facettes assombries), feux bleus inchangés.
+# Atlas à part : npm run art en fait public/sprites/atlas-moderne.png, chargé seulement pour une partie du DLC.
+#= Boss : commissaire et Centaure
+categorie ennemi
+palette commune
+taille 32 32
+ancre 16 30
+
+#: moderne-commissaire-boss | Le Commissaire Divisionnaire (boss) | -
+sprite moderne-commissaire-boss
+derive moderne-commissaire
+agrandi 2
+
+#: moderne-centaure-boss | Le Grand Centaure (boss) | -
+sprite moderne-centaure-boss
+taille 64 64
+ancre 32 61
+couleur 6 263044  caisse gris-bleu sombre (celle du Centaure)
+couleur 7 34405a  facette éclairée
+couleur 8 4e5d7c  arête vive, boulons
+couleur 9 181e2c  pan dans l'ombre
+derive moderne-centaure couleurs 6=#17181d 7=#24262e 8=#3b3e4a 9=#0c0d10

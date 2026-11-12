@@ -3,7 +3,7 @@
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { plancheGenerale, plancheSprite } from './apercu.ts';
-import { construire, construireIllustrations, DOSSIER_SORTIE, RACINE } from './construire.ts';
+import { construire, construireIllustrations, construireModerne, DOSSIER_SORTIE, RACINE } from './construire.ts';
 import { encoderPng } from './png.ts';
 import { planScene } from './scene.ts';
 import { planHerosJ2 } from './scene-heros.ts';
@@ -15,6 +15,15 @@ const resultat = construire();
 mkdirSync(DOSSIER_SORTIE, { recursive: true });
 writeFileSync(join(DOSSIER_SORTIE, 'atlas.png'), resultat.png);
 writeFileSync(join(DOSSIER_SORTIE, 'atlas.json'), resultat.texteJson);
+
+// L'atlas à part du DLC « Temps modernes », chargé par le jeu seulement pour une partie de cette campagne.
+const moderne = construireModerne();
+writeFileSync(join(DOSSIER_SORTIE, 'atlas-moderne.png'), moderne.png);
+writeFileSync(join(DOSSIER_SORTIE, 'atlas-moderne.json'), moderne.texteJson);
+const cadresModernes = moderne.sprites.reduce((n, s) => n + s.anims.reduce((m, a) => m + a.cadres.length, 0), 0);
+console.log(`Atlas du DLC « Temps modernes » : ${String(moderne.sprites.length)} sprites, ${String(cadresModernes)} cadres, `
+  + `${String(moderne.image.largeur)}×${String(moderne.image.hauteur)} px, ${String(Math.round(moderne.png.length / 1024))} Ko `
+  + `(JSON ${String(Math.round(moderne.texteJson.length / 1024))} Ko).`);
 
 const illustrations = construireIllustrations();
 const dossierIllustrations = join(DOSSIER_SORTIE, '..', 'illustrations');
