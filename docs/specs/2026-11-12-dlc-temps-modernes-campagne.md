@@ -74,8 +74,7 @@ avec ses propres récompenses.
 - **Charge** : les chargeurs passent à travers les soldats (comme la charge du Prince Croisé).
 - **Défi Fer** : tous les événements du niveau sont joués pendant la vague unique, à des moments répartis dans le temps.
 - **Renvoi** : le tir de LBD renvoyé **blesse** son tireur (dégâts, sans étourdissement) ; montant réglé au simulateur.
-- **Chemin fermé** : les ennemis déjà engagés finissent leur route ; les nouveaux groupes prennent le repli ; les cases deviennent
-  constructibles une fois le chemin vide.
+- **Chemin fermé** : les ennemis déjà engagés finissent leur route ; les nouveaux groupes prennent le repli.
 - **Foule « ralentir »** : ralentit d'un coup les ennemis présents dans le rayon à l'activation.
 - **Sauvegarde** : tout le DLC (progression, badges, collection, titres, sticker) dans un bloc `moderne` à part ; les badges
   ne sont pas dans `meta.monnaies`. Les « records » sont les records d'infini par carte du DLC. La partie en cours porte sa
