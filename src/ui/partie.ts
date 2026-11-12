@@ -44,8 +44,10 @@ import { EVENEMENT_SECOURS } from './notes';
 
 /** Résultat d'une partie terminée, transmis à `surFin` (étoiles, vies, journal pour une future vérification). */
 export interface ResultatPartie {
-  /** Numéro du niveau de campagne (1 à 150). */
+  /** Numéro du niveau de campagne (1 à 150), ou du DLC (1 à 30) si `campagne` vaut `moderne`. */
   readonly niveau: number;
+  /** Campagne du niveau joué : `moderne` pour le DLC « Temps modernes » ; absent = l'histoire. */
+  readonly campagne?: 'moderne';
   /** `abandon` : le joueur a quitté avant la fin (rendu seulement à `surQuitter`, jamais à `surFin`). */
   readonly statut: 'victoire' | 'defaite' | 'abandon';
   /** 0 en cas de défaite ou d'abandon, 1 à 3 en cas de victoire. */
@@ -351,6 +353,7 @@ export async function lancerNiveau(
   const objetsUtilises = (): string[] => etat.config.objets.filter((_, i) => etat.objetsUtilises[i] === true);
   const resultatDe = (statut: 'victoire' | 'defaite' | 'abandon'): ResultatPartie => ({
     niveau: niveau.numero,
+    ...(niveau.niveau.campagne === 'moderne' ? { campagne: 'moderne' as const } : {}),
     statut,
     etoiles: statut === 'victoire' ? etat.etoiles : 0,
     vies: etat.vies,

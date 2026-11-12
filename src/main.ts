@@ -17,7 +17,7 @@ import type { NiveauCampagne } from './data/visuel';
 import type { DefiPartie, EtatPartie } from './engine';
 import { t } from './i18n';
 import { chargerAtlas, type AtlasRendu } from './render/atlas';
-import { campagneTerminee, Depot, difficulteDe, infiniOuvert, inscriptionTrouvee, ouvrirCanalNavigateur, ouvrirStockage, recordDeLaCarte, Session, stickerDlcReplie, type ChoixPartie, type DifficulteSauvegarde } from './save';
+import { campagneTerminee, Depot, difficulteDe, infiniOuvert, inscriptionTrouvee, ouvrirCanalNavigateur, ouvrirStockage, recordDeLaCarte, sauvegardeDeCampagne, Session, stickerDlcReplie, type ChoixPartie, type DifficulteSauvegarde, type Sauvegarde } from './save';
 import { afficherBestiaire } from './ui/bestiaire';
 import { ennemisAMontrer } from './ui/fiches-ennemis';
 import { afficherBoutique } from './ui/boutique';
@@ -29,7 +29,7 @@ import { afficherEcranInfini } from './ui/ecran-infini';
 import { afficherEcranInscriptions } from './ui/ecran-inscriptions';
 import { afficherAccueil, afficherAvis, afficherConfirmation, afficherFinCampagne, type ChoixNiveau } from './ui/ecrans';
 import { lignesBilanInfini, vueCartesInfini } from './ui/infini-vues';
-import { configDeRelance, configDuChoix, configInfini, debiterAuLancement, nouvelleGraine, relancerAvecDebit } from './ui/lancement';
+import { configDeRelance, configDuChoix, configInfini, debiterAuLancement, detailPerte, nouvelleGraine, partieEnCoursDe, relancerAvecDebit, type PartieEnCoursVue, type SessionLancement } from './ui/lancement';
 import { choixJouable } from './ui/meta-vues';
 import { NIVEAU_CAMPAGNE_TEST } from './ui/niveau-test';
 import { installerIndicationsClavier } from './ui/indications-clavier';
@@ -79,6 +79,12 @@ async function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, l
   carteOuverte = null;
   app.replaceChildren();
   const { reprise, horsSauvegarde, infini } = lancement;
+  // La campagne du niveau joué : les retours (« Carte », abandon, erreur) rouvrent la carte de cette campagne, jamais celle de l'autre.
+  const campagne = campagneDuNiveau(niveau.niveau);
+  const retourCarte = (): void => { ouvrirCarte(campagne); };
+  // La sauvegarde telle que cette campagne la lit : les défis s'ouvrent d'après les étoiles du niveau dans la bonne progression.
+  const vue = (): Sauvegarde => sauvegardeDeCampagne(session.sauvegarde, campagne);
+  const sessionDeCampagne: SessionLancement = { get sauvegarde() { return vue(); }, lancerPartie: (objets) => session.lancerPartie(objets) };
   let config = reprise?.config;
   if (!config) {
     // Tout ce qui entre dans la partie (dieu, héros et son niveau, compétences, arbre, objets) est figé ici.
@@ -86,11 +92,11 @@ async function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, l
     const choix = lancement.choix ?? choixJouable(session.sauvegarde);
     const composee = infini
       ? configInfini(session.sauvegarde, choix, nouvelleGraine(), infini.region)
-      : configDuChoix(session.sauvegarde, choix, difficulte, nouvelleGraine(), demande);
+      : configDuChoix(vue(), choix, difficulte, nouvelleGraine(), demande);
     if (!composee.ok) {
       afficherAvis(document.body, t('fiche.lancement_refuse', { raison: texteRefusMeta(composee.raison) }));
       if (infini) accueil();
-      else carte();
+      else retourCarte();
       return;
     }
     config = composee.config;
@@ -100,7 +106,7 @@ async function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, l
       if (!debit.ok) {
         afficherAvis(document.body, debit.refus);
         if (infini) accueil();
-        else carte();
+        else retourCarte();
         return;
       }
     }
@@ -136,8 +142,8 @@ async function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, l
       // Comme tout lancement, il débite les objets du stock ; refusé, l'écran de fin reste en place.
       nouvelleConfig: async (precedente) => {
         const graine = graineSuivante(precedente.graine);
-        if (horsSauvegarde) return configDeRelance(session.sauvegarde, precedente, graine, niveau.numero);
-        const r = await relancerAvecDebit(session, precedente, graine, niveau.numero);
+        if (horsSauvegarde) return configDeRelance(vue(), precedente, graine, niveau.numero);
+        const r = await relancerAvecDebit(sessionDeCampagne, precedente, graine, niveau.numero);
         if (r.ok) return r.config;
         afficherAvis(document.body, r.refus);
         return null;
@@ -152,13 +158,13 @@ async function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, l
           else if (enSauvegarde) session.effacerPartie().catch(console.error);
         }
         if (infini) accueil();
-        else carte();
+        else retourCarte();
       },
       surContinuer: () => {
         // La première victoire sur le Soleil Blême finit la campagne : l'écran de fin passe avant le retour à la carte.
         (bilanVictoire ?? Promise.resolve(null))
-          .then((r) => { if (r?.bilan?.campagneTerminee === true) finDeCampagne(); else carte(); })
-          .catch((erreur: unknown) => { console.error(erreur); carte(); });
+          .then((r) => { if (r?.bilan?.campagneTerminee === true) finDeCampagne(); else retourCarte(); })
+          .catch((erreur: unknown) => { console.error(erreur); retourCarte(); });
       },
       // Une vieille statue touchée : son inscription entre au recueil (la première fois seulement). Hors sauvegarde, rien n'est gagné.
       surInscription: (id) => {
@@ -198,7 +204,7 @@ async function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, l
     afficherAvis(document.body, t('erreur.chargement'));
     if (reprise && !horsSauvegarde) void session.effacerPartie();
     if (reprise || horsSauvegarde || infini) accueil();
-    else carte();
+    else retourCarte();
   });
 }
 
@@ -238,7 +244,7 @@ function ecranInfini(): void {
           }
           afficherConfirmation(app, {
             titre: t('lancer.perte_titre'),
-            detail: t(enCours.infini ? 'lancer.perte_detail_infini' : 'lancer.perte_detail', { n: enCours.niveau, m: enCours.vague }),
+            detail: detailPerte(enCours),
             confirmer: t('lancer.confirmer'),
             annuler: t('lancer.annuler'),
             surConfirmer: lancer,
@@ -322,12 +328,6 @@ function ouvrirCarte(campagne: IdCampagne): void {
           else derniereRegion = numero;
         },
         surLancer: (niveau, difficulte, choix, defi) => {
-          // Les niveaux du DLC ne se jouent pas encore : leur fin de partie (progression du DLC, badges) arrive avec leur contenu.
-          if (moderne) {
-            afficherAvis(document.body, t('moderne.bientot'));
-            carteModerne();
-            return;
-          }
           // Un défi se joue en Matou, imposé : la difficulté cochée dans la fiche n'est pas changée.
           if (defi === null) derniereDifficulte = difficulte;
           jouer(niveau, difficulte, { choix, ...(defi === null ? {} : { defi }) }).catch(console.error);
@@ -387,9 +387,8 @@ function ouvrirCollection(atlas: AtlasRendu): void {
 }
 
 /** La partie en cours qu'un nouveau lancement remplacerait, ou null. */
-function partieEnCours(): { niveau: number; vague: number; infini?: true } | null {
-  const reprise = session.partieAReprendre();
-  return reprise ? { niveau: reprise.niveau, vague: reprise.vague, ...(reprise.carte === undefined ? {} : { infini: true as const }) } : null;
+function partieEnCours(): PartieEnCoursVue | null {
+  return partieEnCoursDe(session.partieAReprendre());
 }
 
 /** Les raccourcis de test de l'accueil : jamais sur le site public. */

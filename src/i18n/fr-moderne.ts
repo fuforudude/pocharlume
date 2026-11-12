@@ -2,7 +2,7 @@
 export const frModerne = {
   'accueil.moderne': 'Temps modernes',
   'moderne.titre': 'Temps modernes',
-  'moderne.bientot': 'Les niveaux de Temps modernes arrivent bientôt.',
+  'lancer.perte_detail_moderne': 'Ta partie du DLC Temps modernes, niveau {n}, à la vague {m}, sera remplacée si tu lances ce niveau.',
   'region_moderne.1': 'La Fac',
   'region_moderne.2': 'La Manif',
   'region_moderne.3': 'La Préfecture',

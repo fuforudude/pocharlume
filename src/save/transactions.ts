@@ -30,8 +30,11 @@ import {
   type IdHeros,
   type IdObjet,
 } from '../data/meta';
+import { BRAISES_DEFI_MODERNE, braisesDeVictoireModerne, estBossModerne, NIVEAU_MAX_MODERNE } from '../data/campagnes';
+import { badgesDeLaVictoire } from './badges-moderne';
 import { definitionDuHeros, niveauHerosDepuisXp, pointsDeCompetence, type DefsMeta } from './definitions';
 import { DIFFICULTES_SAUVEGARDE, etoilesDepensees, etoilesGagnees, metaParDefaut, type Meta, type Sauvegarde } from './format';
+import { enregistrerVictoireModerne, sauvegardeDeCampagne } from './moderne';
 import { enregistrerVictoire, meilleuresEtoiles, niveauDebloque } from './progression';
 import { estEntierEntre, poser } from './validation';
 
@@ -237,6 +240,12 @@ export interface FinDePartieMeta {
    * pour une victoire.
    */
   readonly defi?: string | null;
+  /**
+   * Campagne de la partie : `moderne` pour le DLC « Temps modernes » ; absent = l'histoire. Le niveau est celui de cette campagne. Une
+   * partie du DLC passe par la progression et les défis du DLC (`moderne`), jamais par ceux de l'histoire ; ses braises suivent les
+   * montants du DLC ; elle n'ouvre ni mode infini, ni disciple, ni région de l'histoire.
+   */
+  readonly campagne?: 'moderne';
 }
 
 /**
@@ -304,7 +313,11 @@ export function nonUtilises(equipes: readonly IdObjet[], utilises: readonly IdOb
 export function enregistrerFinDePartie(s: Sauvegarde, fin: FinDePartieMeta, defs?: DefsMeta): ResultatFin {
   const victoire = fin.statut === 'victoire';
   const abandon = fin.statut === 'abandon';
-  if (!abandon && !niveauDebloque(s, fin.niveau)) return refus('niveau_invalide');
+  // Le DLC lit et écrit sa propre progression et ses propres défis ; `base` est la sauvegarde telle que la campagne de la partie la voit.
+  const moderne = fin.campagne === 'moderne';
+  const base = moderne ? sauvegardeDeCampagne(s, 'moderne') : s;
+  if (!abandon && !niveauDebloque(base, fin.niveau)) return refus('niveau_invalide');
+  if (moderne && fin.niveau > NIVEAU_MAX_MODERNE) return refus('niveau_invalide');
   const difficulte = DIFFICULTES_SAUVEGARDE.find((d) => d === fin.difficulte);
   if (victoire && difficulte === undefined) return refus('difficulte_inconnue');
   if (victoire && !estEntierEntre(fin.etoiles, 1, 3)) return refus('etoiles_invalides');
@@ -317,30 +330,37 @@ export function enregistrerFinDePartie(s: Sauvegarde, fin: FinDePartieMeta, defs
   // Une victoire en défi ne compte que sur un niveau déjà à 3 étoiles (un défi inconnu ou fermé est refusé en entier).
   let defi: IdDefi | null = null;
   if (victoire && fin.defi !== undefined && fin.defi !== null) {
-    if (!estIdDefi(fin.defi) || meilleuresEtoiles(s, fin.niveau) < 3) return refus('niveau_invalide');
+    if (!estIdDefi(fin.defi) || meilleuresEtoiles(base, fin.niveau) < 3) return refus('niveau_invalide');
     defi = fin.defi;
   }
 
   let suivante = s;
-  const etoilesAvant = meilleuresEtoiles(s, fin.niveau);
-  if (victoire && defi === null && difficulte !== undefined) suivante = enregistrerVictoire(s, fin.niveau, difficulte, fin.etoiles);
-  const etoilesApres = meilleuresEtoiles(suivante, fin.niveau);
+  const etoilesAvant = meilleuresEtoiles(base, fin.niveau);
+  if (victoire && defi === null && difficulte !== undefined) {
+    suivante = moderne ? enregistrerVictoireModerne(s, fin.niveau, difficulte, fin.etoiles) : enregistrerVictoire(s, fin.niveau, difficulte, fin.etoiles);
+  }
+  const etoilesApres = meilleuresEtoiles(sauvegardeDeCampagne(suivante, moderne ? 'moderne' : 'histoire'), fin.niveau);
   const nouvellesEtoiles = etoilesApres - etoilesAvant;
 
   // Défi : ses braises la première fois seulement, rien de la campagne. Partie ordinaire : arêtes et braises habituelles.
-  const defiDejaReussi = defi !== null && Object.hasOwn(s.meta.defis, String(fin.niveau)) && s.meta.defis[String(fin.niveau)]?.[defi] === true;
+  const defisAvant = base.meta.defis;
+  const defiDejaReussi = defi !== null && Object.hasOwn(defisAvant, String(fin.niveau)) && defisAvant[String(fin.niveau)]?.[defi] === true;
   const defiReussi = defi !== null && !defiDejaReussi ? defi : null;
-  const aretesGagnees = victoire && defi === null ? aretesDeVictoire(fin.niveau, nouvellesEtoiles) : 0;
+  // Les niveaux du DLC valent ceux d'après l'histoire pour les arêtes et l'expérience (le DLC se joue après la campagne).
+  const rang = moderne ? NIVEAU_FIN_CAMPAGNE + fin.niveau : fin.niveau;
+  const aretesGagnees = victoire && defi === null ? aretesDeVictoire(rang, nouvellesEtoiles) : 0;
+  const braisesVictoire = moderne ? braisesDeVictoireModerne : braisesDeVictoire;
+  const braisesDuDefi = moderne ? BRAISES_DEFI_MODERNE : braisesDeDefi(fin.niveau);
   const braisesGagnees =
     victoire && defi === null
-      ? braisesDeVictoire(fin.niveau, etoilesAvant === 0, etoilesAvant < 3 && etoilesApres === 3)
+      ? braisesVictoire(fin.niveau, etoilesAvant === 0, etoilesAvant < 3 && etoilesApres === 3)
       : defiReussi !== null
-        ? braisesDeDefi(fin.niveau)
+        ? braisesDuDefi
         : 0;
   const aretes = Math.min(PLAFOND_MONNAIE, s.meta.monnaies.aretes + aretesGagnees);
   const braises = Math.min(PLAFOND_MONNAIE, s.meta.monnaies.braises + braisesGagnees);
 
-  let defis = suivante.meta.defis;
+  let defis = moderne ? s.moderne.defis : suivante.meta.defis;
   if (defiReussi !== null) {
     defis = { ...defis };
     poser(defis, String(fin.niveau), { ...(Object.hasOwn(defis, String(fin.niveau)) ? defis[String(fin.niveau)] : undefined), [defiReussi]: true });
@@ -352,7 +372,7 @@ export function enregistrerFinDePartie(s: Sauvegarde, fin: FinDePartieMeta, defs
   if (heros !== null) {
     const ancien = s.meta.heros[heros];
     const xpAvant = ancien?.xp ?? 0;
-    const xpApres = Math.min(PLAFOND_XP, xpAvant + xpDePartie(fin.niveau, victoire));
+    const xpApres = Math.min(PLAFOND_XP, xpAvant + xpDePartie(rang, victoire));
     xpGagnee = xpApres - xpAvant;
     herosMeta = { ...s.meta.heros, [heros]: { xp: xpApres, competences: ancien?.competences ?? {} } };
     if (defs) niveauHeros = { avant: niveauHerosDepuisXp(xpAvant, defs.seuilsXp), apres: niveauHerosDepuisXp(xpApres, defs.seuilsXp) };
@@ -360,14 +380,14 @@ export function enregistrerFinDePartie(s: Sauvegarde, fin: FinDePartieMeta, defs
 
   // La première victoire sur le boss de la région 2, 4, 6 ou 8 offre le premier disciple non encore possédé.
   const discipleOffert =
-    victoire && defi === null && etoilesAvant === 0 && NIVEAUX_DISCIPLE_OFFERT.includes(fin.niveau)
+    !moderne && victoire && defi === null && etoilesAvant === 0 && NIVEAUX_DISCIPLE_OFFERT.includes(fin.niveau)
       ? DISCIPLES_OFFERTS.find((disciple) => !Object.hasOwn(herosMeta, disciple))
       : undefined;
   if (discipleOffert !== undefined) herosMeta = { ...herosMeta, [discipleOffert]: { xp: 0, competences: {} } };
-  const regionDebloquee = suivante.meta.regionMax > s.meta.regionMax ? suivante.meta.regionMax : undefined;
+  const regionDebloquee = !moderne && suivante.meta.regionMax > s.meta.regionMax ? suivante.meta.regionMax : undefined;
   const premiereVictoireOrdinaire = victoire && defi === null && etoilesAvant === 0;
-  const campagneTerminee = premiereVictoireOrdinaire && fin.niveau === NIVEAU_FIN_CAMPAGNE;
-  const infiniDebloque = premiereVictoireOrdinaire && fin.niveau === NIVEAU_OUVERTURE_INFINI;
+  const campagneTerminee = !moderne && premiereVictoireOrdinaire && fin.niveau === NIVEAU_FIN_CAMPAGNE;
+  const infiniDebloque = !moderne && premiereVictoireOrdinaire && fin.niveau === NIVEAU_OUVERTURE_INFINI;
 
   // Les objets emportés ont été débités au lancement : on rend ceux qui n'ont pas servi, sans dépasser le stock maximal.
   const objets = { ...s.meta.objets };
@@ -378,9 +398,15 @@ export function enregistrerFinDePartie(s: Sauvegarde, fin: FinDePartieMeta, defs
     rendus.push(objet);
   }
 
+  const meta = { ...suivante.meta, monnaies: { aretes, braises }, heros: herosMeta, objets };
+  // Le DLC range ses défis et ses badges dans son bloc `moderne` ; les défis de l'histoire (`meta.defis`) ne bougent pas.
+  const badges = moderne && victoire ? badgesDeLaVictoire({ numero: fin.niveau, boss: estBossModerne(fin.niveau), premiereVictoire: premiereVictoireOrdinaire, etoilesAvant, etoilesApres, defiReussi }) : 0;
+  const sauvegarde: Sauvegarde = moderne
+    ? { ...suivante, meta, moderne: { ...suivante.moderne, defis, badges: suivante.moderne.badges + badges } }
+    : { ...suivante, meta: { ...meta, defis } };
   return {
     ok: true,
-    sauvegarde: { ...suivante, meta: { ...suivante.meta, monnaies: { aretes, braises }, heros: herosMeta, objets, defis } },
+    sauvegarde,
     bilan: {
       aretes: aretes - s.meta.monnaies.aretes,
       braises: braises - s.meta.monnaies.braises,
@@ -390,7 +416,7 @@ export function enregistrerFinDePartie(s: Sauvegarde, fin: FinDePartieMeta, defs
       niveauHeros,
       objetsConsommes: utilises,
       objetsRendus: rendus,
-      ...(defiReussi !== null ? { defiReussi, braisesDefi: braisesDeDefi(fin.niveau) } : {}),
+      ...(defiReussi !== null ? { defiReussi, braisesDefi: braisesDuDefi } : {}),
       ...(discipleOffert !== undefined ? { discipleOffert } : {}),
       ...(regionDebloquee !== undefined ? { regionDebloquee } : {}),
       ...(campagneTerminee ? { campagneTerminee: true as const } : {}),
