@@ -25,6 +25,7 @@ describe('capacités de famille dans les bulles et le Bestiaire', () => {
       expect(texte.length, famille).toBeGreaterThan(20);
     }
     expect(texteCapacite({ type: 'piquet', reduction: 0.25, soldats: 2 })).toContain('25');
+    expect(texteCapacite({ type: 'renvoi', chaque: 3, degats: 9 })).toMatch(/9 dégâts.*sur 3/);
     expect(texteCapacite({ type: 'sono', rayon: 1, ralentissement: 0.15, volants: true })).toContain('15');
   });
 
@@ -37,13 +38,16 @@ describe('capacités de famille dans les bulles et le Bestiaire', () => {
     expect(notesCapacite(partie('histoire'), 'tir')).toEqual([]);
   });
 
-  it('le Bestiaire montre la ligne « Capacité DLC » de la famille, pas pour la tour divine', () => {
+  it('le Bestiaire du DLC montre la ligne « Capacité DLC » de la famille, pas pour la tour divine ni dans le Bestiaire de l’histoire', () => {
     for (const famille of FAMILLES) {
-      const contenu = contenuDeTour({ id: `${famille}-1`, famille, palier: 1, voie: null, dieu: null, sprite: '', niveau: 1, ouvert: true } as never);
+      const entree = { id: `${famille}-1`, famille, palier: 1, voie: null, dieu: null, sprite: '', niveau: 1, ouvert: true } as never;
+      expect(contenuDeTour(entree).lignes.some((l) => l.libelle === t('bulle.tour.capacite_dlc')), famille).toBe(false);
+      expect(contenuDeTour(entree, 'histoire').lignes.some((l) => l.libelle === t('bulle.tour.capacite_dlc')), famille).toBe(false);
+      const contenu = contenuDeTour(entree, 'moderne');
       const ligne = contenu.lignes.find((l) => l.libelle === t('bulle.tour.capacite_dlc'));
       expect(ligne?.valeur, famille).toBe(texteCapacite(CAPACITES_CAMPAGNE.moderne[famille] ?? { type: 'percage', ignoreArmure: 0 }));
     }
-    const divine = contenuDeTour({ id: 'divine', famille: 'divine', palier: 1, voie: null, dieu: 'plume', sprite: '', niveau: 1, ouvert: true } as never);
+    const divine = contenuDeTour({ id: 'divine', famille: 'divine', palier: 1, voie: null, dieu: 'plume', sprite: '', niveau: 1, ouvert: true } as never, 'moderne');
     expect(divine.lignes.some((l) => l.libelle === t('bulle.tour.capacite_dlc'))).toBe(false);
   });
 });

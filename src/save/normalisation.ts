@@ -4,6 +4,7 @@
 // Fonction pure : rend une copie, ne modifie pas l'original.
 import { FAMILLES_BASE, type IdFamilier, type IdSkin } from '../data/collection';
 import { HEROS_PAR_DIEU, IDS_HEROS, type IdHeros } from '../data/meta';
+import { CATALOGUE_MODERNE, type CatalogueModerne } from '../data/recompenses-moderne';
 import type { CibleSkin, Collection } from '../meta/collection';
 import { definitionDuHeros, niveauHerosDepuisXp, pointsDeCompetence, type DefsMeta } from './definitions';
 import type { Meta, ProgressionHeros, Sauvegarde } from './format';
@@ -29,9 +30,11 @@ function competencesCoherentes(id: string, progression: ProgressionHeros, defs: 
  * - un héros choisi qui n'est pas possédé est remplacé par l'avatar du dieu choisi ;
  * - un skin de héros ou un familier équipé sur un héros que le joueur n'a pas est déséquipé (il reste dans la collection) :
  *   les transactions d'équipement l'interdisent, un code forgé le contournerait.
- * Sans `defs`, seules les deux dernières corrections ont lieu (les compétences ne peuvent pas être jugées).
+ * - un skin ou un titre du DLC absent du catalogue (retiré ou renommé depuis l'export) est écarté, au lieu de faire refuser toute la
+ *   sauvegarde : la validation ne contrôle que la forme des identifiants (`catalogue` : `null`, pas encore de catalogue, n'écarte rien).
+ * Sans `defs`, seules les corrections de héros et d'équipement ont lieu (les compétences ne peuvent pas être jugées).
  */
-export function normaliserImport(s: Sauvegarde, defs?: DefsMeta): Sauvegarde {
+export function normaliserImport(s: Sauvegarde, defs?: DefsMeta, catalogue: CatalogueModerne | null = CATALOGUE_MODERNE): Sauvegarde {
   const heros: Meta['heros'] = {};
   for (const id of IDS_HEROS) {
     const progression = s.meta.heros[id];
@@ -40,7 +43,11 @@ export function normaliserImport(s: Sauvegarde, defs?: DefsMeta): Sauvegarde {
   }
   const { choix } = s.meta;
   const choisi = Object.hasOwn(heros, choix.heros) ? choix.heros : HEROS_PAR_DIEU[choix.dieu][0];
-  return { ...s, meta: { ...s.meta, heros, choix: { ...choix, heros: choisi }, collection: { ...s.meta.collection, equipes: equipementPossede(s.meta.collection.equipes, heros) } } };
+  return {
+    ...s,
+    meta: { ...s.meta, heros, choix: { ...choix, heros: choisi }, collection: { ...s.meta.collection, equipes: equipementPossede(s.meta.collection.equipes, heros) } },
+    moderne: catalogue ? moderneConnu(s.moderne, catalogue) : s.moderne,
+  };
 }
 
 /** L'équipement sans ce qui est porté par un héros absent de `heros` ; les skins de tour ne dépendent d'aucun héros. */
@@ -54,4 +61,18 @@ function equipementPossede(equipes: Collection['equipes'], heros: Meta['heros'])
     if (Object.hasOwn(heros, id)) familiers[id] = familier;
   }
   return { skins, familiers };
+}
+
+/** La campagne du DLC sans les skins et les titres que le catalogue ne connaît pas (l'ordre, donc la validité, est gardé). */
+function moderneConnu(moderne: Sauvegarde['moderne'], catalogue: CatalogueModerne): Sauvegarde['moderne'] {
+  const garder = (ids: readonly string[], connus: readonly string[]): string[] => ids.filter((id) => connus.includes(id));
+  return {
+    ...moderne,
+    collection: {
+      ...moderne.collection,
+      skinsTours: garder(moderne.collection.skinsTours, catalogue.skinsTours),
+      skinsHeros: garder(moderne.collection.skinsHeros, catalogue.skinsHeros),
+    },
+    titres: garder(moderne.titres, catalogue.titres),
+  };
 }

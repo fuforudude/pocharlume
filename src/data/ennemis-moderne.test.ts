@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import type { ActionEnnemi, DefEnnemi } from '../engine/definitions';
 import { fr } from '../i18n/fr';
 import { ENNEMIS } from './ennemis';
+import { menaceEnnemi } from './equilibrage';
 import { CAMPAGNE } from './niveaux/campagne';
 
 const table: Readonly<Record<string, DefEnnemi>> = ENNEMIS;
@@ -67,6 +68,27 @@ describe('les 15 ennemis du DLC reprennent leur original', () => {
       expect(def(id).pv, id).toBeGreaterThanOrEqual(def(original).pv);
       expect(def(id).prime, id).toBeGreaterThanOrEqual(def(original).prime);
     }
+  });
+
+  it('la menace de chacun reste entre 1 et 3 fois celle de son original (le binôme compte double)', () => {
+    for (const [id, original] of Object.entries(ORIGINAUX_MODERNES)) {
+      const rapport = menaceEnnemi(def(id)) / menaceEnnemi(def(original));
+      expect(rapport, id).toBeGreaterThanOrEqual(1);
+      expect(rapport, id).toBeLessThanOrEqual(3);
+    }
+  });
+
+  it('une BRAV-M pèse deux fois son équivalent seul : le binôme double la menace', () => {
+    const bravm = def('moderne_bravm');
+    const pouvoirs = { ...bravm.pouvoirs } as { binome?: unknown };
+    delete pouvoirs.binome;
+    const seule = { ...bravm, pouvoirs } as DefEnnemi;
+    expect(menaceEnnemi(bravm)).toBeCloseTo(2 * menaceEnnemi(seule));
+  });
+
+  it('les boss pèsent bien plus que n’importe quel ennemi ordinaire du DLC', () => {
+    const ordinaires = Object.keys(ORIGINAUX_MODERNES).filter((id) => !def(id).boss).map((id) => menaceEnnemi(def(id)));
+    for (const id of BOSS_MODERNES) expect(menaceEnnemi(def(id)), id).toBeGreaterThan(10 * Math.max(...ordinaires));
   });
 
   it('les trois mécaniques nouvelles sont portées par le canon à eau, le tireur de LBD et la BRAV-M', () => {

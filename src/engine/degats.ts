@@ -39,6 +39,14 @@ function tuer(etat: EtatPartie, e: Ennemi): void {
     etat.evenements.push({ type: 'binome_seul', ennemi: equipier.id, x: equipier.x, y: equipier.y });
   }
   e.binome = -1;
+  // Tombé au même pas que son équipier : l'accélération annoncée pour lui n'a plus lieu d'être (pas d'événement pour une moto qui meurt).
+  if (e.binomeSeul) {
+    const i = etat.evenements.findIndex((x) => x.type === 'binome_seul' && x.ennemi === e.id);
+    if (i >= 0) {
+      etat.evenements.splice(i, 1);
+      e.binomeSeul = false;
+    }
+  }
   // Un volant tombé dans un couloir n'est pas gardé : le relever le poserait sur un chemin.
   if (!e.boss && e.couloir < 0) {
     etat.morts.push({ type: e.type, chemin: e.chemin, distance: e.distance, elite: e.elite, vague: e.vague });

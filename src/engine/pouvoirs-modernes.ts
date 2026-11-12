@@ -1,12 +1,12 @@
 // Mécaniques d'ennemis du DLC « Temps modernes », génériques et pilotées par les données (aucun ennemi n'est nommé ici) :
 //   - repousse (action `repousser`) : les unités alliées devant l'ennemi sont poussées dans le sens de sa marche et étourdies ;
 //   - tir sur les tours (action `tirer_tour`) : un projectile vole vers une tour et la met hors service à l'arrivée ; un Perchoir
-//     qui a la capacité « Renvoi » (campagne) en renvoie une partie au tireur, qui est étourdi ;
+//     qui a la capacité « Renvoi » (campagne) en renvoie une partie au tireur, qui est blessé ;
 //   - binôme (pouvoir `binome`) : la liaison est posée par `ajouterEnnemi` (ennemis.ts), l'accélération par la chute de l'autre dans
 //     `tuer` (degats.ts) et `facteurVitesse` (ennemis.ts).
 import { renvoiDuTir } from './capacites-campagne';
 import { trajetEnnemi } from './chemins';
-import { appliquerEffet } from './degats';
+import { infligerDegats } from './degats';
 import type { ActionEnnemi } from './definitions';
 import type { Ennemi, EtatPartie, Tour, TirEnnemi } from './etat';
 import { chercherParId, distance2 } from './recherche';
@@ -76,7 +76,7 @@ export function tirerSurTour(etat: EtatPartie, e: Ennemi, action: Extract<Action
     vitesse: action.vitesse / PAS_PAR_SECONDE,
     duree: Math.max(1, enPas(action.duree)),
     renvoye: false,
-    etourdissement: 0,
+    degats: 0,
   };
   etat.tirsEnnemis.push(tir);
   etat.evenements.push({ type: 'tir_tour', tir: tir.id, ennemi: e.id, tour: tour.id, x: e.x, y: e.y });
@@ -89,7 +89,7 @@ function arriverSurTour(etat: EtatPartie, tir: TirEnnemi, tour: Tour): boolean {
   const tireur = renvoi ? chercherParId(etat.ennemis, tir.ennemi) : undefined;
   if (renvoi && tireur?.vivant) {
     tir.renvoye = true;
-    tir.etourdissement = renvoi.capacite.etourdissement;
+    tir.degats = renvoi.capacite.degats;
     etat.evenements.push({ type: 'renvoi', tir: tir.id, tour: renvoi.tour.id, ennemi: tireur.id, x: tir.x, y: tir.y });
     return true;
   }
@@ -101,7 +101,7 @@ function arriverSurTour(etat: EtatPartie, tir: TirEnnemi, tour: Tour): boolean {
 
 /**
  * Fait voler les tirs des ennemis. Vers une tour : il suit la tour (une tour vendue entre-temps le perd) ; à l'arrivée, elle est hors
- * service, sauf renvoi. Renvoyé : il suit le tireur, qui est étourdi à l'arrivée ; un tireur mort entre-temps le perd.
+ * service, sauf renvoi. Renvoyé : il suit le tireur, qui est blessé à l'arrivée ; un tireur mort entre-temps le perd.
  */
 export function mettreAJourTirsEnnemis(etat: EtatPartie): void {
   const liste = etat.tirsEnnemis;
@@ -130,7 +130,7 @@ export function mettreAJourTirsEnnemis(etat: EtatPartie): void {
     if (tour) {
       if (arriverSurTour(etat, tir, tour)) liste[garde++] = tir;
     } else if (tireur) {
-      appliquerEffet(etat, tireur, { type: 'etourdissement', chance: 1, duree: tir.etourdissement, valeur: 0 });
+      infligerDegats(etat, tireur, tir.degats, 'physique');
       etat.evenements.push({ type: 'tir_renvoye_touche', tir: tir.id, ennemi: tireur.id, x: tir.x, y: tir.y });
     }
   }

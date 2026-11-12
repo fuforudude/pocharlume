@@ -76,7 +76,12 @@ describe('campagne Temps modernes : format v9', () => {
     ['record d’une carte mal nommée', { 'moderne.records': { 'Amphi!': 3 } }],
     ['badges négatifs', { 'moderne.badges': -1 }],
     ['badges non entiers', { 'moderne.badges': 1.5 }],
+    ['badges au-delà du plafond', { 'moderne.badges': 100_000_000 }],
+    ['garantie négative', { 'moderne.collection.garantie': -1 }],
     ['garantie au-delà de 9', { 'moderne.collection.garantie': 10 }],
+    ['trop de skins', { 'moderne.collection.skinsTours': Array.from({ length: 129 }, (_, i) => `skin_${String(1000 + i)}`) }],
+    ['skin au nom hérité d’Object', { 'moderne.collection.skinsHeros': ['constructor'] }],
+    ['titre au nom hérité d’Object', { 'moderne.titres': ['constructor'] }],
     ['skin en double', { 'moderne.collection.skinsTours': ['skin_a', 'skin_a'] }],
     ['skins dans le désordre', { 'moderne.collection.skinsTours': ['skin_b', 'skin_a'] }],
     ['skin mal nommé', { 'moderne.collection.skinsHeros': ['__proto__'] }],
@@ -90,7 +95,9 @@ describe('campagne Temps modernes : format v9', () => {
   it('refuse les clés empoisonnées dans les tables du DLC', () => {
     const json = JSON.stringify(avecModerne(moderneRemplie())).replace('"amphi":14', '"__proto__":14');
     expect(validerSauvegarde(JSON.parse(json)).ok).toBe(false);
-    expect(Reflect.get({}, 'amphi')).toBeUndefined();
+    // Aucune pollution du prototype : la clé empoisonnée n'a rien laissé sur Object.prototype.
+    expect(Object.keys(Object.prototype)).toEqual([]);
+    expect(Object.hasOwn(Object.prototype, 'amphi')).toBe(false);
   });
 });
 

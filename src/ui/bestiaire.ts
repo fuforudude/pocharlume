@@ -2,14 +2,17 @@
 // rencontrés en silhouette et « ??? »), Tours (chaque famille, ses niveaux et ses spécialisations, la tour divine de chaque dieu, ce que la
 // campagne n'a pas encore ouvert montré verrouillé) et Particularités (les gimmicks de l'après-histoire, et comment s'y prendre). À gauche la liste, à droite la fiche de ce qu'on a touché. Tout est lu dans les données
 // par `bestiaire-logique.ts` ; l'écran ne calcule rien. Même contrat que les Options : il couvre l'écran dessous, Échap le ferme.
+import { toutEstOuvertDans } from '../data/campagnes';
 import { ENNEMIS } from '../data/ennemis';
+import { NIVEAU_MAX } from '../data/meta';
+import type { IdCampagne } from '../engine/definitions';
 import { t, tCle } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
 import type { Sauvegarde } from '../save';
 import { contenuDeTour, ennemisParRegion, groupesDeTours, libelleDeTour, nomDeTour, precisionDeTour, type EntreeTour, type GroupeEnnemis } from './bestiaire-logique';
 import { bouton, el, image } from './dom';
 import { construireChiffres, construireFicheEnnemi, construireFicheInconnue } from './fiche-ennemi';
-import { REGIONS_MONDE } from './regions-monde';
+import { REGIONS_MONDE, REGIONS_MONDE_MODERNE } from './regions-monde';
 import { creerSpriteAnime } from './sprite-anime';
 import { construireFicheParticularite } from './nouvelle-particularite';
 import { iconeParticularite, nomParticularite, vueParticularites, type TypeParticularite } from './particularites';
@@ -22,6 +25,11 @@ export interface OptionsBestiaire {
   readonly surFermer: () => void;
   /** Onglet ouvert au départ ; Ennemis par défaut. */
   readonly onglet?: Onglet;
+  /**
+   * Campagne de l'écran qui ouvre le Bestiaire : `moderne` (carte du DLC, partie du DLC) montre les ennemis « Temps modernes » (l'atlas
+   * doit avoir été chargé avec `chargerAtlas('moderne')`) et la capacité de chaque famille de tours ; `histoire` (défaut), celui d'avant le DLC.
+   */
+  readonly campagne?: IdCampagne;
 }
 
 export interface EcranBestiaire {
@@ -34,14 +42,15 @@ type Onglet = 'ennemis' | 'tours' | 'particularites';
 const ONGLETS: readonly Onglet[] = ['ennemis', 'tours', 'particularites'];
 const LIBELLES_ONGLETS = { ennemis: 'bestiaire.onglet_ennemis', tours: 'bestiaire.onglet_tours', particularites: 'bestiaire.onglet_particularites' } as const;
 
-function nomDeRegion(groupe: GroupeEnnemis): string {
+function nomDeRegion(groupe: GroupeEnnemis, campagne: IdCampagne): string {
   if (groupe.region === 0) return t('bestiaire.region_autres');
-  const region = REGIONS_MONDE.find((r) => r.numero === groupe.region);
+  const region = (campagne === 'moderne' ? REGIONS_MONDE_MODERNE : REGIONS_MONDE).find((r) => r.numero === groupe.region);
   return t('bestiaire.region', { n: groupe.region, nom: region ? tCle(region.nom) : '' });
 }
 
 export function afficherBestiaire(parent: HTMLElement, options: OptionsBestiaire): EcranBestiaire {
   const { atlas, session } = options;
+  const campagne: IdCampagne = options.campagne ?? 'histoire';
   const precedent = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   const controleur = new AbortController();
   const { signal } = controleur;
@@ -158,7 +167,7 @@ export function afficherBestiaire(parent: HTMLElement, options: OptionsBestiaire
   // --- Onglet Ennemis ---
 
   const dessinerEnnemis = (): void => {
-    const groupes = ennemisParRegion(session.sauvegarde);
+    const groupes = ennemisParRegion(session.sauvegarde, undefined, campagne);
     const tous = groupes.flatMap((g) => g.ennemis);
     compte.textContent = t('bestiaire.compte_ennemis', { n: tous.filter((e) => e.rencontre).length, m: tous.length });
     liste.setAttribute('aria-label', t('bestiaire.liste_ennemis'));
@@ -170,7 +179,7 @@ export function afficherBestiaire(parent: HTMLElement, options: OptionsBestiaire
     };
     for (const groupe of groupes) {
       const section = el('section', 'bestiaire-groupe');
-      section.append(el('h3', 'bestiaire-groupe-titre', nomDeRegion(groupe)));
+      section.append(el('h3', 'bestiaire-groupe-titre', nomDeRegion(groupe, campagne)));
       const grille = el('div', 'bestiaire-grille');
       for (const e of groupe.ennemis) {
         const nom = tCle(ENNEMIS[e.id as keyof typeof ENNEMIS].nom);
@@ -194,7 +203,8 @@ export function afficherBestiaire(parent: HTMLElement, options: OptionsBestiaire
   // --- Onglet Tours ---
 
   const dessinerTours = (): void => {
-    const niveauMax = session.sauvegarde.progression.niveauMax;
+    // Dans le DLC toutes les tours sont ouvertes dès le premier niveau ; dans l'histoire, le niveau le plus avancé atteint décide.
+    const niveauMax = toutEstOuvertDans(campagne) ? NIVEAU_MAX : session.sauvegarde.progression.niveauMax;
     const groupes = groupesDeTours(niveauMax);
     const toutes = groupes.flatMap((g) => g.tours);
     compte.textContent = t('bestiaire.compte_tours', { n: toutes.filter((x) => !x.verrouillee).length, m: toutes.length });
@@ -216,7 +226,7 @@ export function afficherBestiaire(parent: HTMLElement, options: OptionsBestiaire
         racine.append(tete);
         return racine;
       }
-      const contenu = contenuDeTour(tour);
+      const contenu = contenuDeTour(tour, campagne);
       if (contenu.sousTitre) noms.append(el('p', 'fiche-ennemi-lore', contenu.sousTitre));
       tete.append(noms);
       racine.append(tete);

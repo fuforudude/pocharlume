@@ -104,6 +104,8 @@ export interface FinDePartie {
 /** Une partie sauvegardée qu'on peut relancer. */
 export interface Reprise {
   readonly niveau: number;
+  /** Campagne de la partie : `moderne` pour le DLC ; absent = l'histoire (`niveau` est alors celui de cette campagne). */
+  readonly campagne?: 'moderne';
   /** Mode infini : la carte jouée (`etat.config.infini` donne sa région). Absent pour une partie de campagne. */
   readonly carte?: string;
   /** Numéro de la vague à laquelle la partie reprend. */
@@ -529,7 +531,7 @@ export class Session {
       void this.effacerPartie();
       return { reprise: null, oubliee: true };
     }
-    return { reprise: { niveau: partie.niveau, vague: partie.vague, etat, ...(partie.carte === undefined ? {} : { carte: partie.carte }) }, oubliee: false };
+    return { reprise: { niveau: partie.niveau, vague: partie.vague, etat, ...(partie.carte === undefined ? {} : { carte: partie.carte }), ...(partie.campagne === undefined ? {} : { campagne: partie.campagne }) }, oubliee: false };
   }
 
   /** La partie à reprendre, ou null (voir `examinerPartie`). */

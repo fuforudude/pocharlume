@@ -8,9 +8,15 @@ import type { DefEnnemi, IdCampagne, Niveau, Vague } from './definitions';
 import { ajouterEnnemi, facteurVitesse } from './ennemis';
 import type { EtatPartie, Unite } from './etat';
 import { creerPartie, serialiser, step } from './partie';
+import { mettreAJourNuages } from './pouvoirs-ennemis';
 import { creerZone } from './structures';
 import { blesserUnite } from './unites';
 import { ENNEMIS } from '../data/ennemis';
+import { COMPETENCES_TOURS } from '../data/competences-tours';
+import { DIEUX } from '../data/dieux';
+import { HEROS } from '../data/heros';
+import { OBJETS } from '../data/objets';
+import { TOURS } from '../data/tours';
 
 /** Le niveau d'essai dans une campagne donnée (`undefined` : sans le champ, comme les niveaux de l'histoire). */
 function niveauDe(campagne: IdCampagne | undefined, vagues?: readonly Vague[]): Niveau {
@@ -86,6 +92,59 @@ describe('Barricade, « Piquet » : moins de dégâts tant que deux soldats tien
   it('dans l’histoire, rien ne change', () => {
     expect(degatsSubis(undefined, 3)).toBeCloseTo(20);
     expect(degatsSubis('histoire', 3)).toBeCloseTo(20);
+  });
+
+  it('une caserne en feu ou gelée n’exerce pas son Piquet : ses soldats encaissent tout', () => {
+    for (const champ of ['desactivee', 'gel'] as const) {
+      const { etat, soldat } = caserne('moderne', 3);
+      const tour = tourDe(etat, 0);
+      if (!tour) throw new Error('pas de tour');
+      tour[champ] = 30;
+      const avant = soldat.pv;
+      blesserUnite(etat, soldat, 20, 'pur');
+      expect(avant - soldat.pv, champ).toBeCloseTo(20);
+      tour[champ] = 0;
+      blesserUnite(etat, soldat, 20, 'pur');
+      expect(avant - soldat.pv, champ).toBeCloseTo(20 + 20 * (1 - (PIQUET?.type === 'piquet' ? PIQUET.reduction : 0)));
+    }
+  });
+
+  it('il réduit aussi les dégâts du nuage lacrymogène', () => {
+    const subis = (campagne: IdCampagne | undefined, tiennent: number): number => {
+      const { etat, soldat } = caserne(campagne, tiennent);
+      creerZone(etat, { duree: 10, effets: [], critique: 0, volants: true, degatsAllies: 6 }, soldat.x, soldat.y, 1);
+      const avant = soldat.pv;
+      mettreAJourNuages(etat);
+      return avant - soldat.pv;
+    };
+    const reduction = PIQUET?.type === 'piquet' ? PIQUET.reduction : 0;
+    expect(subis(undefined, 3)).toBeCloseTo(6 / 30);
+    expect(subis('moderne', 3)).toBeCloseTo((6 / 30) * (1 - reduction));
+    expect(subis('moderne', 1)).toBeCloseTo(6 / 30);
+  });
+
+  it('il réduit aussi le drain de la sangsue, qui ne se soigne que de ce qu’elle a pris', () => {
+    const drain = (campagne: IdCampagne | undefined): { pris: number; soigne: number } => {
+      const etat = partie(campagne);
+      construireTour(etat, 0, 'caserne');
+      avancerSecondes(etat, 2);
+      for (const u of soldats(etat)) u.stats = { ...u.stats, degats: [0, 0] };
+      // Une sangsue par soldat : tous retiennent un ennemi, le Piquet tient.
+      const sangsues = soldats(etat).map(() => ajouterEnnemi(etat, { ...ENNEMIS.sangsue, vitesse: 0, degats: [0, 0], pv: 100 }, 'sangsue', 0, 5));
+      for (const s of sangsues) s.pv = 50;
+      avancerSecondes(etat, 1);
+      expect(soldats(etat).every((u) => u.bloques > 0)).toBe(true);
+      const pvSoldats = soldats(etat).reduce((somme, u) => somme + u.pv, 0);
+      const pvSangsues = sangsues.reduce((somme, s) => somme + s.pv, 0);
+      avancerSecondes(etat, 2);
+      return { pris: pvSoldats - soldats(etat).reduce((somme, u) => somme + u.pv, 0), soigne: sangsues.reduce((somme, s) => somme + s.pv, 0) - pvSangsues };
+    };
+    const reduction = PIQUET?.type === 'piquet' ? PIQUET.reduction : 0;
+    const h = drain(undefined);
+    const m = drain('moderne');
+    expect(h.pris).toBeGreaterThan(0);
+    expect(m.pris).toBeCloseTo(h.pris * (1 - reduction), 4);
+    expect(m.soigne).toBeCloseTo(h.soigne * (1 - reduction), 4);
   });
 
   it('le héros n’en profite pas', () => {
@@ -171,6 +230,36 @@ describe('Sono, « Sono » : ralentissement léger et permanent autour de la tou
     step(etat);
     expect((e.distance - avant) * 30).toBeCloseTo(0.5);
     expect(facteurVitesse(e)).toBeCloseTo(0.5);
+  });
+
+  /** Tous les ralentissements écrits dans les données (effets de coups, de zones, de compétences, de dieux, d'objets, de héros). */
+  function ralentissementsDesDonnees(): number[] {
+    const valeurs: number[] = [];
+    const parcourir = (x: unknown, vus: Set<unknown>): void => {
+      if (typeof x !== 'object' || x === null || vus.has(x)) return;
+      vus.add(x);
+      const o = x as Record<string, unknown>;
+      if (o.type === 'ralentissement' && typeof o.valeur === 'number') valeurs.push(o.valeur);
+      for (const v of Object.values(o)) parcourir(v, vus);
+    };
+    for (const table of [TOURS, DIEUX, HEROS, OBJETS, ENNEMIS, COMPETENCES_TOURS]) parcourir(table, new Set());
+    return valeurs;
+  }
+
+  it('aucun ralentissement des données n’est plus faible que la Sono (la Sono passe par la même case d’effet : le plus fort l’emporte, sans cumul)', () => {
+    const valeurs = ralentissementsDesDonnees();
+    expect(valeurs.length).toBeGreaterThan(0);
+    for (const v of valeurs) expect(v).toBeLessThanOrEqual(facteur);
+  });
+
+  it('deux Sono qui couvrent le même ennemi ne cumulent pas leur ralentissement', () => {
+    const etat = partie('moderne');
+    construireTour(etat, 1, 'magie');
+    construireTour(etat, 2, 'magie');
+    const e = ajouterEnnemi(etat, { ...ENNEMIS.paysan_affame, pv: 1e9, vitesse: 1, degats: [0, 0] }, 'paysan_affame', 0, 11);
+    const avant = e.distance;
+    step(etat);
+    expect((e.distance - avant) * 30).toBeCloseTo(facteur);
   });
 
   it('dans l’histoire, rien ne ralentit', () => {

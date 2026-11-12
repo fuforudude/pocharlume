@@ -8,8 +8,8 @@ export const CAPACITES_CAMPAGNE: Readonly<Record<IdCampagne, CapacitesCampagne>>
   moderne: {
     /** Barricade, « Piquet » : −25 % de dégâts subis tant que deux soldats de la caserne au moins retiennent des ennemis. */
     caserne: { type: 'piquet', reduction: 0.25, soldats: 2 },
-    /** Perchoir, « Renvoi » : dissipe les nuages à portée et renvoie un tir de LBD sur trois (le tireur est étourdi 2 s). */
-    tir: { type: 'renvoi', chaque: 3, etourdissement: 2 },
+    /** Perchoir, « Renvoi » : dissipe les nuages à portée et renvoie un tir de LBD sur trois, qui blesse son tireur (9 : la moyenne d'un tir de Perchoir de rang 2). */
+    tir: { type: 'renvoi', chaque: 3, degats: 9 },
     /** Sono, « Sono » : −15 % de vitesse aux ennemis à portée de la tour, volants compris. */
     magie: { type: 'sono', rayon: 1, ralentissement: 0.15, volants: true },
     /** Engin bricolé, « Perçage » : les pavés passent le bouclier frontal et ignorent 30 % de l'armure en plus. */

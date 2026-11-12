@@ -70,6 +70,11 @@ export interface PartieEnCours {
    * campagne gagné dont la carte et les entrées servent). Absent en campagne.
    */
   carte?: string;
+  /**
+   * Campagne de la partie : `moderne` pour le DLC « Temps modernes » ; absent = l'histoire. Le niveau (`niveau`) est celui de cette campagne et
+   * se contrôle contre sa progression (`progression` pour l'histoire, `moderne.progression` pour le DLC).
+   */
+  campagne?: 'moderne';
 }
 
 export interface Monnaies {

@@ -10,7 +10,7 @@ import './ui/style-indications.css';
 import './ui/style-notes.css';
 import './ui/style-moderne.css';
 import { installerAudio } from './audio';
-import type { IdCampagne } from './data/campagnes';
+import { campagneDuNiveau, type IdCampagne } from './data/campagnes';
 import { DEFS_META } from './data/heros';
 import { REGION1 } from './data/niveaux/region1';
 import type { NiveauCampagne } from './data/visuel';
@@ -173,7 +173,7 @@ async function jouer(niveau: NiveauCampagne, difficulte: DifficulteSauvegarde, l
       // Un niveau à particularité : la première fois, elle est notée et sa fiche s'ouvre (même option que « Nouvel ennemi »).
       surNouvelleParticularite: (type) => particulariteAMontrer(session, type, horsSauvegarde === true, lancement.essai === true),
       // « Bestiaire » dans la pause : monté dans la partie par-dessus la pause ; c'est la partie qui le possède et le ferme.
-      surBestiaire: (parent: HTMLElement, atlas: AtlasRendu, surFermer: () => void) => afficherBestiaire(parent, { atlas, session, surFermer }),
+      surBestiaire: (parent: HTMLElement, atlas: AtlasRendu, surFermer: () => void) => afficherBestiaire(parent, { atlas, session, surFermer, campagne: campagneDuNiveau(niveau.niveau) }),
       ...(infini ? { infini: { record: () => recordDeLaCarte(session.sauvegarde, infini.carte) } } : {}),
       ...(horsSauvegarde
         ? {}
@@ -283,7 +283,21 @@ function ouvrirCarte(campagne: IdCampagne): void {
         difficulte: derniereDifficulte,
         partieEnCours: partieEnCours(),
         ...(moderne
-          ? { campagne, regions: REGIONS_MONDE_MODERNE }
+          ? {
+              campagne,
+              regions: REGIONS_MONDE_MODERNE,
+              // Le Bestiaire du DLC : ses ennemis ont leurs images dans l'atlas du DLC, chargé ici (une seule fois).
+              surBestiaire: () => {
+                carteOuverte?.suspendre(true);
+                chargerAtlas('moderne')
+                  .then((atlasModerne) => afficherBestiaire(app, { atlas: atlasModerne, session, surFermer: rouvrirCarte, campagne: 'moderne' }))
+                  .catch((erreur: unknown) => {
+                    console.error(erreur);
+                    afficherAvis(document.body, t('erreur.chargement'));
+                    rouvrirCarte();
+                  });
+              },
+            }
           : {
               // La campagne finie : l'écran de fin ne se perd pas si le joueur a cliqué « Rejouer » ou fermé l'onglet.
               ...(campagneTerminee(session.sauvegarde) ? { surRevoirFin: finDeCampagne } : {}),
@@ -417,7 +431,8 @@ function accueil(): void {
   app.replaceChildren();
   const { reprise, oubliee } = session.examinerPartie();
   if (oubliee) afficherAvis(document.body, t('sauvegarde.partie_oubliee'));
-  const niveauRepris = reprise ? niveauDeCampagne(reprise.niveau) : undefined;
+  // La partie reprend dans la campagne où elle a été rangée (histoire sans précision).
+  const niveauRepris = reprise ? niveauDeCampagne(reprise.niveau, reprise.campagne === 'moderne' ? REGIONS_MONDE_MODERNE : undefined) : undefined;
   afficherAccueil(app, {
     surJouer: carte,
     // Le DLC « Temps modernes » est ouvert à tous, dès le départ.

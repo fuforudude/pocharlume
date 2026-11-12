@@ -6,6 +6,7 @@
 // purifier).
 // Les mécaniques propres au combat (brûlure, noyade, drain, dégâts contre le héros, rage, renversement) sont dans
 // ennemis.ts et unites.ts.
+import { facteurPiquet } from './capacites-campagne';
 import { placerSurChemin, segmentPour, trajetEnnemi } from './chemins';
 import { defEnnemi } from './contenu';
 import { libererEnnemi } from './degats';
@@ -406,7 +407,8 @@ export function mettreAJourNuages(etat: EtatPartie): void {
     const montant = zone.degatsAllies / PAS_PAR_SECONDE;
     for (const u of etat.unites) {
       if (u.mort || distance2(u.x, u.y, zone.x, zone.y) > rayon2) continue;
-      u.pv -= montant;
+      // « Piquet » (campagne) : le nuage aussi est amoindri pour des soldats qui tiennent la ligne.
+      u.pv -= montant * facteurPiquet(etat, u);
       if (u.pv <= 0) mourir(etat, u);
     }
   }

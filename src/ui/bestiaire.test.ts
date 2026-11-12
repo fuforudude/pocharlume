@@ -4,6 +4,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ENNEMIS } from '../data/ennemis';
 import { TOURS } from '../data/tours';
+import type { IdCampagne } from '../engine/definitions';
 import { t, tCle } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
 import { Depot, rencontrerEnnemis, sauvegardeVide, Session, StockageMemoire, type Sauvegarde } from '../save';
@@ -17,9 +18,9 @@ afterEach(() => {
   document.body.replaceChildren();
 });
 
-function avec(sauvegarde: Sauvegarde, onglet?: 'ennemis' | 'tours') {
+function avec(sauvegarde: Sauvegarde, onglet?: 'ennemis' | 'tours', campagne?: IdCampagne) {
   const surFermer = vi.fn();
-  const ecran = afficherBestiaire(document.body, { atlas: ATLAS, session: { sauvegarde }, surFermer, ...(onglet ? { onglet } : {}) });
+  const ecran = afficherBestiaire(document.body, { atlas: ATLAS, session: { sauvegarde }, surFermer, ...(onglet ? { onglet } : {}), ...(campagne ? { campagne } : {}) });
   return { ecran, surFermer };
 }
 
@@ -41,7 +42,13 @@ describe('onglet Ennemis', () => {
   it('liste tous les ennemis des données, une tuile chacun', () => {
     avec(sauvegardeVide());
     const ids = [...document.querySelectorAll<HTMLElement>('.bestiaire-tuile')].map((b) => b.dataset.ennemi);
-    expect([...ids].sort()).toEqual(Object.keys(ENNEMIS).sort());
+    expect([...ids].sort()).toEqual(Object.keys(ENNEMIS).filter((id) => !id.startsWith('moderne_')).sort());
+  });
+
+  it('le Bestiaire de l’histoire ne montre aucun ennemi du DLC', () => {
+    avec(sauvegardeVide());
+    expect(document.querySelectorAll('.bestiaire-tuile[data-ennemi^="moderne_"]')).toHaveLength(0);
+    expect(document.querySelector('.bestiaire-compte')?.textContent).toBe(t('bestiaire.compte_ennemis', { n: 0, m: Object.keys(ENNEMIS).filter((id) => !id.startsWith('moderne_')).length }));
   });
 
   it('un ennemi jamais rencontré reste « ??? » : ni nom, ni chiffres', () => {
@@ -68,7 +75,7 @@ describe('onglet Ennemis', () => {
   it('ouvre sur la fiche du premier ennemi rencontré, et compte les rencontrés', () => {
     avec(rencontrerEnnemis(sauvegardeVide(), ['glaneur']).sauvegarde);
     expect(detail()).toContain(tCle(ENNEMIS.glaneur.nom));
-    expect(document.querySelector('.bestiaire-compte')?.textContent).toBe(t('bestiaire.compte_ennemis', { n: 1, m: Object.keys(ENNEMIS).length }));
+    expect(document.querySelector('.bestiaire-compte')?.textContent).toBe(t('bestiaire.compte_ennemis', { n: 1, m: Object.keys(ENNEMIS).filter((id) => !id.startsWith('moderne_')).length }));
   });
 
   it('les ennemis sont rangés par région, avec un titre par région', () => {
@@ -165,5 +172,37 @@ describe('option des fiches dans les Options', () => {
     await vi.waitFor(() => { expect(session.sauvegarde.meta.bestiaire.fiches).toBe(false); });
     oui.click();
     await vi.waitFor(() => { expect(session.sauvegarde.meta.bestiaire.fiches).toBe(true); });
+  });
+});
+
+describe('Bestiaire du DLC « Temps modernes »', () => {
+  it('liste les ennemis du DLC, avec leur image, et aucun ennemi de l’histoire', () => {
+    avec(sauvegardeVide(), undefined, 'moderne');
+    const ids = [...document.querySelectorAll<HTMLElement>('.bestiaire-tuile')].map((b) => b.dataset.ennemi);
+    expect([...ids].sort()).toEqual(Object.keys(ENNEMIS).filter((id) => id.startsWith('moderne_')).sort());
+    for (const b of document.querySelectorAll<HTMLElement>('.bestiaire-tuile')) {
+      expect(b.querySelector('img')?.getAttribute('src'), b.dataset.ennemi).toBe(`${(b.dataset.ennemi ?? '').replaceAll('_', '-')}.png`);
+    }
+    expect(document.querySelector('.bestiaire-compte')?.textContent).toBe(t('bestiaire.compte_ennemis', { n: 0, m: 17 }));
+  });
+
+  it('un ennemi du DLC rencontré a sa fiche', () => {
+    avec(rencontrerEnnemis(sauvegardeVide(), ['moderne_gendarme']).sauvegarde, undefined, 'moderne');
+    expect(detail()).toContain(tCle(ENNEMIS.moderne_gendarme.nom));
+    tuileEnnemi('moderne_crs').click();
+    expect(detail()).toContain(t('bestiaire.inconnu'));
+  });
+
+  it('les tours sont toutes ouvertes dans le DLC et portent leur capacité ; dans l’histoire, pas de ligne « Capacité DLC »', () => {
+    avec(sauvegardeVide(), 'tours', 'moderne');
+    expect(document.querySelectorAll('.bestiaire-tuile[data-verrouillee="true"]')).toHaveLength(0);
+    tuileTour('tir-2').click();
+    expect(detail()).toContain(t('bulle.tour.capacite_dlc'));
+    expect(detail()).toContain('Renvoi');
+    document.body.replaceChildren();
+    avec({ ...sauvegardeVide(), progression: { ...sauvegardeVide().progression, niveauMax: 11 } }, 'tours');
+    tuileTour('tir-2').click();
+    expect(detail()).not.toContain(t('bulle.tour.capacite_dlc'));
+    expect(detail()).not.toContain('Renvoi');
   });
 });
