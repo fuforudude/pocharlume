@@ -151,3 +151,7 @@ avec ses propres récompenses.
   décors se posent sur des cases sans valeur (vérifié par un test).
 - **Décors de la Fac** : les grands décors qui prenaient une case de tour près d'un chemin, et ceux cachés par le fourgon,
   sont tous déplacés ; aucune liste d'exceptions (décision du 2026-11-12).
+- **Boss tuables** : sur chaque niveau de boss du DLC, le boss doit pouvoir être tué ; un test vérifie que le bot le tue
+  (le laisser passer en perdant des vies ne compte pas comme une vraie victoire de conception).
+- **Scène vivante** : cortèges et figurants de décor suivent la même règle que les grands décors (cases sans valeur).
+- **Fermetures de chemin** : une fermeture dure quelques vagues puis le chemin rouvre avant la fin du niveau, sur les 30 niveaux.
