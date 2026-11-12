@@ -26,6 +26,8 @@ export interface OptionsAccueil {
   reprise?: { readonly vague: number; readonly surReprendre: () => void };
   /** « Mode infini » : présent seulement quand le mode est ouvert (boss de la région 1 battu). */
   surInfini?: () => void;
+  /** « Temps modernes » : ouvre la carte du monde du DLC (ouvert à tous). Absent : pas d'entrée. */
+  surModerne?: () => void;
 }
 
 export function afficherAccueil(parent: HTMLElement, options: OptionsAccueil): HTMLElement {
@@ -36,6 +38,12 @@ export function afficherAccueil(parent: HTMLElement, options: OptionsAccueil): H
   jouer.textContent = t('accueil.jouer');
   let boutonFocus = jouer;
   boutons.append(jouer);
+  if (options.surModerne) {
+    const moderne = bouton('bouton grand bouton-moderne', t('accueil.moderne'), options.surModerne);
+    moderne.textContent = t('accueil.moderne');
+    moderne.dataset.cle = 'moderne';
+    boutons.append(moderne);
+  }
   if (options.surInfini) {
     const infini = bouton('bouton grand secondaire', t('accueil.infini'), options.surInfini);
     infini.textContent = t('accueil.infini');

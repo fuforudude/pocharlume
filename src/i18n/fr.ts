@@ -16,6 +16,7 @@ import { frEnnemisRegions11a15 } from './fr-ennemis-regions-11-15';
 import { frEnnemisVariete } from './fr-ennemis-variete';
 import { frLore } from './fr-lore';
 import { frMeta } from './fr-meta';
+import { frModerne } from './fr-moderne';
 import { frNiveaux } from './fr-niveaux';
 
 export const fr = {
@@ -255,4 +256,7 @@ export const fr = {
 
   // Inscriptions, paroles des boss, descriptions des ennemis (fr-lore.ts, généré depuis docs/lore.md)
   ...frLore,
+
+  // DLC Temps modernes : menu, carte du monde du DLC, sticker (fr-moderne.ts)
+  ...frModerne,
 } as const;

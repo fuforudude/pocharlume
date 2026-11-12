@@ -1,8 +1,10 @@
-// Les régions que la carte du monde montre (les quinze : l'histoire, puis l'après-histoire) et ce qu'elles contiennent : les 10 niveaux, leurs
+// Les régions que la carte du monde montre (les quinze : l'histoire, puis l'après-histoire ; et les trois du DLC Temps modernes) et ce qu'elles contiennent : les 10 niveaux, leurs
 // nœuds sur le fond de 512 × 288, le tracé de la route, le décor de la carte et les textes des niveaux. C'est ici, et
 // seulement ici, que la carte apprend l'existence d'une région : brancher une région livrée par la tâche « niveaux »
 // (src/data/niveaux/) se fait en remplaçant son `contenu: null` par ses données, sans toucher aux écrans.
+import { NOMBRE_REGIONS_MODERNE, type IdCampagne } from '../data/campagnes';
 import { NIVEAUX_PAR_REGION, NOMBRE_REGIONS } from '../data/meta';
+import { NOEUDS_REGIONS_MODERNE, REGIONS_MODERNE, TEXTES_REGIONS_MODERNE, TRACES_REGIONS_MODERNE } from '../data/niveaux/campagne-moderne';
 import { REGIONS, TEXTES_REGIONS } from '../data/niveaux/campagne';
 import { NOEUDS_REGIONS, TRACES_REGIONS, type NoeudNiveau } from '../data/niveaux/carte-du-monde';
 import type { TextesNiveau } from '../data/niveaux/region1';
@@ -23,10 +25,15 @@ export interface ContenuRegion {
   readonly textes: readonly TextesNiveau[];
 }
 
+/** Décor de fond dessiné en CSS derrière une région du DLC (style.css, `.carte-monde[data-ambiance]`). */
+export type MotifRegion = 'fac' | 'manif' | 'prefecture';
+
 /** Les couleurs d'ambiance d'une région : le fond (le plus sombre) et la brume qui le voile. */
 export interface AmbianceRegion {
   readonly fond: string;
   readonly brume: string;
+  /** Décor de fond propre (régions du DLC) ; absent : le fond uni. */
+  readonly motif?: MotifRegion;
 }
 
 /**
@@ -39,8 +46,10 @@ const AMBIANCE_GREVES_GRISES: AmbianceRegion = { fond: '#15181b', brume: '#4b525
 const AMBIANCES: Readonly<Record<number, AmbianceRegion>> = { 11: AMBIANCE_GREVES_GRISES };
 
 export interface RegionMonde {
-  /** 1 à 15. */
+  /** 1 à 15 pour l'histoire, 1 à 3 pour le DLC. */
   readonly numero: number;
+  /** Campagne de la région ; absente = l'histoire. */
+  readonly campagne?: IdCampagne;
   /** Clé de texte du nom de la région. */
   readonly nom: CleTexte;
   /** Numéro de campagne de son premier niveau (1, 11, 21…). */
@@ -67,6 +76,8 @@ export function contenuDeRegion(
     readonly noeuds: readonly (readonly NoeudNiveau[])[];
     readonly traces: readonly (readonly (readonly Point[])[])[];
     readonly textes: readonly (readonly TextesNiveau[])[];
+    /** Décor du fond de chaque région ; absent : celui de la région 1 de l'histoire, aucun pour les autres. */
+    readonly decors?: readonly (readonly DecorMonde[])[];
   } = { niveaux: REGIONS, noeuds: NOEUDS_REGIONS, traces: TRACES_REGIONS, textes: TEXTES_REGIONS },
 ): ContenuRegion | null {
   const niveaux = donnees.niveaux[numero - 1];
@@ -77,12 +88,34 @@ export function contenuDeRegion(
   if (!niveaux || !noeuds || !trace || !textes || !complet(niveaux) || !complet(noeuds) || !complet(textes) || trace.length !== NIVEAUX_PAR_REGION - 1) {
     return null;
   }
-  return { niveaux, noeuds, trace, decor: numero === 1 ? DECOR_MONDE_REGION1 : [], textes };
+  const decor = donnees.decors ? (donnees.decors[numero - 1] ?? []) : numero === 1 ? DECOR_MONDE_REGION1 : [];
+  return { niveaux, noeuds, trace, decor, textes };
 }
 
 export const REGIONS_MONDE: readonly RegionMonde[] = Array.from({ length: NOMBRE_REGIONS }, (_, i) =>
   region(i + 1, `region.${String(i + 1)}` as CleTexte, contenuDeRegion(i + 1)),
 );
+
+/** La Fac (occupation, AG) : murs de fac défraîchis, affiches et tags, un beige grisé. */
+const AMBIANCE_FAC: AmbianceRegion = { fond: '#24201c', brume: '#6b5d4a', motif: 'fac' };
+/** La Manif (cortège, boulevards) : bitume et pavés, gris froid. */
+const AMBIANCE_MANIF: AmbianceRegion = { fond: '#18191c', brume: '#4a4d55', motif: 'manif' };
+/** La Préfecture (le siège final) : façade préfectorale de pierre claire, bleu ardoise. */
+const AMBIANCE_PREFECTURE: AmbianceRegion = { fond: '#1a1d24', brume: '#5d6678', motif: 'prefecture' };
+const AMBIANCES_MODERNE: readonly AmbianceRegion[] = [AMBIANCE_FAC, AMBIANCE_MANIF, AMBIANCE_PREFECTURE];
+
+/**
+ * Les 3 régions de la carte du monde du DLC « Temps modernes », numérotées 1 à 3, aux niveaux numérotés dans leur campagne (1, 11, 21).
+ * Leur contenu vient de src/data/niveaux/campagne-moderne.ts : tant qu'il est vide, chacune s'annonce « à venir ».
+ */
+export const REGIONS_MONDE_MODERNE: readonly RegionMonde[] = Array.from({ length: NOMBRE_REGIONS_MODERNE }, (_, i) => ({
+  numero: i + 1,
+  campagne: 'moderne',
+  nom: `region_moderne.${String(i + 1)}` as CleTexte,
+  premierNiveau: i * NIVEAUX_PAR_REGION + 1,
+  contenu: contenuDeRegion(i + 1, { niveaux: REGIONS_MODERNE, noeuds: NOEUDS_REGIONS_MODERNE, traces: TRACES_REGIONS_MODERNE, textes: TEXTES_REGIONS_MODERNE, decors: [] }),
+  ambiance: AMBIANCES_MODERNE[i] ?? AMBIANCE_PROVISOIRE,
+}));
 
 /** Les niveaux qui existent vraiment (ceux des régions livrées, 110 avec la région 11) : le compteur d'étoiles en vise 3 chacun. */
 export function nombreNiveauxLivres(regions: readonly RegionMonde[] = REGIONS_MONDE): number {
