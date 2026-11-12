@@ -145,3 +145,7 @@ avec ses propres récompenses.
 - Un chemin mobile ouvert en cours de niveau reste ouvert assez longtemps pour qu'y construire vaille le coup (Fac : niveau 8
   ouvert jusqu'à la fin, niveau 10 ouvert dès la moitié du niveau) ; règle à suivre pour les régions 2 et 3.
 - Une seule source pour la règle des badges ; l'écran de fin affiche badges et titres gagnés.
+- **Charges** : la traversée des soldats et l'accélération ont deux durées distinctes. L'accélération est courte (environ 4 s) ;
+  la traversée dure jusqu'au milieu du chemin. La charge du Prince Croisé (histoire) ne change pas.
+- **Décor et cases de tour** : un déplacement de décor pour l'apparence ne doit pas retirer de bonnes cases de tour ; les grands
+  décors se posent sur des cases sans valeur (vérifié par un test).
