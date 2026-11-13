@@ -177,3 +177,8 @@ avec ses propres récompenses.
   une tâche à part, pour tout le jeu.
 - **Tests lourds** : les tests de boss sur toutes les graines et zone-ordinaires sortent de la suite habituelle (passe d'équilibrage
   et job distant) ; la suite habituelle garde une version rapide. La vérification avant sortie lance les deux.
+- **Import d'un code sans DLC** : le bloc DLC de l'appareil est gardé (aucune perte silencieuse) ; un code qui en contient un le remplace.
+- **`moderne.records`** : réservé (le DLC n'a pas de mode infini pour l'instant).
+- **Après la mise en ligne, jamais de retour en arrière par revert** : l'ancien client efface une sauvegarde v9. On corrige en avant ;
+  pour retirer le DLC en urgence, on garde `VERSION_SAUVEGARDE = 9` et on cache les entrées.
+- **Animations des 9 héros** : revue visuelle par l'étudiant avant la sortie.
