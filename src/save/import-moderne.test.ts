@@ -116,6 +116,14 @@ describe('import : le DLC de l’appareil face au code', () => {
     await session.appliquerImport(lu.sauvegarde, lu.avecModerne);
     expect(session.sauvegarde.moderne.collection.equipes).toEqual({});
     expect(session.sauvegarde.moderne.collection.skinsHeros).toEqual(['skin_moderne_suie']);
+
+    // Témoin positif : un code qui contient Suie garde le skin porté.
+    const avecSuie = await importerCode(await exporterCode(appareil));
+    if (!avecSuie.ok) throw new Error(avecSuie.detail);
+    expect(avecSuie.sauvegarde.meta.heros).toHaveProperty('suie');
+    const autre = await sessionAvec(appareil);
+    await autre.appliquerImport(avecSuie.sauvegarde, false);
+    expect(autre.sauvegarde.moderne.collection.equipes).toEqual({ suie: 'skin_moderne_suie' });
   });
 
   it('un DLC écrit par un autre onglet n’est pas écrasé par l’import (le stockage est relu)', async () => {

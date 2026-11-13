@@ -87,4 +87,26 @@ describe('import d’un code : le DLC de l’appareil', () => {
     await importerParEcran(session, code, t('options.confirmer_dlc_remplace'));
     expect(session.sauvegarde.moderne.badges).toBe(55);
   });
+
+  it('si l’import n’a pas pu être écrit, l’écran le dit au lieu d’annoncer un succès', async () => {
+    class StockageEnPanne extends StockageMemoire {
+      panne = false;
+      override set(cle: string, valeur: string): Promise<void> {
+        return this.panne ? Promise.reject(new Error('écriture impossible')) : super.set(cle, valeur);
+      }
+    }
+    const stockage = new StockageEnPanne();
+    const session = await Session.ouvrir(new Depot(stockage));
+    stockage.panne = true;
+    afficherOptions(document.body, session, vi.fn());
+    const champ = [...document.querySelectorAll('textarea')].find((c) => !c.readOnly);
+    if (!champ) throw new Error('champ d’import absent');
+    champ.value = await exporterCode(enregistrerVictoire(sauvegardeVide(), 1, 'matou', 3));
+    const bouton = (texte: string): HTMLButtonElement | undefined => [...document.querySelectorAll('button')].find((b) => b.textContent === texte);
+    bouton(t('options.importer_valider'))?.click();
+    await vi.waitFor(() => { expect(bouton(t('options.confirmer'))).toBeDefined(); });
+    bouton(t('options.confirmer'))?.click();
+    await vi.waitFor(() => { expect(document.body.textContent).toContain(t('options.import_echec')); });
+    expect(document.body.textContent).not.toContain(t('options.import_ok'));
+  });
 });

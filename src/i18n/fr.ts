@@ -135,6 +135,7 @@ export const fr = {
   'options.confirmer': 'Remplacer',
   'options.annuler': 'Annuler',
   'options.import_ok': 'Progression importée.',
+  'options.import_echec': 'Import non enregistré : le stockage de l’appareil refuse l’écriture.',
   'options.fermer': 'Fermer',
 
   // Import : pourquoi un code est refusé

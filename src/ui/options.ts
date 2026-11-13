@@ -242,7 +242,17 @@ export function afficherOptions(parent: HTMLElement, session: Session, surFermer
     );
     const rangee = el('div', 'rangee');
     const remplacer = bouton('bouton', t('options.confirmer'), () => {
-      void session.appliquerImport(importee, avecModerne).then(() => {
+      const echec = (): void => {
+        confirmation.hidden = true;
+        valider.hidden = false;
+        message.textContent = t('options.import_echec');
+        message.classList.add('refus');
+      };
+      void session.appliquerImport(importee, avecModerne).then((ecrite) => {
+        if (!ecrite) {
+          echec();
+          return;
+        }
         confirmation.hidden = true;
         valider.hidden = false;
         champ.value = '';
@@ -250,7 +260,7 @@ export function afficherOptions(parent: HTMLElement, session: Session, surFermer
         message.classList.remove('refus');
         zoneCode.hidden = true;
         dessinerReglages();
-      });
+      }, echec);
     });
     remplacer.textContent = t('options.confirmer');
     const annuler = bouton('bouton secondaire', t('options.annuler'), () => {
