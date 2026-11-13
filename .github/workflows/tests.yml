@@ -183,10 +183,7 @@ jobs:
           if [ "$(wc -c < rapport-equilibrage.md)" -le 900000 ]; then
             cat rapport-equilibrage.md >> "$GITHUB_STEP_SUMMARY"
           else
-            { head -c 900000 rapport-equilibrage.md; printf '
-
-_(Tronqué : rapport entier dans l’artefact rapport-equilibrage.)_
-'; } >> "$GITHUB_STEP_SUMMARY"
+            { head -c 900000 rapport-equilibrage.md; printf '\n\n_(Tronqué : rapport entier dans l’artefact rapport-equilibrage.)_\n'; } >> "$GITHUB_STEP_SUMMARY"
           fi
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
