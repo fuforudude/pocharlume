@@ -171,3 +171,7 @@ avec ses propres récompenses.
 - **Musique** : reportée (le jeu n'a aucune musique, histoire comprise) ; le DLC sort avec les slogans scandés et la scène vivante.
 - **Équilibrage** : mêmes bandes que la campagne (Chaton, sans défense et défis imposés ; Matou et Vieux Sage affichés, suspendus
   comme pour l'histoire). « Victoire implique boss tué » doit tenir sur toutes les graines d'évaluation, pas seulement une.
+- **Boss du DLC qui passe** : il coûte 20 vies (donnée des 3 boss du DLC ; ceux de l'histoire inchangés) : le laisser passer en
+  Matou est une défaite. **Niveau 20** : 24 000 arêtes de départ, assumé comme un siège et annoncé dans la fiche du niveau.
+- **Écarts suspendus** (Matou de la Manif, écart entre dieux en Vieux Sage) : acceptés pour la sortie ; l'équilibrage des dieux est
+  une tâche à part, pour tout le jeu.
