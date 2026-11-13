@@ -162,3 +162,5 @@ avec ses propres récompenses.
 - **Niveau 20** : le Grand Centaure n'était tuable par aucune stratégie, faute de cases de tour le long du couloir final ; on
   ouvre des cases le long de ce couloir et sur la moitié droite, armure gardée à 0,9.
 - **Scène vivante** : la règle stricte (aucune case de tour utile occupée) est gardée, même si quelques cortèges sont raccourcis.
+- **Niveau 20 (suite)** : la carte n'était pas en cause (diagnostic corrigé) ; on allège la vague 15 (escorte) et on baisse les PV du
+  Grand Centaure, armure gardée à 0,9 : la stratégie perce-armure doit le tuer avec les arêtes normales (test).
