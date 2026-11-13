@@ -151,7 +151,7 @@ export const BOULEVARD: CarteModerne = {
  * Le Carrefour : deux boulevards se croisent deux fois : l’un vient de l’ouest et sort au sud, l’autre vient du nord et sort à l’est.
  */
 export const CARREFOUR: CarteModerne = {
-  id: 'carrefour',
+  id: 'carrefour_manif',
   region: REGION_VISUELLE_MANIF,
   largeur: 32,
   hauteur: 18,
@@ -706,7 +706,7 @@ export const GRAND_CARREFOUR: CarteModerne = {
 export const CARTES_MODERNE_R2 = {
   rendez_vous: RENDEZ_VOUS,
   boulevard: BOULEVARD,
-  carrefour: CARREFOUR,
+  carrefour_manif: CARREFOUR,
   abribus: ABRIBUS,
   nasse: NASSE,
   republique: REPUBLIQUE,

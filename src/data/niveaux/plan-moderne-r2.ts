@@ -86,7 +86,7 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
   },
   {
     numero: 13,
-    carte: 'carrefour',
+    carte: 'carrefour_manif',
     chemins: [0, 1],
     aretesDepart: 1600,
     defiFer: { familles: ['caserne', 'artillerie'] },

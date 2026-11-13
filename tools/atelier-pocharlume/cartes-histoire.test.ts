@@ -1,5 +1,6 @@
-// L'atelier lit les décors des cartes de l'histoire dans leurs fichiers source. Le DLC « Temps modernes » réutilise des identifiants
-// de l'histoire (`carrefour`) : l'atelier ne doit jamais lire la carte du DLC à la place, sinon les cases interdites de l'histoire
+// L'atelier lit les décors des cartes de l'histoire dans leurs fichiers source. Les identifiants du DLC « Temps modernes » sont distincts
+// de ceux de l'histoire (unicité testée dans cartes-moderne.test.ts) : l'atelier ne doit pourtant jamais lire une carte du DLC à la place,
+// sinon les cases interdites de l'histoire
 // (donc la position de la statue) seraient jugées sur un autre décor. Ce test fige, pour chaque carte de l'histoire, les décors
 // lus par l'atelier et les cases interdites qui en résultent.
 import { join } from 'node:path';

@@ -44,7 +44,7 @@ const LIGNE_DECOR = /^(\s*decor\(\s*')([^']+)(',\s*)(-?\d+(?:\.\d+)?)(,\s*)(-?\d
 
 /**
  * Fichiers de données des cartes de l'histoire, relatifs à la racine. Ni le fichier qui les rassemble, ni les tests, ni les cartes du
- * DLC « Temps modernes » (cartes-moderne*.ts) n'en font partie : le DLC réutilise des identifiants de l'histoire (`carrefour`), et
+ * DLC « Temps modernes » (cartes-moderne*.ts) n'en font partie : le DLC a ses propres identifiants (uniques dans tout le jeu, testé dans cartes-moderne.test.ts), et
  * `-` trie avant `.`, donc sa carte serait lue à la place de celle de l'histoire.
  */
 function fichiersCartes(racine: string): string[] {
