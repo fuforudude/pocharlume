@@ -168,3 +168,6 @@ avec ses propres récompenses.
   l'équilibrage global (tâche 7). Le test « le Centaure doit mourir » reste en garde-fou (`it.fails`) et bloque la sortie tant qu'il
   n'est pas passé en `it` vert.
 - **Identifiants de cartes** : uniques dans tout le jeu, histoire et DLC confondus (test) ; la carte « carrefour » de la Manif est renommée.
+- **Musique** : reportée (le jeu n'a aucune musique, histoire comprise) ; le DLC sort avec les slogans scandés et la scène vivante.
+- **Équilibrage** : mêmes bandes que la campagne (Chaton, sans défense et défis imposés ; Matou et Vieux Sage affichés, suspendus
+  comme pour l'histoire). « Victoire implique boss tué » doit tenir sur toutes les graines d'évaluation, pas seulement une.
