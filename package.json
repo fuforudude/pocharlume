@@ -11,6 +11,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "test": "vitest run",
+    "test:equilibrage": "vitest run --config vitest.equilibrage.config.ts",
     "lint": "eslint .",
     "art": "node tools/art/index.ts",
     "lore": "node tools/lore/reporter.ts",

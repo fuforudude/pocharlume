@@ -62,6 +62,14 @@ jobs, services locaux joignables) et neuf points à corriger. Décisions de l'é
 - [ ] README de `infra/vps/` et `CLAUDE.md` décrivent les étapes de l'auteur : installer et connecter `gh`, créer le jeton
   et le secret, enregistrer le runner.
 
+## Tests d'équilibrage lourds (2026-11-13)
+`boss-moderne.test.ts` (3 boss, 3 dieux, 10 graines : environ 6 min) et `zone-ordinaires.test.ts` (environ 4 min seul) dépassaient
+leurs délais dans la vérification complète sur une machine chargée. `npm run test` garde une version rapide de `boss-moderne` (graine 7,
+un boss par cas : tué par la stratégie dédiée, jamais de victoire en le laissant passer ; quelques secondes). `zone-ordinaires` n'a pas
+d'équivalent rapide : il est exclu de la suite habituelle (`vite.config.ts`). La version complète se lance par
+`npm run test:equilibrage` (`vitest.equilibrage.config.ts`, variable `EQUILIBRAGE_COMPLET`) et par le job `equilibrage-tests-lourds`,
+avec `[equilibrage]` dans le message du commit.
+
 ## Hors périmètre
 - Changer le déploiement sur `main`, migrer d'autres projets.
 
