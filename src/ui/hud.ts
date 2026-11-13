@@ -337,8 +337,8 @@ export class Hud {
 
   /**
    * Montre le menu en cercle autour du point (cx, cy) en pixels CSS, ou le cache si `elements` est null.
-   * Les boutons ne sont reconstruits que si leur contenu change (prix, grisé), et replacés que si le
-   * point bouge.
+   * Les boutons ne sont reconstruits que si leur forme change (autre action, autre icône, rang ou prix qui apparaît ou
+   * disparaît, déblocage) ; prix, grisé, rang et libellé se mettent à jour en place. Ils ne sont replacés que si le point bouge.
    */
   placerMenu(elements: readonly ElementMenu[] | null, version: number, cx: number, cy: number, largeur: number, hauteur: number, rayon: number): void {
     if (!elements || elements.length === 0) {
@@ -356,11 +356,11 @@ export class Hud {
     if (version !== this.versionMenu) {
       this.versionMenu = version;
       // La forme (id, icône, rang, prix, déblocage) décide : même forme, les boutons gardent leur nœud et reprennent les
-      // nouveaux éléments (autre lieu, autre prix, autre icône) ; sinon on reconstruit.
+      // nouveaux éléments (autre lieu, autre prix) ; sinon (autre icône comprise) on reconstruit.
       const forme = (e: ElementMenu): string => `${e.id}|${e.icone}|${String(e.rang !== null)}|${String(e.prix !== null || e.gain !== null)}|${String(e.deblocage)}`;
       const actuels = this.boutonsMenu;
       if (actuels.length === elements.length && elements.every((e, i) => forme(e) === forme(actuels[i]?.element ?? e))) {
-        // Mêmes boutons : mis à jour en place (élément, prix, grisé, rang, icône, libellé), la bulle ouverte et un appui long en
+        // Mêmes boutons : mis à jour en place (élément, prix, grisé, rang, libellé), la bulle ouverte et un appui long en
         // cours restent attachés au bouton, et un clic vise le lieu courant.
         elements.forEach((e, i) => {
           const b = actuels[i];
@@ -441,15 +441,17 @@ export class Hud {
     b.element = element;
     const noeud = b.noeud;
     const libelle = element.deblocage !== null ? t('menu.non_debloque', { nom: element.libelle, n: element.deblocage }) : element.libelle;
-    noeud.setAttribute('aria-label', libelle);
+    if (noeud.getAttribute('aria-label') !== libelle) noeud.setAttribute('aria-label', libelle);
     // Sans bulle de description, l'info-bulle du navigateur dit au moins le libellé.
-    if (!this.commandes.decrireElement) noeud.title = libelle;
-    noeud.setAttribute('aria-disabled', String(element.refus !== null));
+    if (!this.commandes.decrireElement && noeud.title !== libelle) noeud.title = libelle;
+    const desactive = String(element.refus !== null);
+    if (noeud.getAttribute('aria-disabled') !== desactive) noeud.setAttribute('aria-disabled', desactive);
     basculerClasse(noeud, 'grise', element.refus !== null);
     basculerClasse(noeud, 'trop-cher', element.refus === 'aretes_insuffisantes');
     basculerClasse(noeud, 'au-sommet', element.refus === 'competence_au_maximum');
-    if (b.rang) b.rang.textContent = element.rang ?? '';
-    if (b.prix) b.prix.textContent = `${element.gain !== null ? '+' : ''}${String(element.prix ?? element.gain)}`;
+    if (b.rang && b.rang.textContent !== (element.rang ?? '')) b.rang.textContent = element.rang ?? '';
+    const prix = `${element.gain !== null ? '+' : ''}${String(element.prix ?? element.gain)}`;
+    if (b.prix && b.prix.textContent !== prix) b.prix.textContent = prix;
   }
 
   detruire(): void {

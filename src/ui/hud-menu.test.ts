@@ -187,4 +187,40 @@ describe('menu du HUD : changement de lieu à contenu identique', () => {
     const dernier = vi.mocked(cmd.survolerElement).mock.calls.at(-1)?.[0];
     expect(dernier).toBe(nouveaux[1]);
   });
+
+  it('deux mises à jour en place au même contenu ne réécrivent ni texte ni libellé', () => {
+    const etat = partie(10);
+    const { hud } = monterAvec(etat);
+    const liste = elementsMenu(etat, { cx: ct(0).cx, cy: ct(0).cy });
+    hud.placerMenu(liste, 1, 200, 200, 800, 600, 64);
+    const prix = document.querySelector('.element-menu .prix span:not(.arete)');
+    const texte = prix?.firstChild;
+    expect(texte).not.toBeNull();
+    const observateur = new MutationObserver(() => undefined);
+    const cible = document.querySelector('.element-menu');
+    if (!cible || !prix) throw new Error('bouton absent');
+    observateur.observe(cible, { subtree: true, characterData: true, childList: true, attributes: true });
+    hud.placerMenu([...liste], 2, 200, 200, 800, 600, 64);
+    hud.placerMenu([...liste], 3, 200, 200, 800, 600, 64);
+    expect(observateur.takeRecords()).toEqual([]);
+    expect(prix.firstChild).toBe(texte);
+    observateur.disconnect();
+  });
+
+  it('fermer puis rouvrir : boutons retirés, survol effacé, puis boutons recréés', () => {
+    const etat = partie(10);
+    const { hud, cmd } = monterAvec(etat);
+    const liste = elementsMenu(etat, { cx: ct(0).cx, cy: ct(0).cy });
+    hud.placerMenu(liste, 1, 200, 200, 800, 600, 64);
+    const avant = document.querySelectorAll('.element-menu')[0];
+    expect(avant).toBeDefined();
+    vi.mocked(cmd.survolerElement).mockClear();
+    hud.placerMenu(null, 2, 200, 200, 800, 600, 64);
+    expect(document.querySelectorAll('.element-menu').length).toBe(0);
+    expect(cmd.survolerElement).toHaveBeenCalledWith(null);
+    hud.placerMenu(liste, 1, 200, 200, 800, 600, 64);
+    const apres = document.querySelectorAll('.element-menu');
+    expect(apres.length).toBe(liste.length);
+    expect(apres[0]).not.toBe(avant);
+  });
 });
