@@ -95,7 +95,6 @@ describe('menu du HUD : élément pas encore débloqué', () => {
   });
 });
 
-<<<<<<< HEAD
 describe('portrait du héros dans le HUD', () => {
   const atlasAvec = (sprites: readonly string[]): AtlasRendu => ({
     iconeUrl: (nom: string) => `${nom}.png`,
@@ -125,7 +124,9 @@ describe('portrait du héros dans le HUD', () => {
   it('dans l’histoire, le portrait reste celui de l’histoire', () => {
     monterAvec(partie(1), atlasAvec(['moderne-heros-charlie', 'moderne-heros-brise-os']));
     expect(visage()).not.toContain('moderne-heros');
-=======
+  });
+});
+
 describe('menu du HUD : changement de lieu à contenu identique', () => {
   /** Le lieu visé par l'action du bouton `i`, tel que le HUD le transmet à `choisirElement`. */
   function lieuVise(cmd: CommandesHud, i: number): LieuTour | undefined {
@@ -253,6 +254,5 @@ describe('menu du HUD : changement de lieu à contenu identique', () => {
     const apres = document.querySelectorAll('.element-menu');
     expect(apres.length).toBe(liste.length);
     expect(apres[0]).not.toBe(avant);
->>>>>>> origin/main
   });
 });
