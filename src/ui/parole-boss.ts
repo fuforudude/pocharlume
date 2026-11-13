@@ -14,6 +14,11 @@ export function regionDeParole(niveau: Pick<NiveauCampagne, 'numero' | 'campagne
   return niveau.campagne === 'moderne' ? Math.floor((niveau.numero - 1) / NIVEAUX_PAR_REGION) + 1 : niveau.visuel.region;
 }
 
+/** Vrai si un des paquets de la vague est un boss. */
+export function vagueAUnBoss(vague: Vague): boolean {
+  return vague.paquets.some((p) => Object.hasOwn(ENNEMIS, p.ennemi) && ENNEMIS[p.ennemi as keyof typeof ENNEMIS].boss);
+}
+
 /**
  * Clé de la parole à dire au lancement de la vague `index` (0 = première) d'un niveau, ou null (pas de boss dans la vague, ou pas de texte).
  * `region` est la région visuelle pour l'histoire (`boss.r<n>.parole`), ou la région de la campagne pour le DLC quand `moderne` est vrai
@@ -23,8 +28,7 @@ export function cleParoleBoss(vagues: readonly Vague[], index: number, region: n
   if (!niveauDeBoss) return null;
   const vague = vagues[index];
   if (!vague) return null;
-  const aUnBoss = vague.paquets.some((p) => Object.hasOwn(ENNEMIS, p.ennemi) && ENNEMIS[p.ennemi as keyof typeof ENNEMIS].boss);
-  if (!aUnBoss) return null;
+  if (!vagueAUnBoss(vague)) return null;
   const cle = `boss.${moderne ? 'm' : 'r'}${String(region)}.parole`;
   return aTexte(cle) ? (cle as CleTexte) : null;
 }

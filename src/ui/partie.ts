@@ -36,6 +36,7 @@ import { afficherNouvelleParticularite } from './nouvelle-particularite';
 import { contenuParticularite, contenuRadeau, type TypeParticularite } from './particularites';
 import { centreRadeauAffiche, placeAffichee } from '../render/gimmicks';
 import { cleParoleBoss, regionDeParole } from './parole-boss';
+import { ajouterSlogan, sloganDuPas } from './slogans-moderne';
 import { texteRefus } from './refus';
 import { fouleVisee, reunirParoles, texteBandeau, toucherFoule } from './evenements-niveau';
 import { statueTouchee } from './statue';
@@ -767,7 +768,8 @@ export async function lancerNiveau(
           const cle = cleParoleBoss(etat.niveau.vagues, evenement.index, regionDeParole(niveau), niveau.boss, niveau.campagne === 'moderne');
           if (cle) paroles.push(t(cle));
         }
-        const parole = reunirParoles(paroles);
+        // Slogan de la foule (DLC seulement), après les annonces et paroles : il ne les remplace jamais.
+        const parole = reunirParoles(ajouterSlogan(paroles, sloganDuPas(niveau, etat, etat.niveau.vagues)));
         if (parole !== null) hud.afficherParole(parole);
         if (etat.statut === 'en_cours' && (options.surVague || options.surObjet)) {
           let vague = false;

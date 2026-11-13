@@ -22,6 +22,7 @@ import { frMeta } from './fr-meta';
 import { frModerne } from './fr-moderne';
 import { frModerneNiveaux } from './fr-moderne-niveaux';
 import { frNiveaux } from './fr-niveaux';
+import { frSlogansModerne } from './fr-slogans-moderne';
 
 export const fr = {
   'jeu.titre': 'Pocharlume',
@@ -268,4 +269,5 @@ export const fr = {
   // DLC Temps modernes : menu, carte du monde du DLC, sticker (fr-moderne.ts)
   ...frModerne,
   ...frModerneNiveaux,
+  ...frSlogansModerne,
 } as const;
