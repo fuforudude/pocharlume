@@ -4,7 +4,9 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { CAMPAGNE } from '../data/niveaux/campagne';
 import type { Evaluation } from './campagne';
-import { evaluationsDeRegion, redigerRegions, REGIONS_DE_LA_CAMPAGNE } from './rapport-regions';
+import { CAMPAGNE_MODERNE } from '../data/niveaux/campagne-moderne';
+import { lireRegions } from './bandes.test-utils';
+import { ecartsDeLaRegion, evaluationsDeRegion, lireCampagne, redigerBoss, redigerDefis, redigerRegions, regionsDe, REGIONS_DE_LA_CAMPAGNE, REGIONS_MODERNE_EVALUEES } from './rapport-regions';
 import type { ResultatPartie } from './simulation';
 
 function partie(gagnee: boolean, vies = 20): ResultatPartie {
@@ -92,5 +94,48 @@ describe('régions de la campagne', () => {
     const flux = readFileSync(new URL('../../.github/workflows/deploiement.yml', import.meta.url), 'utf8');
     const matrice = /region:\s*\[([^\]]*)\]/.exec(flux)?.[1] ?? '';
     expect(matrice.split(',').map((r) => Number(r.trim()))).toEqual([...REGIONS_DE_LA_CAMPAGNE]);
+  });
+});
+
+describe('campagne du DLC « Temps modernes »', () => {
+  it('ses régions se déduisent de ses niveaux : 1 à 3, 10 niveaux chacune', () => {
+    expect(REGIONS_MODERNE_EVALUEES).toEqual(Array.from({ length: Math.ceil(CAMPAGNE_MODERNE.length / 10) }, (_, i) => i + 1));
+    expect(REGIONS_MODERNE_EVALUEES).toEqual([1, 2, 3]);
+    expect(regionsDe('moderne')).toBe(REGIONS_MODERNE_EVALUEES);
+    expect(regionsDe('histoire')).toBe(REGIONS_DE_LA_CAMPAGNE);
+  });
+
+  it('lit la campagne demandée et refuse le reste', () => {
+    expect(lireCampagne(undefined)).toBe('histoire');
+    expect(lireCampagne('')).toBe('histoire');
+    expect(lireCampagne('histoire')).toBe('histoire');
+    expect(lireCampagne('moderne')).toBe('moderne');
+    expect(() => lireCampagne('dlc')).toThrow(/Campagne invalide/);
+  });
+
+  it('BANDES_REGIONS se lit dans les régions de la campagne testée', () => {
+    expect(lireRegions('2', 'moderne')).toEqual([2]);
+    expect(lireRegions(undefined, 'moderne')).toEqual([1, 2, 3]);
+    expect(() => lireRegions('4', 'moderne')).toThrow(/BANDES_REGIONS invalide/);
+    expect(lireRegions('11')).toEqual([11]);
+  });
+
+  it('préfixe ses écarts par « Temps modernes, région N » et titre ses sections par ses thèmes', () => {
+    const evaluations = toutesLesEvaluations().filter((e) => e.niveau <= 30);
+    const ecarts = ecartsDeLaRegion(evaluations, 2, 'moderne');
+    expect(ecarts.length).toBeGreaterThan(0);
+    for (const e of ecarts) expect(e).toMatch(/^Temps modernes, région 2 : /);
+    const texte = redigerRegions(evaluations, [1, 2, 3], 'moderne');
+    for (const titre of ['la Fac', 'la Manif', 'la Préfecture']) expect(texte).toContain(titre);
+    expect(texte).toContain('### Temps modernes, région 3 : la Préfecture');
+    expect(redigerDefis(evaluations, [1], 'moderne')).toContain('## Temps modernes : défis');
+  });
+
+  it('compte les boss tués et les victoires où le boss est passé', () => {
+    const tue = { ...partie(true), bossTues: ['moderne_prefet'] };
+    const passe = { ...partie(true), bossTues: [] };
+    const evaluations: Evaluation[] = [{ dieu: 'plume', niveau: 30, difficulte: 'matou', bot: 'soigneux', parties: [tue, passe, partie(false)] }];
+    expect(redigerBoss(evaluations, [30])).toContain('| 30 | Matou | soigneux | 1/3 | 2/3 | 1 |');
+    expect(redigerBoss([], [10])).toContain('Aucun niveau de boss évalué.');
   });
 });

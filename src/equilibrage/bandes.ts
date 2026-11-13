@@ -77,16 +77,32 @@ export function ecartsBloquants(ecarts: readonly string[]): string[] {
  */
 export const REGIONS_SUSPENDUES: readonly number[] = [];
 
-/** Les écarts d'une région qui bloquent : tous, sauf pour une région suspendue (affichés seulement, comme `ecartsBloquants`). */
-export function ecartsSelonRegion(region: number, ecarts: readonly string[]): string[] {
-  return REGIONS_SUSPENDUES.includes(region) ? ecartsBloquants(ecarts) : [...ecarts];
+/**
+ * Régions du DLC « Temps modernes » dont toutes les bandes sont suspendues. Aucune : ses bandes sont celles de l'histoire, imposées
+ * de la même façon (Chaton, sans défense, défis ; Matou et Vieux Sage suspendus comme partout).
+ */
+export const REGIONS_MODERNE_SUSPENDUES: readonly number[] = [];
+
+/**
+ * Les écarts d'une région qui bloquent : tous, sauf pour une région suspendue (affichés seulement, comme `ecartsBloquants`). Les
+ * régions du DLC (`campagne` à `moderne`) ont leur propre liste de régions suspendues.
+ */
+export function ecartsSelonRegion(region: number, ecarts: readonly string[], campagne: 'histoire' | 'moderne' = 'histoire'): string[] {
+  const suspendues = campagne === 'moderne' ? REGIONS_MODERNE_SUSPENDUES : REGIONS_SUSPENDUES;
+  return suspendues.includes(region) ? ecartsBloquants(ecarts) : [...ecarts];
 }
 
-/** Vrai si un écart (phrase de `verifierBandes`) relève d'une famille ou d'une région suspendue. */
+/** Le début d'une phrase d'écart d'une région : « Région 3 : » (histoire) ou « Temps modernes, région 3 : » (DLC). */
+const PREFIXE_REGION = /^(Temps modernes, r|R)égion (\d+) : /;
+
+/** Vrai si un écart (phrase de `verifierBandes`) relève d'une famille ou d'une région suspendue (de l'histoire ou du DLC). */
 export function estSuspendu(ecart: string): boolean {
-  const region = /^Région (\d+) : /.exec(ecart);
-  if (region && REGIONS_SUSPENDUES.includes(Number(region[1]))) return true;
-  const phrase = ecart.replace(/^Région \d+ : /, '');
+  const region = PREFIXE_REGION.exec(ecart);
+  if (region) {
+    const suspendues = region[1] === 'R' ? REGIONS_SUSPENDUES : REGIONS_MODERNE_SUSPENDUES;
+    if (suspendues.includes(Number(region[2]))) return true;
+  }
+  const phrase = ecart.replace(PREFIXE_REGION, '');
   return FAMILLES_SUSPENDUES.some((f) => phrase.startsWith(f));
 }
 

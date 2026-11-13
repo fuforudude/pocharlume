@@ -4,7 +4,7 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { ecartsDefis, ecartsSelonRegion } from './bandes';
 import { DEFIS_EVALUES, type Evaluation } from './campagne';
-import { DELAI_EVALUATION, evaluerRegions, REGIONS_DES_BANDES } from './bandes.test-utils';
+import { CAMPAGNE_DES_BANDES, DELAI_EVALUATION, evaluerRegions, REGIONS_DES_BANDES } from './bandes.test-utils';
 
 const parDefi = new Map<string, Evaluation[][]>();
 beforeAll(async () => {
@@ -13,8 +13,8 @@ beforeAll(async () => {
   parDefi.set('fer', fer ?? []);
 }, DELAI_EVALUATION);
 
-describe.each(REGIONS_DES_BANDES)('bandes des défis, région %i', (region) => {
+describe.each(REGIONS_DES_BANDES)(`bandes des défis, ${CAMPAGNE_DES_BANDES}, région %i`, (region) => {
   it.each(DEFIS_EVALUES)('le soigneux réussit entre 40 et 90 %% des parties du défi %s', (defi) => {
-    expect(ecartsSelonRegion(region, ecartsDefis(parDefi.get(defi)?.[region - 1] ?? []))).toEqual([]);
+    expect(ecartsSelonRegion(region, ecartsDefis(parDefi.get(defi)?.[region - 1] ?? []), CAMPAGNE_DES_BANDES)).toEqual([]);
   });
 });

@@ -5,7 +5,7 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { SUSPENDUES_IMPOSEES, ecartsBloquants, ecartsCourbe, ecartsSelonRegion, ecartsEntreDieux, ecartsMatou, ecartsSansDefense } from './bandes';
 import type { Evaluation } from './campagne';
-import { DELAI_EVALUATION, evaluerRegions, REGIONS_DES_BANDES } from './bandes.test-utils';
+import { CAMPAGNE_DES_BANDES, DELAI_EVALUATION, evaluerRegions, REGIONS_DES_BANDES } from './bandes.test-utils';
 
 let parRegion: Evaluation[][] = [];
 // Les bandes de cette difficulté sont suspendues (bandes.ts) : sans `BANDES_SUSPENDUES_IMPOSEES=1`, seul le héros sans défense est joué.
@@ -13,20 +13,20 @@ beforeAll(async () => {
   parRegion = await evaluerRegions('matou', SUSPENDUES_IMPOSEES ? undefined : ['inactif']);
 }, DELAI_EVALUATION);
 
-describe.each(REGIONS_DES_BANDES)('bandes en Matou, région %i', (region) => {
+describe.each(REGIONS_DES_BANDES)(`bandes en Matou, ${CAMPAGNE_DES_BANDES}, région %i`, (region) => {
   it.skipIf(!SUSPENDUES_IMPOSEES)('le soigneux gagne tout en perdant des vies sans laisser d’arêtes, le naïf gagne entre 30 et 70 %', () => {
-    expect(ecartsSelonRegion(region, ecartsBloquants(ecartsMatou(parRegion[region - 1] ?? [])))).toEqual([]);
+    expect(ecartsSelonRegion(region, ecartsBloquants(ecartsMatou(parRegion[region - 1] ?? [])), CAMPAGNE_DES_BANDES)).toEqual([]);
   });
 
   it.skipIf(!SUSPENDUES_IMPOSEES)('les trois dieux se valent : au plus 3 vies d’écart de vies restantes moyennes du soigneux', () => {
-    expect(ecartsSelonRegion(region, ecartsBloquants(ecartsEntreDieux(parRegion[region - 1] ?? [])))).toEqual([]);
+    expect(ecartsSelonRegion(region, ecartsBloquants(ecartsEntreDieux(parRegion[region - 1] ?? [])), CAMPAGNE_DES_BANDES)).toEqual([]);
   });
 
   it('sans défense, on perd tous les niveaux', () => {
-    expect(ecartsSelonRegion(region, ecartsSansDefense(parRegion[region - 1] ?? []))).toEqual([]);
+    expect(ecartsSelonRegion(region, ecartsSansDefense(parRegion[region - 1] ?? []), CAMPAGNE_DES_BANDES)).toEqual([]);
   });
 
   it.skipIf(!SUSPENDUES_IMPOSEES)('la difficulté monte : les vies restantes du bot naïf baissent (corrélation de rang ≤ −0,6), le niveau 10 est parmi les plus durs', () => {
-    expect(ecartsSelonRegion(region, ecartsBloquants(ecartsCourbe(parRegion[region - 1] ?? [])))).toEqual([]);
+    expect(ecartsSelonRegion(region, ecartsBloquants(ecartsCourbe(parRegion[region - 1] ?? [])), CAMPAGNE_DES_BANDES)).toEqual([]);
   });
 });

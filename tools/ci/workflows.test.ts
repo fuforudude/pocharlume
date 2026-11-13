@@ -3,6 +3,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { parseDocument } from 'yaml';
+import { REGIONS_MODERNE_EVALUEES } from '../../src/equilibrage/rapport-regions';
 
 function lire(nom: string): string {
   // Sous Windows, git peut rendre les fichiers en fins de ligne \r\n : les motifs attendent \n.
@@ -74,7 +75,15 @@ describe('workflow des tests distants', () => {
 
   it('repli sur GitHub même si le job de choix échoue : vérification et équilibrage ne dépendent pas de son succès', () => {
     expect(job(tests, 'verifier')).toContain('if: ${{ !cancelled() }}');
-    for (const nom of ['equilibrage', 'equilibrage-infini']) expect(job(tests, nom)).toMatch(/if: \$\{\{ !cancelled\(\) && \(.*\[equilibrage\].*\) \}\}/);
+    for (const nom of ['equilibrage', 'equilibrage-infini', 'equilibrage-moderne']) expect(job(tests, nom)).toMatch(/if: \$\{\{ !cancelled\(\) && \(.*\[equilibrage\].*\) \}\}/);
+  });
+
+  it('passe du DLC : une machine par région du DLC, en campagne moderne, réunie dans le rapport', () => {
+    const moderne = job(tests, 'equilibrage-moderne');
+    expect(regions(moderne)).toEqual([...REGIONS_MODERNE_EVALUEES]);
+    expect(moderne).toContain('--campagne=moderne');
+    expect(moderne).toMatch(/name: equilibrage-moderne-region-/);
+    expect(job(tests, 'rapport-equilibrage')).toMatch(/needs: \[[^\]]*equilibrage-moderne[^\]]*\]/);
   });
 
   it('le rapport d’équilibrage reste sur GitHub (il ne fait que réunir des journaux)', () => {
