@@ -3,6 +3,7 @@
 // traite les tâches qu'on lui envoie l'une après l'autre : démarrer un fil et charger le jeu coûte autant qu'une évaluation.
 import { parentPort } from 'node:worker_threads';
 import { niveauDeCampagne } from '../../src/data/niveaux/campagne.ts';
+import { niveauModerne } from '../../src/data/niveaux/campagne-moderne.ts';
 import {
   evaluerCampagne,
   evaluerProfil,
@@ -16,6 +17,8 @@ import { mesurerInfini, type CarteInfini, type MesureInfini } from '../../src/eq
 
 export interface TacheBandes {
   readonly type: 'bandes';
+  /** `moderne` : `numero` est celui d'un niveau du DLC (1 à 30) ; l'histoire sinon. */
+  readonly campagne?: 'histoire' | 'moderne';
   readonly numero: number;
   readonly difficulte: string;
   readonly dieu: string;
@@ -47,7 +50,7 @@ function calculer(tache: TacheBandes | TacheProfil | TacheInfini): (Evaluation |
     const graines = tache.graines <= GRAINES_EVALUATION.length ? GRAINES_EVALUATION.slice(0, tache.graines) : Array.from({ length: tache.graines }, (_, i) => 101 + i);
     return [mesurerInfini(tache.bot, tache.dieu, tache.carte, graines)];
   }
-  const campagne = niveauDeCampagne(tache.numero);
+  const campagne = tache.type === 'bandes' && tache.campagne === 'moderne' ? niveauModerne(tache.numero) : niveauDeCampagne(tache.numero);
   if (!campagne) throw new Error(`Niveau ${String(tache.numero)} introuvable`);
   const graines =
     tache.graines <= GRAINES_EVALUATION.length ? GRAINES_EVALUATION.slice(0, tache.graines) : Array.from({ length: tache.graines }, (_, i) => 101 + i);

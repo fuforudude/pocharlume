@@ -119,6 +119,41 @@ jobs:
           path: equilibrage/
           if-no-files-found: warn
 
+  # Passe d'équilibrage du DLC « Temps modernes », une machine par région (régions du DLC, REGIONS_MODERNE_EVALUEES de
+  # src/equilibrage/rapport-regions.ts, vérifié par tools/ci/workflows.test.ts), même déclencheur que les régions de l'histoire.
+  # Chaque région écrit son rapport (régions, défis, boss) et son journal ; le job échoue sur un écart aux bandes imposées.
+  equilibrage-moderne:
+    name: Équilibrage du DLC, région ${{ matrix.region }}
+    needs: choisir
+    if: ${{ !cancelled() && (contains(github.event.head_commit.message, '[equilibrage]') || (github.event_name == 'workflow_dispatch' && inputs.equilibrage)) }}
+    runs-on: ${{ needs.choisir.outputs.runner == 'vps' && fromJSON('["self-hosted","vps"]') || 'ubuntu-latest' }}
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        region: [1, 2, 3]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Passe de la région ${{ matrix.region }} du DLC
+        shell: bash
+        env:
+          REGION: ${{ matrix.region }}
+        run: |
+          mkdir -p equilibrage
+          niveaux="$(( (REGION - 1) * 10 + 1 ))-$(( REGION * 10 ))"
+          npm run --silent balance -- --campagne=moderne "--niveaux=$niveaux" "--sortie=equilibrage/moderne-region-$REGION.md" 2>&1 | tr '\r' '\n' | sed -e '/tâches calculées/d' -e '/^ *$/d' | tee "equilibrage/moderne-region-$REGION.log"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: equilibrage-moderne-region-${{ matrix.region }}
+          path: equilibrage/
+          if-no-files-found: warn
+
   equilibrage-infini:
     name: Équilibrage, mode infini
     needs: choisir
@@ -146,7 +181,7 @@ jobs:
 
   rapport-equilibrage:
     name: Rapport d'équilibrage
-    needs: [choisir, equilibrage, equilibrage-infini]
+    needs: [choisir, equilibrage, equilibrage-infini, equilibrage-moderne]
     if: ${{ !cancelled() && needs.equilibrage.result != 'skipped' }}
     # Ne fait que réunir des journaux : toujours sur GitHub, un job de moins en file sur le VPS.
     runs-on: ubuntu-latest
@@ -162,12 +197,13 @@ jobs:
         env:
           REGIONS: ${{ needs.equilibrage.result }}
           INFINI: ${{ needs.equilibrage-infini.result }}
+          MODERNE: ${{ needs.equilibrage-moderne.result }}
           SHA: ${{ github.sha }}
         run: |
           {
             echo "# Rapport d'équilibrage (journaux assemblés)"
             echo
-            echo "Commit \`$SHA\`. Régions : $REGIONS ; mode infini : $INFINI."
+            echo "Commit \`$SHA\`. Régions : $REGIONS ; mode infini : $INFINI ; DLC : $MODERNE."
             echo "Assemblé à partir des journaux de \`npm run balance -- --niveaux=…\` de chaque région : ce n'est pas le"
             echo "\`balance-report.md\` complet de \`npm run balance\` (pas de section zone, pas de tableau d'ensemble)."
             for f in $(ls morceaux/*.log 2>/dev/null | sort); do

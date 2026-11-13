@@ -5,7 +5,7 @@
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { Worker } from 'node:worker_threads';
 import { DIEUX_EVALUES, GRAINES_ENTRAINEMENT, GRAINES_EVALUATION, type Evaluation, type IdBot } from './campagne';
-import { REGIONS_DE_LA_CAMPAGNE } from './rapport-regions';
+import { lireCampagne, regionsDe, type CampagneEvaluee } from './rapport-regions';
 
 /**
  * Graines des tests : les dix de `npm run balance`, avec ses deux graines d'entraînement (mêmes résultats que le rapport).
@@ -14,17 +14,25 @@ import { REGIONS_DE_LA_CAMPAGNE } from './rapport-regions';
 export const GRAINES_TEST = GRAINES_EVALUATION;
 
 /**
- * Les régions que testent les bandes : toutes celles de la campagne (`REGIONS_DE_LA_CAMPAGNE`), ou celles de `BANDES_REGIONS` (ex. `3`
+ * La campagne que testent les bandes : l'histoire par défaut, ou le DLC avec `BANDES_CAMPAGNE=moderne` (ses trois régions, numéros 1
+ * à 30 dans sa campagne, mêmes bandes). Le DLC reste hors de la suite par défaut (`npm run test` ne joue que l'histoire) : ses bandes
+ * se jouent à la demande, `BANDES_CAMPAGNE=moderne BANDES_REGIONS=2 npx vitest run src/equilibrage/bandes-chaton.test.ts …`.
+ */
+export const CAMPAGNE_DES_BANDES: CampagneEvaluee = lireCampagne(process.env['BANDES_CAMPAGNE']);
+
+/**
+ * Les régions que testent les bandes : toutes celles de la campagne testée (`regionsDe`), ou celles de `BANDES_REGIONS` (ex. `3`
  * ou `1,2`). La CI de déploiement s'en sert pour jouer une région par machine : sur 2 cœurs, toutes d'un coup dépassent le quart
  * d'heure. Une valeur invalide est refusée plutôt que de laisser passer des tests qui n'évaluent rien.
  */
-export const REGIONS_DES_BANDES: readonly number[] = lireRegions(process.env['BANDES_REGIONS']);
+export const REGIONS_DES_BANDES: readonly number[] = lireRegions(process.env['BANDES_REGIONS'], CAMPAGNE_DES_BANDES);
 
-function lireRegions(valeur: string | undefined): readonly number[] {
-  if (valeur === undefined || valeur.trim() === '') return REGIONS_DE_LA_CAMPAGNE;
+export function lireRegions(valeur: string | undefined, campagne: CampagneEvaluee = 'histoire'): readonly number[] {
+  const toutes = regionsDe(campagne);
+  if (valeur === undefined || valeur.trim() === '') return toutes;
   const regions = valeur.split(',').map((morceau) => Number(morceau.trim()));
-  if (regions.some((r) => !REGIONS_DE_LA_CAMPAGNE.includes(r))) {
-    const derniere = String(REGIONS_DE_LA_CAMPAGNE[REGIONS_DE_LA_CAMPAGNE.length - 1] ?? 1);
+  if (regions.some((r) => !toutes.includes(r))) {
+    const derniere = String(toutes[toutes.length - 1] ?? 1);
     throw new Error(`BANDES_REGIONS invalide : « ${valeur} » (attendu : numéros de région de 1 à ${derniere}, séparés par des virgules)`);
   }
   return [...new Set(regions)];
@@ -36,7 +44,7 @@ const CROCHET = pathToFileURL(fileURLToPath(new URL('../../tools/niveaux/enregis
 function evaluerDieu(region: number, difficulte: string, dieu: string, bots?: readonly IdBot[]): Promise<Evaluation[]> {
   return new Promise((resolve, reject) => {
     const fil = new Worker(TRAVAILLEUR, {
-      workerData: { region, difficulte, dieu, graines: [...GRAINES_TEST], grainesEntrainement: [...GRAINES_ENTRAINEMENT], bots: bots ? [...bots] : undefined },
+      workerData: { campagne: CAMPAGNE_DES_BANDES, region, difficulte, dieu, graines: [...GRAINES_TEST], grainesEntrainement: [...GRAINES_ENTRAINEMENT], bots: bots ? [...bots] : undefined },
       execArgv: ['--import', CROCHET],
     });
     fil.once('message', (evaluations: Evaluation[]) => {
@@ -50,7 +58,7 @@ function evaluerDieu(region: number, difficulte: string, dieu: string, bots?: re
 }
 
 /**
- * Évalue les 10 niveaux d'une région dans une difficulté (ou un défi : `heroique`, `fer`) pour les trois dieux, sur les graines
+ * Évalue les 10 niveaux d'une région (de la campagne testée) dans une difficulté (ou un défi : `heroique`, `fer`) pour les trois dieux, sur les graines
  * de test. Les dieux sont calculés en parallèle.
  */
 export async function evaluerRegion(region: number, difficulte: string, bots?: readonly IdBot[]): Promise<Evaluation[]> {
@@ -59,7 +67,7 @@ export async function evaluerRegion(region: number, difficulte: string, bots?: r
 
 /** Les évaluations de chaque région évaluée (indice 0 = région 1, vide pour une région non évaluée), calculées en parallèle. */
 export async function evaluerRegions(difficulte: string, bots?: readonly IdBot[]): Promise<Evaluation[][]> {
-  const parRegion: Evaluation[][] = REGIONS_DE_LA_CAMPAGNE.map(() => []);
+  const parRegion: Evaluation[][] = regionsDe(CAMPAGNE_DES_BANDES).map(() => []);
   await Promise.all(
     REGIONS_DES_BANDES.map(async (region) => {
       parRegion[region - 1] = await evaluerRegion(region, difficulte, bots);

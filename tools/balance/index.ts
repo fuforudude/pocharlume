@@ -10,6 +10,12 @@
 // (`--entrainement=1` reproduit les tests des bandes) ne joue que les bandes demandées, affiche un résumé compact (`--detail` : niveau par niveau, avec sorts lancés et tour divine) et
 // n'écrit pas le rapport. `--difficultes=heroique,fer` joue les défis. `--niveaux=11-20` (ou `--niveaux=3,12,40-42`) limite les
 // niveaux joués ; sans lui, la mise au point porte sur la région 1.
+//
+// DLC « Temps modernes » : `npm run balance -- --campagne=moderne` joue ses 30 niveaux (numéros 1 à 30 dans sa campagne) avec les mêmes
+// bots, graines, difficultés et bandes que l'histoire, écrit balance-report-moderne.md (régions, défis, boss) et échoue sur un écart
+// imposé ; `--campagne=moderne --niveaux=11-20` fait de même pour une région. Avec une option de mise au point (`--detail` ne compte
+// pas : `--dieux=`, `--difficultes=heroique,fer`, `--graines=`…), il affiche le résumé et les écarts sans écrire de rapport. Ni vérifications supplémentaires ni mode infini pour le DLC.
+// `--fils=N` limite le nombre de fils de calcul (par défaut : les cœurs de la machine, ou AGENTS_LOURD_COEURS sous `lourd`).
 import { writeFileSync } from 'node:fs';
 import { availableParallelism } from 'node:os';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -33,10 +39,21 @@ import { CARTES_INFINI_AUTRES, CARTES_INFINI_REGION1, ecartsInfini, mediane, red
 import { redigerRapport } from '../../src/equilibrage/rapport.ts';
 import { moyennesZone, NIVEAUX_ZONE_HORDE, NIVEAUX_ZONE_ORDINAIRES, redigerZone } from '../../src/equilibrage/zone.ts';
 import { niveauDeCampagne } from '../../src/data/niveaux/campagne.ts';
-import { ecartsDeLaRegion, evaluationsDeRegion, redigerDefis, redigerRegions, REGIONS_DE_LA_CAMPAGNE } from '../../src/equilibrage/rapport-regions.ts';
+import { CAMPAGNE_MODERNE } from '../../src/data/niveaux/campagne-moderne.ts';
+import {
+  ecartsDeLaRegion,
+  evaluationsDeRegion,
+  lireCampagne,
+  redigerBoss,
+  redigerDefis,
+  redigerRegions,
+  regionsDe,
+  REGIONS_DE_LA_CAMPAGNE,
+} from '../../src/equilibrage/rapport-regions.ts';
 import type { TacheBandes, TacheInfini, TacheProfil } from './travailleur.ts';
 
 const SORTIE = fileURLToPath(new URL('../../balance-report.md', import.meta.url));
+const SORTIE_MODERNE = fileURLToPath(new URL('../../balance-report-moderne.md', import.meta.url));
 const TRAVAILLEUR = new URL('./travailleur.ts', import.meta.url);
 const CROCHET = pathToFileURL(fileURLToPath(new URL('../niveaux/enregistrer.ts', import.meta.url))).href;
 
@@ -47,13 +64,20 @@ for (const argument of process.argv.slice(2)) {
   const [cle, valeur] = argument.replace(/^--/, '').split('=');
   options.set(cle ?? '', valeur ?? '');
 }
+const campagne = lireCampagne(options.get('campagne'));
+const moderne = campagne === 'moderne';
+const NIVEAUX_DE_LA_CAMPAGNE = moderne ? CAMPAGNE_MODERNE : CAMPAGNE;
+/** Rapport du DLC : balance-report-moderne.md à la racine, ou `--sortie=chemin` (une passe par région sans écraser les autres). */
+const sortieModerne = options.get('sortie') || SORTIE_MODERNE;
 const liste = (cle: string, tout: readonly string[]): readonly string[] => (options.has(cle) ? (options.get(cle) ?? '').split(',') : tout);
 const dieuxVoulus = liste('dieux', DIEUX_EVALUES);
 const difficultesVoulues = liste('difficultes', [...DIFFICULTES_EVALUEES, ...DEFIS_EVALUES]);
 const graines = Number(options.get('graines') ?? GRAINES_EVALUATION.length);
 const entrainement = Number(options.get('entrainement') ?? GRAINES_ENTRAINEMENT.length);
 const profilsVoulus = (options.get('profils') ?? '').split(',').filter((x) => x !== '');
-const miseAuPoint = ['dieux', 'difficultes', 'graines', 'entrainement', 'profils', 'niveaux', 'infini'].some((cle) => options.has(cle));
+// Pour le DLC, `--niveaux` seul ne passe pas en mise au point : `--campagne=moderne --niveaux=11-20` est la passe complète d'une région
+// (trois difficultés, deux défis, trois dieux, dix graines), avec son rapport et ses écarts.
+const miseAuPoint = ['dieux', 'difficultes', 'graines', 'entrainement', 'profils', 'niveaux', 'infini'].some((cle) => options.has(cle) && !(moderne && cle === 'niveaux'));
 /** `11-20` ou `3,12,40-42` : la liste des numéros de campagne voulus. */
 function lireNiveaux(texte: string): number[] {
   return texte.split(',').flatMap((morceau) => {
@@ -61,20 +85,21 @@ function lireNiveaux(texte: string): number[] {
     return Array.from({ length: (fin ?? debut ?? 0) - (debut ?? 0) + 1 }, (_, i) => (debut ?? 0) + i);
   });
 }
-const NIVEAUX_REGION1 = CAMPAGNE.slice(0, 10).map((n) => n.numero);
+const NIVEAUX_REGION1 = moderne ? [] : CAMPAGNE.slice(0, 10).map((n) => n.numero);
+// Le DLC, sans `--niveaux`, joue ses 30 niveaux, en mise au point comme dans le rapport.
 const numeros = options.has('infini') && !options.has('niveaux')
   ? []
   : options.has('niveaux')
-  ? lireNiveaux(options.get('niveaux') ?? '').filter((n) => CAMPAGNE.some((c) => c.numero === n))
-  : miseAuPoint
+  ? lireNiveaux(options.get('niveaux') ?? '').filter((n) => NIVEAUX_DE_LA_CAMPAGNE.some((c) => c.numero === n))
+  : miseAuPoint && !moderne
     ? NIVEAUX_REGION1
-    : CAMPAGNE.map((n) => n.numero);
+    : NIVEAUX_DE_LA_CAMPAGNE.map((n) => n.numero);
 // En mise au point, les défis ne se jouent que sur demande (`--difficultes=heroique,fer`).
 const difficultesJouees = miseAuPoint && !options.has('difficultes') ? difficultesVoulues.filter((d) => !estDefi(d)) : difficultesVoulues;
 
 const debut = performance.now();
 const taches: Tache[] = numeros.flatMap((numero) =>
-  difficultesJouees.flatMap((difficulte) => dieuxVoulus.map((dieu): Tache => ({ type: 'bandes', numero, difficulte, dieu, graines, entrainement }))),
+  difficultesJouees.flatMap((difficulte) => dieuxVoulus.map((dieu): Tache => ({ type: 'bandes', campagne, numero, difficulte, dieu, graines, entrainement }))),
 );
 // Vérifications supplémentaires : toutes dans le rapport complet, au choix (`--profils=disciples,progression,divine`) en mise au point.
 const complet = !miseAuPoint;
@@ -103,7 +128,7 @@ for (const numero of numeros.filter((n) => NIVEAUX_REGION1.includes(n))) {
 // Mode infini : tout dans le rapport complet ; en mise au point seulement sur demande (`--infini` ou `--infini=chaumes,gue`, avec
 // `--dieux=` et `--graines=`), sans les bandes de la campagne (`--difficultes=` vide ne joue rien d'autre : `--niveaux=0`).
 const cartesInfini = [...CARTES_INFINI_REGION1, ...CARTES_INFINI_AUTRES];
-if (!miseAuPoint || options.has('infini')) {
+if (!moderne && (!miseAuPoint || options.has('infini'))) {
   const voulues = options.get('infini') ? (options.get('infini') ?? '').split(',') : cartesInfini.map((c) => c.id);
   for (const carte of cartesInfini.filter((c) => voulues.includes(c.id))) {
     for (const dieu of dieuxVoulus) for (const bot of deuxBots) taches.push({ type: 'infini', bot, dieu, carte, graines });
@@ -141,7 +166,10 @@ function boucle(): Promise<void> {
   });
 }
 
-await Promise.all(Array.from({ length: Math.min(availableParallelism(), taches.length) }, boucle));
+// Sous `lourd`, AGENTS_LOURD_COEURS borne le nombre de fils (la machine est partagée) ; `--fils=N` le fixe.
+const filsVoulus = Number(options.get('fils') ?? process.env['AGENTS_LOURD_COEURS'] ?? availableParallelism());
+const fils = Math.max(1, Math.min(Number.isFinite(filsVoulus) && filsVoulus > 0 ? filsVoulus : availableParallelism(), taches.length));
+await Promise.all(Array.from({ length: fils }, boucle));
 process.stdout.write('\r' + ' '.repeat(50) + '\r');
 
 const evaluations: Evaluation[] = [];
@@ -157,7 +185,9 @@ taches.forEach((tache, i) => {
 
 /** Les écarts aux bandes de toutes les régions évaluées (1 à 11), ceux de la région 1 avec la puissance des tours. */
 function ecartsDeTout(): string[] {
-  const regions = REGIONS_DE_LA_CAMPAGNE.filter((r) => evaluationsDeRegion(evaluations, r).length > 0);
+  const regions = regionsDe(campagne).filter((r) => evaluationsDeRegion(evaluations, r).length > 0);
+  // Le DLC : ses régions seules (la puissance des tours et l'infini sont ceux de l'histoire).
+  if (moderne) return regions.flatMap((r) => ecartsDeLaRegion(evaluations, r, 'moderne'));
   return [
     ...regions.flatMap((r) => (r === 1 ? verifierBandes(evaluationsDeRegion(evaluations, 1)) : ecartsDeLaRegion(evaluations, r))),
     ...ecartsInfini(mesuresInfini),
@@ -198,17 +228,39 @@ if (miseAuPoint) {
   }
   // Défis : part de réussites du soigneux par région et par défi (bande 40 à 90 %), trois dieux ensemble.
   for (const defi of difficultesJouees.filter(estDefi)) {
-    const parRegion = REGIONS_DE_LA_CAMPAGNE.flatMap((r) => {
+    const parRegion = regionsDe(campagne).flatMap((r) => {
       const deLaRegion = evaluationsDeRegion(evaluations, r).filter((e) => e.difficulte === defi && e.bot === 'soigneux');
       return deLaRegion.length === 0 ? [] : [`R${String(r)} ${pct(synthetiser(deLaRegion.flatMap((e) => [...e.parties])).tauxVictoire)} %`];
     });
     if (parRegion.length > 0) console.log(`défi ${defi} par région : ${parRegion.join(' | ')}`);
   }
-  // Écarts aux bandes : tous si l'on a joué tous les dieux et toutes les difficultés, sinon seulement ceux des dieux joués.
-  if (!options.has('difficultes')) {
+  // Boss (niveaux de fin de région) : parties du soigneux où le boss meurt, et victoires en le laissant passer.
+  for (const niveau of numeros.filter((n) => n % 10 === 0)) {
+    for (const difficulte of difficultesJouees) {
+      const parties = evaluations.filter((e) => e.niveau === niveau && e.difficulte === difficulte && e.bot === 'soigneux').flatMap((e) => [...e.parties]);
+      if (parties.length === 0) continue;
+      const tues = parties.filter((p) => (p.bossTues ?? []).length > 0).length;
+      const passes = parties.filter((p) => p.statut === 'victoire' && (p.bossTues ?? []).length === 0).length;
+      console.log(`boss niv ${String(niveau)} ${difficulte.padEnd(10)} soigneux : tué ${String(tues)}/${String(parties.length)}, victoires boss passé ${String(passes)}`);
+    }
+  }
+  // Écarts aux bandes des difficultés jouées : tous si l'on a joué tous les dieux, sinon seulement ceux des dieux joués. Une famille
+  // dont la difficulté n'est pas jouée (Chaton, Matou, Vieux Sage) n'est pas jugée : faute de parties, elle donnerait un faux écart.
+  {
     const complets = dieuxVoulus.length === DIEUX_EVALUES.length;
-    const ecarts = ecartsDeTout().filter((e) => complets || dieuxVoulus.some((d) => e.includes(`(${nomDuDieu(d)})`)));
-    console.log(ecarts.length === 0 ? 'Toutes les bandes sont respectées.' : [`${String(ecarts.length)} écart(s) aux bandes :`, ...ecarts.map((e) => `- ${e}`)].join('\n'));
+    const familles: readonly (readonly [string, string])[] = [['Chaton', 'chaton'], ['Matou', 'matou'], ['Vieux Sage', 'vieux_sage']];
+    const jouee = (ecart: string): boolean => {
+      const phrase = ecart.replace(/^(Temps modernes, r|R)égion \d+ : /, '');
+      const famille = familles.find(([debut]) => phrase.startsWith(debut));
+      return famille === undefined || difficultesJouees.includes(famille[1]);
+    };
+    const ecarts = ecartsDeTout().filter((e) => jouee(e) && (complets || dieuxVoulus.some((d) => e.includes(`(${nomDuDieu(d)})`))));
+    const imposes = ecartsImposes(ecarts);
+    console.log(
+      ecarts.length === 0
+        ? 'Toutes les bandes sont respectées.'
+        : [`${String(ecarts.length)} écart(s) aux bandes, dont ${String(imposes.length)} imposé(s) :`, ...ecarts.map((e) => `- ${imposes.includes(e) ? '' : '(suspendu) '}${e}`)].join('\n'),
+    );
   }
   for (const m of mesuresInfini) console.log(`infini ${m.bot.padEnd(8)} ${m.dieu.padEnd(8)} ${m.carte.id.padEnd(10)} médiane ${String(mediane(m.vagues)).padStart(3)} : ${m.vagues.join(' ')}`);
   const groupes = new Map<string, EvaluationProfil[]>();
@@ -221,6 +273,33 @@ if (miseAuPoint) {
     console.log(`profil ${(profil ?? '').padEnd(10)} ${nomDuDieu(dieu ?? '').padEnd(8)} ${(difficulte ?? '').padEnd(10)} ${(bot ?? '').padEnd(8)} victoires ${pct(s.tauxVictoire)} % vies ${un(s.viesMoyennes).padStart(4)}${ecartAvatar}`);
   }
   console.log(`${String(Math.round((performance.now() - debut) / 100) / 10)} s.`);
+} else if (moderne) {
+  // Rapport du DLC : ses trois régions, leurs défis et leurs boss, avec les écarts aux mêmes bandes que l'histoire.
+  const regions = regionsDe('moderne').filter((r) => evaluationsDeRegion(evaluations, r).length > 0);
+  writeFileSync(
+    sortieModerne,
+    `# Équilibrage du DLC « Temps modernes »
+
+Généré par \`npm run balance -- --campagne=moderne\` : ${String(graines)} graines d’évaluation par niveau, difficulté et dieu.
+
+${redigerRegions(evaluations, regions, 'moderne').trimEnd()}
+
+${redigerDefis(evaluations, regions, 'moderne').trimEnd()}
+
+${redigerBoss(evaluations, numeros.filter((n) => n % 10 === 0)).trimEnd()}
+`,
+  );
+  const ecarts = ecartsDeTout();
+  const imposes = ecartsImposes(ecarts);
+  console.log(`${sortieModerne} écrit en ${String(Math.round((performance.now() - debut) / 100) / 10)} s.`);
+  console.log(`${String(imposes.length)} écart(s) aux bandes imposées du DLC${imposes.length === 0 ? '.' : ' :'}`);
+  for (const e of imposes) console.log(`- ${e}`);
+  const suspendus = ecarts.filter((e) => !imposes.includes(e));
+  if (suspendus.length > 0) {
+    console.log(`${String(suspendus.length)} écart(s) aux bandes suspendues (Matou, Vieux Sage : voir bandes.ts, ils ne bloquent pas) :`);
+    for (const e of suspendus) console.log(`- ${e}`);
+  }
+  if (imposes.length > 0) process.exitCode = 1;
 } else {
   // Rapport principal : région 1, comme avant ; puis les régions 2 à 11 et les défis des onze régions.
   const region1 = evaluationsDeRegion(evaluations, 1);
