@@ -179,6 +179,23 @@ jobs:
           path: equilibrage/
           if-no-files-found: warn
 
+  # Version complète des tests d'équilibrage lourds (boss du DLC sur toutes les graines, zone des niveaux ordinaires), exclus de
+  # `npm run test` : `npm run test:equilibrage`. Une seule machine, même déclencheur que les passes ci-dessus.
+  equilibrage-tests-lourds:
+    name: Équilibrage, tests lourds
+    needs: choisir
+    if: ${{ !cancelled() && (contains(github.event.head_commit.message, '[equilibrage]') || (github.event_name == 'workflow_dispatch' && inputs.equilibrage)) }}
+    runs-on: ${{ needs.choisir.outputs.runner == 'vps' && fromJSON('["self-hosted","vps"]') || 'ubuntu-latest' }}
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run test:equilibrage
+
   rapport-equilibrage:
     name: Rapport d'équilibrage
     needs: [choisir, equilibrage, equilibrage-infini, equilibrage-moderne]

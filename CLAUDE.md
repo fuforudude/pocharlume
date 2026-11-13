@@ -11,6 +11,7 @@ Capacitor plus tard.
 - Linter : `npm run lint` (ESLint, typescript-eslint strict avec typage)
 - Reporter le lore : `npm run lore` (reporte `docs/lore.md` dans `src/i18n/` ; `-- --verifier` compare sans écrire). `fr-lore.ts` est généré : corriger `lore.md`, jamais ce fichier.
 - Retoucher les designs : `npm run editeur` (atelier local sur http://127.0.0.1:5199, `-- --port N` pour un autre port ; sprites, palette, décors des cartes ; écrit dans `art/` et les fichiers de cartes, jamais commite). Usage dans `tools/atelier/README.md`, adaptateur Pocharlume dans `tools/atelier-pocharlume/README.md`.
+- Tests d'équilibrage lourds (boss du DLC sur toutes les graines, zone des niveaux ordinaires ; hors de `npm run test`, qui en garde une version rapide) : `npm run test:equilibrage` (plus de 10 min ; lancé aussi par la CI avec `[equilibrage]`).
 - Tout vérifier : `npm run verifier` (lint, types, tests, build). Doit être vert avant tout commit.
 - **Tests lourds sur la CI, jamais en local** : la vérification complète (`npm run verifier`) et les passes d'équilibrage
   (`npm run balance`) rendent le PC de l'auteur inutilisable. On pousse sa branche (jamais `main`) : chaque push lance
