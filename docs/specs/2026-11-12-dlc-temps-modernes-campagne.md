@@ -164,3 +164,6 @@ avec ses propres récompenses.
 - **Scène vivante** : la règle stricte (aucune case de tour utile occupée) est gardée, même si quelques cortèges sont raccourcis.
 - **Niveau 20 (suite)** : la carte n'était pas en cause (diagnostic corrigé) ; on allège la vague 15 (escorte) et on baisse les PV du
   Grand Centaure, armure gardée à 0,9 : la stratégie perce-armure doit le tuer avec les arêtes normales (test).
+- **Niveau 20 (décision finale)** : après trois tentatives, la cause est l'économie des vagues 8 à 14 ; le niveau est réglé dans
+  l'équilibrage global (tâche 7). Le test « le Centaure doit mourir » reste en garde-fou (`it.fails`) et bloque la sortie tant qu'il
+  n'est pas passé en `it` vert.
