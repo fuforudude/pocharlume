@@ -2,6 +2,7 @@
 // Le menu en cercle du HUD et le déblocage progressif : un bouton verrouillé montre le cadenas et la pastille du niveau de
 // campagne qui l'ouvre, sans prix, et se refait quand l'élément change d'état.
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { CAMPAGNE } from '../data/niveaux/campagne';
 import { REGION1 } from '../data/niveaux/region1';
 import { appliquerAction, creerPartie } from '../engine';
 import type { LieuTour } from '../engine';
@@ -117,12 +118,18 @@ describe('menu du HUD : changement de lieu à contenu identique', () => {
     const a = { cx: ct(0).cx, cy: ct(0).cy };
     const b = { cx: ct(1).cx, cy: ct(1).cy };
     hud.placerMenu(elementsMenu(etat, a), 1, 200, 200, 800, 600, 64);
+    const avant = document.querySelectorAll('.element-menu')[1];
     hud.placerMenu(elementsMenu(etat, b), 2, 300, 300, 800, 600, 64);
+    // Même nœud : le menu n'a pas été reconstruit, ce sont bien les éléments qui ont été repris.
+    expect(document.querySelectorAll('.element-menu')[1]).toBe(avant);
     expect(lieuVise(cmd, 1)).toEqual(b);
   });
 
   it('deux places du radeau identiques : le bouton vise la dernière place touchée', () => {
-    const etat = partie(10);
+    const niveau = CAMPAGNE[105]?.niveau;
+    if (niveau?.gimmick?.type !== 'radeau') throw new Error('niveau 106 sans radeau');
+    const etat = creerPartie({ ...niveau, numero: 106 }, CONFIG);
+    etat.aretes = 5000;
     const { hud, cmd } = monterAvec(etat);
     hud.placerMenu(elementsCaseVide(etat, { place: 0 }), 1, 200, 200, 800, 600, 64);
     hud.placerMenu(elementsCaseVide(etat, { place: 1 }), 2, 300, 300, 800, 600, 64);
@@ -138,8 +145,46 @@ describe('menu du HUD : changement de lieu à contenu identique', () => {
     }
     const { hud, cmd } = monterAvec(etat);
     hud.placerMenu(elementsMenu(etat, a), 1, 200, 200, 800, 600, 64);
+    const avant = [...document.querySelectorAll('.element-menu')];
     hud.placerMenu(elementsMenu(etat, b), 2, 300, 300, 800, 600, 64);
-    const n = document.querySelectorAll('.element-menu').length;
-    for (let i = 0; i < n; i++) expect(lieuVise(cmd, i)).toEqual(b);
+    const apres = [...document.querySelectorAll('.element-menu')];
+    expect(apres.length).toBe(avant.length);
+    apres.forEach((noeud, i) => {
+      expect(noeud).toBe(avant[i]);
+    });
+    for (let i = 0; i < apres.length; i++) expect(lieuVise(cmd, i)).toEqual(b);
+  });
+
+  it('même prix mais icône et libellé différents : le bouton montre la nouvelle tour', () => {
+    const etat = partie(10);
+    const { hud } = monterAvec(etat);
+    const a = elementsMenu(etat, { cx: ct(0).cx, cy: ct(0).cy });
+    hud.placerMenu(a, 1, 200, 200, 800, 600, 64);
+    const autre = a.map((e, i) => (i === 1 ? { ...e, icone: 'tour-autre', libelle: 'Autre tour' } : e));
+    hud.placerMenu(autre, 2, 200, 200, 800, 600, 64);
+    const bouton = document.querySelectorAll<HTMLButtonElement>('.element-menu')[1];
+    expect(bouton?.querySelector('img.icone')?.getAttribute('src')).toBe('tour-autre.png');
+    expect(bouton?.getAttribute('aria-label')).toBe('Autre tour');
+    // Même icône, libellé seul différent : mis à jour en place.
+    const libelle = autre.map((e, i) => (i === 1 ? { ...e, libelle: 'Encore une autre' } : e));
+    hud.placerMenu(libelle, 3, 200, 200, 800, 600, 64);
+    expect(document.querySelectorAll('.element-menu')[1]).toBe(bouton);
+    expect(bouton?.getAttribute('aria-label')).toBe('Encore une autre');
+  });
+
+  it('un bouton survolé pendant le changement de case renvoie le survol du nouvel élément', () => {
+    const etat = partie(10);
+    const { hud, cmd } = monterAvec(etat);
+    const a = { cx: ct(0).cx, cy: ct(0).cy };
+    const b = { cx: ct(1).cx, cy: ct(1).cy };
+    hud.placerMenu(elementsMenu(etat, a), 1, 200, 200, 800, 600, 64);
+    const bouton = document.querySelectorAll<HTMLButtonElement>('.element-menu')[1];
+    bouton?.focus();
+    expect(document.activeElement).toBe(bouton);
+    const nouveaux = elementsMenu(etat, b);
+    hud.placerMenu(nouveaux, 2, 300, 300, 800, 600, 64);
+    expect(document.querySelectorAll('.element-menu')[1]).toBe(bouton);
+    const dernier = vi.mocked(cmd.survolerElement).mock.calls.at(-1)?.[0];
+    expect(dernier).toBe(nouveaux[1]);
   });
 });

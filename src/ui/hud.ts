@@ -100,7 +100,6 @@ export class Hud {
   private derniereImage = 0;
   private viesPrecedentes = -1;
   private fractionPv = -1;
-  private signatureMenu = '';
   private boutonsMenu: BoutonMenu[] = [];
   private versionMenu = -1;
   private menuX = Number.NaN;
@@ -343,8 +342,7 @@ export class Hud {
    */
   placerMenu(elements: readonly ElementMenu[] | null, version: number, cx: number, cy: number, largeur: number, hauteur: number, rayon: number): void {
     if (!elements || elements.length === 0) {
-      if (this.signatureMenu !== '') {
-        this.signatureMenu = '';
+      if (this.boutonsMenu.length > 0) {
         this.versionMenu = -1;
         this.boutonsMenu = [];
         this.menu.replaceChildren();
@@ -353,41 +351,31 @@ export class Hud {
       return;
     }
     const bouge = Math.abs(cx - this.menuX) > 0.5 || Math.abs(cy - this.menuY) > 0.5;
-    // La signature (id, prix, gain, refus de chaque élément) n'est recalculée que si le contenu a été recalculé
-    // (`version` change à chaque pas de simulation), pas à chaque image.
+    // Le contenu n'est comparé que s'il a été recalculé (`version` change à chaque pas de simulation), pas à chaque image.
     let reconstruit = false;
     if (version !== this.versionMenu) {
       this.versionMenu = version;
-      const signature = elements.map((e) => `${e.id}|${String(e.prix)}|${String(e.gain)}|${String(e.rang)}|${String(e.refus)}|${String(e.deblocage)}`).join(';');
-      if (signature === this.signatureMenu) {
-        // Même contenu mais peut-être un autre lieu (deux cases vides, deux tours identiques) : les boutons gardent leur
-        // nœud et reprennent les nouveaux éléments, sinon un clic viserait encore l'ancien lieu.
-        this.boutonsMenu.forEach((b, i) => {
-          const e = elements[i];
-          if (e) b.element = e;
+      // La forme (id, icône, rang, prix, déblocage) décide : même forme, les boutons gardent leur nœud et reprennent les
+      // nouveaux éléments (autre lieu, autre prix, autre icône) ; sinon on reconstruit.
+      const forme = (e: ElementMenu): string => `${e.id}|${e.icone}|${String(e.rang !== null)}|${String(e.prix !== null || e.gain !== null)}|${String(e.deblocage)}`;
+      const actuels = this.boutonsMenu;
+      if (actuels.length === elements.length && elements.every((e, i) => forme(e) === forme(actuels[i]?.element ?? e))) {
+        // Mêmes boutons : mis à jour en place (élément, prix, grisé, rang, icône, libellé), la bulle ouverte et un appui long en
+        // cours restent attachés au bouton, et un clic vise le lieu courant.
+        elements.forEach((e, i) => {
+          const b = actuels[i];
+          if (!b) return;
+          this.remplirBouton(b, e);
+          if (b.noeud.matches(':hover') || b.noeud === document.activeElement) this.commandes.survolerElement(e);
         });
       } else {
-        this.signatureMenu = signature;
-        const forme = (e: ElementMenu): string => `${e.id}|${e.icone}|${String(e.rang !== null)}|${String(e.prix !== null || e.gain !== null)}|${String(e.deblocage)}`;
-        const actuels = this.boutonsMenu;
-        if (actuels.length === elements.length && elements.every((e, i) => forme(e) === forme(actuels[i]?.element ?? e))) {
-          // Mêmes boutons (seuls prix, grisé ou rang changent) : mis à jour en place, la bulle ouverte et un appui long en
-          // cours restent attachés au bouton.
-          elements.forEach((e, i) => {
-            const b = actuels[i];
-            if (!b) return;
-            this.remplirBouton(b, e);
-            if (b.noeud.matches(':hover') || b.noeud === document.activeElement) this.commandes.survolerElement(e);
-          });
-        } else {
-          this.boutonsMenu = elements.map((e) => this.boutonMenu(e));
-          this.menu.replaceChildren(...this.boutonsMenu.map((b) => b.noeud));
-          reconstruit = true;
-          // Les boutons remplacés n'envoient pas de « pointeur parti » : on redit lequel est survolé, s'il y en a un.
-          this.commandes.survolerElement(null);
-          for (const b of this.boutonsMenu) {
-            if (b.noeud.matches(':hover') || b.noeud === document.activeElement) this.commandes.survolerElement(b.element);
-          }
+        this.boutonsMenu = elements.map((e) => this.boutonMenu(e));
+        this.menu.replaceChildren(...this.boutonsMenu.map((b) => b.noeud));
+        reconstruit = true;
+        // Les boutons remplacés n'envoient pas de « pointeur parti » : on redit lequel est survolé, s'il y en a un.
+        this.commandes.survolerElement(null);
+        for (const b of this.boutonsMenu) {
+          if (b.noeud.matches(':hover') || b.noeud === document.activeElement) this.commandes.survolerElement(b.element);
         }
       }
     }
