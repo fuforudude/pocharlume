@@ -42,9 +42,13 @@ interface CarteTexte {
 
 const LIGNE_DECOR = /^(\s*decor\(\s*')([^']+)(',\s*)(-?\d+(?:\.\d+)?)(,\s*)(-?\d+(?:\.\d+)?)((?:,\s*(?:true|false))?\s*\)\s*,?\s*(?:\/\/.*)?)$/;
 
-/** Fichiers de données des cartes, relatifs à la racine (le fichier qui les rassemble n'en fait pas partie). */
+/**
+ * Fichiers de données des cartes de l'histoire, relatifs à la racine. Ni le fichier qui les rassemble, ni les tests, ni les cartes du
+ * DLC « Temps modernes » (cartes-moderne*.ts) n'en font partie : le DLC réutilise des identifiants de l'histoire (`carrefour`), et
+ * `-` trie avant `.`, donc sa carte serait lue à la place de celle de l'histoire.
+ */
 function fichiersCartes(racine: string): string[] {
-  return readdirSync(join(racine, DOSSIER_CARTES)).filter((f) => /^cartes.*\.ts$/.test(f) && f !== 'cartes-toutes.ts').sort().map((f) => `${DOSSIER_CARTES}/${f}`);
+  return readdirSync(join(racine, DOSSIER_CARTES)).filter((f) => /^cartes.*\.ts$/.test(f) && !/\.test\.ts$/.test(f) && !f.startsWith('cartes-moderne') && f !== 'cartes-toutes.ts').sort().map((f) => `${DOSSIER_CARTES}/${f}`);
 }
 
 /** Lit dans le texte les décors de la carte `id` (dans l'ordre du tableau `decor: [...]`). Lève si le format n'est pas reconnu. */
