@@ -27,7 +27,13 @@ const TAILLE_MAX_DONNEES = 64 * 1024;
 export type RaisonImport = 'vide' | 'trop_long' | 'format' | 'somme' | 'compression' | 'donnees' | 'trop_recent';
 
 export type ResultatImport =
-  | { readonly ok: true; readonly sauvegarde: Sauvegarde; readonly depuis: number }
+  | {
+      readonly ok: true;
+      readonly sauvegarde: Sauvegarde;
+      readonly depuis: number;
+      /** Le code contenait un bloc `moderne` (le DLC). Sinon `sauvegarde.moderne` est un défaut vide à ne pas appliquer : l'appareil garde le sien. */
+      readonly avecModerne: boolean;
+    }
   | { readonly ok: false; readonly raison: RaisonImport; readonly detail: string };
 
 // --- CRC-32 -----------------------------------------------------------------------------------------------
@@ -209,13 +215,15 @@ export async function importerCode(code: string, defs?: DefsMeta): Promise<Resul
   const sansModerne = typeof version === 'number' && version >= VERSION_MODERNE && !Object.hasOwn(analyse, 'moderne');
   const migration = migrer({ ...analyse, partie: null, ...(sansModerne ? { moderne: moderneParDefaut() } : {}) });
   if (!migration.ok) return refus(migration.cause === 'trop_recente' ? 'trop_recent' : 'donnees', migration.raison);
-  return { ok: true, sauvegarde: normaliserImport(migration.sauvegarde, defs), depuis: migration.depuis };
+  return { ok: true, sauvegarde: normaliserImport(migration.sauvegarde, defs), depuis: migration.depuis, avecModerne: Object.hasOwn(analyse, 'moderne') };
 }
 
 /**
  * Applique un import réussi : la progression, les réglages et la méta-progression du code remplacent ceux de la
  * sauvegarde courante, la partie en cours est abandonnée (elle appartenait à l'ancienne progression).
+ * La campagne du DLC vient du code, sauf si `moderneAppareil` est donné (code sans bloc `moderne`, `avecModerne` faux) :
+ * l'appareil garde alors la sienne (badges, skins, titres, progression).
  */
-export function remplacerProgression(importee: Sauvegarde): Sauvegarde {
-  return { version: VERSION_SAUVEGARDE, progression: importee.progression, reglages: importee.reglages, meta: importee.meta, partie: null, moderne: importee.moderne };
+export function remplacerProgression(importee: Sauvegarde, moderneAppareil?: CampagneModerne): Sauvegarde {
+  return { version: VERSION_SAUVEGARDE, progression: importee.progression, reglages: importee.reglages, meta: importee.meta, partie: null, moderne: moderneAppareil ?? importee.moderne };
 }

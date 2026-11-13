@@ -229,11 +229,11 @@ export function afficherOptions(parent: HTMLElement, session: Session, surFermer
       message.classList.add('refus');
       return;
     }
-    proposer(resultat.sauvegarde);
+    proposer(resultat.sauvegarde, resultat.avecModerne);
   };
 
   /** Demande confirmation avant de remplacer la progression : ce qu'on perd, ce qu'on gagne. */
-  const proposer = (importee: Sauvegarde): void => {
+  const proposer = (importee: Sauvegarde, avecModerne: boolean): void => {
     confirmation.replaceChildren();
     confirmation.append(
       el('h4', 'sous-titre', t('options.confirmer_titre')),
@@ -241,7 +241,7 @@ export function afficherOptions(parent: HTMLElement, session: Session, surFermer
     );
     const rangee = el('div', 'rangee');
     const remplacer = bouton('bouton', t('options.confirmer'), () => {
-      void session.appliquerImport(importee).then(() => {
+      void session.appliquerImport(importee, avecModerne).then(() => {
         confirmation.hidden = true;
         valider.hidden = false;
         champ.value = '';

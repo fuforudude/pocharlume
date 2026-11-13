@@ -730,8 +730,11 @@ export class Session {
     return importerCode(code, this.defs);
   }
 
-  /** Remplace la progression, les réglages et la méta-progression par ceux d'un import réussi (la partie en cours est abandonnée). */
-  async appliquerImport(importee: Sauvegarde): Promise<boolean> {
-    return ecrite(await this.lancer(() => reussite(remplacerProgression(importee)), false));
+  /**
+   * Remplace la progression, les réglages et la méta-progression par ceux d'un import réussi (la partie en cours est abandonnée).
+   * `avecModerne` (celui du résultat de `importer`) : faux = le code n'avait pas de campagne du DLC, celle de l'appareil est gardée.
+   */
+  async appliquerImport(importee: Sauvegarde, avecModerne = true): Promise<boolean> {
+    return ecrite(await this.lancer((s) => reussite(remplacerProgression(importee, avecModerne ? undefined : s.moderne)), false));
   }
 }

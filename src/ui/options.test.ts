@@ -1,7 +1,8 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { t } from '../i18n';
-import { Depot, Session, StockageMemoire } from '../save';
+import { CATALOGUE_MODERNE } from '../data/recompenses-moderne';
+import { Depot, enregistrerVictoire, exporterCode, sauvegardeVide, Session, StockageMemoire, type Sauvegarde } from '../save';
 import { afficherOptions } from './options';
 
 afterEach(() => {
@@ -49,5 +50,38 @@ describe('options par-dessus un écran', () => {
     document.querySelector('.ecran.options button')?.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
     expect(dessous).not.toHaveBeenCalled();
     window.removeEventListener('keydown', dessous);
+  });
+});
+
+describe('import d’un code : le DLC de l’appareil', () => {
+  async function importerParEcran(session: Session, code: string): Promise<void> {
+    afficherOptions(document.body, session, vi.fn());
+    const champ = [...document.querySelectorAll('textarea')].find((c) => !c.readOnly);
+    if (!champ) throw new Error('champ d’import absent');
+    champ.value = code;
+    const bouton = (texte: string): HTMLButtonElement | undefined => [...document.querySelectorAll('button')].find((b) => b.textContent === texte);
+    bouton(t('options.importer_valider'))?.click();
+    await vi.waitFor(() => { expect(bouton(t('options.confirmer'))).toBeDefined(); });
+    bouton(t('options.confirmer'))?.click();
+    await vi.waitFor(() => { expect(document.body.textContent).toContain(t('options.import_ok')); });
+  }
+
+  it('un code sans `moderne` laisse badges et skins de l’appareil', async () => {
+    const vide = sauvegardeVide();
+    const avecDlc: Sauvegarde = { ...vide, moderne: { ...vide.moderne, badges: 321, collection: { ...vide.moderne.collection, skinsTours: [...CATALOGUE_MODERNE.skinsTours].slice(0, 1) } } };
+    const session = await ouvrirSession();
+    await session.appliquerImport(avecDlc);
+    await importerParEcran(session, await exporterCode(enregistrerVictoire(sauvegardeVide(), 1, 'matou', 3)));
+    expect(session.sauvegarde.moderne.badges).toBe(321);
+    expect(session.sauvegarde.moderne.collection.skinsTours).toEqual(avecDlc.moderne.collection.skinsTours);
+  });
+
+  it('un code avec `moderne` le remplace', async () => {
+    const vide = sauvegardeVide();
+    const code = await exporterCode({ ...vide, moderne: { ...vide.moderne, badges: 55 } });
+    const session = await ouvrirSession();
+    await session.appliquerImport({ ...vide, moderne: { ...vide.moderne, badges: 321 } });
+    await importerParEcran(session, code);
+    expect(session.sauvegarde.moderne.badges).toBe(55);
   });
 });
