@@ -175,3 +175,5 @@ avec ses propres récompenses.
   Matou est une défaite. **Niveau 20** : 24 000 arêtes de départ, assumé comme un siège et annoncé dans la fiche du niveau.
 - **Écarts suspendus** (Matou de la Manif, écart entre dieux en Vieux Sage) : acceptés pour la sortie ; l'équilibrage des dieux est
   une tâche à part, pour tout le jeu.
+- **Tests lourds** : les tests de boss sur toutes les graines et zone-ordinaires sortent de la suite habituelle (passe d'équilibrage
+  et job distant) ; la suite habituelle garde une version rapide. La vérification avant sortie lance les deux.
