@@ -31,7 +31,7 @@ export type ResultatImport =
       readonly ok: true;
       readonly sauvegarde: Sauvegarde;
       readonly depuis: number;
-      /** Le code contenait un bloc `moderne` (le DLC). Sinon `sauvegarde.moderne` est un défaut vide à ne pas appliquer : l'appareil garde le sien. */
+      /** Le code (v9 ou plus) contenait un bloc `moderne` (le DLC). Avant la v9 le DLC n'existait pas : toujours faux. Sinon `sauvegarde.moderne` est un défaut vide à ne pas appliquer : l'appareil garde le sien. */
       readonly avecModerne: boolean;
     }
   | { readonly ok: false; readonly raison: RaisonImport; readonly detail: string };
@@ -215,7 +215,7 @@ export async function importerCode(code: string, defs?: DefsMeta): Promise<Resul
   const sansModerne = typeof version === 'number' && version >= VERSION_MODERNE && !Object.hasOwn(analyse, 'moderne');
   const migration = migrer({ ...analyse, partie: null, ...(sansModerne ? { moderne: moderneParDefaut() } : {}) });
   if (!migration.ok) return refus(migration.cause === 'trop_recente' ? 'trop_recent' : 'donnees', migration.raison);
-  return { ok: true, sauvegarde: normaliserImport(migration.sauvegarde, defs), depuis: migration.depuis, avecModerne: Object.hasOwn(analyse, 'moderne') };
+  return { ok: true, sauvegarde: normaliserImport(migration.sauvegarde, defs), depuis: migration.depuis, avecModerne: typeof version === 'number' && version >= VERSION_MODERNE && Object.hasOwn(analyse, 'moderne') };
 }
 
 /**

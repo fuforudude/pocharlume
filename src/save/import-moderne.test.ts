@@ -96,4 +96,47 @@ describe('import : le DLC de l’appareil face au code', () => {
     expect(remplacerProgression(importee, appareil.moderne).moderne).toEqual(appareil.moderne);
     expect(remplacerProgression(importee).moderne).toEqual(importee.moderne);
   });
+
+  it('un DLC gardé est remis en cohérence : le skin d’un héros absent du code est déséquipé mais reste possédé', async () => {
+    const vide = sauvegardeVide();
+    const appareil: Sauvegarde = {
+      ...vide,
+      meta: { ...vide.meta, heros: { ...vide.meta.heros, suie: { xp: 0, competences: {} } } },
+      moderne: {
+        ...vide.moderne,
+        collection: { ...vide.moderne.collection, skinsHeros: ['skin_moderne_suie'], equipes: { suie: 'skin_moderne_suie' } },
+      },
+    };
+    const session = await sessionAvec(appareil);
+    expect(session.sauvegarde.moderne.collection.equipes).toEqual({ suie: 'skin_moderne_suie' });
+    // Le code n'a ni Suie ni DLC.
+    const lu = await importerCode(await exporterCode(sauvegardeVide()));
+    if (!lu.ok) throw new Error(lu.detail);
+    expect(lu.sauvegarde.meta.heros).not.toHaveProperty('suie');
+    await session.appliquerImport(lu.sauvegarde, lu.avecModerne);
+    expect(session.sauvegarde.moderne.collection.equipes).toEqual({});
+    expect(session.sauvegarde.moderne.collection.skinsHeros).toEqual(['skin_moderne_suie']);
+  });
+
+  it('un DLC écrit par un autre onglet n’est pas écrasé par l’import (le stockage est relu)', async () => {
+    const stockage = new StockageMemoire();
+    const a = await Session.ouvrir(new Depot(stockage), null, { verrou: null });
+    const b = await Session.ouvrir(new Depot(stockage), null, { verrou: null });
+    await b.appliquerImport(appareilAvecDlc());
+    expect(a.sauvegarde.moderne.badges).toBe(0);
+    const lu = await importerCode(await exporterCode(sauvegardeRemplie()));
+    if (!lu.ok) throw new Error(lu.detail);
+    await a.appliquerImport(lu.sauvegarde, lu.avecModerne);
+    expect(a.sauvegarde.moderne.badges).toBe(1234);
+    expect((await Session.ouvrir(new Depot(stockage), null, { verrou: null })).sauvegarde.moderne.badges).toBe(1234);
+  });
+
+  it('avant la v9, le code n’a pas de DLC : avecModerne est faux même avec une clé `moderne`', async () => {
+    const v8 = JSON.parse(FIXTURE_V8) as Record<string, unknown>;
+    Reflect.deleteProperty(v8, 'partie');
+    const lu = await importerCode(fabriquerCode(JSON.stringify({ ...v8, moderne: appareilAvecDlc().moderne })));
+    if (!lu.ok) throw new Error(lu.detail);
+    expect(lu.depuis).toBe(8);
+    expect(lu.avecModerne).toBe(false);
+  });
 });

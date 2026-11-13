@@ -130,6 +130,8 @@ export const fr = {
   'options.importer_valider': 'Importer ce code',
   'options.confirmer_titre': 'Remplacer ta progression ?',
   'options.confirmer_detail': 'Tu as {n} étoile(s). Le code en contient {m}. Ta progression et tes réglages actuels seront remplacés, la partie en cours abandonnée.',
+  'options.confirmer_dlc_garde': 'Le code n’a pas de Temps modernes : ceux de cet appareil sont gardés.',
+  'options.confirmer_dlc_remplace': 'Le code a des Temps modernes : ils remplaceront ceux de cet appareil.',
   'options.confirmer': 'Remplacer',
   'options.annuler': 'Annuler',
   'options.import_ok': 'Progression importée.',

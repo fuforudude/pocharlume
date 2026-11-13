@@ -238,6 +238,7 @@ export function afficherOptions(parent: HTMLElement, session: Session, surFermer
     confirmation.append(
       el('h4', 'sous-titre', t('options.confirmer_titre')),
       el('p', 'detail', t('options.confirmer_detail', { n: totalEtoiles(session.sauvegarde), m: totalEtoiles(importee) })),
+      el('p', 'detail', t(avecModerne ? 'options.confirmer_dlc_remplace' : 'options.confirmer_dlc_garde')),
     );
     const rangee = el('div', 'rangee');
     const remplacer = bouton('bouton', t('options.confirmer'), () => {
