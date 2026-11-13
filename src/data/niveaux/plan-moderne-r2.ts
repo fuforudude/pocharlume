@@ -17,8 +17,17 @@
 // pas), envoyer des renforts ou bloquer (toujours avec une recharge au moins égale à la durée de la coupure).
 // `aretesDepart` et `facteurBudget` : une première estimation prudente, posée sur un seul essai du bot soigneux en Matou par niveau ;
 // la tâche 7 les règle contre les bandes imposées.
-// Niveau 20 : arêtes de départ et budget dans la courbe de la région (2 200 et 0,21), au lieu de 3 600 et 0,12 qui laissaient le bot « gagner » en
-// laissant passer le Grand Centaure. Le boss n'est pas encore tuable par le bot (voir src/equilibrage/boss-moderne.test.ts).
+// Réglage de la tâche 7 (équilibrage du DLC, région 2) :
+// - Fer propre à la région, qui le réussissait à 100 % : `facteurAretes` 4 et `facteurEffectifs` 0,8 (3,5 et 1 aux niveaux 16, 18 et 19 ;
+//   3 et 1,3 aux niveaux 12 et 13) au lieu de 6 et 0,36.
+// - Budgets des vagues 11 à 19 inchangés : relevés de 10 à 30 % (ou avec 300 arêtes de départ de moins), ils ne retiraient presque rien au
+//   naïf en Matou mais faisaient tomber l'Héroïque (bande imposée) de 70 à 50 % environ.
+// - Niveau 20 : 24 000 arêtes de départ, budget des vagues inchangé (0,21). Le Grand Centaure (armure 90 %, 16 000 PV) est un contrôle de
+//   puissance : il ne meurt qu'à une défense percée et très améliorée. Mesures en Matou, dix graines, trois dieux : la stratégie
+//   perce-armure ne le tue qu'avec environ 16 000 arêtes (Plume), 20 000 (Charlie) et 24 000 (Pollen) ; alléger les vagues 8 à 14 lui retire
+//   des primes sans rien lui rendre. Fer du niveau : 24 000 × 0,55 ≈ 13 200 arêtes (comme avant), effectifs × 0,7. Le bot générique, lui,
+//   survit au passage du boss (12 vies sur 20) dès que l'économie suffit à la perce-armure : DÉCISION REQUISE, voir
+//   src/equilibrage/boss-moderne.test.ts.
 // `defiFer` : une famille qui touche les volants (tir ou magie) dès qu'il y a drones ou hélicoptères, la tour de tir avec la BAC
 // (furtive), jamais la même paire deux niveaux de suite.
 import type { IdCarteModerneR2 } from './cartes-moderne-r2';
@@ -32,7 +41,7 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     carte: 'rendez_vous',
     chemins: [0, 1],
     aretesDepart: 1500,
-    defiFer: { familles: ['caserne', 'tir'] },
+    defiFer: { familles: ['caserne', 'tir'], facteurAretes: 4, facteurEffectifs: 0.8 },
     nom: 'niveau.m2.01.nom',
     ambiance: 'niveau.m2.01.ambiance',
     evenements: [
@@ -59,7 +68,7 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     carte: 'boulevard',
     chemins: [0, 1],
     aretesDepart: 1500,
-    defiFer: { familles: ['magie', 'artillerie'] },
+    defiFer: { familles: ['magie', 'artillerie'], facteurAretes: 3, facteurEffectifs: 1.3 },
     nom: 'niveau.m2.02.nom',
     ambiance: 'niveau.m2.02.ambiance',
     // Le cortège avance : la rue latérale du sud s'ouvre à la vague 4 et reste ouverte jusqu'à la fin.
@@ -89,7 +98,7 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     carte: 'carrefour_manif',
     chemins: [0, 1],
     aretesDepart: 1600,
-    defiFer: { familles: ['caserne', 'artillerie'] },
+    defiFer: { familles: ['caserne', 'artillerie'], facteurAretes: 3, facteurEffectifs: 1.3 },
     nom: 'niveau.m2.03.nom',
     ambiance: 'niveau.m2.03.ambiance',
     evenements: [
@@ -118,7 +127,7 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     carte: 'abribus',
     chemins: [0, 1],
     aretesDepart: 1900,
-    defiFer: { familles: ['tir', 'magie'] },
+    defiFer: { familles: ['tir', 'magie'], facteurAretes: 4, facteurEffectifs: 0.8 },
     nom: 'niveau.m2.04.nom',
     ambiance: 'niveau.m2.04.ambiance',
     // Le cortège bloque la rue du nord des vagues 5 à 9 : les forces passent par le sud, puis la rue rouvre jusqu'à la fin.
@@ -150,7 +159,7 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     carte: 'nasse',
     chemins: [0, 1],
     aretesDepart: 1500,
-    defiFer: { familles: ['tir', 'caserne'] },
+    defiFer: { familles: ['tir', 'caserne'], facteurAretes: 4, facteurEffectifs: 0.8 },
     nom: 'niveau.m2.05.nom',
     ambiance: 'niveau.m2.05.ambiance',
     evenements: [
@@ -180,7 +189,7 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     carte: 'republique',
     chemins: [0, 1, 2],
     aretesDepart: 1700,
-    defiFer: { familles: ['artillerie', 'tir'] },
+    defiFer: { familles: ['artillerie', 'tir'], facteurAretes: 3.5, facteurEffectifs: 1 },
     nom: 'niveau.m2.06.nom',
     ambiance: 'niveau.m2.06.ambiance',
     // Les barrières de la rue du nord cèdent à la vague 6 : elle reste ouverte jusqu'à la fin.
@@ -212,7 +221,7 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     carte: 'cortege',
     chemins: [0, 1, 2],
     aretesDepart: 1800,
-    defiFer: { familles: ['magie', 'tir'] },
+    defiFer: { familles: ['magie', 'tir'], facteurAretes: 4, facteurEffectifs: 0.8 },
     nom: 'niveau.m2.07.nom',
     ambiance: 'niveau.m2.07.ambiance',
     // Le cortège de tête avance : la grande rue s'ouvre devant lui à la vague 3 (jusqu'à la fin), puis il occupe la rue du nord de la
@@ -247,7 +256,7 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     carte: 'camionnettes',
     chemins: [0, 1],
     aretesDepart: 1800,
-    defiFer: { familles: ['caserne', 'magie'] },
+    defiFer: { familles: ['caserne', 'magie'], facteurAretes: 3.5, facteurEffectifs: 1 },
     nom: 'niveau.m2.08.nom',
     ambiance: 'niveau.m2.08.ambiance',
     evenements: [
@@ -277,7 +286,7 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     carte: 'paves',
     chemins: [0, 1, 2],
     aretesDepart: 2000,
-    defiFer: { familles: ['tir', 'artillerie'] },
+    defiFer: { familles: ['tir', 'artillerie'], facteurAretes: 3.5, facteurEffectifs: 1 },
     nom: 'niveau.m2.09.nom',
     ambiance: 'niveau.m2.09.ambiance',
     // La ruelle du sud (chemin 2) s'ouvre à la vague 5 et reste ouverte jusqu'à la fin ; la foule prend la rue du sud (chemin 1) aux
@@ -312,8 +321,8 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     numero: 20,
     carte: 'grand_carrefour',
     chemins: [0, 1, 2],
-    aretesDepart: 2200,
-    defiFer: { familles: ['caserne', 'magie'] },
+    aretesDepart: 24000,
+    defiFer: { familles: ['caserne', 'magie'], facteurAretes: 0.55, facteurEffectifs: 0.7 },
     nom: 'niveau.m2.10.nom',
     ambiance: 'niveau.m2.10.ambiance',
     cheminsFermes: [{ chemin: 2, repli: 1 }],
