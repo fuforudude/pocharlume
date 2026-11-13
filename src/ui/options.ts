@@ -229,19 +229,30 @@ export function afficherOptions(parent: HTMLElement, session: Session, surFermer
       message.classList.add('refus');
       return;
     }
-    proposer(resultat.sauvegarde);
+    proposer(resultat.sauvegarde, resultat.avecModerne);
   };
 
   /** Demande confirmation avant de remplacer la progression : ce qu'on perd, ce qu'on gagne. */
-  const proposer = (importee: Sauvegarde): void => {
+  const proposer = (importee: Sauvegarde, avecModerne: boolean): void => {
     confirmation.replaceChildren();
     confirmation.append(
       el('h4', 'sous-titre', t('options.confirmer_titre')),
       el('p', 'detail', t('options.confirmer_detail', { n: totalEtoiles(session.sauvegarde), m: totalEtoiles(importee) })),
+      el('p', 'detail', t(avecModerne ? 'options.confirmer_dlc_remplace' : 'options.confirmer_dlc_garde')),
     );
     const rangee = el('div', 'rangee');
     const remplacer = bouton('bouton', t('options.confirmer'), () => {
-      void session.appliquerImport(importee).then(() => {
+      const echec = (): void => {
+        confirmation.hidden = true;
+        valider.hidden = false;
+        message.textContent = t('options.import_echec');
+        message.classList.add('refus');
+      };
+      void session.appliquerImport(importee, avecModerne).then((ecrite) => {
+        if (!ecrite) {
+          echec();
+          return;
+        }
         confirmation.hidden = true;
         valider.hidden = false;
         champ.value = '';
@@ -249,7 +260,7 @@ export function afficherOptions(parent: HTMLElement, session: Session, surFermer
         message.classList.remove('refus');
         zoneCode.hidden = true;
         dessinerReglages();
-      });
+      }, echec);
     });
     remplacer.textContent = t('options.confirmer');
     const annuler = bouton('bouton secondaire', t('options.annuler'), () => {

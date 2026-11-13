@@ -37,6 +37,7 @@ import { rangDe } from '../meta/collection';
 import { JETS_PAR_TIRAGE } from '../meta/tirage';
 import { estIdCollection } from '../data/collection';
 import type { CanalSauvegarde } from './canal';
+import { normaliserImport } from './normalisation';
 import { exporterCode, importerCode, remplacerProgression, type ResultatImport } from './code';
 import type { DefsMeta } from './definitions';
 import type { Chargement, Depot, OrigineChargement } from './depot';
@@ -730,8 +731,17 @@ export class Session {
     return importerCode(code, this.defs);
   }
 
-  /** Remplace la progression, les réglages et la méta-progression par ceux d'un import réussi (la partie en cours est abandonnée). */
-  async appliquerImport(importee: Sauvegarde): Promise<boolean> {
-    return ecrite(await this.lancer(() => reussite(remplacerProgression(importee)), false));
+  /**
+   * Remplace la progression, les réglages et la méta-progression par ceux d'un import réussi (la partie en cours est abandonnée).
+   * `avecModerne` (celui du résultat de `importer`) : faux = le code n'avait pas de campagne du DLC, celle de l'appareil est gardée.
+   */
+  async appliquerImport(importee: Sauvegarde, avecModerne = true): Promise<boolean> {
+    // DLC gardé : la sauvegarde est relue pour partir du DLC le plus récent (un autre onglet a pu l'écrire), puis remise en cohérence
+    // avec les héros importés (un skin porté par un héros absent est déséquipé, règle de `normaliserImport`).
+    const operation = (s: Sauvegarde) => {
+      const remplacee = remplacerProgression(importee, avecModerne ? undefined : s.moderne);
+      return reussite(avecModerne ? remplacee : normaliserImport(remplacee, this.defs));
+    };
+    return ecrite(await this.lancer(operation, !avecModerne));
   }
 }
