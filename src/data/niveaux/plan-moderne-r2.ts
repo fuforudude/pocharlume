@@ -26,7 +26,7 @@
 //   puissance : il ne meurt qu'à une défense percée et très améliorée. Mesures en Matou, dix graines, trois dieux : la stratégie
 //   perce-armure ne le tue qu'avec environ 16 000 arêtes (Plume), 20 000 (Charlie) et 24 000 (Pollen) ; alléger les vagues 8 à 14 lui retire
 //   des primes sans rien lui rendre. Fer du niveau : 24 000 × 0,55 ≈ 13 200 arêtes (comme avant), effectifs × 0,7. Le bot générique, lui,
-//   survit au passage du boss (12 vies sur 20) dès que l'économie suffit à la perce-armure : DÉCISION REQUISE, voir
+//   laissait passer le boss (12 vies sur 20) : un boss du DLC coûte désormais 20 vies, voir
 //   src/equilibrage/boss-moderne.test.ts.
 // `defiFer` : une famille qui touche les volants (tir ou magie) dès qu'il y a drones ou hélicoptères, la tour de tir avec la BAC
 // (furtive), jamais la même paire deux niveaux de suite.
@@ -325,6 +325,7 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     defiFer: { familles: ['caserne', 'magie'], facteurAretes: 0.55, facteurEffectifs: 0.7 },
     nom: 'niveau.m2.10.nom',
     ambiance: 'niveau.m2.10.ambiance',
+    annonce: 'niveau.m2.10.annonce',
     cheminsFermes: [{ chemin: 2, repli: 1 }],
     // Le boulevard du sud s'ouvre à mi-niveau (vague 7, jusqu'à la fin). Le Grand Centaure entre à la vague 15 par le nord-ouest
     // (chemin 0) : les étudiants se massent sur le carrefour (renforts), son canon à eau balaie la ligne deux fois, la police montée

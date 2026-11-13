@@ -40,6 +40,8 @@ export interface PlanNiveauModerne<C extends string = IdCarteModerneR1> {
   /** Clés de src/i18n/fr-moderne-niveaux.ts (textes dans docs/lore.md). */
   readonly nom: string;
   readonly ambiance: string;
+  /** Clé d'une phrase d'annonce de la fiche (niveau particulier, ex. le siège du niveau 20). */
+  readonly annonce?: string;
   readonly evenements?: readonly EvenementNiveau[];
   readonly cheminsFermes?: readonly CheminFerme[];
   readonly foules?: readonly Foule[];

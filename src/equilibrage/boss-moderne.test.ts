@@ -50,14 +50,10 @@ describe('boss du DLC tuables par le bot', () => {
 // d'entraînement, puis il joue les dix graines d'évaluation en Matou (toutes : c'est la décision ; environ 6 minutes pour le fichier sur une
 // machine chargée, 2 à 3 minutes sinon). Toute victoire doit avoir tué le boss.
 //
-// Écarts connus, gardés en `it.fails` (le test passe au rouge dès que l'écart disparaît : le retirer alors de la liste).
-// - Niveau 20, Charlie et Pollen : DÉCISION REQUISE. Le Grand Centaure coûte 12 vies sur les 20 de Matou ; le soigneux générique ne perd
-//   presque rien d'autre dès que l'économie suffit à la perce-armure (24 000 arêtes), il gagne donc en le laissant passer (8 vies). Aucun
-//   levier du plan de la région 2 ne l'en empêche (mesures du rapport de réglage de la région 2) ; il faudrait par exemple un coût en vies
-//   du boss d'au moins 20 (src/data/ennemis.ts), donnée commune hors de ce réglage. Plume, lui, tue le boss à chaque graine.
-// - Niveaux 10 et 30, Plume et Charlie : quelques graines gagnées en laissant passer le commissaire (10 : graines 101 et 110 pour Plume,
-//   103, 104 et 108 pour Charlie) ou le préfet (30 : graine 101 pour Plume, 102 pour Charlie). Signalé : ces régions sont réglées à part.
-const ECARTS_CONNUS: ReadonlySet<string> = new Set(['10:plume', '10:charlie', '20:charlie', '20:pollen', '30:plume', '30:charlie']);
+// Plus aucun écart connu : un boss du DLC qui passe coûte 20 vies (src/data/ennemis.ts), soit toute la réserve de Matou, donc le laisser
+// passer est une défaite. Un écart futur s'ajoute ici sous la forme « niveau:dieu » et se garde en `it.fails` (le test passe au rouge dès
+// que l'écart disparaît : le retirer alors de la liste).
+const ECARTS_CONNUS: ReadonlySet<string> = new Set<string>();
 
 describe.each(BOSS_DU_DLC)('niveau %i : une victoire du soigneux implique que le boss (%s) a été tué, sur toutes les graines d’évaluation', (numero, boss) => {
   for (const dieu of DIEUX_EVALUES) {

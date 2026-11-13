@@ -271,9 +271,9 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
   haut.append(barre);
   racine.append(haut);
 
-  const textesDe = (numero: number): { nom: string; ambiance: string } | null => {
+  const textesDe = (numero: number): { nom: string; ambiance: string; annonce: string | null } | null => {
     const textes = regionCourante()?.contenu?.textes.find((x) => x.numero === numero);
-    return textes ? { nom: tCle(textes.nom), ambiance: tCle(textes.ambiance) } : null;
+    return textes ? { nom: tCle(textes.nom), ambiance: tCle(textes.ambiance), annonce: textes.annonce ? tCle(textes.annonce) : null } : null;
   };
 
   const majTitre = (): void => {
@@ -550,6 +550,7 @@ export function afficherCarteMonde(parent: HTMLElement, options: OptionsCarteMon
     }
     if (niveau.horde) entete.append(el('span', 'etiquette-horde', t('fiche.horde')));
     gauche.append(entete, el('h2', 'titre', textes.nom), el('p', 'ambiance', textes.ambiance));
+    if (textes.annonce) gauche.append(el('p', 'fiche-annonce', textes.annonce));
     if (niveau.horde) gauche.append(el('p', 'horde-aide', t('fiche.horde_aide')));
     // La particularité du niveau (régions 11 à 15), tirée de son gimmick : une ligne, rien pour un niveau ordinaire.
     // Sur un écran bas, seul « Particularité : <nom> » se voit (la phrase est dans sa bulle) : « Lancer » ne doit pas sortir de

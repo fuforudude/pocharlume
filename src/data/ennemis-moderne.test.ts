@@ -108,7 +108,8 @@ describe('boss du DLC', () => {
       expect(d.boss, id).toBe(true);
       expect(d.insensibleEtourdissement, id).toBe(true);
       expect(d.prime, id).toBeGreaterThan(5 * prime);
-      expect(d.coutVies, id).toBeGreaterThan(1);
+      // Un boss du DLC qui passe coûte 20 vies : toute la réserve de Matou, c'est donc une défaite.
+      expect(d.coutVies, id).toBe(20);
       expect(d.pouvoirs?.paliers?.length ?? 0, id).toBeGreaterThan(0);
     }
     expect(def('moderne_commissaire_boss').pv).toBeGreaterThan(def('moderne_commissaire').pv * 20);

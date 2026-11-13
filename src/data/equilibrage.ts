@@ -179,10 +179,20 @@ export function facteurVitesse(vitesse: number): number {
   return Math.sqrt(vitesse / EQUILIBRAGE.vitesseReference);
 }
 
-/** Menace = PV ÷ (1 − protection moyenne) × facteur de vitesse × coût en vies ; doublée pour un binôme (une apparition en crée deux). */
+/**
+ * Coût en vies compté dans la menace des boss du DLC. Leur coût réel est de 20 (un boss qui passe est une défaite en Matou), mais la
+ * menace sert à répartir budgets de vagues et défenses des bots : la garder à l'ancienne valeur laisse ce réglage inchangé.
+ */
+const VIES_DE_MENACE_DLC: Readonly<Record<string, number>> = {
+  'ennemi.moderne_commissaire_boss': 10,
+  'ennemi.moderne_centaure_boss': 12,
+  'ennemi.moderne_prefet': 12,
+};
+
+/** Menace = PV ÷ (1 − protection moyenne) × facteur de vitesse × coût en vies (voir VIES_DE_MENACE_DLC) ; doublée pour un binôme (une apparition en crée deux). */
 export function menaceEnnemi(def: DefEnnemi): number {
   const protection = (def.armure + def.resistance) / 2;
-  return (def.pv / (1 - protection)) * facteurVitesse(def.vitesse) * def.coutVies * (def.pouvoirs?.binome ? 2 : 1);
+  return (def.pv / (1 - protection)) * facteurVitesse(def.vitesse) * (VIES_DE_MENACE_DLC[def.nom] ?? def.coutVies) * (def.pouvoirs?.binome ? 2 : 1);
 }
 
 /** Budget de menace b(L, w) de la vague w (1, 2…) du niveau de campagne L (1 à 100). */

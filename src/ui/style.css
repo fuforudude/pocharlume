@@ -776,6 +776,13 @@ html[data-sans-clavier] .touche {
   font-weight: bold;
 }
 
+.ecran .fiche-annonce {
+  margin: 0;
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--or);
+}
+
 .ecran .horde-aide {
   margin: 0;
   font-size: 13px;

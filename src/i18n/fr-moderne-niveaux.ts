@@ -40,6 +40,7 @@ export const frModerneNiveaux = {
   'niveau.m2.09.nom': 'Les Pavés',
   'niveau.m2.09.ambiance': 'Sous les pavés, la plage, disait-on. Sous ceux-là, il y a surtout un devis de voirie.',
   'niveau.m2.10.nom': 'Le Grand Carrefour',
+  'niveau.m2.10.annonce': 'Siège : un trésor de guerre au départ, bâtissez tout avant l’assaut, le Centaure est blindé.',
   'niveau.m2.10.ambiance': 'Le Grand Centaure vient rétablir la circulation. Pour l’instant, la circulation, c’est lui.',
   'niveau.m3.01.nom': 'Les Grilles',
   'niveau.m3.01.ambiance': 'Les grilles ont été repeintes pour la visite du ministre. Elles n’ont jamais été aussi fermées.',

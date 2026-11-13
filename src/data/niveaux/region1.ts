@@ -75,6 +75,8 @@ export interface TextesNiveau {
   readonly numero: number;
   readonly nom: string;
   readonly ambiance: string;
+  /** Clé d'une phrase d'annonce affichée sous l'ambiance de la fiche (ex. un siège), absente pour la plupart des niveaux. */
+  readonly annonce?: string;
 }
 
 export const TEXTES_REGION1: readonly TextesNiveau[] = PLANS_REGION1.map((p) => ({ numero: p.numero, nom: p.nom, ambiance: p.ambiance }));

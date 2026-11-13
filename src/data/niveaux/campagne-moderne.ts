@@ -152,9 +152,9 @@ export const NOEUDS_REGIONS_MODERNE: readonly (readonly NoeudNiveau[])[] = [NOEU
 export const TRACES_REGIONS_MODERNE: readonly (readonly (readonly Point[])[])[] = [TRACE_FAC, TRACE_MANIF, TRACE_PREFECTURE];
 /** Nom et phrase d'ambiance de chaque niveau, par région (numéros du DLC, 1 à 30). */
 export const TEXTES_REGIONS_MODERNE: readonly (readonly TextesNiveau[])[] = [
-  PLANS_MODERNE_R1.map((p) => ({ numero: p.numero, nom: p.nom, ambiance: p.ambiance })),
-  PLANS_MODERNE_R2.map((p) => ({ numero: p.numero, nom: p.nom, ambiance: p.ambiance })),
-  PLANS_MODERNE_R3.map((p) => ({ numero: p.numero, nom: p.nom, ambiance: p.ambiance })),
+  PLANS_MODERNE_R1.map((p) => ({ numero: p.numero, nom: p.nom, ambiance: p.ambiance, ...(p.annonce ? { annonce: p.annonce } : {}) })),
+  PLANS_MODERNE_R2.map((p) => ({ numero: p.numero, nom: p.nom, ambiance: p.ambiance, ...(p.annonce ? { annonce: p.annonce } : {}) })),
+  PLANS_MODERNE_R3.map((p) => ({ numero: p.numero, nom: p.nom, ambiance: p.ambiance, ...(p.annonce ? { annonce: p.annonce } : {}) })),
 ];
 
 /** Le niveau du DLC de ce numéro (1 à 30), ou `undefined` s'il n'est pas livré. */
