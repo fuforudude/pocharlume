@@ -3,13 +3,14 @@
 // campagne qui l'ouvre, sans prix, et se refait quand l'élément change d'état.
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { REGION1 } from '../data/niveaux/region1';
-import { creerPartie } from '../engine';
+import { appliquerAction, creerPartie } from '../engine';
+import type { LieuTour } from '../engine';
 import { CONFIG, ct } from '../engine/aides.test-utils';
 import type { EtatPartie } from '../engine';
 import { t, tCle } from '../i18n';
 import type { AtlasRendu } from '../render/atlas';
 import { Hud, type CommandesHud } from './hud';
-import { elementsCaseVide, type ElementMenu } from './menu-cercle';
+import { elementsCaseVide, elementsMenu, type ElementMenu } from './menu-cercle';
 
 const ATLAS = { iconeUrl: (nom: string) => `${nom}.png` } as unknown as AtlasRendu;
 
@@ -90,5 +91,55 @@ describe('menu du HUD : élément pas encore débloqué', () => {
     hud.placerMenu(elements(partie(4)), 3, 200, 200, 800, 600, 64);
     expect(boutonDivine().querySelector('.pastille-niveau')?.textContent).toBe('10');
     expect(boutonDivine().querySelector('.prix')).toBeNull();
+  });
+});
+
+describe('menu du HUD : changement de lieu à contenu identique', () => {
+  /** Le lieu visé par l'action du bouton `i`, tel que le HUD le transmet à `choisirElement`. */
+  function lieuVise(cmd: CommandesHud, i: number): LieuTour | undefined {
+    const bouton = document.querySelectorAll<HTMLButtonElement>('.element-menu')[i];
+    if (!bouton) throw new Error('bouton absent');
+    bouton.click();
+    const choisir = vi.mocked(cmd.choisirElement);
+    const action = choisir.mock.calls.at(-1)?.[0].action;
+    if (!action || !('cx' in action || 'place' in action)) return undefined;
+    return action.place !== undefined ? { place: action.place } : { cx: action.cx, cy: action.cy };
+  }
+
+  function monterAvec(etat: EtatPartie): { hud: Hud; cmd: CommandesHud } {
+    const cmd = commandes();
+    return { hud: new Hud(document.body, ATLAS, etat, cmd, new AbortController().signal), cmd };
+  }
+
+  it('deux cases vides : le bouton construit sur la dernière case touchée', () => {
+    const etat = partie(10);
+    const { hud, cmd } = monterAvec(etat);
+    const a = { cx: ct(0).cx, cy: ct(0).cy };
+    const b = { cx: ct(1).cx, cy: ct(1).cy };
+    hud.placerMenu(elementsMenu(etat, a), 1, 200, 200, 800, 600, 64);
+    hud.placerMenu(elementsMenu(etat, b), 2, 300, 300, 800, 600, 64);
+    expect(lieuVise(cmd, 1)).toEqual(b);
+  });
+
+  it('deux places du radeau identiques : le bouton vise la dernière place touchée', () => {
+    const etat = partie(10);
+    const { hud, cmd } = monterAvec(etat);
+    hud.placerMenu(elementsCaseVide(etat, { place: 0 }), 1, 200, 200, 800, 600, 64);
+    hud.placerMenu(elementsCaseVide(etat, { place: 1 }), 2, 300, 300, 800, 600, 64);
+    expect(lieuVise(cmd, 1)).toEqual({ place: 1 });
+  });
+
+  it('deux tours identiques : vendre ou améliorer vise la dernière tour touchée', () => {
+    const etat = partie(10);
+    const a = { cx: ct(0).cx, cy: ct(0).cy };
+    const b = { cx: ct(1).cx, cy: ct(1).cy };
+    for (const lieu of [a, b]) {
+      expect(appliquerAction(etat, { type: 'construire', tour: 'tir', ...lieu }).ok).toBe(true);
+    }
+    const { hud, cmd } = monterAvec(etat);
+    hud.placerMenu(elementsMenu(etat, a), 1, 200, 200, 800, 600, 64);
+    hud.placerMenu(elementsMenu(etat, b), 2, 300, 300, 800, 600, 64);
+    const n = document.querySelectorAll('.element-menu').length;
+    for (let i = 0; i < n; i++) expect(lieuVise(cmd, i)).toEqual(b);
   });
 });

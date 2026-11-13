@@ -359,7 +359,14 @@ export class Hud {
     if (version !== this.versionMenu) {
       this.versionMenu = version;
       const signature = elements.map((e) => `${e.id}|${String(e.prix)}|${String(e.gain)}|${String(e.rang)}|${String(e.refus)}|${String(e.deblocage)}`).join(';');
-      if (signature !== this.signatureMenu) {
+      if (signature === this.signatureMenu) {
+        // Même contenu mais peut-être un autre lieu (deux cases vides, deux tours identiques) : les boutons gardent leur
+        // nœud et reprennent les nouveaux éléments, sinon un clic viserait encore l'ancien lieu.
+        this.boutonsMenu.forEach((b, i) => {
+          const e = elements[i];
+          if (e) b.element = e;
+        });
+      } else {
         this.signatureMenu = signature;
         const forme = (e: ElementMenu): string => `${e.id}|${e.icone}|${String(e.rang !== null)}|${String(e.prix !== null || e.gain !== null)}|${String(e.deblocage)}`;
         const actuels = this.boutonsMenu;
