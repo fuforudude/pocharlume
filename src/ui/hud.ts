@@ -101,7 +101,6 @@ export class Hud {
   private derniereImage = 0;
   private viesPrecedentes = -1;
   private fractionPv = -1;
-  private signatureMenu = '';
   private boutonsMenu: BoutonMenu[] = [];
   private versionMenu = -1;
   private menuX = Number.NaN;
@@ -345,13 +344,12 @@ export class Hud {
 
   /**
    * Montre le menu en cercle autour du point (cx, cy) en pixels CSS, ou le cache si `elements` est null.
-   * Les boutons ne sont reconstruits que si leur contenu change (prix, grisé), et replacés que si le
-   * point bouge.
+   * Les boutons ne sont reconstruits que si leur forme change (autre action, autre icône, rang ou prix qui apparaît ou
+   * disparaît, déblocage) ; prix, grisé, rang et libellé se mettent à jour en place. Ils ne sont replacés que si le point bouge.
    */
   placerMenu(elements: readonly ElementMenu[] | null, version: number, cx: number, cy: number, largeur: number, hauteur: number, rayon: number): void {
     if (!elements || elements.length === 0) {
-      if (this.signatureMenu !== '') {
-        this.signatureMenu = '';
+      if (this.boutonsMenu.length > 0) {
         this.versionMenu = -1;
         this.boutonsMenu = [];
         this.menu.replaceChildren();
@@ -360,34 +358,31 @@ export class Hud {
       return;
     }
     const bouge = Math.abs(cx - this.menuX) > 0.5 || Math.abs(cy - this.menuY) > 0.5;
-    // La signature (id, prix, gain, refus de chaque élément) n'est recalculée que si le contenu a été recalculé
-    // (`version` change à chaque pas de simulation), pas à chaque image.
+    // Le contenu n'est comparé que s'il a été recalculé (`version` change à chaque pas de simulation), pas à chaque image.
     let reconstruit = false;
     if (version !== this.versionMenu) {
       this.versionMenu = version;
-      const signature = elements.map((e) => `${e.id}|${String(e.prix)}|${String(e.gain)}|${String(e.rang)}|${String(e.refus)}|${String(e.deblocage)}`).join(';');
-      if (signature !== this.signatureMenu) {
-        this.signatureMenu = signature;
-        const forme = (e: ElementMenu): string => `${e.id}|${e.icone}|${String(e.rang !== null)}|${String(e.prix !== null || e.gain !== null)}|${String(e.deblocage)}`;
-        const actuels = this.boutonsMenu;
-        if (actuels.length === elements.length && elements.every((e, i) => forme(e) === forme(actuels[i]?.element ?? e))) {
-          // Mêmes boutons (seuls prix, grisé ou rang changent) : mis à jour en place, la bulle ouverte et un appui long en
-          // cours restent attachés au bouton.
-          elements.forEach((e, i) => {
-            const b = actuels[i];
-            if (!b) return;
-            this.remplirBouton(b, e);
-            if (b.noeud.matches(':hover') || b.noeud === document.activeElement) this.commandes.survolerElement(e);
-          });
-        } else {
-          this.boutonsMenu = elements.map((e) => this.boutonMenu(e));
-          this.menu.replaceChildren(...this.boutonsMenu.map((b) => b.noeud));
-          reconstruit = true;
-          // Les boutons remplacés n'envoient pas de « pointeur parti » : on redit lequel est survolé, s'il y en a un.
-          this.commandes.survolerElement(null);
-          for (const b of this.boutonsMenu) {
-            if (b.noeud.matches(':hover') || b.noeud === document.activeElement) this.commandes.survolerElement(b.element);
-          }
+      // La forme (id, icône, rang, prix, déblocage) décide : même forme, les boutons gardent leur nœud et reprennent les
+      // nouveaux éléments (autre lieu, autre prix) ; sinon (autre icône comprise) on reconstruit.
+      const forme = (e: ElementMenu): string => `${e.id}|${e.icone}|${String(e.rang !== null)}|${String(e.prix !== null || e.gain !== null)}|${String(e.deblocage)}`;
+      const actuels = this.boutonsMenu;
+      if (actuels.length === elements.length && elements.every((e, i) => forme(e) === forme(actuels[i]?.element ?? e))) {
+        // Mêmes boutons : mis à jour en place (élément, prix, grisé, rang, libellé), la bulle ouverte et un appui long en
+        // cours restent attachés au bouton, et un clic vise le lieu courant.
+        elements.forEach((e, i) => {
+          const b = actuels[i];
+          if (!b) return;
+          this.remplirBouton(b, e);
+          if (b.noeud.matches(':hover') || b.noeud === document.activeElement) this.commandes.survolerElement(e);
+        });
+      } else {
+        this.boutonsMenu = elements.map((e) => this.boutonMenu(e));
+        this.menu.replaceChildren(...this.boutonsMenu.map((b) => b.noeud));
+        reconstruit = true;
+        // Les boutons remplacés n'envoient pas de « pointeur parti » : on redit lequel est survolé, s'il y en a un.
+        this.commandes.survolerElement(null);
+        for (const b of this.boutonsMenu) {
+          if (b.noeud.matches(':hover') || b.noeud === document.activeElement) this.commandes.survolerElement(b.element);
         }
       }
     }
@@ -453,15 +448,17 @@ export class Hud {
     b.element = element;
     const noeud = b.noeud;
     const libelle = element.deblocage !== null ? t('menu.non_debloque', { nom: element.libelle, n: element.deblocage }) : element.libelle;
-    noeud.setAttribute('aria-label', libelle);
+    if (noeud.getAttribute('aria-label') !== libelle) noeud.setAttribute('aria-label', libelle);
     // Sans bulle de description, l'info-bulle du navigateur dit au moins le libellé.
-    if (!this.commandes.decrireElement) noeud.title = libelle;
-    noeud.setAttribute('aria-disabled', String(element.refus !== null));
+    if (!this.commandes.decrireElement && noeud.title !== libelle) noeud.title = libelle;
+    const desactive = String(element.refus !== null);
+    if (noeud.getAttribute('aria-disabled') !== desactive) noeud.setAttribute('aria-disabled', desactive);
     basculerClasse(noeud, 'grise', element.refus !== null);
     basculerClasse(noeud, 'trop-cher', element.refus === 'aretes_insuffisantes');
     basculerClasse(noeud, 'au-sommet', element.refus === 'competence_au_maximum');
-    if (b.rang) b.rang.textContent = element.rang ?? '';
-    if (b.prix) b.prix.textContent = `${element.gain !== null ? '+' : ''}${String(element.prix ?? element.gain)}`;
+    if (b.rang && b.rang.textContent !== (element.rang ?? '')) b.rang.textContent = element.rang ?? '';
+    const prix = `${element.gain !== null ? '+' : ''}${String(element.prix ?? element.gain)}`;
+    if (b.prix && b.prix.textContent !== prix) b.prix.textContent = prix;
   }
 
   detruire(): void {

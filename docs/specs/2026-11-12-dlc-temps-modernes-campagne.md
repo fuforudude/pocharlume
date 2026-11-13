@@ -167,3 +167,4 @@ avec ses propres récompenses.
 - **Niveau 20 (décision finale)** : après trois tentatives, la cause est l'économie des vagues 8 à 14 ; le niveau est réglé dans
   l'équilibrage global (tâche 7). Le test « le Centaure doit mourir » reste en garde-fou (`it.fails`) et bloque la sortie tant qu'il
   n'est pas passé en `it` vert.
+- **Identifiants de cartes** : uniques dans tout le jeu, histoire et DLC confondus (test) ; la carte « carrefour » de la Manif est renommée.
