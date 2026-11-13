@@ -56,6 +56,7 @@ jobs, services locaux joignables) et neuf points à corriger. Décisions de l'é
   s'arrête après 15 min sans machine et après 6 h en tout (testé par une logique pure).
 - [ ] Lancement à la main avec l'entrée `machine` (`auto`, `github`, `vps`), testée.
 - [ ] Le secret `VPS_DEPLOY_KEY` n'est lu que dans l'environnement `production` (vérifié par `tools/ci/workflows.test.ts`).
+- [ ] Les workflows GitHub sont validés par la librairie `yaml` dans les tests (`tools/ci/workflows.test.ts`) : aucune erreur de syntaxe.
 - [ ] Les consignes des agents (`CLAUDE.md` du projet) disent : vérification complète et passes d'équilibrage sur la CI,
   seulement des tests ciblés en local.
 - [ ] README de `infra/vps/` et `CLAUDE.md` décrivent les étapes de l'auteur : installer et connecter `gh`, créer le jeton

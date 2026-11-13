@@ -1,37 +1,12 @@
 // Garde-fous des workflows : même découpage par région que le déploiement, repli sur GitHub, délais, actions épinglées
-// par SHA, clé de déploiement réservée à l'environnement production. Lecture par motifs : pas de dépendance YAML.
-import { readFileSync } from 'node:fs';
+// par SHA, clé de déploiement réservée à l'environnement production. Syntaxe validée par la librairie yaml ; le reste est lu par motifs.
+import { readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { parseDocument } from 'yaml';
 
 function lire(nom: string): string {
   // Sous Windows, git peut rendre les fichiers en fins de ligne \r\n : les motifs attendent \n.
   return readFileSync(new URL(`../../.github/workflows/${nom}`, import.meta.url), 'utf8').replace(/\r\n/g, '\n');
-}
-
-/**
- * Défauts d'indentation des blocs `run: |` : toute ligne non vide d'un bloc doit être indentée au moins autant que sa
- * première ligne. Un retour à la ligne littéral dans un `printf` fait sortir le texte du bloc et rend le YAML invalide.
- * Le bloc se termine à la prochaine clé ou entrée de liste placée au plus au niveau de `run:`.
- */
-function defautsBlocsRun(flux: string): string[] {
-  const defauts: string[] = [];
-  const lignes = flux.split('\n');
-  for (let i = 0; i < lignes.length; i++) {
-    const debut = /^(\s*)(?:- )?run:\s*[|>][+-]?\s*$/.exec(lignes[i] ?? '');
-    if (debut?.[1] === undefined) continue;
-    const niveauCle = debut[1].length;
-    let base: number | null = null;
-    for (let j = i + 1; j < lignes.length; j++) {
-      const ligne = lignes[j] ?? '';
-      if (ligne.trim() === '') continue;
-      const indentation = ligne.length - ligne.trimStart().length;
-      base ??= indentation;
-      if (indentation >= base) continue;
-      if (indentation <= niveauCle && /^\s*(?:- |[\w.-]+:)/.test(ligne)) break;
-      defauts.push(`ligne ${String(j + 1)} : ${ligne.trim()}`);
-    }
-  }
-  return defauts;
 }
 
 function regions(flux: string): number[] {
@@ -121,16 +96,24 @@ describe('workflow de déploiement', () => {
   });
 });
 
-describe('syntaxe des blocs run', () => {
-  for (const nom of ['tests.yml', 'deploiement.yml']) {
-    it(`${nom} : aucune ligne d'un bloc run: | ne sort de son indentation`, () => {
-      expect(defautsBlocsRun(lire(nom))).toEqual([]);
+describe('syntaxe YAML des workflows', () => {
+  const dossier = new URL('../../.github/workflows/', import.meta.url);
+  const fichiers = readdirSync(dossier).filter((f) => /\.ya?ml$/.test(f));
+
+  it('trouve des workflows', () => {
+    expect(fichiers.length).toBeGreaterThan(0);
+  });
+
+  for (const nom of fichiers) {
+    it(`${nom} : analysé par yaml sans erreur`, () => {
+      const doc = parseDocument(lire(nom));
+      expect(doc.errors.map((e) => e.message)).toEqual([]);
     });
   }
 
-  it('repère un retour à la ligne littéral dans un printf', () => {
+  it('repère un retour à la ligne littéral dans un printf d’un bloc run: |', () => {
     const casse = "jobs:\n  a:\n    steps:\n      - run: |\n          printf 'x\n\n_(suite)_\n'\n      - uses: y\n";
-    expect(defautsBlocsRun(casse)).toHaveLength(2);
+    expect(parseDocument(casse).errors.length).toBeGreaterThan(0);
   });
 });
 
