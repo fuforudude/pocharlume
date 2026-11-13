@@ -4,6 +4,8 @@ import { sauvegardeRemplie } from './aides.test-utils';
 import { exporterCode, importerCode } from './code';
 import type { Sauvegarde } from './format';
 import { validerSauvegarde } from './validation';
+import { estIdCarteBienForme } from './validation-infini';
+import { CARTES_MODERNE } from '../data/niveaux/cartes-moderne';
 
 function avecInfini(infini: unknown): unknown {
   const s = sauvegardeRemplie();
@@ -73,5 +75,11 @@ describe('export et import du mode infini', () => {
     const s = sauvegardeRemplie();
     const piege: Sauvegarde = { ...s, meta: { ...s.meta, infini: { records: { chaumes: 5 }, paliers: [100] } } };
     expect((await importerCode(await exporterCode(piege))).ok).toBe(false);
+  });
+});
+
+describe('identifiants de cartes du DLC', () => {
+  it('chaque identifiant du DLC est accepté par la validation des records de la sauvegarde', () => {
+    for (const id of Object.keys(CARTES_MODERNE)) expect(estIdCarteBienForme(id), id).toBe(true);
   });
 });

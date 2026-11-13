@@ -1,7 +1,6 @@
 // Les cartes du DLC réunies (cartes-moderne.ts) : la fusion par décomposition écrase sans rien dire une carte dont l'identifiant existe
 // déjà dans une autre région. Ce test le rend visible (relecture de la Préfecture, point 4).
 import { describe, expect, it } from 'vitest';
-import { estIdCarteBienForme } from '../../save/validation-infini';
 import { CARTES } from './cartes-toutes';
 import { CARTES_MODERNE } from './cartes-moderne';
 import { CARTES_MODERNE_R1 } from './cartes-moderne-r1';
@@ -22,9 +21,5 @@ describe('cartes du DLC réunies', () => {
     const tous = [...histoire, ...dlc].map((c) => c.id);
     const doublons = tous.filter((id, i) => tous.indexOf(id) !== i);
     expect(doublons).toEqual([]);
-  });
-
-  it('chaque identifiant du DLC est accepté par la validation des records de la sauvegarde', () => {
-    for (const id of Object.keys(CARTES_MODERNE)) expect(estIdCarteBienForme(id), id).toBe(true);
   });
 });
