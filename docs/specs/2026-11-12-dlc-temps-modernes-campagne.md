@@ -1,6 +1,6 @@
 ﻿# DLC « Temps modernes » : la campagne jouable
 
-Statut : validée le 2026-11-12
+Statut : livrée le 2026-11-14
 Date : 2026-11-12
 
 ## Besoin
@@ -182,3 +182,10 @@ avec ses propres récompenses.
 - **Après la mise en ligne, jamais de retour en arrière par revert** : l'ancien client efface une sauvegarde v9. On corrige en avant ;
   pour retirer le DLC en urgence, on garde `VERSION_SAUVEGARDE = 9` et on cache les entrées.
 - **Animations des 9 héros** : revue visuelle par l'étudiant avant la sortie.
+
+## Écarts à la livraison (2026-11-14)
+- Musique plus rythmée : reportée (le jeu n'a pas encore de musique).
+- Bandes Matou et Vieux Sage : suspendues comme pour l'histoire ; l'écart entre dieux en Vieux Sage est une tâche à part.
+- `moderne.records` réservé (pas de mode infini dans le DLC).
+- Niveau 20 : 24 000 arêtes de départ (siège assumé).
+- Décision structurante consignée dans `docs/adr/0002-campagnes-nommees-et-sauvegarde-v9.md`.
