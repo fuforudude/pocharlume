@@ -59,8 +59,8 @@ function route(...points: [number, number][]): readonly Point[] {
  * par le resto U et le parvis, puis remonte par le piquet, l'AG et le hall jusqu'au rectorat (nord-est).
  */
 const NOEUDS_FAC: readonly NoeudNiveau[] = [
-  noeud(1, 48, 236),
-  noeud(2, 120, 244),
+  noeud(1, 48, 232),
+  noeud(2, 120, 232),
   noeud(3, 184, 208),
   noeud(4, 132, 160),
   noeud(5, 196, 120),
@@ -73,8 +73,8 @@ const NOEUDS_FAC: readonly NoeudNiveau[] = [
 
 /** Les 9 tronçons de la Fac : `TRACE_FAC[i]` va du nœud i + 1 au nœud i + 2, en couloirs à angle droit. */
 const TRACE_FAC: readonly (readonly Point[])[] = [
-  route([48, 236], [84, 236], [84, 244], [120, 244]),
-  route([120, 244], [184, 244], [184, 208]),
+  route([48, 232], [120, 232]),
+  route([120, 232], [184, 232], [184, 208]),
   route([184, 208], [132, 208], [132, 160]),
   route([132, 160], [132, 120], [196, 120]),
   route([196, 120], [268, 120], [268, 150]),
@@ -121,9 +121,9 @@ const TRACE_MANIF: readonly (readonly Point[])[] = [
  * jusqu'au bureau du préfet (nord-est).
  */
 const NOEUDS_PREFECTURE: readonly NoeudNiveau[] = [
-  noeud(1, 56, 240),
+  noeud(1, 56, 232),
   noeud(2, 132, 216),
-  noeud(3, 212, 244),
+  noeud(3, 212, 232),
   noeud(4, 276, 196),
   noeud(5, 204, 152),
   noeud(6, 116, 124),
@@ -135,9 +135,9 @@ const NOEUDS_PREFECTURE: readonly NoeudNiveau[] = [
 
 /** Les 9 tronçons de la Préfecture : `TRACE_PREFECTURE[i]` va du nœud i + 1 au nœud i + 2, en couloirs à angle droit. */
 const TRACE_PREFECTURE: readonly (readonly Point[])[] = [
-  route([56, 240], [96, 240], [96, 216], [132, 216]),
-  route([132, 216], [172, 216], [172, 244], [212, 244]),
-  route([212, 244], [276, 244], [276, 196]),
+  route([56, 232], [96, 232], [96, 216], [132, 216]),
+  route([132, 216], [172, 216], [172, 232], [212, 232]),
+  route([212, 232], [276, 232], [276, 196]),
   route([276, 196], [276, 152], [204, 152]),
   route([204, 152], [116, 152], [116, 124]),
   route([116, 124], [116, 72], [176, 72]),

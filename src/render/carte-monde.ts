@@ -180,6 +180,22 @@ export function calculerCadrage(
   return zoom === null ? { zoom: prefere, x: focus.x, y: focus.y } : { zoom, x: (xMin + xMax) / 2, y: (yMin + yMax) / 2 };
 }
 
+/** Met le point (x, y) du fond au milieu de la zone libre de la caméra (qui reste dans les bornes du fond). */
+export function centrerCameraSur(cam: Camera, x: number, y: number): void {
+  cam.x = x - (cam.vueL / 2);
+  cam.y = y - (cam.vueH + cam.margeHautLogique) / 2;
+  cam.contraindre();
+}
+
+/** Le cadrage d'une région sur la caméra (voir `RenduCarteMonde.cadrer`), sans canvas : `ratio` est le nombre de pixels physiques par pixel CSS. */
+export function cadrerCamera(cam: Camera, points: readonly Point[], focus: Point, ratio: number): void {
+  const prefere = Math.min(cam.zoomMax, Math.max(cam.zoomMin, Math.round(ZOOM_CSS_MAX * ratio)));
+  const plancher = Math.min(prefere, Math.max(cam.zoomMin, Math.ceil(ratio)));
+  const cadrage = calculerCadrage(points, focus, cam.ecranL, cam.ecranH, cam.margeHautLogique * cam.zoom, prefere, plancher);
+  cam.zoom = cadrage.zoom;
+  centrerCameraSur(cam, cadrage.x, cadrage.y);
+}
+
 export class RenduCarteMonde {
   readonly camera: Camera;
   /** Pixels physiques par pixel CSS. */
@@ -236,10 +252,7 @@ export class RenduCarteMonde {
 
   /** Met le point (x, y) du fond au milieu de la zone libre de la vue (la caméra reste dans les bornes du fond). */
   centrerSur(x: number, y: number): void {
-    const cam = this.camera;
-    cam.x = x - (cam.vueL / 2);
-    cam.y = y - (cam.vueH + cam.margeHautLogique) / 2;
-    cam.contraindre();
+    centrerCameraSur(this.camera, x, y);
   }
 
   /**
@@ -250,12 +263,7 @@ export class RenduCarteMonde {
    * d'un pixel CSS par pixel du fond (les chiffres des nœuds deviendraient illisibles).
    */
   cadrer(points: readonly Point[], focus: Point): void {
-    const cam = this.camera;
-    const prefere = Math.min(cam.zoomMax, Math.max(cam.zoomMin, Math.round(ZOOM_CSS_MAX * this.ratio)));
-    const plancher = Math.min(prefere, Math.max(cam.zoomMin, Math.ceil(this.ratio)));
-    const cadrage = calculerCadrage(points, focus, cam.ecranL, cam.ecranH, cam.margeHautLogique * cam.zoom, prefere, plancher);
-    cam.zoom = cadrage.zoom;
-    this.centrerSur(cadrage.x, cadrage.y);
+    cadrerCamera(this.camera, points, focus, this.ratio);
   }
 
   /** Rayon, en pixels du fond, de la zone qui répond au toucher autour d'un nœud (26 px CSS au moins). */
