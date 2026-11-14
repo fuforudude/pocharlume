@@ -70,6 +70,8 @@ d'équivalent rapide : il est exclu de la suite habituelle (`vite.config.ts`). L
 `npm run test:equilibrage` (`vitest.equilibrage.config.ts`, variable `EQUILIBRAGE_COMPLET`) et par le job `equilibrage-tests-lourds`,
 avec `[equilibrage]` dans le message du commit.
 
+Les runners GitHub (2 cœurs) sont environ dix fois plus lents qu'un poste de dev (2026-11-14) : la vérification complète exclut les fichiers de bandes (variable `BANDES`, comme `deploiement.yml`), `simulation.test.ts` ne joue que la graine 7 et `bot-moderne-r3` sans le niveau 30 (déjà joué par `boss-moderne`) ; les versions complètes sont dans `npm run test:equilibrage`.
+
 ## Hors périmètre
 - Changer le déploiement sur `main`, migrer d'autres projets.
 

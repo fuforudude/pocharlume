@@ -86,6 +86,21 @@ describe('workflow des tests distants', () => {
     expect(job(tests, 'rapport-equilibrage')).toMatch(/needs: \[[^\]]*equilibrage-moderne[^\]]*\]/);
   });
 
+  it('la vérification complète exclut les fichiers de bandes, avec la même liste que le déploiement', () => {
+    const liste = (flux: string) => /^ {2}BANDES: (.+)$/m.exec(flux)?.[1]?.split(' ') ?? [];
+    expect(liste(tests).length).toBeGreaterThan(0);
+    expect(liste(tests)).toEqual(liste(deploiement));
+    const verifier = job(tests, 'verifier');
+    expect(verifier).toContain('--exclude %s');
+    expect(verifier).toContain('$BANDES');
+    expect(verifier).not.toContain('npm run verifier');
+  });
+
+  it('les tests lourds sont lancés par le job d’équilibrage, pas par la vérification complète', () => {
+    expect(job(tests, 'equilibrage-tests-lourds')).toContain('npm run test:equilibrage');
+    expect(job(tests, 'verifier')).not.toContain('test:equilibrage');
+  });
+
   it('le rapport d’équilibrage reste sur GitHub (il ne fait que réunir des journaux)', () => {
     expect(job(tests, 'rapport-equilibrage')).toMatch(/runs-on: ubuntu-latest\n/);
   });

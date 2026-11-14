@@ -32,6 +32,11 @@ concurrency:
   group: tests-${{ github.ref }}-${{ (contains(github.event.head_commit.message, '[equilibrage]') || (github.event_name == 'workflow_dispatch' && inputs.equilibrage)) && 'equilibrage' || 'verif' }}
   cancel-in-progress: true
 
+# Fichiers de bandes : exclus de la vérification complète comme dans deploiement.yml (même liste, vérifié par tools/ci/workflows.test.ts) ;
+# ils sont joués par les jobs d'équilibrage (`npm run balance`) et par la matrice « bandes » du déploiement.
+env:
+  BANDES: src/equilibrage/bandes-chaton.test.ts src/equilibrage/bandes-defis.test.ts src/equilibrage/bandes-matou.test.ts src/equilibrage/bandes-vieux-sage.test.ts
+
 jobs:
   # Lit le quota de minutes Actions du compte (tools/ci/quota.ts) : sous 10 % restants, les jobs suivants partent sur
   # le runner auto-hébergé du VPS (labels self-hosted, vps ; infra/vps/runner-github.sh). Sans secret QUOTA_GITHUB ou si
@@ -75,7 +80,11 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm run verifier
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - name: Tests (hors simulations des bandes)
+        run: npx vitest run $(for f in $BANDES; do printf -- '--exclude %s ' "$f"; done)
+      - run: npm run build
 
   # Passe d'équilibrage, une machine par région : `[equilibrage]` dans le message du commit poussé, ou lancement à la
   # main avec la case cochée. La matrice est la même que celle des bandes de deploiement.yml (vérifié par

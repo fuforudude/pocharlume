@@ -6,12 +6,16 @@ import { CAMPAGNE_MODERNE } from '../data/niveaux/campagne-moderne';
 import { creerBotSoigneux } from './bot-soigneux';
 import { jouerPartie } from './simulation';
 
+// Le niveau 30 (boss) n'est joué ici que par `npm run test:equilibrage` : la suite habituelle le joue déjà dans boss-moderne.test.ts (version
+// rapide, même bot, même graine 7), et sur 2 cœurs GitHub (dix fois plus lents qu'un poste de dev) il dépassait le délai de 30 s.
+const COMPLET = Boolean(process.env['EQUILIBRAGE_COMPLET']);
+
 describe('bot soigneux sur les niveaux de la Préfecture', () => {
-  for (const n of CAMPAGNE_MODERNE.slice(20, 30)) {
+  for (const n of CAMPAGNE_MODERNE.slice(20, COMPLET ? 30 : 29)) {
     it(`niveau ${String(n.numero)} : victoire${n.numero === 30 ? ' et préfet tué' : ''}`, () => {
       const r = jouerPartie(n.niveau, creerBotSoigneux(), { graine: 7, difficulte: 'matou', secondesMax: 3600 });
       expect(r.statut, `${String(r.vies)}/${String(r.viesDepart)} vies, pertes par vague ${r.viesPerduesParVague.join(',')}`).toBe('victoire');
       if (n.numero === 30) expect(r.bossTues ?? []).toContain('moderne_prefet');
-    });
+    }, 120_000);
   }
 });

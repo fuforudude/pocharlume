@@ -28,14 +28,18 @@ describe('les niveaux de la région 11 se jouent jusqu’au bout', () => {
   }
 });
 
-const DELAI_PARTIE_LONGUE = 180_000;
+/** Version complète (graines 7, 8 et 9) : seulement par `npm run test:equilibrage`. La suite habituelle joue la graine 7 : sur les 2 cœurs
+ * d'une machine GitHub (dix fois plus lents qu'un poste de dev), les trois graines dépassaient 180 s dès les niveaux 6 à 8. */
+const COMPLET = Boolean(process.env['EQUILIBRAGE_COMPLET']);
+const GRAINES_GAGNEES = COMPLET ? [7, 8, 9] : [7];
+const DELAI_PARTIE_LONGUE = COMPLET ? 900_000 : 600_000;
 
 describe('les niveaux de la région 1 se jouent', () => {
   for (const campagne of REGION1) {
-    it(`niveau ${String(campagne.numero)} : le bot soigneux gagne en Matou, quelle que soit la graine`, () => {
+    it(`niveau ${String(campagne.numero)} : le bot soigneux gagne en Matou${COMPLET ? ', quelle que soit la graine' : ' (graine 7 ; les trois graines : npm run test:equilibrage)'}`, () => {
       // Matou est assez dur pour que le bot sans recherche perde parfois : on joue la variante retenue à l'entraînement, comme le simulateur.
       const { variante } = optimiserBot(campagne.niveau, 'matou', GRAINES_ENTRAINEMENT);
-      for (const graine of [7, 8, 9]) {
+      for (const graine of GRAINES_GAGNEES) {
         const bilan = jouerPartie(campagne.niveau, creerBotSoigneux({ variante }), { graine, difficulte: 'matou' });
         expect(bilan.statut, `graine ${String(graine)}`).toBe('victoire');
         expect(bilan.etoiles).toBeGreaterThanOrEqual(1);

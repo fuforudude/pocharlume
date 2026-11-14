@@ -12,6 +12,6 @@ describe('bot soigneux sur les niveaux de la Manif', () => {
       const r = jouerPartie(n.niveau, creerBotSoigneux(), { graine: 7, difficulte: 'matou', secondesMax: 3600 });
       console.info(`Manif ${String(n.numero)} : ${r.statut}, ${String(r.vies)}/${String(r.viesDepart)} vies, ${String(Math.round(r.secondes))} s, ${String(r.aretesFin)} arêtes restantes`);
       expect(r.statut).not.toBe('en_cours');
-    });
+    }, 120_000);
   }
 });
