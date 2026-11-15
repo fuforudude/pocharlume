@@ -2,7 +2,7 @@
 // docs/specs/2026-11-12-dlc-temps-modernes-campagne.md, tâche 5). Même forme que la Fac (plan-moderne-r1.ts) : les vagues sont générées par
 // `npm run niveaux -- moderne` depuis ce plan et figées dans vagues-moderne-r2.ts ; une carte neuve par niveau (cartes-moderne-r2.ts).
 //
-// La difficulté prend la suite de la Fac : tous les ennemis de la Fac sont connus, leur mélange s'élargit et leur nombre monte (13 à 15
+// La difficulté prend la suite de la Fac : tous les ennemis de la Fac sont connus, leur mélange s'élargit et leur nombre monte (8 à 10
 // vagues, budget annoncé L = 31 à 40). Trois ennemis du DLC qui manquaient à la Fac arrivent un à un : le Cavalier de la Police Montée
 // (niveau 13), l'Hélicoptère (niveau 16), le Centaure (niveau 18), avant le Grand Centaure (boss, niveau 20).
 // Ce qui est mis en avant, comme le demande la région :
@@ -28,6 +28,18 @@
 //   des primes sans rien lui rendre. Fer du niveau : 24 000 × 0,55 ≈ 13 200 arêtes (comme avant), effectifs × 0,7. Le bot générique, lui,
 //   laissait passer le boss (12 vies sur 20) : un boss du DLC coûte désormais 20 vies, voir
 //   src/equilibrage/boss-moderne.test.ts.
+// Rythme plus nerveux (spec docs/specs/2026-11-15-dlc-rythme.md), qui remplace les nombres ci-dessus :
+// - 8 vagues aux niveaux 11 à 13, 9 aux niveaux 14 à 16, 10 aux niveaux 17 à 20 (13, 14 et 15 avant). `facteurBudget` multiplié par
+//   S(avant) / S(après), où S(N) = N + 0,6 N (N − 1) est la somme des (1 + 1,2 (w − 1)) de budgetVague : × 2,56, × 2,36 et × 2,20. La
+//   menace totale de chaque niveau reste ainsi à ±5 % de celle d'avant (src/data/niveaux/rythme-moderne-r2.test.ts), et les primes avec.
+// - Événements replacés à la même proportion du niveau (vague × nouveau nombre / ancien, arrondi), dans le même ordre ; au niveau 19 le
+//   canon de la vague 5 passe au délai 10 (après la nasse de la même vague), et la rue du sud y rouvre à la vague 8 (2 vagues avant la fin).
+// - Niveau 16 : graine 6216 au lieu de 5116, la seule façon de garder l'Hélicoptère à ce niveau (avec 9 vagues, la graine d'avant ne le
+//   tirait plus) ; il arrive à la vague 6 sur 9 (10 sur 14 avant).
+// - Vagues plus denses, donc dernières vagues plus lourdes : l'Héroïque tombait à 33 % (bande 40 à 90 %). Arêtes de départ × 1,4 aux niveaux
+//   11 à 19 (Héroïque remonté vers 60 %), et `facteurAretes` du défi Fer divisé d'autant (2,9 ; 2,5 aux niveaux 16, 18, 19 ; 2,1 aux
+//   niveaux 12 et 13) : le Fer garde les mêmes arêtes qu'avant (il montait à 94 %, au-dessus de la bande).
+// - Niveau 20 : 24 000 arêtes de départ et Fer inchangés, `facteurBudget` 0,46 ; le perce-armure tue toujours le Grand Centaure.
 // `defiFer` : une famille qui touche les volants (tir ou magie) dès qu'il y a drones ou hélicoptères, la tour de tir avec la BAC
 // (furtive), jamais la même paire deux niveaux de suite.
 import type { IdCarteModerneR2 } from './cartes-moderne-r2';
@@ -40,8 +52,8 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     numero: 11,
     carte: 'rendez_vous',
     chemins: [0, 1],
-    aretesDepart: 1500,
-    defiFer: { familles: ['caserne', 'tir'], facteurAretes: 4, facteurEffectifs: 0.8 },
+    aretesDepart: 2100,
+    defiFer: { familles: ['caserne', 'tir'], facteurAretes: 2.9, facteurEffectifs: 0.8 },
     nom: 'niveau.m2.01.nom',
     ambiance: 'niveau.m2.01.ambiance',
     evenements: [
@@ -67,11 +79,11 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     numero: 12,
     carte: 'boulevard',
     chemins: [0, 1],
-    aretesDepart: 1500,
-    defiFer: { familles: ['magie', 'artillerie'], facteurAretes: 3, facteurEffectifs: 1.3 },
+    aretesDepart: 2100,
+    defiFer: { familles: ['magie', 'artillerie'], facteurAretes: 2.1, facteurEffectifs: 1.3 },
     nom: 'niveau.m2.02.nom',
     ambiance: 'niveau.m2.02.ambiance',
-    // Le cortège avance : la rue latérale du sud s'ouvre à la vague 4 et reste ouverte jusqu'à la fin.
+    // Le cortège avance : la rue latérale du sud s'ouvre à la vague 2 et reste ouverte jusqu'à la fin.
     cheminsFermes: [{ chemin: 1, repli: 0 }],
     evenements: [
       { vague: 1, delai: 8, type: 'canon_a_eau', cy: 1, sens: 1, recul: 3, etourdissement: 1.5 },
@@ -97,8 +109,8 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     numero: 13,
     carte: 'carrefour_manif',
     chemins: [0, 1],
-    aretesDepart: 1600,
-    defiFer: { familles: ['caserne', 'artillerie'], facteurAretes: 3, facteurEffectifs: 1.3 },
+    aretesDepart: 2250,
+    defiFer: { familles: ['caserne', 'artillerie'], facteurAretes: 2.1, facteurEffectifs: 1.3 },
     nom: 'niveau.m2.03.nom',
     ambiance: 'niveau.m2.03.ambiance',
     evenements: [
@@ -126,11 +138,11 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     numero: 14,
     carte: 'abribus',
     chemins: [0, 1],
-    aretesDepart: 1900,
-    defiFer: { familles: ['tir', 'magie'], facteurAretes: 4, facteurEffectifs: 0.8 },
+    aretesDepart: 2650,
+    defiFer: { familles: ['tir', 'magie'], facteurAretes: 2.9, facteurEffectifs: 0.8 },
     nom: 'niveau.m2.04.nom',
     ambiance: 'niveau.m2.04.ambiance',
-    // Le cortège bloque la rue du nord des vagues 5 à 9 : les forces passent par le sud, puis la rue rouvre jusqu'à la fin.
+    // Le cortège bloque la rue du nord des vagues 3 à 6 : les forces passent par le sud, puis la rue rouvre jusqu'à la fin.
     evenements: [
       { vague: 1, delai: 8, type: 'canon_a_eau', cy: 1, sens: 1, recul: 3, etourdissement: 1.5 },
       { vague: 2, delai: 8, type: 'charge', chemin: 1, ennemi: 'moderne_crs', nombre: 3, intervalle: 1, facteurVitesse: 1.6, duree: 21 },
@@ -158,8 +170,8 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     numero: 15,
     carte: 'nasse',
     chemins: [0, 1],
-    aretesDepart: 1500,
-    defiFer: { familles: ['tir', 'caserne'], facteurAretes: 4, facteurEffectifs: 0.8 },
+    aretesDepart: 2100,
+    defiFer: { familles: ['tir', 'caserne'], facteurAretes: 2.9, facteurEffectifs: 0.8 },
     nom: 'niveau.m2.05.nom',
     ambiance: 'niveau.m2.05.ambiance',
     evenements: [
@@ -188,11 +200,11 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     numero: 16,
     carte: 'republique',
     chemins: [0, 1, 2],
-    aretesDepart: 1700,
-    defiFer: { familles: ['artillerie', 'tir'], facteurAretes: 3.5, facteurEffectifs: 1 },
+    aretesDepart: 2400,
+    defiFer: { familles: ['artillerie', 'tir'], facteurAretes: 2.5, facteurEffectifs: 1 },
     nom: 'niveau.m2.06.nom',
     ambiance: 'niveau.m2.06.ambiance',
-    // Les barrières de la rue du nord cèdent à la vague 6 : elle reste ouverte jusqu'à la fin.
+    // Les barrières de la rue du nord cèdent à la vague 4 : elle reste ouverte jusqu'à la fin.
     cheminsFermes: [{ chemin: 2, repli: 0 }],
     evenements: [
       { vague: 1, delai: 8, type: 'canon_a_eau', cy: 4, sens: -1, recul: 3, etourdissement: 1.5 },
@@ -220,12 +232,12 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     numero: 17,
     carte: 'cortege',
     chemins: [0, 1, 2],
-    aretesDepart: 1800,
-    defiFer: { familles: ['magie', 'tir'], facteurAretes: 4, facteurEffectifs: 0.8 },
+    aretesDepart: 2500,
+    defiFer: { familles: ['magie', 'tir'], facteurAretes: 2.9, facteurEffectifs: 0.8 },
     nom: 'niveau.m2.07.nom',
     ambiance: 'niveau.m2.07.ambiance',
-    // Le cortège de tête avance : la grande rue s'ouvre devant lui à la vague 3 (jusqu'à la fin), puis il occupe la rue du nord de la
-    // vague 9 à la vague 11 (ses groupes passent alors par la grande rue) ; elle rouvre à la vague 12. La rue du sud ne bouge pas.
+    // Le cortège de tête avance : la grande rue s'ouvre devant lui à la vague 2 (jusqu'à la fin), puis il occupe la rue du nord de la
+    // vague 6 à la vague 7 (ses groupes passent alors par la grande rue) ; elle rouvre à la vague 8. La rue du sud ne bouge pas.
     cheminsFermes: [{ chemin: 1, repli: 0 }],
     evenements: [
       { vague: 2, delai: 3, type: 'ouvrir_chemin', chemin: 1 },
@@ -255,8 +267,8 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     numero: 18,
     carte: 'camionnettes',
     chemins: [0, 1],
-    aretesDepart: 1800,
-    defiFer: { familles: ['caserne', 'magie'], facteurAretes: 3.5, facteurEffectifs: 1 },
+    aretesDepart: 2500,
+    defiFer: { familles: ['caserne', 'magie'], facteurAretes: 2.5, facteurEffectifs: 1 },
     nom: 'niveau.m2.08.nom',
     ambiance: 'niveau.m2.08.ambiance',
     evenements: [
@@ -285,12 +297,12 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     numero: 19,
     carte: 'paves',
     chemins: [0, 1, 2],
-    aretesDepart: 2000,
-    defiFer: { familles: ['tir', 'artillerie'], facteurAretes: 3.5, facteurEffectifs: 1 },
+    aretesDepart: 2800,
+    defiFer: { familles: ['tir', 'artillerie'], facteurAretes: 2.5, facteurEffectifs: 1 },
     nom: 'niveau.m2.09.nom',
     ambiance: 'niveau.m2.09.ambiance',
-    // La ruelle du sud (chemin 2) s'ouvre à la vague 5 et reste ouverte jusqu'à la fin ; la foule prend la rue du sud (chemin 1) aux
-    // vagues 11 et 12 : ses groupes repassent par la rue du nord ; la rue rouvre à la vague 13.
+    // La ruelle du sud (chemin 2) s'ouvre à la vague 3 et reste ouverte jusqu'à la fin ; la foule prend la rue du sud (chemin 1) aux
+    // vagues 6 et 7 : ses groupes repassent par la rue du nord ; la rue rouvre à la vague 8.
     cheminsFermes: [{ chemin: 2, repli: 1 }],
     evenements: [
       { vague: 1, delai: 8, type: 'charge', chemin: 0, ennemi: 'moderne_gendarme_mobile', nombre: 4, intervalle: 0.8, facteurVitesse: 1.7, duree: 24 },
@@ -327,7 +339,7 @@ export const PLANS_MODERNE_R2: readonly PlanNiveauModerne<IdCarteModerneR2>[] = 
     ambiance: 'niveau.m2.10.ambiance',
     annonce: 'niveau.m2.10.annonce',
     cheminsFermes: [{ chemin: 2, repli: 1 }],
-    // Le boulevard du sud s'ouvre à mi-niveau (vague 7, jusqu'à la fin). Le Grand Centaure entre à la vague 15 par le nord-ouest
+    // Le boulevard du sud s'ouvre à mi-niveau (vague 5, jusqu'à la fin). Le Grand Centaure entre à la vague 10 par le nord-ouest
     // (chemin 0) : les étudiants se massent sur le carrefour (renforts), son canon à eau balaie la ligne deux fois, la police montée
     // l'escorte par le sud, une nasse coupe le boulevard du sud-ouest et la BRAV-M ferme la marche.
     evenements: [
