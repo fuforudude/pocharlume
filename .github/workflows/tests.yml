@@ -32,8 +32,9 @@ concurrency:
   group: tests-${{ github.ref }}-${{ (contains(github.event.head_commit.message, '[equilibrage]') || (github.event_name == 'workflow_dispatch' && inputs.equilibrage)) && 'equilibrage' || 'verif' }}
   cancel-in-progress: true
 
-# Fichiers de bandes : exclus de la vérification complète comme dans deploiement.yml (même liste, vérifié par tools/ci/workflows.test.ts) ;
-# ils sont joués par les jobs d'équilibrage (`npm run balance`) et par la matrice « bandes » du déploiement.
+# Fichiers de bandes : exclus de la vérification complète (une trentaine de fils par fichier ralentissaient tout sur 2 cœurs), comme dans
+# deploiement.yml (même liste, vérifié par tools/ci/workflows.test.ts). Ils sont joués par le job `bandes` ci-dessous (avec
+# `[equilibrage]`) et par la matrice « bandes » du déploiement.
 env:
   BANDES: src/equilibrage/bandes-chaton.test.ts src/equilibrage/bandes-defis.test.ts src/equilibrage/bandes-matou.test.ts src/equilibrage/bandes-vieux-sage.test.ts
 
@@ -187,6 +188,30 @@ jobs:
           name: equilibrage-infini
           path: equilibrage/
           if-no-files-found: warn
+
+  # Bandes de victoire (fichiers BANDES), une machine par région : même matrice et même commande que le job `bandes` de deploiement.yml,
+  # exclues de la vérification complète ci-dessus. Même déclencheur que les passes d'équilibrage.
+  bandes:
+    name: Bandes, région ${{ matrix.region }}
+    needs: choisir
+    if: ${{ !cancelled() && (contains(github.event.head_commit.message, '[equilibrage]') || (github.event_name == 'workflow_dispatch' && inputs.equilibrage)) }}
+    runs-on: ${{ needs.choisir.outputs.runner == 'vps' && fromJSON('["self-hosted","vps"]') || 'ubuntu-latest' }}
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        region: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Simulations de la région ${{ matrix.region }}
+        env:
+          BANDES_REGIONS: ${{ matrix.region }}
+        run: npx vitest run $BANDES
 
   # Version complète des tests d'équilibrage lourds (boss du DLC sur toutes les graines, zone des niveaux ordinaires), exclus de
   # `npm run test` : `npm run test:equilibrage`. Une seule machine, même déclencheur que les passes ci-dessus.

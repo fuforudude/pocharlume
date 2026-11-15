@@ -11,12 +11,12 @@ Capacitor plus tard.
 - Linter : `npm run lint` (ESLint, typescript-eslint strict avec typage)
 - Reporter le lore : `npm run lore` (reporte `docs/lore.md` dans `src/i18n/` ; `-- --verifier` compare sans écrire). `fr-lore.ts` est généré : corriger `lore.md`, jamais ce fichier.
 - Retoucher les designs : `npm run editeur` (atelier local sur http://127.0.0.1:5199, `-- --port N` pour un autre port ; sprites, palette, décors des cartes ; écrit dans `art/` et les fichiers de cartes, jamais commite). Usage dans `tools/atelier/README.md`, adaptateur Pocharlume dans `tools/atelier-pocharlume/README.md`.
-- Tests d'équilibrage lourds (boss du DLC sur toutes les graines, zone des niveaux ordinaires ; hors de `npm run test`, qui en garde une version rapide) : `npm run test:equilibrage` (plus de 10 min ; lancé aussi par la CI avec `[equilibrage]`).
+- Tests d'équilibrage lourds (boss du DLC sur toutes les graines, zone des niveaux ordinaires ; hors de `npm run test`, qui garde une version rapide du premier ; les bandes, `src/equilibrage/bandes-*.test.ts` de la liste `BANDES`, sont aussi hors de la vérification de branche) : `npm run test:equilibrage` (plus de 10 min ; lancé aussi par la CI avec `[equilibrage]`).
 - Tout vérifier : `npm run verifier` (lint, types, tests, build). Doit être vert avant tout commit.
-- **Tests lourds sur la CI, jamais en local** : la vérification complète (`npm run verifier`) et les passes d'équilibrage
+- **Tests lourds sur la CI, jamais en local** : la vérification complète (lint, types, tests hors bandes, build) et les passes d'équilibrage
   (`npm run balance`) rendent le PC de l'auteur inutilisable. On pousse sa branche (jamais `main`) : chaque push lance
-  `.github/workflows/tests.yml` (vérification complète) ; avec `[equilibrage]` dans le message du commit, la passe
-  complète part aussi, répartie par région, rapport en artefact. Puis `npm run ci:attendre` attend la fin du run de la
+  `.github/workflows/tests.yml` (vérification hors bandes) ; avec `[equilibrage]` dans le message du commit, les bandes (une
+  machine par région, aussi jouées au déploiement sur main), les tests lourds et la passe complète d'équilibrage partent aussi, rapport en artefact. Puis `npm run ci:attendre` attend la fin du run de la
   branche, affiche le résultat par job et télécharge les artefacts dans `ci-artefacts/`. En local, seulement des tests
   ciblés (`npx vitest run <fichiers>`, `npx eslint <fichiers>`, `npx tsc --noEmit`). Le job décide seul s'il tourne sur
   GitHub ou sur le runner du VPS (quota de minutes sous 10 %). Si `ci:attendre` s'arrête avec le code 2 (aucune machine

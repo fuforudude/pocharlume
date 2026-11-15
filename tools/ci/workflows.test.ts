@@ -1,6 +1,6 @@
 // Garde-fous des workflows : même découpage par région que le déploiement, repli sur GitHub, délais, actions épinglées
 // par SHA, clé de déploiement réservée à l'environnement production. Syntaxe validée par la librairie yaml ; le reste est lu par motifs.
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { parseDocument } from 'yaml';
 import { REGIONS_MODERNE_EVALUEES } from '../../src/equilibrage/rapport-regions';
@@ -37,6 +37,15 @@ function job(flux: string, nom: string): string {
   const texte = jobs(flux).get(nom);
   if (texte === undefined) throw new Error(`job ${nom} introuvable`);
   return texte;
+}
+
+interface Flux {
+  env?: Record<string, string>;
+  jobs: Record<string, { if?: string; strategy?: { matrix?: { region?: number[] } }; steps?: { run?: string }[] }>;
+}
+/** Le YAML analysé (et non lu par motifs) : la structure des jobs. */
+function analyser(flux: string): Flux {
+  return parseDocument(flux).toJS() as Flux;
 }
 
 const tests = lire('tests.yml');
@@ -86,19 +95,53 @@ describe('workflow des tests distants', () => {
     expect(job(tests, 'rapport-equilibrage')).toMatch(/needs: \[[^\]]*equilibrage-moderne[^\]]*\]/);
   });
 
-  it('la vérification complète exclut les fichiers de bandes, avec la même liste que le déploiement', () => {
-    const liste = (flux: string) => /^ {2}BANDES: (.+)$/m.exec(flux)?.[1]?.split(' ') ?? [];
-    expect(liste(tests).length).toBeGreaterThan(0);
-    expect(liste(tests)).toEqual(liste(deploiement));
-    const verifier = job(tests, 'verifier');
-    expect(verifier).toContain('--exclude %s');
-    expect(verifier).toContain('$BANDES');
-    expect(verifier).not.toContain('npm run verifier');
+  it('la vérification complète lance lint, types, tests hors bandes et build, avec la même liste de bandes que le déploiement', () => {
+    const t = analyser(tests);
+    const d = analyser(deploiement);
+    const liste = (flux: Flux) => (flux.env?.['BANDES'] ?? '').split(' ').filter((f) => f !== '');
+    expect(liste(t).length).toBeGreaterThan(0);
+    expect(liste(t)).toEqual(liste(d));
+    const etapes = (t.jobs['verifier']?.steps ?? []).map((e) => e.run ?? '');
+    expect(etapes).toContain('npm run lint');
+    expect(etapes).toContain('npx tsc --noEmit');
+    expect(etapes).toContain('npm run build');
+    const vitest = etapes.find((r) => r.startsWith('npx vitest run'));
+    expect(vitest).toContain('--exclude %s');
+    expect(vitest).toContain('$BANDES');
+    expect(etapes.some((r) => r.includes('npm run verifier'))).toBe(false);
+  });
+
+  it('les bandes se jouent sur demande, une machine par région, comme au déploiement', () => {
+    const t = analyser(tests).jobs['bandes'];
+    const d = analyser(deploiement).jobs['bandes'];
+    expect(t?.strategy?.matrix?.region).toEqual(d?.strategy?.matrix?.region);
+    expect(t?.if).toMatch(/\[equilibrage\]/);
+    expect((t?.steps ?? []).map((e) => e.run)).toContain('npx vitest run $BANDES');
+  });
+
+  it('les fichiers de bandes existent sur le disque', () => {
+    for (const f of (analyser(tests).env?.['BANDES'] ?? '').split(' ').filter((x) => x !== '')) {
+      expect(existsSync(new URL(`../../${f}`, import.meta.url)), f).toBe(true);
+    }
   });
 
   it('les tests lourds sont lancés par le job d’équilibrage, pas par la vérification complète', () => {
     expect(job(tests, 'equilibrage-tests-lourds')).toContain('npm run test:equilibrage');
     expect(job(tests, 'verifier')).not.toContain('test:equilibrage');
+  });
+
+  it('tout fichier qui lit EQUILIBRAGE_COMPLET est joué par la configuration d’équilibrage', () => {
+    const config = readFileSync(new URL('../../vitest.equilibrage.config.ts', import.meta.url), 'utf8');
+    const fichiers: string[] = [];
+    const parcourir = (dossier: URL, relatif: string): void => {
+      for (const e of readdirSync(dossier, { withFileTypes: true })) {
+        if (e.isDirectory()) parcourir(new URL(`${e.name}/`, dossier), `${relatif}${e.name}/`);
+        else if (e.name.endsWith('.ts') && readFileSync(new URL(e.name, dossier), 'utf8').includes("process.env['EQUILIBRAGE_COMPLET']")) fichiers.push(`${relatif}${e.name}`);
+      }
+    };
+    parcourir(new URL('../../src/', import.meta.url), 'src/');
+    expect(fichiers.length).toBeGreaterThan(0);
+    for (const f of fichiers) expect(config, f).toContain(`'${f}'`);
   });
 
   it('le rapport d’équilibrage reste sur GitHub (il ne fait que réunir des journaux)', () => {
