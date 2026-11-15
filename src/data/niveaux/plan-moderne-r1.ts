@@ -138,7 +138,7 @@ export const PLANS_MODERNE_R1: readonly PlanNiveauModerne[] = [
     evenements: [
       { vague: 2, delai: 8, type: 'canon_a_eau', cy: 7, sens: 1, recul: 3, etourdissement: 1.5 },
       { vague: 4, delai: 10, type: 'canon_a_eau', cy: 2, sens: -1, recul: 3, etourdissement: 1.5 },
-      { vague: 5, delai: 8, type: 'charge', chemin: 0, ennemi: 'moderne_bravm', nombre: 2, intervalle: 0.4, facteurVitesse: 1.5, duree: 23 },
+      { vague: 5, delai: 8, type: 'charge', chemin: 0, ennemi: 'moderne_bravm', nombre: 2, intervalle: 0.4, facteurVitesse: 1.5, duree: 27 },
       { vague: 6, delai: 5, type: 'charge', chemin: 0, ennemi: 'moderne_crs', nombre: 3, intervalle: 1, facteurVitesse: 1.6, duree: 44 },
     ],
     foules: [

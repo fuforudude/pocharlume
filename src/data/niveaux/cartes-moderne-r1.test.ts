@@ -189,20 +189,21 @@ describe('les 10 niveaux de la Fac', () => {
     }
   });
 
-  it('événements datés dès le niveau 3, et des cartes qui bougent (chemin qui s’ouvre, chemin qui se ferme)', () => {
-    expect(NIVEAUX.slice(0, 2).every((n) => n.niveau.evenements === undefined)).toBe(true);
-    for (const n of NIVEAUX.slice(2)) expect(n.niveau.evenements?.length ?? 0, `niveau ${String(n.numero)}`).toBeGreaterThanOrEqual(2);
+  it('événements datés dès le niveau 2 (le Canon à Eau arrive avec ses lignes d’eau), et des cartes qui bougent (chemin qui s’ouvre, chemin qui se ferme)', () => {
+    expect(NIVEAUX[0]?.niveau.evenements).toBeUndefined();
+    for (const n of NIVEAUX.slice(1)) expect(n.niveau.evenements?.length ?? 0, `niveau ${String(n.numero)}`).toBeGreaterThanOrEqual(2);
     const types = new Set(NIVEAUX.flatMap((n) => (n.niveau.evenements ?? []).map((e) => e.type)));
     expect(types).toEqual(new Set(['charge', 'nasse', 'canon_a_eau', 'renforts', 'ouvrir_chemin', 'fermer_chemin']));
     const bougent = NIVEAUX.filter((n) => (n.niveau.evenements ?? []).some((e) => e.type === 'ouvrir_chemin' || e.type === 'fermer_chemin'));
     expect(bougent.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('les mécaniques arrivent une à une : ennemis simples, puis canon à eau, puis LBD, puis BRAV-M', () => {
+  it('les mécaniques arrivent par deux (spec du rythme) : ennemis simples, puis CRS et canon à eau, puis BAC et LBD, puis BRAV-M et grenadier', () => {
     const premier = (id: string): number => NIVEAUX.findIndex((n) => n.niveau.vagues.some((v) => v.paquets.some((p) => p.ennemi === id)) || (n.niveau.evenements ?? []).some((e) => e.type === 'charge' && e.ennemi === id)) + 1;
     expect(premier('moderne_gendarme')).toBe(1);
     const canon = Math.min(premier('moderne_canon_a_eau'), NIVEAUX.findIndex((n) => (n.niveau.evenements ?? []).some((e) => e.type === 'canon_a_eau')) + 1);
-    expect(canon).toBeGreaterThan(2);
+    expect(canon).toBe(2);
+    expect(premier('moderne_crs')).toBe(2);
     expect(premier('moderne_tireur_lbd')).toBeGreaterThan(canon);
     expect(premier('moderne_bravm')).toBeGreaterThan(premier('moderne_tireur_lbd'));
   });

@@ -143,14 +143,14 @@ describe('chemins mobiles', () => {
     expect(problemes).toEqual([]);
   });
 
-  it('niveau 8 : le chemin 2 une fois ouvert le reste jusqu’à la fin ; niveau 10 : il s’ouvre vers la moitié du niveau (vague 6 ou 7)', () => {
+  it('niveau 8 : le chemin 2 une fois ouvert le reste jusqu’à la fin ; niveau 10 : il s’ouvre vers la moitié du niveau (vague 4 ou 5 sur 8)', () => {
     const n8 = PLANS_MODERNE_R1[7];
     const n10 = PLANS_MODERNE_R1[9];
     if (!n8 || !n10) throw new Error('plans absents');
     expect((n8.evenements ?? []).some((e) => e.type === 'fermer_chemin' && e.chemin === 2)).toBe(false);
     const ouverture = (n10.evenements ?? []).find((e) => e.type === 'ouvrir_chemin' && e.chemin === 2);
-    expect(ouverture?.vague).toBeGreaterThanOrEqual(6);
-    expect(ouverture?.vague).toBeLessThanOrEqual(7);
+    expect(ouverture?.vague).toBeGreaterThanOrEqual(4);
+    expect(ouverture?.vague).toBeLessThanOrEqual(5);
   });
 
   it('une fermeture de chemin dure quelques vagues : le même chemin rouvre au plus tard 2 vagues avant la dernière', () => {
