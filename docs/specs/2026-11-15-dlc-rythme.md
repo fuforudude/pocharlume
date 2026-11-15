@@ -40,6 +40,22 @@ trop de vagues. Il veut découvrir le bestiaire plus vite et des niveaux plus co
 - **Rééquilibrage contre les bandes** : les mêmes bandes que la livraison du DLC, avec Matou et Vieux Sage toujours suspendus.
   Le boss du niveau 20 doit rester tuable avec une stratégie perce-armure.
 
+## Décisions et réglages en cours de route (2026-11-16)
+- **Le décor sous le fourgon du canon à eau est déplacé.** Avec le Canon à eau présent aux niveaux 2 à 10 de la Fac, les décors
+  qui passaient sous sa silhouette vont vers une case libre proche. Le test reste strict. C'est la décision de l'auteur.
+- **Les tests lourds ne tournent plus sur la machine de l'auteur.** Les bandes et la vérification complète passent sur GitHub,
+  avec `[equilibrage]` dans le message du commit. C'est la décision de l'auteur.
+- **Les arêtes de départ sont relevées pour compenser l'économie.** Avec moins de vagues, on gagne moins d'arêtes avant les
+  vagues lourdes, et l'Héroïque (une seule vie) sortait de sa bande par le bas.
+  - Fac : arêtes environ ×2 aux niveaux 1 à 9.
+  - Manif : arêtes ×1,4 aux niveaux 11 à 19, avec `facteurAretes` du défi Fer divisé d'autant.
+  - Préfecture : arêtes relevées aux niveaux 24 et 28.
+- **Des graines changent.** Le tirage d'origine ne faisait plus apparaître l'ennemi attendu au bon niveau.
+  - Fac : niveaux 3, 6, 7, 8 et 9.
+  - Manif : niveau 16, pour que l'Hélicoptère apparaisse bien au 16.
+- **Un test est assoupli.** Le test qui imposait que la Manif n'ait jamais moins de vagues que la Fac ne compare plus que les
+  niveaux d'une même région.
+
 ## Critères d'acceptation
 - [ ] Les nouveaux ennemis de la Fac sont exactement ceux de la liste ci-dessus, niveau par niveau. Un test le vérifie à partir
       des vagues figées : première apparition de chaque ennemi.
