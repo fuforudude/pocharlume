@@ -1,3 +1,3 @@
-// Version des données de jeu. À incrémenter à chaque changement d'équilibrage ou de contenu qui modifie
-// le déroulement d'une partie : un journal ou un état d'une autre version ne se rejoue pas à l'identique.
-export const VERSION_DONNEES = 17;
+﻿// Version des donnÃ©es de jeu. Ã€ incrÃ©menter Ã  chaque changement d'Ã©quilibrage ou de contenu qui modifie
+// le dÃ©roulement d'une partie : un journal ou un Ã©tat d'une autre version ne se rejoue pas Ã  l'identique.
+export const VERSION_DONNEES = 18;

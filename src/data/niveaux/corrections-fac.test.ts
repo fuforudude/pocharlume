@@ -143,14 +143,14 @@ describe('chemins mobiles', () => {
     expect(problemes).toEqual([]);
   });
 
-  it('niveau 8 : le chemin 2 une fois ouvert le reste jusqu’à la fin ; niveau 10 : il s’ouvre vers la moitié du niveau (vague 6 ou 7)', () => {
+  it('niveau 8 : le chemin 2 une fois ouvert le reste jusqu’à la fin ; niveau 10 : il s’ouvre vers la moitié du niveau (vague 4 ou 5 sur 8)', () => {
     const n8 = PLANS_MODERNE_R1[7];
     const n10 = PLANS_MODERNE_R1[9];
     if (!n8 || !n10) throw new Error('plans absents');
     expect((n8.evenements ?? []).some((e) => e.type === 'fermer_chemin' && e.chemin === 2)).toBe(false);
     const ouverture = (n10.evenements ?? []).find((e) => e.type === 'ouvrir_chemin' && e.chemin === 2);
-    expect(ouverture?.vague).toBeGreaterThanOrEqual(6);
-    expect(ouverture?.vague).toBeLessThanOrEqual(7);
+    expect(ouverture?.vague).toBeGreaterThanOrEqual(4);
+    expect(ouverture?.vague).toBeLessThanOrEqual(5);
   });
 
   it('une fermeture de chemin dure quelques vagues : le même chemin rouvre au plus tard 2 vagues avant la dernière', () => {
@@ -280,7 +280,7 @@ describe('grands décors et cases de tour', () => {
     avant.forEach((n, i) => {
       expect(apres[i], `niveau ${String(i + 1)}`).toBeGreaterThanOrEqual(n);
     });
-    expect(apres).toEqual([108, 100, 101, 94, 101, 110, 109, 96, 94, 95]);
+    expect(apres).toEqual([108, 98, 101, 94, 97, 109, 105, 96, 96, 95]);
   });
 
   it('niveau 4 : le plan de jeu a au moins les cases de tour d’avant le déplacement du décor (étagère en (9, 2), tableau en (12, 2))', () => {
@@ -304,11 +304,10 @@ describe('grands décors et cases de tour', () => {
 const AVEC_FOURGON = PLANS_DLC.filter((_, i) => (VAGUES_DLC[i] ?? []).some((v) => v.paquets.some((p) => p.ennemi === 'moderne_canon_a_eau')));
 
 describe('le décor reste visible sous les fourgons du canon à eau', () => {
-  it('les niveaux 4 et 10 ont des fourgons ; le niveau 8 n’en a pas', () => {
+  it('les niveaux 2 à 10 ont des fourgons (le canon à eau arrive au niveau 2) ; le niveau 1 n’en a pas', () => {
     const numeros = AVEC_FOURGON.map((p) => p.numero);
-    expect(numeros).toContain(4);
-    expect(numeros).toContain(10);
-    expect(numeros).not.toContain(8);
+    for (let n = 2; n <= 10; n++) expect(numeros).toContain(n);
+    expect(numeros).not.toContain(1);
   });
 
   it.each(AVEC_FOURGON.map((p) => [p.numero, p] as const))('niveau %i : aucun décor sous la silhouette du fourgon (4 tuiles de large, 3,4 de haut au-dessus de ses pieds)', (_numero, plan) => {
