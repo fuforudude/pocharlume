@@ -40,7 +40,10 @@ describe('rythme de la Préfecture', () => {
       const n = p.vagues.nombre;
       const problemes: string[] = [];
       const parcourir = (x: unknown, chemin: string): void => {
-        if (Array.isArray(x)) return x.forEach((e, k) => { parcourir(e, `${chemin}[${String(k)}]`); });
+        if (Array.isArray(x)) {
+          x.forEach((e, k) => { parcourir(e, `${chemin}[${String(k)}]`); });
+          return;
+        }
         if (typeof x !== 'object' || x === null) return;
         for (const [cle, valeur] of Object.entries(x)) {
           if (cle === 'vague' && typeof valeur === 'number' && (valeur < 1 || valeur > n)) problemes.push(`${chemin} : vague ${String(valeur)}`);

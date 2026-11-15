@@ -17,7 +17,8 @@
 // (0,27 à 0,45 au lieu de 0,17 à 0,27 : vagues plus denses). Les événements, les chemins qui s'ouvrent et se ferment sont replacés sur les
 // nouvelles vagues, dans le même ordre et à la même proportion du niveau ; les règles ci-dessus tiennent encore (un chemin ouvert le reste
 // au moins 5 vagues, une fermeture rouvre au plus tard 2 vagues avant la dernière, une foule qui bloque se recharge au moins aussi
-// longtemps que sa coupure). Le préfet garde sa dernière vague mise en scène (la 11e).
+// longtemps que sa coupure). Le préfet garde sa dernière vague mise en scène (la 11e). Moins de vagues, c'est moins de temps pour réunir des
+// arêtes : `aretesDepart` des niveaux 24 (1850 à 2300) et 28 (2200 à 2700) est relevé, sans quoi le bot soigneux perd (bot-moderne-r3.test.ts).
 //
 // Budget des vagues : `niveauBudget` est le niveau L de l'histoire dont le budget b(L, w) sert, 41 à 50 (la Fac a pris 21 à 30, la Manif
 // 31 à 40). `aretesDepart` et `facteurBudget` sont une première estimation, posée sur la menace des vagues (en-têtes de vagues-moderne-r3.ts)
@@ -134,7 +135,7 @@ export const PLANS_MODERNE_R3: readonly PlanNiveauModerne<IdCarteModerneR3>[] = 
     numero: 24,
     carte: 'perron',
     chemins: [0, 1],
-    aretesDepart: 1850,
+    aretesDepart: 2300,
     defiFer: { familles: ['caserne', 'magie'], facteurAretes: 3, facteurEffectifs: 0.9 },
     nom: 'niveau.m3.04.nom',
     ambiance: 'niveau.m3.04.ambiance',
@@ -265,7 +266,7 @@ export const PLANS_MODERNE_R3: readonly PlanNiveauModerne<IdCarteModerneR3>[] = 
     numero: 28,
     carte: 'salle_fetes',
     chemins: [0, 1],
-    aretesDepart: 2200,
+    aretesDepart: 2700,
     defiFer: { familles: ['tir', 'caserne'], facteurAretes: 3, facteurEffectifs: 0.9 },
     nom: 'niveau.m3.08.nom',
     ambiance: 'niveau.m3.08.ambiance',
