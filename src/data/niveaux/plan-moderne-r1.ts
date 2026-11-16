@@ -22,6 +22,9 @@
 // essai rapide du bot soigneux en Matou (graine 7) : il gagne chaque niveau, avec des pertes dès le niveau 2 (le boss lui coûte 12 vies).
 // Les ennemis du DLC (armures, canon à eau intouchable, LBD qui coupe les tours, binômes) pèsent plus que leur menace : d'où des facteurs
 // bas et des arêtes de départ hautes. La tâche 7 (bots et équilibrage des 3 régions) les règle contre les bandes imposées.
+// Réglage du rythme (spec du rythme) : vagues plus denses, donc l'Héroïque tombait à 21–25 % (bande 40 à 90 %). Arêtes de départ × 2 aux
+// niveaux 1 à 9 (Héroïque à 65 %), et `facteurAretes` du défi Fer à 3 au lieu de 6 : le Fer garde les mêmes arêtes qu'avant. Niveau 10 : 6000
+// arêtes de départ (3000 avant), Fer en proportion, pour que le soigneux tue encore le Commissaire Divisionnaire avec 8 vagues au lieu de 13.
 //
 // Foules : au moins une par niveau dès le niveau 2, à payer en arêtes ou à tenir avec le héros (cases sur le chemin), pour ralentir,
 // envoyer des renforts étudiants ou bloquer un passage. Les cases d'une foule « payer » sont hors chemin et réservées par la carte (aucun
@@ -84,7 +87,7 @@ export const PLANS_MODERNE_R1: readonly PlanNiveauModerne[] = [
     carte: 'amphi',
     chemins: [0],
     aretesDepart: 1600,
-    defiFer: { familles: ['caserne', 'tir'], facteurEffectifs: 0.45 },
+    defiFer: { familles: ['caserne', 'tir'], facteurAretes: 3, facteurEffectifs: 0.45 },
     nom: 'niveau.m1.01.nom',
     ambiance: 'niveau.m1.01.ambiance',
     vagues: { nombre: 6, ennemis: ['moderne_gendarme', 'moderne_gendarme_mobile'], graine: 5101, niveauBudget: 21, facteurBudget: 1.73 },
@@ -94,7 +97,7 @@ export const PLANS_MODERNE_R1: readonly PlanNiveauModerne[] = [
     carte: 'couloirs',
     chemins: [0],
     aretesDepart: 2300,
-    defiFer: { familles: ['magie', 'artillerie'], facteurEffectifs: 0.9 },
+    defiFer: { familles: ['magie', 'artillerie'], facteurAretes: 3, facteurEffectifs: 0.9 },
     nom: 'niveau.m1.02.nom',
     ambiance: 'niveau.m1.02.ambiance',
     // Les CRS et le Canon à Eau arrivent ici : leur charge et leurs lignes d'eau (les rangées 7 et 2 que le chemin des couloirs traverse).
@@ -113,7 +116,7 @@ export const PLANS_MODERNE_R1: readonly PlanNiveauModerne[] = [
     carte: 'cour',
     chemins: [0, 1],
     aretesDepart: 3400,
-    defiFer: { familles: ['caserne', 'magie'], facteurEffectifs: 0.9 },
+    defiFer: { familles: ['caserne', 'magie'], facteurAretes: 3, facteurEffectifs: 0.9 },
     nom: 'niveau.m1.03.nom',
     ambiance: 'niveau.m1.03.ambiance',
     evenements: [
@@ -132,7 +135,7 @@ export const PLANS_MODERNE_R1: readonly PlanNiveauModerne[] = [
     carte: 'bibliotheque',
     chemins: [0],
     aretesDepart: 2400,
-    defiFer: { familles: ['tir', 'artillerie'], facteurEffectifs: 0.9 },
+    defiFer: { familles: ['tir', 'artillerie'], facteurAretes: 3, facteurEffectifs: 0.9 },
     nom: 'niveau.m1.04.nom',
     ambiance: 'niveau.m1.04.ambiance',
     evenements: [
@@ -158,7 +161,7 @@ export const PLANS_MODERNE_R1: readonly PlanNiveauModerne[] = [
     carte: 'resto',
     chemins: [0, 1],
     aretesDepart: 2000,
-    defiFer: { familles: ['tir', 'magie'] },
+    defiFer: { familles: ['tir', 'magie'], facteurAretes: 3 },
     nom: 'niveau.m1.05.nom',
     ambiance: 'niveau.m1.05.ambiance',
     evenements: [
@@ -177,7 +180,7 @@ export const PLANS_MODERNE_R1: readonly PlanNiveauModerne[] = [
     carte: 'parvis',
     chemins: [0, 1],
     aretesDepart: 2800,
-    defiFer: { familles: ['caserne', 'artillerie'], facteurEffectifs: 0.9 },
+    defiFer: { familles: ['caserne', 'artillerie'], facteurAretes: 3, facteurEffectifs: 0.9 },
     nom: 'niveau.m1.06.nom',
     ambiance: 'niveau.m1.06.ambiance',
     cheminsFermes: [{ chemin: 1, repli: 0 }],
@@ -199,7 +202,7 @@ export const PLANS_MODERNE_R1: readonly PlanNiveauModerne[] = [
     carte: 'piquet',
     chemins: [0, 1],
     aretesDepart: 2400,
-    defiFer: { familles: ['tir', 'caserne'], facteurEffectifs: 0.9 },
+    defiFer: { familles: ['tir', 'caserne'], facteurAretes: 3, facteurEffectifs: 0.9 },
     nom: 'niveau.m1.07.nom',
     ambiance: 'niveau.m1.07.ambiance',
     evenements: [
@@ -220,7 +223,7 @@ export const PLANS_MODERNE_R1: readonly PlanNiveauModerne[] = [
     carte: 'assemblee',
     chemins: [0, 1, 2],
     aretesDepart: 3000,
-    defiFer: { familles: ['caserne', 'tir'], facteurEffectifs: 0.9 },
+    defiFer: { familles: ['caserne', 'tir'], facteurAretes: 3, facteurEffectifs: 0.9 },
     nom: 'niveau.m1.08.nom',
     ambiance: 'niveau.m1.08.ambiance',
     cheminsFermes: [{ chemin: 2, repli: 1 }],
@@ -243,7 +246,7 @@ export const PLANS_MODERNE_R1: readonly PlanNiveauModerne[] = [
     carte: 'hall',
     chemins: [0, 1],
     aretesDepart: 3600,
-    defiFer: { familles: ['artillerie', 'tir'], facteurEffectifs: 0.9 },
+    defiFer: { familles: ['artillerie', 'tir'], facteurAretes: 3, facteurEffectifs: 0.9 },
     nom: 'niveau.m1.09.nom',
     ambiance: 'niveau.m1.09.ambiance',
     evenements: [
@@ -266,8 +269,8 @@ export const PLANS_MODERNE_R1: readonly PlanNiveauModerne[] = [
     numero: 10,
     carte: 'rectorat',
     chemins: [0, 1, 2],
-    aretesDepart: 3000,
-    defiFer: { familles: ['magie', 'tir'], facteurEffectifs: 0.9 },
+    aretesDepart: 6000,
+    defiFer: { familles: ['magie', 'tir'], facteurAretes: 3, facteurEffectifs: 0.9 },
     nom: 'niveau.m1.10.nom',
     ambiance: 'niveau.m1.10.ambiance',
     cheminsFermes: [{ chemin: 2, repli: 1 }],
